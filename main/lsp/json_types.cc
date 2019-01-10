@@ -59,9 +59,11 @@ InvalidTypeError::InvalidTypeError(const string &fieldName, const std::string &e
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
                                      expectedType, stringify(*found))) {}
 
+const std::string JSONBaseType::defaultFieldName = "root";
+
 string JSONBaseType::toJSON() {
-    unique_ptr<rapidjson::Document> d = std::make_unique<rapidjson::Document>();
-    auto v = toJSONValueInternal(*d.get());
+    rapidjson::MemoryPoolAllocator<> alloc;
+    auto v = toJSONValue(alloc);
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     v->Accept(writer);

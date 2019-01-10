@@ -18,6 +18,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
     if (handleReplies(d)) {
         return gs;
     }
+
     const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
 
     ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);

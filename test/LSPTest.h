@@ -43,10 +43,10 @@ private:
 
     /** Parses the given LSP message string into a NotificationMessage or ResponseMessage. If parsing fails, adds an
      * error to the currently running test. */
-    std::optional<std::unique_ptr<JSONDocument<JSONBaseType>>> parseLSPResponse(std::string raw);
+    std::optional<std::unique_ptr<JSONBaseType>> parseLSPResponse(std::string raw);
 
     /** Sends the given string directly to Sorbet's LSP component, and returns any response messages. */
-    std::vector<std::unique_ptr<JSONDocument<JSONBaseType>>> getLSPResponsesForRaw(std::string json);
+    std::vector<std::unique_ptr<JSONBaseType>> getLSPResponsesForRaw(std::string json);
 
     /** Parses the test file and its assertions. */
     void parseTestFile();
@@ -70,11 +70,13 @@ public:
     /** If true, then LSPLoop is initialized and is ready to receive requests. */
     bool initialized = false;
 
+    /** Memory allocator for rapidjson objects. */
+    rapidjson::MemoryPoolAllocator<> alloc;
+
     /**
      * Send a message to LSP, and returns any responses.
      */
-    std::vector<std::unique_ptr<JSONDocument<JSONBaseType>>>
-    getLSPResponsesFor(const std::unique_ptr<JSONBaseType> &message);
+    std::vector<std::unique_ptr<JSONBaseType>> getLSPResponsesFor(const std::unique_ptr<JSONBaseType> &message);
 };
 } // namespace sorbet::test
 #endif // TEST_LSPTEST_H

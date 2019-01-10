@@ -45,11 +45,11 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
         // things like <Class:Foo> as html tags and make them clickable (but the click takes
         // you somewhere nonsensical)
         auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, contents);
-        sendResult(d, Hover(markupContents->toJSONValueInternal(d)));
+        sendResult(d, Hover(markupContents->toJSONValue(alloc)));
     } else if (resp->kind == core::QueryResponse::Kind::IDENT || resp->kind == core::QueryResponse::Kind::CONSTANT ||
                resp->kind == core::QueryResponse::Kind::LITERAL) {
         auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->retType.type->show(*finalGs));
-        sendResult(d, Hover(markupContents->toJSONValueInternal(d)));
+        sendResult(d, Hover(markupContents->toJSONValue(alloc)));
     } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
         // TODO: Actually send the type signature here. I'm skipping this for now
         // since it's not a very useful feature for the end user (i.e., they should

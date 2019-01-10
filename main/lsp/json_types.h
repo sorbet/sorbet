@@ -70,38 +70,11 @@ public:
 
 class JSONNullObject {};
 
-template <typename T> class JSONDocument {
-public:
-    // Owns all of the memory associated with JSONAny types, which are
-    // represented as rapidjson::Value pointers.
-    // An unfortunate necessity until we have smarter deserialization logic
-    // that delurks all "Any" types.
-    std::unique_ptr<rapidjson::Document> memoryOwner;
-
-    // Root object extracted from the JSON document.
-    std::unique_ptr<T> root;
-
-    JSONDocument(std::unique_ptr<rapidjson::Document> &memoryOwner, std::unique_ptr<T> &root)
-        : memoryOwner(std::move(memoryOwner)), root(std::move(root)){};
-
-    /**
-     * Casts the root object to the given type, and, if casting succeeds, moves owned items into a new
-     * JSONDocument with the given root type.
-     */
-    template <typename NEW_TYPE> std::optional<std::unique_ptr<JSONDocument<NEW_TYPE>>> dynamicCast() {
-        if (auto newRootPtr = dynamic_cast<NEW_TYPE *>(root.get())) {
-            std::unique_ptr<NEW_TYPE> newRoot(newRootPtr);
-            root.release();
-            return std::make_unique<JSONDocument<NEW_TYPE>>(memoryOwner, newRoot);
-        }
-        // Cast failed.
-        return std::nullopt;
-    };
-};
-
 class JSONBaseType {
 public:
     virtual ~JSONBaseType() = default;
+
+    static const std::string defaultFieldName;
 
     /**
      * Converts C++ object into a string containing a stringified JSON object.
@@ -109,17 +82,9 @@ public:
     std::string toJSON();
 
     /**
-     * (For internal use only; public because it is used by codegen'd static methods.)
-     * Converts C++ object into a RapidJSON JSON value owned by the given rapidjson document.
+     * Converts C++ object into a RapidJSON JSON value owned by the given rapidjson allocator.
      */
-    virtual std::unique_ptr<rapidjson::Value> toJSONValueInternal(rapidjson::Document &d) const = 0;
-
-    /**
-     * Converts C++ object into a rapidjson JSON object owned by the given JSONDocument.
-     */
-    template <typename T> std::unique_ptr<rapidjson::Value> toJSONValue(const std::unique_ptr<JSONDocument<T>> &doc) {
-        return toJSONValueInternal(*doc->memoryOwner.get());
-    };
+    virtual std::unique_ptr<rapidjson::Value> toJSONValue(rapidjson::MemoryPoolAllocator<> &alloc) const = 0;
 };
 
 #include "main/lsp/lsp_messages_gen.h"

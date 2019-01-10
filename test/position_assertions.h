@@ -112,7 +112,7 @@ public:
     LSPRequestResponseAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine);
     ~LSPRequestResponseAssertion() = default;
 
-    virtual void check(const Expectations &expectations, LSPTest &test, std::unique_ptr<JSONDocument<int>> &doc,
+    virtual void check(const Expectations &expectations, LSPTest &test, rapidjson::MemoryPoolAllocator<> &alloc,
                        std::string_view uriPrefix, int &nextId) = 0;
 };
 
@@ -121,11 +121,11 @@ class UsageAssertion;
 class DefAssertion final : public LSPRequestResponseAssertion {
 private:
     void checkDefinition(const Expectations &expectations, LSPTest &test, const std::string_view uriPrefix,
-                         std::unique_ptr<JSONDocument<int>> &doc, const std::unique_ptr<Location> &loc, int character,
+                         rapidjson::MemoryPoolAllocator<> &alloc, const std::unique_ptr<Location> &loc, int character,
                          int id, std::string_view defSourceLine);
 
     void checkReferences(const Expectations &expectations, LSPTest &test, const std::string_view uriPrefix,
-                         std::unique_ptr<JSONDocument<int>> &doc, const std::vector<std::unique_ptr<Location>> &allLocs,
+                         rapidjson::MemoryPoolAllocator<> &alloc, const std::vector<std::unique_ptr<Location>> &allLocs,
                          const std::unique_ptr<Location> &loc, int character, int id, std::string_view defSourceLine);
 
 public:
@@ -137,7 +137,7 @@ public:
 
     DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
 
-    void check(const Expectations &expectations, LSPTest &test, std::unique_ptr<JSONDocument<int>> &doc,
+    void check(const Expectations &expectations, LSPTest &test, rapidjson::MemoryPoolAllocator<> &alloc,
                std::string_view uriPrefix, int &nextId) override;
     std::string toString() override;
 };

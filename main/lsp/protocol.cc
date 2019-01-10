@@ -249,14 +249,14 @@ void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &resu
 }
 
 void LSPLoop::sendResult(rapidjson::Document &forRequest, const JSONBaseType &result) {
-    sendResult(forRequest, *result.toJSONValueInternal(forRequest));
+    sendResult(forRequest, *result.toJSONValue(alloc));
 }
 
 void LSPLoop::sendResult(rapidjson::Document &forRequest, const std::vector<std::unique_ptr<JSONBaseType>> &result) {
     rapidjson::Value finalResult;
     finalResult.SetArray();
     for (auto &item : result) {
-        finalResult.PushBack(*item->toJSONValueInternal(forRequest), alloc);
+        finalResult.PushBack(*item->toJSONValue(alloc), alloc);
     }
     sendResult(forRequest, finalResult);
 }
@@ -339,7 +339,7 @@ void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Document &d, const JSO
     string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
 
     request.AddMember("method", meth.name, alloc);
-    request.AddMember("params", *data.toJSONValueInternal(d), alloc);
+    request.AddMember("params", *data.toJSONValue(alloc), alloc);
 
     sendRaw(request);
 }

@@ -12,10 +12,7 @@
 
 using namespace sorbet;
 
-// rapidjson::Document variable, which is assumed to be available in serialization methods.
-const std::string DOCUMENT_VAR = "d";
-
-// rapidjson::Allocator variable, which is assumed to be available in deserialization methods.
+// rapidjson::Allocator variable, which is assumed to be available in serialization and deserialization methods.
 // Used to copy things of type "any" from the JSON document into our C++ objects so we manage the memory.
 const std::string ALLOCATOR_VAR = "alloc";
 
@@ -247,7 +244,7 @@ public:
         // Create new scope for temp var.
         fmt::format_to(out, "{{\n");
         fmt::format_to(out, "rapidjson::Value strCopy;\n");
-        fmt::format_to(out, "strCopy.SetString({0}.c_str(), {0}.length(), {1}.GetAllocator());\n", from, DOCUMENT_VAR);
+        fmt::format_to(out, "strCopy.SetString({0}.c_str(), {0}.length(), {1});\n", from, ALLOCATOR_VAR);
         assign(out, "strCopy");
         fmt::format_to(out, "}}\n");
     }
@@ -349,7 +346,7 @@ public:
         fmt::format_to(out, "if ({} == nullptr) {{\n", from);
         fmt::format_to(out, "throw NullPtrError(\"{}\");\n", fieldName);
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {}.GetAllocator());\n", from, DOCUMENT_VAR);
+        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {});\n", from, ALLOCATOR_VAR);
         simpleSerialization(out, "valueCopy", assign);
     }
 };
@@ -387,7 +384,7 @@ class JSONAnyObjectType final : public JSONType {
         fmt::format_to(out, "}} else if (!{}->IsObject()) {{\n", from);
         fmt::format_to(out, "throw InvalidTypeError(\"{}\", \"object\", {});\n", fieldName, from);
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {}.GetAllocator());\n", from, DOCUMENT_VAR);
+        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {});\n", from, ALLOCATOR_VAR);
         simpleSerialization(out, "valueCopy", assign);
     }
 };
@@ -403,7 +400,7 @@ private:
     }
 
     static void AssignSerializedElementValue(fmt::memory_buffer &out, const std::string &from) {
-        fmt::format_to(out, "{}.PushBack({}, {}.GetAllocator());", arrayVar, from, DOCUMENT_VAR);
+        fmt::format_to(out, "{}.PushBack({}, {});", arrayVar, from, ALLOCATOR_VAR);
     }
 
 public:
@@ -715,7 +712,7 @@ public:
         fmt::format_to(out, "if ({} == nullptr) {{\n", from);
         fmt::format_to(out, "throw NullPtrError(\"{}\");\n", fieldName);
         fmt::format_to(out, "}}\n");
-        assign(out, fmt::format("*({}->toJSONValueInternal({}))", from, DOCUMENT_VAR));
+        assign(out, fmt::format("*({}->toJSONValue({}))", from, ALLOCATOR_VAR));
     }
 
     /**
@@ -728,10 +725,13 @@ public:
     void emitDeclaration(fmt::memory_buffer &out) {
         fmt::format_to(out, "class {} final : public JSONBaseType {{\n", typeName);
         fmt::format_to(out, "public:\n");
-        fmt::format_to(out, "static std::unique_ptr<JSONDocument<{}>> fromJSON(const std::string &json);\n", typeName);
+        fmt::format_to(
+            out,
+            "static std::unique_ptr<{}> fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);\n",
+            typeName);
         fmt::format_to(out,
                        "static {} fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
-                       "rapidjson::Value &val, const std::string &fieldName);\n",
+                       "rapidjson::Value &val, const std::string &fieldName = JSONBaseType::defaultFieldName);\n",
                        getCPPType(), ALLOCATOR_VAR);
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             fieldDef->emitDeclaration(out);
@@ -744,7 +744,8 @@ public:
                                return fmt::format("{} {}", field->type->getCPPType(), field->name);
                            }));
         }
-        fmt::format_to(out, "std::unique_ptr<rapidjson::Value> toJSONValueInternal(rapidjson::Document &d) const;\n");
+        fmt::format_to(
+            out, "std::unique_ptr<rapidjson::Value> toJSONValue(rapidjson::MemoryPoolAllocator<> &alloc) const;\n");
         fmt::format_to(out, "}};\n");
     }
 
@@ -764,8 +765,16 @@ public:
                            }));
             fmt::format_to(out, "}}\n");
         }
-        fmt::format_to(out, "std::unique_ptr<JSONDocument<{0}>> {0}::fromJSON(const std::string &json) {{\n", typeName);
-        fmt::format_to(out, "return fromJSONInternal<{}>(json);", typeName);
+        fmt::format_to(out,
+                       "std::unique_ptr<{0}> {0}::fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, "
+                       "const std::string &json) {{\n",
+                       typeName);
+        fmt::format_to(out, "rapidjson::Document d(&alloc);\n");
+        fmt::format_to(out, "d.Parse(json);\n");
+        fmt::format_to(out, "if (!d.IsObject()) {{\n");
+        fmt::format_to(out, "throw JSONTypeError(\"document root\", \"object\", d);\n");
+        fmt::format_to(out, "}}\n");
+        fmt::format_to(out, "return fromJSONValue(alloc, d.GetObject(), \"root\");\n");
         fmt::format_to(out, "}}\n");
         fmt::format_to(out,
                        "{} {}::fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
@@ -813,14 +822,14 @@ public:
         fmt::format_to(out, "}}\n");
 
         fmt::format_to(out,
-                       "std::unique_ptr<rapidjson::Value> {}::toJSONValueInternal(rapidjson::Document &{}) const {{\n",
-                       typeName, DOCUMENT_VAR);
+                       "std::unique_ptr<rapidjson::Value> {}::toJSONValue(rapidjson::MemoryPoolAllocator<> "
+                       "&{}) const {{\n",
+                       typeName, ALLOCATOR_VAR);
         fmt::format_to(out, "auto rv = std::make_unique<rapidjson::Value>(rapidjson::kObjectType);\n");
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
             AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
-                fmt::format_to(out, "rv->AddMember(\"{}\", {}, {}.GetAllocator());\n", fieldDef->name, from,
-                               DOCUMENT_VAR);
+                fmt::format_to(out, "rv->AddMember(\"{}\", {}, {});\n", fieldDef->name, from, ALLOCATOR_VAR);
             };
             fieldDef->type->emitToJSONValue(out, fieldDef->name, assign, fieldName);
         }

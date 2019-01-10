@@ -8,7 +8,7 @@ using namespace sorbet::realmain::lsp;
 
 namespace sorbet::realmain::lsp::test {
 
-template <typename T> using ParseTestLambda = function<void(std::unique_ptr<JSONDocument<T>> &)>;
+template <typename T> using ParseTestLambda = function<void(std::unique_ptr<T> &)>;
 
 /**
  * Using jsonStr, creates two versions of the same document:
@@ -17,19 +17,20 @@ template <typename T> using ParseTestLambda = function<void(std::unique_ptr<JSON
  * It then calls lambda with each, ensuring that any assertions it makes
  * passes on the parsed and re-parsed document.
  */
-template <typename T> void parseTest(const string &jsonStr, ParseTestLambda<T> lambda) {
-    auto originalDoc = T::fromJSON(jsonStr);
-    lambda(originalDoc);
-    auto reparsedDoc = T::fromJSON(originalDoc->root->toJSON());
-    lambda(reparsedDoc);
+template <typename T>
+void parseTest(rapidjson::MemoryPoolAllocator<> &alloc, const string &jsonStr, ParseTestLambda<T> lambda) {
+    auto original = T::fromJSON(alloc, jsonStr);
+    lambda(original);
+    auto reparsed = T::fromJSON(alloc, original->toJSON());
+    lambda(reparsed);
 };
 
 const string SAMPLE_RANGE = "{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2, \"character\": 3}}";
+rapidjson::MemoryPoolAllocator<> alloc;
 
 // N.B.: Also tests integer fields.
 TEST(GenerateLSPMessagesTest, Object) {
-    parseTest<Range>(SAMPLE_RANGE, [](auto &doc) -> void {
-        auto &range = doc->root;
+    parseTest<Range>(alloc, SAMPLE_RANGE, [](auto &range) -> void {
         ASSERT_EQ(range->start->line, 0);
         ASSERT_EQ(range->start->character, 1);
         ASSERT_EQ(range->end->line, 2);
@@ -37,18 +38,19 @@ TEST(GenerateLSPMessagesTest, Object) {
     });
 
     // Throws when missing a field.
-    ASSERT_THROW(Range::fromJSON("{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2}}"),
+    ASSERT_THROW(Range::fromJSON(alloc, "{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2}}"),
                  MissingFieldError);
     // Throws when not an object.
-    ASSERT_THROW(Range::fromJSON("4"), JSONTypeError);
+    ASSERT_THROW(Range::fromJSON(alloc, "4"), JSONTypeError);
     // Throws when field does not contain a number
     ASSERT_THROW(
-        Range::fromJSON("{\"start\": {\"line\": 0, \"character\": true}, \"end\": {\"line\": 2, \"character\": 3}}"),
+        Range::fromJSON(alloc,
+                        "{\"start\": {\"line\": 0, \"character\": true}, \"end\": {\"line\": 2, \"character\": 3}}"),
         JSONTypeError);
     // Throws when field contains a double, not an int.
-    ASSERT_THROW(
-        Range::fromJSON("{\"start\": {\"line\": 0, \"character\": 1.1}, \"end\": {\"line\": 2, \"character\": 3}}"),
-        JSONTypeError);
+    ASSERT_THROW(Range::fromJSON(
+                     alloc, "{\"start\": {\"line\": 0, \"character\": 1.1}, \"end\": {\"line\": 2, \"character\": 3}}"),
+                 JSONTypeError);
 
     // Serialization: Throws if sub-objects are not initialized.
     auto badRange = make_unique<Range>(nullptr, nullptr);
@@ -57,28 +59,24 @@ TEST(GenerateLSPMessagesTest, Object) {
 
 TEST(GenerateLSPMessagesTest, StringField) {
     const string expectedText = "Hello World!";
-    parseTest<TextEdit>(fmt::format("{{\"range\": {}, \"newText\": \"{}\"}}", SAMPLE_RANGE, expectedText),
-                        [&expectedText](auto &doc) -> void {
-                            auto &textEdit = doc->root;
-                            ASSERT_EQ(textEdit->newText, expectedText);
-                        });
+    parseTest<TextEdit>(alloc, fmt::format("{{\"range\": {}, \"newText\": \"{}\"}}", SAMPLE_RANGE, expectedText),
+                        [&expectedText](auto &textEdit) -> void { ASSERT_EQ(textEdit->newText, expectedText); });
 
     // Throws when not a string
-    ASSERT_THROW(TextEdit::fromJSON(fmt::format("{{\"range\": {}, \"newText\": 4.0}}", SAMPLE_RANGE)), JSONTypeError);
+    ASSERT_THROW(TextEdit::fromJSON(alloc, fmt::format("{{\"range\": {}, \"newText\": 4.0}}", SAMPLE_RANGE)),
+                 JSONTypeError);
 }
 
 TEST(GenerateLSPMessagesTest, StringEnumField) {
     const string markupKind = "markdown";
-    parseTest<MarkupContent>(fmt::format("{{\"kind\": \"{}\", \"value\": \"Markup stuff\"}}", markupKind),
-                             [](auto &doc) -> void {
-                                 auto &markupContent = doc->root;
-                                 ASSERT_EQ(markupContent->kind, MarkupKind::Markdown);
-                             });
+    parseTest<MarkupContent>(alloc, fmt::format("{{\"kind\": \"{}\", \"value\": \"Markup stuff\"}}", markupKind),
+                             [](auto &markupContent) -> void { ASSERT_EQ(markupContent->kind, MarkupKind::Markdown); });
 
     // Throws when not a valid enum.
-    ASSERT_THROW(MarkupContent::fromJSON("{\"kind\": \"foobar\", \"value\": \"Hello\"}"), InvalidStringEnumError);
+    ASSERT_THROW(MarkupContent::fromJSON(alloc, "{\"kind\": \"foobar\", \"value\": \"Hello\"}"),
+                 InvalidStringEnumError);
     // Throws when not a string.
-    ASSERT_THROW(MarkupContent::fromJSON("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
+    ASSERT_THROW(MarkupContent::fromJSON(alloc, "{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
 
     // Create a C++ object with an invalid enum value and try to serialize.
     auto markupContent = make_unique<MarkupContent>((MarkupKind)1000, "hello");
@@ -86,30 +84,28 @@ TEST(GenerateLSPMessagesTest, StringEnumField) {
 }
 
 TEST(GenerateLSPMessagesTest, NullField) {
-    parseTest<VersionedTextDocumentIdentifier>("{\"uri\": \"file://foo\", \"version\": null}", [](auto &doc) -> void {
-        auto &versionedTextDocumentIdentifier = doc->root;
-        auto nullValue = get_if<JSONNullObject>(&(versionedTextDocumentIdentifier->version));
-        // Should not be null; should point to an instance of JSONNullObject.
-        ASSERT_NE(nullValue, nullptr);
-    });
+    parseTest<VersionedTextDocumentIdentifier>(
+        alloc, "{\"uri\": \"file://foo\", \"version\": null}", [](auto &versionedTextDocumentIdentifier) -> void {
+            auto nullValue = get_if<JSONNullObject>(&(versionedTextDocumentIdentifier->version));
+            // Should not be null; should point to an instance of JSONNullObject.
+            ASSERT_NE(nullValue, nullptr);
+        });
 }
 
 // N.B.: Also covers testing boolean types, which are treated as optional almost everywhere in the spec.
 TEST(GenerateLSPMessagesTest, OptionalField) {
-    parseTest<CreateOrRenameFileOptions>("{\"overwrite\": true}", [](auto &doc) -> void {
-        auto &createOrRenameFileOptions = doc->root;
+    parseTest<CreateOrRenameFileOptions>(alloc, "{\"overwrite\": true}", [](auto &createOrRenameFileOptions) -> void {
         ASSERT_TRUE(createOrRenameFileOptions->overwrite.has_value());
         ASSERT_FALSE(createOrRenameFileOptions->ignoreIfExists.has_value());
         ASSERT_TRUE(*(createOrRenameFileOptions->overwrite));
     });
 
-    parseTest<CreateOrRenameFileOptions>("{}", [](auto &doc) -> void {
-        auto &createOrRenameFileOptions = doc->root;
+    parseTest<CreateOrRenameFileOptions>(alloc, "{}", [](auto &createOrRenameFileOptions) -> void {
         ASSERT_FALSE(createOrRenameFileOptions->overwrite.has_value());
     });
 
     // Throws when not the correct type.
-    ASSERT_THROW(CreateOrRenameFileOptions::fromJSON("{\"overwrite\": 4}"), JSONTypeError);
+    ASSERT_THROW(CreateOrRenameFileOptions::fromJSON(alloc, "{\"overwrite\": 4}"), JSONTypeError);
 }
 
 struct ExceptionThrower {
@@ -120,8 +116,7 @@ struct ExceptionThrower {
 
 TEST(GenerateLSPMessagesTest, DoubleField) {
     // Doubles can be ints or doubles.
-    parseTest<Color>("{\"red\": 0, \"green\": 1.1, \"blue\": 2.0, \"alpha\": 3}", [](auto &doc) -> void {
-        auto &color = doc->root;
+    parseTest<Color>(alloc, "{\"red\": 0, \"green\": 1.1, \"blue\": 2.0, \"alpha\": 3}", [](auto &color) -> void {
         ASSERT_EQ(0.0, color->red);
         ASSERT_EQ(1.1, color->green);
         ASSERT_EQ(2.0, color->blue);
@@ -130,16 +125,14 @@ TEST(GenerateLSPMessagesTest, DoubleField) {
 }
 
 TEST(GenerateLSPMessagesTest, VariantField) {
-    parseTest<CancelParams>("{\"id\": 4}", [](auto &docNumber) -> void {
-        auto &cancelParamsNumber = docNumber->root;
+    parseTest<CancelParams>(alloc, "{\"id\": 4}", [](auto &cancelParamsNumber) -> void {
         auto numberId = get_if<int>(&cancelParamsNumber->id);
         ASSERT_NE(numberId, nullptr);
         ASSERT_EQ(*numberId, 4);
         ASSERT_EQ(get_if<std::string>(&cancelParamsNumber->id), nullptr);
     });
 
-    parseTest<CancelParams>("{\"id\": \"iamanid\"}", [](auto &docString) -> void {
-        auto &cancelParamsString = docString->root;
+    parseTest<CancelParams>(alloc, "{\"id\": \"iamanid\"}", [](auto &cancelParamsString) -> void {
         auto stringId = get_if<std::string>(&cancelParamsString->id);
         ASSERT_NE(stringId, nullptr);
         ASSERT_EQ(*stringId, "iamanid");
@@ -147,13 +140,13 @@ TEST(GenerateLSPMessagesTest, VariantField) {
     });
 
     // Throws when missing.
-    ASSERT_THROW(CancelParams::fromJSON("{}"), MissingFieldError);
+    ASSERT_THROW(CancelParams::fromJSON(alloc, "{}"), MissingFieldError);
 
     // Throws when not the correct type.
-    ASSERT_THROW(CancelParams::fromJSON("{\"id\": true}"), JSONTypeError);
+    ASSERT_THROW(CancelParams::fromJSON(alloc, "{\"id\": true}"), JSONTypeError);
 
     // Int types cannot be doubles.
-    ASSERT_THROW(CancelParams::fromJSON("{\"id\": 4.1}"), JSONTypeError);
+    ASSERT_THROW(CancelParams::fromJSON(alloc, "{\"id\": 4.1}"), JSONTypeError);
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
@@ -166,9 +159,8 @@ TEST(GenerateLSPMessagesTest, VariantField) {
 }
 
 TEST(GenerateLSPMessagesTest, AnyArray) {
-    parseTest<Command>("{\"title\": \"\", \"command\": \"\", \"arguments\": [0, true, \"foo\"]}",
-                       [](auto &doc) -> void {
-                           auto &msg = doc->root;
+    parseTest<Command>(alloc, "{\"title\": \"\", \"command\": \"\", \"arguments\": [0, true, \"foo\"]}",
+                       [](auto &msg) -> void {
                            auto &argsOptional = msg->arguments;
                            ASSERT_TRUE(argsOptional.has_value());
                            auto &args = *argsOptional;
@@ -179,7 +171,7 @@ TEST(GenerateLSPMessagesTest, AnyArray) {
                        });
 
     // Must be an array.
-    ASSERT_THROW(Command::fromJSON("{\"title\": \"\", \"command\": \"\", \"arguments\": {}}"), JSONTypeError);
+    ASSERT_THROW(Command::fromJSON(alloc, "{\"title\": \"\", \"command\": \"\", \"arguments\": {}}"), JSONTypeError);
 }
 
 string makeNotificationMessage(const std::string &params) {
@@ -187,8 +179,7 @@ string makeNotificationMessage(const std::string &params) {
 }
 
 TEST(GenerateLSPMessagesTest, AnyObject) {
-    parseTest<NotificationMessage>(makeNotificationMessage("{\"jim\": \"henson\"}"), [](auto &doc) -> void {
-        auto &msg = doc->root;
+    parseTest<NotificationMessage>(alloc, makeNotificationMessage("{\"jim\": \"henson\"}"), [](auto &msg) -> void {
         auto &paramsOptional = msg->params;
         ASSERT_TRUE(paramsOptional.has_value());
         auto &paramsVariant = *paramsOptional;
@@ -199,7 +190,7 @@ TEST(GenerateLSPMessagesTest, AnyObject) {
     });
 
     // Deserialization: Must be an object.
-    ASSERT_THROW(NotificationMessage::fromJSON(makeNotificationMessage("true")), JSONTypeError);
+    ASSERT_THROW(NotificationMessage::fromJSON(alloc, makeNotificationMessage("true")), JSONTypeError);
 
     // Serialization: Must be an object.
     // Null pointer case
@@ -212,22 +203,20 @@ TEST(GenerateLSPMessagesTest, AnyObject) {
     ASSERT_THROW(notificationMessage->toJSON(), InvalidTypeError);
 
     // New object case -- doesn't throw and stresses supported APIs for making values.
-    auto doc = NotificationMessage::fromJSON(makeNotificationMessage("{}"));
+    auto notifMsg = NotificationMessage::fromJSON(alloc, makeNotificationMessage("{}"));
     auto range = make_unique<Position>(0, 0);
-    doc->root->params = range->toJSONValue(doc);
-    ASSERT_NO_THROW(doc->root->toJSON());
+    notifMsg->params = range->toJSONValue(alloc);
+    ASSERT_NO_THROW(notifMsg->toJSON());
 }
 
 TEST(GenerateLSPMessagesTest, StringConstant) {
-    parseTest<CreateFile>("{\"kind\": \"create\", \"uri\": \"file://foo\"}", [](auto &doc) -> void {
-        auto &createFile = doc->root;
-        ASSERT_EQ(createFile->kind, "create");
-    });
+    parseTest<CreateFile>(alloc, "{\"kind\": \"create\", \"uri\": \"file://foo\"}",
+                          [](auto &createFile) -> void { ASSERT_EQ(createFile->kind, "create"); });
 
     // Throws when not the correct constant.
-    ASSERT_THROW(CreateFile::fromJSON("{\"kind\": \"delete\", \"uri\": \"file://foo\"}"), JSONConstantError);
+    ASSERT_THROW(CreateFile::fromJSON(alloc, "{\"kind\": \"delete\", \"uri\": \"file://foo\"}"), JSONConstantError);
     // Throws when not a string.
-    ASSERT_THROW(CreateFile::fromJSON("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
+    ASSERT_THROW(CreateFile::fromJSON(alloc, "{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
 
     // Throws during serialization if not set to proper constant value.
     auto createFile = make_unique<CreateFile>("delete", "file://foo");
@@ -235,8 +224,7 @@ TEST(GenerateLSPMessagesTest, StringConstant) {
 }
 
 TEST(GenerateLSPMessagesTest, JSONArray) {
-    parseTest<SymbolKindOptions>("{\"valueSet\": [1,2,3,4,5,6]}", [](auto &doc) -> void {
-        auto &symbolKindOptions = doc->root;
+    parseTest<SymbolKindOptions>(alloc, "{\"valueSet\": [1,2,3,4,5,6]}", [](auto &symbolKindOptions) -> void {
         auto &valueSetOptional = symbolKindOptions->valueSet;
         ASSERT_TRUE(valueSetOptional.has_value());
         auto &valueSetUniquePtr = *valueSetOptional;
@@ -248,17 +236,16 @@ TEST(GenerateLSPMessagesTest, JSONArray) {
     });
 
     // Throws when not an array.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": null}"), JSONTypeError);
+    ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": null}"), JSONTypeError);
 
     // Throws when a member of array has an invalid type.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
+    ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
 }
 
 TEST(GenerateLSPMessagesTest, IntEnums) {
     parseTest<SymbolKindOptions>(
-        fmt::format("{{\"valueSet\": [{},{}]}}", (int)SymbolKind::Namespace, (int)SymbolKind::Null),
-        [](auto &doc) -> void {
-            auto &symbolKindOptions = doc->root;
+        alloc, fmt::format("{{\"valueSet\": [{},{}]}}", (int)SymbolKind::Namespace, (int)SymbolKind::Null),
+        [](auto &symbolKindOptions) -> void {
             auto &valueSetOptional = symbolKindOptions->valueSet;
             ASSERT_TRUE(valueSetOptional.has_value());
             auto &valueSet = *valueSetOptional;
@@ -268,10 +255,10 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
         });
 
     // Throws if enum is out of valid range.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2,-1,10]}"), InvalidEnumValueError);
+    ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": [1,2,-1,10]}"), InvalidEnumValueError);
 
     // Throws if enum is not the right type.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2.1]}"), JSONTypeError);
+    ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": [1,2.1]}"), JSONTypeError);
 
     // Throws during serialization if enum is out of valid range.
     auto symbolKind = make_unique<SymbolKindOptions>();

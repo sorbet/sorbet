@@ -63,18 +63,18 @@ void LSPTest::parseTestFile() {
     }
 }
 
-optional<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::parseLSPResponse(string message) {
-    rapidjson::Document document;
-    document.Parse(message.c_str());
+optional<unique_ptr<JSONBaseType>> LSPTest::parseLSPResponse(string message) {
+    rapidjson::Document d(&alloc);
+    d.Parse(message.c_str());
 
     // What did we receive: ResponseMessage, NotificationMessage, or Unknown?
     try {
-        if (document.HasMember("id")) {
+        if (d.HasMember("id")) {
             // ResponseMessage
-            return ResponseMessage::fromJSON(message)->dynamicCast<JSONBaseType>();
-        } else if (document.HasMember("method")) {
+            return ResponseMessage::fromJSONValue(alloc, d.GetObject());
+        } else if (d.HasMember("method")) {
             // NotificationMessage
-            return NotificationMessage::fromJSON(message)->dynamicCast<JSONBaseType>();
+            return NotificationMessage::fromJSONValue(alloc, d.GetObject());
         } else {
             // Something unexpected.
             ADD_FAILURE() << fmt::format("Received invalid LSP message from server; response is not a ResponseMessage "
@@ -87,14 +87,14 @@ optional<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::parseLSPResponse(strin
     return nullopt;
 }
 
-vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(string json) {
+vector<unique_ptr<JSONBaseType>> LSPTest::getLSPResponsesForRaw(string json) {
     // TODO(jvilk): Share parsing code with main LSP codebase.
     // processRequest does not require Content-Length or other headers.
     gs = lspLoop->processRequest(move(gs), json);
     // Should always run typechecking at least once for each request post-initialization.
     ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
 
-    vector<unique_ptr<JSONDocument<JSONBaseType>>> rv;
+    vector<unique_ptr<JSONBaseType>> rv;
     string responses = lspOstream.str();
     // Reset error flags and change contents of stream to the empty string.
     lspOstream.clear();
@@ -145,8 +145,7 @@ vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(st
         }
 
         string messageLine = responses.substr(pos, contentLength);
-        auto response = parseLSPResponse(messageLine);
-        if (response.has_value()) {
+        if (auto response = parseLSPResponse(messageLine)) {
             rv.push_back(move(*response));
         }
         pos += contentLength;
@@ -155,7 +154,7 @@ vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(st
     return rv;
 }
 
-vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesFor(const unique_ptr<JSONBaseType> &message) {
+vector<unique_ptr<JSONBaseType>> LSPTest::getLSPResponsesFor(const unique_ptr<JSONBaseType> &message) {
     return getLSPResponsesForRaw(message->toJSON());
 }
 

@@ -32,16 +32,6 @@ inline Representation tryConvertToEnum(const rapidjson::Value &value, std::strin
     return tryConvertToEnumFunction(tryConvertToString(value, name));
 };
 
-template <typename T> inline std::unique_ptr<JSONDocument<T>> fromJSONInternal(const std::string &json) {
-    std::unique_ptr<rapidjson::Document> d = std::make_unique<rapidjson::Document>();
-    d->Parse(json);
-    if (!d->IsObject()) {
-        throw JSONTypeError("document root", "object", *d);
-    }
-    auto rootObject = T::fromJSONValue(d->GetAllocator(), d->GetObject(), "root");
-    return std::make_unique<JSONDocument<T>>(d, rootObject);
-};
-
 } // namespace sorbet::realmain::lsp
 
 #endif // LSP_MESSAGES_GEN_HELPERS_H

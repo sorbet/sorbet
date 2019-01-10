@@ -361,24 +361,22 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
     return make_shared<DefAssertion>(filename, range, assertionLine, assertionContents);
 }
 
-vector<unique_ptr<Location>> extractLocations(const unique_ptr<JSONDocument<int>> &doc,
+vector<unique_ptr<Location>> extractLocations(rapidjson::MemoryPoolAllocator<> &alloc,
                                               const unique_ptr<rapidjson::Value> &obj) {
     vector<unique_ptr<Location>> locations;
     if (obj->IsArray()) {
         for (auto &element : obj->GetArray()) {
-            locations.push_back(
-                Location::fromJSONValue(doc->memoryOwner->GetAllocator(), element, "ResponseMessage.result"));
+            locations.push_back(Location::fromJSONValue(alloc, element, "ResponseMessage.result"));
         }
     } else if (obj->IsObject()) {
-        locations.push_back(
-            Location::fromJSONValue(doc->memoryOwner->GetAllocator(), *obj.get(), "ResponseMessage.result"));
+        locations.push_back(Location::fromJSONValue(alloc, *obj.get(), "ResponseMessage.result"));
     }
     return locations;
 }
 
 void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &test, string_view uriPrefix,
-                                   unique_ptr<JSONDocument<int>> &doc, const unique_ptr<Location> &loc, int character,
-                                   int id, string_view defSourceLine) {
+                                   rapidjson::MemoryPoolAllocator<> &alloc, const unique_ptr<Location> &loc,
+                                   int character, int id, string_view defSourceLine) {
     const int line = loc->range->start->line;
     auto locSourceLine = getLine(expectations.sourceFileContents, uriPrefix, loc);
     string locFilename = uriToFilePath(uriPrefix, loc->uri);
@@ -387,19 +385,19 @@ void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &te
     unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
         make_unique<TextDocumentIdentifier>(loc->uri), make_unique<Position>(line, character));
     auto responses =
-        test.getLSPResponsesFor(makeRequestMessage(doc, "textDocument/definition", id, textDocumentPositionParams));
+        test.getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/definition", id, textDocumentPositionParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
         return;
     }
 
-    if (auto maybeDoc = assertResponseMessage(id, responses.at(0))) {
-        auto &respMsg = (*maybeDoc)->root;
+    if (auto maybeRespMsg = assertResponseMessage(id, responses.at(0))) {
+        auto &respMsg = *maybeRespMsg;
         ASSERT_TRUE(respMsg->result.has_value());
         ASSERT_FALSE(respMsg->error.has_value());
 
         auto &result = *(respMsg->result);
-        vector<unique_ptr<Location>> locations = extractLocations(doc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(alloc, result);
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -441,7 +439,7 @@ void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &te
 }
 
 void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &test, string_view uriPrefix,
-                                   unique_ptr<JSONDocument<int>> &doc, const vector<unique_ptr<Location>> &allLocs,
+                                   rapidjson::MemoryPoolAllocator<> &alloc, const vector<unique_ptr<Location>> &allLocs,
                                    const unique_ptr<Location> &loc, int character, int id, string_view defSourceLine) {
     const int line = loc->range->start->line;
     auto locSourceLine = getLine(expectations.sourceFileContents, uriPrefix, loc);
@@ -452,19 +450,19 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
         make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(loc->uri),
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
-    auto responses = test.getLSPResponsesFor(makeRequestMessage(doc, "textDocument/references", id, referenceParams));
+    auto responses = test.getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/references", id, referenceParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
     }
 
-    if (auto maybeDoc = assertResponseMessage(id, responses.at(0))) {
-        auto &respMsg = (*maybeDoc)->root;
+    if (auto maybeRespMsg = assertResponseMessage(id, responses.at(0))) {
+        auto &respMsg = *maybeRespMsg;
         ASSERT_TRUE(respMsg->result.has_value());
         ASSERT_FALSE(respMsg->error.has_value());
         auto &result = *(respMsg->result);
 
-        vector<unique_ptr<Location>> locations = extractLocations(doc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(alloc, result);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, a->range, "", b->uri, b->range, "");
         });
@@ -548,7 +546,7 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
     }
 }
 
-void DefAssertion::check(const Expectations &expectations, LSPTest &test, unique_ptr<JSONDocument<int>> &doc,
+void DefAssertion::check(const Expectations &expectations, LSPTest &test, rapidjson::MemoryPoolAllocator<> &alloc,
                          string_view uriPrefix, int &nextId) {
     auto locationsToCheck = vector<unique_ptr<Location>>();
     locationsToCheck.push_back(getLocation(uriPrefix));
@@ -571,9 +569,9 @@ void DefAssertion::check(const Expectations &expectations, LSPTest &test, unique
 
         // Every character in range should work as a source location for a definition or reference request, but we'll
         // just check the first character to avoid blowing up test failures.
-        checkDefinition(expectations, test, uriPrefix, doc, location, locRange->start->character, nextId++,
+        checkDefinition(expectations, test, uriPrefix, alloc, location, locRange->start->character, nextId++,
                         defSourceLine);
-        checkReferences(expectations, test, uriPrefix, doc, locationsToCheck, location, locRange->start->character,
+        checkReferences(expectations, test, uriPrefix, alloc, locationsToCheck, location, locRange->start->character,
                         nextId++, defSourceLine);
     }
 }

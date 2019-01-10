@@ -109,10 +109,10 @@ unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
     return initializeParams;
 }
 
-unique_ptr<RequestMessage> makeRequestMessage(unique_ptr<JSONDocument<int>> &doc, string method, int id,
+unique_ptr<RequestMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, string method, int id,
                                               unique_ptr<JSONBaseType> &params) {
     auto initialize = make_unique<RequestMessage>("2.0", id, method);
-    initialize->params = params->toJSONValue(doc);
+    initialize->params = params->toJSONValue(alloc);
     return initialize;
 }
 
@@ -171,11 +171,11 @@ void checkServerCapabilities(const unique_ptr<ServerCapabilities> &capabilities)
     EXPECT_FALSE(capabilities->workspace.has_value());
 }
 
-void failWithUnexpectedLSPResponse(const unique_ptr<JSONDocument<JSONBaseType>> &item) {
-    if (auto rootPtr = dynamic_cast<ResponseMessage *>(item->root.get())) {
+void failWithUnexpectedLSPResponse(JSONBaseType &item) {
+    if (auto rootPtr = dynamic_cast<ResponseMessage *>(&item)) {
         FAIL() << fmt::format("Expected a notification, but received the following response message instead: {}",
                               rootPtr->toJSON());
-    } else if (auto rootPtr = dynamic_cast<NotificationMessage *>(item->root.get())) {
+    } else if (auto rootPtr = dynamic_cast<NotificationMessage *>(&item)) {
         FAIL() << fmt::format("Expected a response message, but received the following notification instead: {}",
                               rootPtr->toJSON());
     } else {
@@ -185,44 +185,45 @@ void failWithUnexpectedLSPResponse(const unique_ptr<JSONDocument<JSONBaseType>> 
     }
 }
 
-optional<unique_ptr<JSONDocument<ResponseMessage>>>
-assertResponseMessage(int expectedId, unique_ptr<JSONDocument<JSONBaseType>> &response) {
-    auto maybeRespMsgDoc = response->dynamicCast<ResponseMessage>();
-    if (!maybeRespMsgDoc) {
-        failWithUnexpectedLSPResponse(response);
+optional<unique_ptr<ResponseMessage>> assertResponseMessage(int expectedId, unique_ptr<JSONBaseType> &response) {
+    auto respMsg = dynamic_cast<ResponseMessage *>(response.get());
+    if (!respMsg) {
+        failWithUnexpectedLSPResponse(*response);
         return nullopt;
     }
 
-    auto &respMsgDoc = *maybeRespMsgDoc;
-    auto idIntPtr = get_if<int>(&respMsgDoc->root->id);
+    auto idIntPtr = get_if<int>(&respMsg->id);
     EXPECT_NE(nullptr, idIntPtr) << "Response message lacks an integer ID field.";
     if (idIntPtr != nullptr) {
         EXPECT_EQ(expectedId, *idIntPtr) << "Response message's ID does not match expected value.";
     }
-    return move(respMsgDoc);
+    std::unique_ptr<ResponseMessage> respMsgPtr(respMsg);
+    response.release();
+    return respMsgPtr;
 }
 
-optional<unique_ptr<JSONDocument<NotificationMessage>>>
-assertNotificationMessage(string expectedMethod, unique_ptr<JSONDocument<JSONBaseType>> &response) {
-    auto maybeNotifMsgDoc = response->dynamicCast<NotificationMessage>();
-    if (!maybeNotifMsgDoc) {
-        failWithUnexpectedLSPResponse(response);
+optional<unique_ptr<NotificationMessage>> assertNotificationMessage(string expectedMethod,
+                                                                    unique_ptr<JSONBaseType> &response) {
+    auto notifMsg = dynamic_cast<NotificationMessage *>(response.get());
+    if (!notifMsg) {
+        failWithUnexpectedLSPResponse(*response);
         return nullopt;
     }
 
-    auto &notifMsgDoc = *maybeNotifMsgDoc;
-    EXPECT_EQ(expectedMethod, notifMsgDoc->root->method) << "Unexpected method on notification message.";
-    return move(notifMsgDoc);
+    EXPECT_EQ(expectedMethod, notifMsg->method) << "Unexpected method on notification message.";
+
+    std::unique_ptr<NotificationMessage> notifMsgPtr(notifMsg);
+    response.release();
+    return notifMsgPtr;
 }
 
-optional<unique_ptr<PublishDiagnosticsParams>>
-getPublishDiagnosticParams(const unique_ptr<JSONDocument<NotificationMessage>> &doc) {
-    auto &notifMsg = doc->root;
-    if (!notifMsg->params.has_value()) {
+optional<unique_ptr<PublishDiagnosticsParams>> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
+                                                                          const NotificationMessage &notifMsg) {
+    if (!notifMsg.params.has_value()) {
         ADD_FAILURE() << "textDocument/publishDiagnostics message is missing parameters.";
         return nullopt;
     }
-    auto &params = *notifMsg->params;
+    auto &params = *notifMsg.params;
     auto paramsValuePtr = get_if<unique_ptr<rapidjson::Value>>(&params);
     if (!paramsValuePtr) {
         // It's an array rather than a single object.
@@ -230,8 +231,6 @@ getPublishDiagnosticParams(const unique_ptr<JSONDocument<NotificationMessage>> &
         return nullopt;
     }
     auto &paramsValue = *paramsValuePtr;
-    // TODO(jvilk): Need a better way to unwrap these.
-    return PublishDiagnosticsParams::fromJSONValue(doc->memoryOwner->GetAllocator(), *paramsValue.get(),
-                                                   "NotificationMessage.params");
+    return PublishDiagnosticsParams::fromJSONValue(alloc, *paramsValue.get(), "NotificationMessage.params");
 }
 } // namespace sorbet::test

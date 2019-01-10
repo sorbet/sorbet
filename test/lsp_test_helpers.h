@@ -29,7 +29,7 @@ std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
 std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::string rootUri);
 
 /** Creates a RequestMessage object from the given items. */
-std::unique_ptr<RequestMessage> makeRequestMessage(std::unique_ptr<JSONDocument<int>> &doc, std::string method, int id,
+std::unique_ptr<RequestMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, std::string method, int id,
                                                    std::unique_ptr<JSONBaseType> &params);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
@@ -37,18 +37,18 @@ void checkServerCapabilities(const std::unique_ptr<ServerCapabilities> &capabili
 
 /** Asserts that the JSONBaseType is a ResponseMessage with the given id. Returns the response message on success, fails
  * the test otherwise. */
-std::optional<std::unique_ptr<JSONDocument<ResponseMessage>>>
-assertResponseMessage(int expectedId, std::unique_ptr<JSONDocument<JSONBaseType>> &response);
+std::optional<std::unique_ptr<ResponseMessage>> assertResponseMessage(int expectedId,
+                                                                      std::unique_ptr<JSONBaseType> &response);
 
 /** Asserts that the JSONBaseType is a NotificationMessage with the given method. Returns the notification message on
  * success, fails the test otherwise. */
-std::optional<std::unique_ptr<JSONDocument<NotificationMessage>>>
-assertNotificationMessage(std::string expectedMethod, std::unique_ptr<JSONDocument<JSONBaseType>> &response);
+std::optional<std::unique_ptr<NotificationMessage>> assertNotificationMessage(std::string expectedMethod,
+                                                                              std::unique_ptr<JSONBaseType> &response);
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
 std::optional<std::unique_ptr<PublishDiagnosticsParams>>
-getPublishDiagnosticParams(const std::unique_ptr<JSONDocument<NotificationMessage>> &doc);
+getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc, const NotificationMessage &notifMsg);
 
 } // namespace sorbet::test
 #endif // TEST_LSP_TEST_HELPERS_H

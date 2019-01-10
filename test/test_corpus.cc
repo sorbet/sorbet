@@ -588,33 +588,25 @@ TEST_P(LSPTest, PositionTests) {
         testFileUris[filename] = filePathToUri(rootUri, filename);
     }
 
-    // Fake root document; used to allocate JSONAny values.
-    auto fakeRoot = make_unique<int>(0);
-    // Used to allocate JSONValues.
-    auto rapidjsonDoc = make_unique<rapidjson::Document>();
-    auto doc = make_unique<JSONDocument<int>>(rapidjsonDoc, fakeRoot);
     int nextId = 0;
 
     // Send 'initialize' message.
     {
         unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(rootPath, rootUri);
-        auto responses = getLSPResponsesFor(makeRequestMessage(doc, "initialize", nextId++, initializeParams));
+        auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "initialize", nextId++, initializeParams));
 
         // Should just have an 'initialize' response.
         ASSERT_EQ(1, responses.size());
         auto lspResponse = move(responses.at(0));
 
-        auto maybeDoc = assertResponseMessage(0, lspResponse);
-        if (maybeDoc.has_value()) {
-            auto &doc = *maybeDoc;
-            auto &respMsg = doc->root;
+        if (auto maybeRespMsg = assertResponseMessage(0, lspResponse)) {
+            auto &respMsg = *maybeRespMsg;
             ASSERT_FALSE(respMsg->error.has_value());
             ASSERT_TRUE(respMsg->result.has_value());
 
             auto &result = *respMsg->result;
             // TODO(jvilk): Need a better way to unwrap these.
-            auto initializeResult = InitializeResult::fromJSONValue(doc->memoryOwner->GetAllocator(), *result.get(),
-                                                                    "ResponseMessage.result");
+            auto initializeResult = InitializeResult::fromJSONValue(alloc, *result.get(), "ResponseMessage.result");
             checkServerCapabilities(initializeResult->capabilities);
         }
     }
@@ -636,14 +628,14 @@ TEST_P(LSPTest, PositionTests) {
         for (auto &filename : filenames) {
             unique_ptr<JSONBaseType> params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = getLSPResponsesFor(makeRequestMessage(doc, "textDocument/didOpen", nextId++, params));
+            auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/didOpen", nextId++, params));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
 
     // Tell LSP that the new files now have the contents from the test files on disk.
     {
-        vector<unique_ptr<JSONDocument<JSONBaseType>>> allResponses;
+        vector<unique_ptr<JSONBaseType>> allResponses;
         for (auto &filename : filenames) {
             auto textDoc = make_unique<VersionedTextDocumentIdentifier>(testFileUris[filename], 2);
             auto textDocContents = test.sourceFileContents[filename]->source();
@@ -655,7 +647,7 @@ TEST_P(LSPTest, PositionTests) {
 
             auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
             auto didChangeNotif = make_unique<NotificationMessage>("2.0", "textDocument/didChange");
-            didChangeNotif->params = didChangeParams->toJSONValue(doc);
+            didChangeNotif->params = didChangeParams->toJSONValue(alloc);
 
             auto responses = getLSPResponsesFor(move(didChangeNotif));
             allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
@@ -669,12 +661,11 @@ TEST_P(LSPTest, PositionTests) {
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         {
             for (auto &response : allResponses) {
-                auto maybeDoc = assertNotificationMessage("textDocument/publishDiagnostics", response);
-                if (!maybeDoc.has_value()) {
+                auto maybeNotifMsg = assertNotificationMessage("textDocument/publishDiagnostics", response);
+                if (!maybeNotifMsg) {
                     continue;
                 }
-                auto &doc = *maybeDoc;
-                auto maybeDiagnosticParams = getPublishDiagnosticParams(doc);
+                auto maybeDiagnosticParams = getPublishDiagnosticParams(alloc, **maybeNotifMsg);
                 ASSERT_TRUE(maybeDiagnosticParams.has_value());
                 auto &diagnosticParams = *maybeDiagnosticParams;
                 auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
@@ -691,7 +682,7 @@ TEST_P(LSPTest, PositionTests) {
     {
         auto requestResponseAssertions = RangeAssertion::getRequestResponseAssertions(assertions);
         for (auto &requestResponseAssertion : requestResponseAssertions) {
-            requestResponseAssertion->check(test, *this, doc, rootUri, nextId);
+            requestResponseAssertion->check(test, *this, alloc, rootUri, nextId);
         }
     }
 }
