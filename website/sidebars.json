@@ -1,0 +1,34 @@
+{
+  "core": {
+    "Intro": [
+      "overview",
+      "quickstart"
+    ],
+    "Type Annotations": [
+      "sigils",
+      "sigs"
+    ],
+    "Type System": [
+      "class-types",
+      "nilable-types",
+      "union-types",
+      "flow-sensitive",
+      "tuples",
+      "shapes",
+      "untyped",
+      "noreturn",
+      "type-aliases",
+      "stdlib-generics",
+      "proc",
+      "class-of",
+      "self-type",
+      "abstract",
+      "intersection-types"
+    ],
+    "Troubleshooting": [
+      "troubleshooting",
+      "faq",
+      "error-reference"
+    ]
+  }
+}
