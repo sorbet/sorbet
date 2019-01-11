@@ -1066,6 +1066,7 @@ public:
             return make_unique<Float>(loc, oper->string() + num->val);
         }
         if (auto *num = parser::cast_node<Rational>(receiver.get())) {
+            // todo fairly sure this isn't right, but mirrors negate() and this very behavior is tested for already?!
             return make_unique<Float>(loc, oper->string() + num->val);
         }
 
