@@ -238,15 +238,6 @@ using namespace std::string_literals;
   symbols
   top_compstmt
   top_stmt
-  tr_argsig
-  tr_blockproto
-  tr_constraint
-  tr_cpath
-  tr_gendeclarg
-  tr_methodgenargs
-  tr_returnsig
-  tr_type
-  tr_union_type
   user_variable
   var_lhs
   var_ref
@@ -296,9 +287,6 @@ using namespace std::string_literals;
   string_contents
   symbol_list
   top_stmts
-  tr_constraints
-  tr_gendeclargs
-  tr_types
   undef_list
   word
   word_list
@@ -569,10 +557,6 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | mlhs tEQL mrhs_arg
                     {
                       $$ = driver.build.multi_assign(self, $1, $3);
-                    }
-                | kDEF tIVAR tCOLON tr_type
-                    {
-                      $$ = driver.build.tr_ivardecl(self, $1, $2, $4);
                     }
                 | expr
 
@@ -932,10 +916,6 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     {
                       $$ = driver.build.const_(self, $1);
                     }
-                | primary_value tCOLON2 tLBRACK2 tr_gendeclargs tr_constraints rbracket
-                    {
-                      $$ = driver.build.tr_gendecl(self, $1, $3, $4, $5, $6);
-                    }
                 | primary_value tCOLON2 cname
                     {
                       $$ = driver.build.const_fetch(self, $1, $2, $3);
@@ -1018,11 +998,6 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     {
                       auto const_ = driver.build.const_op_assignable(self, driver.build.const_fetch(self, $1, $2, $3));
                       $$ = driver.build.op_assign(self, const_, $4, $5);
-                      DIAGCHECK();
-                    }
-                | primary_value tCOLON2 tLBRACK2 tr_types rbracket
-                    {
-                      $$ = driver.build.tr_arg_instance(self, $1, $4, $5);
                       DIAGCHECK();
                     }
                 | tCOLON3 tCONSTANT tOP_ASGN arg_rhs
@@ -1362,10 +1337,6 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | tLPAREN compstmt tRPAREN
                     {
                       $$ = driver.build.begin(self, $1, $2, $3);
-                    }
-                | tLPAREN expr tCOLON tr_type tRPAREN
-                    {
-                      $$ = driver.build.tr_cast(self, $1, $2, $3, $4, $5);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
@@ -1887,17 +1858,6 @@ opt_block_args_tail:
                 | block_param_def
                     {
                       driver.lex.set_state_expr_value();
-                    }
-                  tr_returnsig
-                    {
-                      auto args = $1;
-                      auto return_sig = $3;
-
-                      if (return_sig) {
-                        $$ = driver.build.tr_prototype(self, nullptr, args, return_sig);
-                      } else {
-                        $$ = args;
-                      }
                     }
 
  block_param_def: tPIPE opt_bv_decl tPIPE
@@ -2543,51 +2503,15 @@ keyword_variable: kNIL
                       $$ = nullptr;
                     }
 
-tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
-                    {
-                      $$ = driver.build.tr_genargs(self, $1, $2, $3, $4);
-                    }
-                | // nothing
-                    {
-                      $$ = nullptr;
-                    }
-
-       f_arglist: tr_methodgenargs tLPAREN2 f_args rparen
+       f_arglist: tLPAREN2 f_args rparen
                     {
                       driver.lex.set_state_expr_value();
+                      $$ = driver.build.args(self, $1, $2, $3, true);
                     }
-                  tr_returnsig
+                | f_args term
                     {
-                      auto genargs = $1;
-                      auto returnsig = $6;
-                      auto args = driver.build.args(self, $2, $3, $4, true);
+                      $$ = driver.build.args(self, nullptr, $1, nullptr, true);
                       DIAGCHECK();
-
-                      if (genargs || returnsig) {
-                        $$ = driver.build.tr_prototype(self, genargs, args, returnsig);
-                      } else {
-                        $$ = args;
-                      }
-                    }
-                | tr_methodgenargs
-                    {
-                      $<boolean>$ = driver.lex.in_kwarg;
-                      driver.lex.in_kwarg = true;
-                    }
-                  f_args tr_returnsig term
-                    {
-                      driver.lex.in_kwarg = $<boolean>2;
-
-                      auto genargs = $1;
-                      auto returnsig = $4;
-                      auto args = driver.build.args(self, nullptr, $3, nullptr, true);
-                      DIAGCHECK();
-
-                      if (genargs || returnsig) {
-                        $$ = driver.build.tr_prototype(self, genargs, args, returnsig);
-                      } else {
-                        $$ = args;
-                      }
                     }
 
        args_tail: f_kwarg tCOMMA f_kwrest opt_f_block_arg
@@ -2756,16 +2680,9 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       $$ = $1;
                     }
 
-      f_arg_item: tr_argsig f_arg_asgn
+      f_arg_item: f_arg_asgn
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.arg(self, $2);
-
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.arg(self, $1);
                     }
                 | tLPAREN f_margs rparen
                     {
@@ -2794,48 +2711,22 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       $$ = label;
                     }
 
-            f_kw: tr_argsig f_label arg_value
+            f_kw: f_label arg_value
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.kwoptarg(self, $2, $3);
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.kwoptarg(self, $1, $2);
                     }
-                | tr_argsig f_label
+                | f_label
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.kwarg(self, $2);
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.kwarg(self, $1);
                     }
 
-      f_block_kw: tr_argsig f_label primary_value
+      f_block_kw: f_label primary_value
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.kwoptarg(self, $2, $3);
-
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.kwoptarg(self, $1, $2);
                     }
-                | tr_argsig f_label
+                | f_label
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.kwarg(self, $2);
-
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.kwarg(self, $1);
                     }
 
    f_block_kwarg: f_block_kw
@@ -2862,53 +2753,31 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
 
      kwrest_mark: tPOW | tDSTAR
 
-        f_kwrest: tr_argsig kwrest_mark tIDENTIFIER
+        f_kwrest: kwrest_mark tIDENTIFIER
                     {
-                      auto argsig = $1;
-                      auto ident = $3;
+                      auto ident = $2;
 
                       driver.lex.declare(ident->string());
 
-                      auto kwrestarg = driver.build.kwrestarg(self, $2, ident);
-
-                      if (argsig) {
-                        kwrestarg = driver.build.tr_typed_arg(self, argsig, kwrestarg);
-                      }
+                      auto kwrestarg = driver.build.kwrestarg(self, $1, ident);
 
                       $$ = driver.alloc.node_list(kwrestarg);
                     }
-                | tr_argsig kwrest_mark
+                | kwrest_mark
                     {
-                      auto argsig = $1;
-                      auto kwrestarg = driver.build.kwrestarg(self, $2, nullptr);
-
-                      if (argsig) {
-                        kwrestarg = driver.build.tr_typed_arg(self, argsig, kwrestarg);
-                      }
+                      auto kwrestarg = driver.build.kwrestarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(kwrestarg);
                     }
 
-           f_opt: tr_argsig f_arg_asgn tEQL arg_value
+           f_opt: f_arg_asgn tEQL arg_value
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.optarg(self, $2, $3, $4);
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 
-     f_block_opt: tr_argsig f_arg_asgn tEQL primary_value
+     f_block_opt: f_arg_asgn tEQL primary_value
                     {
-                      auto argsig = $1;
-                      auto arg = driver.build.optarg(self, $2, $3, $4);
-                      if (argsig) {
-                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
-                      } else {
-                        $$ = arg;
-                      }
+                      $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 
   f_block_optarg: f_block_opt
@@ -2935,58 +2804,38 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
 
     restarg_mark: tSTAR2 | tSTAR
 
-      f_rest_arg: tr_argsig restarg_mark tIDENTIFIER
+      f_rest_arg: restarg_mark tIDENTIFIER
                     {
-                      auto argsig = $1;
-                      auto ident = $3;
+                      auto ident = $2;
 
                       driver.lex.declare(ident->string());
 
-                      auto restarg = driver.build.restarg(self, $2, ident);
-
-                      if (argsig) {
-                        restarg = driver.build.tr_typed_arg(self, argsig, restarg);
-                      }
+                      auto restarg = driver.build.restarg(self, $1, ident);
 
                       $$ = driver.alloc.node_list(restarg);
                     }
-                | tr_argsig restarg_mark
+                | restarg_mark
                     {
-                      auto argsig = $1;
-                      auto restarg = driver.build.restarg(self, $2, nullptr);
-
-                      if (argsig) {
-                        restarg = driver.build.tr_typed_arg(self, argsig, restarg);
-                      }
+                      auto restarg = driver.build.restarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(restarg);
                     }
 
      blkarg_mark: tAMPER2 | tAMPER
 
-     f_block_arg: tr_argsig blkarg_mark tIDENTIFIER
+     f_block_arg: blkarg_mark tIDENTIFIER
                     {
-                      auto argsig = $1;
-                      auto ident = $3;
+                      auto ident = $2;
 
                       driver.lex.declare(ident->string());
 
-                      auto blockarg = driver.build.blockarg(self, $2, ident);
-
-                      if (argsig) {
-                        blockarg = driver.build.tr_typed_arg(self, argsig, blockarg);
-                      }
+                      auto blockarg = driver.build.blockarg(self, $1, ident);
 
                       $$ = driver.alloc.node_list(blockarg);
                     }
-                | tr_argsig blkarg_mark
+                | blkarg_mark
                     {
-                      auto argsig = $1;
-                      auto blockarg = driver.build.blockarg(self, $2, nullptr);
-
-                      if (argsig) {
-                        blockarg = driver.build.tr_typed_arg(self, argsig, blockarg);
-                      }
+                      auto blockarg = driver.build.blockarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(blockarg);
                     }
@@ -3086,159 +2935,5 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                   {
                     $$ = nullptr;
                   }
-
-        tr_cpath: tCOLON3 tCONSTANT
-                    {
-                      $$ = driver.build.const_global(self, $1, $2);
-                    }
-                | tCONSTANT
-                    {
-                      $$ = driver.build.const_(self, $1);
-                    }
-                | tr_cpath tCOLON2 tCONSTANT
-                    {
-                      $$ = driver.build.const_fetch(self, $1, $2, $3);
-                    }
-
-       tr_types: tr_types tCOMMA tr_type
-                    {
-                      auto &list = $1;
-                      list->emplace_back($3);
-                      $$ = list;
-                    }
-               | tr_type
-                    {
-                      $$ = driver.alloc.node_list($1);
-                    }
-
-         tr_type: tr_cpath
-                    {
-                      $$ = driver.build.tr_cpath(self, $1);
-                    }
-                | tr_cpath tCOLON2 tLBRACK2 tr_types rbracket
-                    {
-                      $$ = driver.build.tr_geninst(self, $1, $3, $4, $5);
-                    }
-                | tLBRACK tr_type rbracket
-                    {
-                      $$ = driver.build.tr_array(self, $1, $2, $3);
-                    }
-                | tLBRACK tr_type tCOMMA tr_types rbracket
-                    {
-                      auto &types = $4;
-                      types->push_front($2);
-                      $$ = driver.build.tr_tuple(self, $1, types, $5);
-                    }
-                | tLBRACE tr_type tASSOC tr_type tRCURLY
-                    {
-                      $$ = driver.build.tr_hash(self, $1, $2, $3, $4, $5);
-                    }
-                | tLBRACE tr_blockproto tr_returnsig tRCURLY
-                    {
-                      auto blockproto = $2;
-                      auto returnsig = $3;
-
-                      auto prototype = returnsig
-                        ? driver.build.tr_prototype(self, nullptr, blockproto, returnsig)
-                        : blockproto;
-
-                      $$ = driver.build.tr_proc(self, $1, prototype, $4);
-                    }
-                | tTILDE tr_type
-                    {
-                      $$ = driver.build.tr_nillable(self, $1, $2);
-                    }
-                | kNIL
-                    {
-                      $$ = driver.build.tr_nil(self, $1);
-                    }
-                | tSYMBOL
-                    {
-                      if ($1->string() == "any") {
-                        $$ = driver.build.tr_any(self, $1);
-                      } else if ($1->string() == "class") {
-                        $$ = driver.build.tr_class(self, $1);
-                      } else if ($1->string() == "instance") {
-                        $$ = driver.build.tr_instance(self, $1);
-                      } else if ($1->string() == "self") {
-                        $$ = driver.build.tr_self(self, $1);
-                      } else {
-                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, $1->string());
-                        YYERROR;
-                      }
-                    }
-                | tLPAREN tr_union_type rparen
-                    {
-                      $$ = driver.build.tr_paren(self, $1, $2, $3);
-                    }
-
-   tr_union_type: tr_union_type tPIPE tr_type
-                    {
-                      $$ = driver.build.tr_or(self, $1, $3);
-                    }
-                | tr_type
-
-       tr_argsig: tr_type
-                    {
-                      $$ = $1;
-                      driver.lex.set_state_expr_beg();
-                    }
-                |
-                    {
-                      $$ = nullptr;
-                    }
-
-    tr_returnsig: tASSOC tr_type
-                    {
-                      $$ = driver.build.tr_returnsig(self, $1, $2);
-                    }
-                |
-                    {
-                      $$ = nullptr;
-                    }
-
-   tr_constraint: tr_type tCOLON tr_type
-                    {
-                      $$ = driver.build.tr_consubtype(self, $1, $3);
-                    }
-
-   tr_gendeclarg: tCONSTANT
-                    {
-                      $$ = driver.build.tr_gendeclarg(self, $1, nullptr);
-                    }
-                | tCONSTANT tCOLON tr_type
-                    {
-                      $$ = driver.build.tr_gendeclarg(self, $1, $3);
-                    }
-
-  tr_constraints: tr_constraints tSEMI tr_constraint
-                    {
-                      auto &list = $1;
-                      list->emplace_back($3);
-                      $$ = list;
-                    }
-                |
-                    {
-                      $$ = driver.alloc.node_list();
-                    }
-
-
-  tr_gendeclargs: tr_gendeclargs tCOMMA tr_gendeclarg
-                    {
-                      auto &list = $1;
-                      list->emplace_back($3);
-                      $$ = list;
-                    }
-                | tr_gendeclarg
-                    {
-                      $$ = driver.alloc.node_list($1);
-                    }
-
-   tr_blockproto: { driver.lex.extend_dynamic(); }
-                  block_param_def
-                    {
-                      driver.lex.unextend();
-                      $$ = $2;
-                    }
 
 %%
