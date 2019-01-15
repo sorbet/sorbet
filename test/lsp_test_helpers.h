@@ -30,7 +30,7 @@ std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::st
 
 /** Creates a RequestMessage object from the given items. */
 std::unique_ptr<RequestMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, std::string method, int id,
-                                                   std::unique_ptr<JSONBaseType> &params);
+                                                   const JSONBaseType &params);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const std::unique_ptr<ServerCapabilities> &capabilities);

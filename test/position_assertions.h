@@ -32,7 +32,6 @@ std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath)
 std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
 
 class ErrorAssertion;
-class LSPRequestResponseAssertion;
 class LSPTest;
 
 /**
@@ -61,12 +60,6 @@ public:
      */
     static std::vector<std::shared_ptr<ErrorAssertion>>
     getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
-
-    /**
-     * Filters a vector of assertions and returns only LSPRequestResponseAssertions.
-     */
-    static std::vector<std::shared_ptr<LSPRequestResponseAssertion>>
-    getRequestResponseAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
     const std::string filename;
     const std::unique_ptr<Range> range;
@@ -103,57 +96,38 @@ public:
     void check(const std::unique_ptr<Diagnostic> &diagnostic, std::string_view sourceLine);
 };
 
-/**
- * These assertions are only valid for LSP tests. They send one or more requests to LSP, and assert things on
- * the responses.
- */
-class LSPRequestResponseAssertion : public RangeAssertion {
-public:
-    LSPRequestResponseAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine);
-    ~LSPRequestResponseAssertion() = default;
-
-    virtual void check(const Expectations &expectations, LSPTest &test, rapidjson::MemoryPoolAllocator<> &alloc,
-                       std::string_view uriPrefix, int &nextId) = 0;
-};
-
-class UsageAssertion;
 // # ^^^ def: symbol
-class DefAssertion final : public LSPRequestResponseAssertion {
-private:
-    void checkDefinition(const Expectations &expectations, LSPTest &test, const std::string_view uriPrefix,
-                         rapidjson::MemoryPoolAllocator<> &alloc, const std::unique_ptr<Location> &loc, int character,
-                         int id, std::string_view defSourceLine);
-
-    void checkReferences(const Expectations &expectations, LSPTest &test, const std::string_view uriPrefix,
-                         rapidjson::MemoryPoolAllocator<> &alloc, const std::vector<std::unique_ptr<Location>> &allLocs,
-                         const std::unique_ptr<Location> &loc, int character, int id, std::string_view defSourceLine);
-
+class DefAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<DefAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                               int assertionLine, std::string_view assertionContents);
 
     const std::string symbol;
-    std::vector<std::shared_ptr<UsageAssertion>> usages;
+    const int version;
 
-    DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
+    DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
+                 int version);
 
-    void check(const Expectations &expectations, LSPTest &test, rapidjson::MemoryPoolAllocator<> &alloc,
-               std::string_view uriPrefix, int &nextId) override;
+    void check(LSPTest &test, std::string_view uriPrefix, const Location &queryLoc);
+
     std::string toString() override;
 };
 
 // # ^^^ usage: symbol
-// Is checked as a part of DefAssertion.
 class UsageAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<UsageAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                 int assertionLine, std::string_view assertionContents);
 
+    static void check(LSPTest &test, std::string_view uriPrefix, std::string_view symbol, const Location &queryLoc,
+                      const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
+
     const std::string symbol;
+    const int version;
     std::shared_ptr<DefAssertion> def;
 
-    UsageAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                   std::string_view symbol);
+    UsageAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
+                   int version);
 
     std::string toString() override;
 };

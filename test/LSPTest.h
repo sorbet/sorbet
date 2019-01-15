@@ -73,6 +73,12 @@ public:
     /** Memory allocator for rapidjson objects. */
     rapidjson::MemoryPoolAllocator<> alloc;
 
+    /** Test expectations. Stored here for convenience. */
+    Expectations test;
+
+    /** The next ID to use when sending an LSP message. */
+    int nextId = 0;
+
     /**
      * Send a message to LSP, and returns any responses.
      */

@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // ^ Include first because it violates linting rules.
 
+#include "absl/strings/str_split.h"
 #include "test/lsp_test_helpers.h"
 #include "test/position_assertions.h"
 #include <regex>
@@ -101,12 +102,12 @@ string prettyPrintRangeComment(string_view sourceLine, const unique_ptr<Range> &
 }
 
 string_view getLine(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
-                    const unique_ptr<Location> &loc) {
-    auto filename = uriToFilePath(uriPrefix, loc->uri);
+                    const Location &loc) {
+    auto filename = uriToFilePath(uriPrefix, loc.uri);
     auto foundFile = sourceFileContents.find(filename);
     EXPECT_NE(sourceFileContents.end(), foundFile) << fmt::format("Unable to find file `{}`", filename);
     auto &file = foundFile->second;
-    return file->getLine(loc->range->start->line + 1);
+    return file->getLine(loc.range->start->line + 1);
 }
 
 string filePathToUri(string_view prefixUrl, string_view filePath) {
@@ -176,17 +177,6 @@ RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &ass
     vector<shared_ptr<ErrorAssertion>> rv;
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
-            rv.push_back(assertionOfType);
-        }
-    }
-    return rv;
-}
-
-vector<shared_ptr<LSPRequestResponseAssertion>>
-RangeAssertion::getRequestResponseAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<shared_ptr<LSPRequestResponseAssertion>> rv;
-    for (auto assertion : assertions) {
-        if (auto assertionOfType = dynamic_pointer_cast<LSPRequestResponseAssertion>(assertion)) {
             rv.push_back(assertionOfType);
         }
     }
@@ -277,51 +267,6 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
         }
         lineNum += 1;
     }
-
-    // Associate usage/def assertions with one another.
-    // symbol => definition assertion
-    UnorderedMap<string, shared_ptr<DefAssertion>> defAssertions;
-
-    // Pass 1: Find def assertions, insert into map.
-    for (auto &assertion : assertions) {
-        if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
-            {
-                auto found = defAssertions.find(defAssertion->symbol);
-                if (found != defAssertions.end()) {
-                    auto &existingDefAssertion = found->second;
-                    auto errorMessage = fmt::format(
-                        "Found multiple def comments for label `{}`.\nPlease use unique labels for definition "
-                        "assertions. Note that these labels do not need to match the pointed-to identifiers.\nFor "
-                        "example, the following is completely valid:\n foo = 3\n#^^^ def: bar",
-                        defAssertion->symbol);
-                    ADD_FAILURE_AT(filename.c_str(), existingDefAssertion->assertionLine + 1) << errorMessage;
-                    ADD_FAILURE_AT(filename.c_str(), defAssertion->assertionLine + 1) << errorMessage;
-                    // Ignore duplicate symbol.
-                    continue;
-                }
-            }
-            defAssertions[defAssertion->symbol] = defAssertion;
-        }
-    }
-
-    // Pass 2: Find usage assertions, associate with def assertion found with map.
-    for (auto &assertion : assertions) {
-        if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
-            auto it = defAssertions.find(usageAssertion->symbol);
-            if (it == defAssertions.end()) {
-                ADD_FAILURE_AT(filename.c_str(), usageAssertion->assertionLine + 1) << fmt::format(
-                    "Found usage comment for label {0} without matching def comment. Please add a `# ^^ def: {0}` "
-                    "assertion that points to the definition of the pointed-to thing being used.",
-                    usageAssertion->symbol);
-                // Ignore invalid usage assertion.
-                continue;
-            }
-            auto defAssertion = it->second;
-            defAssertion->usages.push_back(usageAssertion);
-            usageAssertion->def = defAssertion;
-        }
-    }
-
     return assertions;
 }
 
@@ -349,16 +294,29 @@ unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) {
     return make_unique<Location>(uri, move(newRange));
 }
 
-LSPRequestResponseAssertion::LSPRequestResponseAssertion(string_view filename, unique_ptr<Range> &range,
-                                                         int assertionLine)
-    : RangeAssertion(filename, range, assertionLine) {}
+pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
+    int version = 1;
+    vector<string_view> split = absl::StrSplit(assertionContents, ' ');
+    EXPECT_GE(split.size(), 0);
+    EXPECT_LT(split.size(), 3) << fmt::format(
+        "Invalid usage and def assertion; multiple words found:\n{}\nUsage and def assertions should be "
+        "of the form:\n# [^*] [usage | def]: symbolname [version?]",
+        assertionContents);
+    if (split.size() == 2) {
+        string_view versionString = split[1];
+        version = stoi(string(versionString));
+    }
+    return pair<string_view, int>(split[0], version);
+}
 
-DefAssertion::DefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol)
-    : LSPRequestResponseAssertion(filename, range, assertionLine), symbol(symbol) {}
+DefAssertion::DefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol,
+                           int version)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version) {}
 
 shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                             string_view assertionContents) {
-    return make_shared<DefAssertion>(filename, range, assertionLine, assertionContents);
+    auto symbolAndVersion = getSymbolAndVersion(assertionContents);
+    return make_shared<DefAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
 
 vector<unique_ptr<Location>> extractLocations(rapidjson::MemoryPoolAllocator<> &alloc,
@@ -374,18 +332,21 @@ vector<unique_ptr<Location>> extractLocations(rapidjson::MemoryPoolAllocator<> &
     return locations;
 }
 
-void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &test, string_view uriPrefix,
-                                   rapidjson::MemoryPoolAllocator<> &alloc, const unique_ptr<Location> &loc,
-                                   int character, int id, string_view defSourceLine) {
-    const int line = loc->range->start->line;
-    auto locSourceLine = getLine(expectations.sourceFileContents, uriPrefix, loc);
-    string locFilename = uriToFilePath(uriPrefix, loc->uri);
+void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &queryLoc) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    const int character = queryLoc.range->start->character;
+    auto &sourceFileContents = test.test.sourceFileContents;
+    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    auto defSourceLine = getLine(sourceFileContents, uriPrefix, *getLocation(uriPrefix));
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
     string defUri = filePathToUri(uriPrefix, filename);
 
     unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
-        make_unique<TextDocumentIdentifier>(loc->uri), make_unique<Position>(line, character));
-    auto responses =
-        test.getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/definition", id, textDocumentPositionParams));
+        make_unique<TextDocumentIdentifier>(queryLoc.uri), make_unique<Position>(line, character));
+    int id = test.nextId++;
+    auto responses = test.getLSPResponsesFor(
+        makeRequestMessage(test.alloc, "textDocument/definition", id, *textDocumentPositionParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
         return;
@@ -397,7 +358,7 @@ void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &te
         ASSERT_FALSE(respMsg->error.has_value());
 
         auto &result = *(respMsg->result);
-        vector<unique_ptr<Location>> locations = extractLocations(alloc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(test.alloc, result);
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -411,22 +372,21 @@ void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &te
                 "Sorbet unexpectedly returned multiple locations for definition of symbol `{}`.\nFor "
                 "location:\n{}\nSorbet returned the following definition locations:\n{}",
                 symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                fmt::map_join(locations, "\n", [&expectations, &uriPrefix](const auto &arg) -> string {
-                    return prettyPrintRangeComment(getLine(expectations.sourceFileContents, uriPrefix, arg), arg->range,
-                                                   "");
+                fmt::map_join(locations, "\n", [&sourceFileContents, &uriPrefix](const auto &arg) -> string {
+                    return prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *arg), arg->range, "");
                 }));
             return;
         }
 
         auto &location = locations.at(0);
         // Note: Sorbet will point to the *statement* that defines the symbol, not just the symbol.
-        // For example, it'll point to "class Foo" instead of just "Foo". Thus, we just check that "Foo"
-        // is in the range reported.
-        if (location->uri != defUri || !rangeIsSubset(location->range, range)) {
+        // For example, it'll point to "class Foo" instead of just "Foo", or `5` in `a = 5` instead of `a`.
+        // Thus, we just check that it returns the same line.
+        if (location->uri != defUri || location->range->start->line != range->start->line) {
             string foundLocationString = "null";
             if (location != nullptr) {
-                foundLocationString = prettyPrintRangeComment(
-                    getLine(expectations.sourceFileContents, uriPrefix, location), location->range, "");
+                foundLocationString =
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), location->range, "");
             }
 
             ADD_FAILURE_AT(filename.c_str(), line + 1)
@@ -438,19 +398,22 @@ void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &te
     }
 }
 
-void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &test, string_view uriPrefix,
-                                   rapidjson::MemoryPoolAllocator<> &alloc, const vector<unique_ptr<Location>> &allLocs,
-                                   const unique_ptr<Location> &loc, int character, int id, string_view defSourceLine) {
-    const int line = loc->range->start->line;
-    auto locSourceLine = getLine(expectations.sourceFileContents, uriPrefix, loc);
-    string locFilename = uriToFilePath(uriPrefix, loc->uri);
-    string defUri = filePathToUri(uriPrefix, filename);
+void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view symbol, const Location &queryLoc,
+                           const vector<shared_ptr<RangeAssertion>> &allLocs) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    const int character = queryLoc.range->start->character;
+    auto &sourceFileContents = test.test.sourceFileContents;
+    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
 
     unique_ptr<JSONBaseType> referenceParams =
-        make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(loc->uri),
+        make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(queryLoc.uri),
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
-    auto responses = test.getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/references", id, referenceParams));
+    int id = test.nextId++;
+    auto responses =
+        test.getLSPResponsesFor(makeRequestMessage(test.alloc, "textDocument/references", id, *referenceParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
@@ -462,7 +425,7 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
         ASSERT_FALSE(respMsg->error.has_value());
         auto &result = *(respMsg->result);
 
-        vector<unique_ptr<Location>> locations = extractLocations(alloc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(test.alloc, result);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, a->range, "", b->uri, b->range, "");
         });
@@ -470,7 +433,7 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
         auto expectedLocationsIt = allLocs.begin();
         auto actualLocationsIt = locations.begin();
         while (expectedLocationsIt != allLocs.end() && actualLocationsIt != locations.end()) {
-            auto &expectedLocation = *expectedLocationsIt;
+            auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
             auto &actualLocation = *actualLocationsIt;
 
             // If true, the expectedLocation is a subset of the actualLocation
@@ -492,9 +455,8 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
                                    symbol,
                                    prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1),
                                                            ""),
-                                   prettyPrintRangeComment(
-                                       getLine(expectations.sourceFileContents, uriPrefix, expectedLocation),
-                                       expectedLocation->range, ""));
+                                   prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
+                                                           expectedLocation->range, ""));
                         expectedLocationsIt++;
                         break;
                     }
@@ -502,11 +464,11 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
                         // Expected location is *after* actual location
                         auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
                         ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
-                            "Sorbet reported unexpected reference to symbom `{}`.\nGiven symbol "
+                            "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
                             "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                             symbol,
                             prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                            prettyPrintRangeComment(getLine(expectations.sourceFileContents, uriPrefix, actualLocation),
+                            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation),
                                                     actualLocation->range, ""));
                         actualLocationsIt++;
                         break;
@@ -521,13 +483,13 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
         }
 
         while (expectedLocationsIt != allLocs.end()) {
-            auto &expectedLocation = *expectedLocationsIt;
+            auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
             auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
             ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
                 "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
                 "did not report reference at:\n{}",
                 symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(expectations.sourceFileContents, uriPrefix, expectedLocation),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
                                         expectedLocation->range, ""));
             expectedLocationsIt++;
         }
@@ -536,43 +498,13 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
             auto &actualLocation = *actualLocationsIt;
             auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
             ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
-                "Sorbet reported unexpected reference to symbom `{}`.\nGiven symbol "
+                "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
                 "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                 symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(expectations.sourceFileContents, uriPrefix, actualLocation),
-                                        actualLocation->range, ""));
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), actualLocation->range,
+                                        ""));
             actualLocationsIt++;
         }
-    }
-}
-
-void DefAssertion::check(const Expectations &expectations, LSPTest &test, rapidjson::MemoryPoolAllocator<> &alloc,
-                         string_view uriPrefix, int &nextId) {
-    auto locationsToCheck = vector<unique_ptr<Location>>();
-    locationsToCheck.push_back(getLocation(uriPrefix));
-    auto defSourceLine = getLine(expectations.sourceFileContents, uriPrefix, locationsToCheck.at(0));
-
-    for (auto &usage : usages) {
-        locationsToCheck.push_back(usage->getLocation(uriPrefix));
-    }
-
-    // Canonicalize order for reference comparison.
-    fast_sort(locationsToCheck, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
-        return errorComparison(a->uri, a->range, "", b->uri, b->range, "");
-    });
-
-    for (auto &location : locationsToCheck) {
-        auto &locRange = location->range;
-        // Should never happen -- there's no way to construct them.
-        EXPECT_EQ(locRange->start->line, locRange->end->line)
-            << "Multi-line ranges are not supported for position assertions.";
-
-        // Every character in range should work as a source location for a definition or reference request, but we'll
-        // just check the first character to avoid blowing up test failures.
-        checkDefinition(expectations, test, uriPrefix, alloc, location, locRange->start->character, nextId++,
-                        defSourceLine);
-        checkReferences(expectations, test, uriPrefix, alloc, locationsToCheck, location, locRange->start->character,
-                        nextId++, defSourceLine);
     }
 }
 
@@ -580,12 +512,14 @@ string DefAssertion::toString() {
     return fmt::format("def: {}", symbol);
 }
 
-UsageAssertion::UsageAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol)
-    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+UsageAssertion::UsageAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol,
+                               int version)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version) {}
 
 shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                 string_view assertionContents) {
-    return make_shared<UsageAssertion>(filename, range, assertionLine, assertionContents);
+    auto symbolAndVersion = getSymbolAndVersion(assertionContents);
+    return make_shared<UsageAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
 
 string UsageAssertion::toString() {

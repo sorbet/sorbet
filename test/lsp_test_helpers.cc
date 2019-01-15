@@ -110,9 +110,9 @@ unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
 }
 
 unique_ptr<RequestMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, string method, int id,
-                                              unique_ptr<JSONBaseType> &params) {
+                                              const JSONBaseType &params) {
     auto initialize = make_unique<RequestMessage>("2.0", id, method);
-    initialize->params = params->toJSONValue(alloc);
+    initialize->params = params.toJSONValue(alloc);
     return initialize;
 }
 

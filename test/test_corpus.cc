@@ -580,7 +580,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 TEST_P(LSPTest, PositionTests) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
-    Expectations test = GetParam();
 
     // filename => URI
     UnorderedMap<string, string> testFileUris;
@@ -588,12 +587,13 @@ TEST_P(LSPTest, PositionTests) {
         testFileUris[filename] = filePathToUri(rootUri, filename);
     }
 
-    int nextId = 0;
+    // Reset next id.
+    nextId = 0;
 
     // Send 'initialize' message.
     {
         unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(rootPath, rootUri);
-        auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "initialize", nextId++, initializeParams));
+        auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "initialize", nextId++, *initializeParams));
 
         // Should just have an 'initialize' response.
         ASSERT_EQ(1, responses.size());
@@ -628,7 +628,7 @@ TEST_P(LSPTest, PositionTests) {
         for (auto &filename : filenames) {
             unique_ptr<JSONBaseType> params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/didOpen", nextId++, params));
+            auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/didOpen", nextId++, *params));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
@@ -679,10 +679,71 @@ TEST_P(LSPTest, PositionTests) {
         checkErrors(test, assertions, diagnostics);
     }
 
+    // Usage and def assertions
     {
-        auto requestResponseAssertions = RangeAssertion::getRequestResponseAssertions(assertions);
-        for (auto &requestResponseAssertion : requestResponseAssertions) {
-            requestResponseAssertion->check(test, *this, alloc, rootUri, nextId);
+        // Sort by symbol.
+        // symbol => [version => DefAssertion, [DefAssertion+UsageAssertion][]]
+        // Note: Using a vector in pair since order matters; assertions are ordered by location, which
+        // is used when comparing against LSP responses.
+        UnorderedMap<string, pair<UnorderedMap<int, shared_ptr<DefAssertion>>, vector<shared_ptr<RangeAssertion>>>>
+            defUsageMap;
+        for (auto &assertion : assertions) {
+            if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
+                auto &entry = defUsageMap[defAssertion->symbol];
+                auto &defMap = entry.first;
+                EXPECT_FALSE(defMap.contains(defAssertion->version)) << fmt::format(
+                    "Found multiple def comments for label `{}` version `{}`.\nPlease use unique labels and versions "
+                    "for definition assertions. Note that these labels do not need to match the pointed-to "
+                    "identifiers.\nFor example, the following is completely valid:\n foo = 3\n#^^^ def: bar 100",
+                    defAssertion->symbol, defAssertion->version);
+                defMap[defAssertion->version] = defAssertion;
+                entry.second.push_back(defAssertion);
+            } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
+                auto &entry = defUsageMap[usageAssertion->symbol];
+                entry.second.push_back(usageAssertion);
+            }
+        }
+
+        // Check each assertion.
+        for (auto &entry : defUsageMap) {
+            auto &entryAssertions = entry.second.second;
+            // Sort assertions in (filename, range) order
+            fast_sort(entryAssertions,
+                      [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
+                          return errorComparison(a->filename, a->range, "", b->filename, b->range, "");
+                      });
+
+            auto &defAssertions = entry.second.first;
+            // Shouldn't be possible to have an entry with 0 assertions, but explicitly check anyway.
+            EXPECT_GE(entryAssertions.size(), 1);
+
+            for (auto &assertion : entryAssertions) {
+                string_view symbol;
+                int version = -1;
+                std::unique_ptr<Location> location;
+                // TODO(jvilk): Worth unifying as a parent class (DefOrUsageAssertion)?
+                if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
+                    version = defAssertion->version;
+                    symbol = defAssertion->symbol;
+                } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
+                    version = usageAssertion->version;
+                    symbol = usageAssertion->symbol;
+                }
+                auto entry = defAssertions.find(version);
+                if (entry != defAssertions.end()) {
+                    auto &def = entry->second;
+                    auto queryLoc = assertion->getLocation(rootUri);
+                    // Check that a definition request at this location returns def.
+                    def->check(*this, rootUri, *queryLoc);
+                    // Check that a reference request at this location returns entryAssertions.
+                    UsageAssertion::check(*this, rootUri, symbol, *queryLoc, entryAssertions);
+                } else {
+                    ADD_FAILURE() << fmt::format(
+                        "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
+                        "^^ def: {0} {1}` assertion that points to the definition of the pointed-to thing being used.",
+                        symbol, version);
+                }
+            }
         }
     }
 }

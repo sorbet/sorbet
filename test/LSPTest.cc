@@ -14,6 +14,7 @@ using namespace std;
 regex contentLengthRegex("^Content-Length: ([0-9]+)$");
 
 void LSPTest::SetUp() {
+    test = GetParam();
     parseTestFile();
     startLSP();
 }
@@ -41,14 +42,13 @@ void LSPTest::startLSP() {
 }
 
 void LSPTest::parseTestFile() {
-    auto expectations = GetParam();
-    for (auto &sourceFile : expectations.sourceFiles) {
-        filenames.insert(expectations.folder + sourceFile);
+    for (auto &sourceFile : test.sourceFiles) {
+        filenames.insert(test.folder + sourceFile);
     }
 
-    assertions = RangeAssertion::parseAssertions(expectations.sourceFileContents);
+    assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
-    if (expectations.expectations.find("autogen") != expectations.expectations.end()) {
+    if (test.expectations.find("autogen") != test.expectations.end()) {
         // When autogen is enabled, skip DSL passes...
         opts.skipDSLPasses = true;
         // Some autogen tests assume that some errors will occur from the resolver step, others assume the resolver
