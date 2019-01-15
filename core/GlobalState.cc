@@ -113,7 +113,7 @@ atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
-    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue) {
+    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue), lspQuery(Query::noQuery()) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int max_name_count = 8192;
@@ -995,8 +995,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->strings_last_page_used = STRINGS_PAGE_SIZE;
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
-    result->lspInfoQueryLoc = this->lspInfoQueryLoc;
-    result->lspQuerySymbol = this->lspQuerySymbol;
+    result->lspQuery = this->lspQuery;
     result->lspTypecheckCount = this->lspTypecheckCount;
 
     result->names.reserve(this->names.capacity());

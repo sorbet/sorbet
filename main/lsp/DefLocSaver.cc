@@ -4,9 +4,8 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx,
                                                                unique_ptr<ast::MethodDef> methodDef) {
-    // This TypeAndOrigins object is currently unused so we just let the default constructor make tp.type
-    // an empty shared_ptr and tp.origins an empty vector
-    bool lspQueryMatch = ctx.state.lspInfoQueryLoc.exists() && methodDef->declLoc.contains(ctx.state.lspInfoQueryLoc);
+    const core::Query &lspQuery = ctx.state.lspQuery;
+    bool lspQueryMatch = lspQuery.matchesLoc(methodDef->declLoc);
 
     if (lspQueryMatch) {
         core::TypeAndOrigins tp;

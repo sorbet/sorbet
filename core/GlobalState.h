@@ -9,6 +9,7 @@
 #include "core/Loc.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
+#include "core/lsp/Query.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -124,10 +125,9 @@ public:
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
-    // When set, contains a location at which the typechecker should generate information
+    // Contains a location / symbol / variable reference that various Sorbet passes are looking for.
     // See ErrorQueue#queryResponse
-    Loc lspInfoQueryLoc;
-    SymbolRef lspQuerySymbol;
+    Query lspQuery;
 
     // Indicates the number of times LSP has run the type checker with this global state.
     // Used to ensure GlobalState is in the correct state to process requests.

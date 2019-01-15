@@ -254,7 +254,7 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
-    TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, core::Loc loc, core::SymbolRef symbol,
+    TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::Query &q,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
     TypecheckRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, const MessageId &id, std::string_view uri,
                                     const Position &pos, const LSPMethod &forMethod, bool errorIfFileIsUntyped);

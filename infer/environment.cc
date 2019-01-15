@@ -769,7 +769,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             cfg::isa_instruction<cfg::Alias>(bind.value.get()) || cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
 
         bool checkFullyDefined = true;
-        bool lspQueryMatch = ctx.state.lspInfoQueryLoc.exists() && bind.loc.contains(ctx.state.lspInfoQueryLoc);
+        const core::Query &lspQuery = ctx.state.lspQuery;
+        bool lspQueryMatch = lspQuery.matchesLoc(bind.loc);
 
         typecase(
             bind.value.get(),
@@ -807,8 +808,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                         for (auto &err : comp.errors) {
                             ctx.state._error(std::move(err));
                         }
-                        lspQueryMatch = lspQueryMatch ||
-                                        (ctx.state.lspQuerySymbol.exists() && ctx.state.lspQuerySymbol == comp.method);
+                        lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(comp.method);
                     }
 
                     if (lspQueryMatch) {
@@ -834,8 +834,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             },
             [&](cfg::Alias *a) {
                 core::SymbolRef symbol = a->what.data(ctx)->dealias(ctx);
-                lspQueryMatch =
-                    lspQueryMatch || (ctx.state.lspQuerySymbol.exists() && symbol == ctx.state.lspQuerySymbol);
+                lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(symbol);
                 const auto &data = symbol.data(ctx);
                 if (data->isClass()) {
                     if (!data->resultType) { // common case

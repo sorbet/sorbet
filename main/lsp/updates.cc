@@ -193,7 +193,7 @@ void LSPLoop::reIndexFromFileSystem() {
 }
 
 void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
-    if (gs.lspInfoQueryLoc == core::Loc::none()) {
+    if (gs.lspQuery.kind != core::Query::Kind::LOC) {
         return;
     }
     for (auto &t : indexedCopies) {
