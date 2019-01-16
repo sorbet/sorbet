@@ -38,7 +38,6 @@ const vector<PrintOptions> print_options({
     {"cfg", &Printers::CFG, true},
     {"cfg-raw", &Printers::CFGRaw, true},
     {"typed-source", &Printers::TypedSource, true},
-    {"error-files", &Printers::ErrorFiles, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
 });

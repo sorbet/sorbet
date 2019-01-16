@@ -317,14 +317,7 @@ int realmain(int argc, char *argv[]) {
 
         gs->errorQueue->flushErrors(true);
 
-        if (opts.print.ErrorFiles) {
-            for (auto &tree : indexed) {
-                auto f = tree.file;
-                if (f.data(*gs).hadErrors()) {
-                    fmt::print("{}\n", f.data(*gs).path());
-                }
-            }
-        } else if (!opts.noErrorCount) {
+        if (!opts.noErrorCount) {
             gs->errorQueue->flushErrorCount();
         }
         if (opts.autocorrect) {

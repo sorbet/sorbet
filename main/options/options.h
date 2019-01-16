@@ -30,7 +30,6 @@ struct Printers {
     bool CFG = false;
     bool CFGRaw = false;
     bool TypedSource = false;
-    bool ErrorFiles = false;
     bool Autogen = false;
     bool AutogenMsgPack = false;
 };
