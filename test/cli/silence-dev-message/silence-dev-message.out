@@ -1,0 +1,20 @@
+👋 Hey there! Heads up that this is not a release build of sorbet.
+Release builds are faster and more well-supported by the Sorbet team.
+Consider rebuilding sorbet with the `--config=release` flag!
+To forcibly silence this error, either pass --silence-dev-message,
+or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.
+
+-e:1: Method `x` does not exist on `T.class_of(<root>)` http://go/e/7003
+     1 |x
+        ^
+Errors: 1
+-----------------------------------------------------------------------
+-e:1: Method `x` does not exist on `T.class_of(<root>)` http://go/e/7003
+     1 |x
+        ^
+Errors: 1
+-----------------------------------------------------------------------
+-e:1: Method `x` does not exist on `T.class_of(<root>)` http://go/e/7003
+     1 |x
+        ^
+Errors: 1

@@ -201,10 +201,13 @@ int realmain(int argc, char *argv[]) {
             absl::StrAppend(&argsConcat, " ", argv[i]);
         }
         logger->debug("Running sorbet version {} with arguments: {}", Version::full_version_string, argsConcat);
-        if (!Version::isReleaseBuild && !opts.silenceDevMessage) {
-            logger->info("This is a non-release build that might be slower and do extra checks that are supposed to "
-                         "only run during development of Sorbet. Please build with `--config=release` or pass "
-                         "`--silence-dev-message` to silence this error");
+        if (!Version::isReleaseBuild && !opts.silenceDevMessage &&
+            std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
+            logger->info("👋 Hey there! Heads up that this is not a release build of sorbet.\n"
+                         "Release builds are faster and more well-supported by the Sorbet team.\n"
+                         "Consider rebuilding sorbet with the `--config=release` flag!\n"
+                         "To forcibly silence this error, either pass --silence-dev-message,\n"
+                         "or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.\n");
         }
     }
     WorkerPool workers(opts.threads, logger);
