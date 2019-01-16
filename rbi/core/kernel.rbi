@@ -54,6 +54,22 @@ module Kernel
 
   sig do
     params(
+        symbol: Symbol,
+        method: T.any(Proc, Method, UnboundMethod)
+    )
+    .returns(Symbol)
+  end
+  sig do
+    params(
+        symbol: Symbol,
+        blk: Proc
+    )
+    .returns(Symbol)
+  end
+  def define_singleton_method(symbol, method=T.unsafe(nil), &blk); end
+
+  sig do
+    params(
         arg0: String,
         arg1: Binding,
         filename: String,
