@@ -49,7 +49,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 }
 
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                  std::string_view uri, const Position &pos, const LSPMethod &forMethod,
+                                                  string_view uri, const Position &pos, const LSPMethod &forMethod,
                                                   bool errorIfFileIsUntyped) {
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {

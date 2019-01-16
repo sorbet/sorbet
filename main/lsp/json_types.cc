@@ -16,45 +16,45 @@ string stringify(const rapidjson::Value &value) {
     return buffer.GetString();
 }
 
-DeserializationError::DeserializationError(const string &message)
+DeserializationError::DeserializationError(string_view message)
     : runtime_error(fmt::format("Error deserializing JSON message: {}", message)) {}
 
-InvalidStringEnumError::InvalidStringEnumError(const string &enumName, const std::string &value)
+InvalidStringEnumError::InvalidStringEnumError(string_view enumName, string_view value)
     : DeserializationError(fmt::format("Invalid value for enum type `{}`: {}", enumName, value)) {}
 
-MissingFieldError::MissingFieldError(const string &objectName, const std::string &fieldName)
+MissingFieldError::MissingFieldError(string_view objectName, string_view fieldName)
     : DeserializationError(fmt::format("Missing field `{}` on object of type `{}`.", fieldName, objectName)) {}
 
-JSONTypeError::JSONTypeError(const string &fieldName, const std::string &expectedType)
+JSONTypeError::JSONTypeError(string_view fieldName, string_view expectedType)
     : DeserializationError(fmt::format("Expected field `{}` to have value of type `{}`.", fieldName, expectedType)) {}
 
-JSONTypeError::JSONTypeError(const string &fieldName, const std::string &expectedType, const rapidjson::Value &found)
+JSONTypeError::JSONTypeError(string_view fieldName, string_view expectedType, const rapidjson::Value &found)
     : DeserializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
                                        expectedType, stringify(found))) {}
 
-JSONConstantError::JSONConstantError(const string &fieldName, const std::string &expectedValue,
+JSONConstantError::JSONConstantError(string_view fieldName, string_view expectedValue,
                                      const rapidjson::Value &actualValue)
     : DeserializationError(fmt::format("Expected field `{}` to have value \"{}\", but had value `{}`.", fieldName,
                                        expectedValue, stringify(actualValue))) {}
 
-SerializationError::SerializationError(const string &message)
+SerializationError::SerializationError(string_view message)
     : runtime_error(fmt::format("Error serializing object to JSON message: {}", message)) {}
 
-MissingVariantValueError::MissingVariantValueError(const string &fieldName)
+MissingVariantValueError::MissingVariantValueError(string_view fieldName)
     : SerializationError(fmt::format("Variant field `{}` does not have a value", fieldName)) {}
 
-NullPtrError::NullPtrError(const string &fieldName)
+NullPtrError::NullPtrError(string_view fieldName)
     : SerializationError(fmt::format("Field `{}` does not have a value, and contains a null pointer", fieldName)) {}
 
-InvalidEnumValueError::InvalidEnumValueError(const string &typeName, int value)
+InvalidEnumValueError::InvalidEnumValueError(string_view typeName, int value)
     : SerializationError(fmt::format("Found invalid value `{}` for enum of type {}", value, typeName)) {}
 
-InvalidConstantValueError::InvalidConstantValueError(const string &fieldName, const std::string &expectedValue,
-                                                     const string &actualValue)
+InvalidConstantValueError::InvalidConstantValueError(string_view fieldName, string_view expectedValue,
+                                                     string_view actualValue)
     : SerializationError(fmt::format("Expected `{}` to have value \"{}\", but found value \"{}\".", fieldName,
                                      expectedValue, actualValue)) {}
 
-InvalidTypeError::InvalidTypeError(const string &fieldName, const std::string &expectedType,
+InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedType,
                                    const unique_ptr<rapidjson::Value> &found)
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
                                      expectedType, stringify(*found))) {}

@@ -174,7 +174,7 @@ TEST(GenerateLSPMessagesTest, AnyArray) {
     ASSERT_THROW(Command::fromJSON(alloc, "{\"title\": \"\", \"command\": \"\", \"arguments\": {}}"), JSONTypeError);
 }
 
-string makeNotificationMessage(const std::string &params) {
+string makeNotificationMessage(string_view params) {
     return fmt::format("{{\"jsonrpc\": \"2.0\", \"method\": \"blah\", \"params\": {}}}", params);
 }
 

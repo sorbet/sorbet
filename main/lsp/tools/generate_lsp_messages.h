@@ -30,7 +30,7 @@ enum class BaseKind {
     ComplexKind,
 };
 
-typedef std::function<void(fmt::memory_buffer &out, const std::string &)> AssignLambda;
+typedef std::function<void(fmt::memory_buffer &out, std::string_view)> AssignLambda;
 
 class JSONType {
 public:
@@ -71,8 +71,8 @@ public:
      *
      * `fieldName` should be used to generate error messages.
      */
-    virtual void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                                   const std::string &fieldName) = 0;
+    virtual void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                                   std::string_view fieldName) = 0;
 
     /**
      * Writes the C++ statements needed to convert this type into a value
@@ -80,16 +80,16 @@ public:
      * A value of this type is currently stored in eval(`from`), and the the code
      * for writing it into the destination is produced by calling assign(codeThatProducesValue)
      */
-    virtual void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                                 const std::string &fieldName) = 0;
+    virtual void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                                 std::string_view fieldName) = 0;
 
 protected:
-    void simpleDeserialization(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                               std::string fieldName, std::string helperFunctionName) {
+    void simpleDeserialization(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                               std::string_view fieldName, std::string_view helperFunctionName) {
         assign(out, fmt::format("{}({}, \"{}\")", helperFunctionName, from, fieldName));
     }
 
-    void simpleSerialization(fmt::memory_buffer &out, const std::string &from, AssignLambda assign) {
+    void simpleSerialization(fmt::memory_buffer &out, std::string_view from, AssignLambda assign) {
         assign(out, from);
     }
 };
@@ -109,7 +109,7 @@ protected:
     virtual void emitDefinition(fmt::memory_buffer &out) = 0;
 
 public:
-    JSONClassType(const std::string typeName) : typeName(typeName) {}
+    JSONClassType(std::string_view typeName) : typeName(std::string(typeName)) {}
 
     /**
      * Recursively emits definitions and declarations for this type and all
@@ -139,13 +139,13 @@ public:
         return "null";
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         simpleDeserialization(out, from, assign, fieldName, "tryConvertToNull");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         assign(out, "rapidjson::Value(rapidjson::kNullType)");
     }
 };
@@ -168,13 +168,13 @@ public:
         return "boolean";
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         simpleDeserialization(out, from, assign, fieldName, "tryConvertToBoolean");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         simpleSerialization(out, from, assign);
     }
 };
@@ -197,13 +197,13 @@ public:
         return "integer";
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         simpleDeserialization(out, from, assign, fieldName, "tryConvertToInt");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         simpleSerialization(out, from, assign);
     }
 };
@@ -226,20 +226,20 @@ public:
         return "number";
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         simpleDeserialization(out, from, assign, fieldName, "tryConvertToDouble");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         simpleSerialization(out, from, assign);
     }
 };
 
 class JSONStringType final : public JSONType {
 public:
-    static void serializeStringToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign) {
+    static void serializeStringToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign) {
         // Copy into document so that it owns the string.
         // Create new scope for temp var.
         fmt::format_to(out, "{{\n");
@@ -265,13 +265,13 @@ public:
         return "string";
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         simpleDeserialization(out, from, assign, fieldName, "tryConvertToString");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         serializeStringToJSONValue(out, from, assign);
     }
 };
@@ -282,7 +282,7 @@ private:
     const std::string value;
 
 public:
-    JSONStringConstantType(const std::string value) : value(value) {}
+    JSONStringConstantType(std::string_view value) : value(std::string(value)) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::StringKind;
@@ -300,13 +300,13 @@ public:
         return fmt::format("\"{}\"", value);
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         assign(out, fmt::format("tryConvertToStringConstant({}, \"{}\", \"{}\")", from, value, fieldName));
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         fmt::format_to(out, "if ({} != \"{}\") {{\n", from, value);
         fmt::format_to(out, "throw InvalidConstantValueError(\"{}\", \"{}\", {});\n", fieldName, value, from);
         fmt::format_to(out, "}}\n");
@@ -336,13 +336,13 @@ public:
         return true;
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         assign(out, fmt::format("tryConvertToAny({}, {}, \"{}\")", ALLOCATOR_VAR, from, fieldName));
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         fmt::format_to(out, "if ({} == nullptr) {{\n", from);
         fmt::format_to(out, "throw NullPtrError(\"{}\");\n", fieldName);
         fmt::format_to(out, "}}\n");
@@ -372,13 +372,13 @@ class JSONAnyObjectType final : public JSONType {
         return true;
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         assign(out, fmt::format("tryConvertToAnyObject({}, {}, \"{}\")", ALLOCATOR_VAR, from, fieldName));
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         fmt::format_to(out, "if ({} == nullptr) {{\n", from);
         fmt::format_to(out, "throw NullPtrError(\"{}\");\n", fieldName);
         fmt::format_to(out, "}} else if (!{}->IsObject()) {{\n", from);
@@ -395,11 +395,11 @@ private:
     // Temp variable name used during serialization and deserialization.
     static const std::string arrayVar;
 
-    static void AssignDeserializedElementValue(fmt::memory_buffer &out, const std::string &from) {
+    static void AssignDeserializedElementValue(fmt::memory_buffer &out, std::string_view from) {
         fmt::format_to(out, "{}.push_back({});", arrayVar, from);
     }
 
-    static void AssignSerializedElementValue(fmt::memory_buffer &out, const std::string &from) {
+    static void AssignSerializedElementValue(fmt::memory_buffer &out, std::string_view from) {
         fmt::format_to(out, "{}.PushBack({}, {});", arrayVar, from, ALLOCATOR_VAR);
     }
 
@@ -426,8 +426,8 @@ public:
         return componentType->cannotBeCopied();
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         fmt::format_to(out, "if (!{}.IsArray()) {{\n", from);
         fmt::format_to(out, "throw JSONTypeError(\"{}\", \"array\", {});\n", fieldName, from);
         // Use else branch so we operate in new scope to avoid ArrayVar conflicts.
@@ -440,8 +440,8 @@ public:
         fmt::format_to(out, "}}\n");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         // Create new scope so our variable names don't conflict with other serialized arrays in same
         // context.
         fmt::format_to(out, "{{\n");
@@ -458,13 +458,13 @@ class JSONIntEnumType final : public JSONClassType {
 private:
     std::vector<std::pair<const std::string, int>> enumValues;
 
-    std::string enumVar(const std::string &value) {
+    std::string enumVar(std::string_view value) {
         return fmt::format("{}::{}", typeName, value);
     }
 
 public:
-    JSONIntEnumType(const std::string typeName, std::vector<std::pair<const std::string, int>> enumValues)
-        : JSONClassType(typeName), enumValues(enumValues) {}
+    JSONIntEnumType(std::string_view typeName, std::vector<std::pair<const std::string, int>> enumValues)
+        : JSONClassType(std::string(typeName)), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::IntKind;
@@ -484,13 +484,13 @@ public:
                            }));
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         assign(out, fmt::format("tryConvertTo{}(tryConvertToInt({}, \"{}\"))", typeName, from, fieldName));
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         // Running tryConvertTo[typeName] will check that the enum value is valid.
         assign(out, fmt::format("(int)tryConvertTo{}((int){})", typeName, from));
     }
@@ -524,21 +524,21 @@ private:
 
     // Capitalizes the first character of the input string (e.g., foo => Foo)
     // and replaces periods.
-    static std::string toIdentifier(const std::string &val) {
+    static std::string toIdentifier(std::string_view val) {
         return fmt::format("{}{}", std::string(1, toupper(val[0])), absl::StrReplaceAll(val.substr(1), {{".", "_"}}));
     }
 
-    std::string enumStrVar(const std::string &value) {
+    std::string enumStrVar(std::string_view value) {
         return fmt::format("{}_{}", typeName, toIdentifier(value));
     }
 
-    std::string enumVar(const std::string &value) {
+    std::string enumVar(std::string_view value) {
         return fmt::format("{}::{}", typeName, toIdentifier(value));
     }
 
 public:
-    JSONStringEnumType(const std::string typeName, std::vector<const std::string> enumValues)
-        : JSONClassType(typeName), enumValues(enumValues) {}
+    JSONStringEnumType(std::string_view typeName, std::vector<const std::string> enumValues)
+        : JSONClassType(std::string(typeName)), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::IntKind;
@@ -556,38 +556,38 @@ public:
         return fmt::format("{}", fmt::join(enumValues, " | "));
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         assign(out, fmt::format("get{}(tryConvertToString({}, \"{}\"))", typeName, from, fieldName));
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         JSONStringType::serializeStringToJSONValue(out, fmt::format("convert{}ToString({})", typeName, from), assign);
     }
 
     void emitDeclaration(fmt::memory_buffer &out) {
         fmt::format_to(out, "enum class {} {{\n", typeName);
-        for (const std::string &value : enumValues) {
+        for (std::string_view value : enumValues) {
             fmt::format_to(out, "{},\n", toIdentifier(value));
         }
         fmt::format_to(out, "}};\n");
-        fmt::format_to(out, "{0} get{0}(std::string value);\n", typeName);
+        fmt::format_to(out, "{0} get{0}(std::string_view value);\n", typeName);
         fmt::format_to(out, "std::string convert{0}ToString({0} kind);", typeName);
     }
 
     void emitDefinition(fmt::memory_buffer &out) {
-        for (const std::string &value : enumValues) {
+        for (std::string_view value : enumValues) {
             fmt::format_to(out, "static const std::string {} = \"{}\";\n", enumStrVar(value), value);
         }
         // Map from str => enum value to facilitate conversion.
         fmt::format_to(out, "static const UnorderedMap<std::string, {0}> StringTo{0} = {{\n", typeName);
-        for (const std::string &value : enumValues) {
+        for (std::string_view value : enumValues) {
             fmt::format_to(out, "{{{}, {}}},\n", enumStrVar(value), enumVar(value));
         }
         fmt::format_to(out, "}};\n");
-        fmt::format_to(out, "{0} get{0}(std::string value) {{\n", typeName);
-        fmt::format_to(out, "auto it = StringTo{}.find(value);\n", typeName);
+        fmt::format_to(out, "{0} get{0}(std::string_view value) {{\n", typeName);
+        fmt::format_to(out, "auto it = StringTo{}.find(std::string(value));\n", typeName);
         fmt::format_to(out, "if (it == StringTo{}.end()) {{\n", typeName);
         fmt::format_to(out, "throw InvalidStringEnumError(\"{}\", value);\n", typeName);
         fmt::format_to(out, "}}\n");
@@ -595,7 +595,7 @@ public:
         fmt::format_to(out, "}}\n");
         fmt::format_to(out, "std::string convert{0}ToString({0} kind) {{\n", typeName);
         fmt::format_to(out, "switch (kind) {{\n");
-        for (const std::string &value : enumValues) {
+        for (std::string_view value : enumValues) {
             fmt::format_to(out, "case {}:\n", enumVar(value));
             fmt::format_to(out, "return {};\n", enumStrVar(value));
         }
@@ -611,7 +611,7 @@ public:
     const std::string name;
     std::shared_ptr<JSONType> type;
 
-    FieldDef(const std::string name, std::shared_ptr<JSONType> type) : name(name), type(type) {}
+    FieldDef(std::string_view name, std::shared_ptr<JSONType> type) : name(std::string(name)), type(type) {}
 
     void emitDeclaration(fmt::memory_buffer &out) const {
         fmt::format_to(out, "{} {};\n", type->getCPPType(), name);
@@ -645,18 +645,18 @@ public:
         return innerType->cannotBeCopied();
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         const std::string innerCPPType = innerType->getCPPType();
-        AssignLambda assignOptional = [innerCPPType, assign](fmt::memory_buffer &out, const std::string &from) -> void {
+        AssignLambda assignOptional = [innerCPPType, assign](fmt::memory_buffer &out, std::string_view from) -> void {
             assign(out, fmt::format("std::make_optional<{}>({});", innerCPPType, from));
         };
         // Caller has checked for presence of field.
         innerType->emitFromJSONValue(out, from, assignOptional, fieldName);
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         fmt::format_to(out, "if ({}.has_value()) {{\n", from);
         // N.B.: Mac OSX does not support .value() on std::optional yet.
         // Dereferencing does the same thing, but does not check if the value is present.
@@ -679,8 +679,8 @@ private:
     }
 
 public:
-    JSONObjectType(const std::string typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs)
-        : JSONClassType(typeName), fieldDefs(fieldDefs) {}
+    JSONObjectType(std::string_view typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs)
+        : JSONClassType(std::string(typeName)), fieldDefs(fieldDefs) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::ObjectKind;
@@ -702,13 +702,13 @@ public:
         return true;
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         assign(out, fmt::format("{}::fromJSONValue({}, {}, \"{}\")", typeName, ALLOCATOR_VAR, from, fieldName));
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         fmt::format_to(out, "if ({} == nullptr) {{\n", from);
         fmt::format_to(out, "throw NullPtrError(\"{}\");\n", fieldName);
         fmt::format_to(out, "}}\n");
@@ -727,11 +727,11 @@ public:
         fmt::format_to(out, "public:\n");
         fmt::format_to(
             out,
-            "static std::unique_ptr<{}> fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);\n",
+            "static std::unique_ptr<{}> fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, std::string_view json);\n",
             typeName);
         fmt::format_to(out,
                        "static {} fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
-                       "rapidjson::Value &val, const std::string &fieldName = JSONBaseType::defaultFieldName);\n",
+                       "rapidjson::Value &val, std::string_view fieldName = JSONBaseType::defaultFieldName);\n",
                        getCPPType(), ALLOCATOR_VAR);
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             fieldDef->emitDeclaration(out);
@@ -767,10 +767,10 @@ public:
         }
         fmt::format_to(out,
                        "std::unique_ptr<{0}> {0}::fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, "
-                       "const std::string &json) {{\n",
+                       "std::string_view json) {{\n",
                        typeName);
         fmt::format_to(out, "rapidjson::Document d(&alloc);\n");
-        fmt::format_to(out, "d.Parse(json);\n");
+        fmt::format_to(out, "d.Parse(std::string(json));\n");
         fmt::format_to(out, "if (!d.IsObject()) {{\n");
         fmt::format_to(out, "throw JSONTypeError(\"document root\", \"object\", d);\n");
         fmt::format_to(out, "}}\n");
@@ -778,7 +778,7 @@ public:
         fmt::format_to(out, "}}\n");
         fmt::format_to(out,
                        "{} {}::fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
-                       "rapidjson::Value &val, const std::string &fieldName) {{\n",
+                       "rapidjson::Value &val, std::string_view fieldName) {{\n",
                        getCPPType(), typeName, ALLOCATOR_VAR);
         fmt::format_to(out, "if (!val.IsObject()) {{\n");
         fmt::format_to(out, "throw JSONTypeError(fieldName, \"object\", val);\n");
@@ -791,7 +791,7 @@ public:
             fmt::format_to(out, "throw MissingFieldError(\"{}\", \"{}\");\n", typeName, fieldDef->name);
             fmt::format_to(out, "}}\n");
             fmt::format_to(out, "{} {};\n", fieldDef->type->getCPPType(), fieldDef->name);
-            AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
+            AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
                 fmt::format_to(out, "{} = {};\n", fieldDef->name, from);
             };
             fieldDef->type->emitFromJSONValue(out, fmt::format("val[\"{}\"]", fieldDef->name), assign, fieldName);
@@ -811,7 +811,7 @@ public:
                 std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
                 fmt::format_to(out, "if (val.HasMember(\"{}\")) {{\n", fieldDef->name);
                 fmt::format_to(out, "const rapidjson::Value &fieldVal = val[\"{}\"];\n", fieldDef->name);
-                AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
+                AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
                     fmt::format_to(out, "rv->{} = {};\n", fieldDef->name, from);
                 };
                 fieldDef->type->emitFromJSONValue(out, "fieldVal", assign, fieldName);
@@ -828,7 +828,7 @@ public:
         fmt::format_to(out, "auto rv = std::make_unique<rapidjson::Value>(rapidjson::kObjectType);\n");
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
-            AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
+            AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
                 fmt::format_to(out, "rv->AddMember(\"{}\", {}, {});\n", fieldDef->name, from, ALLOCATOR_VAR);
             };
             fieldDef->type->emitToJSONValue(out, fieldDef->name, assign, fieldName);
@@ -901,8 +901,8 @@ public:
         return false;
     }
 
-    void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                           const std::string &fieldName) {
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
         bool first = true;
         for (std::shared_ptr<JSONType> variant : variants) {
             std::string checkMethod;
@@ -948,8 +948,8 @@ public:
         fmt::format_to(out, "}}\n");
     }
 
-    void emitToJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
-                         const std::string &fieldName) {
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
         bool first = true;
         for (std::shared_ptr<JSONType> variant : variants) {
             auto condition = fmt::format("auto val = std::get_if<{}>(&{})", variant->getCPPType(), from);

@@ -11,60 +11,58 @@ namespace sorbet::realmain::lsp {
 
 class DeserializationError : public std::runtime_error {
 public:
-    DeserializationError(const std::string &message);
+    DeserializationError(std::string_view message);
 };
 
 class InvalidStringEnumError : public DeserializationError {
 public:
-    InvalidStringEnumError(const std::string &enumName, const std::string &value);
+    InvalidStringEnumError(std::string_view enumName, std::string_view value);
 };
 
 class MissingFieldError : public DeserializationError {
 public:
-    MissingFieldError(const std::string &objectName, const std::string &fieldName);
+    MissingFieldError(std::string_view objectName, std::string_view fieldName);
 };
 
 class JSONTypeError : public DeserializationError {
 public:
-    JSONTypeError(const std::string &fieldName, const std::string &expectedType);
-    JSONTypeError(const std::string &fieldName, const std::string &expectedType, const rapidjson::Value &found);
+    JSONTypeError(std::string_view fieldName, std::string_view expectedType);
+    JSONTypeError(std::string_view fieldName, std::string_view expectedType, const rapidjson::Value &found);
 };
 
 class JSONConstantError : public DeserializationError {
 public:
-    JSONConstantError(const std::string &fieldName, const std::string &expectedValue,
-                      const rapidjson::Value &actualValue);
+    JSONConstantError(std::string_view fieldName, std::string_view expectedValue, const rapidjson::Value &actualValue);
 };
 
 class SerializationError : public std::runtime_error {
 public:
-    SerializationError(const std::string &message);
+    SerializationError(std::string_view message);
 };
 
 class MissingVariantValueError : public SerializationError {
 public:
-    MissingVariantValueError(const std::string &fieldName);
+    MissingVariantValueError(std::string_view fieldName);
 };
 
 class NullPtrError : public SerializationError {
 public:
-    NullPtrError(const std::string &fieldName);
+    NullPtrError(std::string_view fieldName);
 };
 
 class InvalidEnumValueError : public SerializationError {
 public:
-    InvalidEnumValueError(const std::string &typeName, int value);
+    InvalidEnumValueError(std::string_view typeName, int value);
 };
 
 class InvalidConstantValueError : public SerializationError {
 public:
-    InvalidConstantValueError(const std::string &fieldName, const std::string &expectedValue,
-                              const std::string &actualValue);
+    InvalidConstantValueError(std::string_view fieldName, std::string_view expectedValue, std::string_view actualValue);
 };
 
 class InvalidTypeError : public SerializationError {
 public:
-    InvalidTypeError(const std::string &fieldName, const std::string &expectedType,
+    InvalidTypeError(std::string_view fieldName, std::string_view expectedType,
                      const std::unique_ptr<rapidjson::Value> &found);
 };
 

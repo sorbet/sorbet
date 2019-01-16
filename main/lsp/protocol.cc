@@ -238,8 +238,8 @@ LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pen
     return pendingRequests.end();
 }
 
-void LSPLoop::sendShowMessageNotification(MessageType messageType, const string &message) {
-    sendNotification(LSPMethod::WindowShowMessage(), ShowMessageParams(messageType, message));
+void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) {
+    sendNotification(LSPMethod::WindowShowMessage(), ShowMessageParams(messageType, string(message)));
 }
 
 void LSPLoop::sendNullResponse(const MessageId &id) {

@@ -278,7 +278,7 @@ class LSPLoop {
                                                                     const CompletionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       const core::QueryResponse &resp);
-    void sendShowMessageNotification(MessageType messageType, const std::string &message);
+    void sendShowMessageNotification(MessageType messageType, std::string_view message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
     std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
                                                                const MessageId &id,
