@@ -760,6 +760,32 @@ core::TypePtr flatmapHack(core::Context ctx, const shared_ptr<core::SendAndBlock
     return core::Types::arrayOf(ctx, flattenArrays(ctx, returnType));
 }
 
+void pushSendResponse(core::Context ctx, core::DispatchResult::ComponentVec dispatchComponents,
+                      const std::shared_ptr<core::TypeConstraint> &constraint, core::Loc termLoc, core::NameRef name,
+                      core::TypeAndOrigins receiver, core::TypeAndOrigins retType) {
+    core::QueryResponse::pushQueryResponse(ctx, core::QueryResponse::Kind::SEND, ctx.owner,
+                                           std::move(dispatchComponents), constraint, termLoc, core::LocalVariable(),
+                                           name, receiver, retType);
+}
+
+void pushIdentResponse(core::Context ctx, core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable,
+                       core::TypeAndOrigins tp) {
+    core::QueryResponse::pushQueryResponse(ctx, core::QueryResponse::Kind::IDENT, owner, {}, nullptr, termLoc, variable,
+                                           variable._name, tp, tp);
+}
+
+void pushConstantResponse(core::Context ctx, core::DispatchResult::ComponentVec dispatchComponents, core::Loc termLoc,
+                          core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType) {
+    core::QueryResponse::pushQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, ctx.owner,
+                                           std::move(dispatchComponents), nullptr, termLoc, core::LocalVariable(), name,
+                                           receiver, retType);
+}
+
+void pushLiteralResponse(core::Context ctx, core::Loc termLoc, core::TypeAndOrigins tp) {
+    core::QueryResponse::pushQueryResponse(ctx, core::QueryResponse::Kind::LITERAL, ctx.owner, {}, nullptr, termLoc,
+                                           core::LocalVariable(), core::NameRef::noName(), tp, tp);
+}
+
 core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
                                           KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
                                           core::TypePtr &methodReturnType) {
@@ -812,9 +838,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     }
 
                     if (lspQueryMatch) {
-                        core::QueryResponse::setQueryResponse(
-                            ctx, core::QueryResponse::Kind::SEND, std::move(dispatched.components),
-                            send->link ? send->link->constr : nullptr, bind.loc, send->fun, recvType, tp);
+                        pushSendResponse(ctx, std::move(dispatched.components),
+                                         send->link ? send->link->constr : nullptr, bind.loc, send->fun, recvType, tp);
                     }
                 }
 
@@ -826,8 +851,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch) {
-                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::IDENT, {}, nullptr, bind.loc,
-                                                          i->what._name, tp, tp);
+                    pushIdentResponse(ctx, ctx.owner, bind.loc, i->what, tp);
                 }
 
                 ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
@@ -868,9 +892,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     dealiasedReceiver.origins = tp.origins;
                     core::DispatchResult::ComponentVec components;
                     components.emplace_back(core::DispatchComponent{tp.type, symbol, {}});
-                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT,
-                                                          std::move(components), nullptr, bind.loc,
-                                                          symbol.data(ctx)->name, dealiasedReceiver, tp);
+                    pushConstantResponse(ctx, std::move(components), bind.loc, data->name, dealiasedReceiver, tp);
                 }
                 pinnedTypes[bind.bind.variable] = tp;
             },
@@ -984,8 +1006,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins.emplace_back(bind.loc);
 
                 if (lspQueryMatch) {
-                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::LITERAL, {}, nullptr,
-                                                          bind.loc, core::NameRef::noName(), tp, tp);
+                    pushLiteralResponse(ctx, bind.loc, tp);
                 }
             },
             [&](cfg::Unanalyzable *i) {
