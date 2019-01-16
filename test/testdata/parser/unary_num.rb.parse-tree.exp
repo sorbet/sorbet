@@ -32,21 +32,5 @@ Begin {
         val = "-42.01"
       }
     }
-    Assign {
-      lhs = LVarLhs {
-        name = f
-      }
-      rhs = Float {
-        val = "+1.1"
-      }
-    }
-    Assign {
-      lhs = LVarLhs {
-        name = g
-      }
-      rhs = Float {
-        val = "-1.1"
-      }
-    }
   ]
 }
