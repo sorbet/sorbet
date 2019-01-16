@@ -84,7 +84,6 @@ struct builder {
 	foreign_ptr(*multi_assign)(self_ptr builder, foreign_ptr mlhs, foreign_ptr rhs);
 	foreign_ptr(*multi_lhs)(self_ptr builder, const token* begin, const node_list* items, const token* end);
 	foreign_ptr(*multi_lhs1)(self_ptr builder, const token* begin, foreign_ptr item, const token* end);
-	foreign_ptr(*negate)(self_ptr builder, const token* uminus, foreign_ptr numeric);
 	foreign_ptr(*nil)(self_ptr builder, const token* tok);
 	foreign_ptr(*not_op)(self_ptr builder, const token* not_, const token* begin, foreign_ptr receiver, const token* end);
 	foreign_ptr(*nth_ref)(self_ptr builder, const token* tok);

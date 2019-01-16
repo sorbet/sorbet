@@ -742,20 +742,6 @@ public:
         return make_unique<Mlhs>(collection_loc(begin, args, end), std::move(args));
     }
 
-    unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
-        Loc loc = tok_loc(uminus).join(numeric->loc);
-        if (auto *i = parser::cast_node<Integer>(numeric.get())) {
-            return make_unique<Integer>(loc, "-" + i->val);
-        }
-        if (auto *i = parser::cast_node<Float>(numeric.get())) {
-            return make_unique<Float>(loc, "-" + i->val);
-        }
-        if (auto *r = parser::cast_node<Rational>(numeric.get())) {
-            return make_unique<Float>(loc, "-" + r->val);
-        }
-        Exception::raise("unexpected numeric type: ", numeric->nodeName());
-    }
-
     unique_ptr<Node> nil(const token *tok) {
         return make_unique<Nil>(tok_loc(tok));
     }
@@ -1453,11 +1439,6 @@ foreign_ptr multi_lhs1(self_ptr builder, const token *begin, foreign_ptr item, c
     return build->to_foreign(build->multi_lhs1(begin, build->cast_node(item), end));
 }
 
-foreign_ptr negate(self_ptr builder, const token *uminus, foreign_ptr numeric) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->negate(uminus, build->cast_node(numeric)));
-}
-
 foreign_ptr nil(self_ptr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->to_foreign(build->nil(tok));
@@ -1736,7 +1717,6 @@ struct ruby_parser::builder Builder::interface = {
     multi_assign,
     multi_lhs,
     multi_lhs1,
-    negate,
     nil,
     not_op,
     nth_ref,
