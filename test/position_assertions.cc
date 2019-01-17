@@ -28,16 +28,16 @@ const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "lineariza
 
 // Compares the two positions. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are
 // equivalent.
-int positionComparison(const unique_ptr<Position> &a, const unique_ptr<Position> &b) {
-    if (a->line < b->line) {
+int positionComparison(const Position &a, const Position &b) {
+    if (a.line < b.line) {
         return -1; // Less than
-    } else if (a->line > b->line) {
+    } else if (a.line > b.line) {
         return 1;
     } else {
         // Same line
-        if (a->character < b->character) {
+        if (a.character < b.character) {
             return -1;
-        } else if (a->character > b->character) {
+        } else if (a.character > b.character) {
             return 1;
         } else {
             // Same position.
@@ -46,28 +46,28 @@ int positionComparison(const unique_ptr<Position> &a, const unique_ptr<Position>
     }
 }
 
-int rangeComparison(const unique_ptr<Range> &a, const unique_ptr<Range> &b) {
-    int startPosCmp = positionComparison(a->start, b->start);
+int rangeComparison(const Range &a, const Range &b) {
+    int startPosCmp = positionComparison(*a.start, *b.start);
     if (startPosCmp != 0) {
         return startPosCmp;
     }
     // Whichever range ends earlier comes first.
-    return positionComparison(a->end, b->end);
+    return positionComparison(*a.end, *b.end);
 }
 
 /** Returns true if `b` is a subset of `a`. Only works on single-line ranges. Assumes ranges are well-formed (start <=
  * end) */
-bool rangeIsSubset(const unique_ptr<Range> &a, const unique_ptr<Range> &b) {
-    if (a->start->line != a->end->line || b->start->line != b->end->line || a->start->line != b->start->line) {
+bool rangeIsSubset(const Range &a, const Range &b) {
+    if (a.start->line != a.end->line || b.start->line != b.end->line || a.start->line != b.start->line) {
         return false;
     }
 
     // One-liners on same line.
-    return b->start->character >= a->start->character && b->end->character <= a->end->character;
+    return b.start->character >= a.start->character && b.end->character <= a.end->character;
 }
 
-int errorComparison(string_view aFilename, const unique_ptr<Range> &a, string_view aMessage, string_view bFilename,
-                    const unique_ptr<Range> &b, string_view bMessage) {
+int errorComparison(string_view aFilename, const Range &a, string_view aMessage, string_view bFilename, const Range &b,
+                    string_view bMessage) {
     int filecmp = aFilename.compare(bFilename);
     if (filecmp != 0) {
         return filecmp;
@@ -79,19 +79,19 @@ int errorComparison(string_view aFilename, const unique_ptr<Range> &a, string_vi
     return aMessage.compare(bMessage);
 }
 
-string prettyPrintRangeComment(string_view sourceLine, const unique_ptr<Range> &range, string_view comment) {
-    int numLeadingSpaces = range->start->character;
+string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
+    int numLeadingSpaces = range.start->character;
     if (numLeadingSpaces < 0) {
-        ADD_FAILURE() << fmt::format("Invalid range: {} < 0", range->start->character);
+        ADD_FAILURE() << fmt::format("Invalid range: {} < 0", range.start->character);
         return "";
     }
-    string sourceLineNumber = fmt::format("{}", range->start->line + 1);
-    EXPECT_EQ(range->start->line, range->end->line) << "Multi-line ranges are not supported at this time.";
-    if (range->start->line != range->end->line) {
+    string sourceLineNumber = fmt::format("{}", range.start->line + 1);
+    EXPECT_EQ(range.start->line, range.end->line) << "Multi-line ranges are not supported at this time.";
+    if (range.start->line != range.end->line) {
         return string(comment);
     }
 
-    int numCarets = range->end->character - range->start->character;
+    int numCarets = range.end->character - range.start->character;
     if (numCarets == RangeAssertion::END_OF_LINE_POS) {
         // Caret the entire line.
         numCarets = sourceLine.length();
@@ -127,7 +127,7 @@ string uriToFilePath(string_view prefixUrl, string_view uri) {
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
 
-int RangeAssertion::compare(string_view otherFilename, const unique_ptr<Range> &otherRange) {
+int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) {
     int filenamecmp = filename.compare(otherFilename);
     if (filenamecmp != 0) {
         return filenamecmp;
@@ -136,15 +136,15 @@ int RangeAssertion::compare(string_view otherFilename, const unique_ptr<Range> &
         // This assertion matches the whole line.
         // (Will match diagnostics that span multiple lines for parity with existing test logic.)
         int targetLine = range->start->line;
-        if (targetLine >= otherRange->start->line && targetLine <= otherRange->end->line) {
+        if (targetLine >= otherRange.start->line && targetLine <= otherRange.end->line) {
             return 0;
-        } else if (targetLine > otherRange->start->line) {
+        } else if (targetLine > otherRange.start->line) {
             return 1;
         } else {
             return -1;
         }
     }
-    return rangeComparison(range, otherRange);
+    return rangeComparison(*range, otherRange);
 }
 
 ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message)
@@ -155,16 +155,16 @@ shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr
     return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents);
 }
 
-string ErrorAssertion::toString() {
+string ErrorAssertion::toString() const {
     return fmt::format("error: {}", message);
 }
 
-void ErrorAssertion::check(const unique_ptr<Diagnostic> &diagnostic, const string_view sourceLine) {
+void ErrorAssertion::check(const Diagnostic &diagnostic, const string_view sourceLine) {
     // The error message must contain `message`.
-    if (diagnostic->message.find(message) == string::npos) {
+    if (diagnostic.message.find(message) == string::npos) {
         ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
-            "Expected error of form:\n{}\nFound error:\n{}", prettyPrintRangeComment(sourceLine, range, toString()),
-            prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
+            "Expected error of form:\n{}\nFound error:\n{}", prettyPrintRangeComment(sourceLine, *range, toString()),
+            prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
     }
 }
 
@@ -281,7 +281,7 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
 
     // Sort assertions in (filename, range, message) order
     fast_sort(assertions, [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-        return errorComparison(a->filename, a->range, a->toString(), b->filename, b->range, b->toString()) == -1;
+        return errorComparison(a->filename, *a->range, a->toString(), b->filename, *b->range, b->toString()) == -1;
     });
 
     return assertions;
@@ -364,16 +364,16 @@ void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &q
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
                 "Sorbet did not find a definition for location that references symbol `{}`.\nExpected definition "
                 "of:\n{}\nTo be:\n{}",
-                symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(defSourceLine, range, ""));
+                symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(defSourceLine, *range, ""));
             return;
         } else if (locations.size() > 1) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
                 "Sorbet unexpectedly returned multiple locations for definition of symbol `{}`.\nFor "
                 "location:\n{}\nSorbet returned the following definition locations:\n{}",
-                symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
+                symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
                 fmt::map_join(locations, "\n", [&sourceFileContents, &uriPrefix](const auto &arg) -> string {
-                    return prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *arg), arg->range, "");
+                    return prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *arg), *arg->range, "");
                 }));
             return;
         }
@@ -386,14 +386,14 @@ void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &q
             string foundLocationString = "null";
             if (location != nullptr) {
                 foundLocationString =
-                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), location->range, "");
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, "");
             }
 
             ADD_FAILURE_AT(filename.c_str(), line + 1)
                 << fmt::format("Sorbet did not return the expected definition for location. Expected "
                                "definition of:\n{}\nTo be:\n{}\nBut was:\n{}",
-                               prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                               prettyPrintRangeComment(defSourceLine, range, ""), foundLocationString);
+                               prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                               prettyPrintRangeComment(defSourceLine, *range, ""), foundLocationString);
         }
     }
 }
@@ -427,7 +427,7 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
 
         vector<unique_ptr<Location>> locations = extractLocations(test.alloc, result);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
-            return errorComparison(a->uri, a->range, "", b->uri, b->range, "");
+            return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });
 
         auto expectedLocationsIt = allLocs.begin();
@@ -438,13 +438,13 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
 
             // If true, the expectedLocation is a subset of the actualLocation
             if (actualLocation->uri == expectedLocation->uri &&
-                rangeIsSubset(actualLocation->range, expectedLocation->range)) {
+                rangeIsSubset(*actualLocation->range, *expectedLocation->range)) {
                 // Assertion passes. Consume both.
                 actualLocationsIt++;
                 expectedLocationsIt++;
             } else {
-                switch (errorComparison(expectedLocation->uri, expectedLocation->range, "", actualLocation->uri,
-                                        actualLocation->range, "")) {
+                switch (errorComparison(expectedLocation->uri, *expectedLocation->range, "", actualLocation->uri,
+                                        *actualLocation->range, "")) {
                     case -1: {
                         // Expected location is *before* actual location.
                         auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
@@ -453,10 +453,10 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
                                    "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
                                    "did not report reference at:\n{}",
                                    symbol,
-                                   prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1),
+                                   prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1),
                                                            ""),
                                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
-                                                           expectedLocation->range, ""));
+                                                           *expectedLocation->range, ""));
                         expectedLocationsIt++;
                         break;
                     }
@@ -467,9 +467,9 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
                             "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
                             "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                             symbol,
-                            prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
+                            prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
                             prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation),
-                                                    actualLocation->range, ""));
+                                                    *actualLocation->range, ""));
                         actualLocationsIt++;
                         break;
                     }
@@ -488,9 +488,9 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
             ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
                 "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
                 "did not report reference at:\n{}",
-                symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
+                symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
                 prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
-                                        expectedLocation->range, ""));
+                                        *expectedLocation->range, ""));
             expectedLocationsIt++;
         }
 
@@ -500,15 +500,15 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
             ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
                 "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
                 "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
-                symbol, prettyPrintRangeComment(locSourceLine, makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), actualLocation->range,
+                symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), *actualLocation->range,
                                         ""));
             actualLocationsIt++;
         }
     }
 }
 
-string DefAssertion::toString() {
+string DefAssertion::toString() const {
     return fmt::format("def: {}", symbol);
 }
 
@@ -522,7 +522,7 @@ shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr
     return make_shared<UsageAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
 
-string UsageAssertion::toString() {
+string UsageAssertion::toString() const {
     return fmt::format("usage: {}", symbol);
 }
 

@@ -10,20 +10,19 @@ using namespace sorbet::realmain::lsp;
 
 // Compares the two ranges. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are equivalent.
 // If range `a` starts at the same character as `b` but ends earlier, it comes before `b`.
-int rangeComparison(const std::unique_ptr<Range> &a, const std::unique_ptr<Range> &b);
+int rangeComparison(const Range &a, const Range &b);
 
 // Compares the two errors. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are equivalent.
 // Compares filenames, then ranges, and then compares messages in the event of a tie.
-int errorComparison(std::string_view aFilename, const std::unique_ptr<Range> &a, std::string_view aMessage,
-                    std::string_view bFilename, const std::unique_ptr<Range> &b, std::string_view bMessage);
+int errorComparison(std::string_view aFilename, const Range &a, std::string_view aMessage, std::string_view bFilename,
+                    const Range &b, std::string_view bMessage);
 
 /**
  * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
  * foo.bar
  *     ^^^ error: bar not defined
  */
-std::string prettyPrintRangeComment(std::string_view sourceLine, const std::unique_ptr<Range> &range,
-                                    std::string_view comment);
+std::string prettyPrintRangeComment(std::string_view sourceLine, const Range &range, std::string_view comment);
 
 // Converts a relative file path into an absolute file:// URI.
 std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath);
@@ -72,12 +71,12 @@ public:
     /** Compares this assertion's filename and range with the given filename and range. Returns 0 if it matches, -1 if
      * range comes before otherRange, and 1 if otherRange comes before range. Unlike rangeComparison, this function
      * supports line-only ranges. */
-    int compare(std::string_view otherFilename, const std::unique_ptr<Range> &otherRange);
+    int compare(std::string_view otherFilename, const Range &otherRange);
 
     // Returns a Location object for this assertion's filename and range.
     std::unique_ptr<Location> getLocation(std::string_view uriPrefix);
 
-    virtual std::string toString() = 0;
+    virtual std::string toString() const = 0;
 };
 
 // # ^^^ error: message
@@ -91,9 +90,9 @@ public:
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message);
 
-    std::string toString() override;
+    std::string toString() const override;
 
-    void check(const std::unique_ptr<Diagnostic> &diagnostic, std::string_view sourceLine);
+    void check(const Diagnostic &diagnostic, std::string_view sourceLine);
 };
 
 // # ^^^ def: symbol
@@ -110,7 +109,7 @@ public:
 
     void check(LSPTest &test, std::string_view uriPrefix, const Location &queryLoc);
 
-    std::string toString() override;
+    std::string toString() const override;
 };
 
 // # ^^^ usage: symbol
@@ -129,7 +128,7 @@ public:
     UsageAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
                    int version);
 
-    std::string toString() override;
+    std::string toString() const override;
 };
 
 } // namespace sorbet::test

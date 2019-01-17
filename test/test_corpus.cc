@@ -128,15 +128,15 @@ unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
 }
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
-unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const unique_ptr<core::Error> &error) {
-    auto position = error->loc.position(gs);
+unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
+    auto position = error.loc.position(gs);
     auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
-    return make_unique<Diagnostic>(move(range), error->header);
+    return make_unique<Diagnostic>(move(range), error.header);
 }
 
 /** Returns true if a and b are different Diagnostic objects but have the same range and message. */
 bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
-    return a != b && rangeComparison(a->range, b->range) == 0 && a->message == b->message;
+    return a != b && rangeComparison(*a->range, *b->range) == 0 && a->message == b->message;
 }
 
 /**
@@ -162,17 +162,17 @@ string getSourceLine(const UnorderedMap<string, std::shared_ptr<core::File>> &so
 }
 
 /** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
-void reportMissingError(const string &filename, const shared_ptr<ErrorAssertion> &assertion, string_view sourceLine) {
-    ADD_FAILURE_AT(filename.c_str(), assertion->range->start->line + 1)
+void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine) {
+    ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
         << fmt::format("Did not find expected error:\n{}",
-                       prettyPrintRangeComment(sourceLine, assertion->range, assertion->toString()));
+                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()));
 }
 
 /** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
-void reportUnexpectedError(const string &filename, const unique_ptr<Diagnostic> &diagnostic, string_view sourceLine) {
-    ADD_FAILURE_AT(filename.c_str(), diagnostic->range->start->line + 1) << fmt::format(
+void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine) {
+    ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
         "Found unexpected error:\n{}",
-        prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
+        prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
 }
 
 /**
@@ -194,7 +194,7 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
         // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
         // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
         fast_sort(diagnostics, [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
-            return errorComparison(filename, a->range, a->message, filename, b->range, b->message) == -1;
+            return errorComparison(filename, *a->range, a->message, filename, *b->range, b->message) == -1;
         });
 
         auto diagnosticsIt = diagnostics.begin();
@@ -213,11 +213,11 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
             }
             lastDiagnostic = diagnostic.get();
 
-            switch (assertion->compare(filename, diagnostic->range)) {
+            switch (assertion->compare(filename, *diagnostic->range)) {
                 case 1: {
                     // Diagnostic comes *before* this assertion, so we don't
                     // have an assertion that matches the diagnostic.
-                    reportUnexpectedError(filename, diagnostic,
+                    reportUnexpectedError(filename, *diagnostic,
                                           getSourceLine(files, filename, diagnostic->range->start->line));
                     // We've 'consumed' the diagnostic -- nothing matches it.
                     diagnosticsIt++;
@@ -226,7 +226,7 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
                 case -1: {
                     // Diagnostic comes *after* this assertion
                     // We don't have a diagnostic that matches the assertion.
-                    reportMissingError(assertion->filename, assertion,
+                    reportMissingError(assertion->filename, *assertion,
                                        getSourceLine(files, assertion->filename, assertion->range->start->line));
                     // We've 'consumed' this error assertion -- nothing matches it.
                     assertionsIt++;
@@ -234,7 +234,7 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
                 }
                 default: {
                     // Ranges match, so check the assertion.
-                    assertion->check(diagnostic,
+                    assertion->check(*diagnostic,
                                      getSourceLine(files, assertion->filename, assertion->range->start->line));
                     // We've 'consumed' the diagnostic and assertion.
                     diagnosticsIt++;
@@ -250,7 +250,7 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
             // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
             if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
                 auto &diagnostic = *diagnosticsIt;
-                reportUnexpectedError(filename, diagnostic,
+                reportUnexpectedError(filename, *diagnostic,
                                       getSourceLine(files, filename, diagnostic->range->start->line));
             }
             lastDiagnostic = (*diagnosticsIt).get();
@@ -260,7 +260,7 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
 
     while (assertionsIt != errorAssertions.end()) {
         // Had more error assertions than diagnostics
-        reportMissingError((*assertionsIt)->filename, *assertionsIt,
+        reportMissingError((*assertionsIt)->filename, **assertionsIt,
                            getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line));
         assertionsIt++;
     }
@@ -566,7 +566,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 continue;
             }
             auto path = error->loc.file().data(gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, error));
+            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, *error));
         }
         checkErrors(test, assertions, diagnostics);
     }
@@ -710,7 +710,7 @@ TEST_P(LSPTest, PositionTests) {
             // Sort assertions in (filename, range) order
             fast_sort(entryAssertions,
                       [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-                          return errorComparison(a->filename, a->range, "", b->filename, b->range, "");
+                          return errorComparison(a->filename, *a->range, "", b->filename, *b->range, "") == -1;
                       });
 
             auto &defAssertions = entry.second.first;
@@ -720,7 +720,6 @@ TEST_P(LSPTest, PositionTests) {
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
                 int version = -1;
-                std::unique_ptr<Location> location;
                 // TODO(jvilk): Worth unifying as a parent class (DefOrUsageAssertion)?
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                     version = defAssertion->version;
