@@ -1,0 +1,36 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = LVarLhs {
+        name = a
+      }
+      rhs = Integer {
+        val = "+42"
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = b
+      }
+      rhs = Integer {
+        val = "-42"
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = c
+      }
+      rhs = Float {
+        val = "+42.01"
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = d
+      }
+      rhs = Float {
+        val = "-42.01"
+      }
+    }
+  ]
+}

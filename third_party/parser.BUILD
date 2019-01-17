@@ -8,14 +8,14 @@ genrule(
 genrule(
     name = "bison_parser",
     srcs = [
-        "cc/grammars/typedruby24.ypp",
+        "cc/grammars/typedruby.ypp",
     ],
     outs = [
-        "cc/grammars/typedruby24.cc",
-        "cc/grammars/typedruby24.hh",
+        "cc/grammars/typedruby.cc",
+        "cc/grammars/typedruby.hh",
         "cc/grammars/stack.hh",
     ],
-    cmd = "bison --defines=$(location cc/grammars/typedruby24.hh) -o $(location cc/grammars/typedruby24.cc) $(location cc/grammars/typedruby24.ypp)",
+    cmd = "bison --defines=$(location cc/grammars/typedruby.hh) -o $(location cc/grammars/typedruby.cc) $(location cc/grammars/typedruby.ypp)",
 )
 
 genrule(

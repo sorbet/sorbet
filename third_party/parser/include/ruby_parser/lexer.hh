@@ -25,6 +25,7 @@ namespace ruby_parser {
     RUBY_22,
     RUBY_23,
     RUBY_24,
+    RUBY_25,
   };
 
   class lexer {

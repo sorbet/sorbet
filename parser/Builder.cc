@@ -742,20 +742,6 @@ public:
         return make_unique<Mlhs>(collection_loc(begin, args, end), std::move(args));
     }
 
-    unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
-        Loc loc = tok_loc(uminus).join(numeric->loc);
-        if (auto *i = parser::cast_node<Integer>(numeric.get())) {
-            return make_unique<Integer>(loc, "-" + i->val);
-        }
-        if (auto *i = parser::cast_node<Float>(numeric.get())) {
-            return make_unique<Float>(loc, "-" + i->val);
-        }
-        if (auto *r = parser::cast_node<Rational>(numeric.get())) {
-            return make_unique<Float>(loc, "-" + r->val);
-        }
-        Exception::raise("unexpected numeric type: ", numeric->nodeName());
-    }
-
     unique_ptr<Node> nil(const token *tok) {
         return make_unique<Nil>(tok_loc(tok));
     }
@@ -947,117 +933,23 @@ public:
         return make_unique<If>(loc, transform_condition(std::move(cond)), std::move(if_true), std::move(if_false));
     }
 
-    unique_ptr<Node> tr_any(const token *special) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, sorbet::parser::NodeVec types, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_array(const token *begin, unique_ptr<Node> type_, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_cast(const token *begin, unique_ptr<Node> expr, const token *colon, unique_ptr<Node> type_,
-                             const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_class(const token *special) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_consubtype(unique_ptr<Node> sub, unique_ptr<Node> super_) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_conunify(unique_ptr<Node> a, unique_ptr<Node> b) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_cpath(unique_ptr<Node> cpath) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_genargs(const token *begin, sorbet::parser::NodeVec genargs,
-                                sorbet::parser::NodeVec constraints, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, sorbet::parser::NodeVec genargs,
-                                sorbet::parser::NodeVec constraints, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_gendeclarg(const token *tok, unique_ptr<Node> constraint) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, sorbet::parser::NodeVec genargs,
-                                const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_hash(const token *begin, unique_ptr<Node> key_type, const token *assoc,
-                             unique_ptr<Node> value_type, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_instance(const token *special) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_ivardecl(const token *def, const token *name, unique_ptr<Node> type_) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_nil(const token *nil) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_nillable(const token *tilde, unique_ptr<Node> type_) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_or(unique_ptr<Node> a, unique_ptr<Node> b) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_paren(const token *begin, unique_ptr<Node> node, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_proc(const token *begin, unique_ptr<Node> args, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_returnsig(const token *arrow, unique_ptr<Node> ret) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_self(const token *special) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_tuple(const token *begin, sorbet::parser::NodeVec types, const token *end) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
-    unique_ptr<Node> tr_typed_arg(unique_ptr<Node> type_, unique_ptr<Node> arg) {
-        Exception::raise("Unsupported TypedRuby syntax");
-    }
-
     unique_ptr<Node> true_(const token *tok) {
         return make_unique<True>(tok_loc(tok));
     }
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
         Loc loc = tok_loc(oper).join(receiver->loc);
+
+        if (auto *num = parser::cast_node<Integer>(receiver.get())) {
+            return make_unique<Integer>(loc, oper->string() + num->val);
+        }
+        if (auto *num = parser::cast_node<Float>(receiver.get())) {
+            return make_unique<Float>(loc, oper->string() + num->val);
+        }
+        if (auto *num = parser::cast_node<Rational>(receiver.get())) {
+            Exception::raise("non-implemented");
+        }
+
         NameRef op;
         if (oper->string() == "+") {
             op = core::Names::unaryPlus();
@@ -1546,11 +1438,6 @@ foreign_ptr multi_lhs1(self_ptr builder, const token *begin, foreign_ptr item, c
     return build->to_foreign(build->multi_lhs1(begin, build->cast_node(item), end));
 }
 
-foreign_ptr negate(self_ptr builder, const token *uminus, foreign_ptr numeric) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->negate(uminus, build->cast_node(numeric)));
-}
-
 foreign_ptr nil(self_ptr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->to_foreign(build->nil(tok));
@@ -1713,140 +1600,6 @@ foreign_ptr ternary(self_ptr builder, foreign_ptr cond, const token *question, f
         build->ternary(build->cast_node(cond), question, build->cast_node(if_true), colon, build->cast_node(if_false)));
 }
 
-foreign_ptr tr_any(self_ptr builder, const token *special) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_any(special));
-}
-
-foreign_ptr tr_arg_instance(self_ptr builder, foreign_ptr base, const node_list *types, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_arg_instance(build->cast_node(base), build->convert_node_list(types), end));
-}
-
-foreign_ptr tr_array(self_ptr builder, const token *begin, foreign_ptr type_, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_array(begin, build->cast_node(type_), end));
-}
-
-foreign_ptr tr_cast(self_ptr builder, const token *begin, foreign_ptr expr, const token *colon, foreign_ptr type_,
-                    const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_cast(begin, build->cast_node(expr), colon, build->cast_node(type_), end));
-}
-
-foreign_ptr tr_class(self_ptr builder, const token *special) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_class(special));
-}
-
-foreign_ptr tr_consubtype(self_ptr builder, foreign_ptr sub, foreign_ptr super_) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_consubtype(build->cast_node(sub), build->cast_node(super_)));
-}
-
-foreign_ptr tr_conunify(self_ptr builder, foreign_ptr a, foreign_ptr b) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_conunify(build->cast_node(a), build->cast_node(b)));
-}
-
-foreign_ptr tr_cpath(self_ptr builder, foreign_ptr cpath) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_cpath(build->cast_node(cpath)));
-}
-
-foreign_ptr tr_genargs(self_ptr builder, const token *begin, const node_list *genargs, const node_list *constraints,
-                       const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->tr_genargs(begin, build->convert_node_list(genargs), build->convert_node_list(constraints), end));
-}
-
-foreign_ptr tr_gendecl(self_ptr builder, foreign_ptr cpath, const token *begin, const node_list *genargs,
-                       const node_list *constraints, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_gendecl(build->cast_node(cpath), begin, build->convert_node_list(genargs),
-                                               build->convert_node_list(constraints), end));
-}
-
-foreign_ptr tr_gendeclarg(self_ptr builder, const token *tok, foreign_ptr constraint) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_gendeclarg(tok, build->cast_node(constraint)));
-}
-
-foreign_ptr tr_geninst(self_ptr builder, foreign_ptr cpath, const token *begin, const node_list *genargs,
-                       const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_geninst(build->cast_node(cpath), begin, build->convert_node_list(genargs), end));
-}
-
-foreign_ptr tr_hash(self_ptr builder, const token *begin, foreign_ptr key_type, const token *assoc,
-                    foreign_ptr value_type, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->tr_hash(begin, build->cast_node(key_type), assoc, build->cast_node(value_type), end));
-}
-
-foreign_ptr tr_instance(self_ptr builder, const token *special) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_instance(special));
-}
-
-foreign_ptr tr_ivardecl(self_ptr builder, const token *def, const token *name, foreign_ptr type_) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_ivardecl(def, name, build->cast_node(type_)));
-}
-
-foreign_ptr tr_nil(self_ptr builder, const token *nil) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_nil(nil));
-}
-
-foreign_ptr tr_nillable(self_ptr builder, const token *tilde, foreign_ptr type_) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_nillable(tilde, build->cast_node(type_)));
-}
-
-foreign_ptr tr_or(self_ptr builder, foreign_ptr a, foreign_ptr b) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_or(build->cast_node(a), build->cast_node(b)));
-}
-
-foreign_ptr tr_paren(self_ptr builder, const token *begin, foreign_ptr node, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_paren(begin, build->cast_node(node), end));
-}
-
-foreign_ptr tr_proc(self_ptr builder, const token *begin, foreign_ptr args, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_proc(begin, build->cast_node(args), end));
-}
-
-foreign_ptr tr_prototype(self_ptr builder, foreign_ptr genargs, foreign_ptr args, foreign_ptr return_type) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->tr_prototype(build->cast_node(genargs), build->cast_node(args), build->cast_node(return_type)));
-}
-
-foreign_ptr tr_returnsig(self_ptr builder, const token *arrow, foreign_ptr ret) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_returnsig(arrow, build->cast_node(ret)));
-}
-
-foreign_ptr tr_self(self_ptr builder, const token *special) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_self(special));
-}
-
-foreign_ptr tr_tuple(self_ptr builder, const token *begin, const node_list *types, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_tuple(begin, build->convert_node_list(types), end));
-}
-
-foreign_ptr tr_typed_arg(self_ptr builder, foreign_ptr type_, foreign_ptr arg) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->tr_typed_arg(build->cast_node(type_), build->cast_node(arg)));
-}
-
 foreign_ptr true_(self_ptr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->to_foreign(build->true_(tok));
@@ -1963,7 +1716,6 @@ struct ruby_parser::builder Builder::interface = {
     multi_assign,
     multi_lhs,
     multi_lhs1,
-    negate,
     nil,
     not_op,
     nth_ref,
@@ -1995,31 +1747,6 @@ struct ruby_parser::builder Builder::interface = {
     symbol_internal,
     symbols_compose,
     ternary,
-    tr_any,
-    tr_arg_instance,
-    tr_array,
-    tr_cast,
-    tr_class,
-    tr_consubtype,
-    tr_conunify,
-    tr_cpath,
-    tr_genargs,
-    tr_gendecl,
-    tr_gendeclarg,
-    tr_geninst,
-    tr_hash,
-    tr_instance,
-    tr_ivardecl,
-    tr_nil,
-    tr_nillable,
-    tr_or,
-    tr_paren,
-    tr_proc,
-    tr_prototype,
-    tr_returnsig,
-    tr_self,
-    tr_tuple,
-    tr_typed_arg,
     true_,
     unary_op,
     undef_method,

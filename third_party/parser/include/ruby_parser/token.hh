@@ -73,7 +73,7 @@
   XX(tFLOAT,               1061) \
   XX(tUPLUS,               1062) \
   XX(tUMINUS,              1063) \
-  XX(tUMINUS_NUM,          1064) \
+  XX(tUNARY_OP,            1064) \
   XX(tPOW,                 1065) \
   XX(tCMP,                 1066) \
   XX(tEQ,                  1067) \

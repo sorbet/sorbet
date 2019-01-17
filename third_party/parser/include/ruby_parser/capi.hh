@@ -16,11 +16,11 @@ struct cdiagnostic {
 	size_t endPos;
 };
 
-ruby_parser::typedruby24*
-rbdriver_typedruby24_new(const char* source, size_t source_length, const ruby_parser::builder* builder);
+ruby_parser::typedruby25*
+rbdriver_typedruby25_new(const char* source, size_t source_length, const ruby_parser::builder* builder);
 
 void
-rbdriver_typedruby24_free(ruby_parser::typedruby24* parser);
+rbdriver_typedruby25_free(ruby_parser::typedruby25* parser);
 
 const void*
 rbdriver_parse(ruby_parser::base_driver* parser, ruby_parser::self_ptr self);
