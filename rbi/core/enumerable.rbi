@@ -301,7 +301,7 @@ module Enumerable
   sig {returns(Enumerator[Elem])}
   sig do
     params(
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+        blk: T.proc.params(arg0: Elem).returns(Comparable),
     )
     .returns(T.nilable(Elem))
   end
@@ -314,7 +314,7 @@ module Enumerable
   sig do
     params(
         arg0: Integer,
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+        blk: T.proc.params(arg0: Elem).returns(Comparable),
     )
     .returns(T::Array[Elem])
   end
@@ -332,7 +332,7 @@ module Enumerable
   sig {returns([T.nilable(Elem), T.nilable(Elem)])}
   sig do
     params(
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+        blk: T.proc.params(arg0: Elem).returns(Comparable),
     )
     .returns(Enumerator[Elem])
   end
