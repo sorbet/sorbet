@@ -54,14 +54,14 @@ module Kernel
 
   sig do
     params(
-        symbol: Symbol,
+        symbol: T.any(Symbol, String),
         method: T.any(Proc, Method, UnboundMethod)
     )
     .returns(Symbol)
   end
   sig do
     params(
-        symbol: Symbol,
+        symbol: T.any(Symbol, String),
         blk: Proc
     )
     .returns(Symbol)

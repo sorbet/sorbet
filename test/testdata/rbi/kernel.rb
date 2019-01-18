@@ -15,3 +15,6 @@ if x
 else
   puts x
 end
+
+define_singleton_method(:foo) { puts '' }
+define_singleton_method('foo') { puts '' }
