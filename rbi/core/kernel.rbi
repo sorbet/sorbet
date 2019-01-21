@@ -62,7 +62,7 @@ module Kernel
   sig do
     params(
         symbol: T.any(Symbol, String),
-        blk: Proc
+        blk: BasicObject
     )
     .returns(Symbol)
   end
