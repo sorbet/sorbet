@@ -25,7 +25,7 @@ def externals():
     new_git_repository(
         name="spdlog",
         remote="https://github.com/gabime/spdlog.git",
-        commit="0955ea5b8510fdc1784f4f5684728011f129f60d",
+        commit="a7148b718ea2fabb8387cb90aee9bf448da63e65", # v1.3.1
         build_file = "//third_party:spdlog.BUILD",
     )
 
@@ -46,11 +46,10 @@ def externals():
         build_file = "//third_party:lmdb.BUILD",
     )
 
-
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="b56eb28575626104922d77f6d74a116c5dbd611e",
+        commit="bfdcf4911047688fec49014d575433e2e5eb05be",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
@@ -97,10 +96,10 @@ def externals():
 
     native.new_http_archive(
         name="cxxopts",
-        url="https://github.com/jarro2783/cxxopts/archive/v2.1.1.zip",
-        sha256="b07a9fbe277247e8e7a9cbfc50af7f56775773efe5082986c215df798c93ee5d",
+        url="https://github.com/jarro2783/cxxopts/archive/v2.1.2.zip",
+        sha256="01897fd1930487f3e22879489721b5527ea5dbb32e40a57438e50d848cae22cf",
         build_file = "//third_party:cxxopts.BUILD",
-        strip_prefix = "cxxopts-2.1.1",
+        strip_prefix = "cxxopts-2.1.2",
     )
 
     native.new_http_archive(
@@ -114,7 +113,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="111ca7060a6ff50115ca85b59f6b5d8c8c5e9105"
+        commit="0b1e6d417b414aad9282e32e8c49c719edeb63c1"
     )
 
     new_git_repository(
