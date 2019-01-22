@@ -1,33 +1,25 @@
-#include "absl/container/inlined_vector.h"
 #include "common/common.h"
 #include "core/core.h"
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace sorbet::parser {
 
-using core::Loc;
-using core::NameRef;
-using std::move;
-using std::unique_ptr;
-using std::vector;
-
 class Node {
 public:
-    Node(Loc loc) : loc(loc) {
+    Node(core::Loc loc) : loc(loc) {
         ENFORCE(loc.exists(), "Location of parser node is none");
     }
     virtual ~Node() = default;
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
-    Loc loc;
+    core::Loc loc;
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count);
-    void printNode(fmt::memory_buffer &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
-    void printNodeJSON(fmt::memory_buffer &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
+    void printNode(fmt::memory_buffer &to, std::unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
+    void printNodeJSON(fmt::memory_buffer &to, std::unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
 };
 
 template <class To> To *cast_node(Node *what) {

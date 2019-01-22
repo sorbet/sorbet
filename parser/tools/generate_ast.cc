@@ -199,29 +199,12 @@ NodeDef nodes[] = {
     {"ZSuper", vector<FieldDef>()},
 };
 
-string arg_type(FieldType arg) {
-    switch (arg) {
-        case Name:
-            return "NameRef ";
-        case Node:
-            return "unique_ptr<Node> ";
-        case NodeVec:
-            return "NodeVec ";
-        case String:
-            return "std::string_view ";
-        case Uint:
-            return "u4 ";
-        case Loc:
-            return "core::Loc ";
-    }
-}
-
 string field_type(FieldType arg) {
     switch (arg) {
         case Name:
-            return "NameRef";
+            return "core::NameRef";
         case Node:
-            return "unique_ptr<Node>";
+            return "std::unique_ptr<Node>";
         case NodeVec:
             return "NodeVec";
         case String:
@@ -238,9 +221,9 @@ void emit_node_header(ostream &out, NodeDef &node) {
     out << "public:" << '\n';
 
     // generate constructor
-    out << "    " << node.name << "(Loc loc";
+    out << "    " << node.name << "(core::Loc loc";
     for (auto &arg : node.fields) {
-        out << ", " << arg_type(arg.type) << arg.name;
+        out << ", " << field_type(arg.type) << " " << arg.name;
     }
     out << ")" << '\n';
     out << "        : Node(loc)";

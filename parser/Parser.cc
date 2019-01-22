@@ -47,8 +47,8 @@ public:
             }
             string msg("Parse {}: ");
             msg.append(dclass_strings[(int)diag.error_class()]);
-            Loc loc(file, translatePos(diag.location().beginPos, max_off),
-                    translatePos(diag.location().endPos, max_off));
+            core::Loc loc(file, translatePos(diag.location().beginPos, max_off),
+                          translatePos(diag.location().endPos, max_off));
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader(msg, level, diag.data());
             }

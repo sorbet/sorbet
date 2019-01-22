@@ -72,34 +72,34 @@ public:
         return std::min(off, max_off_);
     }
 
-    Loc tok_loc(const token *tok) {
-        return Loc{file_, clamp((u4)tok->start()), clamp((u4)tok->end())};
+    core::Loc tok_loc(const token *tok) {
+        return core::Loc{file_, clamp((u4)tok->start()), clamp((u4)tok->end())};
     }
 
-    Loc maybe_loc(unique_ptr<Node> &node) {
+    core::Loc maybe_loc(unique_ptr<Node> &node) {
         if (node == nullptr) {
-            return Loc::none(file_);
+            return core::Loc::none(file_);
         }
         return node->loc;
     }
 
-    Loc tok_loc(const token *begin, const token *end) {
-        return Loc{file_, clamp((u4)begin->start()), clamp((u4)end->end())};
+    core::Loc tok_loc(const token *begin, const token *end) {
+        return core::Loc{file_, clamp((u4)begin->start()), clamp((u4)end->end())};
     }
 
-    Loc collection_loc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
+    core::Loc collection_loc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
         if (begin != nullptr) {
             ENFORCE(end != nullptr);
             return tok_loc(begin, end);
         }
         ENFORCE(end == nullptr);
         if (elts.empty()) {
-            return Loc::none(file_);
+            return core::Loc::none(file_);
         }
         return elts.front()->loc.join(elts.back()->loc);
     }
 
-    Loc collection_loc(sorbet::parser::NodeVec &elts) {
+    core::Loc collection_loc(sorbet::parser::NodeVec &elts) {
         return collection_loc(nullptr, elts, nullptr);
     }
 
@@ -126,7 +126,7 @@ public:
         return cond;
     }
 
-    void error(ruby_parser::dclass err, Loc loc) {
+    void error(ruby_parser::dclass err, core::Loc loc) {
         driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), "");
     }
 
@@ -165,7 +165,7 @@ public:
     }
 
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
-        Loc loc = lhs->loc.join(rhs->loc);
+        core::Loc loc = lhs->loc.join(rhs->loc);
 
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
@@ -205,8 +205,8 @@ public:
     }
 
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
-        NameRef method = gs_.enterNameUTF8(selector->string() + "=");
-        Loc loc = receiver->loc.join(tok_loc(selector));
+        core::NameRef method = gs_.enterNameUTF8(selector->string() + "=");
+        core::Loc loc = receiver->loc.join(tok_loc(selector));
         if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
         }
@@ -218,7 +218,7 @@ public:
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
-        Loc loc;
+        core::Loc loc;
         if (begin != nullptr) {
             loc = tok_loc(begin).join(tok_loc(end));
         } else {
@@ -261,7 +261,7 @@ public:
         }
 
         if (ensure_tok != nullptr) {
-            Loc loc;
+            core::Loc loc;
             if (body != nullptr) {
                 loc = body->loc;
             } else {
@@ -275,7 +275,7 @@ public:
     }
 
     unique_ptr<Node> begin_keyword(const token *begin, unique_ptr<Node> body, const token *end) {
-        Loc loc = tok_loc(begin).join(tok_loc(end));
+        core::Loc loc = tok_loc(begin).join(tok_loc(end));
         if (body != nullptr) {
             if (auto *b = parser::cast_node<Begin>(body.get())) {
                 return make_unique<Kwbegin>(loc, std::move(b->stmts));
@@ -289,7 +289,7 @@ public:
     }
 
     unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
-        Loc loc = receiver->loc.join(arg->loc);
+        core::Loc loc = receiver->loc.join(arg->loc);
 
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
@@ -337,7 +337,7 @@ public:
                  [&](Node *n) { Exception::raise("Unexpected send node: ", n->nodeName()); });
 
         auto &send = exprs->front();
-        Loc block_loc = send->loc.join(tok_loc(end));
+        core::Loc block_loc = send->loc.join(tok_loc(end));
         unique_ptr<Node> block = make_unique<Block>(block_loc, std::move(send), std::move(args), std::move(body));
         exprs->front().swap(block);
         return method_call;
@@ -348,8 +348,8 @@ public:
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        Loc loc = tok_loc(amper);
-        NameRef nm;
+        core::Loc loc = tok_loc(amper);
+        core::NameRef nm;
 
         if (name != nullptr) {
             loc = loc.join(tok_loc(name));
@@ -366,7 +366,7 @@ public:
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
                                  const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
-        Loc selector_loc, start_loc;
+        core::Loc selector_loc, start_loc;
         if (selector != nullptr) {
             selector_loc = tok_loc(selector);
         } else {
@@ -378,7 +378,7 @@ public:
             start_loc = receiver->loc;
         }
 
-        Loc loc;
+        core::Loc loc;
         if (rparen != nullptr) {
             loc = start_loc.join(tok_loc(rparen));
         } else if (!args.empty()) {
@@ -387,7 +387,7 @@ public:
             loc = start_loc.join(selector_loc);
         }
 
-        NameRef method;
+        core::NameRef method;
         if (selector == nullptr) {
             method = core::Names::bang();
         } else {
@@ -429,7 +429,7 @@ public:
     unique_ptr<Node> condition(const token *cond_tok, unique_ptr<Node> cond, const token *then,
                                unique_ptr<Node> if_true, const token *else_, unique_ptr<Node> if_false,
                                const token *end) {
-        Loc loc = tok_loc(cond_tok).join(cond->loc);
+        core::Loc loc = tok_loc(cond_tok).join(cond->loc);
         if (then != nullptr) {
             loc = loc.join(tok_loc(then));
         }
@@ -449,7 +449,7 @@ public:
     }
 
     unique_ptr<Node> condition_mod(unique_ptr<Node> if_true, unique_ptr<Node> if_false, unique_ptr<Node> cond) {
-        Loc loc = cond->loc;
+        core::Loc loc = cond->loc;
         if (if_true != nullptr) {
             loc = loc.join(if_true->loc);
         } else {
@@ -513,38 +513,38 @@ public:
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
                                unique_ptr<Node> superclass, unique_ptr<Node> body, const token *end_) {
-        Loc declLoc = tok_loc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
-        Loc loc = tok_loc(class_, end_);
+        core::Loc declLoc = tok_loc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
+        core::Loc loc = tok_loc(class_, end_);
 
         return make_unique<Class>(loc, declLoc, std::move(name), std::move(superclass), std::move(body));
     }
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                 const token *end) {
-        Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
-        Loc loc = tok_loc(def, end);
+        core::Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
+        core::Loc loc = tok_loc(def, end);
 
         return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->string()), std::move(args),
                                       std::move(body));
     }
 
     unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
-        Loc declLoc = tok_loc(module).join(maybe_loc(name));
-        Loc loc = tok_loc(module, end_);
+        core::Loc declLoc = tok_loc(module).join(maybe_loc(name));
+        core::Loc loc = tok_loc(module, end_);
         return make_unique<Module>(loc, declLoc, std::move(name), std::move(body));
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
                                 const token *end_) {
-        Loc declLoc = tok_loc(class_);
-        Loc loc = tok_loc(class_, end_);
+        core::Loc declLoc = tok_loc(class_);
+        core::Loc loc = tok_loc(class_, end_);
         return make_unique<SClass>(loc, declLoc, std::move(expr), std::move(body));
     }
 
     unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
                                    unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
-        Loc loc = tok_loc(def, end);
+        core::Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
+        core::Loc loc = tok_loc(def, end);
 
         // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
         // need to reject it here, or can we defer that until later analysis?
@@ -608,7 +608,7 @@ public:
 
     unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                    const token *rparen) {
-        Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
+        core::Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
         return make_unique<Break>(loc, std::move(args));
     }
 
@@ -631,14 +631,14 @@ public:
 
     unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                     const token *rparen) {
-        Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
+        core::Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
         return make_unique<Return>(loc, std::move(args));
     }
 
     unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                    const token *rparen) {
-        Loc loc = tok_loc(keyword);
-        Loc argloc = collection_loc(lparen, args, rparen);
+        core::Loc loc = tok_loc(keyword);
+        core::Loc argloc = collection_loc(lparen, args, rparen);
         if (argloc.exists()) {
             loc = loc.join(argloc);
         }
@@ -647,7 +647,7 @@ public:
 
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                    const token *rparen) {
-        Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
+        core::Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
         if (!args.empty() && parser::isa_node<BlockPass>(args.back().get())) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
         }
@@ -668,8 +668,8 @@ public:
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        Loc loc = tok_loc(dstar);
-        NameRef nm;
+        core::Loc loc = tok_loc(dstar);
+        core::NameRef nm;
 
         if (name != nullptr) {
             loc = loc.join(tok_loc(name));
@@ -719,7 +719,7 @@ public:
         // groups, Ruby will autovivify the match groups as locals. If we were
         // to support that, we'd need to analyze that here and call
         // `driver_->lex.declare`.
-        Loc loc = receiver->loc.join(arg->loc);
+        core::Loc loc = receiver->loc.join(arg->loc);
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
         return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->string()), std::move(args));
@@ -748,7 +748,7 @@ public:
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
         if (receiver != nullptr) {
-            Loc loc;
+            core::Loc loc;
             if (end != nullptr) {
                 loc = tok_loc(not_).join(tok_loc(end));
             } else {
@@ -833,7 +833,7 @@ public:
 
     unique_ptr<Node> regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                     unique_ptr<Node> options) {
-        Loc loc = tok_loc(begin).join(tok_loc(end)).join(maybe_loc(options));
+        core::Loc loc = tok_loc(begin).join(tok_loc(end)).join(maybe_loc(options));
         return make_unique<Regexp>(loc, std::move(parts), std::move(options));
     }
 
@@ -843,7 +843,7 @@ public:
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
                                  unique_ptr<Node> exc_var, const token *then, unique_ptr<Node> body) {
-        Loc loc = tok_loc(rescue);
+        core::Loc loc = tok_loc(rescue);
         if (exc_list != nullptr) {
             loc = loc.join(exc_list->loc);
         }
@@ -857,8 +857,8 @@ public:
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        Loc loc = tok_loc(star);
-        NameRef nm;
+        core::Loc loc = tok_loc(star);
+        core::NameRef nm;
 
         if (name != nullptr) {
             loc = loc.join(tok_loc(name));
@@ -882,7 +882,7 @@ public:
     }
 
     unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
-        Loc loc = tok_loc(star).join(maybe_loc(arg));
+        core::Loc loc = tok_loc(star).join(maybe_loc(arg));
         return make_unique<SplatLhs>(loc, std::move(arg));
     }
 
@@ -891,7 +891,7 @@ public:
     }
 
     unique_ptr<Node> string_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        Loc loc = collection_loc(begin, parts, end);
+        core::Loc loc = collection_loc(begin, parts, end);
         return make_unique<DString>(loc, std::move(parts));
     }
 
@@ -912,7 +912,7 @@ public:
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        Loc loc = collection_loc(begin, parts, end);
+        core::Loc loc = collection_loc(begin, parts, end);
         sorbet::parser::NodeVec out_parts;
         out_parts.reserve(parts.size());
         for (auto &p : parts) {
@@ -929,7 +929,7 @@ public:
 
     unique_ptr<Node> ternary(unique_ptr<Node> cond, const token *question, unique_ptr<Node> if_true, const token *colon,
                              unique_ptr<Node> if_false) {
-        Loc loc = cond->loc.join(if_false->loc);
+        core::Loc loc = cond->loc.join(if_false->loc);
         return make_unique<If>(loc, transform_condition(std::move(cond)), std::move(if_true), std::move(if_false));
     }
 
@@ -938,7 +938,7 @@ public:
     }
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
-        Loc loc = tok_loc(oper).join(receiver->loc);
+        core::Loc loc = tok_loc(oper).join(receiver->loc);
 
         if (auto *num = parser::cast_node<Integer>(receiver.get())) {
             return make_unique<Integer>(loc, oper->string() + num->val);
@@ -950,7 +950,7 @@ public:
             Exception::raise("non-implemented");
         }
 
-        NameRef op;
+        core::NameRef op;
         if (oper->string() == "+") {
             op = core::Names::unaryPlus();
         } else if (oper->string() == "-") {
@@ -963,7 +963,7 @@ public:
     }
 
     unique_ptr<Node> undef_method(const token *undef, sorbet::parser::NodeVec name_list) {
-        Loc loc = tok_loc(undef);
+        core::Loc loc = tok_loc(undef);
         if (!name_list.empty()) {
             loc = loc.join(name_list.back()->loc);
         }
@@ -972,7 +972,7 @@ public:
 
     unique_ptr<Node> when(const token *when, sorbet::parser::NodeVec patterns, const token *then,
                           unique_ptr<Node> body) {
-        Loc loc = tok_loc(when);
+        core::Loc loc = tok_loc(when);
         if (body != nullptr) {
             loc = loc.join(body->loc);
         } else if (then != nullptr) {
@@ -984,7 +984,7 @@ public:
     }
 
     unique_ptr<Node> word(sorbet::parser::NodeVec parts) {
-        Loc loc = collection_loc(parts);
+        core::Loc loc = collection_loc(parts);
         return make_unique<DString>(loc, std::move(parts));
     }
 
