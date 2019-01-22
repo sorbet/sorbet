@@ -489,7 +489,7 @@ common ones with shell aliases of your choice:
 
 ```shell
 # mnemonic: 's' for sorbet
-alias sb="bazel build //main-sorbet --config=dbg"
+alias sb="bazel build //main:sorbet --config=dbg"
 alias st="bazel test //... --config=dbg --test_output=errors"
 ```
 
