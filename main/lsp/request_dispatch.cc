@@ -115,7 +115,9 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 vector<shared_ptr<core::File>> changedFiles;
                 auto newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
                 ENFORCE(newGs);
-                this->globalStateHashes = computeStateHashes(newGs->getFiles());
+                if (!disableFastPath) {
+                    this->globalStateHashes = computeStateHashes(newGs->getFiles());
+                }
                 return newGs;
             }
         }
