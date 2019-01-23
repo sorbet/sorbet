@@ -923,9 +923,9 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::Complex *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Symbols::Complex().data(ctx)->name;
+                core::NameRef complex_name = core::Names::Complex();
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
-                auto send = MK::Send1(loc, std::move(kernel), complex_name, MK::String(loc, value));
+                auto send = MK::Send2(loc, std::move(kernel), complex_name, MK::Int(loc, 0), MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
