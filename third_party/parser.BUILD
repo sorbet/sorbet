@@ -1,4 +1,5 @@
 load("@io_bazel_rules_ragel//ragel:ragel.bzl", "ragel")
+load("@io_bazel_rules_bison//bison:bison.bzl", "bison")
 
 ragel(
     name = "ragel_lexer",
@@ -6,17 +7,9 @@ ragel(
     language = "c++",
 )
 
-genrule(
-    name = "bison_parser",
-    srcs = [
-        "cc/grammars/typedruby.ypp",
-    ],
-    outs = [
-        "cc/grammars/typedruby.cc",
-        "cc/grammars/typedruby.hh",
-        "cc/grammars/stack.hh",
-    ],
-    cmd = "PATH=/usr/local/bin:/usr/local/opt/bison/bin:/usr/bin:/bin bison --defines=$(location cc/grammars/typedruby.hh) -o $(location cc/grammars/typedruby.cc) $(location cc/grammars/typedruby.ypp)",
+bison(
+    name = "typedruby_bison",
+    src = "cc/grammars/typedruby.ypp",
 )
 
 genrule(
@@ -35,13 +28,11 @@ cc_library(
     srcs = glob(["cc/*.cc"]) + [
         ":gen_cpp_diagnostics",
         ":ragel_lexer",
-        ":bison_parser",
+        ":typedruby_bison",
     ],
     hdrs = glob(["include/**/*.hh"]),
     copts = [
         "-Wno-unused-const-variable",
-        "-I$(GENDIR)/external/parser/cc",
-        "-I$(GENDIR)/external/parser/cc/grammars",
     ],
     includes = [
         "include",

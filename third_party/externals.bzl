@@ -60,10 +60,10 @@ def externals():
     )
 
     new_git_repository(
-            name="pdqsort",
-            remote="https://github.com/orlp/pdqsort.git",
-            commit="08879029ab8dcb80a70142acb709e3df02de5d37",
-            build_file = "//third_party:pdqsort.BUILD",
+        name="pdqsort",
+        remote="https://github.com/orlp/pdqsort.git",
+        commit="08879029ab8dcb80a70142acb709e3df02de5d37",
+        build_file = "//third_party:pdqsort.BUILD",
     )
 
     new_git_repository(
@@ -117,8 +117,8 @@ def externals():
 
     new_git_repository(
         name = "compdb",
-        commit = "7bc80f9355b09466fffabce24d463d65e37fcc0f",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
+        commit = "7bc80f9355b09466fffabce24d463d65e37fcc0f",
         build_file_content = (
         """
 package(default_visibility = ["//visibility:public"])
@@ -146,67 +146,79 @@ package(default_visibility = ["//visibility:public"])
 
     git_repository(
         name = "com_github_bazelbuild_buildtools",
-        commit = "8a1359dc25add12a6e724f6a2bded60fbc23d08a",
         remote = "https://github.com/bazelbuild/buildifier.git",
+        commit = "8a1359dc25add12a6e724f6a2bded60fbc23d08a",
     )
 
 
     # optimized version of blake2 hashing algorithm
     new_git_repository(
         name = "com_github_blake2_libb2",
-        commit = "7feb2bb35dfe89750fba62bcd909409e995af754",
         remote ="https://github.com/BLAKE2/libb2",
+        commit = "7feb2bb35dfe89750fba62bcd909409e995af754",
         build_file = "//third_party:libb2.BUILD",
     )
 
     # portable reference implementation of blake2
     new_git_repository(
-            name = "com_github_blake2_blake2",
-            commit = "320c325437539ae91091ce62efec1913cd8093c2",
-            remote ="https://github.com/BLAKE2/BLAKE2",
-            build_file = "//third_party:blake2.BUILD",
-        )
+        name = "com_github_blake2_blake2",
+        remote ="https://github.com/BLAKE2/BLAKE2",
+        commit = "320c325437539ae91091ce62efec1913cd8093c2",
+        build_file = "//third_party:blake2.BUILD",
+    )
 
     new_git_repository(
         name = "com_github_msgpack_msgpack",
-        commit = "daa78b46062d49bc192a921f7192637f58b334cc",
         remote = "https://github.com/msgpack/msgpack-c",
+        commit = "daa78b46062d49bc192a921f7192637f58b334cc",
         build_file = "//third_party:msgpack.BUILD",
     )
 
     new_git_repository(
         name = "com_github_d_bahr_crcpp",
-        commit = "76dc872e163ea91ca51468db686ba16912979765",
         remote = "https://github.com/d-bahr/CRCpp.git",
+        commit = "76dc872e163ea91ca51468db686ba16912979765",
         build_file = "//third_party:crcpp.BUILD",
     )
 
     http_archive(
-      name = "emscripten_toolchain",
-      url = "https://github.com/kripken/emscripten/archive/1.38.21.tar.gz",
-      build_file = "//third_party:emscripten-toolchain.BUILD",
-      sha256 = "f3e6f1e6039256968131bc491ea8c2e1bfc31c41c1ec1370e2f1fae9a8e56faa",
-      strip_prefix = "emscripten-1.38.21"
+        name = "emscripten_toolchain",
+        url = "https://github.com/kripken/emscripten/archive/1.38.21.tar.gz",
+        build_file = "//third_party:emscripten-toolchain.BUILD",
+        sha256 = "f3e6f1e6039256968131bc491ea8c2e1bfc31c41c1ec1370e2f1fae9a8e56faa",
+        strip_prefix = "emscripten-1.38.21"
     )
 
     http_archive(
-      name = "emscripten_clang_linux",
-      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.21.tar.gz",
-      build_file = "//third_party:emscripten-clang.BUILD",
-      sha256 = "355d64048529b77e076de84e5aa842773afbb672ccad1308f4cc734afe581a35",
-      strip_prefix = "emscripten-llvm-e1.38.21",
+        name = "emscripten_clang_linux",
+        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.21.tar.gz",
+        build_file = "//third_party:emscripten-clang.BUILD",
+        sha256 = "355d64048529b77e076de84e5aa842773afbb672ccad1308f4cc734afe581a35",
+        strip_prefix = "emscripten-llvm-e1.38.21",
     )
 
     http_archive(
-      name = "emscripten_clang_darwin",
-      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.21.tar.gz",
-      build_file = "//third_party:emscripten-clang.BUILD",
-      sha256 = "ce473d2bf88dda0ec313c1899caaa586d69a4336cbc4bd2c6da1f5be217680cd",
-      strip_prefix = "emscripten-llvm-e1.38.21",
+        name = "emscripten_clang_darwin",
+        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.21.tar.gz",
+        build_file = "//third_party:emscripten-clang.BUILD",
+        sha256 = "ce473d2bf88dda0ec313c1899caaa586d69a4336cbc4bd2c6da1f5be217680cd",
+        strip_prefix = "emscripten-llvm-e1.38.21",
     )
 
     git_repository(
         name="io_bazel_rules_ragel",
         remote="https://github.com/jmillikin/rules_ragel.git",
         commit="5723d752a53dd8e25eb4509f3ed869196a06cb2a"
+    )
+
+    git_repository(
+        name="io_bazel_rules_bison",
+        remote="https://github.com/jmillikin/rules_bison.git",
+        commit="5695c1c63a63a9cc4f125da1864212a79c62a6ae"
+    )
+
+    git_repository(
+        name = "io_bazel_rules_m4",
+        remote = "https://github.com/jmillikin/rules_m4",
+        commit = "047c793295c4387672f1cb78ccb7f42f11316ee2",
     )

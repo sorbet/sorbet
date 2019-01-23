@@ -11,7 +11,8 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update
 RUN apt-get update && apt-get install -y realpath time
 
 # Dependencies for the parser
-RUN apt-get update && apt-get install -y bison ruby autoconf
+
+RUN apt-get update && apt-get install -y ruby autoconf
 
 # Dependencies for pay-server gems
 RUN apt-get update && apt-get install -y libpq-dev libicu-dev libsqlite3-dev libgsl0-dev

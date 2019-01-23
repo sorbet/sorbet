@@ -96,7 +96,7 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
 1.  Install the dependencies
 
-    - `brew install bazel bison autoconf coreutils parallel`
+    - `brew install bazel autoconf coreutils parallel`
 
 2. Build Sorbet
 
@@ -106,23 +106,6 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
     - `bazel-bin/main/sorbet -e "42 + 'hello'"`
 
-
-### Troubleshooting
-
-If you see a build error that looks like
-
-```
-Executing genrule @parser//:bison_parser failed
-```
-
-then you might need to run
-
-```
-brew link bison --force
-```
-
-to symlink the correct version of bison into `/usr/local/bin` so it appears on
-your PATH.
 
 ## Building Sorbet
 
