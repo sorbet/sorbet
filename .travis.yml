@@ -12,9 +12,6 @@ addons:
     packages:
     - bazel
 before_script:
-- cp bazelrc-jenkins .bazelrc
-- sed -i 's/ --jobs 30//g' .bazelrc
-- sed -i 's/startup --output_base.*//' .bazelrc
 - sed -i '1s/^/common --curses no\n/' .bazelrc
 matrix:
   include:
@@ -26,7 +23,7 @@ matrix:
     - bazel test --config=travis //...
   - name: "Release"
     script:
-    - bazel build main:sorbet --config=release
+    - bazel build main:sorbet --config=release-linux
     # Set up git user name and tag this commit
     - git config --local user.name "Sorbet"
     - git config --local user.email "sorbet@stripe.com"

@@ -2,6 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_toolchain_suite(
     name = "webasm-linux",
+    tags = ["manual"],
     toolchains = {
         "webasm-linux": ":webasm_toolchain_linux",
         "webasm|emscripten": ":webasm_toolchain_linux",
@@ -37,5 +38,6 @@ cc_toolchain(
     static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
+    tags = ["manual"],
     toolchain_identifier = "webasm-toolchain",
 )

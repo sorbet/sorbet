@@ -2,7 +2,7 @@ genrule(
     name = "ragel_lexer",
     srcs = ["cc/lexer.rl"],
     outs = ["cc/lexer.cc"],
-    cmd = "ragel -o $@ -C $(location cc/lexer.rl)",
+    cmd = "PATH=/usr/local/bin:/usr/local/opt/bison/bin:/usr/bin:/bin ragel -o $@ -C $(location cc/lexer.rl)",
 )
 
 genrule(
@@ -15,7 +15,7 @@ genrule(
         "cc/grammars/typedruby.hh",
         "cc/grammars/stack.hh",
     ],
-    cmd = "bison --defines=$(location cc/grammars/typedruby.hh) -o $(location cc/grammars/typedruby.cc) $(location cc/grammars/typedruby.ypp)",
+    cmd = "PATH=/usr/local/bin:/usr/local/opt/bison/bin:/usr/bin:/bin bison --defines=$(location cc/grammars/typedruby.hh) -o $(location cc/grammars/typedruby.cc) $(location cc/grammars/typedruby.ypp)",
 )
 
 genrule(

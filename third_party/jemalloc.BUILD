@@ -56,6 +56,7 @@ genrule(
         "include/jemalloc/jemalloc.h",
     ],
     cmd = JEMALLOC_BUILD_COMMAND,
+    toolchains = ["@bazel_tools//tools/cpp:current_cc_toolchain"],
 )
 
 cc_library(

@@ -1,11 +1,12 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # We define our externals here instead of directly in WORKSPACE
 # because putting the `new_git_repository` calls here instead of there
 # works around https://github.com/bazelbuild/bazel/issues/1465 when
 # passing `build_file` to the `new_git_repository`.
 def externals():
-    native.new_http_archive(
+    http_archive(
         name = "gtest",
         url = "https://github.com/google/googletest/archive/release-1.8.0.zip",
         sha256 = "f3ed3b58511efd272eb074a3a6d6fb79d7c2e6a0e374323d1e6bcbcc1ef141bf",
@@ -13,7 +14,7 @@ def externals():
         strip_prefix = "googletest-release-1.8.0",
     )
 
-    native.new_http_archive(
+    http_archive(
         name = "yaml_cpp",
         url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.zip",
         sha256 = "292c8de66bfda19a2ca08a32a8c1ec39b709ac75f54e6be0735940db2dbdff76",
@@ -32,7 +33,7 @@ def externals():
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
     # depend on @com_google_protobuf for protoc and proto runtimes.
     # This statement defines the @com_google_protobuf repo.
-    native.http_archive(
+    http_archive(
         name = "com_google_protobuf",
         sha256 = "d7a221b3d4fb4f05b7473795ccea9e05dab3b8721f6286a95fffbffc2d926f8b",
         strip_prefix = "protobuf-3.6.1",
@@ -94,7 +95,7 @@ def externals():
         build_file = "//third_party:statsd.BUILD",
     )
 
-    native.new_http_archive(
+    http_archive(
         name="cxxopts",
         url="https://github.com/jarro2783/cxxopts/archive/v2.1.2.zip",
         sha256="01897fd1930487f3e22879489721b5527ea5dbb32e40a57438e50d848cae22cf",
@@ -102,7 +103,7 @@ def externals():
         strip_prefix = "cxxopts-2.1.2",
     )
 
-    native.new_http_archive(
+    http_archive(
         name="rang",
         url = "https://github.com/agauniyal/rang/archive/v3.1.0.zip",
         sha256="658adeb8a36d36981d4339fc839f2deedc0e75cb421db1982041d8a0a255835d",
@@ -118,7 +119,7 @@ def externals():
 
     new_git_repository(
         name = "compdb",
-        commit = "c4cf16f3162c0a13bb8983b3716a979678ae6dc4",
+        commit = "7bc80f9355b09466fffabce24d463d65e37fcc0f",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
         build_file_content = (
         """
@@ -136,13 +137,13 @@ package(default_visibility = ["//visibility:public"])
     git_repository(
         name = "com_grail_bazel_toolchain",
         remote = "https://github.com/DarkDimius/bazel-toolchain.git",
-        commit="d11b0ecfee53387564be08172c8d7ce2199e06ee",
+        commit="cbbedc03065f9d6806395cf4b95b4bcb4ed37025",
     )
 
     git_repository(
         name = "io_bazel_rules_go",
         remote = "https://github.com/bazelbuild/rules_go.git",
-        commit = "cbc1e32fba771845305f15e341fa26595d4a136d",
+        commit = "153c823428660f14b6e028cc71086833e445b2da",
     )
 
     git_repository(
@@ -182,7 +183,7 @@ package(default_visibility = ["//visibility:public"])
         build_file = "//third_party:crcpp.BUILD",
     )
 
-    native.new_http_archive(
+    http_archive(
       name = "emscripten_toolchain",
       url = "https://github.com/kripken/emscripten/archive/1.38.21.tar.gz",
       build_file = "//third_party:emscripten-toolchain.BUILD",
@@ -190,7 +191,7 @@ package(default_visibility = ["//visibility:public"])
       strip_prefix = "emscripten-1.38.21"
     )
 
-    native.new_http_archive(
+    http_archive(
       name = "emscripten_clang_linux",
       url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.21.tar.gz",
       build_file = "//third_party:emscripten-clang.BUILD",
@@ -198,7 +199,7 @@ package(default_visibility = ["//visibility:public"])
       strip_prefix = "emscripten-llvm-e1.38.21",
     )
 
-    native.new_http_archive(
+    http_archive(
       name = "emscripten_clang_darwin",
       url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.21.tar.gz",
       build_file = "//third_party:emscripten-clang.BUILD",

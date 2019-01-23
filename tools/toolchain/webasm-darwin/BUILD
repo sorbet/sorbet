@@ -2,6 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_toolchain_suite(
     name = "webasm-darwin",
+    tags = ["manual"],
     toolchains = {
         "webasm-darwin": ":webasm_toolchain_darwin",
         "webasm|emscripten": ":webasm_toolchain_darwin",
@@ -37,5 +38,6 @@ cc_toolchain(
     static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
+    tags = ["manual"],
     toolchain_identifier = "webasm-toolchain",
 )

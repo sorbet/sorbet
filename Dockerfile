@@ -23,6 +23,10 @@ RUN rbenv exec gem install bundler --no-rdoc --no-ri -v 1.17.1
 ADD https://shellcheck.storage.googleapis.com/shellcheck-v0.5.0.linux.x86_64.tar.xz /tmp
 RUN tar -xf /tmp/shellcheck-v0.5.0.linux.x86_64.tar.xz -C /usr/local/bin --strip-components=1 shellcheck-v0.5.0/shellcheck
 
+RUN /usr/stripe/bin/docker/stripe-install-bazel 0.16.1 # version used by pay-server
+
+RUN rm /etc/bazel.bazelrc # script installed there sets a lot of insane defaults, e.g. https://git.corp.stripe.com/stripe-internal/dev-vm/blob/075acc03/files/stripe-build/bazelrc/stripe_build_bazelrc_014#L47
+
 WORKDIR /src
 
 ENV PATH $PATH:/src/

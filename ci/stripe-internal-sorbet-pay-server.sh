@@ -17,7 +17,7 @@ maxrss: %M
 # This is what we'll ship to our users
 /usr/local/bin/junit-script-output \
     release-build \
-    bazel build main:sorbet --config=release
+    bazel build main:sorbet --config=stripeci --config=release-linux
 
 # Validate the build
 VERSION=$(./bazel-bin/main/sorbet --version)
@@ -63,11 +63,14 @@ eval "$(rbenv init -)"
 stripe-deps-ruby --without ci_ignore
 
 # Clobber our .bazelrc so pay-server's bazel doesn't see it.
-rm ../.bazelrc
+mv ../.bazelrc ../.bazelrc-moved
 
 # Unset JENKINS_URL so pay-server acts like it's running in dev, not
 # CI, and runs its own `bazel` invocations
 env -u JENKINS_URL rbenv exec bundle exec rake build:FileListStep
+
+# restore bazelrc
+mv ../.bazelrc-moved ../.bazelrc
 
 RECORD_STATS=
 if [ "$GIT_BRANCH" == "master" ] || [[ "$GIT_BRANCH" == integration-* ]]; then
@@ -112,12 +115,11 @@ fi
 
 (
     cd -
-    cp bazelrc-jenkins .bazelrc
 
     # Ship a version with debug assertions and counters, as well.
     /usr/local/bin/junit-script-output \
         release-build \
-        bazel build main:sorbet --config=release --config=forcedebug
+        bazel build main:sorbet --config=stripeci --config=release-debug-linux
     cp bazel-bin/main/sorbet /build/bin/sorbet.dbg
 )
 
@@ -134,10 +136,9 @@ export LSAN_OPTIONS
 
 (
     cd -
-    cp bazelrc-jenkins .bazelrc
     /usr/local/bin/junit-script-output \
         sanitized-build \
-        bazel build main:sorbet --config=ci
+        bazel build main:sorbet --config=stripeci --config=release-sanitized-linux
     cp bazel-bin/main/sorbet /build/bin/sorbet.san
 )
 
