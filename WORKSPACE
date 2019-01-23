@@ -17,6 +17,10 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
+load("@io_bazel_rules_ragel//ragel:ragel.bzl", "ragel_register_toolchains")
+
+ragel_register_toolchains()
+
 BAZEL_VERSION = "0.21.0"
 
 BAZEL_INSTALLER_VERSION_linux_SHA = "328d5fa87a61e1f6e674a8f88c5ae54b8987eaf5a6c944257600c5029c8feef8"

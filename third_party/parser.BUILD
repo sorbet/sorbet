@@ -1,8 +1,9 @@
-genrule(
+load("@io_bazel_rules_ragel//ragel:ragel.bzl", "ragel")
+
+ragel(
     name = "ragel_lexer",
-    srcs = ["cc/lexer.rl"],
-    outs = ["cc/lexer.cc"],
-    cmd = "PATH=/usr/local/bin:/usr/local/opt/bison/bin:/usr/bin:/bin ragel -o $@ -C $(location cc/lexer.rl)",
+    src = "cc/lexer.rl",
+    language = "c++",
 )
 
 genrule(

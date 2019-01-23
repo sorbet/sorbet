@@ -96,7 +96,7 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
 1.  Install the dependencies
 
-    - `brew install bazel ragel bison autoconf coreutils parallel`
+    - `brew install bazel bison autoconf coreutils parallel`
 
 2. Build Sorbet
 

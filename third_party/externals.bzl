@@ -207,6 +207,8 @@ package(default_visibility = ["//visibility:public"])
       strip_prefix = "emscripten-llvm-e1.38.21",
     )
 
-
-
-
+    git_repository(
+        name="io_bazel_rules_ragel",
+        remote="https://github.com/jmillikin/rules_ragel.git",
+        commit="5723d752a53dd8e25eb4509f3ed869196a06cb2a"
+    )
