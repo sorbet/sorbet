@@ -109,7 +109,7 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
 }
 
 cxxopts::Options buildOptions() {
-    cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
+    cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
     // Common user options in order of use
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>()->default_value(""), "string");

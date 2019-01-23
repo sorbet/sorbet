@@ -1,0 +1,95 @@
+----- Abbreviated help output: -------------------------------------------
+
+You must pass either `-e` or at least one ruby file.
+
+Typechecker for Ruby
+Usage:
+  sorbet [OPTION...] <file1.rb> <file2.rb> ...
+
+  -e, string                    Parse an inline ruby string (default: )
+  -q, --quiet                   Silence all non-critical errors
+  -P, --progress                Draw progressbar
+  -v, --verbose                 Verbosity level [0-3]
+  -h, --help                    Show long help
+      --version                 Show version
+      --color {always,never,[auto]}
+                                Use color output (default: auto)
+
+
+----- Full help output: --------------------------------------------------
+
+Typechecker for Ruby
+Usage:
+  sorbet [OPTION...] <file1.rb> <file2.rb> ...
+
+  -e, string                    Parse an inline ruby string (default: )
+  -q, --quiet                   Silence all non-critical errors
+  -P, --progress                Draw progressbar
+  -v, --verbose                 Verbosity level [0-3]
+  -h, --help                    Show long help
+      --version                 Show version
+      --color {always,never,[auto]}
+                                Use color output (default: auto)
+
+ advanced options:
+      --configatron-dir path    Path to configatron yaml folders
+      --configatron-file path   Path to configatron yaml files
+      --debug-log-file file     Path to debug log file (default: )
+      --reserve-mem-kb arg      Preallocate the specified amount of memory
+                                for symbol+name tables (default: 0)
+      --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup
+  -a, --autocorrect             Auto-correct source files with suggested
+                                fixes
+      --suggest-runtime-profiled
+                                When suggesting signatures in `typed: strict`
+                                mode, suggest `::T::Utils::RuntimeProfiled`
+      --lsp                     Start in language-server-protocol mode
+      --no-error-count          Do not print the error count summary line
+
+ dev options:
+  -p, --print type              Print: [parse-tree, parse-tree-json, ast,
+                                ast-raw, dsl-tree, dsl-tree-raw, symbol-table,
+                                symbol-table-json, symbol-table-full, name-tree,
+                                name-tree-raw, file-table-json, resolve-tree,
+                                resolve-tree-raw, cfg, cfg-raw, typed-source,
+                                autogen, autogen-msgpack]
+      --stop-after phase        Stop After: [init, parser, desugarer, dsl,
+                                namer, resolver, cfg, inferencer] (default:
+                                inferencer)
+      --no-stdlib               Do not load included rbi files for stdlib
+      --skip-dsl-passes         Do not run DSL passess
+      --wait-for-dbg            Wait for debugger on start
+      --simulate-crash          Crash on start
+      --silence-dev-message     Silence "You are running a development build"
+                                message
+      --error-white-list errorCodes
+                                White list of errors to ever be reported
+      --typed {ruby,true,strict,strong,[auto]}
+                                Force all code to specified strictness level
+                                (default: auto)
+      --typed-override filepath.yaml
+                                Yaml config that overrides strictness levels
+                                on files (default: )
+      --store-state file        Store state into file (default: )
+      --typed-source file       Print the specified file with type
+                                annotations (default: )
+      --cache-dir dir           Use the specified folder to cache data
+                                (default: )
+      --suppress-non-critical   Exit 0 unless there was a critical error
+      --counter counter         Print internal counter
+      --statsd-host host        StatsD sever hostname (default: )
+      --counters                Print all internal counters
+      --suggest-typed           Suggest which files to add `typed: true` to
+      --statsd-prefix prefix    StatsD prefix (default: ruby_typer.unknown)
+      --statsd-port port        StatsD sever port (default: 8200)
+      --metrics-file file       File to export metrics to (default: )
+      --metrics-prefix file     Prefix to use in metrics (default:
+                                ruby_typer.unknown.)
+      --metrics-branch branch   Branch to report in metrics export (default:
+                                none)
+      --metrics-sha sha1        Sha1 to report in metrics export (default:
+                                none)
+      --metrics-repo repo       Repo to report in metrics export (default:
+                                none)
+
+--------------------------------------------------------------------------
