@@ -51,11 +51,11 @@ class <emptyTree><<constant:<root>>> < ()
 
   "x"
 
-  1.+(::Kernel.<constant:Complex>("4"))
+  1.+(::Kernel.Complex(0, "4"))
 
   0.500000
 
-  ::Kernel.<constant:Complex>("1.5")
+  ::Kernel.Complex(0, "1.5")
 
   def self.classmeth<<constant:<todo sym>>>()
     <emptyTree>
@@ -178,7 +178,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   ::Kernel.<constant:Rational>("4")
 
-  ::Kernel.<constant:Complex>("5")
+  ::Kernel.Complex(0, "5")
 
   <emptyTree>
 rescue <emptyTree>::<constant:E> => x
