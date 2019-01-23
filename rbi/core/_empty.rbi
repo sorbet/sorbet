@@ -652,9 +652,6 @@ end
 class FloatDomainError < RangeError
 end
 
-module GC::Profiler
-end
-
 class Gem::BasicSpecification < Object
 end
 

@@ -28,3 +28,34 @@ module GC
   sig {returns(T.any(Integer, TrueClass, FalseClass))}
   def self.stress(); end
 end
+
+module GC::Profiler
+  sig {void}
+  def self.clear(); end
+
+  sig {void}
+  def self.disable(); end
+
+  sig {void}
+  def self.enable(); end
+
+  sig {returns(T.any(TrueClass, FalseClass))}
+  def self.enabled?(); end
+
+  sig {returns(T::Array[T::Hash[Symbol, T.untyped]])}
+  def self.raw_data(); end
+
+  sig do
+    params(
+      io: IO
+    )
+    .void
+  end
+  def self.report(io=T.unsafe(nil)); end
+
+  sig {returns(String)}
+  def self.result(); end
+
+  sig {returns(Float)}
+  def self.total_time(); end
+end
