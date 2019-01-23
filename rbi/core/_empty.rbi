@@ -926,9 +926,6 @@ end
 class Thread::Backtrace < Object
 end
 
-class Thread::Backtrace::Location < Object
-end
-
 class Thread::ConditionVariable < Object
 end
 

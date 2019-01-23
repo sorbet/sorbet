@@ -16,3 +16,20 @@ class Thread < Object
   sig {returns(T.any(TrueClass, FalseClass))}
   def alive?; end
 end
+
+class Thread::Backtrace::Location
+  sig {returns(String)}
+  def absolute_path(); end
+
+  sig {returns(String)}
+  def base_label(); end
+
+  sig {returns(String)}
+  def label(); end
+
+  sig {returns(Integer)}
+  def lineno(); end
+
+  sig {returns(String)}
+  def path(); end
+end
