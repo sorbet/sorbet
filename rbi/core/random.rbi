@@ -95,6 +95,30 @@ module Random::Formatter
     )
     .returns(Integer)
   end
+  sig do
+    params(
+      n: T.nilable(Numeric)
+    )
+    .returns(Numeric)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Float])
+    )
+    .returns(Float)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Integer])
+    )
+    .returns(Integer)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Numeric])
+    )
+    .returns(Numeric)
+  end
   def rand(n=nil); end
 
   sig do
@@ -117,6 +141,30 @@ module Random::Formatter
       n: T.nilable(Integer)
     )
     .returns(Integer)
+  end
+  sig do
+    params(
+      n: T.nilable(Numeric)
+    )
+    .returns(Numeric)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Float])
+    )
+    .returns(Float)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Integer])
+    )
+    .returns(Integer)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Numeric])
+    )
+    .returns(Numeric)
   end
   def random_number(n=nil); end
 
