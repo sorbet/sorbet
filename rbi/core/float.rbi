@@ -620,8 +620,8 @@ class Float < Numeric
   sig {returns(Rational)}
   def to_r(); end
 
-  sig {returns(String)}
-  def to_s(); end
+  sig {params(base: Integer).returns(String)}
+  def to_s(base=10); end
 
   sig {returns(Integer)}
   def truncate(); end
