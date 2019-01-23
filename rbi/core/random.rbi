@@ -64,3 +64,71 @@ class Random < Object
   end
   def self.srand(number=T.unsafe(nil)); end
 end
+
+module Random::Formatter
+  sig do
+    params(
+      n: T.nilable(Integer)
+    )
+    .returns(String)
+  end
+  def base64(n=nil); end
+
+  sig do
+    params(
+      n: T.nilable(Integer)
+    )
+    .returns(String)
+  end
+  def hex(n=nil); end
+
+  sig {returns(Float)}
+  sig do
+    params(
+      n: T.nilable(Float)
+    )
+    .returns(Float)
+  end
+  sig do
+    params(
+      n: T.nilable(Integer)
+    )
+    .returns(Integer)
+  end
+  def rand(n=nil); end
+
+  sig do
+    params(
+      n: T.nilable(Integer)
+    )
+    .returns(String)
+  end
+  def random_bytes(n=nil); end
+
+  sig {returns(Float)}
+  sig do
+    params(
+      n: T.nilable(Float)
+    )
+    .returns(Float)
+  end
+  sig do
+    params(
+      n: T.nilable(Integer)
+    )
+    .returns(Integer)
+  end
+  def random_number(n=nil); end
+
+  sig do
+    params(
+      n: T.nilable(Integer),
+      padding: T.any(FalseClass, TrueClass)
+    )
+    .returns(String)
+  end
+  def urlsafe_base64(n=nil, padding=false); end
+
+  sig {returns(String)}
+  def uuid(); end
+end

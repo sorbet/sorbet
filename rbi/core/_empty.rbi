@@ -853,9 +853,6 @@ end
 class Process::Tms < Struct
 end
 
-module Random::Formatter
-end
-
 class RangeError < StandardError
 end
 
