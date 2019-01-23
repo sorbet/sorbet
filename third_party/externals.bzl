@@ -6,12 +6,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # works around https://github.com/bazelbuild/bazel/issues/1465 when
 # passing `build_file` to the `new_git_repository`.
 def externals():
-    http_archive(
-        name = "gtest",
-        url = "https://github.com/google/googletest/archive/release-1.8.0.zip",
-        sha256 = "f3ed3b58511efd272eb074a3a6d6fb79d7c2e6a0e374323d1e6bcbcc1ef141bf",
-        build_file = "//third_party:gtest.BUILD",
-        strip_prefix = "googletest-release-1.8.0",
+    git_repository(
+        name="com_google_googletest",
+        remote="https://github.com/google/googletest.git",
+        commit="9518a57428ae0a7ed450c1361768e84a2a38af5a"
     )
 
     http_archive(

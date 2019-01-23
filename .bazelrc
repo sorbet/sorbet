@@ -1,6 +1,10 @@
 # waiting for protobuf to upgrade
 common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
+# enable https://github.com/google/googletest/pull/1653
+common:build --define absl=1
+common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
+
 # custom toolchain. Should become the default after we figure out how to make sanitized builds run well on OSX
 test:clang7 --crosstool_top=@llvm_toolchain//:toolchain
 build:clang7 --crosstool_top=@llvm_toolchain//:toolchain

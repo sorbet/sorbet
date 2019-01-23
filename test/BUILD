@@ -33,8 +33,8 @@ cc_binary(
         "//payload/binary:some",
         "//payload/text:empty",
         "//resolver",
+        "@com_google_googletest//:gtest",
         "@cxxopts",
-        "@gtest",
     ],
 )
 
@@ -56,9 +56,9 @@ cc_test(
         "//core/serialize",
         "//parser",
         "//payload/binary:some",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
         "@cxxopts",
-        "@gtest",
-        "@gtest//:gtest_main",
     ],
 )
 
@@ -78,8 +78,8 @@ cc_test(
         "//common",
         "//core",
         "//parser",
-        "@gtest",
-        "@gtest//:gtest_main",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -96,8 +96,8 @@ cc_test(
     deps = [
         "//common",
         "//core",
-        "@gtest",
-        "@gtest//:gtest_main",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

@@ -84,7 +84,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":parser",
-        "@gtest",
-        "@gtest//:gtest_main",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
