@@ -9,8 +9,8 @@ const users = [];
 const siteConfig = {
   title: 'Sorbet',
   tagline: 'A static type checker for Ruby',
-  url: 'https://jez.ngrok.io', // TODO(jez) Get a proper domain
-  baseUrl: '/',
+  url: 'https://stripe.github.io',
+  baseUrl: '/sorbet/super-secret-private-beta/',
 
   // Used for publishing and more
   projectName: 'sorbet',
@@ -18,7 +18,7 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {label: 'Docs', page: 'docs'},
+    {label: 'Docs', doc: 'overview'},
     {label: 'Community', doc: 'community'},
     {label: 'Blog', blog: true},
     {label: 'GitHub', href: 'https://github.com/stripe/sorbet'},
@@ -36,8 +36,10 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor: '#6856f0',
-    secondaryColor: '#9280f4',
+    // primaryColor: '#6856f0',
+    // secondaryColor: '#9280f4',
+    primaryColor: '#4f4397',
+    secondaryColor: '#330066',
   },
 
   // Custom fonts for website

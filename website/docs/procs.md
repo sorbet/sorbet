@@ -1,6 +1,6 @@
 ---
 id: procs
-title: Procs
+title: Proc Types
 ---
 
 TODO(jez) procs

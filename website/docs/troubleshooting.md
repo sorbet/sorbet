@@ -3,54 +3,52 @@ id: troubleshooting
 title: Troubleshooting
 ---
 
-> General strategies for getting unblocked when faced with a type error.
+<!-- TODO(jez) This doc references a lot of Stripe internals still -->
 
 This is one of three docs aimed at helping answer common questions about Sorbet:
 
-- [→ Sorbet Error Reference](error-reference.md)
-- [→ Ruby Types FAQ](faq.md)
-- [Troubleshooting](troubleshooting.md) (this doc)
+1.  [Troubleshooting](troubleshooting.md) (this doc)
+1.  [Frequently Asked Questions](faq.md)
+1.  [Sorbet Error Reference](error-reference.md)
 
 This doc covers two main topics:
 
-1. When you're stuck, how to find out **why**
-2. Regardless of why, how to **get unstuck**
+- When stuck, how to find out **why**
+- Regardless of why, how to **get unstuck**
 
 
-## Validating your assumptions
+## Validating our assumptions
 
-When faced with a type error, checking your assumptions is step number one.
+When faced with a type error, checking our assumptions is step number one.
 Here are some tools and tactics to help.
 
-Sometimes even if you can figure out where the problem is coming from, it's not
-possible for you to fix it easily. Step number two is to work around the
-problem; see [Escape Hatches](#escape-hatches) below.
+> Sometimes even if we can figure out where the problem is coming from, it's not
+> possible to fix it easily. Step number two is to work around the problem; see
+> [Escape Hatches](#escape-hatches) below.
 
 ### `T.reveal_type`
 
-If you wrap a variable or method call in `T.reveal_type`, Sorbet will show
-you what type it thinks that variable has.
-
-This is a super powerful debugging technique! `T.reveal_type` should be one of
-the first tools you reach for when debugging a confusing error.
+If we wrap a variable or method call in `T.reveal_type`, Sorbet will show
+us what type it thinks that variable has. This is a super powerful debugging
+technique! `T.reveal_type` should be **one of the first tools** to reach for
+when debugging a confusing error.
 
 <!-- TODO(jez) Shorten this example and make it more of a story. -->
 
-Try hypothesizing the problem ("I think the problem is...") and create small
-examples in <https://sorbet.run> to test these problems.
-
-For example:
+Try making a hypothesis of what the problem is ("I think the problem is...") and
+then create small examples in <https://sorbet.run> to test the hypothesis with
+`T.reveal_type`. For example:
 
 ```ruby
 # typed: true
-extend T::Helpers
+extend T::Sig
 
 sig {params(xs: T::Array[Integer]).returns(Integer)}
 def foo(xs)
   T.reveal_type(xs.first) # => Revealed type: `T.nilable(Integer)`
 end
 ```
-→ View on sorbet.run
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend)
 
 With this example we see that `xs.first` returns `T.nilable(Integer)`.
 
@@ -58,29 +56,35 @@ Frequently when troubleshooting type errors, either something is `nil` when or
 `T.untyped` unexpectedly. We can use `T.reveal_type` to track down where the
 type originated.
 
-Remember: Sorbet is a [gradual type system]. While most code you'll encounter is
-typed, that are still large swaths of code that's untyped!
+> **Remember**: Sorbet is a [gradual type system](gradual.md). Even if most code
+> in a codebase is typed, it's still possible for code to be untyped!
 
 ### sorbet.run
 
-Sorbet is available in an [online sandbox](https://sorbet.run). The online version of Sorbet can
-typecheck...
+Sorbet is available in an online sandbox:
+
+[→ sorbet.run](https://sorbet.run)
+
+The online version of Sorbet can typecheck...
 
 - core Ruby language constructs (like control flow)
 - Ruby standard libraries (like `Array` and `Hash`)
-- **select** pay-server DSLs (like `Chalk::ODM` `prop`s)
+- **select** DSLs (like `T::Struct` `prop`s)
 
 Using [sorbet.run](https://sorbet.run) to make a minimal repro is a great way to
-learn if some behavior is core to how Sorbet models Ruby, or is because of some
-specific change you've introduced locally.
+isolate whether something is "just how Sorbet works" or is acting strangely in
+conjunction with the code in a specific project locally.
 
-### Run your code
+> **Note**: sorbet.run only shows how the static component of Sorbet works. To
+> test the runtime component, see the [Quick Reference](quickref.md).
+
+### Run the code
 
 <!-- TODO(jez) Document offline sorbet runtime. -->
 
 Types predict values. Is Sorbet's prediction accurate? Use `irb`, `pay console`,
-or `pay test` to run your code. Does it actually work, even when Sorbet thinks
-it doesn't? If it doesn't actually work, Sorbet caught a bug!
+or `pay test` to run the code. Does it actually work? If it doesn't actually
+work, Sorbet caught a bug!
 
 Otherwise, there are a handful of reasons why Sorbet predicts code will not work
 even when it does:
@@ -98,35 +102,34 @@ even when it does:
 ### Help with common errors
 
 The tips above are very generic and apply to lots of cases. For some common
-gotchas when using Sorbet, you'll want to check these two resources:
+gotchas when using Sorbet, here are two more specific resources:
 
-- [→ Sorbet Error Reference](error-reference.md)
+- [Sorbet Error Reference](error-reference.md)
 
   This document is a collaborative reference with suggestions for commonly
   encountered error codes. You should see links to this document in Sorbet's
   error output.
 
-- [→ Ruby Types FAQ](faq.md)
+- [FAQ](faq.md)
 
   This is a list of questions people commonly have when working with Sorbet and
-  the runtime type system. Skim it to see if it says anything about what you're
-  working on!
+  the runtime type system. Skim it to see if it says anything useful!
 
 
 ## Escape Hatches
 
 <!-- TODO(jez) Note about how you should always prefer the refactor. -->
 
-Regardless of whether you can figure out the root cause of the error at hand,
-Sorbet is designed as a [gradual type system]. This means there will always be
-**escape hatches** to silence the problem.
+Regardless of whether we can figure out the root cause of the error at hand,
+Sorbet is designed as a [gradual type system](gradual.md). This means there will
+always be **escape hatches** to silence the problem.
 
 ### `T.unsafe`
 
-By wrapping an expression like `x` in `T.unsafe(...)` you can ask Sorbet to
+By wrapping an expression like `x` in `T.unsafe(...)` we can ask Sorbet to
 forget the result type of something.
 
-One case when this is useful when you know for sure that a method exists, but
+One case when this is useful when we know for sure that a method exists, but
 Sorbet don't know about that method exists statically:
 
 ```
@@ -139,8 +142,8 @@ T.unsafe(self) too
 ### `T.cast`
 
 `T.unsafe` is maximally unsafe. It forces Sorbet to forget all type information
-statically—sometimes this is more power than you need. For example, sometimes
-you the programmer are aware of an invariant in the code that isn't currently
+statically—sometimes this is more power than we need. For example, sometimes
+we the programmer are aware of an invariant in the code that isn't currently
 expressed in the type system:
 
 ```ruby
@@ -212,9 +215,9 @@ the `sig` of the specific method we'd like to opt out of:
 - `.checked(:tests)`
 - `.checked(:never)`
 
-From the static system's perspective, these adding any of these to a sig will
-have no effect. In the runtime, the behavior of these three differs depending on
-whether we're in tests or in production:
+From the static system's perspective, adding any of these to a sig will have no
+effect. In the runtime, the behavior of these three differs depending on whether
+we're in tests or in production:
 
 | If types don't match, using ↓ in → ... | Tests            | Production       |
 | ---                                    | -----            | ----------       |
@@ -231,7 +234,7 @@ To recap:
 - `.soft()` works the same as all soft assertions (raise in tests, soft assert
   in prod)
 
-- `.checked(:tests)` is preferred for methods which you've measured to be
+- `.checked(:tests)` is preferred for methods which we've measured to be
   performance sensitive. They'll have no effect on production from the runtime
   perspective, but will still be checked in tests.
 
@@ -239,5 +242,3 @@ To recap:
   production. Use this with caution!! Without **any** runtime validation, Sorbet
   cannot warn when interoperating with untyped code.
 
-
-[gradual type system]: /blog/2018/01/09/gradual-type-systems

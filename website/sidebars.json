@@ -1,34 +1,38 @@
 {
   "core": {
-    "Intro": [
+    "Getting Started": [
       "overview",
-      "quickstart"
+      "adopting",
+      "quickref"
     ],
-    "Type Annotations": [
-      "sigils",
-      "sigs"
+    "Static & Runtime": [
+      "gradual",
+      "static",
+      "runtime"
+    ],
+    "Troubleshooting": [
+      "troubleshooting",
+      "faq",
+      "error-reference"
     ],
     "Type System": [
+      "sigs",
       "class-types",
       "nilable-types",
       "union-types",
       "flow-sensitive",
+      "inline",
       "tuples",
       "shapes",
       "untyped",
       "noreturn",
       "type-aliases",
       "stdlib-generics",
-      "proc",
+      "procs",
       "class-of",
       "self-type",
       "abstract",
       "intersection-types"
-    ],
-    "Troubleshooting": [
-      "troubleshooting",
-      "faq",
-      "error-reference"
     ]
   }
 }
