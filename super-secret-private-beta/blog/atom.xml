@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://stripe.github.io/sorbet/super-secret-private-beta/blog</id>
+    <title>Sorbet Blog</title>
+    <updated>2018-01-09T06:00:00Z</updated>
+    <generator>Feed for Node.js</generator>
+    <link rel="alternate" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog"/>
+    <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
+    <logo>https://stripe.github.io/sorbet/super-secret-private-beta/img/favicon-32x32.png</logo>
+    <rights>© 2019 Stripe</rights>
+    <entry>
+        <title type="html"><![CDATA[Sample Blog Post]]></title>
+        <id>https://stripe.github.io/sorbet/super-secret-private-beta/blog/2018/01/09/gradual-type-systems.html</id>
+        <link href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/2018/01/09/gradual-type-systems.html">
+        </link>
+        <updated>2018-01-09T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>This is a sample blog post.</p>
+]]></summary>
+        <author>
+            <name>Jake Zimmerman</name>
+            <uri>https://jez.io</uri>
+        </author>
+    </entry>
+</feed>

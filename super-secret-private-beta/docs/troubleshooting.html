@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Troubleshooting · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!-- TODO(jez) This doc references a lot of Stripe internals still --&gt;"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Troubleshooting · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://stripe.github.io/sorbet/super-secret-private-beta/index.html"/><meta property="og:description" content="&lt;!-- TODO(jez) This doc references a lot of Stripe internals still --&gt;"/><meta property="og:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/logo-512x512.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/logo-512x512.png"/><link rel="shortcut icon" href="/sorbet/super-secret-private-beta/img/favicon-16x16.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/feed.xml" title="Sorbet Blog RSS Feed"/><link rel="stylesheet" href="/sorbet/super-secret-private-beta/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/sorbet/super-secret-private-beta/"><img class="logo" src="/sorbet/super-secret-private-beta/img/favicon-32x32.png" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/overview" target="_self">Docs</a></li><li class=""><a href="/sorbet/super-secret-private-beta/docs/community" target="_self">Community</a></li><li class=""><a href="/sorbet/super-secret-private-beta/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/stripe/sorbet" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Troubleshooting</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/runtime">Enabling Runtime Checks</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul><li class="navListItem navListItemActive"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/inline">Inline Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Troubleshooting</h1></header><article><div><span><!-- TODO(jez) This doc references a lot of Stripe internals still -->
+<p>This is one of three docs aimed at helping answer common questions about Sorbet:</p>
+<ol>
+<li><a href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a> (this doc)</li>
+<li><a href="/sorbet/super-secret-private-beta/docs/faq">Frequently Asked Questions</a></li>
+<li><a href="/sorbet/super-secret-private-beta/docs/error-reference">Sorbet Error Reference</a></li>
+</ol>
+<p>This doc covers two main topics:</p>
+<ul>
+<li>When stuck, how to find out <strong>why</strong></li>
+<li>Regardless of why, how to <strong>get unstuck</strong></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="validating-our-assumptions"></a><a href="#validating-our-assumptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Validating our assumptions</h2>
+<p>When faced with a type error, checking our assumptions is step number one.
+Here are some tools and tactics to help.</p>
+<blockquote>
+<p>Sometimes even if we can figure out where the problem is coming from, it's not
+possible to fix it easily. Step number two is to work around the problem; see
+<a href="#escape-hatches">Escape Hatches</a> below.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="treveal-type"></a><a href="#treveal-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.reveal_type</code></h3>
+<p>If we wrap a variable or method call in <code>T.reveal_type</code>, Sorbet will show
+us what type it thinks that variable has. This is a super powerful debugging
+technique! <code>T.reveal_type</code> should be <strong>one of the first tools</strong> to reach for
+when debugging a confusing error.</p>
+<!-- TODO(jez) Shorten this example and make it more of a story. -->
+<p>Try making a hypothesis of what the problem is (&quot;I think the problem is...&quot;) and
+then create small examples in <a href="https://sorbet.run">https://sorbet.run</a> to test the hypothesis with
+<code>T.reveal_type</code>. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+extend T::Sig
+
+sig {params(<span class="hljs-symbol">xs:</span> T::Array[Integer]).returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(xs)</span></span>
+  T.reveal_type(xs.first) <span class="hljs-comment"># =&gt; Revealed type: `T.nilable(Integer)`</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend">→ View on sorbet.run</a></p>
+<p>With this example we see that <code>xs.first</code> returns <code>T.nilable(Integer)</code>.</p>
+<p>Frequently when troubleshooting type errors, either something is <code>nil</code> when or
+<code>T.untyped</code> unexpectedly. We can use <code>T.reveal_type</code> to track down where the
+type originated.</p>
+<blockquote>
+<p><strong>Remember</strong>: Sorbet is a <a href="/sorbet/super-secret-private-beta/docs/gradual">gradual type system</a>. Even if most code
+in a codebase is typed, it's still possible for code to be untyped!</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="sorbetrun"></a><a href="#sorbetrun" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>sorbet.run</h3>
+<p>Sorbet is available in an online sandbox:</p>
+<p><a href="https://sorbet.run">→ sorbet.run</a></p>
+<p>The online version of Sorbet can typecheck...</p>
+<ul>
+<li>core Ruby language constructs (like control flow)</li>
+<li>Ruby standard libraries (like <code>Array</code> and <code>Hash</code>)</li>
+<li><strong>select</strong> DSLs (like <code>T::Struct</code> <code>prop</code>s)</li>
+</ul>
+<p>Using <a href="https://sorbet.run">sorbet.run</a> to make a minimal repro is a great way to
+isolate whether something is &quot;just how Sorbet works&quot; or is acting strangely in
+conjunction with the code in a specific project locally.</p>
+<blockquote>
+<p><strong>Note</strong>: sorbet.run only shows how the static component of Sorbet works. To
+test the runtime component, see the <a href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a>.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="run-the-code"></a><a href="#run-the-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Run the code</h3>
+<!-- TODO(jez) Document offline sorbet runtime. -->
+<p>Types predict values. Is Sorbet's prediction accurate? Use <code>irb</code>, <code>pay console</code>,
+or <code>pay test</code> to run the code. Does it actually work? If it doesn't actually
+work, Sorbet caught a bug!</p>
+<p>Otherwise, there are a handful of reasons why Sorbet predicts code will not work
+even when it does:</p>
+<ul>
+<li><p>Maybe the code ran fine for all provided input values, but there's an edge
+case being left untested.</p></li>
+<li><p>Maybe the code uses a method from the standard library that is missing or
+typed incorrectly (our standard library shims are sometimes incomplete).</p></li>
+<li><p>Maybe a method Sorbet thinks doesn't exist actually <strong>does</strong> exist because it
+was dynamically defined with <code>define_method</code> or <code>missing_method</code>. See <a href="#escape-hatches">Escape
+Hatches</a> below for working around this.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="help-with-common-errors"></a><a href="#help-with-common-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Help with common errors</h3>
+<p>The tips above are very generic and apply to lots of cases. For some common
+gotchas when using Sorbet, here are two more specific resources:</p>
+<ul>
+<li><p><a href="/sorbet/super-secret-private-beta/docs/error-reference">Sorbet Error Reference</a></p>
+<p>This document is a collaborative reference with suggestions for commonly
+encountered error codes. You should see links to this document in Sorbet's
+error output.</p></li>
+<li><p><a href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></p>
+<p>This is a list of questions people commonly have when working with Sorbet and
+the runtime type system. Skim it to see if it says anything useful!</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="escape-hatches"></a><a href="#escape-hatches" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Escape Hatches</h2>
+<!-- TODO(jez) Note about how you should always prefer the refactor. -->
+<p>Regardless of whether we can figure out the root cause of the error at hand,
+Sorbet is designed as a <a href="/sorbet/super-secret-private-beta/docs/gradual">gradual type system</a>. This means there will
+always be <strong>escape hatches</strong> to silence the problem.</p>
+<h3><a class="anchor" aria-hidden="true" id="tunsafe"></a><a href="#tunsafe" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.unsafe</code></h3>
+<p>By wrapping an expression like <code>x</code> in <code>T.unsafe(...)</code> we can ask Sorbet to
+forget the result type of something.</p>
+<p>One case when this is useful when we know for sure that a method exists, but
+Sorbet don't know about that method exists statically:</p>
+<pre><code class="hljs">missing <span class="hljs-function"><span class="hljs-keyword">method</span> <span class="hljs-title">example</span>
+
+<span class="hljs-title">T</span>.<span class="hljs-title">unsafe</span><span class="hljs-params">(<span class="hljs-keyword">self</span>)</span> <span class="hljs-title">too</span>
+</span></code></pre>
+<h3><a class="anchor" aria-hidden="true" id="tcast"></a><a href="#tcast" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.cast</code></h3>
+<p><code>T.unsafe</code> is maximally unsafe. It forces Sorbet to forget all type information
+statically—sometimes this is more power than we need. For example, sometimes
+we the programmer are aware of an invariant in the code that isn't currently
+expressed in the type system:</p>
+<pre><code class="hljs css language-ruby">extend T::Helpers
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>; <span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">label:</span> String, <span class="hljs-symbol">a_or_b:</span> T.any(A, B)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(label, a_or_b)</span></span>
+  <span class="hljs-keyword">case</span> label
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'a'</span>
+    a_or_b.foo
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'b'</span>
+    a_or_b.bar
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this case, we know (through careful test cases / confidence in our production
+monitoring) that every time this method is called with <code>label = 'a'</code>, <code>a_or_b</code>
+is an instance of <code>A</code>, and same for <code>'b'</code> / <code>B</code>.</p>
+<p>Ideally we'd refactor our code to express this invariant in the types. To
+re-iterate: the <strong>preferred</strong> solution is to refactor this code. The time spent
+adjusting this code now will make it easier and safer to refactor the code in
+the future. Even still, we don't always have the time <em>right now</em>, so let's see
+how we can work around the issue.</p>
+<p>We <strong>could</strong> use <code>T.unsafe</code> here, but that's a pretty big hammer. Instead, we'll
+use <code>T.cast</code> to explicitly tell our invariant to Sorbet:</p>
+<pre><code class="hljs css language-ruby">  <span class="hljs-keyword">case</span> label
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'a'</span>
+    T.cast(a_or_b, A).foo
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'b'</span>
+    T.cast(a_or_b, B).bar
+  <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sorbet cannot <strong>statically</strong> guarantee that a <code>T.cast</code>-enforced invariant will
+succeed in every case, but it will check the invariant <strong>dynamically</strong> on every
+invocation.</p>
+<p><code>T.cast</code> is better than <code>T.unsafe</code>, because it means that something like</p>
+<pre><code class="hljs css language-ruby">    T.cast(a_or_b, A).bad_method
+</code></pre>
+<p>will still be caught as a missing method statically.</p>
+<h3><a class="anchor" aria-hidden="true" id="soft-checked"></a><a href="#soft-checked" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>.soft()</code> &amp; <code>.checked()</code></h3>
+<p><code>T.unsafe</code> and <code>T.cast</code> let us opt out of static checks. These next constructs
+let us opt out of runtime checks. We might want to opt out of runtime checks
+because...</p>
+<ul>
+<li>we've measured that calling our method is performance sensitive</li>
+<li>we're rolling out types to previously-untyped code, and want to make sure our
+types are correct</li>
+</ul>
+<p>To opt out of runtime checks, we have three options, all of which we'll add to
+the <code>sig</code> of the specific method we'd like to opt out of:</p>
+<ul>
+<li><code>.soft(notify: ...)</code></li>
+<li><code>.checked(:tests)</code></li>
+<li><code>.checked(:never)</code></li>
+</ul>
+<p>From the static system's perspective, adding any of these to a sig will have no
+effect. In the runtime, the behavior of these three differs depending on whether
+we're in tests or in production:</p>
+<table>
+<thead>
+<tr><th>If types don't match, using ↓ in → ...</th><th>Tests</th><th>Production</th></tr>
+</thead>
+<tbody>
+<tr><td><em>none of the below</em></td><td>will raise</td><td>will raise</td></tr>
+<tr><td><code>.soft(notify: ...)</code></td><td>will raise</td><td>soft asserts</td></tr>
+<tr><td><code>.checked(:tests)</code></td><td>will raise</td><td>skips validation</td></tr>
+<tr><td><code>.checked(:never)</code></td><td>skips validation</td><td>skips validation</td></tr>
+</tbody>
+</table>
+<p>To recap:</p>
+<ul>
+<li><p>By default, calling a method or returning a result that doesn't match the sig
+will <strong>raise</strong> in both tests and prod.</p></li>
+<li><p><code>.soft()</code> works the same as all soft assertions (raise in tests, soft assert
+in prod)</p></li>
+<li><p><code>.checked(:tests)</code> is preferred for methods which we've measured to be
+performance sensitive. They'll have no effect on production from the runtime
+perspective, but will still be checked in tests.</p></li>
+<li><p><code>.checked(:never)</code> is a hammer. It silences all validation in both tests and
+production. Use this with caution!! Without <strong>any</strong> runtime validation, Sorbet
+cannot warn when interoperating with untyped code.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/runtime"><span class="arrow-prev">← </span><span>Enabling Runtime Checks</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/faq"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#validating-our-assumptions">Validating our assumptions</a><ul class="toc-headings"><li><a href="#treveal-type"><code>T.reveal_type</code></a></li><li><a href="#sorbetrun">sorbet.run</a></li><li><a href="#run-the-code">Run the code</a></li><li><a href="#help-with-common-errors">Help with common errors</a></li></ul></li><li><a href="#escape-hatches">Escape Hatches</a><ul class="toc-headings"><li><a href="#tunsafe"><code>T.unsafe</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#soft-checked"><code>.soft()</code> &amp; <code>.checked()</code></a></li></ul></li></ul></nav></div></div></body></html>
