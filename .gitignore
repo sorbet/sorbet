@@ -2,3 +2,5 @@
 /compile_commands.json
 /emscripten
 /website/node_modules
+/website/build
+/website/i18n
