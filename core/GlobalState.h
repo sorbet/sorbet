@@ -127,7 +127,7 @@ public:
 
     // Contains a location / symbol / variable reference that various Sorbet passes are looking for.
     // See ErrorQueue#queryResponse
-    Query lspQuery;
+    lsp::Query lspQuery;
 
     // Indicates the number of times LSP has run the type checker with this global state.
     // Used to ensure GlobalState is in the correct state to process requests.

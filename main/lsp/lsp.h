@@ -228,7 +228,7 @@ class LSPLoop {
     struct TypecheckRun {
         std::vector<std::unique_ptr<core::Error>> errors;
         std::vector<core::FileRef> filesTypechecked;
-        std::vector<std::unique_ptr<core::QueryResponse>> responses;
+        std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
     };
@@ -254,7 +254,7 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
-    TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::Query &q,
+    TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
     TypecheckRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, const MessageId &id, std::string_view uri,
                                     const Position &pos, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
@@ -277,7 +277,10 @@ class LSPLoop {
                                                                     const MessageId &id,
                                                                     const CompletionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
-                                                      const core::QueryResponse &resp);
+                                                      core::TypePtr receiverType,
+                                                      const std::shared_ptr<core::TypeConstraint> &constraint);
+    void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
+                                    std::vector<std::unique_ptr<CompletionItem>> &items);
     void sendShowMessageNotification(MessageType messageType, std::string_view message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
     std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,

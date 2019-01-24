@@ -10,8 +10,6 @@
 
 namespace sorbet::core {
 
-struct QueryResponse;
-
 class ErrorClass {
 public:
     const u2 code;

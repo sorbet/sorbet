@@ -34,7 +34,7 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
             "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
 }
 
-LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::Query &q,
+LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                                            vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     ENFORCE(gs->lspQuery.isEmpty());
     ENFORCE(initialGS->lspQuery.isEmpty());
@@ -44,7 +44,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
     // TODO(jvilk): If this throws, then we'll want to reset `lspQuery` on `initialGS`.
     // If throwing is common, then we need some way to *not* throw away `gs`.
     auto rv = tryFastPath(move(gs), changedFiles, allFiles);
-    rv.gs->lspQuery = initialGS->lspQuery = core::Query::noQuery();
+    rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
     return rv;
 }
 
@@ -74,13 +74,13 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> 
 
     vector<shared_ptr<core::File>> files;
     files.emplace_back(make_shared<core::File>(std::move(fref.data(*gs))));
-    return runLSPQuery(move(gs), core::Query::createLocQuery(*loc.get()), files);
+    return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym,
                                                      const LSPMethod &forMethod) {
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
-    return runLSPQuery(move(gs), core::Query::createSymbolQuery(sym), files, true);
+    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
 }
 
 bool silenceError(bool disableFastPath, core::ErrorClass what) {

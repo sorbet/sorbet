@@ -4,7 +4,7 @@
 #include "core/Loc.h"
 #include "core/LocalVariable.h"
 
-namespace sorbet::core {
+namespace sorbet::core::lsp {
 /**
  * Represents an LSP query.
  */
@@ -42,6 +42,6 @@ public:
 private:
     Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable);
 };
-} // namespace sorbet::core
+} // namespace sorbet::core::lsp
 
 #endif // SORBET_CORE_LSP_QUERYRESPONSE

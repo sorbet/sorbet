@@ -113,7 +113,7 @@ atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
-    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue), lspQuery(Query::noQuery()) {
+    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue), lspQuery(lsp::Query::noQuery()) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int max_name_count = 8192;

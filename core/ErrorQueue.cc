@@ -1,6 +1,5 @@
 #include "core/ErrorQueue.h"
 #include "core/Error.h"
-#include "lsp/QueryResponse.h"
 
 namespace sorbet::core {
 
@@ -9,9 +8,10 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, vector<int> errorCodeWhiteList)
     : errorFlusher(move(errorCodeWhiteList)), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::QueryResponse>>> ErrorQueue::drainWithQueryResponses() {
+pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::lsp::QueryResponse>>>
+ErrorQueue::drainWithQueryResponses() {
     checkOwned();
-    vector<unique_ptr<core::QueryResponse>> outResponses;
+    vector<unique_ptr<core::lsp::QueryResponse>> outResponses;
     vector<unique_ptr<core::Error>> out;
 
     auto collected = drainAll();
@@ -29,15 +29,17 @@ pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::QueryResponse>>> E
     stable_sort(outResponses.begin(), outResponses.end(), [](auto &left, auto &right) -> bool {
         /* we want the most precise information to go first. Normally, they are computed in this order by construction,
          * but threading artifact might reorder them, thus we'd like to sort them */
-        auto leftLength = left->termLoc.endPos() - left->termLoc.beginPos();
-        auto rightLength = right->termLoc.endPos() - right->termLoc.beginPos();
+        auto leftTermLoc = left->getLoc();
+        auto rightTermLoc = right->getLoc();
+        auto leftLength = leftTermLoc.endPos() - leftTermLoc.beginPos();
+        auto rightLength = rightTermLoc.endPos() - rightTermLoc.beginPos();
         if (leftLength != rightLength) {
             return leftLength < rightLength;
         }
-        if (left->termLoc.beginPos() != right->termLoc.beginPos()) {
-            return left->termLoc.beginPos() < right->termLoc.beginPos();
+        if (leftTermLoc.beginPos() != rightTermLoc.beginPos()) {
+            return leftTermLoc.beginPos() < rightTermLoc.beginPos();
         }
-        return left->termLoc.endPos() < right->termLoc.endPos();
+        return leftTermLoc.endPos() < rightTermLoc.endPos();
     });
 
     return make_pair(move(out), move(outResponses));
@@ -117,7 +119,7 @@ void ErrorQueue::markFileForFlushing(core::FileRef file) {
     this->queue.push(move(msg), 1);
 }
 
-void ErrorQueue::pushQueryResponse(unique_ptr<core::QueryResponse> queryResponse) {
+void ErrorQueue::pushQueryResponse(unique_ptr<core::lsp::QueryResponse> queryResponse) {
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::QueryResponse;
     msg.queryResponse = move(queryResponse);

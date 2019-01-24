@@ -19,20 +19,19 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
     if (!queryResponses.empty()) {
         auto resp = move(queryResponses[0]);
 
-        auto receiverType = resp->receiver.type;
-        if (resp->kind == core::QueryResponse::Kind::CONSTANT && !resp->dispatchComponents.empty()) {
-            auto symRef = resp->dispatchComponents[0].method;
-            auto run2 = setupLSPQueryBySymbol(move(finalGs), symRef, LSPMethod::TextDocumentRefernces());
-            finalGs = move(run2.gs);
-            vector<unique_ptr<JSONBaseType>> result;
-            auto &queryResponses = run2.responses;
-            for (auto &q : queryResponses) {
-                result.push_back(loc2Location(*finalGs, q->termLoc));
+        if (auto constResp = resp->isConstant()) {
+            if (!constResp->dispatchComponents.empty()) {
+                auto symRef = constResp->dispatchComponents[0].method;
+                auto run2 = setupLSPQueryBySymbol(move(finalGs), symRef, LSPMethod::TextDocumentRefernces());
+                finalGs = move(run2.gs);
+                vector<unique_ptr<JSONBaseType>> result;
+                auto &queryResponses = run2.responses;
+                for (auto &q : queryResponses) {
+                    result.push_back(loc2Location(*finalGs, q->getLoc()));
+                }
+                sendResponse(id, result);
+                return finalGs;
             }
-            sendResponse(id, result);
-            return finalGs;
-        } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
-            // TODO: find them in tree
         }
     }
     // An explicit null indicates that we don't support this request (or that nothing was at the location).

@@ -120,7 +120,8 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 }
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
-                                                      const core::QueryResponse &resp) {
+                                                      core::TypePtr receiverType,
+                                                      const shared_ptr<core::TypeConstraint> &constraint) {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
     auto resultType = what.data(gs)->resultType;
@@ -130,7 +131,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
     if (what.data(gs)->isMethod()) {
         item->kind = CompletionItemKind::Function;
         if (what.exists()) {
-            item->detail = methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint);
+            item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
         }
         if (clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
@@ -160,6 +161,28 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
     return item;
 }
 
+void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
+                                         vector<unique_ptr<CompletionItem>> &items) {
+    if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
+        auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
+        logger->debug("Looking for constant similar to {}", pattern);
+        core::SymbolRef owner = c->symbol;
+        do {
+            owner = owner.data(gs)->owner;
+            for (auto member : owner.data(gs)->membersStableOrderSlow(gs)) {
+                auto sym = member.second;
+                if (sym.exists() && (sym.data(gs)->isClass() || sym.data(gs)->isStaticField()) &&
+                    sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
+                    // hide singletons
+                    hasSimilarName(gs, sym.data(gs)->name, pattern) &&
+                    !sym.data(gs)->derivesFrom(gs, core::Symbols::StubClass())) {
+                    items.push_back(getCompletionItem(gs, sym, receiverType, nullptr));
+                }
+            }
+        } while (owner != core::Symbols::root());
+    }
+}
+
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const CompletionParams &params) {
@@ -172,11 +195,11 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
     auto &queryResponses = run.responses;
     vector<unique_ptr<CompletionItem>> items;
     if (!queryResponses.empty()) {
-        auto resp = std::move(queryResponses[0]);
+        auto resp = move(queryResponses[0]);
 
-        auto receiverType = resp->receiver.type;
-        if (resp->kind == core::QueryResponse::Kind::SEND) {
-            auto pattern = resp->name.data(*finalGs)->shortName(*finalGs);
+        if (auto sendResp = resp->isSend()) {
+            auto pattern = sendResp->name.data(*finalGs)->shortName(*finalGs);
+            auto receiverType = sendResp->receiver.type;
             logger->debug("Looking for method similar to {}", pattern);
             UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
                 findSimilarMethodsIn(*finalGs, receiverType, pattern);
@@ -194,30 +217,14 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
             for (auto &entry : methodsSorted) {
                 if (entry.second[0].exists()) {
                     fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                    items.push_back(getCompletionItem(*finalGs, entry.second[0], *resp));
+                    items.push_back(
+                        getCompletionItem(*finalGs, entry.second[0], sendResp->receiver.type, sendResp->constraint));
                 }
             }
-        } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
-                   resp->kind == core::QueryResponse::Kind::CONSTANT) {
-            if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
-                auto pattern = c->symbol.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs);
-                logger->debug("Looking for constant similar to {}", pattern);
-                core::SymbolRef owner = c->symbol;
-                do {
-                    owner = owner.data(*finalGs)->owner;
-                    for (auto member : owner.data(*finalGs)->membersStableOrderSlow(*finalGs)) {
-                        auto sym = member.second;
-                        if (sym.exists() && (sym.data(*finalGs)->isClass() || sym.data(*finalGs)->isStaticField()) &&
-                            sym.data(*finalGs)->name.data(*finalGs)->kind == core::NameKind::CONSTANT &&
-                            // hide singletons
-                            hasSimilarName(*finalGs, sym.data(*finalGs)->name, pattern) &&
-                            !sym.data(*finalGs)->derivesFrom(*finalGs, core::Symbols::StubClass())) {
-                            items.push_back(getCompletionItem(*finalGs, sym, *resp));
-                        }
-                    }
-                } while (owner != core::Symbols::root());
-            }
-        } else {
+        } else if (auto identResp = resp->isIdent()) {
+            findSimilarConstantOrIdent(*finalGs, identResp->retType.type, items);
+        } else if (auto constantResp = resp->isConstant()) {
+            findSimilarConstantOrIdent(*finalGs, constantResp->retType.type, items);
         }
     }
     sendResponse(id, CompletionList(false, move(items)));

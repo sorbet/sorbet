@@ -23,14 +23,14 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<c
     if (!queryResponses.empty()) {
         auto resp = move(queryResponses[0]);
 
-        if (resp->kind == core::QueryResponse::Kind::IDENT) {
-            for (auto &originLoc : resp->retType.origins) {
+        if (auto identResp = resp->isIdent()) {
+            for (auto &originLoc : identResp->retType.origins) {
                 addLocIfExists(*finalGs, result, originLoc);
             }
-        } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
-            result.push_back(loc2Location(*finalGs, resp->termLoc));
+        } else if (auto defResp = resp->isDefinition()) {
+            result.push_back(loc2Location(*finalGs, defResp->termLoc));
         } else {
-            for (auto &component : resp->dispatchComponents) {
+            for (auto &component : resp->getDispatchComponents()) {
                 if (component.method.exists()) {
                     addLocIfExists(*finalGs, result, component.method.data(*finalGs)->loc());
                 }

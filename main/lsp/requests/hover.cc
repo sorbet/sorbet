@@ -19,25 +19,26 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
     }
 
     auto resp = move(queryResponses[0]);
-    if (resp->kind == core::QueryResponse::Kind::SEND) {
-        if (resp->dispatchComponents.empty()) {
+    if (auto sendResp = resp->isSend()) {
+        if (sendResp->dispatchComponents.empty()) {
             sendError(id, (int)LSPErrorCodes::InvalidParams,
                       "Did not find any dispatchComponents for a SEND QueryResponse in textDocument/hover");
             return finalGs;
         }
         string contents = "";
-        for (auto &dispatchComponent : resp->dispatchComponents) {
-            auto retType = resp->retType.type;
-            if (resp->constraint) {
-                retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
-                                                   *resp->constraint);
+        auto retType = sendResp->retType.type;
+        auto &constraint = sendResp->constraint;
+        for (auto &dispatchComponent : sendResp->dispatchComponents) {
+            if (constraint) {
+                retType =
+                    core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType, *constraint);
             }
             if (dispatchComponent.method.exists()) {
                 if (contents.size() > 0) {
                     contents += " ";
                 }
-                contents += methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType,
-                                         resp->constraint);
+                contents +=
+                    methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint);
             }
         }
         // We use markdown here because if we just use a string, VSCode tries to interpret
@@ -45,18 +46,16 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
         // you somewhere nonsensical)
         auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, contents);
         sendResponse(id, Hover(markupContents->toJSONValue(alloc)));
-    } else if (resp->kind == core::QueryResponse::Kind::IDENT || resp->kind == core::QueryResponse::Kind::CONSTANT ||
-               resp->kind == core::QueryResponse::Kind::LITERAL) {
-        auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->retType.type->show(*finalGs));
-        sendResponse(id, Hover(markupContents->toJSONValue(alloc)));
-    } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
+    } else if (auto defResp = resp->isDefinition()) {
         // TODO: Actually send the type signature here. I'm skipping this for now
         // since it's not a very useful feature for the end user (i.e., they should
         // be able to see this right above the definition in ruby)
         sendNullResponse(id);
     } else {
-        sendError(id, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
+        auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*finalGs));
+        sendResponse(id, Hover(markupContents->toJSONValue(alloc)));
     }
+
     return finalGs;
 }
 } // namespace sorbet::realmain::lsp

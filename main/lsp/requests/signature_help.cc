@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
-                          vector<unique_ptr<SignatureInformation>> &sigs, const core::QueryResponse &resp,
+                          vector<unique_ptr<SignatureInformation>> &sigs, const core::lsp::SendResponse &resp,
                           int activeParameter) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     // signature helps only exist for methods.
@@ -58,10 +58,9 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
     vector<unique_ptr<SignatureInformation>> signatures;
     if (!queryResponses.empty()) {
         auto resp = move(queryResponses[0]);
-        auto receiverType = resp->receiver.type;
         // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
-        if (resp->kind == core::QueryResponse::Kind::SEND) {
-            auto sendLocIndex = resp->termLoc.beginPos();
+        if (auto sendResp = resp->isSend()) {
+            auto sendLocIndex = sendResp->termLoc.beginPos();
 
             auto fref = uri2FileRef(params.textDocument->uri);
             if (!fref.exists()) {
@@ -78,9 +77,9 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
             // 2nd arg)
             activeParameter = numberCommas;
 
-            auto firstDispatchComponentMethod = resp->dispatchComponents.front().method;
+            auto firstDispatchComponentMethod = sendResp->dispatchComponents.front().method;
 
-            addSignatureHelpItem(*finalGs, firstDispatchComponentMethod, signatures, *resp, numberCommas);
+            addSignatureHelpItem(*finalGs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
         }
     }
     auto result = SignatureHelp(move(signatures));

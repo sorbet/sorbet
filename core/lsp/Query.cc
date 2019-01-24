@@ -2,7 +2,7 @@
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;
-namespace sorbet::core {
+namespace sorbet::core::lsp {
 
 Query::Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable)
     : kind(kind), loc(loc), symbol(symbol), variable(variable) {}
@@ -43,4 +43,4 @@ bool Query::isEmpty() const {
     return kind == Query::Kind::NONE;
 }
 
-} // namespace sorbet::core
+} // namespace sorbet::core::lsp

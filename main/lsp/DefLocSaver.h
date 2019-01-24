@@ -1,7 +1,6 @@
 #include "ast/ast.h"
 #include "common/common.h"
 #include "core/core.h"
-#include "core/lsp/QueryResponse.h"
 
 namespace sorbet::realmain::lsp {
 
