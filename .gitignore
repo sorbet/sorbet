@@ -1,3 +1,4 @@
 /bazel-*
 /compile_commands.json
 /emscripten
+/website/node_modules
