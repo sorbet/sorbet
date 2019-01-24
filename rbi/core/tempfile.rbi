@@ -16,6 +16,16 @@ class Tempfile < File
     )
     .returns(T.any(File, T.type_parameter(:U)))
   end
+  sig do
+    type_parameters(:U).params(
+      basename: [String, String],
+      tmpdir: T.nilable(String),
+      mode: String,
+      options: T::Hash[Symbol, T.untyped],
+      blk: T.proc.params(arg0: File).returns(T.type_parameter(:U)),
+    )
+    .void
+  end
   def self.create(basename="", tmpdir=nil, mode='o', options={}, &blk); end
 
   sig do
@@ -39,6 +49,15 @@ class Tempfile < File
     )
     .void
   end
+  sig do
+    type_parameters(:U).params(
+      basename: [String, String],
+      tmpdir: T.nilable(String),
+      mode: String,
+      options: T::Hash[Symbol, T.untyped],
+    )
+    .void
+  end
   def initialize(basename='', tmpdir=nil, mode='o', options={}); end
 
   sig {params(unlink_now: T.any(TrueClass, FalseClass)).void}
@@ -56,7 +75,7 @@ class Tempfile < File
   sig {returns(Tempfile)}
   def open; end
 
-  # path returns nil of the Tempfile has been unlinked.
+  # path returns nil if the Tempfile has been unlinked.
   sig {returns(T.nilable(String))}
   def path; end
 

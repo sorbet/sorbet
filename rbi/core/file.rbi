@@ -745,6 +745,15 @@ class File::Stat < Object
   sig {returns(Integer)}
   def rdev_minor(); end
 
+  sig do
+    params(
+        length: Integer,
+        outbuf: String,
+    )
+    .returns(String)
+  end
+  def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
+
   sig {returns(T.any(TrueClass, FalseClass))}
   def readable?(); end
 
