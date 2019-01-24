@@ -9,6 +9,6 @@ module Exception2MessageMapper
   sig {params(c: Class, m: String).void}
   def def_e2message(c, m); end
 
-  sig {params(c: Symbol, m: String, s: Class).void}
-  def def_exception(c, m, s = StandardError); end
+  sig {params(n: Symbol, m: String, s: Class).void}
+  def def_exception(n, m, s = StandardError); end
 end
