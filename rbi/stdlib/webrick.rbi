@@ -1,5 +1,12 @@
 # typed: strict
 
+module WEBrick
+  CR = T.let(_, T.untyped)
+  CRLF = T.let(_, T.untyped)
+  LF = T.let(_, T.untyped)
+  VERSION = T.let(_, T.untyped)
+end
+
 module WEBrick::AccessLog
   AGENT_LOG_FORMAT = T.let(_, T.untyped)
   CLF = T.let(_, T.untyped)
