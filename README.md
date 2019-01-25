@@ -338,7 +338,7 @@ Or, if you want to try running sorbet under LLDB:
 bazel build //main:sorbet --config=dbg
 ```
 
-Careful! This will build a version of of Sorbet without optimizations and with
+Careful! This will build a version of Sorbet without optimizations and with
 all ENFORCE checks enabled, so it will take longer to run. You might want to see
 if you can reproduce the issue with an optimized build first.
 
