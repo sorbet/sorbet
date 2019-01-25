@@ -8,7 +8,7 @@ class Box
   A = type_member
 
   def initialize
-    @value = T.let(_, A)
+    @value = T.let(T.unsafe(nil), A)
   end
 
    sig {params(value: A).returns(NilClass)}

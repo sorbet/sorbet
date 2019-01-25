@@ -1,19 +1,19 @@
 # typed: strict
 
 module WEBrick
-  CR = T.let(_, T.untyped)
-  CRLF = T.let(_, T.untyped)
-  LF = T.let(_, T.untyped)
-  VERSION = T.let(_, T.untyped)
+  CR = T.let(nil, T.untyped)
+  CRLF = T.let(nil, T.untyped)
+  LF = T.let(nil, T.untyped)
+  VERSION = T.let(nil, T.untyped)
 end
 
 module WEBrick::AccessLog
-  AGENT_LOG_FORMAT = T.let(_, T.untyped)
-  CLF = T.let(_, T.untyped)
-  CLF_TIME_FORMAT = T.let(_, T.untyped)
-  COMBINED_LOG_FORMAT = T.let(_, T.untyped)
-  COMMON_LOG_FORMAT = T.let(_, T.untyped)
-  REFERER_LOG_FORMAT = T.let(_, T.untyped)
+  AGENT_LOG_FORMAT = T.let(nil, T.untyped)
+  CLF = T.let(nil, T.untyped)
+  CLF_TIME_FORMAT = T.let(nil, T.untyped)
+  COMBINED_LOG_FORMAT = T.let(nil, T.untyped)
+  COMMON_LOG_FORMAT = T.let(nil, T.untyped)
+  REFERER_LOG_FORMAT = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -44,11 +44,11 @@ module WEBrick::AccessLog
 end
 
 class WEBrick::BasicLog
-  DEBUG = T.let(_, T.untyped)
-  ERROR = T.let(_, T.untyped)
-  FATAL = T.let(_, T.untyped)
-  INFO = T.let(_, T.untyped)
-  WARN = T.let(_, T.untyped)
+  DEBUG = T.let(nil, T.untyped)
+  ERROR = T.let(nil, T.untyped)
+  FATAL = T.let(nil, T.untyped)
+  INFO = T.let(nil, T.untyped)
+  WARN = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -391,10 +391,10 @@ module WEBrick::HTTPAuth
 end
 
 module WEBrick::HTTPAuth::Authenticator
-  AuthScheme = T.let(_, T.untyped)
-  RequestField = T.let(_, T.untyped)
-  ResponseField = T.let(_, T.untyped)
-  ResponseInfoField = T.let(_, T.untyped)
+  AuthScheme = T.let(nil, T.untyped)
+  RequestField = T.let(nil, T.untyped)
+  ResponseField = T.let(nil, T.untyped)
+  ResponseInfoField = T.let(nil, T.untyped)
 
   sig {returns(T.untyped)}
   def logger(); end
@@ -408,7 +408,7 @@ end
 
 class WEBrick::HTTPAuth::BasicAuth
   include WEBrick::HTTPAuth::Authenticator
-  AuthScheme = T.let(_, T.untyped)
+  AuthScheme = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -459,9 +459,9 @@ end
 
 class WEBrick::HTTPAuth::DigestAuth
   include WEBrick::HTTPAuth::Authenticator
-  AuthScheme = T.let(_, T.untyped)
-  MustParams = T.let(_, T.untyped)
-  MustParamsAuth = T.let(_, T.untyped)
+  AuthScheme = T.let(nil, T.untyped)
+  MustParams = T.let(nil, T.untyped)
+  MustParamsAuth = T.let(nil, T.untyped)
 
   sig {returns(T.untyped)}
   def algorithm(); end
@@ -709,9 +709,9 @@ class WEBrick::HTTPAuth::Htpasswd
 end
 
 module WEBrick::HTTPAuth::ProxyAuthenticator
-  InfoField = T.let(_, T.untyped)
-  RequestField = T.let(_, T.untyped)
-  ResponseField = T.let(_, T.untyped)
+  InfoField = T.let(nil, T.untyped)
+  RequestField = T.let(nil, T.untyped)
+  ResponseField = T.let(nil, T.untyped)
 
 end
 
@@ -767,9 +767,9 @@ module WEBrick::HTTPAuth::UserDB
 end
 
 class WEBrick::HTTPRequest
-  BODY_CONTAINABLE_METHODS = T.let(_, T.untyped)
-  MAX_URI_LENGTH = T.let(_, T.untyped)
-  PrivateNetworkRegexp = T.let(_, T.untyped)
+  BODY_CONTAINABLE_METHODS = T.let(nil, T.untyped)
+  MAX_URI_LENGTH = T.let(nil, T.untyped)
+  PrivateNetworkRegexp = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -1364,8 +1364,8 @@ class WEBrick::HTTPServlet::AbstractServlet
 end
 
 class WEBrick::HTTPServlet::CGIHandler < WEBrick::HTTPServlet::AbstractServlet
-  CGIRunner = T.let(_, T.untyped)
-  Ruby = T.let(_, T.untyped)
+  CGIRunner = T.let(nil, T.untyped)
+  Ruby = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -1476,7 +1476,7 @@ class WEBrick::HTTPServlet::ERBHandler < WEBrick::HTTPServlet::AbstractServlet
 end
 
 class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
-  HandlerTable = T.let(_, T.untyped)
+  HandlerTable = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -1581,59 +1581,59 @@ class WEBrick::HTTPServlet::ProcHandler < WEBrick::HTTPServlet::AbstractServlet
 end
 
 module WEBrick::HTTPStatus
-  CodeToError = T.let(_, T.untyped)
-  RC_ACCEPTED = T.let(_, T.untyped)
-  RC_BAD_GATEWAY = T.let(_, T.untyped)
-  RC_BAD_REQUEST = T.let(_, T.untyped)
-  RC_CONFLICT = T.let(_, T.untyped)
-  RC_CONTINUE = T.let(_, T.untyped)
-  RC_CREATED = T.let(_, T.untyped)
-  RC_EXPECTATION_FAILED = T.let(_, T.untyped)
-  RC_FAILED_DEPENDENCY = T.let(_, T.untyped)
-  RC_FORBIDDEN = T.let(_, T.untyped)
-  RC_FOUND = T.let(_, T.untyped)
-  RC_GATEWAY_TIMEOUT = T.let(_, T.untyped)
-  RC_GONE = T.let(_, T.untyped)
-  RC_HTTP_VERSION_NOT_SUPPORTED = T.let(_, T.untyped)
-  RC_INSUFFICIENT_STORAGE = T.let(_, T.untyped)
-  RC_INTERNAL_SERVER_ERROR = T.let(_, T.untyped)
-  RC_LENGTH_REQUIRED = T.let(_, T.untyped)
-  RC_LOCKED = T.let(_, T.untyped)
-  RC_METHOD_NOT_ALLOWED = T.let(_, T.untyped)
-  RC_MOVED_PERMANENTLY = T.let(_, T.untyped)
-  RC_MULTIPLE_CHOICES = T.let(_, T.untyped)
-  RC_MULTI_STATUS = T.let(_, T.untyped)
-  RC_NETWORK_AUTHENTICATION_REQUIRED = T.let(_, T.untyped)
-  RC_NON_AUTHORITATIVE_INFORMATION = T.let(_, T.untyped)
-  RC_NOT_ACCEPTABLE = T.let(_, T.untyped)
-  RC_NOT_FOUND = T.let(_, T.untyped)
-  RC_NOT_IMPLEMENTED = T.let(_, T.untyped)
-  RC_NOT_MODIFIED = T.let(_, T.untyped)
-  RC_NO_CONTENT = T.let(_, T.untyped)
-  RC_OK = T.let(_, T.untyped)
-  RC_PARTIAL_CONTENT = T.let(_, T.untyped)
-  RC_PAYMENT_REQUIRED = T.let(_, T.untyped)
-  RC_PRECONDITION_FAILED = T.let(_, T.untyped)
-  RC_PRECONDITION_REQUIRED = T.let(_, T.untyped)
-  RC_PROXY_AUTHENTICATION_REQUIRED = T.let(_, T.untyped)
-  RC_REQUEST_ENTITY_TOO_LARGE = T.let(_, T.untyped)
-  RC_REQUEST_HEADER_FIELDS_TOO_LARGE = T.let(_, T.untyped)
-  RC_REQUEST_RANGE_NOT_SATISFIABLE = T.let(_, T.untyped)
-  RC_REQUEST_TIMEOUT = T.let(_, T.untyped)
-  RC_REQUEST_URI_TOO_LARGE = T.let(_, T.untyped)
-  RC_RESET_CONTENT = T.let(_, T.untyped)
-  RC_SEE_OTHER = T.let(_, T.untyped)
-  RC_SERVICE_UNAVAILABLE = T.let(_, T.untyped)
-  RC_SWITCHING_PROTOCOLS = T.let(_, T.untyped)
-  RC_TEMPORARY_REDIRECT = T.let(_, T.untyped)
-  RC_TOO_MANY_REQUESTS = T.let(_, T.untyped)
-  RC_UNAUTHORIZED = T.let(_, T.untyped)
-  RC_UNAVAILABLE_FOR_LEGAL_REASONS = T.let(_, T.untyped)
-  RC_UNPROCESSABLE_ENTITY = T.let(_, T.untyped)
-  RC_UNSUPPORTED_MEDIA_TYPE = T.let(_, T.untyped)
-  RC_UPGRADE_REQUIRED = T.let(_, T.untyped)
-  RC_USE_PROXY = T.let(_, T.untyped)
-  StatusMessage = T.let(_, T.untyped)
+  CodeToError = T.let(nil, T.untyped)
+  RC_ACCEPTED = T.let(nil, T.untyped)
+  RC_BAD_GATEWAY = T.let(nil, T.untyped)
+  RC_BAD_REQUEST = T.let(nil, T.untyped)
+  RC_CONFLICT = T.let(nil, T.untyped)
+  RC_CONTINUE = T.let(nil, T.untyped)
+  RC_CREATED = T.let(nil, T.untyped)
+  RC_EXPECTATION_FAILED = T.let(nil, T.untyped)
+  RC_FAILED_DEPENDENCY = T.let(nil, T.untyped)
+  RC_FORBIDDEN = T.let(nil, T.untyped)
+  RC_FOUND = T.let(nil, T.untyped)
+  RC_GATEWAY_TIMEOUT = T.let(nil, T.untyped)
+  RC_GONE = T.let(nil, T.untyped)
+  RC_HTTP_VERSION_NOT_SUPPORTED = T.let(nil, T.untyped)
+  RC_INSUFFICIENT_STORAGE = T.let(nil, T.untyped)
+  RC_INTERNAL_SERVER_ERROR = T.let(nil, T.untyped)
+  RC_LENGTH_REQUIRED = T.let(nil, T.untyped)
+  RC_LOCKED = T.let(nil, T.untyped)
+  RC_METHOD_NOT_ALLOWED = T.let(nil, T.untyped)
+  RC_MOVED_PERMANENTLY = T.let(nil, T.untyped)
+  RC_MULTIPLE_CHOICES = T.let(nil, T.untyped)
+  RC_MULTI_STATUS = T.let(nil, T.untyped)
+  RC_NETWORK_AUTHENTICATION_REQUIRED = T.let(nil, T.untyped)
+  RC_NON_AUTHORITATIVE_INFORMATION = T.let(nil, T.untyped)
+  RC_NOT_ACCEPTABLE = T.let(nil, T.untyped)
+  RC_NOT_FOUND = T.let(nil, T.untyped)
+  RC_NOT_IMPLEMENTED = T.let(nil, T.untyped)
+  RC_NOT_MODIFIED = T.let(nil, T.untyped)
+  RC_NO_CONTENT = T.let(nil, T.untyped)
+  RC_OK = T.let(nil, T.untyped)
+  RC_PARTIAL_CONTENT = T.let(nil, T.untyped)
+  RC_PAYMENT_REQUIRED = T.let(nil, T.untyped)
+  RC_PRECONDITION_FAILED = T.let(nil, T.untyped)
+  RC_PRECONDITION_REQUIRED = T.let(nil, T.untyped)
+  RC_PROXY_AUTHENTICATION_REQUIRED = T.let(nil, T.untyped)
+  RC_REQUEST_ENTITY_TOO_LARGE = T.let(nil, T.untyped)
+  RC_REQUEST_HEADER_FIELDS_TOO_LARGE = T.let(nil, T.untyped)
+  RC_REQUEST_RANGE_NOT_SATISFIABLE = T.let(nil, T.untyped)
+  RC_REQUEST_TIMEOUT = T.let(nil, T.untyped)
+  RC_REQUEST_URI_TOO_LARGE = T.let(nil, T.untyped)
+  RC_RESET_CONTENT = T.let(nil, T.untyped)
+  RC_SEE_OTHER = T.let(nil, T.untyped)
+  RC_SERVICE_UNAVAILABLE = T.let(nil, T.untyped)
+  RC_SWITCHING_PROTOCOLS = T.let(nil, T.untyped)
+  RC_TEMPORARY_REDIRECT = T.let(nil, T.untyped)
+  RC_TOO_MANY_REQUESTS = T.let(nil, T.untyped)
+  RC_UNAUTHORIZED = T.let(nil, T.untyped)
+  RC_UNAVAILABLE_FOR_LEGAL_REASONS = T.let(nil, T.untyped)
+  RC_UNPROCESSABLE_ENTITY = T.let(nil, T.untyped)
+  RC_UNSUPPORTED_MEDIA_TYPE = T.let(nil, T.untyped)
+  RC_UPGRADE_REQUIRED = T.let(nil, T.untyped)
+  RC_USE_PROXY = T.let(nil, T.untyped)
+  StatusMessage = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -1889,12 +1889,12 @@ class WEBrick::HTTPStatus::UseProxy < WEBrick::HTTPStatus::Redirect
 end
 
 module WEBrick::HTTPUtils
-  DefaultMimeTypes = T.let(_, T.untyped)
-  ESCAPED = T.let(_, T.untyped)
-  NONASCII = T.let(_, T.untyped)
-  UNESCAPED = T.let(_, T.untyped)
-  UNESCAPED_FORM = T.let(_, T.untyped)
-  UNESCAPED_PCHAR = T.let(_, T.untyped)
+  DefaultMimeTypes = T.let(nil, T.untyped)
+  ESCAPED = T.let(nil, T.untyped)
+  NONASCII = T.let(nil, T.untyped)
+  UNESCAPED = T.let(nil, T.untyped)
+  UNESCAPED_FORM = T.let(nil, T.untyped)
+  UNESCAPED_PCHAR = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -2070,8 +2070,8 @@ module WEBrick::HTTPUtils
 end
 
 class WEBrick::HTTPUtils::FormData < String
-  EmptyHeader = T.let(_, T.untyped)
-  EmptyRawHeader = T.let(_, T.untyped)
+  EmptyHeader = T.let(nil, T.untyped)
+  EmptyRawHeader = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -2240,7 +2240,7 @@ class WEBrick::SimpleServer
 end
 
 module WEBrick::Utils
-  RAND_CHARS = T.let(_, T.untyped)
+  RAND_CHARS = T.let(nil, T.untyped)
 
   sig do
     params(
@@ -2299,7 +2299,7 @@ end
 class WEBrick::Utils::TimeoutHandler
   include Singleton
   extend Singleton::SingletonClassMethods
-  TimeoutMutex = T.let(_, T.untyped)
+  TimeoutMutex = T.let(nil, T.untyped)
 
   sig do
     params(
