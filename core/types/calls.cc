@@ -503,9 +503,18 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (!(pit->data(ctx)->isKeyword() || pit->data(ctx)->isOptional() || pit->data(ctx)->isRepeated() ||
               pit->data(ctx)->isBlockArgument())) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
-                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
-                            prettyArity(ctx, method),
-                            args.args.size()); // TODO: should use position and print the source tree, not the cfg one.
+                if (args.fullType.get() != thisType) {
+                    e.setHeader(
+                        "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
+                        "`{}`",
+                        data->show(ctx), thisType->show(ctx), args.fullType->show(ctx), prettyArity(ctx, method),
+                        args.args.size()); // TODO: should use position and print the source tree, not the cfg one.
+                } else {
+                    e.setHeader(
+                        "Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
+                        prettyArity(ctx, method),
+                        args.args.size()); // TODO: should use position and print the source tree, not the cfg one.
+                }
                 e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", data->show(ctx));
                 if (args.name == core::Names::any() &&
                     symbol == core::Symbols::T().data(ctx)->lookupSingletonClass(ctx)) {
