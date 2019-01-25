@@ -12,7 +12,7 @@ def dropExtension(p):
   "TODO: handle multiple . in name"
   return p.partition(".")[0]
 
-def pipeline_tests(all_paths):
+def pipeline_tests(all_paths, filter):
     tests = {} # test_name-> {"path": String, "prefix": String, "sentinel": String}
     for path in all_paths:
       if "disabled" not in path:
@@ -30,12 +30,12 @@ def pipeline_tests(all_paths):
       prefix = tests[name]["prefix"]
       sentinel = tests[name]["sentinel"]
       native.sh_test(
-          name = "test_{}".format(name),
+          name = "test_{}/{}".format(filter, name),
           srcs = ["test_corpus_forwarder.sh"],
-          args = ["--single_test=$(location {})".format(sentinel)],
+          args = ["--single_test=$(location {})".format(sentinel), "--gtest_filter={}/*".format(filter)],
           data = native.glob([
                              "{}/{}*".format(path, prefix),
                          ]) + ["test_corpus_sharded"],
           size = 'small',
       )
-    return ["test_{}".format(test) for test in tests]
+    return ["test_{}/{}".format(filter, test) for test in tests]

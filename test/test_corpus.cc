@@ -576,7 +576,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     TEST_COUT << "errors OK" << '\n';
 }
 
-TEST_P(LSPTest, PositionTests) {
+TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
 
@@ -747,7 +747,7 @@ TEST_P(LSPTest, PositionTests) {
 }
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
-INSTANTIATE_TEST_CASE_P(PositionTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_CASE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
@@ -893,9 +893,15 @@ vector<Expectations> getInputs(string singleTest) {
 
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
-    options.add_options()("single_test", "run over single test.", cxxopts::value<std::string>()->default_value(""),
-                          "testpath");
+    options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
+                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
     auto res = options.parse(argc, argv);
+
+    if (res.count("single_test") != 1) {
+        printf("--single_test=<filename> argument expected\n");
+        return 1;
+    }
+
     sorbet::test::singleTest = res["single_test"].as<std::string>();
 
     ::testing::InitGoogleTest(&argc, (char **)argv);

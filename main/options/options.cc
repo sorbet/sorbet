@@ -350,7 +350,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
-            logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
+            logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help({""}));
             throw EarlyReturnWithCode(1);
         }
 

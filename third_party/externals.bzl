@@ -93,12 +93,11 @@ def externals():
         build_file = "//third_party:statsd.BUILD",
     )
 
-    http_archive(
+    new_git_repository(
         name="cxxopts",
-        url="https://github.com/jarro2783/cxxopts/archive/v2.1.2.zip",
-        sha256="01897fd1930487f3e22879489721b5527ea5dbb32e40a57438e50d848cae22cf",
+        remote="https://github.com/jarro2783/cxxopts.git",
+        commit="9990f73845d76106063536d7cd630ac15cb4a065",
         build_file = "//third_party:cxxopts.BUILD",
-        strip_prefix = "cxxopts-2.1.2",
     )
 
     http_archive(

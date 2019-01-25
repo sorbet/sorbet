@@ -192,6 +192,15 @@ bazel test //... --config=dbg
 ```
 
 (The `//...` literally means "all targets".)
+
+To run a subset of the test that we normally run in development run:
+
+```
+bazel test test --config=dbg
+```
+
+Note that in bazel terms, the second test is an alias for `//test:test`, so we're being a bit cute here.
+
 By default, all test output goes into files. To also print it to the screen:
 
 ```

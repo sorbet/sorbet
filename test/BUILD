@@ -133,13 +133,35 @@ cc_binary(
 
 load(":pipeline_test.bzl", "pipeline_tests")
 
-corpus_tests = pipeline_tests(glob([
-    "testdata/**/*.rb",
-    "testdata/**/*.exp",
-    "testdata/**/*.exp.svg",
-]))
+test_corpus_tests = pipeline_tests(
+    glob([
+        "testdata/**/*.rb",
+        "testdata/**/*.exp",
+        "testdata/**/*.exp.svg",
+    ]),
+    "PosTests",
+)
+
+test_corpus_lsp_tests = pipeline_tests(
+    glob([
+        "testdata/**/*.rb",
+        "testdata/**/*.exp",
+        "testdata/**/*.exp.svg",
+    ]),
+    "LSPTests",
+)
 
 test_suite(
     name = "test_corpus",
-    tests = corpus_tests,
+    tests = test_corpus_tests,
+)
+
+test_suite(
+    name = "test_corpus_lsp",
+    tests = test_corpus_lsp_tests,
+)
+
+test_suite(
+    name = "test",
+    tests = ["test_corpus"],
 )
