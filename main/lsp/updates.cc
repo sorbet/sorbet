@@ -174,16 +174,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
 void LSPLoop::reIndexFromFileSystem() {
     indexed.clear();
-    UnorderedSet<string> fileNamesDedup(opts.inputFileNames.begin(), opts.inputFileNames.end());
-    for (int i = 1; i < initialGS->filesUsed(); i++) {
-        core::FileRef f(i);
-        if (f.data(*initialGS, true).sourceType == core::File::Type::Normal) {
-            fileNamesDedup.insert(string(f.data(*initialGS, true).path()));
-        }
-    }
-    vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
     vector<core::FileRef> emptyInputFiles;
-    for (auto &t : pipeline::index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
+    for (auto &t : pipeline::index(initialGS, opts.inputFileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
         int id = t.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
