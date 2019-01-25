@@ -104,5 +104,6 @@ Stripe-only. For Stripe-only instructions, see the
 
 - [Signatures](sigs.md)
 
-  Method signatures are the primary way that we add static and dynamic checks to
-  methods. Learn the available syntax advanced features of signatures.
+  Method signatures are the primary way that we add static and dynamic type
+  checking in our code. Learn the available syntax advanced features of
+  signatures.
