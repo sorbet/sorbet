@@ -60,7 +60,7 @@ build:release-linux --config=lto-linux --config=clang7 --config=release-common
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=forcedebug
 
-build:release-sanitized-linux --config=release-debug-linux
+build:release-sanitized-linux --copt=-O2 --cxxopt=-O2
 build:release-sanitized-linux --config=sanitize-linux
 build:release-sanitized-linux --define jemalloc=true
 build:release-sanitized-linux --config=debugsymbols
@@ -123,7 +123,8 @@ build:sanitize --define unsanitized=false
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
 build:sanitize-linux --config=clang7 --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 test:sanitize-linux --config=clang7 --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-
+build:sanitize-linux --config=sanitize
+test:sanitize-linux --config=sanitize
 
 build:tsan --copt=-fsanitize=thread
 build:tsan --cxxopt=-fsanitize=thread
