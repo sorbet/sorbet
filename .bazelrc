@@ -1,13 +1,22 @@
-# waiting for protobuf to upgrade
+##
+##  Workarounds for bugs and temporary things
+##
+
 common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
 # enable https://github.com/google/googletest/pull/1653
 common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
-# custom toolchain. Should become the default after we figure out how to make sanitized builds run well on OSX
+##
+##  Custom toolchain. Should become the default after we figure out how to make sanitized builds run well on OSX
+##
 test:clang7 --crosstool_top=@llvm_toolchain//:toolchain
 build:clang7 --crosstool_top=@llvm_toolchain//:toolchain
+
+##
+##  Common build options across all build configurations
+##
 
 # C / C++ Options
 # Don't depend on system compiler
@@ -38,12 +47,18 @@ build --host_copt=-DFORCE_DEBUG
 build --copt=-Wno-macro-redefined
 build --cxxopt=-Wno-macro-redefined
 
+##
+## debug configuration
+##
 build:dbg --copt=-O0
 build:dbg --cxxopt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
 build:dbg --config=nopie
 
+##
+## Configurations used for releases
+##
 # release version: optimized, with debug symbols and version information
 build:release-common --define release=true
 build:release-common --define jemalloc=true
@@ -57,14 +72,32 @@ build:release-common --stamp
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=clang7 --config=release-common
 
+build:release-mac --config=release-common
+build:release-mac --config=clang7
+
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=forcedebug
+build:release-debug-linux --config=dbg
+
+build:release-debug-mac --config=release-mac
+build:release-debug-mac --config=forcedebug
+build:release-debug-mac --config=dbg
 
 build:release-sanitized-linux --copt=-O2 --cxxopt=-O2
 build:release-sanitized-linux --config=sanitize-linux
-build:release-sanitized-linux --define jemalloc=true
+build:release-sanitized-linux --define jemalloc=false
 build:release-sanitized-linux --config=debugsymbols
+build:release-sanitized-linux --config=forcedebug
 
+build:release-sanitized-mac --copt=-O2 --cxxopt=-O2
+build:release-sanitized-mac --config=forcedebug
+build:release-sanitized-mac --config=debugsymbols
+build:release-sanitized-mac --config=sanitize-mac
+build:release-sanitized-mac --define jemalloc=false
+
+##
+## Configuration used to to as much testing as possible in CI
+##
 build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
 test:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
 test:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
@@ -77,6 +110,10 @@ test:travis --ram_utilization_factor=10
 test:travis --test_strategy=standalone
 test:travis --test_output=errors
 test:travis --curses=no
+
+##
+## Shared fragments of configuration
+##
 
 # DEBUG_MODE is set by default for all builds except --config=release.
 # Use this flag to set DEBUG_MODE even for --config=release.
@@ -95,11 +132,6 @@ build:lto-linux --cxxopt=-fwhole-program-vtables --cxxopt=-fvisibility=hidden --
 build:lto-linux --linkopt=-fwhole-program-vtables --linkopt=-fvisibility=hidden --linkopt=-fforce-emit-vtables
 build:lto-linux --linkopt=-Wl,--icf=all
 build:lto-linux --config=lto
-
-# DEBUG_MODE is set by default for all builds except --config=release.
-# Use this flag to set DEBUG_MODE even for --config=release.
-build:forcedebug --copt=-DFORCE_DEBUG
-build:forcedebug --cxxopt=-DFORCE_DEBUG
 
 # Used to build --stamp build that contains version and build time.
 build --workspace_status_command=tools/buildstamp/get_workspace_status
@@ -125,6 +157,9 @@ build:sanitize-linux --config=clang7 --linkopt=external/llvm_toolchain/lib/clang
 test:sanitize-linux --config=clang7 --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 build:sanitize-linux --config=sanitize
 test:sanitize-linux --config=sanitize
+
+build:sanitize-mac --config=sanitize
+test:sanitize-mac --config=sanitize
 
 build:tsan --copt=-fsanitize=thread
 build:tsan --cxxopt=-fsanitize=thread
@@ -154,7 +189,9 @@ build --strip=never
 common --experimental_ui --experimental_ui_actions_shown 8
 common --show_progress_rate_limit=0.25
 
-# Webasm config. Please use either of those depending on your platform
+##
+## Webasm config. Please use either of those depending on your platform
+##
 build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm
 build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=webasm
 
@@ -166,6 +203,9 @@ build:webasm --copt=--llvm-lto --copt=3 --cxxopt=--llvm-lto --cxxopt=3 --linkopt
 # Specify a "sane" C++ toolchain for the host platform.
 build:webasm --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
 
+##
+## Stripe's ci passes --config=ci, we need it to exist
+##
 common:stripeci --config=ci
 build:ci --announce_rc
 common:ci --color yes

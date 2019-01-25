@@ -129,7 +129,7 @@ below). There are many options you can pass when building `sorbet`:
   - (Included by `--config=dbg`) debugging symbols, and nothing else.
 - `--config=forcedebug`
   - Use more memory, but report even more sanity checks.
-- `--config=release`
+- `--config=release-mac` and `--config=release-linux`
   - Exact set of options that we ship to our users.
 
 Independently of providing or omitting any of the above flags, you can turn on
@@ -354,13 +354,14 @@ if you can reproduce the issue with an optimized build first.
 Alternatively, if you want to exactly reproduce what we ship to our users:
 
 ```
-bazel build //main:sorbet --config=release
+bazel build //main:sorbet --config=release-mac
+bazel build //main:sorbet --config=release-linux
 ```
 
-(but note that `--config=release` has poor symbols because `-O2` is very
+(but note that `--config=release*` has poor symbols because `-O2` is very
 aggressive, and no sanitization).
 
-Also note that `--config=release` on Linux makes a fully static binary. This
+Also note that `--config=release-linux` on Linux makes a fully static binary. This
 means that this binary can potentially run on any Linux distribution, but it has
 some quirks due to glibc having long-known bugs when linked statically (e.g. it
 can't resolve DNS names).
