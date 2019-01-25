@@ -35,6 +35,12 @@ class Main
   def self.main(x)
     x.length
   end
+
+  # alternatively, for a method with no parameters:
+  sig {returns(Integer)}
+  def no_params
+    42
+  end
 end
 ```
 

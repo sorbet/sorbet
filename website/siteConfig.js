@@ -11,6 +11,7 @@ const siteConfig = {
   tagline: 'A static type checker for Ruby',
   url: 'https://stripe.github.io',
   baseUrl: '/sorbet/super-secret-private-beta/',
+  editUrl: 'https://github.com/stripe/sorbet/edit/master/website/docs/',
 
   // Used for publishing and more
   projectName: 'sorbet',
@@ -19,6 +20,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {label: 'Docs', doc: 'overview'},
+    {label: 'Try', href: 'https://sorbet.run'},
     {label: 'Community', doc: 'community'},
     {label: 'Blog', blog: true},
     {label: 'GitHub', href: 'https://github.com/stripe/sorbet'},

@@ -4,7 +4,7 @@ title: Gradual Type Checking & Sorbet
 sidebar_label: Gradual Type Checking
 ---
 
-> Sorbet is a gradual type checker, which is a blessing and a curse.
+Sorbet is a gradual type checker, which is a blessing and a curse.
 
 ## What is a gradual type system?
 

@@ -133,9 +133,9 @@ One case when this is useful when we know for sure that a method exists, but
 Sorbet don't know about that method exists statically:
 
 ```
-missing method example
+TODO(jez) missing method example
 
-T.unsafe(self) too
+TODO(jez) T.unsafe(self) example
 ```
 
 
@@ -147,7 +147,7 @@ we the programmer are aware of an invariant in the code that isn't currently
 expressed in the type system:
 
 ```ruby
-extend T::Helpers
+extend T::Sig
 
 class A; def foo; end; end
 class B; def bar; end; end
