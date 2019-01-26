@@ -694,6 +694,7 @@ private:
                                                       core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     arg.data(ctx)->name.toString(ctx));
+                        e.addErrorLine(send->block->loc, "Signature");
                     }
                 }
                 ++it;
