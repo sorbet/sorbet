@@ -32,6 +32,18 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
                 sendResponse(id, result);
                 return finalGs;
             }
+        } else if (auto identResp = resp->isIdent()) {
+            std::vector<std::shared_ptr<core::File>> files;
+            auto run2 = runLSPQuery(
+                move(finalGs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable), files, true);
+            finalGs = move(run2.gs);
+            vector<unique_ptr<JSONBaseType>> result;
+            auto &queryResponses = run2.responses;
+            for (auto &q : queryResponses) {
+                result.push_back(loc2Location(*finalGs, q->getLoc()));
+            }
+            sendResponse(id, result);
+            return finalGs;
         }
     }
     // An explicit null indicates that we don't support this request (or that nothing was at the location).

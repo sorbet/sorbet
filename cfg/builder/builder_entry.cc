@@ -1,28 +1,10 @@
+#include "ast/Helpers.h"
 #include "cfg/builder/builder.h"
 #include "core/Names.h"
 
 using namespace std;
 
 namespace sorbet::cfg {
-
-ast::Local *CFGBuilder::arg2Local(ast::Expression *arg) {
-    while (true) {
-        if (auto *local = ast::cast_tree<ast::Local>(arg)) {
-            // Buried deep within every argument is a Local
-            return local;
-        }
-
-        // Recurse into structure to find the Local
-        typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
-                 [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
-                 [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
-                 [&](ast::BlockArg *blk) { arg = blk->expr.get(); },
-                 [&](ast::ShadowArg *shadow) { arg = shadow->expr.get(); },
-                 // ENFORCES are last so that we don't pay the price of casting in the happy path.
-                 [&](ast::UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                 [&](ast::Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
-    }
-}
 
 void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 
@@ -49,7 +31,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     int i = -1;
     for (auto &argExpr : md.args) {
         i++;
-        auto *a = arg2Local(argExpr.get());
+        auto *a = ast::MK::arg2Local(argExpr.get());
         auto argSym = md.symbol.data(ctx)->arguments()[i];
         auto &inserted = entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, argSym));
         inserted.value->isSynthetic = true;

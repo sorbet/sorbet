@@ -306,6 +306,24 @@ public:
         return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForTypechecking(),
                      std::move(arg));
     }
+
+    static class Local *arg2Local(Expression *arg) {
+        while (true) {
+            if (auto *local = cast_tree<class Local>(arg)) {
+                // Buried deep within every argument is a Local
+                return local;
+            }
+
+            // Recurse into structure to find the Local
+            typecase(arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
+                     [&](class KeywordArg *kw) { arg = kw->expr.get(); },
+                     [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
+                     [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
+                     // ENFORCES are last so that we don't pay the price of casting in the happy path.
+                     [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
+                     [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+        }
+    }
 };
 
 } // namespace sorbet::ast

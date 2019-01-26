@@ -12,6 +12,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "lsp.h"
 #include "main/lsp/DefLocSaver.h"
+#include "main/lsp/LocalVarSaver.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
@@ -184,6 +185,17 @@ void LSPLoop::reIndexFromFileSystem() {
     }
 }
 
+void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
+    if (gs.lspQuery.kind != core::lsp::Query::Kind::VAR) {
+        return;
+    }
+    for (auto &t : indexedCopies) {
+        LocalVarSaver localVarSaver;
+        core::Context ctx(gs, core::Symbols::root());
+        t.tree = ast::TreeMap::apply(ctx, localVarSaver, move(t.tree));
+    }
+}
+
 void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
     if (gs.lspQuery.kind != core::lsp::Query::Kind::LOC) {
         return;
@@ -219,6 +231,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     auto finalGs = initialGS->deepCopy(true);
     auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger, skipConfigatron);
     tryApplyDefLocSaver(*finalGs, resolved);
+    tryApplyLocalVarSaver(*finalGs, resolved);
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
         ENFORCE(tree.file.exists());
@@ -301,6 +314,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
 
         auto resolved = incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
         tryApplyDefLocSaver(*finalGs, resolved);
+        tryApplyLocalVarSaver(*finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
         finalGs->lspTypecheckCount++;

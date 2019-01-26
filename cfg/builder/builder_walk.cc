@@ -234,7 +234,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     for (int i = 0; i < data->arguments().size(); ++i) {
                         auto &arg = s->block->args[i];
-                        auto id = arg2Local(arg.get());
+                        auto id = ast::MK::arg2Local(arg.get());
                         ENFORCE(id, "Should have been removed by namer");
                         core::LocalVariable argLoc = id->localVariable;
 
