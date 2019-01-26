@@ -38,8 +38,11 @@ void LSPTest::startLSP() {
     // N.B.: cin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to run on test files (as all test input files are "test" files), disable configatron, and
     // disable the fast path.
-    lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), cin, lspOstream, true, true, true);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), cin, lspOstream, true, true,
+                                   LSPTest::fastpathDisabled);
 }
+
+bool LSPTest::fastpathDisabled = false;
 
 void LSPTest::parseTestFile() {
     for (auto &sourceFile : test.sourceFiles) {

@@ -83,6 +83,7 @@ public:
      * Send a message to LSP, and returns any responses.
      */
     std::vector<std::unique_ptr<JSONBaseType>> getLSPResponsesFor(const std::unique_ptr<JSONBaseType> &message);
+    static bool fastpathDisabled;
 };
 } // namespace sorbet::test
 #endif // TEST_LSPTEST_H

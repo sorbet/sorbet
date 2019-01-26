@@ -895,11 +895,17 @@ int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<std::string>()->default_value(""), "testpath");
+    options.add_options()("lsp-disable-fastpath", "disable fastpath in lsp tests");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
         printf("--single_test=<filename> argument expected\n");
         return 1;
+    }
+
+    if (res["lsp-disable-fastpath"].as<bool>()) {
+        printf("disabling lsp fastpath\n");
+        sorbet::test::LSPTest::fastpathDisabled = true;
     }
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();

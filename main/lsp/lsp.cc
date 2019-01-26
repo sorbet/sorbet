@@ -88,11 +88,6 @@ bool silenceError(bool disableFastPath, core::ErrorClass what) {
         // We only need to silence errors during the fast path.
         return false;
     }
-    if (what == core::errors::Namer::RedefinitionOfMethod ||
-        what == core::errors::Resolver::DuplicateVariableDeclaration ||
-        what == core::errors::Resolver::RedefinitionOfParents) {
-        return true;
-    }
     return false;
 }
 
