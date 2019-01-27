@@ -1,0 +1,71 @@
+class <emptyTree><<constant:<root>>> < ()
+  class <emptyTree>::<constant:MyBasicClass><<constant:<todo sym>>> < (<emptyTree>::<constant:BasicObject>)
+    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+
+    self(<constant:<todo sym>>).sig() do ||
+      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Complex>}).void()
+    end
+
+    def foo<<constant:<todo sym>>>(x)
+      <emptyTree>::<constant:Kernel>.puts(x)
+    end
+
+    self(<constant:<todo sym>>).sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Complex>)
+    end
+
+    def bar<<constant:<todo sym>>>()
+      ::Kernel.Complex(0, "11")
+    end
+
+    self(<constant:<todo sym>>).sig() do ||
+      self(<constant:<todo sym>>).void()
+    end
+
+    def baz<<constant:<todo sym>>>()
+      <emptyTree>::<constant:Kernel>.puts(::Kernel.Complex(0, "2"))
+    end
+  end
+
+  class <emptyTree>::<constant:MyKernelClass><<constant:<todo sym>>> < (::<todo sym>)
+    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+
+    self(<constant:<todo sym>>).sig() do ||
+      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Complex>}).void()
+    end
+
+    def foo<<constant:<todo sym>>>(x)
+      self(<constant:<todo sym>>).puts(x)
+    end
+  end
+
+  bc = <emptyTree>::<constant:MyBasicClass>.new()
+
+  bc.foo(::Kernel.Complex(0, "1"))
+
+  bc.foo(::Kernel.Complex(0, "1").-@())
+
+  bc.foo(self(<constant:<todo sym>>).Complex(0, 1))
+
+  bc.foo(self(<constant:<todo sym>>).Complex(0, 1).-@())
+
+  bc.foo(self(<constant:<todo sym>>).Complex(0, -1))
+
+  bc.foo(-1)
+
+  <emptyTree>::<constant:MyBasicClass>.new().bar()
+
+  kc = <emptyTree>::<constant:MyKernelClass>.new()
+
+  kc.foo(::Kernel.Complex(0, "1"))
+
+  kc.foo(::Kernel.Complex(0, "1").-@())
+
+  kc.foo(self(<constant:<todo sym>>).Complex(0, 1))
+
+  kc.foo(self(<constant:<todo sym>>).Complex(0, 1).-@())
+
+  kc.foo(self(<constant:<todo sym>>).Complex(0, -1))
+
+  kc.foo(-1)
+end
