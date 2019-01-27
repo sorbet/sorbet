@@ -52,6 +52,31 @@ given only `String`s and returns only `Integer`s:
   checks](runtime.md) that run every time the method is called.
 
 
+## Type System
+
+The complete type system reference can be found to the left. Here's a quick
+table of contents:
+
+- [Integer](class-types.md), [String](class-types.md),
+  [T::Boolean](class-types.md) – Class Types
+- [T.nilable](nilable-types.md) – Nilable Types
+- [T.any](union-types.md) – Union Types
+- [T.let](assertions.md), [T.cast](assertions.md), [T.must](assertions.md),
+  [T.assert_type!](assertions.md) – Type Assertions
+- [[Type1, Type2]](tuples.md) – Tuple Types
+- [{key1: Type1, key2: Type2}](shapes.md) – Shape Types
+- [T.untyped](untyped.md)
+- [T.noreturn](noreturn.md)
+- [T.type_alias](type-aliases.md) – Type Aliases
+- [T::Array](stdlib-generics.md), [T::Hash](stdlib-generics.md),
+  [T::Set](stdlib-generics.md), [T::Enumerable](stdlib-generics.md) – Generics
+  in the Standard Library
+- [T.proc](procs.md) – Proc Types
+- [T.class_of](class-of.md)
+- [T.self_type](self-type.md)
+- [T.all](intersection-types.md) – Intersection Types
+
+
 ## How do I...
 
 ### Figure out what's going on?
@@ -119,4 +144,3 @@ To generate a rudimentary file list:
 ```
 ❯ find . -name '*.rb' -o -name '*.rbi' > FILE_LIST
 ```
-
