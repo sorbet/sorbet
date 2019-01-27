@@ -175,15 +175,14 @@ most methods and even a few core abstractions are not typed yet.
 
 There are a number of tools for managing `T.untyped` in a codebase:
 
-<!-- TODO(jez) Add links from gradual to tools for managing T.untyped -->
-
-- Strictness levels (`typed: true`, `typed: strict`, and `typed: strong`).
+- [Strictness levels](static.md) (`typed: true`, `typed: strict`, and `typed:
+  strong`).
   - These levels control when `T.untyped` is allowed.
-- `sig` and `T.let` annotations.
+- [`sig`](sigs.md) and [`T.let` annotations](strict-mode.md).
   - Adding annotations opts code into static type checking.
-- `T.unsafe` and `T.cast`.
+- [`T.unsafe` and `T.cast`](troubleshooting.md#escape-hatches).
   - These helpers opt code out of static checks.
-- `T.reveal_type` and our editors.
+- [`T.reveal_type`](troubleshooting.md) and our editors.
   - Knowing which things are `T.untyped` is half the battle.
 
 These tools are the bread and butter for rolling out types in a gradual type
