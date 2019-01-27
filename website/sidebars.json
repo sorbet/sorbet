@@ -32,6 +32,7 @@
       "class-of",
       "self-type",
       "abstract",
+      "strict",
       "intersection-types"
     ]
   }
