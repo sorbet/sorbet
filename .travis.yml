@@ -1,4 +1,3 @@
-language: cpp
 dist: trusty
 compiler: gcc
 if: tag IS blank
@@ -12,16 +11,18 @@ addons:
     packages:
     - bazel
 before_script:
-- sed -i '1s/^/common --curses no\n/' .bazelrc
+- sed -i '1s/^/common --curses no --noshow_progress --noshow_loading_progress\n/' .bazelrc
 matrix:
   include:
-  - name: "Test"
+  - name: "Test: static"
+    language: cpp
     script:
     - bazel version
     - ./tools/scripts/ci_checks.sh
     - bazel build --config=travis //...
     - bazel test --config=travis //...
-  - name: "Release"
+  - name: "Release: static"
+    language: cpp
     script:
     - bazel build main:sorbet --config=release-linux
     # Set up git user name and tag this commit
@@ -37,3 +38,32 @@ matrix:
       file: bazel-bin/main/sorbet
       on:
         repo: stripe/sorbet
+  - name: "Test: runtime on Ruby 2.4 & Release"
+    language: ruby
+    rvm: 2.4
+    gemfile: runtime/Gemfile
+    script:
+    - cd runtime && rake test && gem build sorbet-runtime.gemspec && mv sorbet-runtime-*.gem sorbet-runtime.gem
+    # Set up git user name and tag this commit
+    - git config --local user.name "Sorbet"
+    - git config --local user.email "sorbet@stripe.com"
+    - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+    - git tag $TRAVIS_TAG
+    deploy:
+      provider: releases
+      skip_cleanup: true
+      api_key:
+        secure: jUxOnSkUQu1x7u6bjKEM8dPI5ckBf41oTcmRvqLvqGClxM9wte4QO4K8XtLRhO3iEtOYf+XQbaGLoSUos74DdYg9YSc338F7CW6Jy3LsXnUe37zlS7tL+xmSAvEJ1QYWKz8NHmkETWY8iu7qJYZQidikAVlwm5yPKwoz22izronar5gCI1sqt3En5JxDhqZ/Cl40iof8IfpCH5l+PvN04mUI+Vk7gY1DBAb9KIVDBVqtFdwCSiAhernFTJS5JAEkThepFq8ShAu3zOgrZl+h8GHzyVcTamVPBdonaTCYJHbCgHn4r1skz+zaPSuayq4PbwnRIrsAA+YyQ4NIFyO27Rz2lgpGtsqqzoLNPs7LMaBJ+bA4AIU+hfzPBabiOF6+326gVxCQ1jGwN5KTK5xAXGHXTvbguUxj4ImALmXSwAZIP0/Umfp7NFQ/q82gZrmCfEFZcrAmndO6I7L3G9IR2WN3S5NSPDpPpnurppA8t1BWFTs9DFU6F5wjS6O5SeJkNR1FQNsxhuLpxmq15F6k90Z0MUN4W7kMWS7TwXRZu5i3Gikb8o0g84dSpsm0LFbxUymZR5lZgOAD+Hr7syjVQ33pTaT2TaLfq5nvzwTJfm+k3LH5rhQt6CR+K8aplUXLKhBiupmX+RpA4PyXjOjEuVE5Lw7Ga1+6TMw5LZTqOFQ=
+      file: runtime/sorbet-runtime.gem
+      on:
+        repo: stripe/sorbet
+  - name: "Test: runtime on Ruby 2.5"
+    language: ruby
+    rvm: 2.5
+    gemfile: runtime/Gemfile
+    script: cd runtime && rake test
+  - name: "Test: runtime on Ruby 2.6"
+    language: ruby
+    rvm: 2.6
+    gemfile: runtime/Gemfile
+    script: cd runtime && rake test
