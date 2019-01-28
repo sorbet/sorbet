@@ -34,9 +34,8 @@
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/stdlib-generics.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Generics in the Standard Library</h1></header><article><div><span><blockquote>
 <p>TODO(jez) This page is still a fragment. Contributions welcome!</p>
 </blockquote>
-<p>Sorbet supports <a href="generics.md">generics types</a>. The syntax looks likes
-<code>MyClass[Elem]</code>. For user defined generic classes, it's possible to make this
-valid Ruby syntax.</p>
+<p>Sorbet supports generics types. The syntax looks likes <code>MyClass[Elem]</code>. For user
+defined generic classes, it's possible to make this valid Ruby syntax.</p>
 <p>However, it's not possible to change the syntax for classes in the Ruby standard
 library that should be generic. To make up for this, we use wrappers in the T::
 namespace to represent them:</p>

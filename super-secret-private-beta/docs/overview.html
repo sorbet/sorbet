@@ -60,7 +60,7 @@ those predictions with contracts.</p>
   A.new.bar(<span class="hljs-string">"91"</span>)  <span class="hljs-comment"># error: Type mismatch!</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(String)%7D%0A%20%20def%20bar(x)%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0Adef%20main%0A%20%20A.new.barr(91)%20%20%20%23%20error%3A%20Typo!%0A%20%20A.new.bar(%2291%22)%20%20%23%20error%3A%20Type%20mismatch!%0Aend">→ View on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(String)%7D%0A%20%20def%20bar(x)%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0Adef%20main%0A%20%20A.new.barr(91)%20%20%20%23%20error%3A%20Typo!%0A%20%20A.new.bar(%2291%22)%20%20%23%20error%3A%20Type%20mismatch!%0Aend">→ View on sorbet.run</a></p>
 <h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What's next?</h2>
 <ul>
 <li><p><a href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></p>
