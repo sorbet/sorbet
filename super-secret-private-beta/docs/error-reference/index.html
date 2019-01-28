@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sorbet Error Reference · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;TODO(jez) Port error reference&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sorbet Error Reference · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://stripe.github.io/sorbet/super-secret-private-beta/index.html"/><meta property="og:description" content="&lt;p&gt;TODO(jez) Port error reference&lt;/p&gt;
-"/><meta property="og:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/logo-512x512.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/logo-512x512.png"/><link rel="shortcut icon" href="/sorbet/super-secret-private-beta/img/favicon-16x16.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/feed.xml" title="Sorbet Blog RSS Feed"/><link rel="stylesheet" href="/sorbet/super-secret-private-beta/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/sorbet/super-secret-private-beta/"><img class="logo" src="/sorbet/super-secret-private-beta/img/favicon-32x32.png" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/overview" target="_self">Docs</a></li><li class=""><a href="/sorbet/super-secret-private-beta/docs/community" target="_self">Community</a></li><li class=""><a href="/sorbet/super-secret-private-beta/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/stripe/sorbet" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Troubleshooting</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/runtime">Enabling Runtime Checks</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/inline">Inline Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sorbet Error Reference · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;This is one of three docs aimed at helping answer common questions about Sorbet:&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sorbet Error Reference · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://stripe.github.io/sorbet/super-secret-private-beta/index.html"/><meta property="og:description" content="&lt;p&gt;This is one of three docs aimed at helping answer common questions about Sorbet:&lt;/p&gt;
+"/><meta property="og:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/logo-512x512.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/logo-512x512.png"/><link rel="shortcut icon" href="/sorbet/super-secret-private-beta/img/favicon-16x16.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/feed.xml" title="Sorbet Blog RSS Feed"/><link rel="stylesheet" href="/sorbet/super-secret-private-beta/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/sorbet/super-secret-private-beta/"><img class="logo" src="/sorbet/super-secret-private-beta/img/favicon-32x32.png" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/sorbet/super-secret-private-beta/docs/community" target="_self">Community</a></li><li class=""><a href="/sorbet/super-secret-private-beta/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/stripe/sorbet" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Troubleshooting</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/rbi">RBI Files</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/exhaustiveness">Exhaustivness Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
             document.addEventListener('DOMContentLoaded', function() {
               createToggler('#navToggler', '#docsNav', 'docsSliderActive');
               createToggler('#tocToggler', 'body', 'tocActive');
@@ -27,5 +27,252 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Sorbet Error Reference</h1></header><article><div><span><p>TODO(jez) Port error reference</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div></div></body></html>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/error-reference.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Sorbet Error Reference</h1></header><article><div><span><p>This is one of three docs aimed at helping answer common questions about Sorbet:</p>
+<ol>
+<li><a href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li>
+<li><a href="/sorbet/super-secret-private-beta/docs/faq">Frequently Asked Questions</a></li>
+<li><a href="/sorbet/super-secret-private-beta/docs/error-reference">Sorbet Error Reference</a> (this doc)</li>
+</ol>
+<p>This page contains tips and tricks for common errors from <code>sorbet</code>. Note: this
+list is not exhaustive! Some errors are very context dependent to solve, and
+some error codes are very uncommon. Contributions to this list are welcome!</p>
+<h2><a class="anchor" aria-hidden="true" id="1001"></a><a href="#1001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>1001</h2>
+<p>Sorbet has crashed. Please <a href="https://github.com/stripe/sorbet/issues">report an issue</a>!</p>
+<h2><a class="anchor" aria-hidden="true" id="2001"></a><a href="#2001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2001</h2>
+<p>There was a Ruby syntax error. Sorbet was unable to parse the source code. If
+you encounter this error but your code is accepted by Ruby itself, this is a bug
+in our parser; please <a href="https://github.com/stripe/sorbet/issues">report an issue</a> to us so we can address it.</p>
+<h2><a class="anchor" aria-hidden="true" id="4002"></a><a href="#4002" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4002</h2>
+<p>Sorbet requires that every <code>include</code> references a constant literal. For example,
+this is an error, even in <code># typed: false</code> files:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span></span>
+  rand.round == <span class="hljs-number">0</span> ? A : B
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
+  <span class="hljs-keyword">include</span> x  <span class="hljs-comment"># error: `include` must be passed a constant literal</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Non-constant literals make it hard to impossible to determine the complete
+inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
+hierarchy of a codebase in order to check a variable is a valid instance of a
+type.</p>
+<p>It is possible to silence this error, but it should be done with <strong>utmost
+caution</strong>, as Sorbet will fail in strange ways and make far less accurate
+predictions about a codebase. To silence this error, use <code>T.unsafe</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span></span>
+  rand.round == <span class="hljs-number">0</span> ? A : B
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
+  T.unsafe(<span class="hljs-keyword">self</span>).<span class="hljs-keyword">include</span> x
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="4010"></a><a href="#4010" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4010</h2>
+<p>There are multiple definitions for a method. Having multiple definitions for a
+method is problematic, because it can make a codebase's behavior dependent on
+the order in which files are loaded.</p>
+<p>The only way to silence this error currently is to make the offending file as <code># typed: false</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5002"></a><a href="#5002" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5002</h2>
+<p>This means that the typechecker has been unable to resolve a reference to a
+constant (e.g. a Ruby class). Most commonly, this indicates that there's a typo.</p>
+<p>First, try confirming whether the code runs successfully. Does the code raise an
+&quot;uninitialized constant&quot; error when run? If so, Sorbet caught a bug! Try finding
+out why that constant is actually uninitialized.</p>
+<p>If it isn't a typo, then there are a few other things to look at. If it looks
+like the constant is related to a gem, maybe one of these helps:</p>
+<ul>
+<li><p>Is it coming from a gem? Sorbet does not look through the gems' source code.
+Instead, there must be an <code>*.rbi</code> file for this gem. Try finding the <code>*.rbi</code>
+corresponding to this gem, and searching through it for the constant. If it's
+not there, consider asking the Developer Productivity team at your company why
+the gem's <code>*.rbi</code> file is missing some constants.</p>
+<p>At Stripe, gem <code>*.rbi</code> files are in <code>sorbet/shims/autogenerated/gems/</code>.</p></li>
+<li><p>If the gem was recently updated, it's <code>*.rbi</code> might need to be regenerated.
+At Stripe, each gem has a line at the top which can be copy / pasted to
+re-generate the file when the underlying gem has changed.</p></li>
+<li><p>Sometimes gems register that their constants should be autoloaded. If that's
+the case for this constant, make sure that the <code>*.rbi</code> generation script
+explicitly references the constant somewhere to force it to be loaded. This
+will make the constant visible via runtime reflection.</p></li>
+<li><p>When deleting constants, sometimes they are still referenced from an
+autogenerated <code>*.rbi</code> file. If that's the case, consider deleting the constant
+or regenerating the file.</p></li>
+</ul>
+<p>Another thing it could be: Sorbet explicitly does not support resolving
+constants through ancestors (both mixins or superclasses).</p>
+<ul>
+<li><p>Concretely, here's an example of code rejected and accepted by Sorbet:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  MY_CONST = <span class="hljs-number">91</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent;</span> <span class="hljs-keyword">end</span>
+
+Child::MY_CONST    <span class="hljs-comment"># error</span>
+Parent::MY_CONST   <span class="hljs-comment"># ok</span>
+</code></pre></li>
+<li><p>Alternatively, if it's much more preferable to access the constant on the
+child, we can set up an explicit alias:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  MY_CONST = <span class="hljs-number">91</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  MY_CONST = Parent::MY_CONST
+<span class="hljs-keyword">end</span>
+
+Child::MY_CONST    <span class="hljs-comment"># ok</span>
+Parent::MY_CONST   <span class="hljs-comment"># ok</span>
+</code></pre></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="5007"></a><a href="#5007" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5007</h2>
+<p>In <code># typed: strict</code> files, Sorbet requires that all instance and class
+variables are annotated with a <code>T.let</code>.</p>
+<p>For how to fix, see <a href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a>.</p>
+<p>See also: <a href="#5028">5028</a>, <a href="#7017">7017</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5028"></a><a href="#5028" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5028</h2>
+<p>In <code># typed: strict</code> files, Sorbet requires that all constants are annotated
+with a <code>T.let</code>.</p>
+<p>For how to fix, see <a href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a>.</p>
+<p>See also: <a href="#5007">5007</a>, <a href="#7017">7017</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="7001"></a><a href="#7001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7001</h2>
+<p>Sorbet does not allow reassigning a variable to a different type within a loop
+or block. (Note that we model blocks similarly to loops, as in general they may
+execute 0, 1, or more times). Due to implementation constraints, Sorbet does not
+permit this behavior.</p>
+<p>A prototypical example of code that might trigger this is code that sets a
+variable to <code>nil</code>, and then updates it if some value is found inside a loop:</p>
+<pre><code class="hljs css language-ruby">found = <span class="hljs-literal">nil</span> list.each <span class="hljs-keyword">do</span> <span class="hljs-params">|elem|</span>
+  found = elem <span class="hljs-keyword">if</span> want?(elem)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In most cases, we can fix this error by declaring the type of the loop variable
+outside the loop using <code>T.let</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># This is a type annotation that explicitly widens the type:</span>
+found = T.let(<span class="hljs-literal">nil</span>, T.nilable(String))
+
+list.each <span class="hljs-keyword">do</span> <span class="hljs-params">|elem|</span>
+  found = elem <span class="hljs-keyword">if</span> want?(elem)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="7002"></a><a href="#7002" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7002</h2>
+<p>This is a standard type mismatch. A method's <code>sig</code> declares one type, but the
+actual value didn't match. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-string">'str'</span> + <span class="hljs-symbol">:sym</span>  <span class="hljs-comment"># error: `Symbol(:"sym")` doesn't match `String` for argument `arg0`</span>
+</code></pre>
+<p>Even still, sometimes these errors can be rather confusing. Consider using
+<a href="/sorbet/super-secret-private-beta/docs/troubleshooting"><code>T.reveal_type</code></a> to pin down the origin of why Sorbet
+thinks the types are what it says.</p>
+<p><strong>Why does Sorbet think this is <code>nil</code>? I just checked that it's not!</strong></p>
+<p>That's a <a href="flow-sensitive#limitations-of-flow-sensitivity">great question</a>, and
+probably the most common question people have when using Sorbet!</p>
+<p>It's answered here:
+<a href="flow-sensitive#limitations-of-flow-sensitivity">Limitations of flow-sensitivity</a></p>
+<h2><a class="anchor" aria-hidden="true" id="7003"></a><a href="#7003" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7003</h2>
+<p>This error indicates a call to a method we believe does not exist (a la Ruby's
+<code>NoMethodError</code> exception). Some steps to debug:</p>
+<ol>
+<li><p>Double check that the code actually runs, either in the REPL, in CI, or with
+manual tests. If the method doesn't actually exist when run, Sorbet caught a
+bug!</p></li>
+<li><p>Even if the method exists when run, Sorbet still might report an error
+because the method won't <strong>always</strong> be there. For example, maybe sometimes
+the value is <a href="/sorbet/super-secret-private-beta/docs/nilable-types">nilable</a>, or we have a
+<a href="/sorbet/super-secret-private-beta/docs/union-types">union</a> of a handful of different types.</p></li>
+<li><p>Many times, methods are defined dynamically in Ruby. Sorbet cannot see
+methods defined with <code>define_method</code>. Sorbet also can't see methods defined
+using Ruby's <code>included</code> + <code>other.extend(self)</code> pattern. For such dynamically
+defined methods, Sorbet requires <code>*.rbi</code> files which define the method
+statically.</p>
+<p>See the <a href="/sorbet/super-secret-private-beta/docs/rbi">RBI</a> docs for how to regenerate the <code>*.rbi</code> files.</p></li>
+<li><p>Sorbet will complain about this code:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span>;</span> <span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> MyModule).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+  x.<span class="hljs-literal">nil</span>? <span class="hljs-comment"># error: Method `nil?` does not exist on `MyModule`</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>The <code>nil?</code> method is defined on <code>Kernel</code> in Ruby. <code>Kernel</code> is included in
+<code>Object</code> (which classes default to inheriting from), but not on
+<code>BasicObject</code> (which classes can optionally inherit from).</p>
+<p>The solution is to <code>include Kernel</code> in our module:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span></span>
+  <span class="hljs-keyword">include</span> Kernel
+<span class="hljs-keyword">end</span>
+</code></pre></li>
+<li><p>Sorbet will complain about this code:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> puts <span class="hljs-string">'hello'</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>The issue is similar to the above: <code>puts</code> is defined on <code>Kernel</code>, which is
+not necessarily included in our module. For this situation, there are
+actually two fixes:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Option 1: include Kernel</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span></span>
+  <span class="hljs-keyword">include</span> Kernel
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> puts <span class="hljs-string">'hello'</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Option 2: Kernel.puts</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> Kernel.puts <span class="hljs-string">'hello'</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="7017"></a><a href="#7017" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7017</h2>
+<p>In typed: strict files, Sorbet requires that all methods are annotated with a
+<code>sig</code>. In a <code># typed: true</code> file Sorbet implicitly assumes that definitions
+without types are <code>T.untyped</code>, but in a <code># typed: strict</code> file, Sorbet will no
+longer make this implicit assumption.</p>
+<p>You can still add a <code>sig</code> which declares the arguments or return as <code>T.untyped</code>, so
+<code># typed: strict</code> does not outright ban <code>T.untyped</code>. The upside is that usage of
+<code>T.untyped</code> is more explicit, which makes it easier to drive the number of
+occurrences down. If you're seeing this warning, there's no time like the
+present to add proper types to your public-facing API (i.e., your top-level
+constant and method definitions)!</p>
+<p>For how to fix, see <a href="/sorbet/super-secret-private-beta/docs/sigs">Method Signatures</a>.</p>
+<p>See also: <a href="#5007">5007</a>, <a href="#5028">5028</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="7019"></a><a href="#7019" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7019</h2>
+<p>Sorbet does not have great support for splats right now.</p>
+<p>In general, when considering taking a variable number of arguments, consider
+instead taking a single argument that's an array instead of a &quot;rest&quot; arg:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ----- AVOID THIS ----------------------------</span>
+sig {params(<span class="hljs-symbol">xs:</span> Integer).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(*xs)</span></span>; <span class="hljs-keyword">end</span>
+
+xs = Array.new(<span class="hljs-number">3</span>) {<span class="hljs-params">|i|</span> i}
+foo(*xs)
+<span class="hljs-comment"># ---------------------------------------------</span>
+
+<span class="hljs-comment"># ----- Do this instead -----------------------</span>
+
+sig {params(<span class="hljs-symbol">ys:</span> T::Array[Integer]).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span><span class="hljs-params">(ys)</span></span>; <span class="hljs-keyword">end</span>
+
+ys = Array.new(<span class="hljs-number">3</span>) {<span class="hljs-params">|i|</span> i}
+bar(ys)
+<span class="hljs-comment"># ---------------------------------------------</span>
+</code></pre>
+<p>If it is not possible to refactor the code, the current work around is to use
+replace <code>*xs</code> with <code>*T.unsafe(xs)</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ----- WORST CASE ----------------------------</span>
+<span class="hljs-comment"># Prefer the solution described above</span>
+
+sig {params(<span class="hljs-symbol">xs:</span> Integer).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(*xs)</span></span>; <span class="hljs-keyword">end</span>
+
+xs = Array.new(<span class="hljs-number">3</span>) {<span class="hljs-params">|i|</span> i}
+foo(*T.unsafe(xs))
+<span class="hljs-comment"># ---------------------------------------------</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#2001">2001</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#5002">5002</a></li><li><a href="#5007">5007</a></li><li><a href="#5028">5028</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7017">7017</a></li><li><a href="#7019">7019</a></li></ul></nav></div></div></body></html>
