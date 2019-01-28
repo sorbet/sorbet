@@ -223,10 +223,10 @@ calls:
   annotations gives greater confidence in the predictions that `sorbet` [makes
   statically](static.md).
 
-- Inline type assertions would be inevitable.
+- Type assertions in code would be inevitable.
 
-  Having constructs like [`T.let` and `T.cast`](inline.md) work in line require
-  that type annotations already be syntactically valid Ruby (having `T.let` and
-  `T.cast` to do type refinements and assertions are central to Sorbet being a
-  gradual type system). Since types must already be valid Ruby, it makes sense
-  to have `sig`s be valid Ruby too.
+  Having constructs like [`T.let` and `T.cast`](type-assertions.md) work in line
+  require that type annotations already be syntactically valid Ruby (having
+  `T.let` and `T.cast` to do type refinements and assertions are central to
+  Sorbet being a gradual type system). Since types must already be valid Ruby,
+  it makes sense to have `sig`s be valid Ruby too.

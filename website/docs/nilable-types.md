@@ -18,7 +18,7 @@ is `nil` or not.
   if element is not there)
   - if you'd rather it raise an exception:
     - `Array#fetch` / `Hash#fetch`
-    - `T.must` (see also: [Inline Type Assertions](inline.md))
+    - `T.must` (see also: [Type Assertions](type-assertions.md))
 
 Editorial note: something along the lines of "trading off static guarantees for
 runtime guarantees." This is a tradeoff, and sometimes it makes sense, sometimes
