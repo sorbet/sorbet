@@ -483,7 +483,7 @@ class String < Object
     params(
         arg0: T.any(Regexp, String),
     )
-    .returns(T::Array[String])
+    .returns([String, String, String])
   end
   def partition(arg0); end
 
@@ -528,7 +528,7 @@ class String < Object
     params(
         arg0: T.any(String, Regexp),
     )
-    .returns(T::Array[String])
+    .returns([String, String, String])
   end
   def rpartition(arg0); end
 
