@@ -61,8 +61,9 @@ table of contents:
   [T::Boolean](class-types.md) – Class Types
 - [T.nilable](nilable-types.md) – Nilable Types
 - [T.any](union-types.md) – Union Types
-- [T.let](assertions.md), [T.cast](assertions.md), [T.must](assertions.md),
-  [T.assert_type!](assertions.md) – Type Assertions
+- [T.let](type-assertions.md), [T.cast](type-assertions.md),
+  [T.must](type-assertions.md), [T.assert_type!](type-assertions.md) – Type
+  Assertions
 - [[Type1, Type2]](tuples.md) – Tuple Types
 - [{key1: Type1, key2: Type2}](shapes.md) – Shape Types
 - [T.untyped](untyped.md)

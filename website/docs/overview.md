@@ -43,7 +43,7 @@ def main
 end
 ```
 
-[→ View on sorbet.run](https://sorbet.run/class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(String)%7D%0A%20%20def%20bar(x)%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0Adef%20main%0A%20%20A.new.barr(91)%20%20%20%23%20error%3A%20Typo!%0A%20%20A.new.bar(%2291%22)%20%20%23%20error%3A%20Type%20mismatch!%0Aend)
+[→ View on sorbet.run](https://sorbet.run/#class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(String)%7D%0A%20%20def%20bar(x)%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0Adef%20main%0A%20%20A.new.barr(91)%20%20%20%23%20error%3A%20Typo!%0A%20%20A.new.bar(%2291%22)%20%20%23%20error%3A%20Type%20mismatch!%0Aend)
 
 ## What's next?
 

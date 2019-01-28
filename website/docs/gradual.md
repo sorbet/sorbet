@@ -178,7 +178,7 @@ There are a number of tools for managing `T.untyped` in a codebase:
 - [Strictness levels](static.md) (`typed: true`, `typed: strict`, and `typed:
   strong`).
   - These levels control when `T.untyped` is allowed.
-- [`sig`](sigs.md) and [`T.let` annotations](strict-mode.md).
+- [`sig`](sigs.md) and [`T.let` annotations](strict.md).
   - Adding annotations opts code into static type checking.
 - [`T.unsafe` and `T.cast`](troubleshooting.md#escape-hatches).
   - These helpers opt code out of static checks.

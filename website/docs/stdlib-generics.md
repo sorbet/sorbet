@@ -6,9 +6,8 @@ sidebar_label: Builtin Generics
 
 > TODO(jez) This page is still a fragment. Contributions welcome!
 
-Sorbet supports [generics types](generics.md). The syntax looks likes
-`MyClass[Elem]`. For user defined generic classes, it's possible to make this
-valid Ruby syntax.
+Sorbet supports generics types. The syntax looks likes `MyClass[Elem]`. For user
+defined generic classes, it's possible to make this valid Ruby syntax.
 
 However, it's not possible to change the syntax for classes in the Ruby standard
 library that should be generic. To make up for this, we use wrappers in the T::
