@@ -289,6 +289,13 @@ private:
     }
 
     static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
+        if (it.rhs->typeAlias) {
+            if (auto e = ctx.state.beginError(it.rhs->loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                e.setHeader("Reassigning a type alias is not allowed");
+                it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
+                return true;
+            }
+        }
         if (it.rhs->constantSymbol().exists()) {
             if (it.rhs->constantSymbol().data(ctx)->dealias(ctx) != it.lhs) {
                 it.lhs.data(ctx)->resultType = core::make_type<core::AliasType>(it.rhs->constantSymbol());
