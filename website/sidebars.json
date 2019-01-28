@@ -8,7 +8,8 @@
     "Static & Runtime": [
       "gradual",
       "static",
-      "runtime"
+      "runtime",
+      "rbi"
     ],
     "Troubleshooting": [
       "troubleshooting",

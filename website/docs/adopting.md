@@ -138,41 +138,18 @@ this step:
 
 [rand-include]: https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
 
-To solve points (2) and (3), let's introduce `*.rbi` files. We saw `*.rbi` files
-mentioned before when we discussed building the `FILE_LIST`. RBI stands for
-"Ruby Interface." `*.rbi` files are purely type annotations, separate from
-runnable Ruby code.
+To solve points (2) and (3), let's introduce [`*.rbi` files](rbi.md). We saw
+`*.rbi` files mentioned before when we discussed building the `FILE_LIST`. RBI
+stands for "Ruby Interface." `*.rbi` files are purely type annotations, separate
+from runnable Ruby code.
 
-
-We can use `*.rbi` files to tell Sorbet about constants, ancestors, and methods
-that it otherwise doesn't know about. By default, Sorbet does **not** know
-about:
-
-- anything defined within a gem
-- ancestors modified with dynamic includes
-- constants accessed or defined with `const_get` or `const_set`
-- methods defined with `define_method` or `method_missing`
-
-### Using runtime reflection to find constants
-
-We can teach Sorbet about some things defined this way using runtime reflection.
-The procedure looks like this:
-
-- require everything in a codebase
-- use [`ObjectSpace`] (Ruby reflection) to discover what constants exist
-- compute the difference between what Sorbet can see statically and what we
-  discover through reflection
-- serialize the difference into `*.rbi` files
-
-This process is not yet 100% automated. The current companies using Sorbet each
-have their own method for computing and generating `*.rbi` files.
-
-<!-- TODO(jez) Fully document how to generate shims... maybe in separate doc? -->
+There is currently no official way to generate `*.rbi` files to ease the
+adoption of Sorbet. For some tips, see [RBI Files](rbi.md).
 
 > **Note**: This procedure is likely to change greatly while Sorbet is in
 > private beta.
 
-[`ObjectSpace`]: https://ruby-doc.org/core-2.4.0/ObjectSpace.html
+<!-- TODO(jez) Replace these instructions when we have a concrete way to generate rbi's -->
 
 
 ## Step 5: Enable type checking
