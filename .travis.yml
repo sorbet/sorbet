@@ -11,7 +11,7 @@ addons:
     packages:
     - bazel
 before_script:
-- echo 'common --curses no --noshow_progress --noshow_loading_progress' >> .bazelrc
+- echo 'common --curses no' >> .bazelrc
 matrix:
   include:
   - name: "Test: static"
