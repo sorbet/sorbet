@@ -13,18 +13,18 @@ This is one of three docs aimed at helping answer common questions about Sorbet:
 
 This doc covers two main topics:
 
-- When stuck, how to find out **why**
-- Regardless of why, how to **get unstuck**
+- When stuck, how to [find out **why**](#validating-our-assumptions).
+- Regardless of why, [how to **get unstuck**](#escape-hatches).
 
 
 ## Validating our assumptions
 
-When faced with a type error, checking our assumptions is step number one.
-Here are some tools and tactics to help.
+When faced with a type error, checking our assumptions is step number one. The
+first questiont to ask is:
 
-> Sometimes even if we can figure out where the problem is coming from, it's not
-> possible to fix it easily. Step number two is to work around the problem; see
-> [Escape Hatches](#escape-hatches) below.
+> Are my files `# typed: false` or `# typed: true`?
+
+There are also some tools for helping debug type-related errors:
 
 ### `T.reveal_type`
 
@@ -98,6 +98,18 @@ even when it does:
 - Maybe a method Sorbet thinks doesn't exist actually **does** exist because it
   was dynamically defined with `define_method` or `missing_method`. See [Escape
   Hatches](#escape-hatches) below for working around this.
+
+### `*.rbi` files & missing methods
+
+One of the most confusing errors from Sorbet can be "7003: Method does not
+exist." Ruby is a very dynamic language, and methods can be defined in ways
+Sorbet cannot see statically. It's possible that even though a method exists at
+runtime, Sorbet cannot see it.
+
+However, we can use `*.rbi` files to declare methods to Sorbet so that **can**
+see them statically. At Stripe, we even have a way to auto-generate these files:
+
+[→ RBI files](rbi.md)
 
 ### Help with common errors
 
