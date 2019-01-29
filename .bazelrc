@@ -9,8 +9,10 @@ common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
 ##
-##  Custom toolchain. Should become the default after we figure out how to make sanitized builds run well on OSX
+##  Custom toolchain.
 ##
+build --config=clang7
+
 test:clang7 --crosstool_top=@llvm_toolchain//:toolchain
 build:clang7 --crosstool_top=@llvm_toolchain//:toolchain
 
@@ -65,7 +67,6 @@ build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=debugsymbols
 build:release-common --config=nopie
-build:release-common --config=lto
 build:release-common --stamp
 
 # harden: mark relocation sections read-only

@@ -19,6 +19,7 @@ JEMALLOC_BUILD_COMMAND = """
    fi
    echo "$$path"
   }
+  export PATH="/usr/local/bin:$$PATH" # find autoconf on mac
   export CC=$$(absolutize $(CC))
   export CXX=$$(absolutize $(CC))
   [ "$$(uname)" = "Linux" ] && export AR=$$(absolutize $(AR))
@@ -26,12 +27,16 @@ JEMALLOC_BUILD_COMMAND = """
   export OBJCOPY=$$(absolutize $(OBJCOPY))
   export CFLAGS=$(CC_FLAGS)
   export CXXFLAGS=$(CC_FLAGS)
+  export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
+  export EXTRA_CFLAGS="-stdlib=libc++ $${LTOFLAGS}"
+  export EXTRA_CXXFLAGS="$${EXTRA_CFLAGS}"
+  export LDFLAGS="$${LTOFLAGS} $$([ "$$(uname)" = "Linux" ] && echo " -fuse-ld=lld")"
   pushd $$(dirname $(location autogen.sh)) && \
-  EXTRA_CFLAGS=-flto=thin EXTRA_CXXFLAGS='-flto=thin -stdlib=libc++' LDFLAGS="-flto=thin$$([ "$$(uname)" = "Linux" ] && echo " -fuse-ld=lld")" ./autogen.sh --without-export && \
-  make build_lib_static -j4  && \
-  popd && \
-  mv $$(dirname $(location autogen.sh))/lib/libjemalloc.a $(location lib/libjemalloc.a) && \
-  mv $$(dirname $(location autogen.sh))/include/jemalloc/jemalloc.h $(location include/jemalloc/jemalloc.h)
+    ./autogen.sh --without-export && \
+    make build_lib_static -j4  && \
+    popd && \
+    mv $$(dirname $(location autogen.sh))/lib/libjemalloc.a $(location lib/libjemalloc.a) && \
+    mv $$(dirname $(location autogen.sh))/include/jemalloc/jemalloc.h $(location include/jemalloc/jemalloc.h)
 """
 
 genrule(
