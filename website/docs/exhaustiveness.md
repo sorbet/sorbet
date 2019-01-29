@@ -1,6 +1,6 @@
 ---
 id: exhaustiveness
-title: Exhaustivness Checking
+title: Exhaustiveness Checking
 ---
 
 > **Note**: Sorbet does not currently have first-class support for
