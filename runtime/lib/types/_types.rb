@@ -26,8 +26,8 @@
 
 module T
   # T.any(<Type>, <Type>, ...) -- matches any of the types listed
-  def self.any(*types)
-    T::Types::Union.new(types)
+  def self.any(type_a, type_b, *types)
+    T::Types::Union.new([type_a, type_b] + types)
   end
 
   # Shorthand for T.any(type, NilClass)
@@ -47,8 +47,8 @@ module T
   end
 
   # T.all(<Type>, <Type>, ...) -- matches an object that has all of the types listed
-  def self.all(*types)
-    T::Types::Intersection.new(types)
+  def self.all(type_a, type_b, *types)
+    T::Types::Intersection.new([type_a, type_b] + types)
   end
 
   # Matches any of the listed values
@@ -184,7 +184,7 @@ module T
   # sig {params(arg: T.nilable(A), msg: T.nilable(String)).returns(A)}
   def self.must(arg, msg=nil)
     if msg
-      if !msg.is_a?(String)
+      if !T.unsafe(msg).is_a?(String)
         raise TypeError.new("T.must expects a string as second argument")
       end
     else

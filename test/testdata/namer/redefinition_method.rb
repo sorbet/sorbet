@@ -7,9 +7,9 @@ class Main
         a
     end
 
-    def foo(a, b) # error: `foo`: Method redefined
+    def foo(a, b) # error: Method redefined
     end
 
-    def foo(a, b, c) # error: `foo`: Method redefined
+    def foo(a, b, c) # error: Method redefined
     end
 end

@@ -23,7 +23,7 @@ sig {returns(Integer)}
 def too_many_args
   1
 end
-def too_many_args(a) # error: `too_many_args`: Method redefined
+def too_many_args(a) # error: Method redefined without matching argument count. Expected: `0`, got: `1`
   2
 end
 T.reveal_type(too_many_args(2)) # error: Revealed type: `T.untyped`
@@ -32,7 +32,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_args(a)
   1
 end
-def wrong_args(a:) # error: `wrong_args`: Method redefined
+def wrong_args(a:) # error: Method redefined with mismatched argument attribute `isKeyword`. Expected: `false`, got: `true`
   2
 end
 T.reveal_type(wrong_args(a: 2)) # error: Revealed type: `T.untyped`
@@ -41,7 +41,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_name(a)
   1
 end
-def wrong_name(b) # error: `wrong_name`: Method redefined
+def wrong_name(b) # error: Method redefined with mismatched argument name. Expected: `a`, got: `b`
   2
 end
 T.reveal_type(wrong_name(3)) # error: Revealed type: `T.untyped`
@@ -50,7 +50,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_repeatedness(a)
   1
 end
-def wrong_repeatedness(*a) # error: `wrong_repeatedness`: Method redefined
+def wrong_repeatedness(*a) # error: Method redefined with mismatched argument attribute `isRepeated`. Expected: `false`, got: `true`
   2
 end
 T.reveal_type(wrong_repeatedness(3)) # error: Revealed type: `T.untyped`
@@ -59,7 +59,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_blockness(a)
   1
 end
-def wrong_blockness(*a) # error: `wrong_blockness`: Method redefined
+def wrong_blockness(&a) # error: Method redefined with mismatched argument attribute `isBlock`. Expected: `false`, got: `true`
   2
 end
-T.reveal_type(wrong_blockness(3)) # error: Revealed type: `T.untyped`
+T.reveal_type(wrong_blockness()) # error: Revealed type: `T.untyped`

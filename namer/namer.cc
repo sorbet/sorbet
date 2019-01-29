@@ -532,8 +532,14 @@ public:
         return data->intrinsic != nullptr && data->arguments().empty() && data->resultType == nullptr;
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::SymbolRef sym, const vector<ParsedArg> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
+        auto sym = ctx.owner;
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
+            if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                e.setHeader("Method redefined without matching argument count. Expected: `{}`, got: `{}`",
+                            sym.data(ctx)->arguments().size(), parsedArgs.size());
+                e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+            }
             return false;
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
@@ -541,15 +547,35 @@ public:
             auto symArg = sym.data(ctx)->arguments()[i].data(ctx);
 
             if (symArg->isKeyword() != methodArg.keyword) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    e.setHeader("Method redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
+                                "isKeyword", symArg->isKeyword(), methodArg.keyword);
+                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                }
                 return false;
             }
             if (symArg->isBlockArgument() != methodArg.block) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    e.setHeader("Method redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
+                                "isBlock", symArg->isBlockArgument(), methodArg.block);
+                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                }
                 return false;
             }
             if (symArg->isRepeated() != methodArg.repeated) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    e.setHeader("Method redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
+                                "isRepeated", symArg->isRepeated(), methodArg.repeated);
+                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                }
                 return false;
             }
             if (symArg->name != methodArg.name) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    e.setHeader("Method redefined with mismatched argument name. Expected: `{}`, got: `{}`",
+                                symArg->name.toString(ctx), methodArg.name.toString(ctx));
+                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                }
                 return false;
             }
         }
@@ -600,17 +626,9 @@ public:
                 pushBlockArg(ctx, sym);
                 return method;
             }
-            if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), sym, parsedArgs)) {
+            if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), method->declLoc, parsedArgs)) {
                 sym.data(ctx)->addLoc(ctx, method->declLoc);
             } else {
-                if (!method->loc.file().data(ctx).isRBI() && !sym.data(ctx)->loc().file().data(ctx).isRBI()) {
-                    if (auto e = ctx.state.beginError(method->declLoc, core::errors::Namer::RedefinitionOfMethod)) {
-                        e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
-                        e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                    }
-                }
-                // TODO Check that the previous args match the new ones instead of
-                // just moving the original one to the side
                 ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
             }
         }
