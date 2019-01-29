@@ -81,7 +81,7 @@ reports no errors in this file:
 # typed: true
 
 def log_env(env, key)
-  puts "LOG: #{env[key]}"
+  puts "LOG: #{key} => #{env[key]}"
 end
 
 log_env({timeout_len: 2000}, 'timeout_len')
@@ -93,8 +93,11 @@ check, we can add a signature to `log_env`:
 
 ```ruby
 # typed: true
+
+# (1) add this to get access to sig
 extend T::Sig
 
+# (2) add a signature
 sig {params(env: T::Hash[Symbol, Integer], key: Symbol).void}
 def log_env(env, key)
   puts "LOG: #{key} => #{env[key]}"
