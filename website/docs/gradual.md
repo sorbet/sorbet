@@ -170,7 +170,7 @@ three main phases of `T.untyped` in a codebase:
 1.  The long tail, where typed code becomes the majority.
 
 For context, at Stripe we're somewhere about halfway between (2) and (3). We've
-already enabled `typed: true` in the vast majority of files in pay-server, but
+already enabled `typed: true` in the vast majority of files in our main code base, but
 most methods and even a few core abstractions are not typed yet.
 
 There are a number of tools for managing `T.untyped` in a codebase:
