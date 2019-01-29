@@ -649,7 +649,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 }
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
-    ENFORCE(original.exists(), "making a constant name over non-exiting name");
+    ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.data(*this)->kind == UTF8 ||
                 (original.data(*this)->kind == UNIQUE &&
                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),

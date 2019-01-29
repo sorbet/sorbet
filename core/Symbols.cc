@@ -254,6 +254,11 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                 }
             }
         }
+        auto shortName = name.data(gs)->shortName(gs);
+        if (!shortName.empty() && std::isupper(shortName.front())) {
+            vector<Symbol::FuzzySearchResult> constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan);
+            res.insert(res.end(), constant_matches.begin(), constant_matches.end());
+        }
     } else if (name.data(gs)->kind == NameKind::CONSTANT) {
         res = findMemberFuzzyMatchConstant(gs, name, betterThan);
     }
@@ -273,9 +278,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     best.symbol = Symbols::noSymbol();
     best.name = NameRef::noName();
     best.distance = betterThan;
-    ENFORCE(name.data(gs)->kind == NameKind::CONSTANT);
-    ENFORCE(name.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8);
-    auto currentName = name.data(gs)->cnst.original.data(gs)->raw.utf8;
+    auto currentName = name.data(gs)->shortName(gs);
     if (best.distance < 0) {
         best.distance = 1 + (currentName.size() / 2);
     }

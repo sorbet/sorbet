@@ -1,0 +1,10 @@
+test/cli/suggest-new/suggest-new.rb:9: Method `ABC` does not exist on `T.class_of(<root>)` http://go/e/7003
+     9 |ABC(1)
+        ^^^^^^
+    test/cli/suggest-new/suggest-new.rb:4: Did you mean: `ABE.new`?
+     4 |class ABE
+        ^^^^^^^^^
+    test/cli/suggest-new/suggest-new.rb:2: Did you mean: `ABD.new`?
+     2 |class ABD
+        ^^^^^^^^^
+Errors: 1

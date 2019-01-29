@@ -421,8 +421,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     vector<ErrorLine> lines;
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
-                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?",
-                                                           alternative.symbol.show(ctx)));
+                        auto possible_symbol = alternative.symbol.data(ctx);
+                        if (!possible_symbol->isClass() && !possible_symbol->isMethod()) {
+                            continue;
+                        }
+                        auto suggestedName = possible_symbol->isClass() ? alternative.symbol.show(ctx) + ".new"
+                                                                        : alternative.symbol.show(ctx);
+                        lines.emplace_back(
+                            ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?", suggestedName));
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }

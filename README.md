@@ -293,8 +293,8 @@ When run, its output will be compared against `<name>.out` in that folder.
 
 Our bazel setup will produce two targets:
 
-- `bazel run run_<name>` will execute the `.sh` file
-- `bazel test test_<name>` will execute the `.sh` and check it against what's in
+- `bazel run //test/cli:test_<name>` will execute the `.sh` file
+- `bazel test //test/cli:test_<name>` will execute the `.sh` and check it against what's in
   the `.out` file.
 
 The scripts are run inside Bazel, so they will be executed from the top of the
