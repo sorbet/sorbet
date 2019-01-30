@@ -14,7 +14,7 @@ before_script:
 - echo 'common --curses no' >> .bazelrc
 - git config --local user.name "Sorbet Travis bot"
 - git config --local user.email "sorbet@stripe.com"
-- export TRAVIS_TAG=${TRAVIS_TAG:-$(git log --format=%cd-%h --date=iso-strict -1)}
+- export TRAVIS_TAG=${TRAVIS_TAG:-$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)}
 before_deploy:
 - git tag $TRAVIS_TAG
 matrix:
@@ -24,14 +24,14 @@ matrix:
     script:
     - bazel version
     - ./tools/scripts/ci_checks.sh
-    - bazel build --config=travis //...
-    - bazel test --config=travis //...
+    - travis_wait 90 bazel build --config=travis //...
+    - travis_wait 90 bazel test --config=travis //...
   - name: "Release: static for osx"
     os: osx
     osx_image: xcode9.3 # we want jdk 1.8, bazel doesn't support the newer one that ships with 9.4+
     script:
     - brew install bazel
-    - bazel build main:sorbet --config=release-mac
+    - travis_wait 90 bazel build main:sorbet --config=release-mac
     - cp bazel-bin/main/sorbet sorbet-osx
     deploy: &deploy_base
       provider: releases
@@ -44,7 +44,7 @@ matrix:
   - name: "Release: static for linux"
     language: cpp
     script:
-    - bazel build main:sorbet --config=release-linux
+    - travis_wait 90 bazel build main:sorbet --config=release-linux
     - cp bazel-bin/main/sorbet sorbet-linux
     deploy:
       <<: *deploy_base
