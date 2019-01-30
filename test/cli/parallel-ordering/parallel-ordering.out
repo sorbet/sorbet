@@ -1,11 +1,11 @@
-test/cli/parallel-ordering/2.rb:3: Method redefined with mismatched argument name. Expected: `a`, got: `b` http://go/e/4010
+test/cli/parallel-ordering/2.rb:3: Method `Foo#hi` redefined with mismatched argument name. Expected: `a`, got: `b` http://go/e/4010
      3 |    def hi(b)
             ^^^^^^^^^
     test/cli/parallel-ordering/1.rb:3: Previous definition
      3 |    def hi(a)
             ^^^^^^^^^
 
-test/cli/parallel-ordering/3.rb:3: Method redefined with mismatched argument name. Expected: `b`, got: `c` http://go/e/4010
+test/cli/parallel-ordering/3.rb:3: Method `Foo#hi` redefined with mismatched argument name. Expected: `b`, got: `c` http://go/e/4010
      3 |    def hi(c)
             ^^^^^^^^^
     test/cli/parallel-ordering/2.rb:3: Previous definition
