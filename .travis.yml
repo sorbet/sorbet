@@ -16,7 +16,7 @@ before_script:
 - git config --local user.email "sorbet@stripe.com"
 - export TRAVIS_TAG=${TRAVIS_TAG:-$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)}
 before_deploy:
-- git tag $TRAVIS_TAG
+- git tag -f $TRAVIS_TAG
 matrix:
   include:
   - name: "Test: static"
