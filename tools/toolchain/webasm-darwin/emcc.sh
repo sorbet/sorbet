@@ -1,6 +1,11 @@
 #!/bin/bash
 set -eo pipefail
 
+export PATH="${PATH}:/usr/local/bin/" # this is where we find node
+
+command -v node || { echo 'will need node' ; exit 1; }
+command -v realpath || { echo 'will need realpath' ; exit 1; }
+
 EM_CONFIG="LLVM_ROOT='${PWD}/external/emscripten_clang_darwin/';"
 EM_CONFIG+="EMSCRIPTEN_NATIVE_OPTIMIZER='${PWD}/external/external/emscripten_clang_darwin/optimizer';"
 EM_CONFIG+="BINARYEN_ROOT='${PWD}/external/emscripten_clang_darwin/binaryen';"

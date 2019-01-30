@@ -4,8 +4,10 @@ cc_toolchain_suite(
     name = "webasm-linux",
     tags = ["manual"],
     toolchains = {
+        "webasm": ":webasm_toolchain_linux",
         "webasm-linux": ":webasm_toolchain_linux",
         "webasm|emscripten": ":webasm_toolchain_linux",
+        "webasm|webasm": ":webasm_toolchain_linux",
     },
 )
 

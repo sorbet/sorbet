@@ -182,26 +182,26 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "emscripten_toolchain",
-        url = "https://github.com/kripken/emscripten/archive/1.38.21.tar.gz",
+        url = "https://github.com/kripken/emscripten/archive/1.38.25.tar.gz",
         build_file = "//third_party:emscripten-toolchain.BUILD",
-        sha256 = "f3e6f1e6039256968131bc491ea8c2e1bfc31c41c1ec1370e2f1fae9a8e56faa",
-        strip_prefix = "emscripten-1.38.21"
+        sha256 = "4d6fa350895fabc25b89ce5f9dcb528e719e7c2bf7dacab2a3e3cc818ecd7019",
+        strip_prefix = "emscripten-1.38.25"
     )
 
     http_archive(
         name = "emscripten_clang_linux",
-        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.21.tar.gz",
+        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.25.tar.gz",
         build_file = "//third_party:emscripten-clang.BUILD",
-        sha256 = "355d64048529b77e076de84e5aa842773afbb672ccad1308f4cc734afe581a35",
-        strip_prefix = "emscripten-llvm-e1.38.21",
+        sha256 = "0e9a5a114a60c21604f4038b573109bd31424aeba275b4173480485ca0a56ba4",
+        strip_prefix = "emscripten-llvm-e1.38.25",
     )
 
     http_archive(
         name = "emscripten_clang_darwin",
-        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.21.tar.gz",
+        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.25.tar.gz",
         build_file = "//third_party:emscripten-clang.BUILD",
-        sha256 = "ce473d2bf88dda0ec313c1899caaa586d69a4336cbc4bd2c6da1f5be217680cd",
-        strip_prefix = "emscripten-llvm-e1.38.21",
+        sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
+        strip_prefix = "emscripten-llvm-e1.38.25",
     )
 
     git_repository(

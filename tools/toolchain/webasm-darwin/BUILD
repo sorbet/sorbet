@@ -4,8 +4,10 @@ cc_toolchain_suite(
     name = "webasm-darwin",
     tags = ["manual"],
     toolchains = {
+        "webasm": ":webasm_toolchain_darwin",
         "webasm-darwin": ":webasm_toolchain_darwin",
         "webasm|emscripten": ":webasm_toolchain_darwin",
+        "webasm|webasm": ":webasm_toolchain_darwin",
     },
 )
 
