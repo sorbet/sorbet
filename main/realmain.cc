@@ -205,7 +205,7 @@ int realmain(int argc, char *argv[]) {
             std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
             logger->info("👋 Hey there! Heads up that this is not a release build of sorbet.\n"
                          "Release builds are faster and more well-supported by the Sorbet team.\n"
-                         "Consider rebuilding sorbet with the `--config=release` flag!\n"
+                         "Check out the README to learn how to build Sorbet in release mode.\n"
                          "To forcibly silence this error, either pass --silence-dev-message,\n"
                          "or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.\n");
         }
