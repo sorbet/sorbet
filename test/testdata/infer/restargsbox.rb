@@ -7,7 +7,7 @@ class A
   sig {params(xs: E).void}
   def foo(*xs)
     # loads of repeated args become Array of element type
-    T.reveal_type(xs) # error: Revealed type: `T::Array[A#E]`
+    T.reveal_type(xs) # error: Revealed type: `T::Array[A::E]`
   end
 end
 

@@ -4,8 +4,8 @@ class ::<root> < ::Object () @ (test/testdata/namer/constants.rb:2, https://git.
     method ::A#<static-init> () @ test/testdata/namer/constants.rb:2
     class ::A::B < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/constants.rb:5
       method ::A::B#<static-init> () @ test/testdata/namer/constants.rb:5
-      static-field ::A::B#C -> Integer(1) @ test/testdata/namer/constants.rb:3
-      static-field ::A::B#D -> Integer(1) @ test/testdata/namer/constants.rb:8
+      static-field ::A::B::C -> Integer(1) @ test/testdata/namer/constants.rb:3
+      static-field ::A::B::D -> Integer(1) @ test/testdata/namer/constants.rb:8
     class ::A::<Class:B> < ::Module () @ test/testdata/namer/constants.rb:3
   class ::<Class:A> < ::Module () @ test/testdata/namer/constants.rb:2
 

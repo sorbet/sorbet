@@ -2,7 +2,7 @@ begin
   ::RubyTyper.keep_for_ide(::C)
   class ::C<<constant:C>> < (::<todo sym>)
     def self.<static-init><<static-init>>()
-      ::C#L = begin
+      ::C::L = begin
         ::RubyTyper.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
         T.let(self(<singleton class:<constant:C>>).lambda() do |x|
           x$1.*(x$1)

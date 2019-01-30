@@ -184,7 +184,7 @@ subgraph "cluster_::Array#returns_self" {
     "bb::Array#returns_self_1" [shape = parallelogram];
 
     "bb::Array#returns_self_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$2: T::Array[Array#Elem] = self\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Array#Elem]\l<unconditional>\l"
+        label = "block[id=0]()\l<returnMethodTemp>$2: T::Array[Array::Elem] = self\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Array::Elem]\l<unconditional>\l"
     ];
 
     "bb::Array#returns_self_0" -> "bb::Array#returns_self_1" [style="bold"];

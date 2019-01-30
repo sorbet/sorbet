@@ -6,8 +6,8 @@ begin
           ::RubyTyper.keep_for_ide(::A)
           <emptyTree>
         end
-        ::A::B#C
-        ::A::B#D
+        ::A::B::C
+        ::A::B::D
         ::A
         <emptyTree>
       end
@@ -16,7 +16,7 @@ begin
   module ::A<<constant:A>> < ()
     def self.<static-init><<static-init>>()
       begin
-        ::A::B#C = 1
+        ::A::B::C = 1
         begin
           ::RubyTyper.keep_for_ide(::A::B)
           <emptyTree>
@@ -28,8 +28,8 @@ begin
   module ::A::B<<constant:B>> < ()
     def self.<static-init><<static-init>>()
       begin
-        ::A::B#C
-        ::A::B#D = 1
+        ::A::B::C
+        ::A::B::D = 1
         <emptyTree>
       end
     end

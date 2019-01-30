@@ -30,7 +30,7 @@ namespace {
  * To solve this, we collect any failed resolutions into a pair of TODO lists,
  * and repeatedly walk them until we succeed or stop making progress. In
  * practice this loop terminates after 3 or fewer passes on most real codebases.
- * We also tack defined type aliases in a separate map.
+ * We also track defined type aliases in a separate map.
  *
  * This walk replaces ast::UnresolvedConstantLit nodes with either ast::ConstantLit nodes.
  * Successful resolutions are removed from the `todo_` lists.

@@ -1,9 +1,9 @@
 class ::<root> < ::Object () @ (test/testdata/resolver/let_var.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
   method #<static-init> () @ ???
-  static-field #Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/let_var.rb:38
+  static-field ::Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/let_var.rb:38
   class ::Child < ::Parent (<constant:Mixin>) @ test/testdata/resolver/let_var.rb:23
     method ::Child#<static-init> () @ test/testdata/resolver/let_var.rb:23
-    static-field ::Child#@@undefined_cvar -> T.untyped @ test/testdata/resolver/let_var.rb:28
+    static-field ::Child::@@undefined_cvar -> T.untyped @ test/testdata/resolver/let_var.rb:28
     field ::Child#@undefinedivar -> T.untyped @ test/testdata/resolver/let_var.rb:34
     method ::Child#child_method () @ test/testdata/resolver/let_var.rb:30
   class ::<Class:Child> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:23
@@ -12,11 +12,11 @@ class ::<root> < ::Object () @ (test/testdata/resolver/let_var.rb:2, https://git
   class ::<Class:Child1> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:39
   class ::Mixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/let_var.rb:18
     method ::Mixin#<static-init> () @ test/testdata/resolver/let_var.rb:18
-    static-field ::Mixin#@@mixin_cvar -> Integer @ test/testdata/resolver/let_var.rb:19
+    static-field ::Mixin::@@mixin_cvar -> Integer @ test/testdata/resolver/let_var.rb:19
   class ::<Class:Mixin> < ::Module () @ test/testdata/resolver/let_var.rb:18
   class ::Parent < ::Object () @ test/testdata/resolver/let_var.rb:2
     method ::Parent#<static-init> () @ test/testdata/resolver/let_var.rb:2
-    static-field ::Parent#@@class_var -> String @ test/testdata/resolver/let_var.rb:8
+    static-field ::Parent::@@class_var -> String @ test/testdata/resolver/let_var.rb:8
     field ::Parent#@ivar -> Integer @ test/testdata/resolver/let_var.rb:4
     field ::Parent#@ivar2 -> Integer @ test/testdata/resolver/let_var.rb:5
     method ::Parent#hi () @ test/testdata/resolver/let_var.rb:12

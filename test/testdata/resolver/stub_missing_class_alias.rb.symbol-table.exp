@@ -5,11 +5,11 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
       class ::O::B::<constant:Doc1>$1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/stub_missing_class_alias.rb:15
         class ::O::B::<constant:Doc1>$1::J < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:15
         class ::O::B::<constant:Doc1>$1::<Class:J> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/stub_missing_class_alias.rb:15
-      static-field ::O::B#Doc1 -> Integer(1) @ test/testdata/resolver/stub_missing_class_alias.rb:9
+      static-field ::O::B::Doc1 -> Integer(1) @ test/testdata/resolver/stub_missing_class_alias.rb:9
       class ::O::B::<constant:Document>$1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/stub_missing_class_alias.rb:14
         class ::O::B::<constant:Document>$1::J < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:14
         class ::O::B::<constant:Document>$1::<Class:J> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/stub_missing_class_alias.rb:14
-      static-field ::O::B#Document -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:8
+      static-field ::O::B::Document -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:8
       class ::O::B::J < ::Object () @ test/testdata/resolver/stub_missing_class_alias.rb:5
       class ::O::B::<Class:J> < ::<Class:Object> () @ test/testdata/resolver/stub_missing_class_alias.rb:5
     class ::O::<Class:B> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/stub_missing_class_alias.rb:4

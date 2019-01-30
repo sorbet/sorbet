@@ -2,25 +2,25 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolution_order.rb:8, ht
   method #<static-init> () @ ???
   class ::A < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_order.rb:34
     method ::A#<static-init> () @ test/testdata/resolver/resolution_order.rb:34
-    static-field ::A#AB -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:35
-    static-field ::A#AV -> Integer @ test/testdata/resolver/resolution_order.rb:37
+    static-field ::A::AB -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:35
+    static-field ::A::AV -> Integer @ test/testdata/resolver/resolution_order.rb:37
     class ::A::DOES_NOT_EXIST < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
     class ::A::<Class:DOES_NOT_EXIST> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/resolution_order.rb:11
   class ::<Class:A> < ::Module () @ test/testdata/resolver/resolution_order.rb:34
   class ::B < ::Object () @ test/testdata/resolver/resolution_order.rb:40
     method ::B#<static-init> () @ test/testdata/resolver/resolution_order.rb:41
-    static-field ::B#BC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:41
+    static-field ::B::BC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:41
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:40
   class ::C < ::B () @ test/testdata/resolver/resolution_order.rb:44
   class ::<Class:C> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:44
   class ::D < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_order.rb:62
     method ::D#<static-init> () @ test/testdata/resolver/resolution_order.rb:63
-    static-field ::D#DA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:63
+    static-field ::D::DA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:63
   class ::<Class:D> < ::Module () @ test/testdata/resolver/resolution_order.rb:62
   class ::E < ::RubyTyper::ImplicitModuleSuperclass (<constant:D>) @ test/testdata/resolver/resolution_order.rb:56
     method ::E#<static-init> () @ test/testdata/resolver/resolution_order.rb:56
-    static-field ::E#EA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:58
-    static-field ::E#EC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:59
+    static-field ::E::EA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:58
+    static-field ::E::EC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:59
   class ::<Class:E> < ::Module () @ test/testdata/resolver/resolution_order.rb:56
   class ::F < ::RubyTyper::ImplicitModuleSuperclass (<constant:E>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:47
     method ::F#<static-init> () @ test/testdata/resolver/resolution_order.rb:47

@@ -2,7 +2,7 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolve_through_alias.rb:
   method #<static-init> () @ ???
   class ::A < ::Object () @ test/testdata/resolver/resolve_through_alias.rb:8
     method ::A#<static-init> () @ test/testdata/resolver/resolve_through_alias.rb:8
-    static-field ::A#N -> AliasType { symbol = ::NS } @ test/testdata/resolver/resolve_through_alias.rb:9
+    static-field ::A::N -> AliasType { symbol = ::NS } @ test/testdata/resolver/resolve_through_alias.rb:9
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/resolve_through_alias.rb:8
   class ::NS < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolve_through_alias.rb:3
     method ::NS#<static-init> () @ test/testdata/resolver/resolve_through_alias.rb:4

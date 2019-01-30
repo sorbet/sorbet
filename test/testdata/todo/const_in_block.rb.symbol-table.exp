@@ -5,5 +5,5 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::<Class:Test>#<block> () @ test/testdata/todo/const_in_block.rb:3
     class ::<Class:Test>::A < ::Object () @ test/testdata/todo/const_in_block.rb:4
     class ::<Class:Test>::<Class:A> < ::<Class:Object> () @ test/testdata/todo/const_in_block.rb:4
-    static-field ::<Class:Test>#B -> Integer(17) @ test/testdata/todo/const_in_block.rb:7
+    static-field ::<Class:Test>::B -> Integer(17) @ test/testdata/todo/const_in_block.rb:7
 

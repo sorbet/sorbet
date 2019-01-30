@@ -422,12 +422,13 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
 }
 
 string Symbol::fullName(const GlobalState &gs) const {
-    string owner_str;
-    if (!this->owner.exists() || this->owner == Symbols::root()) {
-        return fmt::format("{}{}", this->isClass() ? "::" : "#", this->name.show(gs));
-    }
+    bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
+    string owner = includeOwner ? this->owner.data(gs)->fullName(gs) : "";
 
-    return fmt::format("{}{}{}", this->owner.data(gs)->fullName(gs), this->isClass() ? "::" : "#", this->name.show(gs));
+    bool needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
+    string separator = needsColonColon ? "::" : "#";
+
+    return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
 }
 
 bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
@@ -454,7 +455,11 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     if (this->isClass()) {
         type = "class"sv;
     } else if (this->isStaticField()) {
-        type = "static-field"sv;
+        if (this->isStaticTypeAlias()) {
+            type = "static-field-type-alias"sv;
+        } else {
+            type = "static-field"sv;
+        }
     } else if (this->isField()) {
         type = "field"sv;
     } else if (this->isMethod()) {
@@ -578,7 +583,10 @@ string Symbol::show(const GlobalState &gs) const {
         return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
                            this->name.data(gs)->show(gs));
     }
-    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), this->isClass() ? "::" : "#",
+
+    auto needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
+
+    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
                        this->name.data(gs)->show(gs));
 }
 

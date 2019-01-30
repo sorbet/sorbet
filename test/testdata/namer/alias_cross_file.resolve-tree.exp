@@ -11,7 +11,7 @@ begin
 
     def self.<static-init><<static-init>>()
       self(<singleton class:<constant:TestSig>>).sig() do ||
-        self(<constant:Builder>).returns(#T2)
+        self(<constant:Builder>).returns(::T2)
       end
     end
   end
@@ -25,7 +25,7 @@ begin
           ::RubyTyper.keep_for_ide(::T1)
           <emptyTree>
         end
-        #T2 = ::T1
+        ::T2 = ::T1
         <emptyTree>
       end
     end
