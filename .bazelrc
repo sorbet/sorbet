@@ -11,10 +11,8 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --config=clang7
-
-test:clang7 --crosstool_top=@llvm_toolchain//:toolchain
-build:clang7 --crosstool_top=@llvm_toolchain//:toolchain
+build --crosstool_top=@llvm_toolchain//:toolchain
+test --crosstool_top=@llvm_toolchain//:toolchain
 
 ##
 ##  Common build options across all build configurations
@@ -71,10 +69,9 @@ build:release-common --stamp
 
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
-build:release-linux --config=lto-linux --config=clang7 --config=release-common
+build:release-linux --config=lto-linux --config=release-common
 
 build:release-mac --config=release-common
-build:release-mac --config=clang7
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=forcedebug
@@ -154,8 +151,8 @@ build:sanitize --cxxopt=-DADDRESS_SANITIZER # used by abseil
 build:sanitize --define unsanitized=false
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --config=clang7 --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-test:sanitize-linux --config=clang7 --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+test:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 build:sanitize-linux --config=sanitize
 test:sanitize-linux --config=sanitize
 
