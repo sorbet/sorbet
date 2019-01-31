@@ -36,7 +36,7 @@ module T::Types
     end
 
     private def pretty_names(names)
-      types = names.map(&:name).sort
+      types = names.map(&:name).compact.sort
       if types.length == 2 && types[0] == 'FalseClass' && types[1] == 'TrueClass'
         types = ['TrueClass', 'FalseClass']
       end

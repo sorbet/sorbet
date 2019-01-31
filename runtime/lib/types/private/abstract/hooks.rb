@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Private::Abstract::Hooks
   # This will become the self.extend_object method on a module that extends Abstract::Hooks.
@@ -37,7 +37,7 @@ module T::Private::Abstract::Hooks
   private def prepended(other)
     # Prepending abstract methods is weird. You'd only be able to override them via other prepended
     # modules, or in subclasses. Punt until we have a use case.
-    raise "Prepending abstract mixins is not currently supported. Please explain your use case " \
+    Kernel.raise "Prepending abstract mixins is not currently supported. Please explain your use case " \
           "to #dev-productivity."
   end
 end

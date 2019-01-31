@@ -16,4 +16,9 @@ module T::Props::Constants
     Opus::Enum
     BSON::Timestamp
   ]).freeze
+
+  # A bit silly, but in Ruby, if you use any? with a Set you get a deoptimized version which uses allocations.
+  # While if you use an Array, you get the nice version. Providing this for CustomType.scalar_type?
+  # which doesn't care about Sets, but does need to use any? in an optimized fashion.
+  SCALAR_TYPES_ARRAY = SCALAR_TYPES.to_a.freeze
 end

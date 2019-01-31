@@ -96,7 +96,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       AbstractClass.foo
     end
     assert_equal(
-      "The method `foo` is declared as `abstract`. It does not have an implementation.",
+      "The method `foo` on #<Class:Opus::Types::Test::AbstractValidationTest::AbstractClass> is declared as `abstract`. It does not have an implementation.",
       err.message
     )
   end

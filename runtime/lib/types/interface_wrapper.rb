@@ -9,16 +9,6 @@
 class T::InterfaceWrapper
 
   module Helpers
-    def from_instance(obj)
-      if defined?(Opus) && defined?(Opus::Error)
-        Opus::Error.soft("Called T::InterfaceWrapper::Helpers.from_instance",
-                              storytime: {
-                                self_klass: self.class,
-                              }, notify: 'nelhage')
-      end
-      T::InterfaceWrapper.wrap_instance(obj, self)
-    end
-
     def wrap_instance(obj)
       T::InterfaceWrapper.wrap_instance(obj, self)
     end

@@ -229,7 +229,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       e = assert_raises do
         OptionalMigrate.from_hash({})
       end
-      assert_match(/Property foo is nil/, e.message)
+      assert_match(/tried to deserialize a required prop from a nil value/, e.message)
     end
 
     it "won't serialize with a missing prop" do
@@ -326,7 +326,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     e = assert_raises do
       MatrixStruct.from_hash("e" => nil)
     end
-    assert_match(/is nil/, e.message)
+    assert_match(/tried to deserialize a required prop from a nil value/, e.message)
   end
 
   it 'constructs as expected' do

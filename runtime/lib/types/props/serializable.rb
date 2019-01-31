@@ -103,54 +103,64 @@ module T::Props::Serializable
   def deserialize(hash, strict=false)
     decorator = self.class.decorator
 
+    matching_props = 0
+
     decorator.props.each do |p, rules|
       hkey = rules[:serialized_form]
       val = hash[hkey]
       if val.nil?
         if rules[:optional] == false || rules[:optional] == :migrate
           val = decorator.get_default(rules, self.class)
-          raise "Property #{hkey} is nil. Either provide a default: or factory: on it, or do a migration to populate it" if val.nil?
+          if val.nil?
+            Opus::Error.hard(
+              "tried to deserialize a required prop from a nil value, either provide a default: or factory: on it, or do a migration to populate it",
+              storytime: {
+                prop: hkey,
+                klass: self.class.name,
+              },
+            )
+          end
         elsif T::Props::Utils.need_nil_read_check?(rules)
           self.required_prop_missing_from_deserialize(p)
         end
+
+        matching_props += 1 if hash.key?(hkey)
       else
-        if rules[:type_is_serializable]
-          # Get the underlying prop type in case it is a T.nilable(...).
-          prop_type = rules[:type]
-          non_nilable_type = T::Utils.unwrap_nilable(prop_type)
-          if non_nilable_type
-            if non_nilable_type.is_a?(T::Types::Simple)
-              prop_type = non_nilable_type.raw_type
+        if (subtype = rules[:serializable_subtype])
+          val =
+            if rules[:type_is_array_of_serializable]
+              val.map {|el| subtype.from_hash(el)}
+            elsif rules[:type_is_hash_of_serializable]
+              val.transform_values {|v| subtype.from_hash(v)}
             else
-              prop_type = non_nilable_type
+              subtype.from_hash(val)
             end
-          end
-          val = prop_type.from_hash(val)
-        elsif rules[:type_is_array_of_serializable]
-          val = val.map {|el| rules[:array].from_hash(el)}
-        elsif rules[:type_is_hash_of_serializable]
-          val = val.transform_values {|v| rules[:hash].from_hash(v)}
-        elsif rules[:type_needs_clone]
-          val = T::Props::Utils.deep_clone_object(val)
+        elsif (needs_clone = rules[:type_needs_clone])
+          val =
+            if needs_clone == :shallow
+              val.dup
+            else
+              T::Props::Utils.deep_clone_object(val)
+            end
         elsif rules[:type_is_custom_type]
           val = rules[:type].deserialize(val)
         end
+
+        matching_props += 1
       end
 
       self.instance_variable_set(rules[:accessor_key], val) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
     end
 
     # We compute extra_props this way specifically for performance
-    pbsf = decorator.prop_by_serialized_forms
-    h = hash.reject {|k, _| pbsf.key?(k)}
+    if matching_props < hash.size
+      pbsf = decorator.prop_by_serialized_forms
+      h = hash.reject {|k, _| pbsf.key?(k)}
 
-    @_extra_props = h
-    unless h.empty?
-      # Commented out due to the insane amount of chunder, see logs in PR.
-      # msg = "#{self.class} doesn't know about properties #{h.keys.inspect} -- seen in #{hash['_id']}"
-      # Opus::Log.debug("WARNING: #{msg}")
       if strict
         raise "Unknown properties for #{self.class.name}: #{h.keys.inspect}"
+      else
+        @_extra_props = h
       end
     end
   end
@@ -264,8 +274,11 @@ module T::Props::Serializable::DecoratorMethods
     end
   end
 
+  EMPTY_EXTRA_PROPS = {}.freeze
+  private_constant :EMPTY_EXTRA_PROPS
+
   def extra_props(instance)
-    get(instance, '_extra_props')
+    get(instance, '_extra_props') || EMPTY_EXTRA_PROPS
   end
 
   # @override T::Props::PrettyPrintable

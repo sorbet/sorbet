@@ -23,7 +23,7 @@ module T::Private::Methods::CallValidation
           super(*args, &blk)
         else
           raise NotImplementedError.new(
-            "The method `#{method_sig.method_name}` is declared as `abstract`. It does not have an implementation."
+            "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
           )
         end
       end

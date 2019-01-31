@@ -77,6 +77,11 @@ module Opus::Types::Test
         value = type.types.map(&:raw_type)
         assert_equal([Integer, Boolean, NilClass], value)
       end
+
+      it "does not crash on anonymous classes" do
+        type = T.any(Integer, Class.new, String)
+        assert_equal("T.any(Integer, String)", type.name)
+      end
     end
 
     describe "Intersection" do

@@ -3,6 +3,8 @@
 
 module T::Props
   module CustomType
+    include Kernel # for `is_a?`
+
     # Returns true if the given Ruby value can be assigned to a T::Props field
     # of this type.
     #

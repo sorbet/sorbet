@@ -30,7 +30,8 @@ class Chalk::Log::CLevels::Sheddable; end
 module Chalk::Tools; end
 module Chalk::Tools::RedactionUtils
   def self.redact_with_directive(value, opts = [])
-    case opts.first
+    opts = [opts] unless opts.is_a?(Array)
+    case opts[0]
     when :redact_digits
       value.gsub(/\d/, '*')
     when :truncate
@@ -40,6 +41,19 @@ module Chalk::Tools::RedactionUtils
     end
   end
 end
+Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias(T.any(
+  T.enum([
+    :redact_digits,
+    :redact_digits_except_last4,
+    :redact_card,
+    :redact_all,
+    :truncate,
+  ]),
+  [T.enum([:truncate]), Integer],
+  [T.enum([:truncate_middle]), Integer, Integer],
+  [T.enum([:redact_middle]), Integer, Integer],
+  [T.enum([:replace]), String],
+))
 
 module Opus; end
 module Opus::Types; end
@@ -56,6 +70,10 @@ end
 class Opus::Enum; end
 module Opus::Breakage; end
 module Opus::CI; end
+module Opus::Projects
+  def self.storage
+  end
+end
 
 module Opus::Error
   def self.hard(message, *)

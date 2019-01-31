@@ -149,7 +149,7 @@ module T::Private::Methods
         if defined?(super)
           super(*args, &blk)
         else
-          raise NotImplementedError.new("The method `#{method_sig.method_name}` is declared as `abstract`. It does not have an implementation.")
+          raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
         end
       # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
       # make sure to keep changes in sync.

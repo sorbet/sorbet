@@ -308,10 +308,6 @@ class T::Props::Decorator
   def prop_defined(name, cls, rules={})
     name = name.to_sym
 
-    unless rules.is_a?(Hash)
-      raise ArgumentError.new("The third argument to `prop` must be a hash of options. Got: #{rules.class}")
-    end
-
     type = cls
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
@@ -342,6 +338,13 @@ class T::Props::Decorator
       )
     end
 
+    needs_clone =
+      if cls <= Array || cls <= Hash || cls <= Set
+        shallow_clone_ok(type_object) ? :shallow : true
+      else
+        false
+      end
+
     rules = rules.merge(
       # TODO: The type of this element is confusing. We should refactor so that
       # it can be always `type_object` (a PropType) or always `cls` (a Module)
@@ -354,7 +357,7 @@ class T::Props::Decorator
       type_is_array_of_serializable: !!array_subdoc_type,
       type_is_hash_of_serializable: !!hash_value_subdoc_type,
       type_object: type_object,
-      type_needs_clone: cls <= Array || cls <= Hash || cls <= Set,
+      type_needs_clone: needs_clone,
       accessor_key: "@#{name}".to_sym,
       sensitivity: sensitivity_and_pii[:sensitivity],
       pii: sensitivity_and_pii[:pii],
@@ -367,6 +370,8 @@ class T::Props::Decorator
     # for backcompat
     if type.is_a?(T::Types::TypedArray) && type.type.is_a?(T::Types::Simple)
       rules[:array] = type.type.raw_type
+    elsif array_subdoc_type
+      rules[:array] = array_subdoc_type
     end
 
     # Make nilable types optional, so serialization/deserialization is handled properly.
@@ -374,11 +379,12 @@ class T::Props::Decorator
       rules[:optional] = true
     end
 
-    if array_subdoc_type && rules[:array].nil?
-      rules = rules.merge(array: array_subdoc_type)
-    end
-    if hash_value_subdoc_type
-      rules = rules.merge(hash: hash_value_subdoc_type)
+    if rules[:type_is_serializable]
+      rules[:serializable_subtype] = cls
+    elsif array_subdoc_type
+      rules[:serializable_subtype] = array_subdoc_type
+    elsif hash_value_subdoc_type
+      rules[:serializable_subtype] = hash_value_subdoc_type
     end
 
     add_prop_definition(name, rules)
@@ -438,6 +444,28 @@ class T::Props::Decorator
     end
   end
 
+  # From T::Props::Utils.deep_clone_object, plus String
+  TYPES_NOT_NEEDING_CLONE = [TrueClass, FalseClass, NilClass, Symbol, String, Numeric]
+  if defined?(Opus) && defined?(Opus::Enum)
+    TYPES_NOT_NEEDING_CLONE << Opus::Enum
+  end
+
+  sig {params(type: PropType).returns(Boolean)}
+  private def shallow_clone_ok(type)
+    inner_type =
+      if type.is_a?(T::Types::TypedArray)
+        type.type
+      elsif type.is_a?(T::Types::TypedSet)
+        type.type
+      elsif type.is_a?(T::Types::TypedHash)
+        type.values
+      end
+
+    inner_type.is_a?(T::Types::Simple) && TYPES_NOT_NEEDING_CLONE.any? do |cls|
+      inner_type.raw_type <= cls
+    end
+  end
+
   sig do
     params(type: PropTypeOrClass, array: T.untyped, enum: T.untyped)
     .returns(T::Types::Base)
@@ -487,18 +515,17 @@ class T::Props::Decorator
   sig do
     params(
       prop_name: Symbol,
-      redaction: T.any(Symbol, T::Array[T.any(Symbol, Integer)]),
+      redaction: Chalk::Tools::RedactionUtils::RedactionDirectiveSpec,
     )
     .void
   end
   private def handle_redaction_option(prop_name, redaction)
-    redaction_directive = Array(redaction)
     redacted_method = "#{prop_name}_redacted"
 
     @class.send(:define_method, redacted_method) do
       value = self.public_send(prop_name)
       Chalk::Tools::RedactionUtils.redact_with_directive(
-        value, redaction_directive)
+        value, redaction)
     end
   end
 

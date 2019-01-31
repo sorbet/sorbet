@@ -168,7 +168,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   class MigratingNilFieldModel < T::Struct
     prop :foo, T.nilable(Integer), notify_on_nil_write: 'storage'
-    prop :bar, T.nilable(String), notify_on_nil_write: Opus::Project.fetch(:storage)
+    prop :bar, T.nilable(String), notify_on_nil_write: Opus::Projects.storage
   end
 
   describe 'notify_on_nil_write' do

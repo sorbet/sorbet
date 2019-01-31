@@ -3,7 +3,6 @@
 # This is where we define the shortcuts, so we can't use them here
 # rubocop:disable PrisonGuard/UseOpusTypesShortcut
 
-
 #  _____
 # |_   _|   _ _ __   ___  ___
 #   | || | | | '_ \ / _ \/ __|
@@ -113,6 +112,8 @@ module T
   # an expression that the typechecker is unable to analyze. If `checked` is true, raises an
   # exception at runtime if the value doesn't match the type.
   #
+  # Compared to `T.let`, `T.cast` is _trusted_ by static system.
+  #
   # Does not support unwrapping T::InterfaceWrapper; for that, use dynamic_cast.
   def self.cast(value, type, checked: true)
     return value unless checked
@@ -125,6 +126,7 @@ module T
   #
   #  seconds = T.let(0.0, Float)
   #
+  # Compared to `T.cast`, `T.let` is _checked_ by static system.
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type.
@@ -150,11 +152,12 @@ module T
   end
 
 
-  # Strips all type information from a value and returns the same
-  # value, but statically-typed as `T.untyped`. Can be used to tell
-  # the static checker to "trust you" by discarding type information
+  # For the static type checker, strips all type information from a value
+  # and returns the same value, but statically-typed as `T.untyped`.
+  # Can be used to tell the static checker to "trust you" by discarding type information
   # you know to be incorrect. Use with care!
-
+  # (This has no effect at runtime.)
+  #
   # We can't actually write this sig because we ourselves are inside
   # the `T::` module and doing this would create a bootstrapping
   # cycle. However, we also don't actually need to do so; An untyped
@@ -175,7 +178,7 @@ module T
   # Equivalent to:
   #
   #   foo = maybe_gives_foo
-  #   raise "nil" unless foo
+  #   raise "nil" if foo.nil?
   #   needs_foo(foo)
   #
   # Intended to be used to promise sorbet that a given nilable value happens

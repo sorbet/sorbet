@@ -1,18 +1,18 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Props::PrettyPrintable
   include T::Props::Plugin
 
   # Return a string representation of this object and all of its props
   def inspect
-    self.class.decorator.inspect_instance(self)
+    T.unsafe(T.cast(self, Object).class).decorator.inspect_instance(self)
   end
 
   # Override the PP gem with something that's similar, but gives us a hook
   # to do redaction
   def pretty_inspect
-    self.class.decorator.inspect_instance(self, multiline: true)
+    T.unsafe(T.cast(self, Object).class).decorator.inspect_instance(self, multiline: true)
   end
 
   module DecoratorMethods
@@ -50,7 +50,7 @@ module T::Props::PrettyPrintable
       .returns(T::Array[String])
     end
     private def inspect_instance_components(instance, multiline:, indent:)
-      pretty_props = all_props.map do |prop|
+      pretty_props = T.unsafe(self).all_props.map do |prop|
         [prop, inspect_prop_value(instance, prop, multiline: multiline, indent: indent)]
       end
 
@@ -61,7 +61,7 @@ module T::Props::PrettyPrintable
       )
 
       [
-        decorated_class.to_s,
+        T.unsafe(self).decorated_class.to_s,
         joined_props,
       ]
     end
@@ -72,8 +72,8 @@ module T::Props::PrettyPrintable
       .checked(:never)
     end
     private def inspect_prop_value(instance, prop, multiline:, indent:)
-      val = get(instance, prop)
-      rules = prop_rules(prop)
+      val = T.unsafe(self).get(instance, prop)
+      rules = T.unsafe(self).prop_rules(prop)
       if (custom_inspect = rules[:inspect])
         if T::Utils.arity(custom_inspect) == 1
           custom_inspect.call(val)

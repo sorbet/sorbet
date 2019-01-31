@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Types
   class TypedRange < TypedEnumerable
@@ -16,7 +16,7 @@ module T::Types
     end
 
     def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
-      Range.new(*args)
+      T.unsafe(Range).new(*args)
     end
   end
 end
