@@ -1,3 +1,6 @@
+# typed: true
+# frozen_string_literal: true
+
 module T::Private::ErrorHandler
   # Handle a rescued TypeError. This will pass the TypeError to the
   # T::Configuration.type_error_handler so that the user can override error
@@ -27,7 +30,7 @@ module T::Private::ErrorHandler
   # Handle a sig build validation failure. This allows users to override the
   # behavior when a sig build fails. If T::Configuration.sig_build_error_handler
   # is unset, this method will call handle_sig_build_error_default.
-  def self.handle_sig_build_error(error, opts = {})
+  def self.handle_sig_build_error(error, opts={})
     if T::Configuration.sig_build_error_handler
       T::Configuration.sig_build_error_handler.call(error, opts)
     else
@@ -39,7 +42,7 @@ module T::Private::ErrorHandler
   # Handle a sig call validation failure. This allows users to override the
   # behavior when a sig call fails. If T::Configuration.sig_error_handler
   # is unset, this method will call handle_sig_error_default.
-  def self.handle_sig_error(signature, opts = {})
+  def self.handle_sig_error(signature, opts={})
     if T::Configuration.sig_error_handler
       T::Configuration.sig_error_handler.call(signature, opts)
     else
@@ -93,7 +96,7 @@ module T::Private::ErrorHandler
     if signature.generated
       if defined?(Opus) && defined?(Opus::Log)
         got = opts[:value].class
-        got = T::Enumerable[T.untyped].describe_obj(opts[:value]) if got < Enumerable
+        got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
         Opus::Log.info(
           "SIG-CHECK-FAILED",
           caller_file: location.path,
@@ -113,7 +116,7 @@ module T::Private::ErrorHandler
       if defined?(Opus) && defined?(Opus::Error)
         Opus::Error.soft("TypeError: #{error_message}", {notify: signature.soft_notify})
       else
-        puts "TypeError: #{error_message}, notify: #{signature.soft_notify}"
+        puts "TypeError: #{error_message}, notify: #{signature.soft_notify}" # rubocop:disable PrisonGuard/NoBarePuts
       end
     else
       begin

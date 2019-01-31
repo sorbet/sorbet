@@ -1,3 +1,6 @@
+# typed: true
+# frozen_string_literal: true
+
 module T::Configuration
   # Set a handler to handle `TypeError`s raised by the runtime type system.
   #
@@ -18,7 +21,7 @@ module T::Configuration
   #     puts error.message
   #   end
   def self.type_error_handler=(value)
-    unless value.nil? || value.respond_to?(:call)
+    if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
     @type_error_handler = value
@@ -48,7 +51,7 @@ module T::Configuration
   #     puts error.message
   #   end
   def self.sig_decl_error_handler=(value)
-    unless value.nil? || value.respond_to?(:call)
+    if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
     @sig_decl_error_handler = value
@@ -87,7 +90,7 @@ module T::Configuration
   #     puts error.message
   #   end
   def self.sig_build_error_handler=(value)
-    unless value.nil? || value.respond_to?(:call)
+    if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
     @sig_build_error_handler = value
@@ -127,7 +130,7 @@ module T::Configuration
   #     puts opts[:message]
   #   end
   def self.sig_error_handler=(value)
-    unless value.nil? || value.respond_to?(:call)
+    if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
     @sig_error_handler = value

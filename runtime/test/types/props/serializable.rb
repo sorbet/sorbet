@@ -204,7 +204,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   describe 'notify_on_nil_write with sentry error' do
     it 'throw exception on nil writes with sentry error' do
-      Opus::Breakage.expects(:report_error).once
+      Opus::Breakage.expects(:report_error).once.
+        returns(Opus::Breakage::BreakageInfo.new)
 
       foo = MigratingNilFieldModelWithError.new
       ex = assert_raises do

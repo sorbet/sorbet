@@ -32,15 +32,15 @@ module T::Private::ClassUtils
 
       if @overwritten
         # The original method was overwritten. Overwrite again to restore it.
-        @mod.send(:define_method, @old_method.name, @old_method)
+        @mod.send(:define_method, @old_method.name, @old_method) # rubocop:disable PrisonGuard/UsePublicSendCheck
       else
         # The original method was in an ancestor. Restore it by removing the overriding method.
-        @mod.send(:remove_method, @old_method.name)
+        @mod.send(:remove_method, @old_method.name) # rubocop:disable PrisonGuard/UsePublicSendCheck
       end
 
       # Restore the visibility. Note that we need to do this even when we call remove_method
       # above, because the module may have set custom visibility for a method it inherited.
-      @mod.send(@visibility, @old_method.name)
+      @mod.send(@visibility, @old_method.name) # rubocop:disable PrisonGuard/UsePublicSendCheck
 
       nil
     end
@@ -93,8 +93,8 @@ module T::Private::ClassUtils
     end
 
     overwritten = original_owner == mod
-    mod.send(:define_method, name, &blk)
-    mod.send(original_visibility, name)
+    mod.send(:define_method, name, &blk) # rubocop:disable PrisonGuard/UsePublicSendCheck
+    mod.send(original_visibility, name) # rubocop:disable PrisonGuard/UsePublicSendCheck
     new_method = mod.instance_method(name)
 
     ReplacedMethod.new(mod, original_method, new_method, overwritten, original_visibility)

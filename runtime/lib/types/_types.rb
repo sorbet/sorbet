@@ -186,18 +186,20 @@ module T
   #
   # sig {params(arg: T.nilable(A), msg: T.nilable(String)).returns(A)}
   def self.must(arg, msg=nil)
-    if msg
-      if !T.unsafe(msg).is_a?(String)
-        raise TypeError.new("T.must expects a string as second argument")
+    begin
+      if msg
+        if !T.unsafe(msg).is_a?(String)
+          raise TypeError.new("T.must expects a string as second argument")
+        end
+      else
+        msg = "Passed `nil` into T.must"
       end
-    else
-      msg = "Passed `nil` into T.must"
+      raise TypeError.new(msg) if arg.nil?
+      arg
+    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      T::Private::ErrorHandler.handle_type_error(e)
+      arg
     end
-    raise TypeError.new(msg) if arg.nil?
-    arg
-  rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-    T::Private::ErrorHandler.handle_type_error(e)
-    arg
   end
 
   # Attempts to cast a value to a type at runtime. Unwraps `T::InterfaceWrapper` as

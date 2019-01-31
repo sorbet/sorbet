@@ -322,7 +322,7 @@ class T::Props::Decorator
     array_subdoc_type = array_subdoc_type(type_object)
     hash_value_subdoc_type = hash_value_subdoc_type(type_object)
 
-    sensitivity_and_pii = { sensitivity: rules[:sensitivity] }
+    sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
     if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::Utils)
       sensitivity_and_pii = Opus::Sensitivity::Utils.normalize_sensitivity_and_pii_annotation(sensitivity_and_pii)
     end

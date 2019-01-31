@@ -76,6 +76,7 @@ module Opus::Sensitivity::Utils
 end
 class Opus::Enum; end
 module Opus::Breakage; end
+class Opus::Breakage::BreakageInfo; end
 module Opus::CI; end
 module Opus::Projects
   def self.storage

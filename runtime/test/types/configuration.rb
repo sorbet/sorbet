@@ -59,7 +59,7 @@ module Opus::Types::Test
     describe 'sig_decl_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig { checked(:always).generated.returns(Symbol) }
+          @mod.sig {generated.returns(Symbol).checked(:always)}
           def @mod.foo
             :bar
           end
@@ -68,7 +68,7 @@ module Opus::Types::Test
           end
           assert_includes(
             ex.message,
-            "You can't use .generated with .checked."
+            "You can't use .checked with .generated."
           )
         end
       end
@@ -86,11 +86,11 @@ module Opus::Types::Test
 
         it 'handles a sig declaration error' do
           CustomReceiver.expects(:receive).once.with do |error, location|
-            error.message == "You can't use .generated with .checked." &&
+            error.message == "You can't use .checked with .generated." &&
               error.is_a?(T::Private::Methods::DeclBuilder::BuilderError) &&
               location.is_a?(Thread::Backtrace::Location)
           end
-          @mod.sig { checked(:always).generated.returns(Symbol) }
+          @mod.sig {generated.returns(Symbol).checked(:always)}
           def @mod.foo
             :bar
           end
@@ -102,7 +102,7 @@ module Opus::Types::Test
     describe 'sig_build_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig { override.returns(Symbol) }
+          @mod.sig {override.returns(Symbol)}
           def @mod.foo
             :bar
           end
@@ -137,7 +137,7 @@ module Opus::Types::Test
               opts[:signature].is_a?(T::Private::Methods::Signature)
           end
 
-          @mod.sig { override.returns(Symbol) }
+          @mod.sig {override.returns(Symbol)}
           def @mod.foo
             :bar
           end
@@ -149,7 +149,7 @@ module Opus::Types::Test
     describe 'sig_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig { params(a: String).returns(Symbol) }
+          @mod.sig {params(a: String).returns(Symbol)}
           def @mod.foo(a)
             :bar
           end
@@ -185,7 +185,7 @@ module Opus::Types::Test
               opts[:location].is_a?(Thread::Backtrace::Location) &&
               opts[:message].include?("Expected type String, got type Integer with value 1")
           end
-          @mod.sig { params(a: String).returns(Symbol) }
+          @mod.sig {params(a: String).returns(Symbol)}
           def @mod.foo(a)
             :bar
           end
