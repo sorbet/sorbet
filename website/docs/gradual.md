@@ -83,10 +83,10 @@ def name_length(person)
   name = person.name # (*)
   T.reveal_type(name) # => T.untyped
 
-  length = name.length
-  T.reveal_type(length) # => T.untyped
+  len = name.length
+  T.reveal_type(len) # => T.untyped
 
-  length
+  len
 end
 ```
 
@@ -97,8 +97,9 @@ a corresponding `sig` annotation.
 
 Since `T.untyped` _could be_ any type, when `name.length` runs Sorbet
 optimistically assumes that `name` _will_ have some type which has a `#length`
-method. Then it also optimistically assumes that `#length` returns an `Integer`.
-Thus, Sorbet declares that this method type checks.
+method. Then it also optimistically assumes that the thing `#length` returns
+(in this case, `len`) could be an `Integer`. Thus, Sorbet declares that this
+method type checks.
 
 In a sense, "being optimistic" is really just a way of the programmer telling
 Sorbet, "I believe this code is correct." And realistically, we might be
