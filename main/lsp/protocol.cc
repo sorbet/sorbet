@@ -96,12 +96,16 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
+            int requestCounter = 0;
             while (true) {
                 rapidjson::Document d(&inner_alloc);
 
                 if (!getNewRequest(d, logger, inputStream)) {
                     break;
                 }
+
+                d.AddMember("sorbet_counter", requestCounter++, d.GetAllocator());
+
                 absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
                 const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
@@ -174,6 +178,8 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
     // make pass through pendingRequests and squish any consecutive didChanges that are for the same
     // file together
     // TODO: if we ever support diffs, this would need to be extended
+    int requestsMerged = 0;
+    int originalSize = pendingRequests.size();
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
         auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
@@ -194,6 +200,7 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
                         }
                         next["params"]["contentChanges"] = move(currentUpdates);
                         it = pendingRequests.erase(it);
+                        requestsMerged += 1;
                         continue;
                     }
                 }
@@ -201,6 +208,7 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
         }
         ++it;
     }
+    ENFORCE(pendingRequests.size() + requestsMerged == originalSize);
 }
 
 deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(deque<rapidjson::Document> &pendingRequests,
