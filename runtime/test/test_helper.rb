@@ -21,6 +21,13 @@ module Critic::Unit; end
 module MiniTest; end
 class MiniTest::Spec; end
 class Critic::Unit::UnitTest < MiniTest::Spec; end
+module Critic::Extensions; end
+module Critic::Extensions::TypeExt
+  def self.unpatch_types
+  end
+  def self.patch_types
+  end
+end
 
 module Chalk; end
 module Chalk::Log; end

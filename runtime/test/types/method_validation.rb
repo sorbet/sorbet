@@ -177,11 +177,13 @@ module Opus::Types::Test
           end.to_h,
         }
 
+        Critic::Extensions::TypeExt.unpatch_types
         @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
         @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, second run runs in real mode
         before = GC.stat(:total_allocated_objects)
         @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z])
         allocated = GC.stat(:total_allocated_objects) - before
+        Critic::Extensions::TypeExt.patch_types
         if Gem::Version.new('2.6') <= Gem::Version.new(RUBY_VERSION)
           assert_equal(3, allocated)
         else
