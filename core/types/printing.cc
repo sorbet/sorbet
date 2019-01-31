@@ -248,42 +248,39 @@ string AppliedType::show(const GlobalState &gs) const {
     } else if (this->klass == Symbols::Set()) {
         fmt::format_to(buf, "T::Set");
     } else {
-        bool is_proc = false;
+        bool isProc = false;
         int proc_arity = 0;
         for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
             if (this->klass == Symbols::Proc(i)) {
-                is_proc = true;
+                isProc = true;
                 proc_arity = i;
                 break;
             }
         }
 
-        if (is_proc) {
+        if (isProc) {
             fmt::format_to(buf, "T.proc");
 
             // The first element in targs is the return type.
             // The rest are the arguments (in the correct order)
-            ENFORCE(!this->targs.empty(), "Proc must have at least one arg for the return type");
+            ENFORCE(this->targs.size() == proc_arity + 1, "Proc must have exactly arity + 1 targs");
             auto targs_it = this->targs.begin();
             auto return_type = *targs_it;
             targs_it++;
 
-            bool first = true;
-            int arg_num = 0;
-            for (; targs_it != this->targs.end(); targs_it++) {
-                auto targ = *targs_it;
-                if (first) {
-                    first = false;
-                    fmt::format_to(buf, ".params(");
-                } else {
-                    fmt::format_to(buf, ", ");
-                }
-                fmt::format_to(buf, "arg{}: {}", arg_num++, targ->show(gs));
-                proc_arity--;
-                if (proc_arity == 0) {
-                    fmt::format_to(buf, ")");
-                }
+            if (proc_arity > 0) {
+                fmt::format_to(buf, ".params(");
             }
+
+            int arg_num = 0;
+            fmt::format_to(buf, "{}", fmt::map_join(targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
+                               return fmt::format("arg{}: {}", arg_num++, targ->show(gs));
+                           }));
+
+            if (proc_arity > 0) {
+                fmt::format_to(buf, ")");
+            }
+
             fmt::format_to(buf, ".returns({})", return_type->show(gs));
             return to_string(buf);
         } else {
