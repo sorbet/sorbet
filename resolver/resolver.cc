@@ -57,8 +57,8 @@ namespace {
 class ResolveConstantsWalk {
 private:
     struct Nesting {
-        shared_ptr<Nesting> parent;
-        core::SymbolRef scope;
+        const shared_ptr<Nesting> parent;
+        const core::SymbolRef scope;
 
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
@@ -441,7 +441,7 @@ public:
             transformAncestor(ctx, singleton, ancst);
         }
 
-        nesting_ = std::move(nesting_->parent);
+        nesting_ = nesting_->parent;
         return original;
     }
 

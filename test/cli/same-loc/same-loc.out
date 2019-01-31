@@ -6,20 +6,6 @@ test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `ODM` http://go/e/50
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
-     4 |  const :foo, T::Array[Foo::Baz]
-                               ^^^
-    test/cli/same-loc/same-loc.rb:3: Did you mean: `Foo`?
-     3 |class MyClass < Foo::Bar
-                        ^^^
-
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
-     4 |  const :foo, T::Array[Foo::Baz]
-                               ^^^
-    test/cli/same-loc/same-loc.rb:4: Did you mean: `MyClass::Foo`?
-     4 |  const :foo, T::Array[Foo::Baz]
-                               ^^^
-
 test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
@@ -150,4 +136,4 @@ test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorb
 test/cli/same-loc/same-loc.rb:4: Method `returns` does not exist on `Sorbet::Private::Builder` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 35
+Errors: 33

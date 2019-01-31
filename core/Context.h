@@ -54,6 +54,7 @@ public:
         return state;
     }
 
+    // 👋 Stepped here in the debugger? Type 'finish' to step back out.
     MutableContext(GlobalState &state, SymbolRef owner) noexcept : state(state), owner(owner) {}
     MutableContext(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
 
