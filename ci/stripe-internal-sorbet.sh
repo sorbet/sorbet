@@ -11,6 +11,12 @@ local_repository(
 ' >> WORKSPACE
 
 ./tools/scripts/ci_checks.sh
+(
+    cd runtime
+    rbenv exec gem install bundler
+    rbenv exec bundle
+    rbenv exec bundle exec rake test
+)
 
 err=0
 
