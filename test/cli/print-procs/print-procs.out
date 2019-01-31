@@ -1,0 +1,50 @@
+test/cli/print-procs/print-procs.rb:11: Malformed T.proc: Too many arguments (max `10`) http://go/e/5004
+    11 |  e: T.proc.params(
+    12 |    x1: String, x2: Integer, x3: Float, x4: String, x5: Integer, x6: Float, x7: String, x8: Integer, x9: Float, x10: String, x11: Integer
+    13 |  ).returns(T::Hash[Integer, String]),
+
+test/cli/print-procs/print-procs.rb:11: Malformed T.proc: Too many arguments (max `10`) http://go/e/5004
+    11 |  e: T.proc.params(
+    12 |    x1: String, x2: Integer, x3: Float, x4: String, x5: Integer, x6: Float, x7: String, x8: Integer, x9: Float, x10: String, x11: Integer
+    13 |  ).returns(T::Hash[Integer, String]),
+
+test/cli/print-procs/print-procs.rb:16: Revealed type: `T.proc.returns(T::Hash[Integer, String])` http://go/e/7014
+    16 |  T.reveal_type(a)
+          ^^^^^^^^^^^^^^^^
+  From:
+    test/cli/print-procs/print-procs.rb:15:
+    15 |def foo(a, b, c, d, e)
+                ^
+
+test/cli/print-procs/print-procs.rb:17: Revealed type: `T.proc.params(arg0: String).returns(T::Hash[Integer, String])` http://go/e/7014
+    17 |  T.reveal_type(b)
+          ^^^^^^^^^^^^^^^^
+  From:
+    test/cli/print-procs/print-procs.rb:15:
+    15 |def foo(a, b, c, d, e)
+                   ^
+
+test/cli/print-procs/print-procs.rb:18: Revealed type: `T.proc.params(arg0: String, arg1: Integer, arg2: Float).returns(T::Hash[Integer, String])` http://go/e/7014
+    18 |  T.reveal_type(c)
+          ^^^^^^^^^^^^^^^^
+  From:
+    test/cli/print-procs/print-procs.rb:15:
+    15 |def foo(a, b, c, d, e)
+                      ^
+
+test/cli/print-procs/print-procs.rb:19: Revealed type: `T.proc.params(arg0: String, arg1: Integer, arg2: Float, arg3: String, arg4: Integer, arg5: Float, arg6: String, arg7: Integer, arg8: Float, arg9: String).returns(T::Hash[Integer, String])` http://go/e/7014
+    19 |  T.reveal_type(d)
+          ^^^^^^^^^^^^^^^^
+  From:
+    test/cli/print-procs/print-procs.rb:15:
+    15 |def foo(a, b, c, d, e)
+                         ^
+
+test/cli/print-procs/print-procs.rb:20: Revealed type: `T.untyped` http://go/e/7014
+    20 |  T.reveal_type(e)
+          ^^^^^^^^^^^^^^^^
+  From:
+    test/cli/print-procs/print-procs.rb:15:
+    15 |def foo(a, b, c, d, e)
+                            ^
+Errors: 7

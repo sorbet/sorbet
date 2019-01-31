@@ -13,7 +13,7 @@ class Test
   foo = T.let(
     lambda {|x: nil| 'hello, ' + x.to_s},
     T.proc.params(x: T.nilable(String)).returns(String)
-  ) # error: Argument does not have asserted type `Proc1[String, T.nilable(String)]`
+  ) # error: Argument does not have asserted type `T.proc.params(arg0: T.nilable(String)).returns(String)`
 
   bar = lambda do |x = M::C.id('')|
     'hello, ' + x

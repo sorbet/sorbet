@@ -113,7 +113,7 @@ subgraph "cluster_::Main#main" {
     "bb::Main#main_1" [shape = parallelogram];
 
     "bb::Main#main_0" [
-        label = "block[id=0]()\l<statTemp>$5: Main = self\l<block-pre-call-temp>$6: Proc1[T.untyped, T.untyped] = <statTemp>$5: Main.lambda()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: Main = self\l<block-pre-call-temp>$6: T.proc.params(arg0: T.untyped).returns(T.untyped) = <statTemp>$5: Main.lambda()\l<unconditional>\l"
     ];
 
     "bb::Main#main_0" -> "bb::Main#main_2" [style="bold"];
@@ -130,7 +130,7 @@ subgraph "cluster_::Main#main" {
     "bb::Main#main_2" -> "bb::Main#main_3" [style="tapered"];
 
     "bb::Main#main_3" [
-        label = "block[id=3]()\ll: Proc1[T.untyped, T.untyped] = Solve<::Main#main#<block>>\l<statTemp>$15: Main = self\l<block-pre-call-temp>$16: T.untyped = <statTemp>$15: Main.yielder()\l<unconditional>\l"
+        label = "block[id=3]()\ll: T.proc.params(arg0: T.untyped).returns(T.untyped) = Solve<::Main#main#<block>>\l<statTemp>$15: Main = self\l<block-pre-call-temp>$16: T.untyped = <statTemp>$15: Main.yielder()\l<unconditional>\l"
     ];
 
     "bb::Main#main_3" -> "bb::Main#main_5" [style="bold"];
@@ -140,58 +140,58 @@ subgraph "cluster_::Main#main" {
 
     "bb::Main#main_4" -> "bb::Main#main_2" [style="bold"];
     "bb::Main#main_5" [
-        label = "block[id=5](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=5](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#main_5" -> "bb::Main#main_7" [style="bold"];
     "bb::Main#main_5" -> "bb::Main#main_6" [style="tapered"];
 
     "bb::Main#main_6" [
-        label = "block[id=6](l: Proc1[T.untyped, T.untyped])\l<statTemp>$14: T.untyped = Solve<::Main#main#<block>>\l<statTemp>$27: Main = self\l<block-pre-call-temp>$28: T.untyped = <statTemp>$27: Main.blockpass()\l<unconditional>\l"
+        label = "block[id=6](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<statTemp>$14: T.untyped = Solve<::Main#main#<block>>\l<statTemp>$27: Main = self\l<block-pre-call-temp>$28: T.untyped = <statTemp>$27: Main.blockpass()\l<unconditional>\l"
     ];
 
     "bb::Main#main_6" -> "bb::Main#main_8" [style="bold"];
     "bb::Main#main_7" [
-        label = "block[id=7](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<blk>$17: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$20: <Magic> = alias <constant:<Magic>>\l<statTemp>$21: Proc1[T.untyped, T.untyped] = l: Proc1[T.untyped, T.untyped].to_proc()\l<statTemp>$23: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$19: T.untyped = <statTemp>$20: <Magic>.<call-with-splat>(<statTemp>$21: Proc1[T.untyped, T.untyped], <statTemp>$23: Symbol(:\"call\"), <blk>$17: T.untyped)\l<blockReturnTemp>$25: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$19: T.untyped\l<unconditional>\l"
+        label = "block[id=7](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<blk>$17: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$20: <Magic> = alias <constant:<Magic>>\l<statTemp>$21: T.proc.params(arg0: T.untyped).returns(T.untyped) = l: T.proc.params(arg0: T.untyped).returns(T.untyped).to_proc()\l<statTemp>$23: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$19: T.untyped = <statTemp>$20: <Magic>.<call-with-splat>(<statTemp>$21: T.proc.params(arg0: T.untyped).returns(T.untyped), <statTemp>$23: Symbol(:\"call\"), <blk>$17: T.untyped)\l<blockReturnTemp>$25: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$19: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_7" -> "bb::Main#main_5" [style="bold"];
     "bb::Main#main_8" [
-        label = "block[id=8](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=8](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#main_8" -> "bb::Main#main_10" [style="bold"];
     "bb::Main#main_8" -> "bb::Main#main_9" [style="tapered"];
 
     "bb::Main#main_9" [
-        label = "block[id=9](l: Proc1[T.untyped, T.untyped])\l<statTemp>$26: T.untyped = Solve<::Main#main#<block>>\l<statTemp>$39: Main = self\l<block-pre-call-temp>$40: T.untyped = <statTemp>$39: Main.mixed()\l<unconditional>\l"
+        label = "block[id=9](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<statTemp>$26: T.untyped = Solve<::Main#main#<block>>\l<statTemp>$39: Main = self\l<block-pre-call-temp>$40: T.untyped = <statTemp>$39: Main.mixed()\l<unconditional>\l"
     ];
 
     "bb::Main#main_9" -> "bb::Main#main_11" [style="bold"];
     "bb::Main#main_10" [
-        label = "block[id=10](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<blk>$29: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$32: <Magic> = alias <constant:<Magic>>\l<statTemp>$33: Proc1[T.untyped, T.untyped] = l: Proc1[T.untyped, T.untyped].to_proc()\l<statTemp>$35: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$31: T.untyped = <statTemp>$32: <Magic>.<call-with-splat>(<statTemp>$33: Proc1[T.untyped, T.untyped], <statTemp>$35: Symbol(:\"call\"), <blk>$29: T.untyped)\l<blockReturnTemp>$37: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$31: T.untyped\l<unconditional>\l"
+        label = "block[id=10](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<blk>$29: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$32: <Magic> = alias <constant:<Magic>>\l<statTemp>$33: T.proc.params(arg0: T.untyped).returns(T.untyped) = l: T.proc.params(arg0: T.untyped).returns(T.untyped).to_proc()\l<statTemp>$35: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$31: T.untyped = <statTemp>$32: <Magic>.<call-with-splat>(<statTemp>$33: T.proc.params(arg0: T.untyped).returns(T.untyped), <statTemp>$35: Symbol(:\"call\"), <blk>$29: T.untyped)\l<blockReturnTemp>$37: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$31: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_10" -> "bb::Main#main_8" [style="bold"];
     "bb::Main#main_11" [
-        label = "block[id=11](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=11](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#main_11" -> "bb::Main#main_13" [style="bold"];
     "bb::Main#main_11" -> "bb::Main#main_12" [style="tapered"];
 
     "bb::Main#main_12" [
-        label = "block[id=12](l: Proc1[T.untyped, T.untyped])\l<statTemp>$38: T.untyped = Solve<::Main#main#<block>>\l<statTemp>$50: Main = self\l<block-pre-call-temp>$51: T.untyped = <statTemp>$50: Main.blockyield()\l<unconditional>\l"
+        label = "block[id=12](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<statTemp>$38: T.untyped = Solve<::Main#main#<block>>\l<statTemp>$50: Main = self\l<block-pre-call-temp>$51: T.untyped = <statTemp>$50: Main.blockyield()\l<unconditional>\l"
     ];
 
     "bb::Main#main_12" -> "bb::Main#main_14" [style="bold"];
     "bb::Main#main_13" [
-        label = "block[id=13](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<blk>$41: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$44: <Magic> = alias <constant:<Magic>>\l<statTemp>$45: Proc1[T.untyped, T.untyped] = l: Proc1[T.untyped, T.untyped].to_proc()\l<statTemp>$47: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$43: T.untyped = <statTemp>$44: <Magic>.<call-with-splat>(<statTemp>$45: Proc1[T.untyped, T.untyped], <statTemp>$47: Symbol(:\"call\"), <blk>$41: T.untyped)\l<blockReturnTemp>$49: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$43: T.untyped\l<unconditional>\l"
+        label = "block[id=13](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<blk>$41: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$44: <Magic> = alias <constant:<Magic>>\l<statTemp>$45: T.proc.params(arg0: T.untyped).returns(T.untyped) = l: T.proc.params(arg0: T.untyped).returns(T.untyped).to_proc()\l<statTemp>$47: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$43: T.untyped = <statTemp>$44: <Magic>.<call-with-splat>(<statTemp>$45: T.proc.params(arg0: T.untyped).returns(T.untyped), <statTemp>$47: Symbol(:\"call\"), <blk>$41: T.untyped)\l<blockReturnTemp>$49: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$43: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_13" -> "bb::Main#main_11" [style="bold"];
     "bb::Main#main_14" [
-        label = "block[id=14](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=14](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#main_14" -> "bb::Main#main_16" [style="bold"];
@@ -203,7 +203,7 @@ subgraph "cluster_::Main#main" {
 
     "bb::Main#main_15" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_16" [
-        label = "block[id=16](l: Proc1[T.untyped, T.untyped])\louterLoops: 1\l<blk>$52: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$55: <Magic> = alias <constant:<Magic>>\l<statTemp>$56: Proc1[T.untyped, T.untyped] = l: Proc1[T.untyped, T.untyped].to_proc()\l<statTemp>$58: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$54: T.untyped = <statTemp>$55: <Magic>.<call-with-splat>(<statTemp>$56: Proc1[T.untyped, T.untyped], <statTemp>$58: Symbol(:\"call\"), <blk>$52: T.untyped)\l<blockReturnTemp>$60: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$54: T.untyped\l<unconditional>\l"
+        label = "block[id=16](l: T.proc.params(arg0: T.untyped).returns(T.untyped))\louterLoops: 1\l<blk>$52: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<statTemp>$55: <Magic> = alias <constant:<Magic>>\l<statTemp>$56: T.proc.params(arg0: T.untyped).returns(T.untyped) = l: T.proc.params(arg0: T.untyped).returns(T.untyped).to_proc()\l<statTemp>$58: Symbol(:\"call\") = :\"call\"\l<blockReturnTemp>$54: T.untyped = <statTemp>$55: <Magic>.<call-with-splat>(<statTemp>$56: T.proc.params(arg0: T.untyped).returns(T.untyped), <statTemp>$58: Symbol(:\"call\"), <blk>$52: T.untyped)\l<blockReturnTemp>$60: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$54: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_16" -> "bb::Main#main_14" [style="bold"];
