@@ -149,11 +149,11 @@ ErrorBuilder::~ErrorBuilder() {
 
 unique_ptr<Error> ErrorBuilder::build() {
     ENFORCE(state != State::DidBuild);
-    bool silence = state == State::Unreported;
+    bool isSilenced = state == State::Unreported;
     state = State::DidBuild;
 
     unique_ptr<Error> err = make_unique<Error>(this->loc, this->what, move(this->header), move(this->sections),
-                                               move(this->autocorrects), silence);
+                                               move(this->autocorrects), isSilenced);
     return err;
 }
 
