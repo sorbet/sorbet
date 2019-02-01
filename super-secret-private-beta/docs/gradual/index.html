@@ -91,10 +91,10 @@ sig {params(<span class="hljs-symbol">person:</span> Person).returns(Integer)}
   name = person.name <span class="hljs-comment"># (*)</span>
   T.reveal_type(name) <span class="hljs-comment"># =&gt; T.untyped</span>
 
-  length = name.length
-  T.reveal_type(length) <span class="hljs-comment"># =&gt; T.untyped</span>
+  len = name.length
+  T.reveal_type(len) <span class="hljs-comment"># =&gt; T.untyped</span>
 
-  length
+  len
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Look at the line marked <code>(*)</code>. Sorbet knows about the <code>Person</code> class, and knows
@@ -103,8 +103,9 @@ is <code>T.untyped</code>. Why? This is what Sorbet assumes for any methods that
 a corresponding <code>sig</code> annotation.</p>
 <p>Since <code>T.untyped</code> <em>could be</em> any type, when <code>name.length</code> runs Sorbet
 optimistically assumes that <code>name</code> <em>will</em> have some type which has a <code>#length</code>
-method. Then it also optimistically assumes that <code>#length</code> returns an <code>Integer</code>.
-Thus, Sorbet declares that this method type checks.</p>
+method. Then it also optimistically assumes that the thing <code>#length</code> returns
+(in this case, <code>len</code>) could be an <code>Integer</code>. Thus, Sorbet declares that this
+method type checks.</p>
 <p>In a sense, &quot;being optimistic&quot; is really just a way of the programmer telling
 Sorbet, &quot;I believe this code is correct.&quot; And realistically, we might be
 convinced of our code's correctness for a number of reasons:</p>
@@ -166,8 +167,8 @@ three main phases of <code>T.untyped</code> in a codebase:</p>
 <li>The long tail, where typed code becomes the majority.</li>
 </ol>
 <p>For context, at Stripe we're somewhere about halfway between (2) and (3). We've
-already enabled <code>typed: true</code> in the vast majority of files in pay-server, but
-most methods and even a few core abstractions are not typed yet.</p>
+already enabled <code>typed: true</code> in the vast majority of files in our main
+codebase, but most methods and even a few core abstractions are not typed yet.</p>
 <p>There are a number of tools for managing <code>T.untyped</code> in a codebase:</p>
 <ul>
 <li><a href="/sorbet/super-secret-private-beta/docs/static">Strictness levels</a> (<code>typed: true</code>, <code>typed: strict</code>, and <code>typed: strong</code>).

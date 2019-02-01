@@ -96,7 +96,7 @@ reports no errors in this file:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log_env</span><span class="hljs-params">(env, key)</span></span>
-  puts <span class="hljs-string">"LOG: <span class="hljs-subst">#{env[key]}</span>"</span>
+  puts <span class="hljs-string">"LOG: <span class="hljs-subst">#{key}</span> =&gt; <span class="hljs-subst">#{env[key]}</span>"</span>
 <span class="hljs-keyword">end</span>
 
 log_env({<span class="hljs-symbol">timeout_len:</span> <span class="hljs-number">2000</span>}, <span class="hljs-string">'timeout_len'</span>)
@@ -105,8 +105,11 @@ log_env({<span class="hljs-symbol">timeout_len:</span> <span class="hljs-number"
 Hash with <code>Symbol</code> keys but tried to ask about a <code>String</code> key. To opt into this
 check, we can add a signature to <code>log_env</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+
+<span class="hljs-comment"># (1) add this to get access to sig method</span>
 extend T::Sig
 
+<span class="hljs-comment"># (2) add a signature</span>
 sig {params(<span class="hljs-symbol">env:</span> T::Hash[Symbol, Integer], <span class="hljs-symbol">key:</span> Symbol).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log_env</span><span class="hljs-params">(env, key)</span></span>
   puts <span class="hljs-string">"LOG: <span class="hljs-subst">#{key}</span> =&gt; <span class="hljs-subst">#{env[key]}</span>"</span>

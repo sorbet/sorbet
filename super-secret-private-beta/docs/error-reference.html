@@ -142,6 +142,20 @@ variables are annotated with a <code>T.let</code>.</p>
 with a <code>T.let</code>.</p>
 <p>For how to fix, see <a href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a>.</p>
 <p>See also: <a href="#5007">5007</a>, <a href="#7017">7017</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5034"></a><a href="#5034" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5034</h2>
+<p>Sorbet does not support creating normal Ruby constant aliases to type aliases.
+Once a type alias is created, all subsequent aliases must also be type aliases.</p>
+<p>Concretely, this is not allowed:</p>
+<pre><code class="hljs css language-ruby">A = T.type_alias(Integer)
+B = A <span class="hljs-comment"># error: Reassigning a type alias is not allowed</span>
+</code></pre>
+<p>while this is:</p>
+<pre><code class="hljs css language-ruby">A = T.type_alias(Integer)
+B = T.type_alias(A)
+</code></pre>
+<p>(Why? This is due to design tradeoffs to enforce stronger internal invariants.
+Basically, Sorbet can emit more reliable warnings when users declare their
+intent to create a new type alias.)</p>
 <h2><a class="anchor" aria-hidden="true" id="7001"></a><a href="#7001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7001</h2>
 <p>Sorbet does not allow reassigning a variable to a different type within a loop
 or block. (Note that we model blocks similarly to loops, as in general they may
@@ -275,4 +289,4 @@ xs = Array.new(<span class="hljs-number">3</span>) {<span class="hljs-params">|i
 foo(*T.unsafe(xs))
 <span class="hljs-comment"># ---------------------------------------------</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#2001">2001</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#5002">5002</a></li><li><a href="#5007">5007</a></li><li><a href="#5028">5028</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7017">7017</a></li><li><a href="#7019">7019</a></li></ul></nav></div></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#2001">2001</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#5002">5002</a></li><li><a href="#5007">5007</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7017">7017</a></li><li><a href="#7019">7019</a></li></ul></nav></div></div></body></html>
