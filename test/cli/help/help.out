@@ -63,7 +63,9 @@ Usage:
       --silence-dev-message     Silence "You are running a development build"
                                 message
       --error-white-list errorCodes
-                                White list of errors to ever be reported
+                                Whitelist of errors to be reported
+      --error-black-list errorCodes
+                                Blacklist of errors to be reported
       --typed {ruby,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)

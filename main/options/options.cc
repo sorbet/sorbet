@@ -156,8 +156,10 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("error-white-list", "White list of errors to ever be reported",
-                               cxxopts::value<vector<int>>(), "errorCodes");
+    options.add_options("dev")("error-white-list", "Whitelist of errors to be reported", cxxopts::value<vector<int>>(),
+                               "errorCodes");
+    options.add_options("dev")("error-black-list", "Blacklist of errors to be reported", cxxopts::value<vector<int>>(),
+                               "errorCodes");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{ruby,true,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
@@ -344,6 +346,13 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("error-white-list") > 0) {
             opts.errorCodeWhiteList = raw["error-white-list"].as<vector<int>>();
+        }
+        if (raw.count("error-black-list") > 0) {
+            if (raw.count("error-white-list") > 0) {
+                logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help({""}));
+                throw EarlyReturnWithCode(1);
+            }
+            opts.errorCodeBlackList = raw["error-black-list"].as<vector<int>>();
         }
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();

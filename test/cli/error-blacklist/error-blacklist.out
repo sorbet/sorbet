@@ -1,0 +1,19 @@
+test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Integer` for argument `arg0` http://go/e/7002
+     3 |1 + "1"
+        ^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
+     103 |        arg0: Integer,
+                  ^^^^^
+  Got String("1") originating from:
+    test/cli/error-blacklist/error-blacklist.rb:3:
+     3 |1 + "1"
+            ^^^
+
+test/cli/error-blacklist/error-blacklist.rb:4: Useless cast: inferred type `Integer(1)` is already a subtype of `T.nilable(Integer)` http://go/e/7015
+     4 |T.cast(1, T.nilable(Integer))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
+test/cli/error-blacklist/error-blacklist.rb:4: Useless cast: inferred type `Integer(1)` is already a subtype of `T.nilable(Integer)` http://go/e/7015
+     4 |T.cast(1, T.nilable(Integer))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

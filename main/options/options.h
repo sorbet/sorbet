@@ -80,6 +80,7 @@ struct Options {
     bool enableCounters = false;
     std::vector<std::string> someCounters;
     std::vector<int> errorCodeWhiteList;
+    std::vector<int> errorCodeBlackList;
 
     u4 reserveMemKiB;
 

@@ -997,6 +997,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
     result->lspTypecheckCount = this->lspTypecheckCount;
+    result->suppressed_error_classes = this->suppressed_error_classes;
 
     result->names.reserve(this->names.capacity());
     for (auto &nm : this->names) {
@@ -1127,8 +1128,8 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     return ErrorBuilder(*this, report, loc, what);
 }
 
-void GlobalState::suppressErrorClass(ErrorClass err) {
-    suppressed_error_classes.insert(err);
+void GlobalState::suppressErrorClass(int code) {
+    suppressed_error_classes.insert(code);
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
@@ -1139,7 +1140,7 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     if (what.code == errors::Internal::InternalError.code) {
         return true;
     }
-    if (suppressed_error_classes.count(what) != 0) {
+    if (suppressed_error_classes.count(what.code) != 0) {
         return false;
     }
 

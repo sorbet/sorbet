@@ -234,6 +234,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
     }
+    for (auto code : opts.errorCodeBlackList) {
+        gs->suppressErrorClass(code);
+    }
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
@@ -278,10 +281,10 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (opts.print.Autogen || opts.print.AutogenMsgPack) {
-            gs->suppressErrorClass(core::errors::Namer::MethodNotFound);
-            gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod);
-            gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition);
-            gs->suppressErrorClass(core::errors::Resolver::StubConstant);
+            gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
+            gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+            gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
+            gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
             core::MutableContext ctx(*gs, core::Symbols::root());
 
