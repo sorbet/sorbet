@@ -37,6 +37,7 @@ constexpr ErrorClass RecursiveClassAlias{5030, StrictLevel::Stripe};
 constexpr ErrorClass ConstantInTypeAlias{5031, StrictLevel::Stripe};
 constexpr ErrorClass IncludesNonModule{5032, StrictLevel::Stripe};
 constexpr ErrorClass OverridesFinal{5033, StrictLevel::Stripe};
+constexpr ErrorClass ReassignsTypeAlias{5034, StrictLevel::Stripe};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

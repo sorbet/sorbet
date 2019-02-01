@@ -160,6 +160,29 @@ For how to fix, see [Strict Mode](strict.md).
 
 See also: [5007](#5007), [7017](#7017).
 
+## 5034
+
+Sorbet does not support creating normal Ruby constant aliases to type aliases.
+Once a type alias is created, all subsequent aliases must also be type aliases.
+
+Concretely, this is not allowed:
+
+```ruby
+A = T.type_alias(Integer)
+B = A # error: Reassigning a type alias is not allowed
+```
+
+while this is:
+
+```ruby
+A = T.type_alias(Integer)
+B = T.type_alias(A)
+```
+
+(Why? This is due to design tradeoffs to enforce stronger internal invariants.
+Basically, Sorbet can emit more reliable warnings when users declare their
+intent to create a new type alias.)
+
 
 ## 7001
 
