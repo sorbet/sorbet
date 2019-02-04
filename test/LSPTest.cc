@@ -29,7 +29,7 @@ void LSPTest::startLSP() {
     typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, vector<int>({}))));
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     unique_ptr<KeyValueStore> kvstore;
     realmain::createInitialGlobalState(gs, logger, opts, kvstore);
     // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.

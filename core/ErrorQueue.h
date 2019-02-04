@@ -27,7 +27,7 @@ public:
     std::atomic<int> nonSilencedErrorCount{0};
     bool ignoreFlushes{false};
 
-    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, std::vector<int> errorCodeWhiteList = {});
+    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer);
 
     /** register a new error to be reported */
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);

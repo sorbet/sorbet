@@ -140,6 +140,7 @@ public:
     std::vector<std::shared_ptr<File>> getFiles() const;
 
     void suppressErrorClass(int code);
+    void onlyShowErrorClass(int code);
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
@@ -153,6 +154,7 @@ private:
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> suppressed_error_classes;
+    UnorderedSet<int> only_error_classes;
     bool wasModified_ = false;
 
     mutable absl::Mutex annotations_mtx;

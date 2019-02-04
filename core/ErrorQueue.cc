@@ -5,8 +5,8 @@ namespace sorbet::core {
 
 using namespace std;
 
-ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, vector<int> errorCodeWhiteList)
-    : errorFlusher(move(errorCodeWhiteList)), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
+ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer)
+    : errorFlusher(), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
 pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::lsp::QueryResponse>>>
 ErrorQueue::drainWithQueryResponses() {

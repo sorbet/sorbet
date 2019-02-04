@@ -212,8 +212,8 @@ int realmain(int argc, char *argv[]) {
     }
     WorkerPool workers(opts.threads, logger);
 
-    unique_ptr<core::GlobalState> gs = make_unique<core::GlobalState>(
-        (make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, opts.errorCodeWhiteList)));
+    unique_ptr<core::GlobalState> gs =
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
@@ -233,6 +233,9 @@ int realmain(int argc, char *argv[]) {
     }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
+    }
+    for (auto code : opts.errorCodeWhiteList) {
+        gs->onlyShowErrorClass(code);
     }
     for (auto code : opts.errorCodeBlackList) {
         gs->suppressErrorClass(code);
