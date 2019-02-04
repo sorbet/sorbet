@@ -349,7 +349,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         if (raw.count("error-black-list") > 0) {
             if (raw.count("error-white-list") > 0) {
-                logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help({""}));
+                logger->info("You can't pass both --error-black-list and --error-white-list");
                 throw EarlyReturnWithCode(1);
             }
             opts.errorCodeBlackList = raw["error-black-list"].as<vector<int>>();
