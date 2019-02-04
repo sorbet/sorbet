@@ -27,7 +27,7 @@ def cli_test(path):
             ":run_{}".format(name),
             output,
         ],
-        size = 'small',
+        size = 'medium',
     )
 
     native.sh_test(
