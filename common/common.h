@@ -52,9 +52,16 @@ constexpr bool emscripten_build = false;
 constexpr bool emscripten_build = true;
 #endif
 
+#if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
+constexpr bool fuzz_mode = false;
+#else
+constexpr bool fuzz_mode = true;
+#endif
+
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
 #define ENFORCE(x, ...)                                                                             \
     ((::sorbet::debug_mode && !(x)) ? ({                                                            \
+        ::sorbet::Exception::failInFuzzer();                                                        \
         if (stopInDebugger()) {                                                                     \
             (void)!(x);                                                                             \
         }                                                                                           \

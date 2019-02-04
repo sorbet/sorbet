@@ -10,6 +10,7 @@ compilation_database(
     testonly = True,
     targets = [
         # BEGIN compile_commands targets
+        "//test/fuzz:fuzz_dash_e",
         "//test:test_corpus_sharded",
         "//test:hello-test",
         "//test:error-check-test",

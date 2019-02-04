@@ -1125,6 +1125,9 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (reportForFile) {
         prodHistogramAdd("error", what.code, 1);
     }
+    if (what == errors::Internal::InternalError) {
+        Exception::failInFuzzer();
+    }
     bool report = (what == errors::Internal::InternalError) || (reportForFile && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
 }

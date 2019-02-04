@@ -1382,6 +1382,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
         ENFORCE(result.get() != nullptr, "desugar result unset");
         return result;
     } catch (SorbetException &) {
+        Exception::failInFuzzer();
         if (!locReported) {
             locReported = true;
             if (auto e = ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {

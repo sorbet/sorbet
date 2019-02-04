@@ -493,6 +493,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         ENFORCE(ret != nullptr, "CFB builder ret unset");
         return ret;
     } catch (SorbetException &) {
+        Exception::failInFuzzer();
         if (auto e = cctx.ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {
             e.setHeader("Failed to convert tree to CFG (backtrace is above )");
         }

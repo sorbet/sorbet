@@ -30,6 +30,7 @@ public:
     }
 
     static void print_backtrace() noexcept;
+    static void failInFuzzer() noexcept;
 
     template <typename... TArgs>
     [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line,
@@ -39,6 +40,7 @@ public:
 };
 
 template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... args) {
+    Exception::failInFuzzer();
     std::string message = absl::StrCat("", args...);
 
     if (message.size() > 0) {

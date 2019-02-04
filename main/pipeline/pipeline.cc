@@ -160,6 +160,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
         return dslsInlined;
     } catch (SorbetException &) {
+        Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
         }
@@ -385,6 +386,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             fmt::print("}}\n\n");
         }
     } catch (SorbetException &) {
+        Exception::failInFuzzer();
         if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
@@ -426,6 +428,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                 namingProgress.reportProgress(i);
                 i++;
             } catch (SorbetException &) {
+                Exception::failInFuzzer();
                 if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
                     e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
                 }
@@ -469,6 +472,7 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
             what = resolver::Resolver::run(ctx, move(what));
         }
     } catch (SorbetException &) {
+        Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
@@ -523,6 +527,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                             try {
                                 threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, logger));
                             } catch (SorbetException &) {
+                                Exception::failInFuzzer();
                                 logger->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
                             }
                         }

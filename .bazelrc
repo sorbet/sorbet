@@ -188,6 +188,13 @@ common --experimental_ui --experimental_ui_actions_shown 8
 common --show_progress_rate_limit=0.25
 
 ##
+## Fuzzing
+##
+build:fuzz --copt=-fsanitize=fuzzer --cxxopt=-fsanitize=fuzzer --linkopt=-fsanitize=fuzzer --config=sanitize
+build:fuzz --config=forcedebug --config=debugsymbols
+build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION --cxxopt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+
+##
 ## Webasm config. Please use either of those depending on your platform
 ##
 build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm

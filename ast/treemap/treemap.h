@@ -739,6 +739,8 @@ private:
                 Exception::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*ref).name()));
             }
         } catch (SorbetException &e) {
+            Exception::failInFuzzer();
+
             throw ReportedRubyException{e, loc};
         }
     }
@@ -752,6 +754,7 @@ public:
         try {
             return walker.mapIt(move(to), ctx);
         } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
             if (auto e = ctx.state.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Failed to process tree (backtrace is above)");
             }

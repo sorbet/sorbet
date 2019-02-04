@@ -1141,6 +1141,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
 
         return tp.type;
     } catch (SorbetException &) {
+        Exception::failInFuzzer();
         if (auto e = ctx.state.beginError(bind.loc, core::errors::Internal::InternalError)) {
             e.setHeader("Failed to type (backtrace is above)");
         }

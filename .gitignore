@@ -19,3 +19,7 @@
 /website/i18n/*
 
 /runtime/Gemfile.lock
+
+# used for fuzzing
+/fuzz_corpus
+/fuzz_crashers
