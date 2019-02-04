@@ -19,5 +19,5 @@ class Fixed
 
   Elem = type_member(fixed: String)
 
-  def each; end
+  def each(&blk); end
 end

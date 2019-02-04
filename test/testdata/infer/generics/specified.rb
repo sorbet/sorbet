@@ -89,7 +89,7 @@ class ParentEnumerable
   V = type_member
   Elem = type_member
 
-  def each; end
+  def each(&blk); end
 end
 
 class ChildEnumerable < ParentEnumerable

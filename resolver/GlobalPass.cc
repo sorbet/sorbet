@@ -4,6 +4,8 @@
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"
 
+#include "absl/algorithm/container.h"
+
 #include <map>
 #include <vector>
 
@@ -173,6 +175,120 @@ const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
     return entry;
 }
 
+struct Signature {
+    struct {
+        absl::InlinedVector<core::SymbolRef, 4> required;
+        absl::InlinedVector<core::SymbolRef, 4> optional;
+        core::SymbolRef rest;
+    } pos, kw;
+    core::SymbolRef blk;
+} left, right;
+
+Signature decomposeSignature(core::GlobalState &gs, core::SymbolRef method) {
+    Signature sig;
+    for (auto arg : method.data(gs)->arguments()) {
+        if (arg.data(gs)->isBlockArgument()) {
+            sig.blk = arg;
+            continue;
+        }
+
+        auto &dst = arg.data(gs)->isKeyword() ? sig.kw : sig.pos;
+        if (arg.data(gs)->isRepeated()) {
+            dst.rest = arg;
+        } else if (arg.data(gs)->isOptional()) {
+            dst.optional.push_back(arg);
+        } else {
+            dst.required.push_back(arg);
+        }
+    }
+    return sig;
+}
+
+// Eventually this should check the appropriate subtype relationships on types,
+// as well, but for now we just look at the argument shapes and ensure that they
+// are compatible.
+void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMethod, core::SymbolRef method) {
+    if (method.data(gs)->isOverloaded()) {
+        // Don't try to check overloaded methods; It's not immediately clear how
+        // to match overloads against their superclass definitions. Since we
+        // Only permit overloading in the stdlib for now, this is no great loss.
+        return;
+    }
+
+    auto left = decomposeSignature(gs, superMethod);
+    auto right = decomposeSignature(gs, method);
+
+    if (!right.pos.rest.exists()) {
+        auto leftPos = left.pos.required.size() + left.pos.optional.size();
+        auto rightPos = right.pos.required.size() + right.pos.optional.size();
+        if (leftPos > rightPos) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of abstract method `{}` must accept at least `{}` positional arguments",
+                            superMethod.data(gs)->show(gs), leftPos);
+                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            }
+        }
+    }
+
+    if (left.pos.rest.exists() && !right.pos.rest.exists()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of abstract method `{}` must accept *`{}`", superMethod.data(gs)->show(gs),
+                        left.pos.rest.data(gs)->name.show(gs));
+            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        }
+    }
+
+    if (right.pos.required.size() > left.pos.required.size()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of abstract method `{}` must accept no more than `{}` required argument(s)",
+                        superMethod.data(gs)->show(gs), left.pos.required.size());
+            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        }
+    }
+
+    if (!right.kw.rest.exists()) {
+        for (auto req : left.kw.required) {
+            auto nm = req.data(gs)->name;
+            if (absl::c_any_of(right.kw.required, [&](auto &r) { return r.data(gs)->name == nm; }))
+                continue;
+            if (absl::c_any_of(right.kw.optional, [&](auto &r) { return r.data(gs)->name == nm; }))
+                continue;
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
+                            superMethod.data(gs)->show(gs), req.data(gs)->name.show(gs));
+                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            }
+        }
+    }
+
+    if (left.kw.rest.exists() && !right.kw.rest.exists()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of abstract method `{}` must accept **`{}`", superMethod.data(gs)->show(gs),
+                        left.kw.rest.data(gs)->name.show(gs));
+            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        }
+    }
+
+    for (auto extra : right.kw.required) {
+        if (absl::c_any_of(left.kw.required, [&](auto l) { return l.data(gs)->name == extra.data(gs)->name; })) {
+            continue;
+        }
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of abstract method `{}` contains extra required keyword argument `{}`",
+                        superMethod.data(gs)->show(gs), extra.data(gs)->name.show(gs));
+            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        }
+    }
+
+    if (left.blk.exists() && !right.blk.exists()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of abstract method `{}` must accept a block parameter",
+                        superMethod.data(gs)->show(gs));
+            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        }
+    }
+}
+
 void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
     auto klass = method.data(gs)->owner;
     auto name = method.data(gs)->name;
@@ -198,6 +314,10 @@ void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
                 e.setHeader("Method overrides a final method `{}`", overridenMethod.data(gs)->show(gs));
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
             }
+        }
+        if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
+            (method.data(gs)->isImplementation() || method.data(gs)->isOverride())) {
+            validateCompatibleOverride(gs, overridenMethod, method);
         }
     }
 }
