@@ -43,7 +43,6 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
 bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
                        core::SymbolRef sym, vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
-    auto parentVariance = parentTypeMember.data(gs)->variance();
     core::SymbolRef my = sym.data(gs)->findMember(gs, name);
     bool ok = true;
     if (!my.exists()) {
@@ -67,6 +66,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         return false;
     }
     auto myVariance = data->variance();
+    auto parentVariance = parentTypeMember.data(gs)->variance();
     if (!sym.data(gs)->derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
         myVariance != core::Variance::Invariant) {
         if (auto e = gs.beginError(data->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
