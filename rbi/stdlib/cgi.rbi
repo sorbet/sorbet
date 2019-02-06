@@ -81,6 +81,8 @@ class CGI
 end
 
 class CGI::Cookie < Array
+  Elem = type_member(:out, fixed: String)
+
   Sorbet.sig {returns(::T.untyped)}
   def domain(); end
 

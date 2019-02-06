@@ -509,6 +509,8 @@ class WEBrick::HTTPAuth::DigestAuth
 end
 
 class WEBrick::HTTPAuth::DigestAuth::OpaqueInfo < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   sig {returns(T.untyped)}
   def nc(); end
 

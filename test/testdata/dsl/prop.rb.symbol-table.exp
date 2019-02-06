@@ -352,7 +352,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:NotAODM>#<static-init> () @ test/testdata/dsl/prop.rb:2
     method ::<Class:NotAODM>#prop (args) @ test/testdata/dsl/prop.rb:3
       argument ::<Class:NotAODM>#prop#args<repeated> @ test/testdata/dsl/prop.rb:3
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L842
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L848
     method ::Object#main () @ test/testdata/dsl/prop.rb:85
   class ::Opus < ::RubyTyper::ImplicitModuleSuperclass ()
     class ::Opus::Param < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:14

@@ -6,6 +6,6 @@ class ::<root> < ::Object () @ (test/testdata/namer/singleton_class.rb:2, https:
       class ::A::B::<Class:C> < ::<Class:Object> () @ test/testdata/namer/singleton_class.rb:2
     class ::A::<Class:B> < ::Module () @ test/testdata/namer/singleton_class.rb:2
   class ::<Class:A> < ::Module () @ test/testdata/namer/singleton_class.rb:2
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L842
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L848
     method ::Object#main () @ test/testdata/namer/singleton_class.rb:5
 

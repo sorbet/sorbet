@@ -40,6 +40,6 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
       method ::<Class:H>::<Class:H2>#h () @ test/testdata/desugar/sclass.rb:77
   class ::<Class:<Class:H>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:75
     method ::<Class:<Class:H>>#<static-init> () @ test/testdata/desugar/sclass.rb:76
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L842
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L848
     method ::Object#main () @ test/testdata/desugar/sclass.rb:84
 

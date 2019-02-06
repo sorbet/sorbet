@@ -1,8 +1,8 @@
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L96: Did you mean: `Enumerator::Yielder`?
-    96 |class Enumerator::Yielder < Object
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L98: Did you mean: `Enumerator::Yielder`?
+    98 |class Enumerator::Yielder < Object
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
      3 |class Ripper
@@ -14,8 +14,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L36: Did you mean: `Date`?
-    36 |class Date::Infinity < Numeric
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L38: Did you mean: `Date`?
+    38 |class Date::Infinity < Numeric
               ^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L2: Did you mean: `Integer`?
      2 |class Integer < Numeric
@@ -24,8 +24,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L767: Did you mean: `IO`?
-     767 |class IO::EAGAINWaitReadable < Errno::EAGAIN
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L773: Did you mean: `IO`?
+     773 |class IO::EAGAINWaitReadable < Errno::EAGAIN
                 ^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/set.rbi#L2: Did you mean: `Set`?
      2 |class Set < Object

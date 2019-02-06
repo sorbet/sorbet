@@ -1756,6 +1756,8 @@ class UDPSocket < IPSocket
 end
 
 class UNIXServer < UNIXSocket
+  Elem = type_member(:out, fixed: String)
+
   Sorbet.sig {returns(::T.untyped)}
   def accept(); end
 

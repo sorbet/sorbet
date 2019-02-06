@@ -12,6 +12,8 @@ class Binding < Object
 end
 
 class CSV::FieldInfo < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
 class CSV::MalformedCSVError < RuntimeError
@@ -632,9 +634,13 @@ class Errno::NOERROR < SystemCallError
 end
 
 class Etc::Group < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
 class Etc::Passwd < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
 class FiberError < StandardError
@@ -851,6 +857,8 @@ class ObjectSpace::WeakMap < Object
 end
 
 class Process::Tms < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
 class RangeError < StandardError
