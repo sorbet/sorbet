@@ -79,11 +79,17 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
 }
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
-                        vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
+                        vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
     ENFORCE(sym.data(gs)->isClass());
+    if (resolved[sym._id]) {
+        return;
+    }
+    resolved[sym._id] = true;
 
     if (sym.data(gs)->superClass.exists()) {
         auto parent = sym.data(gs)->superClass;
+        resolveTypeMembers(gs, parent, typeAliases, resolved);
+
         auto tps = parent.data(gs)->typeMembers();
         bool foundAll = true;
         for (core::SymbolRef tp : tps) {
@@ -115,6 +121,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
     }
 
     for (core::SymbolRef mixin : sym.data(gs)->mixins()) {
+        resolveTypeMembers(gs, mixin, typeAliases, resolved);
         for (core::SymbolRef tp : mixin.data(gs)->typeMembers()) {
             resolveTypeMember(gs, mixin, tp, sym, typeAliases);
         }
@@ -569,17 +576,19 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 
+    computeLinearization(gs);
+
     vector<vector<pair<core::SymbolRef, core::SymbolRef>>> typeAliases;
     typeAliases.resize(gs.symbolsUsed());
-
+    vector<bool> resolved;
+    resolved.resize(gs.symbolsUsed());
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
         if (sym.data(gs)->isClass()) {
-            resolveTypeMembers(gs, sym, typeAliases);
+            resolveTypeMembers(gs, sym, typeAliases, resolved);
         }
     }
 
-    computeLinearization(gs);
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
