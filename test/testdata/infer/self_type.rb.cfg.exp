@@ -89,39 +89,39 @@ subgraph "cluster_::Parent#returns_self" {
     "bb::Parent#returns_self_1" -> "bb::Parent#returns_self_1" [style="bold"];
 }
 
-subgraph "cluster_::Parent#<static-init>" {
-    label = "::Parent#<static-init>";
+subgraph "cluster_::<Class:Parent>#<static-init>" {
+    label = "::<Class:Parent>#<static-init>";
     color = blue;
-    "bb::Parent#<static-init>_0" [shape = invhouse];
-    "bb::Parent#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:Parent>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Parent>#<static-init>_1" [shape = parallelogram];
 
-    "bb::Parent#<static-init>_0" [
+    "bb::<Class:Parent>#<static-init>_0" [
         label = "block[id=0]()\l<statTemp>$4: T.class_of(Parent) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Parent).sig()\l<unconditional>\l"
     ];
 
-    "bb::Parent#<static-init>_0" -> "bb::Parent#<static-init>_2" [style="bold"];
-    "bb::Parent#<static-init>_1" [
+    "bb::<Class:Parent>#<static-init>_0" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::Parent#<static-init>_1" -> "bb::Parent#<static-init>_1" [style="bold"];
-    "bb::Parent#<static-init>_2" [
+    "bb::<Class:Parent>#<static-init>_1" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_2" [
         label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::Parent#<static-init>_2" -> "bb::Parent#<static-init>_4" [style="bold"];
-    "bb::Parent#<static-init>_2" -> "bb::Parent#<static-init>_3" [style="tapered"];
+    "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_4" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_3" [style="tapered"];
 
-    "bb::Parent#<static-init>_3" [
+    "bb::<Class:Parent>#<static-init>_3" [
         label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Parent>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
-    "bb::Parent#<static-init>_3" -> "bb::Parent#<static-init>_1" [style="bold"];
-    "bb::Parent#<static-init>_4" [
+    "bb::<Class:Parent>#<static-init>_3" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_4" [
         label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(T) = alias <constant:T>\l<statTemp>$10: T.untyped = <statTemp>$11: T.class_of(T).self_type()\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<::<Class:Parent>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::Parent#<static-init>_4" -> "bb::Parent#<static-init>_2" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_4" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::Generic#bad" {
@@ -142,39 +142,39 @@ subgraph "cluster_::Generic#bad" {
     "bb::Generic#bad_1" -> "bb::Generic#bad_1" [style="bold"];
 }
 
-subgraph "cluster_::Generic#<static-init>" {
-    label = "::Generic#<static-init>";
+subgraph "cluster_::<Class:Generic>#<static-init>" {
+    label = "::<Class:Generic>#<static-init>";
     color = blue;
-    "bb::Generic#<static-init>_0" [shape = invhouse];
-    "bb::Generic#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:Generic>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Generic>#<static-init>_1" [shape = parallelogram];
 
-    "bb::Generic#<static-init>_0" [
+    "bb::<Class:Generic>#<static-init>_0" [
         label = "block[id=0]()\l<statTemp>$4: T.class_of(Generic) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Generic).sig()\l<unconditional>\l"
     ];
 
-    "bb::Generic#<static-init>_0" -> "bb::Generic#<static-init>_2" [style="bold"];
-    "bb::Generic#<static-init>_1" [
+    "bb::<Class:Generic>#<static-init>_0" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::Generic#<static-init>_1" -> "bb::Generic#<static-init>_1" [style="bold"];
-    "bb::Generic#<static-init>_2" [
+    "bb::<Class:Generic>#<static-init>_1" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_2" [
         label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::Generic#<static-init>_2" -> "bb::Generic#<static-init>_4" [style="bold"];
-    "bb::Generic#<static-init>_2" -> "bb::Generic#<static-init>_3" [style="tapered"];
+    "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_4" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_3" [style="tapered"];
 
-    "bb::Generic#<static-init>_3" [
+    "bb::<Class:Generic>#<static-init>_3" [
         label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Generic>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
-    "bb::Generic#<static-init>_3" -> "bb::Generic#<static-init>_1" [style="bold"];
-    "bb::Generic#<static-init>_4" [
+    "bb::<Class:Generic>#<static-init>_3" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_4" [
         label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$13: T.class_of(T) = alias <constant:T>\l<statTemp>$12: T.untyped = <statTemp>$13: T.class_of(T).self_type()\l<statTemp>$10: <Type: Generic[T.untyped]> = <statTemp>$11: T.class_of(Generic).[](<statTemp>$12: T.untyped)\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: <Type: Generic[T.untyped]>)\l<blockReturnTemp>$14: T.noreturn = blockreturn<::<Class:Generic>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::Generic#<static-init>_4" -> "bb::Generic#<static-init>_2" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_4" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::Array#returns_self" {
@@ -195,39 +195,39 @@ subgraph "cluster_::Array#returns_self" {
     "bb::Array#returns_self_1" -> "bb::Array#returns_self_1" [style="bold"];
 }
 
-subgraph "cluster_::Array#<static-init>" {
-    label = "::Array#<static-init>";
+subgraph "cluster_::<Class:Array>#<static-init>" {
+    label = "::<Class:Array>#<static-init>";
     color = blue;
-    "bb::Array#<static-init>_0" [shape = invhouse];
-    "bb::Array#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:Array>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Array>#<static-init>_1" [shape = parallelogram];
 
-    "bb::Array#<static-init>_0" [
+    "bb::<Class:Array>#<static-init>_0" [
         label = "block[id=0]()\l<statTemp>$4: T.class_of(Array) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Array).sig()\l<unconditional>\l"
     ];
 
-    "bb::Array#<static-init>_0" -> "bb::Array#<static-init>_2" [style="bold"];
-    "bb::Array#<static-init>_1" [
+    "bb::<Class:Array>#<static-init>_0" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
+    "bb::<Class:Array>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::Array#<static-init>_1" -> "bb::Array#<static-init>_1" [style="bold"];
-    "bb::Array#<static-init>_2" [
+    "bb::<Class:Array>#<static-init>_1" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
+    "bb::<Class:Array>#<static-init>_2" [
         label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::Array#<static-init>_2" -> "bb::Array#<static-init>_4" [style="bold"];
-    "bb::Array#<static-init>_2" -> "bb::Array#<static-init>_3" [style="tapered"];
+    "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_4" [style="bold"];
+    "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_3" [style="tapered"];
 
-    "bb::Array#<static-init>_3" [
+    "bb::<Class:Array>#<static-init>_3" [
         label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Array>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
-    "bb::Array#<static-init>_3" -> "bb::Array#<static-init>_1" [style="bold"];
-    "bb::Array#<static-init>_4" [
+    "bb::<Class:Array>#<static-init>_3" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
+    "bb::<Class:Array>#<static-init>_4" [
         label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(T) = alias <constant:T>\l<statTemp>$10: T.untyped = <statTemp>$11: T.class_of(T).self_type()\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<::<Class:Array>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::Array#<static-init>_4" -> "bb::Array#<static-init>_2" [style="bold"];
+    "bb::<Class:Array>#<static-init>_4" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::B#returns_self" {
@@ -248,39 +248,39 @@ subgraph "cluster_::B#returns_self" {
     "bb::B#returns_self_1" -> "bb::B#returns_self_1" [style="bold"];
 }
 
-subgraph "cluster_::B#<static-init>" {
-    label = "::B#<static-init>";
+subgraph "cluster_::<Class:B>#<static-init>" {
+    label = "::<Class:B>#<static-init>";
     color = blue;
-    "bb::B#<static-init>_0" [shape = invhouse];
-    "bb::B#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:B>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:B>#<static-init>_1" [shape = parallelogram];
 
-    "bb::B#<static-init>_0" [
+    "bb::<Class:B>#<static-init>_0" [
         label = "block[id=0]()\l<statTemp>$4: T.class_of(B) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(B).sig()\l<unconditional>\l"
     ];
 
-    "bb::B#<static-init>_0" -> "bb::B#<static-init>_2" [style="bold"];
-    "bb::B#<static-init>_1" [
+    "bb::<Class:B>#<static-init>_0" -> "bb::<Class:B>#<static-init>_2" [style="bold"];
+    "bb::<Class:B>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::B#<static-init>_1" -> "bb::B#<static-init>_1" [style="bold"];
-    "bb::B#<static-init>_2" [
+    "bb::<Class:B>#<static-init>_1" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
+    "bb::<Class:B>#<static-init>_2" [
         label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::B#<static-init>_2" -> "bb::B#<static-init>_4" [style="bold"];
-    "bb::B#<static-init>_2" -> "bb::B#<static-init>_3" [style="tapered"];
+    "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_4" [style="bold"];
+    "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_3" [style="tapered"];
 
-    "bb::B#<static-init>_3" [
+    "bb::<Class:B>#<static-init>_3" [
         label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:B>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
-    "bb::B#<static-init>_3" -> "bb::B#<static-init>_1" [style="bold"];
-    "bb::B#<static-init>_4" [
+    "bb::<Class:B>#<static-init>_3" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
+    "bb::<Class:B>#<static-init>_4" [
         label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(T) = alias <constant:T>\l<statTemp>$10: T.untyped = <statTemp>$11: T.class_of(T).self_type()\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<::<Class:B>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::B#<static-init>_4" -> "bb::B#<static-init>_2" [style="bold"];
+    "bb::<Class:B>#<static-init>_4" -> "bb::<Class:B>#<static-init>_2" [style="bold"];
 }
 
 }

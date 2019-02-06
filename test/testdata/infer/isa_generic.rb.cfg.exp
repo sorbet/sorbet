@@ -100,22 +100,22 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_4" -> "bb#<static-init>_2" [style="bold"];
 }
 
-subgraph "cluster_::Concrete#<static-init>" {
-    label = "::Concrete#<static-init>";
+subgraph "cluster_::<Class:Concrete>#<static-init>" {
+    label = "::<Class:Concrete>#<static-init>";
     color = blue;
-    "bb::Concrete#<static-init>_0" [shape = invhouse];
-    "bb::Concrete#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:Concrete>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Concrete>#<static-init>_1" [shape = parallelogram];
 
-    "bb::Concrete#<static-init>_0" [
+    "bb::<Class:Concrete>#<static-init>_0" [
         label = "block[id=0]()\l<constant:Klass>$4: String = alias <constant:Klass>\l<statTemp>$5: T.class_of(Concrete)[String] = self\l<hashTemp>$7: Symbol(:\"fixed\") = :\"fixed\"\l<hashTemp>$8: T.class_of(String) = alias <constant:String>\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: {fixed: T.class_of(String)} = <magic>$9: <Magic>.<build-hash>(<hashTemp>$7: Symbol(:\"fixed\"), <hashTemp>$8: T.class_of(String))\l<constant:Klass>$4: T.untyped = <statTemp>$5: T.class_of(Concrete)[String].type_template(<statTemp>$6: {fixed: T.class_of(String)})\l<returnMethodTemp>$2: T.untyped = <constant:Klass>$4\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
-    "bb::Concrete#<static-init>_0" -> "bb::Concrete#<static-init>_1" [style="bold"];
-    "bb::Concrete#<static-init>_1" [
+    "bb::<Class:Concrete>#<static-init>_0" -> "bb::<Class:Concrete>#<static-init>_1" [style="bold"];
+    "bb::<Class:Concrete>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::Concrete#<static-init>_1" -> "bb::Concrete#<static-init>_1" [style="bold"];
+    "bb::<Class:Concrete>#<static-init>_1" -> "bb::<Class:Concrete>#<static-init>_1" [style="bold"];
 }
 
 }

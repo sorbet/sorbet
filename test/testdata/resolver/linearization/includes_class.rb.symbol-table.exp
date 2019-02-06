@@ -3,15 +3,15 @@ class ::<root> < ::Object () @ (test/testdata/resolver/linearization/includes_cl
   class ::A < ::Sup () @ test/testdata/resolver/linearization/includes_class.rb:5
   class ::<Class:A> < ::<Class:Sup> () @ test/testdata/resolver/linearization/includes_class.rb:5
   class ::B < ::Object (<constant:A>, <constant:Sup>, <constant:Object>, <constant:Kernel>, <constant:BasicObject>) @ test/testdata/resolver/linearization/includes_class.rb:8
-    method ::B#<static-init> () @ ???
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/resolver/linearization/includes_class.rb:8
+    method ::<Class:B>#<static-init> () @ ???
   class ::C < ::RubyTyper::ImplicitModuleSuperclass (<constant:A>, <constant:Sup>, <constant:Object>, <constant:Kernel>, <constant:BasicObject>) @ test/testdata/resolver/linearization/includes_class.rb:12
-    method ::C#<static-init> () @ ???
     method ::C#bla () @ test/testdata/resolver/linearization/includes_class.rb:14
   class ::<Class:C> < ::Module () @ test/testdata/resolver/linearization/includes_class.rb:12
+    method ::<Class:C>#<static-init> () @ ???
   class ::IncludesBO < ::RubyTyper::ImplicitModuleSuperclass (<constant:BasicObject>) @ test/testdata/resolver/linearization/includes_class.rb:19
-    method ::IncludesBO#<static-init> () @ ???
   class ::<Class:IncludesBO> < ::Module () @ test/testdata/resolver/linearization/includes_class.rb:19
+    method ::<Class:IncludesBO>#<static-init> () @ ???
   class ::Sup < ::Object () @ test/testdata/resolver/linearization/includes_class.rb:3
   class ::<Class:Sup> < ::<Class:Object> () @ test/testdata/resolver/linearization/includes_class.rb:3
 

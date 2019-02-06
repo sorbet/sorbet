@@ -9,9 +9,9 @@ class ::<root> < ::Object () @ (test/testdata/resolver/linearization/linearizati
     method ::C4#foo () @ test/testdata/resolver/linearization/linearization4a.rb:8
   class ::<Class:C4> < ::Module () @ test/testdata/resolver/linearization/linearization4a.rb:7
   class ::D4 < ::RubyTyper::ImplicitModuleSuperclass (<constant:A4>, <constant:B4>) @ test/testdata/resolver/linearization/linearization4a.rb:11
-    method ::D4#<static-init> () @ test/testdata/resolver/linearization/linearization4a.rb:11
   class ::<Class:D4> < ::Module () @ test/testdata/resolver/linearization/linearization4a.rb:11
+    method ::<Class:D4>#<static-init> () @ test/testdata/resolver/linearization/linearization4a.rb:11
   class ::E4 < ::Object (<constant:D4>, <constant:A4>, <constant:B4>, <constant:C4>) @ test/testdata/resolver/linearization/linearization4a.rb:15
-    method ::E4#<static-init> () @ test/testdata/resolver/linearization/linearization4a.rb:15
   class ::<Class:E4> < ::<Class:Object> () @ test/testdata/resolver/linearization/linearization4a.rb:15
+    method ::<Class:E4>#<static-init> () @ test/testdata/resolver/linearization/linearization4a.rb:15
 

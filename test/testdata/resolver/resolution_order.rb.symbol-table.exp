@@ -1,35 +1,34 @@
 class ::<root> < ::Object () @ (test/testdata/resolver/resolution_order.rb:8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
   method #<static-init> () @ ???
   class ::A < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_order.rb:34
-    method ::A#<static-init> () @ test/testdata/resolver/resolution_order.rb:34
     static-field ::A::AB -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:35
     static-field ::A::AV -> Integer @ test/testdata/resolver/resolution_order.rb:37
     class ::A::DOES_NOT_EXIST < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
     class ::A::<Class:DOES_NOT_EXIST> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/resolution_order.rb:11
   class ::<Class:A> < ::Module () @ test/testdata/resolver/resolution_order.rb:34
+    method ::<Class:A>#<static-init> () @ test/testdata/resolver/resolution_order.rb:34
   class ::B < ::Object () @ test/testdata/resolver/resolution_order.rb:40
-    method ::B#<static-init> () @ test/testdata/resolver/resolution_order.rb:41
     static-field ::B::BC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:41
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:40
+    method ::<Class:B>#<static-init> () @ test/testdata/resolver/resolution_order.rb:41
   class ::C < ::B () @ test/testdata/resolver/resolution_order.rb:44
   class ::<Class:C> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:44
   class ::D < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_order.rb:62
-    method ::D#<static-init> () @ test/testdata/resolver/resolution_order.rb:63
     static-field ::D::DA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:63
   class ::<Class:D> < ::Module () @ test/testdata/resolver/resolution_order.rb:62
+    method ::<Class:D>#<static-init> () @ test/testdata/resolver/resolution_order.rb:63
   class ::E < ::RubyTyper::ImplicitModuleSuperclass (<constant:D>) @ test/testdata/resolver/resolution_order.rb:56
-    method ::E#<static-init> () @ test/testdata/resolver/resolution_order.rb:56
     static-field ::E::EA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:58
     static-field ::E::EC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:59
   class ::<Class:E> < ::Module () @ test/testdata/resolver/resolution_order.rb:56
+    method ::<Class:E>#<static-init> () @ test/testdata/resolver/resolution_order.rb:56
   class ::F < ::RubyTyper::ImplicitModuleSuperclass (<constant:E>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:47
-    method ::F#<static-init> () @ test/testdata/resolver/resolution_order.rb:47
   class ::<Class:F> < ::Module () @ test/testdata/resolver/resolution_order.rb:47
+    method ::<Class:F>#<static-init> () @ test/testdata/resolver/resolution_order.rb:47
   class ::HasError < ::Object (<constant:DOES_NOT_EXIST>) @ test/testdata/resolver/resolution_order.rb:10
-    method ::HasError#<static-init> () @ ???
   class ::<Class:HasError> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:10
+    method ::<Class:HasError>#<static-init> () @ ???
   class ::IsGood < ::Object () @ test/testdata/resolver/resolution_order.rb:14
-    method ::IsGood#<static-init> () @ test/testdata/resolver/resolution_order.rb:14
     method ::IsGood#foo1 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:18
       argument ::IsGood#foo1#a<> -> C @ test/testdata/resolver/resolution_order.rb:17
     method ::IsGood#foo2 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:23
@@ -37,6 +36,7 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolution_order.rb:8, ht
   class ::<Class:IsGood> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/resolution_order.rb:14
     method ::<Class:IsGood>#<block> () @ test/testdata/resolver/resolution_order.rb:17
     method ::<Class:IsGood>#<block> () @ test/testdata/resolver/resolution_order.rb:22
+    method ::<Class:IsGood>#<static-init> () @ test/testdata/resolver/resolution_order.rb:14
   class ::TestInheritace1 < ::B () @ test/testdata/resolver/resolution_order.rb:28
   class ::<Class:TestInheritace1> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:28
   class ::TestInheritace2 < ::A () @ test/testdata/resolver/resolution_order.rb:31

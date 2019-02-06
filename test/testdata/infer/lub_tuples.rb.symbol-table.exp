@@ -3,7 +3,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     class ::Opus::CIBot < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/infer/lub_tuples.rb:2
       class ::Opus::CIBot::Tasks < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/infer/lub_tuples.rb:2
         class ::Opus::CIBot::Tasks::NotifySlackBuildComplete < ::Object () @ test/testdata/infer/lub_tuples.rb:2
-          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#<static-init> () @ test/testdata/infer/lub_tuples.rb:12
           field ::Opus::CIBot::Tasks::NotifySlackBuildComplete#@determined_build_group_status_and_which -> NilClass | TupleType {
                 0 = TrueClass | FalseClass
                 1 = String | NilClass
@@ -16,6 +15,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
           method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#initialize () @ test/testdata/infer/lub_tuples.rb:5
         class ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete> < ::<Class:Object> (<constant:Sig>) @ test/testdata/infer/lub_tuples.rb:2
           method ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<block> () @ test/testdata/infer/lub_tuples.rb:12
+          method ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<static-init> () @ test/testdata/infer/lub_tuples.rb:12
       class ::Opus::CIBot::<Class:Tasks> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
     class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
 

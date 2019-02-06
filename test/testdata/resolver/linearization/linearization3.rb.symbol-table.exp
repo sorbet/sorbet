@@ -3,12 +3,12 @@ class ::<root> < ::Object () @ (test/testdata/resolver/linearization/linearizati
   class ::A3 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/linearization/linearization3.rb:2
   class ::<Class:A3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:2
   class ::C3 < ::RubyTyper::ImplicitModuleSuperclass (<constant:A3>) @ test/testdata/resolver/linearization/linearization3.rb:3
-    method ::C3#<static-init> () @ ???
   class ::<Class:C3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:3
+    method ::<Class:C3>#<static-init> () @ ???
   class ::D3 < ::RubyTyper::ImplicitModuleSuperclass (<constant:A3>) @ test/testdata/resolver/linearization/linearization3.rb:6
-    method ::D3#<static-init> () @ ???
   class ::<Class:D3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:6
+    method ::<Class:D3>#<static-init> () @ ???
   class ::E3 < ::RubyTyper::ImplicitModuleSuperclass (<constant:D3>, <constant:C3>, <constant:A3>) @ test/testdata/resolver/linearization/linearization3.rb:9
-    method ::E3#<static-init> () @ test/testdata/resolver/linearization/linearization3.rb:9
   class ::<Class:E3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:9
+    method ::<Class:E3>#<static-init> () @ test/testdata/resolver/linearization/linearization3.rb:9
 

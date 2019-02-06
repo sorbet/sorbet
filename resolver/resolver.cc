@@ -1234,7 +1234,8 @@ public:
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.staticInitForFile(classDef->loc.file());
         } else {
-            sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, core::Names::staticInit());
+            sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol.data(ctx)->lookupSingletonClass(ctx),
+                                              core::Names::staticInit());
         }
         auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(),
                                                 ast::MethodDef::ARGS_store(), std::move(inits), true);

@@ -53,56 +53,56 @@ subgraph "cluster_::TestArray#test_arrays" {
     "bb::TestArray#test_arrays_1" -> "bb::TestArray#test_arrays_1" [style="bold"];
 }
 
-subgraph "cluster_::TestArray#<static-init>" {
-    label = "::TestArray#<static-init>";
+subgraph "cluster_::<Class:TestArray>#<static-init>" {
+    label = "::<Class:TestArray>#<static-init>";
     color = blue;
-    "bb::TestArray#<static-init>_0" [shape = invhouse];
-    "bb::TestArray#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:TestArray>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:TestArray>#<static-init>_1" [shape = parallelogram];
 
-    "bb::TestArray#<static-init>_0" [
+    "bb::<Class:TestArray>#<static-init>_0" [
         label = "block[id=0]()\l<statTemp>$5: T.class_of(TestArray) = self\l<block-pre-call-temp>$6: RubyTyper::Void = <statTemp>$5: T.class_of(TestArray).sig()\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_0" -> "bb::TestArray#<static-init>_2" [style="bold"];
-    "bb::TestArray#<static-init>_1" [
+    "bb::<Class:TestArray>#<static-init>_0" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_1" -> "bb::TestArray#<static-init>_1" [style="bold"];
-    "bb::TestArray#<static-init>_2" [
+    "bb::<Class:TestArray>#<static-init>_1" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_2" [
         label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::TestArray#<static-init>_2" -> "bb::TestArray#<static-init>_4" [style="bold"];
-    "bb::TestArray#<static-init>_2" -> "bb::TestArray#<static-init>_3" [style="tapered"];
+    "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_4" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_3" [style="tapered"];
 
-    "bb::TestArray#<static-init>_3" [
+    "bb::<Class:TestArray>#<static-init>_3" [
         label = "block[id=3]()\l<statTemp>$4: RubyTyper::Void = Solve<::<Class:TestArray>#<block>>\l<statTemp>$14: T.class_of(TestArray) = self\l<block-pre-call-temp>$15: RubyTyper::Void = <statTemp>$14: T.class_of(TestArray).sig()\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_3" -> "bb::TestArray#<static-init>_5" [style="bold"];
-    "bb::TestArray#<static-init>_4" [
+    "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_5" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_4" [
         label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.returns(<statTemp>$11: T.class_of(Integer))\l<blockReturnTemp>$12: T.noreturn = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$9: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_4" -> "bb::TestArray#<static-init>_2" [style="bold"];
-    "bb::TestArray#<static-init>_5" [
+    "bb::<Class:TestArray>#<static-init>_4" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_5" [
         label = "block[id=5]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::TestArray#<static-init>_5" -> "bb::TestArray#<static-init>_7" [style="bold"];
-    "bb::TestArray#<static-init>_5" -> "bb::TestArray#<static-init>_6" [style="tapered"];
+    "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_7" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_6" [style="tapered"];
 
-    "bb::TestArray#<static-init>_6" [
+    "bb::<Class:TestArray>#<static-init>_6" [
         label = "block[id=6]()\l<statTemp>$13: RubyTyper::Void = Solve<::<Class:TestArray>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_6" -> "bb::TestArray#<static-init>_1" [style="bold"];
-    "bb::TestArray#<static-init>_7" [
+    "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_7" [
         label = "block[id=7]()\louterLoops: 1\l<statTemp>$19: Sorbet::Private::Builder = self\l<statTemp>$20: T.class_of(String) = alias <constant:String>\l<blockReturnTemp>$18: Sorbet::Private::Builder = <statTemp>$19: Sorbet::Private::Builder.returns(<statTemp>$20: T.class_of(String))\l<blockReturnTemp>$21: T.noreturn = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$18: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_7" -> "bb::TestArray#<static-init>_5" [style="bold"];
+    "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_5" [style="bold"];
 }
 
 }

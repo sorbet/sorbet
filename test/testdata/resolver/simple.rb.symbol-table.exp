@@ -3,20 +3,20 @@ class ::<root> < ::Object () @ (test/testdata/resolver/simple.rb:2, https://git.
   class ::Outer1 < ::Object () @ test/testdata/resolver/simple.rb:2
   class ::<Class:Outer1> < ::<Class:Object> () @ test/testdata/resolver/simple.rb:2
   class ::Outer2 < ::Object () @ test/testdata/resolver/simple.rb:5
-    method ::Outer2#<static-init> () @ test/testdata/resolver/simple.rb:5
     class ::Outer2::C < ::Object () @ test/testdata/resolver/simple.rb:6
     class ::Outer2::<Class:C> < ::<Class:Object> () @ test/testdata/resolver/simple.rb:6
     class ::Outer2::Inner1 < ::Object () @ test/testdata/resolver/simple.rb:9
-      method ::Outer2::Inner1#<static-init> () @ test/testdata/resolver/simple.rb:9
       class ::Outer2::Inner1::A < ::Object () @ test/testdata/resolver/simple.rb:10
       class ::Outer2::Inner1::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/simple.rb:10
       class ::Outer2::Inner1::Inner2 < ::Object () @ test/testdata/resolver/simple.rb:21
-        method ::Outer2::Inner1::Inner2#<static-init> () @ test/testdata/resolver/simple.rb:13
         class ::Outer2::Inner1::Inner2::A < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/simple.rb:23
         class ::Outer2::Inner1::Inner2::<Class:A> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/simple.rb:23
       class ::Outer2::Inner1::<Class:Inner2> < ::<Class:Object> () @ test/testdata/resolver/simple.rb:13
+        method ::Outer2::Inner1::<Class:Inner2>#<static-init> () @ test/testdata/resolver/simple.rb:13
     class ::Outer2::<Class:Inner1> < ::<Class:Object> () @ test/testdata/resolver/simple.rb:9
+      method ::Outer2::<Class:Inner1>#<static-init> () @ test/testdata/resolver/simple.rb:9
     class ::Outer2::Other < ::Outer2::Inner1::Inner2 () @ test/testdata/resolver/simple.rb:26
     class ::Outer2::<Class:Other> < ::Outer2::Inner1::<Class:Inner2> () @ test/testdata/resolver/simple.rb:26
   class ::<Class:Outer2> < ::<Class:Object> () @ test/testdata/resolver/simple.rb:5
+    method ::<Class:Outer2>#<static-init> () @ test/testdata/resolver/simple.rb:5
 

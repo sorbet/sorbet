@@ -17,39 +17,39 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
 
-subgraph "cluster_::A#<static-init>" {
-    label = "::A#<static-init>";
+subgraph "cluster_::<Class:A>#<static-init>" {
+    label = "::<Class:A>#<static-init>";
     color = blue;
-    "bb::A#<static-init>_0" [shape = invhouse];
-    "bb::A#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
 
-    "bb::A#<static-init>_0" [
+    "bb::<Class:A>#<static-init>_0" [
         label = "block[id=0]()\l<statTemp>$4: T.class_of(A) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(A).sig()\l<unconditional>\l"
     ];
 
-    "bb::A#<static-init>_0" -> "bb::A#<static-init>_2" [style="bold"];
-    "bb::A#<static-init>_1" [
+    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_2" [style="bold"];
+    "bb::<Class:A>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::A#<static-init>_1" -> "bb::A#<static-init>_1" [style="bold"];
-    "bb::A#<static-init>_2" [
+    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
+    "bb::<Class:A>#<static-init>_2" [
         label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
-    "bb::A#<static-init>_2" -> "bb::A#<static-init>_4" [style="bold"];
-    "bb::A#<static-init>_2" -> "bb::A#<static-init>_3" [style="tapered"];
+    "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_4" [style="bold"];
+    "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_3" [style="tapered"];
 
-    "bb::A#<static-init>_3" [
+    "bb::<Class:A>#<static-init>_3" [
         label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:A>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
-    "bb::A#<static-init>_3" -> "bb::A#<static-init>_1" [style="bold"];
-    "bb::A#<static-init>_4" [
+    "bb::<Class:A>#<static-init>_3" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
+    "bb::<Class:A>#<static-init>_4" [
         label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"t\") = :\"t\"\l<hashTemp>$13: T.class_of(Time) = alias <constant:Time>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {t: T.class_of(Time)} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"t\"), <hashTemp>$13: T.class_of(Time))\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {t: T.class_of(Time)})\l<statTemp>$15: T.class_of(Time) = alias <constant:Time>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: T.class_of(Time))\l<blockReturnTemp>$16: T.noreturn = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::A#<static-init>_4" -> "bb::A#<static-init>_2" [style="bold"];
+    "bb::<Class:A>#<static-init>_4" -> "bb::<Class:A>#<static-init>_2" [style="bold"];
 }
 
 }

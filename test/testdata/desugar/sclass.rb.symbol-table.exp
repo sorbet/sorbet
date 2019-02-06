@@ -13,20 +13,20 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
     method ::<Class:<Class:D>>#d () @ test/testdata/desugar/sclass.rb:29
   class ::<Class:<Class:<Class:D>>> < ::<Class:<Class:<Class:Object>>> () @ test/testdata/desugar/sclass.rb:28
   class ::E < ::Object () @ test/testdata/desugar/sclass.rb:36
-    method ::E#<static-init> () @ test/testdata/desugar/sclass.rb:44
   class ::<Class:E> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:37
+    method ::<Class:E>#<static-init> () @ test/testdata/desugar/sclass.rb:44
     method ::<Class:E>#e () @ test/testdata/desugar/sclass.rb:39
     method ::<Class:E>#wrapper () @ test/testdata/desugar/sclass.rb:38
   class ::<Class:<Class:E>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:37
   class ::F < ::Object () @ test/testdata/desugar/sclass.rb:47
   class ::<Class:F> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:48
-    method ::<Class:F>#<static-init> () @ test/testdata/desugar/sclass.rb:55
     field ::<Class:F>#@f -> Integer @ test/testdata/desugar/sclass.rb:50
     method ::<Class:F>#f= (f) -> Integer @ test/testdata/desugar/sclass.rb:56
       argument ::<Class:F>#f=#f<> -> Integer @ test/testdata/desugar/sclass.rb:55
     method ::<Class:F>#initialize () @ test/testdata/desugar/sclass.rb:49
   class ::<Class:<Class:F>> < ::<Class:<Class:Object>> (<constant:Sig>) @ test/testdata/desugar/sclass.rb:47
     method ::<Class:<Class:F>>#<block> () @ test/testdata/desugar/sclass.rb:55
+    method ::<Class:<Class:F>>#<static-init> () @ test/testdata/desugar/sclass.rb:55
   class ::G < ::Object () @ test/testdata/desugar/sclass.rb:60
     method ::G#wrapper () @ test/testdata/desugar/sclass.rb:61
   class ::<Class:G> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:62
@@ -35,11 +35,11 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
   class ::<Class:<Class:G>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:62
   class ::H < ::Object () @ test/testdata/desugar/sclass.rb:74
   class ::<Class:H> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:75
-    method ::<Class:H>#<static-init> () @ test/testdata/desugar/sclass.rb:76
     class ::<Class:H>::H2 < ::Object () @ test/testdata/desugar/sclass.rb:76
     class ::<Class:H>::<Class:H2> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:76
       method ::<Class:H>::<Class:H2>#h () @ test/testdata/desugar/sclass.rb:77
   class ::<Class:<Class:H>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:75
+    method ::<Class:<Class:H>>#<static-init> () @ test/testdata/desugar/sclass.rb:76
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L842
     method ::Object#main () @ test/testdata/desugar/sclass.rb:84
 

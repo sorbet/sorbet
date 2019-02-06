@@ -1,9 +1,7 @@
 class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
   method #<static-init> () @ ???
   class ::AdvancedODM < ::Object () @ test/testdata/dsl/prop.rb:35
-    method ::AdvancedODM#<static-init> () @ test/testdata/dsl/prop.rb:35
     class ::AdvancedODM::Mutator < ::Object () @ test/testdata/dsl/prop.rb:56
-      method ::AdvancedODM::Mutator#<static-init> () @ test/testdata/dsl/prop.rb:42
       method ::AdvancedODM::Mutator#array () -> AppliedType {
         klass = ::Chalk::ODM::Mutator::Private::ArrayMutator
         targs = [
@@ -116,6 +114,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
       method ::AdvancedODM::<Class:Mutator>#<block> () @ test/testdata/dsl/prop.rb:45
       method ::AdvancedODM::<Class:Mutator>#<block> () @ test/testdata/dsl/prop.rb:46
       method ::AdvancedODM::<Class:Mutator>#<block> () @ test/testdata/dsl/prop.rb:46
+      method ::AdvancedODM::<Class:Mutator>#<static-init> () @ test/testdata/dsl/prop.rb:42
     method ::AdvancedODM#array () -> AppliedType {
       klass = ::Array
       targs = [
@@ -322,8 +321,8 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:38
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:40
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:40
+    method ::<Class:AdvancedODM>#<static-init> () @ test/testdata/dsl/prop.rb:35
   class ::EncryptedProp < ::Object () @ test/testdata/dsl/prop.rb:80
-    method ::EncryptedProp#<static-init> () @ test/testdata/dsl/prop.rb:80
     method ::EncryptedProp#bar () -> String | NilClass @ test/testdata/dsl/prop.rb:82
     method ::EncryptedProp#encrypted_bar () -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:82
     method ::EncryptedProp#encrypted_foo () -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:81
@@ -339,10 +338,10 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:81
     method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:82
     method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:82
+    method ::<Class:EncryptedProp>#<static-init> () @ test/testdata/dsl/prop.rb:80
   class ::ForeignClass < ::Object () @ test/testdata/dsl/prop.rb:32
   class ::<Class:ForeignClass> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:32
   class ::NotAODM < ::Object () @ test/testdata/dsl/prop.rb:2
-    method ::NotAODM#<static-init> () @ test/testdata/dsl/prop.rb:2
     class ::NotAODM::Default < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:14
     class ::NotAODM::<Class:Default> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:14
     class ::NotAODM::IntegerParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:10
@@ -350,6 +349,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     class ::NotAODM::StringParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
     class ::NotAODM::<Class:StringParam> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:12
   class ::<Class:NotAODM> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:2
+    method ::<Class:NotAODM>#<static-init> () @ test/testdata/dsl/prop.rb:2
     method ::<Class:NotAODM>#prop (args) @ test/testdata/dsl/prop.rb:3
       argument ::<Class:NotAODM>#prop#args<repeated> @ test/testdata/dsl/prop.rb:3
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L842
@@ -362,7 +362,6 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
       class ::Opus::Param::<Class:ParamSpecsParam> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:14
     class ::Opus::<Class:Param> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:14
   class ::PropHelpers < ::Object () @ test/testdata/dsl/prop.rb:66
-    method ::PropHelpers#<static-init> () @ test/testdata/dsl/prop.rb:66
     method ::PropHelpers#created () -> Float @ test/testdata/dsl/prop.rb:68
     method ::PropHelpers#created= (arg0) -> Float @ test/testdata/dsl/prop.rb:68
       argument ::PropHelpers#created=#arg0<> -> Float @ test/testdata/dsl/prop.rb:68
@@ -374,8 +373,8 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:PropHelpers>#<block> () @ test/testdata/dsl/prop.rb:67
     method ::<Class:PropHelpers>#<block> () @ test/testdata/dsl/prop.rb:68
     method ::<Class:PropHelpers>#<block> () @ test/testdata/dsl/prop.rb:68
+    method ::<Class:PropHelpers>#<static-init> () @ test/testdata/dsl/prop.rb:66
   class ::PropHelpers2 < ::Object () @ test/testdata/dsl/prop.rb:71
-    method ::PropHelpers2#<static-init> () @ test/testdata/dsl/prop.rb:71
     method ::PropHelpers2#created () -> Float @ test/testdata/dsl/prop.rb:73
     method ::PropHelpers2#token () -> String @ test/testdata/dsl/prop.rb:72
     method ::PropHelpers2#token= (arg0) -> String @ test/testdata/dsl/prop.rb:72
@@ -384,13 +383,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:PropHelpers2>#<block> () @ test/testdata/dsl/prop.rb:72
     method ::<Class:PropHelpers2>#<block> () @ test/testdata/dsl/prop.rb:72
     method ::<Class:PropHelpers2>#<block> () @ test/testdata/dsl/prop.rb:73
+    method ::<Class:PropHelpers2>#<static-init> () @ test/testdata/dsl/prop.rb:71
   class ::ShardingProp < ::Object () @ test/testdata/dsl/prop.rb:76
-    method ::ShardingProp#<static-init> () @ test/testdata/dsl/prop.rb:77
     method ::ShardingProp#merchant () -> String @ test/testdata/dsl/prop.rb:77
   class ::<Class:ShardingProp> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:76
     method ::<Class:ShardingProp>#<block> () @ test/testdata/dsl/prop.rb:77
+    method ::<Class:ShardingProp>#<static-init> () @ test/testdata/dsl/prop.rb:77
   class ::SomeODM < ::Object () @ test/testdata/dsl/prop.rb:21
-    method ::SomeODM#<static-init> () @ test/testdata/dsl/prop.rb:21
     method ::SomeODM#foo () -> String | NilClass @ test/testdata/dsl/prop.rb:24
     method ::SomeODM#foo2 () -> String | NilClass @ test/testdata/dsl/prop.rb:27
     method ::SomeODM#foo2= (arg0) -> String @ test/testdata/dsl/prop.rb:29
@@ -402,4 +401,5 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:24
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:26
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:28
+    method ::<Class:SomeODM>#<static-init> () @ test/testdata/dsl/prop.rb:21
 
