@@ -97,8 +97,8 @@ string prettyPrintRangeComment(string_view sourceLine, const Range &range, strin
         numCarets = sourceLine.length();
     }
 
-    return fmt::format("{} {}\n {}{} {}", sourceLineNumber, sourceLine,
-                       string(numLeadingSpaces + sourceLineNumber.length(), ' '), string(numCarets, '^'), comment);
+    return fmt::format("{}: {}\n {}{} {}", sourceLineNumber, sourceLine,
+                       string(numLeadingSpaces + sourceLineNumber.length() + 1, ' '), string(numCarets, '^'), comment);
 }
 
 string_view getLine(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
