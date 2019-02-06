@@ -259,7 +259,7 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` http://go/e/7017
 
 suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
      108 |  sig {params(merchant: Merchant).void}
-            ^^^
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 36
 
 --------------------------------------------------------------------------

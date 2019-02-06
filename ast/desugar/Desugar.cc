@@ -707,6 +707,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Block *block) {
+                block->send->loc = loc;
                 auto recv = node2TreeImpl(ctx, std::move(block->send), uniqueCounter);
                 Send *send;
                 unique_ptr<Expression> res;
