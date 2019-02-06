@@ -6,7 +6,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_1" [shape = parallelogram];
 
     "bb::Object#f_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lx: T.any(Concrete, Other) = load_arg(<selfMethodTemp>$3, Object#f#x)\l<statTemp>$7: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<ifTemp>$6: T.any(TrueClass, FalseClass) = <statTemp>$7: T.class_of(Concrete)[String].===(x: T.any(Concrete, Other))\l<ifTemp>$6: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lx: T.any(Concrete, Other) = load_arg(<selfMethodTemp>$3, Object#f#x)\l<statTemp>$7: T.class_of(Concrete) = alias <constant:Concrete>\l<ifTemp>$6: T.any(TrueClass, FalseClass) = <statTemp>$7: T.class_of(Concrete).===(x: T.any(Concrete, Other))\l<ifTemp>$6: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#f_0" -> "bb::Object#f_2" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#f" {
 
     "bb::Object#f_1" -> "bb::Object#f_1" [style="bold"];
     "bb::Object#f_2" [
-        label = "block[id=2](x: Concrete)\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$11: T.class_of(Concrete)[String])\l<castTemp>$12: Concrete = x\l<statTemp>$4: Concrete = cast(<castTemp>$12: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=2](x: Concrete)\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Concrete) = alias <constant:Concrete>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$11: T.class_of(Concrete))\l<castTemp>$12: Concrete = x\l<statTemp>$4: Concrete = cast(<castTemp>$12: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_2" -> "bb::Object#f_7" [style="bold"];
@@ -35,14 +35,14 @@ subgraph "cluster_::Object#f" {
 
     "bb::Object#f_4" -> "bb::Object#f_7" [style="bold"];
     "bb::Object#f_7" [
-        label = "block[id=7](x: T.any(Concrete, Other))\l<statTemp>$23: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<ifTemp>$21: T.any(TrueClass, FalseClass) = x: T.any(Concrete, Other).is_a?(<statTemp>$23: T.class_of(Concrete)[String])\l<ifTemp>$21: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=7](x: T.any(Concrete, Other))\l<statTemp>$23: T.class_of(Concrete) = alias <constant:Concrete>\l<ifTemp>$21: T.any(TrueClass, FalseClass) = x: T.any(Concrete, Other).is_a?(<statTemp>$23: T.class_of(Concrete))\l<ifTemp>$21: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#f_7" -> "bb::Object#f_8" [style="bold"];
     "bb::Object#f_7" -> "bb::Object#f_10" [style="tapered"];
 
     "bb::Object#f_8" [
-        label = "block[id=8](x: Concrete)\l<statTemp>$25: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$26: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$24: RubyTyper::Void = <statTemp>$25: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$26: T.class_of(Concrete)[String])\l<castTemp>$27: Concrete = x\l<statTemp>$20: Concrete = cast(<castTemp>$27: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=8](x: Concrete)\l<statTemp>$25: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$26: T.class_of(Concrete) = alias <constant:Concrete>\l<statTemp>$24: RubyTyper::Void = <statTemp>$25: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$26: T.class_of(Concrete))\l<castTemp>$27: Concrete = x\l<statTemp>$20: Concrete = cast(<castTemp>$27: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_8" -> "bb::Object#f_10" [style="bold"];
@@ -54,7 +54,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_10" -> "bb::Object#f_12" [style="tapered"];
 
     "bb::Object#f_12" [
-        label = "block[id=12](x: Concrete)\l<statTemp>$32: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$33: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$31: RubyTyper::Void = <statTemp>$32: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$33: T.class_of(Concrete)[String])\l<castTemp>$34: Concrete = x\l<returnMethodTemp>$2: Concrete = cast(<castTemp>$34: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=12](x: Concrete)\l<statTemp>$32: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$33: T.class_of(Concrete) = alias <constant:Concrete>\l<statTemp>$31: RubyTyper::Void = <statTemp>$32: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$33: T.class_of(Concrete))\l<castTemp>$34: Concrete = x\l<returnMethodTemp>$2: Concrete = cast(<castTemp>$34: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_12" -> "bb::Object#f_13" [style="bold"];
@@ -72,7 +72,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(Base)[T.untyped])\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(Concrete)[String])\l<statTemp>$13: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$14: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$12: RubyTyper::Void = <statTemp>$13: T.class_of(RubyTyper).keep_for_ide(<statTemp>$14: T.class_of(Base)[T.untyped])\l<statTemp>$17: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$18: T.class_of(Other) = alias <constant:Other>\l<statTemp>$16: RubyTyper::Void = <statTemp>$17: T.class_of(RubyTyper).keep_for_ide(<statTemp>$18: T.class_of(Other))\l<statTemp>$20: T.class_of(<root>) = self\l<block-pre-call-temp>$21: RubyTyper::Void = <statTemp>$20: T.class_of(<root>).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(Base)[T.untyped])\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Concrete) = alias <constant:Concrete>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(Concrete))\l<statTemp>$13: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$14: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$12: RubyTyper::Void = <statTemp>$13: T.class_of(RubyTyper).keep_for_ide(<statTemp>$14: T.class_of(Base)[T.untyped])\l<statTemp>$17: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$18: T.class_of(Other) = alias <constant:Other>\l<statTemp>$16: RubyTyper::Void = <statTemp>$17: T.class_of(RubyTyper).keep_for_ide(<statTemp>$18: T.class_of(Other))\l<statTemp>$20: T.class_of(<root>) = self\l<block-pre-call-temp>$21: RubyTyper::Void = <statTemp>$20: T.class_of(<root>).sig()\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
@@ -94,7 +94,7 @@ subgraph "cluster_#<static-init>" {
 
     "bb#<static-init>_3" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$26: Sorbet::Private::Builder = self\l<hashTemp>$28: Symbol(:\"x\") = :\"x\"\l<statTemp>$30: T.class_of(T) = alias <constant:T>\l<statTemp>$31: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$32: T.class_of(Other) = alias <constant:Other>\l<hashTemp>$29: <Type: T.any(T.class_of(Concrete)[String], Other)> = <statTemp>$30: T.class_of(T).any(<statTemp>$31: T.class_of(Concrete)[String], <statTemp>$32: T.class_of(Other))\l<magic>$33: <Magic> = alias <constant:<Magic>>\l<statTemp>$27: {x: <Type: T.any(T.class_of(Concrete)[String], Other)>} = <magic>$33: <Magic>.<build-hash>(<hashTemp>$28: Symbol(:\"x\"), <hashTemp>$29: <Type: T.any(T.class_of(Concrete)[String], Other)>)\l<statTemp>$25: Sorbet::Private::Builder = <statTemp>$26: Sorbet::Private::Builder.params(<statTemp>$27: {x: <Type: T.any(T.class_of(Concrete)[String], Other)>})\l<blockReturnTemp>$24: Sorbet::Private::Builder = <statTemp>$25: Sorbet::Private::Builder.void()\l<blockReturnTemp>$34: T.noreturn = blockreturn<#<static-init>#<block>> <blockReturnTemp>$24: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$26: Sorbet::Private::Builder = self\l<hashTemp>$28: Symbol(:\"x\") = :\"x\"\l<statTemp>$30: T.class_of(T) = alias <constant:T>\l<statTemp>$31: T.class_of(Concrete) = alias <constant:Concrete>\l<statTemp>$32: T.class_of(Other) = alias <constant:Other>\l<hashTemp>$29: <Type: T.any(T.class_of(Concrete), Other)> = <statTemp>$30: T.class_of(T).any(<statTemp>$31: T.class_of(Concrete), <statTemp>$32: T.class_of(Other))\l<magic>$33: <Magic> = alias <constant:<Magic>>\l<statTemp>$27: {x: <Type: T.any(T.class_of(Concrete), Other)>} = <magic>$33: <Magic>.<build-hash>(<hashTemp>$28: Symbol(:\"x\"), <hashTemp>$29: <Type: T.any(T.class_of(Concrete), Other)>)\l<statTemp>$25: Sorbet::Private::Builder = <statTemp>$26: Sorbet::Private::Builder.params(<statTemp>$27: {x: <Type: T.any(T.class_of(Concrete), Other)>})\l<blockReturnTemp>$24: Sorbet::Private::Builder = <statTemp>$25: Sorbet::Private::Builder.void()\l<blockReturnTemp>$34: T.noreturn = blockreturn<#<static-init>#<block>> <blockReturnTemp>$24: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb#<static-init>_4" -> "bb#<static-init>_2" [style="bold"];
@@ -107,7 +107,7 @@ subgraph "cluster_::<Class:Concrete>#<static-init>" {
     "bb::<Class:Concrete>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Concrete>#<static-init>_0" [
-        label = "block[id=0]()\l<constant:Klass>$4: String = alias <constant:Klass>\l<statTemp>$5: T.class_of(Concrete)[String] = self\l<hashTemp>$7: Symbol(:\"fixed\") = :\"fixed\"\l<hashTemp>$8: T.class_of(String) = alias <constant:String>\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: {fixed: T.class_of(String)} = <magic>$9: <Magic>.<build-hash>(<hashTemp>$7: Symbol(:\"fixed\"), <hashTemp>$8: T.class_of(String))\l<constant:Klass>$4: T.untyped = <statTemp>$5: T.class_of(Concrete)[String].type_template(<statTemp>$6: {fixed: T.class_of(String)})\l<returnMethodTemp>$2: T.untyped = <constant:Klass>$4\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:Klass>$4: String = alias <constant:Klass>\l<statTemp>$5: T.class_of(Concrete) = self\l<hashTemp>$7: Symbol(:\"fixed\") = :\"fixed\"\l<hashTemp>$8: T.class_of(String) = alias <constant:String>\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: {fixed: T.class_of(String)} = <magic>$9: <Magic>.<build-hash>(<hashTemp>$7: Symbol(:\"fixed\"), <hashTemp>$8: T.class_of(String))\l<constant:Klass>$4: T.untyped = <statTemp>$5: T.class_of(Concrete).type_template(<statTemp>$6: {fixed: T.class_of(String)})\l<returnMethodTemp>$2: T.untyped = <constant:Klass>$4\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Concrete>#<static-init>_0" -> "bb::<Class:Concrete>#<static-init>_1" [style="bold"];

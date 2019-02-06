@@ -498,6 +498,9 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         }
 
         auto typeMembers = this->isClass() ? this->typeMembers() : this->typeArguments();
+        auto it = remove_if(typeMembers.begin(), typeMembers.end(),
+                            [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+        typeMembers.erase(it, typeMembers.end());
         if (!typeMembers.empty()) {
             fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
                                return symb.data(gs)->name.toString(gs);

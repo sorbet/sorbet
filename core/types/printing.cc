@@ -287,22 +287,25 @@ string AppliedType::show(const GlobalState &gs) const {
             fmt::format_to(buf, "{}", this->klass.data(gs)->show(gs));
         }
     }
-    fmt::format_to(buf, "[");
-
-    bool first = true;
-    for (auto &targ : this->targs) {
-        if (this->klass == Symbols::Hash() && &targ == &this->targs.back()) {
-            break;
-        }
-        if (first) {
-            first = false;
+    auto targs = this->targs;
+    auto typeMembers = this->klass.data(gs)->typeMembers();
+    if (typeMembers.size() < targs.size()) {
+        targs.erase(targs.begin() + typeMembers.size());
+    }
+    auto it = targs.begin();
+    for (auto typeMember : typeMembers) {
+        if (typeMember.data(gs)->isFixed()) {
+            it = targs.erase(it);
+        } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
+            it = targs.erase(it);
         } else {
-            fmt::format_to(buf, ", ");
+            it++;
         }
-        fmt::format_to(buf, "{}", targ->show(gs));
     }
 
-    fmt::format_to(buf, "]");
+    if (!targs.empty()) {
+        fmt::format_to(buf, "[{}]", fmt::map_join(targs, ", ", [&](auto targ) { return targ->show(gs); }));
+    }
     return to_string(buf);
 }
 

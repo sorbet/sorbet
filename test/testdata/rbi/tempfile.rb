@@ -1,6 +1,7 @@
 # typed: true
 
 tf = Tempfile.new
+T.reveal_type(tf) # error: Revealed type: `Tempfile`
 T.let(T.must(tf.path), String)
 T.let(tf.length, Integer)
 T.let(tf.size, Integer)
