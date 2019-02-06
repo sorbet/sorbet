@@ -16,7 +16,7 @@ constexpr ErrorClass InvalidCast{5010, StrictLevel::Stripe};
 constexpr ErrorClass CircularDependency{5011, StrictLevel::Stripe};
 constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::Stripe};
 constexpr ErrorClass ConstantAssertType{5013, StrictLevel::Stripe};
-constexpr ErrorClass ParentTypeNotDeclared{5014, StrictLevel::Typed};
+constexpr ErrorClass ParentTypeNotDeclared{5014, StrictLevel::Stripe};
 constexpr ErrorClass ParentVarianceMismatch{5015, StrictLevel::Stripe};
 constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::Stripe};
 constexpr ErrorClass TypeMembersInWrongOrder{5017, StrictLevel::Stripe};
