@@ -374,7 +374,7 @@ all Ruby files to run over, which we can get by running one of the intermediate
 steps of autogen locally:
 
 ```
-bundle exec rake build:SorbetFileListStep
+bundle exec rake build:autogen:SorbetFileListStep
 ```
 
 This might fail for any number of reasons, but the error messages are usually

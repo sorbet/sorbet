@@ -67,7 +67,7 @@ mv ../.bazelrc ../.bazelrc-moved
 
 # Unset JENKINS_URL so pay-server acts like it's running in dev, not
 # CI, and runs its own `bazel` invocations
-env -u JENKINS_URL rbenv exec bundle exec rake build:SorbetFileListStep
+env -u JENKINS_URL rbenv exec bundle exec rake build:autogen:SorbetFileListStep
 
 # restore bazelrc
 mv ../.bazelrc-moved ../.bazelrc
