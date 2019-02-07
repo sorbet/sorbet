@@ -2,11 +2,12 @@ def lsp_test(path):
     # path will be like `$name/$name.sh`
     words = path.split("/")
     name = words[-2]
+    test_name = "test_{}".format(name)
     if words[-1] != "{}.rec".format(name):
         fail("cli test scripts must be named cli/$name/$name.rec")
 
     native.sh_test(
-        name = "test_{}".format(name),
+        name = test_name,
         srcs = ["lsp_test_runner.sh"],
         args = ["$(location {})".format(path)],
         data = [
@@ -31,6 +32,8 @@ def lsp_test(path):
             ],
             size = 'small',
         )
+
+    return test_name
 
 def update_test():
     existing = native.existing_rules()

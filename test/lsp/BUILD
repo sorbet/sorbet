@@ -6,9 +6,9 @@ sh_binary(
     data = ["//main:sorbet"],
 )
 
-[
-    lsp_test(script)
-    for script in glob(["*/*.rec"])
-]
+test_suite(
+    name = "lsp",
+    tests = [lsp_test(script) for script in glob(["*/*.rec"])],
+)
 
 update_test()

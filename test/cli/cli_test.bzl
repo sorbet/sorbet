@@ -2,6 +2,7 @@ def cli_test(path):
     # path will be like `$name/$name.sh`
     words = path.split("/")
     name = words[-2]
+    test_name = "test_{}".format(name)
     if words[-1] != "{}.sh".format(name):
         fail("cli test scripts must be named cli/$name/$name.sh")
 
@@ -19,7 +20,7 @@ def cli_test(path):
     output = path.replace('.sh', '.out')
 
     native.sh_test(
-        name = "test_{}".format(name),
+        name = test_name,
         srcs = ["test_one.sh"],
         args = ["$(location {})".format(path), "$(location {})".format(output)],
         data = [
@@ -44,6 +45,8 @@ def cli_test(path):
         ],
         size = 'small',
     )
+
+    return test_name
 
 def update_test():
     existing = native.existing_rules()
