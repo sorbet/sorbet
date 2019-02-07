@@ -235,28 +235,28 @@ class Date
   sig {returns(T.untyped)}
   def gregorian(); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def next_day(*arg0); end
 
   sig {returns(T.untyped)}
   def ld(); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def next_month(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def prev_day(*arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Date)}
   def next(); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def prev_month(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def next_year(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def prev_year(*arg0); end
 
   sig {returns(Time)}
@@ -274,10 +274,10 @@ class Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self._load(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.today(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.parse(*arg0); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
