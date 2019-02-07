@@ -19,13 +19,36 @@ before_deploy:
 - git tag -f $TRAVIS_TAG
 matrix:
   include:
-  - name: "Test: static"
+  - name: "Test: runtime on Ruby 2.4 & Release"
+    language: ruby
+    rvm: 2.4
+    gemfile: runtime/Gemfile
+    script:
+    - cd runtime
+    - rake test
+    - gem build sorbet-runtime.gemspec
+    - mv sorbet-runtime-*.gem sorbet-runtime.gem
+    - cd .. # cd above breaks deploy step
+    deploy:
+      <<: *deploy_base
+      file: runtime/sorbet-runtime.gem
+  - name: "Test: runtime on Ruby 2.5"
+    language: ruby
+    rvm: 2.5
+    gemfile: runtime/Gemfile
+    script: cd runtime && rake test
+  - name: "Test: runtime on Ruby 2.6"
+    language: ruby
+    rvm: 2.6
+    gemfile: runtime/Gemfile
+    script: cd runtime && rake test
+  - name: "Test: static fast"
     language: cpp
     script:
     - bazel version
     - ./tools/scripts/ci_checks.sh
-    - travis_wait 90 bazel build --config=travis //...
-    - travis_wait 90 bazel test --config=travis //...
+    - bazel build --config=travis test
+    - travis_wait 90 bazel test --config=travis test test/cli test/lsp
   - name: "Release: static for osx"
     os: osx
     osx_image: xcode9.3 # we want jdk 1.8, bazel doesn't support the newer one that ships with 9.4+
@@ -55,26 +78,15 @@ matrix:
       file:
       - sorbet-linux
       - sorbet-linux.dbg
-  - name: "Test: runtime on Ruby 2.4 & Release"
-    language: ruby
-    rvm: 2.4
-    gemfile: runtime/Gemfile
+  - name: "Test: static lsp slowpath"
+    language: cpp
     script:
-    - cd runtime
-    - rake test
-    - gem build sorbet-runtime.gemspec
-    - mv sorbet-runtime-*.gem sorbet-runtime.gem
-    - cd .. # cd above breaks deploy step
-    deploy:
-      <<: *deploy_base
-      file: runtime/sorbet-runtime.gem
-  - name: "Test: runtime on Ruby 2.5"
-    language: ruby
-    rvm: 2.5
-    gemfile: runtime/Gemfile
-    script: cd runtime && rake test
-  - name: "Test: runtime on Ruby 2.6"
-    language: ruby
-    rvm: 2.6
-    gemfile: runtime/Gemfile
-    script: cd runtime && rake test
+    - bazel version
+    - bazel build --config=travis //...
+    - travis_wait 90 bazel test --config=travis test:test_corpus_lsp_slowpath
+  - name: "Test: static lsp fastpath"
+    language: cpp
+    script:
+    - bazel version
+    - bazel build --config=travis //...
+    - travis_wait 90 bazel test --config=travis test:test_corpus_lsp_fastpath
