@@ -124,7 +124,7 @@ void checkServerCapabilities(const unique_ptr<ServerCapabilities> &capabilities)
     auto textDocumentSyncValue = get_if<TextDocumentSyncKind>(&textDocumentSync);
     EXPECT_NE(nullptr, textDocumentSyncValue);
     if (textDocumentSyncValue != nullptr) {
-        EXPECT_EQ(TextDocumentSyncKind::Incremental, *(textDocumentSyncValue));
+        EXPECT_EQ(TextDocumentSyncKind::Full, *(textDocumentSyncValue));
     }
 
     EXPECT_TRUE(capabilities->hoverProvider.value_or(false));

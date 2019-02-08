@@ -162,7 +162,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
 
             auto serverCap = make_unique<ServerCapabilities>();
-            serverCap->textDocumentSync = TextDocumentSyncKind::Incremental;
+            serverCap->textDocumentSync = TextDocumentSyncKind::Full;
             serverCap->definitionProvider = true;
             serverCap->documentSymbolProvider = true;
             serverCap->workspaceSymbolProvider = true;
