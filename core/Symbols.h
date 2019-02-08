@@ -571,7 +571,7 @@ public:
 
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
-    Symbol deepCopy(const GlobalState &to) const;
+    Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
 

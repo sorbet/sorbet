@@ -915,6 +915,10 @@ void GlobalState::sanityCheck() const {
     if (!debug_mode) {
         return;
     }
+    if (fuzz_mode) {
+        // it's very slow to check this and it didn't find bugs
+        return;
+    }
     ENFORCE(!names.empty(), "empty name table size");
     ENFORCE(!strings.empty(), "empty string table size");
     ENFORCE(!names_by_hash.empty(), "empty name hash table size");
@@ -1002,10 +1006,14 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->suppressed_error_classes = this->suppressed_error_classes;
     result->only_error_classes = this->only_error_classes;
-
     result->names.reserve(this->names.capacity());
-    for (auto &nm : this->names) {
-        result->names.emplace_back(nm.deepCopy(*result));
+    if (keepId) {
+        result->names.resize(this->names.size());
+        ::memcpy(result->names.data(), this->names.data(), this->names.size() * sizeof(Name));
+    } else {
+        for (auto &nm : this->names) {
+            result->names.emplace_back(nm.deepCopy(*result));
+        }
     }
 
     result->names_by_hash.reserve(this->names_by_hash.size());
@@ -1013,7 +1021,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
 
     result->symbols.reserve(this->symbols.size());
     for (auto &sym : this->symbols) {
-        result->symbols.emplace_back(sym.deepCopy(*result));
+        result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
     result->sanityCheck();
     return result;

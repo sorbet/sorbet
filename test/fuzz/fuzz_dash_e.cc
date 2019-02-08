@@ -37,7 +37,9 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     static const unique_ptr<core::GlobalState> commonGs = buildInitialGlobalState();
     static WorkerPool workers(0, realmain::logger);
-    auto gs = commonGs->deepCopy();
+    commonGs->trace("starting run");
+    unique_ptr<core::GlobalState> gs;
+    { gs = commonGs->deepCopy(true); }
     string inputData((const char *)data, size);
     vector<ast::ParsedFile> indexed;
     vector<core::FileRef> inputFiles;

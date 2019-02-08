@@ -668,7 +668,7 @@ bool Symbol::isBlockSymbol(const GlobalState &gs) const {
     return nm->kind == NameKind::UNIQUE && nm->unique.original == Names::blockTemp();
 }
 
-Symbol Symbol::deepCopy(const GlobalState &to) const {
+Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     Symbol result;
     result.owner = this->owner;
     result.flags = this->flags;
@@ -677,10 +677,13 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name.id());
     result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
-
-    result.members.reserve(this->members.size());
-    for (auto &mem : this->members) {
-        result.members[NameRef(to, mem.first.id())] = mem.second;
+    if (keepGsId) {
+        result.members = this->members;
+    } else {
+        result.members.reserve(this->members.size());
+        for (auto &mem : this->members) {
+            result.members[NameRef(to, mem.first.id())] = mem.second;
+        }
     }
     result.superClass = this->superClass;
     result.uniqueCounter = this->uniqueCounter;

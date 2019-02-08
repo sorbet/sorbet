@@ -593,6 +593,9 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
 
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
+        if (!sym.data(gs)->loc().exists() || sym.data(gs)->loc().file().data(gs).isPayload()) {
+            continue;
+        }
         if (sym.data(gs)->isClass()) {
             validateAbstract(gs, abstractCache, sym);
         }
