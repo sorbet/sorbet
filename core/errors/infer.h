@@ -17,12 +17,13 @@ constexpr ErrorClass GenericArgumentCountMismatch{7010, StrictLevel::Typed};
 constexpr ErrorClass IncompleteType{7011, StrictLevel::Typed};
 constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::Typed};
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, StrictLevel::Typed};
-constexpr ErrorClass GenericMethodConstaintUnsolved{7013, StrictLevel::Typed};
+// constexpr ErrorClass GenericMethodConstaintUnsolved{7013, StrictLevel::Typed};
 constexpr ErrorClass RevealType{7014, StrictLevel::Typed};
 constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::Typed};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
 constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
 constexpr ErrorClass UntypedSplat{7019, StrictLevel::Typed};
+constexpr ErrorClass GenericMethodConstaintUnsolved{7020, StrictLevel::Typed};
 } // namespace sorbet::core::errors::Infer
 #endif
