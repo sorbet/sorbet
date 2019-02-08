@@ -213,11 +213,11 @@ package(default_visibility = ["//visibility:public"])
     git_repository(
         name="io_bazel_rules_bison",
         remote="https://github.com/jmillikin/rules_bison.git",
-        commit="5695c1c63a63a9cc4f125da1864212a79c62a6ae"
+        commit="3809da0cea172c320f1fb7cd94bcb9be97897b14"
     )
 
     git_repository(
         name = "io_bazel_rules_m4",
         remote = "https://github.com/jmillikin/rules_m4",
-        commit = "047c793295c4387672f1cb78ccb7f42f11316ee2",
+        commit = "ae19f8df57f680c6dbad4887e162ca17ee97a13e",
     )
