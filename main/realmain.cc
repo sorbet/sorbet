@@ -321,6 +321,16 @@ int realmain(int argc, char *argv[]) {
             }
         } else {
             indexed = pipeline::resolve(*gs, move(indexed), opts, logger);
+            if (opts.stressFastPath) {
+                for (auto &f : indexed) {
+                    auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore, logger);
+                    vector<ast::ParsedFile> toBeReResolved;
+                    toBeReResolved.emplace_back(move(reIndexed));
+                    auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts, logger);
+                    ENFORCE(reresolved.size() == 1);
+                    f = move(reresolved[0]);
+                }
+            }
             indexed = pipeline::typecheck(gs, move(indexed), opts, workers, logger);
         }
 

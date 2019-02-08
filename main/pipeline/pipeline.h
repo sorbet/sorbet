@@ -21,6 +21,9 @@ std::vector<ast::ParsedFile> resolve(core::GlobalState &gs, std::vector<ast::Par
                                      const options::Options &opts, std::shared_ptr<spdlog::logger> logger,
                                      bool skipConfigatron = false);
 
+std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                                const options::Options &opts, std::shared_ptr<spdlog::logger> logger);
+
 std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                   const options::Options &opts, std::shared_ptr<spdlog::logger> logger,
                                   bool skipConfigatron = false);

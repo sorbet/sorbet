@@ -54,47 +54,6 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     return fref;
 }
 
-vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                           const options::Options &opts, shared_ptr<spdlog::logger> logger) {
-    try {
-        int i = 0;
-        for (auto &tree : what) {
-            auto file = tree.file;
-            try {
-                unique_ptr<ast::Expression> ast;
-                core::MutableContext ctx(gs, core::Symbols::root());
-                logger->trace("Naming: {}", file.data(gs).path());
-                core::ErrorRegion errs(gs, file);
-                core::UnfreezeSymbolTable symbolTable(gs);
-                core::UnfreezeNameTable nameTable(gs);
-                tree = sorbet::namer::Namer::run(ctx, move(tree));
-                i++;
-            } catch (SorbetException &) {
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
-                }
-            }
-        }
-
-        core::MutableContext ctx(gs, core::Symbols::root());
-        {
-            Timer timeit(logger, "incremental_resolve");
-            logger->trace("Resolving (incremental pass)...");
-            core::ErrorRegion errs(gs, sorbet::core::FileRef());
-            core::UnfreezeSymbolTable symbolTable(gs);
-            core::UnfreezeNameTable nameTable(gs);
-
-            what = sorbet::resolver::Resolver::runTreePasses(ctx, move(what));
-        }
-    } catch (SorbetException &) {
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
-            e.setHeader("Exception resolving (backtrace is above)");
-        }
-    }
-
-    return what;
-}
-
 vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
     vector<unsigned int> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
@@ -312,7 +271,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), t.file});
         }
 
-        auto resolved = incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
+        auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
         tryApplyDefLocSaver(*finalGs, resolved);
         tryApplyLocalVarSaver(*finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);

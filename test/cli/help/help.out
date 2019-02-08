@@ -59,6 +59,7 @@ Usage:
       --no-stdlib               Do not load included rbi files for stdlib
       --skip-dsl-passes         Do not run DSL passess
       --wait-for-dbg            Wait for debugger on start
+      --stress-fastpath         Stress fastpath
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message

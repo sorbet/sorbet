@@ -168,6 +168,47 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
     }
 }
 
+vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, shared_ptr<spdlog::logger> logger) {
+    try {
+        int i = 0;
+        for (auto &tree : what) {
+            auto file = tree.file;
+            try {
+                unique_ptr<ast::Expression> ast;
+                core::MutableContext ctx(gs, core::Symbols::root());
+                logger->trace("Naming: {}", file.data(gs).path());
+                core::ErrorRegion errs(gs, file);
+                core::UnfreezeSymbolTable symbolTable(gs);
+                core::UnfreezeNameTable nameTable(gs);
+                tree = sorbet::namer::Namer::run(ctx, move(tree));
+                i++;
+            } catch (SorbetException &) {
+                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
+                }
+            }
+        }
+
+        core::MutableContext ctx(gs, core::Symbols::root());
+        {
+            Timer timeit(logger, "incremental_resolve");
+            logger->trace("Resolving (incremental pass)...");
+            core::ErrorRegion errs(gs, sorbet::core::FileRef());
+            core::UnfreezeSymbolTable symbolTable(gs);
+            core::UnfreezeNameTable nameTable(gs);
+
+            what = sorbet::resolver::Resolver::runTreePasses(ctx, move(what));
+        }
+    } catch (SorbetException &) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
+            e.setHeader("Exception resolving (backtrace is above)");
+        }
+    }
+
+    return what;
+}
+
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<string> &frs,
                               vector<core::FileRef> mainThreadFiles, const options::Options &opts, WorkerPool &workers,
                               unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
