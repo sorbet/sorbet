@@ -12,7 +12,7 @@ class E
         @e = e; # error: Use of undeclared variable `@e`
     end
     def self.e # error: does not have a `sig`
-        @e
+        @e # error: Use of undeclared variable `@e`
     end
 end
 

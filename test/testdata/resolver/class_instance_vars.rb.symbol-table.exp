@@ -2,8 +2,6 @@ class ::<root> < ::Object () @ (test/testdata/resolver/class_instance_vars.rb:2,
   method #<static-init> () @ ???
   static-field ::Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/class_instance_vars.rb:35
   class ::Child < ::Parent (<constant:Mixin>) @ test/testdata/resolver/class_instance_vars.rb:20
-    static-field ::Child::@@undefined_cvar -> T.untyped @ test/testdata/resolver/class_instance_vars.rb:25
-    field ::Child#@undefinedivar -> T.untyped @ test/testdata/resolver/class_instance_vars.rb:31
     method ::Child#child_method () @ test/testdata/resolver/class_instance_vars.rb:27
   class ::<Class:Child> < ::<Class:Parent> () @ test/testdata/resolver/class_instance_vars.rb:20
     method ::<Class:Child>#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:20

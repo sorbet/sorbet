@@ -9,8 +9,9 @@ ClassDef{
           localVariable = a
         }]
       rhs = Assign{
-        lhs = Field{
-          symbol = @a
+        lhs = UnresolvedIdent{
+          kind = Instance
+          name = @a
         }
         rhs = Local{
           localVariable = a

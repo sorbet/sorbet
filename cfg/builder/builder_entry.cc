@@ -19,7 +19,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     }
     u4 temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, core::LocalVariable> aliases;
-    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, nullptr, nullptr, nullptr, aliases, temporaryCounter);
+    UnorderedMap<core::NameRef, core::LocalVariable> discoveredUndeclaredFields;
+    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, nullptr, nullptr, nullptr, aliases,
+                    discoveredUndeclaredFields, temporaryCounter);
 
     core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());
     core::LocalVariable selfSym = cctx.newTemporary(core::Names::selfMethodTemp());
@@ -59,6 +61,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
                 res->minLoops[local] = CFG::MIN_LOOP_GLOBAL;
             }
         }
+    }
+    for (auto kv : discoveredUndeclaredFields) {
+        aliasesPrefix.emplace_back(kv.second, core::Loc::none(),
+                                   make_unique<Alias>(core::Symbols::Magic_undeclaredFieldStub()));
+        res->minLoops[kv.second] = CFG::MIN_LOOP_FIELD;
     }
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();

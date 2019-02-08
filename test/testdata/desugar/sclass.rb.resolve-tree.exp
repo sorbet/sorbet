@@ -104,14 +104,14 @@ begin
     <emptyTree>
 
     def initialize<initialize>()
-      ::<Class:F>#@f = begin
+      @f = begin
         ::RubyTyper.keep_for_typechecking(::Integer)
         T.let(0, Integer)
       end
     end
 
     def f=<f=>(f)
-      ::<Class:F>#@f = f
+      @f = f
     end
 
     def self.<static-init><<static-init>>()

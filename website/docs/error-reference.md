@@ -142,15 +142,6 @@ constants through ancestors (both mixins or superclasses).
     Parent::MY_CONST   # ok
     ```
 
-## 5007
-
-In `# typed: strict` files, Sorbet requires that all instance and class
-variables are annotated with a `T.let`.
-
-For how to fix, see [Strict Mode](strict.md).
-
-See also: [5028](#5028), [7017](#7017).
-
 ## 5028
 
 In `# typed: strict` files, Sorbet requires that all constants are annotated
@@ -158,7 +149,7 @@ with a `T.let`.
 
 For how to fix, see [Strict Mode](strict.md).
 
-See also: [5007](#5007), [7017](#7017).
+See also: [6002](#6002), [7017](#7017).
 
 ## 5034
 
@@ -182,6 +173,15 @@ B = T.type_alias(A)
 (Why? This is due to design tradeoffs to enforce stronger internal invariants.
 Basically, Sorbet can emit more reliable warnings when users declare their
 intent to create a new type alias.)
+
+## 6002
+
+In `# typed: strict` files, Sorbet requires that all instance and class
+variables are annotated with a `T.let`.
+
+For how to fix, see [Strict Mode](strict.md).
+
+See also: [5028](#5028), [7017](#7017).
 
 
 ## 7001
@@ -345,7 +345,7 @@ constant and method definitions)!
 
 For how to fix, see [Method Signatures](sigs.md).
 
-See also: [5007](#5007), [5028](#5028).
+See also: [5028](#5028), [6002](#6002).
 
 ## 7019
 

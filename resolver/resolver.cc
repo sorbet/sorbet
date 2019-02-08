@@ -1387,41 +1387,6 @@ private:
     vector<int> classStack;
 };
 
-class ResolveVariablesWalk {
-public:
-    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
-                                                             unique_ptr<ast::UnresolvedIdent> id) {
-        core::SymbolRef klass;
-
-        switch (id->kind) {
-            case ast::UnresolvedIdent::Class:
-                klass = ctx.contextClass();
-                break;
-            case ast::UnresolvedIdent::Instance:
-                klass = ctx.selfClass();
-                break;
-            default:
-                // These should have been removed in the namer
-                Exception::notImplemented();
-        }
-
-        core::SymbolRef sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);
-        if (!sym.exists()) {
-            if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::UndeclaredVariable)) {
-                e.setHeader("Use of undeclared variable `{}`", id->name.toString(ctx));
-            }
-            if (id->kind == ast::UnresolvedIdent::Class) {
-                sym = ctx.state.enterStaticFieldSymbol(id->loc, klass, id->name);
-            } else {
-                sym = ctx.state.enterFieldSymbol(id->loc, klass, id->name);
-            }
-            sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
-        }
-
-        return make_unique<ast::Field>(id->loc, sym);
-    };
-};
-
 class ResolveSanityCheckWalk {
 public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
@@ -1436,11 +1401,6 @@ public:
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
-        ENFORCE(false, "These should have all been removed: ", original->toString(ctx));
-        return original;
-    }
-    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
-                                                             unique_ptr<ast::UnresolvedIdent> original) {
         ENFORCE(false, "These should have all been removed: ", original->toString(ctx));
         return original;
     }
@@ -1474,11 +1434,9 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
 
 vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     ResolveSignaturesWalk sigs;
-    ResolveVariablesWalk vars;
     Timer timeit(ctx.state.errorQueue->logger, "resolver.sigs_vars_and_flatten");
     for (auto &tree : trees) {
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
-        tree.tree = ast::TreeMap::apply(ctx, vars, std::move(tree.tree));
 
         // declared in here since it holds onto state
         FlattenWalk flatten;

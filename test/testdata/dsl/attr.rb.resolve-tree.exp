@@ -25,15 +25,15 @@ begin
 
     def initialize<initialize>()
       begin
-        ::TestAttr#@v1 = begin
+        @v1 = begin
           ::RubyTyper.keep_for_typechecking(::Integer)
           T.let(0, Integer)
         end
-        ::TestAttr#@v2 = begin
+        @v2 = begin
           ::RubyTyper.keep_for_typechecking(::String)
           T.let("", String)
         end
-        ::TestAttr#@v6 = begin
+        @v6 = begin
           ::RubyTyper.keep_for_typechecking(::String)
           T.let("", String)
         end
@@ -41,39 +41,39 @@ begin
     end
 
     def v1<v1>()
-      ::TestAttr#@v1
+      @v1
     end
 
     def v1=<v1=>(v1)
-      ::TestAttr#@v1 = v1
+      @v1 = v1
     end
 
     def v2<v2>()
-      ::TestAttr#@v2
+      @v2
     end
 
     def v2=<v2=>(v2)
-      ::TestAttr#@v2 = v2
+      @v2 = v2
     end
 
     def v3<v3>()
-      ::TestAttr#@v3
+      @v3
     end
 
     def v4=<v4=>(v4)
-      ::TestAttr#@v4 = v4
+      @v4 = v4
     end
 
     def v5=<v5=>(v5)
-      ::TestAttr#@v5 = v5
+      @v5 = v5
     end
 
     def v6<v6>()
-      ::TestAttr#@v6
+      @v6
     end
 
     def v6=<v6=>(v6)
-      ::TestAttr#@v6 = v6
+      @v6 = v6
     end
 
     def self.<static-init><<static-init>>()

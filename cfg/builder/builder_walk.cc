@@ -53,15 +53,51 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
     }
 }
 
-core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inWhat,
-                                 UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases) {
+core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what) {
     // Note: this will add an empty local to aliases if 'what' is not there
-    core::LocalVariable &alias = aliases[what];
+    core::LocalVariable &alias = cctx.aliases[what];
     if (!alias.exists()) {
         const core::SymbolData data = what.data(cctx.ctx);
         alias = cctx.newTemporary(data->name);
     }
     return alias;
+}
+
+core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent *id) {
+    core::SymbolRef klass;
+
+    switch (id->kind) {
+        case ast::UnresolvedIdent::Class:
+            klass = cctx.ctx.contextClass();
+            while (klass.data(cctx.ctx)->attachedClass(cctx.ctx).exists()) {
+                klass = klass.data(cctx.ctx)->attachedClass(cctx.ctx);
+            }
+            break;
+        case ast::UnresolvedIdent::Instance:
+            ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
+            klass = cctx.ctx.owner.data(cctx.ctx)->owner;
+            break;
+        default:
+            // These should have been removed in the namer
+            Exception::notImplemented();
+    }
+    ENFORCE(klass.data(cctx.ctx)->isClass());
+
+    auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id->name);
+    if (!sym.exists()) {
+        auto fnd = cctx.discoveredUndeclaredFields.find(id->name);
+        if (fnd == cctx.discoveredUndeclaredFields.end()) {
+            if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
+                e.setHeader("Use of undeclared variable `{}`", id->name.toString(cctx.ctx));
+            }
+            auto ret = cctx.newTemporary(id->name);
+            cctx.discoveredUndeclaredFields[id->name] = ret;
+            return ret;
+        }
+        return fnd->second;
+    } else {
+        return global2Local(cctx, sym);
+    }
 }
 
 void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, unique_ptr<Instruction> inst) {
@@ -139,10 +175,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(a->value));
                 ret = current;
             },
+            [&](ast::UnresolvedIdent *id) {
+                core::LocalVariable loc = unresolvedIdent2Local(cctx, id);
+                ENFORCE(loc.exists());
+                current->exprs.emplace_back(cctx.target, id->loc, make_unique<Ident>(loc));
+
+                ret = current;
+            },
             [&](ast::UnresolvedConstantLit *a) { Exception::raise("Should have been eliminated by namer/resolver"); },
             [&](ast::Field *a) {
-                current->exprs.emplace_back(
-                    cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));
+                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol)));
                 ret = current;
             },
             [&](ast::ConstantLit *a) {
@@ -170,15 +212,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Assign *a) {
                 core::LocalVariable lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
-                    lhs = global2Local(cctx, lhsIdent->constantSymbol(), cctx.inWhat, cctx.aliases);
+                    lhs = global2Local(cctx, lhsIdent->constantSymbol());
                 } else if (auto field = ast::cast_tree<ast::Field>(a->lhs.get())) {
-                    lhs = global2Local(cctx, field->symbol, cctx.inWhat, cctx.aliases);
+                    lhs = global2Local(cctx, field->symbol);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {
                     lhs = lhsLocal->localVariable;
+                } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a->lhs.get())) {
+                    lhs = unresolvedIdent2Local(cctx, ident);
+                    ENFORCE(lhs.exists());
                 } else {
-                    // TODO(nelhage): Once namer is complete this should be a
-                    // fatal error
-                    // lhs = core::Symbols::todo();
                     Exception::raise("should never be reached");
                 }
 

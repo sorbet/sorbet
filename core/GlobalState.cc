@@ -83,6 +83,7 @@ constexpr string_view builder_str = "Builder"sv;
 constexpr string_view sig_str = "Sig"sv;
 constexpr string_view utils_str = "Utils"sv;
 constexpr string_view runtime_profiled_str = "RuntimeProfiled"sv;
+constexpr string_view undeclared_field_stub_str = "<undeclared-field-stub>"sv;
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 constexpr string_view reserved_str = "<<RESERVED>>"sv;
@@ -274,6 +275,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private_Builder());
     id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(sig_str));
     ENFORCE(id == Symbols::T_Sig());
+    id = enterFieldSymbol(Loc::none(), Symbols::Magic(), enterNameConstant(undeclared_field_stub_str));
+    ENFORCE(id == Symbols::Magic_undeclaredFieldStub());
 
     // Root members
     Symbols::root().data(*this, true)->members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();

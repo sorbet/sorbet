@@ -2,9 +2,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
   class ::TestAttr < ::Object () @ test/testdata/dsl/attr.rb:2
     field ::TestAttr#@v1 -> Integer @ test/testdata/dsl/attr.rb:7
     field ::TestAttr#@v2 -> String @ test/testdata/dsl/attr.rb:8
-    field ::TestAttr#@v3 -> T.untyped @ test/testdata/dsl/attr.rb:21
-    field ::TestAttr#@v4 -> T.untyped @ test/testdata/dsl/attr.rb:23
-    field ::TestAttr#@v5 -> T.untyped @ test/testdata/dsl/attr.rb:23
     field ::TestAttr#@v6 -> String @ test/testdata/dsl/attr.rb:9
     method ::TestAttr#initialize () -> RubyTyper::Void @ test/testdata/dsl/attr.rb:6
     method ::TestAttr#v1 () -> Integer @ test/testdata/dsl/attr.rb:13
