@@ -175,6 +175,7 @@ NameDef names[] = {{"initialize"},
                    {"dslRequired", "dsl_required"},
                    {"implied"},
                    {"skipGetter", "skip_getter"},
+                   {"skipSetter", "skip_setter"},
 
                    {"wrapInstance", "wrap_instance"},
 
