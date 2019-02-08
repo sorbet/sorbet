@@ -307,6 +307,28 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
     end
     ```
 
+## 7014
+
+Sorbet has a special method called `T.reveal_type` which can be useful for
+debugging. `T.reveal_type(expr)` will report an error that shows what the static
+component of Sorbet thinks the result type of `expr` is.
+
+Making this an error is nice for two reasons:
+
+- It makes our internal implementation easier 😅 We don't have some special-case
+  messages and then error messages. The only thing Sorbet prints under normal
+  circumstances are error messages.
+
+- It serves as a reminder to remove `T.reveal_type` before committing a change.
+  Since it's a proper error, Sorbet will exit with non-zero status until it's
+  removed.
+
+For more information, see [Troubleshooting](troubleshooting.md).
+
+> Looking for how to assert that an expression has a certain type? Check out
+> [Type Assertions](type-assertions.md).
+
+
 ## 7017
 
 In typed: strict files, Sorbet requires that all methods are annotated with a
