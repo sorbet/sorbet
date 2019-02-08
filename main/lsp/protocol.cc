@@ -1,4 +1,5 @@
 #include "absl/synchronization/mutex.h"
+#include "common/Timer.h"
 #include "lsp.h"
 #include <deque>
 #include <iostream>
@@ -105,6 +106,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 }
 
                 d.AddMember("sorbet_counter", requestCounter++, d.GetAllocator());
+                d.AddMember("sorbet_recieve_timestamp", (int64_t)Timer::currentTimeNanos(), d.GetAllocator());
 
                 absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
@@ -165,7 +167,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.requests.received");
+        long requestRecieveTimeNanos = doc["sorbet_recieve_timestamp"].GetInt64();
+
         gs = processRequest(move(gs), doc);
+        timingAdd("processing_time", (Timer::currentTimeNanos() - requestRecieveTimeNanos));
     }
     if (gs) {
         return gs;

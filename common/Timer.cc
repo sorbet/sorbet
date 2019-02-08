@@ -12,4 +12,10 @@ Timer::~Timer() {
     sorbet::timingAdd(this->name, timeNanos);
 }
 
+long Timer::currentTimeNanos() {
+    auto now = std::chrono::steady_clock::now();
+    auto now_ms = std::chrono::time_point_cast<std::chrono::nanoseconds>(now);
+    return now_ms.time_since_epoch().count();
+}
+
 } // namespace sorbet
