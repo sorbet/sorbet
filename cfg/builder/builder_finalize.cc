@@ -262,33 +262,34 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
 }
 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
-    for (auto &pair : RnW.reads) {
-        core::LocalVariable what = pair.first;
-        const UnorderedSet<BasicBlock *> &where = pair.second;
-        auto fnd = cfg.minLoops.insert({what, INT_MAX});
-        int &min = (*(fnd.first)).second;
+    for (const auto [what, where] : RnW.reads) {
+        const auto minIt = cfg.minLoops.find(what);
+        int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
+
         for (const BasicBlock *bb : where) {
-            if (min > bb->outerLoops) {
-                min = bb->outerLoops;
+            if (curMin > bb->outerLoops) {
+                curMin = bb->outerLoops;
             }
         }
+        cfg.minLoops[what] = curMin;
     }
 
-    for (auto &pair : RnW.writes) {
-        core::LocalVariable what = pair.first;
-        const UnorderedSet<BasicBlock *> &where = pair.second;
-        auto fndMn = cfg.minLoops.insert({what, INT_MAX}); // note: this will NOT overrwite existing value
-        auto fndMx = cfg.maxLoopWrite.insert({what, 0});
-        int &min = (*(fndMn.first)).second;
-        int &max = (*(fndMx.first)).second;
+    for (const auto [what, where] : RnW.writes) {
+        const auto minIt = cfg.minLoops.find(what);
+        const auto maxIt = cfg.maxLoopWrite.find(what);
+        int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
+        int curMax = maxIt != cfg.maxLoopWrite.end() ? maxIt->second : 0;
+
         for (const BasicBlock *bb : where) {
-            if (min > bb->outerLoops) {
-                min = bb->outerLoops;
+            if (curMin > bb->outerLoops) {
+                curMin = bb->outerLoops;
             }
-            if (max < bb->outerLoops) {
-                max = bb->outerLoops;
+            if (curMax < bb->outerLoops) {
+                curMax = bb->outerLoops;
             }
         }
+        cfg.minLoops[what] = curMin;
+        cfg.maxLoopWrite[what] = curMax;
     }
 }
 
