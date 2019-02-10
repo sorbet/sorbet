@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package com.stripe.rubytyper.fuzz;
+
+message TextDocumentPositionParamsWithoutTextDocumentIdentifier { 
+  uint32 line = 1;
+  uint32 column = 2;
+}

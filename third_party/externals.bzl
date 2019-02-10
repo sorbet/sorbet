@@ -39,6 +39,13 @@ def externals():
     )
 
     new_git_repository(
+        name="libprotobuf-mutator",
+        remote="https://github.com/google/libprotobuf-mutator.git",
+        commit="3d1ea5f9eb5fc90f9f8e28447541929482cfb049",
+        build_file = "//third_party:libprotobuf-mutator.BUILD",
+    )
+
+    new_git_repository(
         name="lmdb",
         remote="https://github.com/DarkDimius/lmdb.git",
         commit="15a9c2604e3401593110ddf6c9e2e16a4b28e68e",
