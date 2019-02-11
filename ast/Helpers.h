@@ -87,7 +87,7 @@ public:
         return std::make_unique<ast::Literal>(loc, core::Types::nilClass());
     }
 
-    static std::unique_ptr<Expression> Constant(core::Loc loc, core::SymbolRef symbol) {
+    static std::unique_ptr<ConstantLit> Constant(core::Loc loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
         return std::make_unique<ast::ConstantLit>(loc, symbol, nullptr, nullptr);
     }
