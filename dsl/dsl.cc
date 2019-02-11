@@ -1,5 +1,6 @@
 #include "dsl/dsl.h"
 #include "ast/treemap/treemap.h"
+#include "ast/verifier/verifier.h"
 #include "dsl/ChalkODMProp.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
@@ -104,8 +105,8 @@ unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::E
 
     DSLReplacer dslReplacer;
     ast = ast::TreeMap::apply(ctx, dslReplacer, std::move(ast));
-
-    return ast;
+    auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
+    return verifiedResult;
 }
 
 }; // namespace sorbet::dsl

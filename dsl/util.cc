@@ -70,6 +70,26 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
     return ast::MK::UnresolvedConstant(cons->loc, std::move(scope), cons->cnst);
 }
 
+bool ASTUtil::hasHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
+    int i = -1;
+    for (auto &keyExpr : hash->keys) {
+        i++;
+        auto *key = ast::cast_tree<ast::Literal>(keyExpr.get());
+        if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
+            auto val = ast::cast_tree<ast::Literal>(hash->values[i].get());
+            if (!val) {
+                // All non-literals are truthy
+                return true;
+            }
+            if (val->isNil(ctx) || val->isFalse(ctx)) {
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
     int i = -1;
     for (auto &keyExpr : hash->keys) {

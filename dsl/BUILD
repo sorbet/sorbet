@@ -17,6 +17,7 @@ cc_library(
     deps = [
         "//ast",
         "//ast/treemap",
+        "//ast/verifier",
         "//common",
         "//core",
     ],

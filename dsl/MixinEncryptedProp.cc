@@ -50,9 +50,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::replaceDSL(core::Mutable
     }
 
     if (rules) {
-        auto immutable = ASTUtil::getHashValue(ctx, rules, core::Names::immutable());
-        auto immutableBool = ast::cast_tree<ast::Literal>(immutable.get());
-        if (immutableBool && immutableBool->isTrue(ctx)) {
+        if (ASTUtil::hasHashValue(ctx, rules, core::Names::immutable())) {
             isImmutable = true;
         }
     }

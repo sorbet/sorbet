@@ -105,6 +105,24 @@ class <emptyTree><<constant:<root>>> < ()
     end
 
     ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
+    end
+
+    def self.get_no_setter<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
+    end
+
+    def no_setter<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
+    self(<constant:<todo sym>>).dsl_optional(:"no_getter_or_setter", <emptyTree>::<constant:String>, {:"skip_getter" => true, :"skip_setter" => true})
+
+    ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
     end
 

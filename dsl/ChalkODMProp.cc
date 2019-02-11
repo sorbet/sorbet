@@ -98,7 +98,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        if (ASTUtil::getHashValue(ctx, rules, core::Names::enum_()) != nullptr) {
+        if (ASTUtil::hasHashValue(ctx, rules, core::Names::enum_())) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
             type = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
@@ -152,9 +152,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             }
         }
 
-        auto immutable = ASTUtil::getHashValue(ctx, rules, core::Names::immutable());
-        auto immutableBool = ast::cast_tree<ast::Literal>(immutable.get());
-        if (immutableBool && immutableBool->isTrue(ctx)) {
+        if (ASTUtil::hasHashValue(ctx, rules, core::Names::immutable())) {
             isImmutable = true;
         }
 
