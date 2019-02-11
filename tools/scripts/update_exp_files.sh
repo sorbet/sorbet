@@ -5,16 +5,12 @@ COMMAND_FILE=$(mktemp)
 
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-raw typed-source autogen)
 
-bazel build //main:sorbet -c opt
+bazel build //main:sorbet -c opt "$@"
 
-rb_src=("$@")
-
-if [ -z "${rb_src[*]}" ]; then
-    # shellcheck disable=SC2207
-    rb_src=(
-        $(find test/testdata -name '*.rb' | sort)
-    )
-fi
+# shellcheck disable=SC2207
+rb_src=(
+    $(find test/testdata -name '*.rb' | sort)
+)
 
 basename=
 srcs=()
@@ -45,4 +41,4 @@ done
 
 parallel --joblog - < "$COMMAND_FILE"
 
-bazel test -c opt test/cli:update test/lsp:update
+bazel test test/cli:update test/lsp:update -c opt "$@"
