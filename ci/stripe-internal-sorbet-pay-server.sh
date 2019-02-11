@@ -79,36 +79,37 @@ if [ "$GIT_BRANCH" == "master" ] || [[ "$GIT_BRANCH" == integration-* ]]; then
 fi
 
 OUT=$(mktemp)
-TIMEFILE1=$(mktemp)
+TIMEFILE=$(mktemp)
 
 /usr/local/bin/junit-script-output \
     typecheck-uncached \
-    /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+    /usr/bin/time -o "$TIMEFILE" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
     exit 1
 fi
-cat "$TIMEFILE1"
+cat "$TIMEFILE"
 
 # Run 2 more times to exercise caching
 /usr/local/bin/junit-script-output \
     typecheck-cached \
-    /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+    /usr/bin/time -o "$TIMEFILE" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
     exit 1
 fi
-cat "$TIMEFILE1"
+cat "$TIMEFILE"
 
 /usr/local/bin/junit-script-output \
     typecheck-final \
-    /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+    /usr/bin/time -o "$TIMEFILE" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
     exit 1
 fi
-cat "$TIMEFILE1"
+cat "$TIMEFILE"
+
 
 if [ "$RECORD_STATS" ]; then
-    t_user="$(grep user "$TIMEFILE1" | cut -d ' ' -f 2)"
-    t_wall="$(grep wall "$TIMEFILE1" | cut -d ' ' -f 2)"
+    t_user="$(grep user "$TIMEFILE" | cut -d ' ' -f 2)"
+    t_wall="$(grep wall "$TIMEFILE" | cut -d ' ' -f 2)"
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_wall"s -name ruby_typer.payserver.prod_run.seconds
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.prod_run.cpu_seconds
 fi
@@ -142,22 +143,20 @@ export LSAN_OPTIONS
     cp bazel-bin/main/sorbet /build/bin/sorbet.san
 )
 
-TIMEFILE2=$(mktemp)
-
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
 /usr/local/bin/junit-script-output \
     typecheck-sanitized \
-    /usr/bin/time -o "$TIMEFILE2" \
+    /usr/bin/time -o "$TIMEFILE" \
     ./scripts/bin/typecheck --suppress-non-critical --typed=strict --suggest-typed \
     --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
     --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/sorbet --metrics-sha="$GIT_SHA" --error-white-list=1000
 
-cat "$TIMEFILE2"
+cat "$TIMEFILE"
 
 if [ "$RECORD_STATS" ]; then
-    t_user="$(grep user "$TIMEFILE2" | cut -d ' ' -f 2)"
-    t_wall="$(grep wall "$TIMEFILE2" | cut -d ' ' -f 2)"
+    t_user="$(grep user "$TIMEFILE" | cut -d ' ' -f 2)"
+    t_wall="$(grep wall "$TIMEFILE" | cut -d ' ' -f 2)"
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_wall"s -name ruby_typer.payserver.full_run.seconds
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.full_run.cpu_seconds
     LOG_DIR="/log/persisted/$(date "+%Y%m%d")/$PAY_SERVER_SHA/"
