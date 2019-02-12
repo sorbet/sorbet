@@ -36,12 +36,6 @@ void filter_unnecessary(string &out) {
     }
 }
 
-void sorbet::Exception::failInFuzzer() noexcept {
-    if (fuzz_mode) {
-        __builtin_trap();
-    }
-}
-
 void sorbet::Exception::print_backtrace() noexcept {
     int trace_size = 0;
     auto **messages = (char **)nullptr;
@@ -62,4 +56,9 @@ void sorbet::Exception::print_backtrace() noexcept {
 #else
 
 void sorbet::Exception::print_backtrace() noexcept {}
-#endif
+#endif // ifndef EMSCRIPTEN
+void sorbet::Exception::failInFuzzer() noexcept {
+    if (fuzz_mode) {
+        __builtin_trap();
+    }
+}
