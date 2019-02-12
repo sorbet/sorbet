@@ -1461,7 +1461,7 @@ void lexer::set_state_expr_value() {
       class_var_v
       => {
         if (ts[2] >= '0' && ts[2] <= '9') {
-          diagnostic_(dlevel::ERROR, dclass::CvarName, ts);
+          diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts, te));
         }
 
         emit(token_type::tCVAR);
@@ -1471,7 +1471,7 @@ void lexer::set_state_expr_value() {
       instance_var_v
       => {
         if (ts[1] >= '0' && ts[1] <= '9') {
-          diagnostic_(dlevel::ERROR, dclass::IvarName, ts);
+          diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts, te));
         }
 
         emit(token_type::tIVAR);
