@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include "absl/strings/numbers.h"
+#include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -917,14 +919,11 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::Integer *integer) {
                 int64_t val;
-                try {
-                    val = stol(integer->val);
-                } catch (out_of_range &) {
-                    val = 0;
-                    if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
-                        e.setHeader("Unsupported large integer literal: `{}`", integer->val);
-                    }
-                } catch (invalid_argument &) {
+                auto underscorePos = integer->val.find("_");
+
+                const string &withoutUnderscores =
+                    (underscorePos == string::npos) ? integer->val : absl::StrReplaceAll(integer->val, {{"_", ""}});
+                if (!absl::SimpleAtoi(withoutUnderscores, &val)) {
                     val = 0;
                     if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
                         e.setHeader("Unsupported integer literal: `{}`", integer->val);
@@ -936,20 +935,11 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::Float *floatNode) {
                 double val;
-                try {
-                    val = stod(floatNode->val);
-                    if (isinf(val)) {
-                        val = numeric_limits<double>::quiet_NaN();
-                        if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
-                            e.setHeader("Unsupported large float literal: `{}`", floatNode->val);
-                        }
-                    }
-                } catch (out_of_range &) {
-                    val = numeric_limits<double>::quiet_NaN();
-                    if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
-                        e.setHeader("Unsupported large float literal: `{}`", floatNode->val);
-                    }
-                } catch (invalid_argument &) {
+                auto underscorePos = floatNode->val.find("_");
+
+                const string &withoutUnderscores =
+                    (underscorePos == string::npos) ? floatNode->val : absl::StrReplaceAll(floatNode->val, {{"_", ""}});
+                if (!absl::SimpleAtod(withoutUnderscores, &val)) {
                     val = numeric_limits<double>::quiet_NaN();
                     if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
                         e.setHeader("Unsupported float literal: `{}`", floatNode->val);

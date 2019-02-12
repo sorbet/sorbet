@@ -10,7 +10,7 @@ test/cli/parser-error/parser-error-3.rb:1: Parse Error: unexpected token: syntax
      1 |.
         ^
 Errors: 1
-test/cli/parser-error/parser-error-4.rb:2: Parse Error: unexpected `@' http://go/e/2001
+test/cli/parser-error/parser-error-4.rb:2: Parse Error: unexpected `@` http://go/e/2001
      2 |  d!@
             ^
 Errors: 1

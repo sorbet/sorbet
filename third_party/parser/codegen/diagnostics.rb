@@ -13,20 +13,20 @@ MESSAGES = {
   :escape_eof              => 'escape sequence meets end of file',
   :string_eof              => 'unterminated string meets end of file',
   :regexp_options          => 'unknown regexp options: {}',
-  :cvar_name               => "`{}' is not allowed as a class variable name",
-  :ivar_name               => "`{}' is not allowed as an instance variable name",
-  :trailing_in_number      => "trailing `{}' in number",
+  :cvar_name               => "`{}` is not allowed as a class variable name",
+  :ivar_name               => "`{}` is not allowed as an instance variable name",
+  :trailing_in_number      => "trailing `{}` in number",
   :empty_numeric           => 'numeric literal without digits',
   :invalid_octal           => 'invalid octal digit',
   :no_dot_digit_literal    => 'no .<digit> floating literal anymore; put 0 before dot',
   :bare_backslash          => 'bare backslash only allowed before newline',
-  :unexpected              => "unexpected `{}'",
+  :unexpected              => "unexpected `{}`",
   :embedded_document       => 'embedded document meets end of file (and they embark on a romantic journey)',
 
   # Lexer warnings
   :invalid_escape_use      => 'invalid character syntax; use ?{}',
   :ambiguous_literal       => 'ambiguous first argument; put parentheses or a space even after the operator',
-  :ambiguous_prefix        => "`{}' interpreted as argument prefix",
+  :ambiguous_prefix        => "`{}` interpreted as argument prefix",
 
   # Parser errors
   :nth_ref_alias           => 'cannot define an alias for a back-reference variable',
