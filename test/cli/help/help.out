@@ -45,6 +45,7 @@ Usage:
                                 mode, suggest `::T::Utils::RuntimeProfiled`
       --lsp                     Start in language-server-protocol mode
       --no-error-count          Do not print the error count summary line
+      --autogen-version arg     Autogen version to output
 
  dev options:
   -p, --print type              Print: [parse-tree, parse-tree-json, ast,

@@ -414,9 +414,13 @@ private:
         } else {
             id = it->second;
         }
-        packer.pack_ext(2, 0x00);
-        u1 bytes[2] = {(u1)(id >> 8), (u1)(id & 0xff)};
-        packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 2);
+        if (version == 0) {
+            packer.pack_ext(2, 0x00);
+            u1 bytes[2] = {(u1)(id >> 8), (u1)(id & 0xff)};
+            packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 2);
+        } else {
+            packer.pack_uint32(id);
+        }
     }
 
     void packNames(vector<core::NameRef> &names) {
@@ -447,40 +451,52 @@ private:
     void packReferenceRef(ReferenceRef ref) {
         if (!ref.exists()) {
             packer.pack_nil();
-        } else {
+        } else if (version == 0) {
             packer.pack_ext(2, 0x02);
             u1 bytes[2] = {(u1)(ref.id() >> 8), (u1)(ref.id() & 0xff)};
             packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 2);
+        } else {
+            packer.pack_uint16(ref.id());
         }
     }
 
     void packDefinitionnRef(DefinitionRef ref) {
         if (!ref.exists()) {
             packer.pack_nil();
-        } else {
+        } else if (version == 0) {
             packer.pack_ext(2, 0x01);
             u1 bytes[2] = {(u1)(ref.id() >> 8), (u1)(ref.id() & 0xff)};
             packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 2);
+        } else {
+            packer.pack_uint16(ref.id());
         }
     }
 
     void packRange(u4 begin, u4 end) {
-        packer.pack_ext(4, 0x03);
-        u1 bytes[4] = {(u1)(begin >> 8), (u1)(begin & 0xff), (u1)(end >> 8), (u1)(end & 0xff)};
-        packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 4);
+        if (version == 0) {
+            packer.pack_ext(4, 0x03);
+            u1 bytes[4] = {(u1)(begin >> 8), (u1)(begin & 0xff), (u1)(end >> 8), (u1)(end & 0xff)};
+            packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 4);
+        } else {
+            packer.pack_uint32((begin << 16) | end);
+        }
     }
 
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def) {
-        packer.pack_array(def_attrs.size());
+        packer.pack_array(def_attrs[version].size());
 
         // raw_full_name
         auto raw_full_name = pf.fullName(ctx, def.id);
         packNames(raw_full_name);
 
         // type
-        packer.pack_ext(2, 0x00);
-        u1 bytes[2] = {0, (u1)(def.type)};
-        packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 2);
+        if (version == 0) {
+            packer.pack_ext(2, 0x00);
+            u1 bytes[2] = {0, (u1)(def.type)};
+            packer.pack_ext_body(reinterpret_cast<const char *>(&bytes), 2);
+        } else {
+            packer.pack_uint8(def.type);
+        }
 
         // defines_behavior
         packBool(def.defines_behavior);
@@ -499,7 +515,7 @@ private:
     }
 
     void packReference(core::Context ctx, ParsedFile &pf, Reference &ref) {
-        packer.pack_array(ref_attrs.size());
+        packer.pack_array(ref_attrs[version].size());
 
         // scope
         packDefinitionnRef(ref.scope.id());
@@ -526,8 +542,10 @@ private:
             packNames(ref.resolved);
         }
 
-        // is_resolved_statically
-        packer.pack_true();
+        if (version == 0) {
+            // is_resolved_statically
+            packer.pack_true();
+        }
 
         // is_defining_ref
         packBool(ref.is_defining_ref);
@@ -535,15 +553,25 @@ private:
         // parent_of
         packDefinitionnRef(ref.parent_of);
 
-        // used_ancestors_lhs
-        packer.pack_false();
-        // used_ancestors
-        packer.pack_false();
+        if (version == 0) {
+            // used_ancestors_lhs
+            packer.pack_false();
+            // used_ancestors
+            packer.pack_false();
+        }
     }
 
 public:
+    constexpr static int MIN_VERSION = 0;
+    constexpr static int MAX_VERSION = 1;
+
     // symbols[0..3] are reserved for the Type aliases
-    MsgpackWriter() : packer(payload), symbols(4) {}
+    MsgpackWriter(int version) : version(version), packer(payload), symbols(4) {
+        if (version < MIN_VERSION || version > MAX_VERSION) {
+            Exception::raise("msgpack version ", version, " not in available range [", MIN_VERSION, ",", MAX_VERSION,
+                             "]");
+        }
+    }
 
     string pack(core::Context ctx, ParsedFile &pf) {
         packer.pack_array(6);
@@ -602,14 +630,14 @@ public:
         header.pack_uint32(pf.defs.size());
 
         packString(header, "ref_attrs");
-        header.pack_array(ref_attrs.size());
-        for (auto attr : ref_attrs) {
+        header.pack_array(ref_attrs[version].size());
+        for (auto attr : ref_attrs[version]) {
             packString(header, attr);
         }
 
         packString(header, "def_attrs");
-        header.pack_array(def_attrs.size());
-        for (auto attr : def_attrs) {
+        header.pack_array(def_attrs[version].size());
+        for (auto attr : def_attrs[version]) {
             packString(header, attr);
         }
         out.write(payload.data(), payload.size());
@@ -617,36 +645,66 @@ public:
     }
 
 private:
+    int version;
     msgpack::sbuffer payload;
     msgpack::packer<msgpack::sbuffer> packer;
 
     vector<core::NameRef> symbols;
     UnorderedMap<core::NameRef, u4> symbolIds;
 
-    static const vector<string> ref_attrs;
-    static const vector<string> def_attrs;
+    static const vector<string> ref_attrs[MAX_VERSION + 1];
+    static const vector<string> def_attrs[MAX_VERSION + 1];
 };
 
-const vector<string> MsgpackWriter::ref_attrs{
-    "scope",
-    "name",
-    "nesting",
-    "expression_range",
-    "expression_pos_range",
-    "resolved",
-    "is_resolved_statically",
-    "is_defining_ref",
-    "parent_of",
-    "used_ancestors_lhs",
-    "used_ancestors",
+const vector<string> MsgpackWriter::ref_attrs[]{
+    {
+        "scope",
+        "name",
+        "nesting",
+        "expression_range",
+        "expression_pos_range",
+        "resolved",
+        "is_resolved_statically",
+        "is_defining_ref",
+        "parent_of",
+        "used_ancestors_lhs",
+        "used_ancestors",
+    },
+    {
+        "scope",
+        "name",
+        "nesting",
+        "expression_range",
+        "expression_pos_range",
+        "resolved",
+        "is_defining_ref",
+        "parent_of",
+    },
 };
 
-const vector<string> MsgpackWriter::def_attrs{
-    "raw_full_name", "type", "defines_behavior", "is_empty", "parent_ref", "aliased_ref", "defining_ref",
+const vector<string> MsgpackWriter::def_attrs[]{
+    {
+        "raw_full_name",
+        "type",
+        "defines_behavior",
+        "is_empty",
+        "parent_ref",
+        "aliased_ref",
+        "defining_ref",
+    },
+    {
+        "raw_full_name",
+        "type",
+        "defines_behavior",
+        "is_empty",
+        "parent_ref",
+        "aliased_ref",
+        "defining_ref",
+    },
 };
 
-string ParsedFile::toMsgpack(core::Context ctx) {
-    MsgpackWriter write;
+string ParsedFile::toMsgpack(core::Context ctx, int version) {
+    MsgpackWriter write(version);
     return write.pack(ctx, *this);
 }
 

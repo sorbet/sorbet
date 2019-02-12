@@ -147,6 +147,7 @@ cxxopts::Options buildOptions() {
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
+    options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
     options.add_options("dev")("stop-after", to_string(all_stop_after),
@@ -346,6 +347,13 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.typedSource = raw["typed-source"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+        if (raw.count("autogen-version") > 0) {
+            if (!opts.print.AutogenMsgPack) {
+                logger->info("--autogen-version requires -p autogen-msgpack");
+                throw EarlyReturnWithCode(1);
+            }
+            opts.autogenVersion = raw["autogen-version"].as<int>();
+        }
         if (raw.count("error-white-list") > 0) {
             opts.errorCodeWhiteList = raw["error-white-list"].as<vector<int>>();
         }

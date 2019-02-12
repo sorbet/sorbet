@@ -80,7 +80,7 @@ struct ParsedFile {
     std::vector<core::NameRef> requires;
 
     std::string toString(core::Context ctx);
-    std::string toMsgpack(core::Context ctx);
+    std::string toMsgpack(core::Context ctx, int version);
 
 private:
     std::vector<core::NameRef> fullName(core::Context ctx, DefinitionRef def);

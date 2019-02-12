@@ -316,7 +316,7 @@ int realmain(int argc, char *argv[]) {
                     fmt::print("{}", pf.toString(ctx));
                 }
                 if (opts.print.AutogenMsgPack) {
-                    fmt::print("{}", pf.toMsgpack(ctx));
+                    fmt::print("{}", pf.toMsgpack(ctx, opts.autogenVersion));
                 }
             }
         } else {
