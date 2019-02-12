@@ -141,14 +141,18 @@ build --workspace_status_command=tools/buildstamp/get_workspace_status
 build --define unsanitized=true
 # sanitize build: run with ASAN and UBSAN. Catches most memory and
 # undefined-behavior errors, substantially larger and slower binary.
-build:sanitize --copt=-fsanitize=address --copt=-fsanitize-address-use-after-scope
-build:sanitize --cxxopt=-fsanitize=address --cxxopt=-fsanitize-address-use-after-scope
-build:sanitize --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-after-scope
-build:sanitize --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
-build:sanitize --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
-build:sanitize --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
-build:sanitize --cxxopt=-DADDRESS_SANITIZER # used by abseil
-build:sanitize --define unsanitized=false
+build:sanitize --config=asan --config=ubsan
+
+build:asan --copt=-fsanitize=address --copt=-fsanitize-address-use-after-scope
+build:asan --cxxopt=-fsanitize=address --cxxopt=-fsanitize-address-use-after-scope
+build:asan --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-after-scope
+build:asan --cxxopt=-DADDRESS_SANITIZER # used by abseil
+build:asan --define unsanitized=false
+
+build:ubsan --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:ubsan --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:ubsan --define unsanitized=false
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
 build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
@@ -190,7 +194,7 @@ common --show_progress_rate_limit=0.25
 ##
 ## Fuzzing
 ##
-build:fuzz --copt=-fsanitize=fuzzer --cxxopt=-fsanitize=fuzzer --linkopt=-fsanitize=fuzzer --config=sanitize
+build:fuzz --copt=-fsanitize=fuzzer --cxxopt=-fsanitize=fuzzer --linkopt=-fsanitize=fuzzer --config=asan
 build:fuzz --config=forcedebug --config=debugsymbols
 build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION --cxxopt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 
