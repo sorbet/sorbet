@@ -630,7 +630,10 @@ public:
 
 class ResolveSignaturesWalk {
 private:
-    void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
+    void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded,
+                           const ast::MethodDef &mdef) {
+        ENFORCE(mdef.symbol.data(ctx)->isOverloaded() || mdef.symbol == method);
+        ENFORCE(mdef.symbol.data(ctx)->isOverloaded() || method.data(ctx)->arguments().size() == mdef.args.size());
         auto exprLoc = send->loc;
 
         auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true, method);
@@ -680,20 +683,27 @@ private:
         auto methodInfo = method.data(ctx);
 
         methodInfo->resultType = sig.returns;
-
+        auto argIt = mdef.args.begin();
         for (auto it = methodInfo->arguments().begin(); it != methodInfo->arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
-            auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == arg.data(ctx)->name; });
+            const auto &argTree = *argIt;
+            const auto local = ast::MK::arg2Local(argTree.get());
+            auto treeArgName = local->localVariable._name;
+            ENFORCE(local != nullptr);
+            auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx)->resultType = spec->type;
                 arg.data(ctx)->addLoc(ctx, spec->loc);
                 sig.argTypes.erase(spec);
                 ++it;
+                ++argIt;
             } else if (isOverloaded) {
                 it = methodInfo->arguments().erase(it);
+                ++argIt;
             } else if (arg.data(ctx)->resultType != nullptr) {
                 ++it;
+                ++argIt;
             } else {
                 arg.data(ctx)->resultType = core::Types::untyped(ctx, arg);
                 if (sig.seen.params || sig.seen.returns || sig.seen.void_) {
@@ -701,18 +711,19 @@ private:
                     if (auto e = ctx.state.beginError(arg.data(ctx)->loc(),
                                                       core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    arg.data(ctx)->name.toString(ctx));
+                                    treeArgName.toString(ctx));
                         e.addErrorLine(send->block->loc, "Signature");
                     }
                 }
                 ++it;
+                ++argIt;
             }
 
             if (isOverloaded && arg.data(ctx)->isKeyword()) {
                 if (auto e =
                         ctx.state.beginError(arg.data(ctx)->loc(), core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                arg.data(ctx)->name.toString(ctx));
+                                treeArgName.toString(ctx));
                 }
             }
         }
@@ -924,7 +935,8 @@ private:
 
                         while (i < lastSig.size()) {
                             auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
-                            fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded);
+                            fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded,
+                                              *mdef);
                             if (i + 1 < lastSig.size()) {
                                 overload.data(ctx)->setOverloaded();
                             }
@@ -932,7 +944,7 @@ private:
                         }
                     }
 
-                    fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded);
+                    fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded, *mdef);
 
                     // TODO(jez) Should we handle isOverloaded?
                     if (!isOverloaded) {

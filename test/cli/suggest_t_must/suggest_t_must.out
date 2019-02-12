@@ -11,7 +11,7 @@ test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `
         ^^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/string.rbi#L23: Method `String#+` has specified `arg0` as `String`
     23 |        arg0: String,
-                ^^^^^
+                ^^^^
   Got T.nilable(String) originating from:
     test/cli/suggest_t_must/suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))

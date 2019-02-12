@@ -1,26 +1,24 @@
 class ::<root> < ::Object () @ (test/testdata/namer/yield.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
   method #<static-init> () @ ???
   class ::Main < ::Object () @ test/testdata/namer/yield.rb:2
-    method ::Main#blockpass (blk) @ test/testdata/namer/yield.rb:7
-      argument ::Main#blockpass#blk<block> @ test/testdata/namer/yield.rb:7
+    method ::Main#blockpass (&blk) @ test/testdata/namer/yield.rb:7
+      argument ::Main#blockpass#&blk<block> @ test/testdata/namer/yield.rb:7
     method ::Main#blockyield (<blk>) @ test/testdata/namer/yield.rb:15
-      argument ::Main#blockyield#<blk><block> -> T.untyped @ test/testdata/namer/yield.rb:16
       method ::Main#blockyield#<block> (i) @ test/testdata/namer/yield.rb:16
         argument ::Main#blockyield#<block>#i<> @ test/testdata/namer/yield.rb:16
     method ::Main#main () @ test/testdata/namer/yield.rb:19
       method ::Main#main#<block> (x) @ test/testdata/namer/yield.rb:20
         argument ::Main#main#<block>#x<> @ test/testdata/namer/yield.rb:20
-      method ::Main#main#<block> (<block-pass>$2) @ test/testdata/namer/yield.rb:21
-        argument ::Main#main#<block>#<block-pass><repeated> @ test/testdata/namer/yield.rb:21
-      method ::Main#main#<block> (<block-pass>$3) @ test/testdata/namer/yield.rb:22
-        argument ::Main#main#<block>#<block-pass><repeated> @ test/testdata/namer/yield.rb:22
-      method ::Main#main#<block> (<block-pass>$4) @ test/testdata/namer/yield.rb:23
-        argument ::Main#main#<block>#<block-pass><repeated> @ test/testdata/namer/yield.rb:23
-      method ::Main#main#<block> (<block-pass>$5) @ test/testdata/namer/yield.rb:24
-        argument ::Main#main#<block>#<block-pass><repeated> @ test/testdata/namer/yield.rb:24
-    method ::Main#mixed (blk) @ test/testdata/namer/yield.rb:11
-      argument ::Main#mixed#blk<block> @ test/testdata/namer/yield.rb:11
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:21
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:21
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:22
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:22
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:23
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:23
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:24
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:24
+    method ::Main#mixed (&blk) @ test/testdata/namer/yield.rb:11
+      argument ::Main#mixed#&blk<block> @ test/testdata/namer/yield.rb:11
     method ::Main#yielder (<blk>) @ test/testdata/namer/yield.rb:3
-      argument ::Main#yielder#<blk><block> -> T.untyped @ test/testdata/namer/yield.rb:4
   class ::<Class:Main> < ::<Class:Object> () @ test/testdata/namer/yield.rb:2
 

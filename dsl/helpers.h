@@ -10,7 +10,8 @@ namespace sorbet::dsl {
 
 std::unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, std::unique_ptr<ast::Expression> rhs);
 
-std::unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, std::unique_ptr<ast::Expression> rhs);
+std::unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, core::Loc nameLoc,
+                                       std::unique_ptr<ast::Expression> rhs);
 
 std::unique_ptr<ast::Expression> mkNilable(core::Loc loc, std::unique_ptr<ast::Expression> type);
 

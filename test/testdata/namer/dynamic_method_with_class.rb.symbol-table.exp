@@ -5,6 +5,5 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::F#bla () @ test/testdata/namer/dynamic_method_with_class.rb:6
       method ::F#bla#<block> () @ test/testdata/namer/dynamic_method_with_class.rb:7
     method ::F#foo (<blk>) @ test/testdata/namer/dynamic_method_with_class.rb:3
-      argument ::F#foo#<blk><block> -> T.untyped @ test/testdata/namer/dynamic_method_with_class.rb:4
   class ::<Class:F> < ::<Class:Object> () @ test/testdata/namer/dynamic_method_with_class.rb:2
 

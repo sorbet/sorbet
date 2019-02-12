@@ -19,6 +19,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
     core::NameRef name = core::NameRef::noName();
+    core::Loc nameLoc;
 
     switch (send->fun._id) {
         case core::Names::prop()._id:
@@ -34,17 +35,25 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         case core::Names::timestamped_token_prop()._id:
             isNilable = false;
             name = core::Names::token();
+            nameLoc =
+                core::Loc(send->loc.file(),
+                          send->loc.beginPos() + (send->fun._id == core::Names::timestamped_token_prop()._id ? 12 : 0),
+                          send->loc.endPos() - 5); // get the 'token' part of it
             type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::created_prop()._id:
             isNilable = false;
             name = core::Names::created();
+            nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
+                                send->loc.endPos() - 5); // 5 is the difference between `created_prop` and `created`
             type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
         case core::Names::merchant_prop()._id:
             isNilable = false;
             isImmutable = true;
             name = core::Names::merchant();
+            nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
+                                send->loc.endPos() - 5); // 5 is the difference between `merchant_prop` and `merchant`
             type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
 
@@ -63,6 +72,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             return empty;
         }
         name = sym->asSymbol(ctx);
+        ENFORCE(sym->loc.source(ctx).size() > 0 && sym->loc.source(ctx)[0] == ':');
+        nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
     }
 
     if (type == nullptr) {
@@ -174,6 +185,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
     stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
 
+    core::NameRef setName = name.addEq(ctx);
+
     // Compute the setter
     if (!isImmutable) {
         auto setType = ASTUtil::dupType(type.get());
@@ -182,10 +195,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         }
 
         stats.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        core::NameRef setName = name.addEq(ctx);
-        stats.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, std::move(setType))));
+        stats.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
     }
 
     // Compute the `_` foreign accessor
@@ -203,10 +215,10 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         //  T.unsafe(nil)
         // end
         stats.emplace_back(
-            ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
+            ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
 
         unique_ptr<ast::Expression> arg =
-            ast::MK::RestArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, core::Names::opts())));
+            ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         stats.emplace_back(ast::MK::Method1(loc, loc, fk_method, std::move(arg),
                                             ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
     }
@@ -220,10 +232,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         }
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        core::NameRef setName = name.addEq(ctx);
-        rhs.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, std::move(setType))));
+        rhs.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
 
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;

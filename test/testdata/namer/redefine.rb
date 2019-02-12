@@ -41,10 +41,10 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_name(a)
   1
 end
-def wrong_name(b) # error: redefined with mismatched argument name. Expected: `a`, got: `b`
+def wrong_name(b)
   2
 end
-T.reveal_type(wrong_name(3)) # error: Revealed type: `T.untyped`
+T.reveal_type(wrong_name(3)) # error: Revealed type: `Integer`
 
 sig {params(a: Integer).returns(Integer)}
 def wrong_repeatedness(a)

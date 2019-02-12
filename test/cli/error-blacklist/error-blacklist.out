@@ -3,7 +3,7 @@ test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Inte
         ^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
-                  ^^^^^
+                  ^^^^
   Got String("1") originating from:
     test/cli/error-blacklist/error-blacklist.rb:3:
      3 |1 + "1"

@@ -240,7 +240,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
     if (left.pos.rest.exists() && !right.pos.rest.exists()) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of abstract method `{}` must accept *`{}`", superMethod.data(gs)->show(gs),
-                        left.pos.rest.data(gs)->name.show(gs));
+                        left.pos.rest.data(gs)->argumentName(gs));
             e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
         }
     }
@@ -262,7 +262,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
                 continue;
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
-                            superMethod.data(gs)->show(gs), req.data(gs)->name.show(gs));
+                            superMethod.data(gs)->show(gs), req.data(gs)->argumentName(gs));
                 e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
             }
         }
@@ -271,7 +271,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
     if (left.kw.rest.exists() && !right.kw.rest.exists()) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of abstract method `{}` must accept **`{}`", superMethod.data(gs)->show(gs),
-                        left.kw.rest.data(gs)->name.show(gs));
+                        left.kw.rest.data(gs)->argumentName(gs));
             e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
         }
     }
@@ -282,7 +282,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
         }
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of abstract method `{}` contains extra required keyword argument `{}`",
-                        superMethod.data(gs)->show(gs), extra.data(gs)->name.show(gs));
+                        superMethod.data(gs)->show(gs), extra.data(gs)->argumentName(gs));
             e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
         }
     }

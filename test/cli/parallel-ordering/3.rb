@@ -1,5 +1,5 @@
 # typed: true
 class Foo
-    def hi(c)
+    def hi(c, d, e)
     end
 end

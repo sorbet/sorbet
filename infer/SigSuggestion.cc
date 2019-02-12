@@ -544,9 +544,9 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                 chosenType = oldType;
             }
             if (!ctx.state.suggestRuntimeProfiledType || !chosenType->isUntyped()) {
-                fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), chosenType->show(ctx));
+                fmt::format_to(ss, "{}: {}", argSym.data(ctx)->argumentName(ctx), chosenType->show(ctx));
             } else {
-                fmt::format_to(ss, "{}: ::T::Utils::RuntimeProfiled", argSym.data(ctx)->name.show(ctx));
+                fmt::format_to(ss, "{}: ::T::Utils::RuntimeProfiled", argSym.data(ctx)->argumentName(ctx));
             }
         }
         fmt::format_to(ss, ").");

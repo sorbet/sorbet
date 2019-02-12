@@ -46,6 +46,7 @@ enum UniqueNameKind : u2 {
     Singleton,
     Overload,
     TypeVarName,
+    PositionalArg,       // num >=0 - normal args, -1 ==> restarg, -2 => kwrest arg
     ResolverMissingClass // used by resolver when we want to enter a stub class into a static field. see
                          // test/resolver/stub_missing_class_alias.rb
 };

@@ -3,7 +3,7 @@ test/cli/at/at.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` h
         ^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
-                  ^^^^^
+                  ^^^^
   Got String("s") originating from:
     test/cli/at/at.rb:2:
      2 |1 + "s"

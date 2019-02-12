@@ -44,6 +44,9 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     }
     name = sym->asSymbol(ctx);
 
+    ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
+    auto nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
+
     auto *klass = ast::cast_tree<ast::UnresolvedConstantLit>(send->args[1].get());
     if (klass == nullptr) {
         return empty;
@@ -75,9 +78,9 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
 
     // def self.<prop>
     if (!skipSetter) {
-        stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(loc, name), ASTUtil::dupType(type.get()),
+        stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, name), ASTUtil::dupType(type.get()),
                                          ast::MK::Constant(loc, core::Symbols::NilClass())));
-        unique_ptr<ast::Reference> arg = ast::MK::Local(loc, name);
+        unique_ptr<ast::Reference> arg = ast::MK::Local(nameLoc, name);
         if (implied) {
             auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
             arg = make_unique<ast::OptionalArg>(loc, move(arg), move(default_));

@@ -100,7 +100,15 @@ class NameInserter {
             auto localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
             return make_pair(sym, move(localExpr));
         }
-        core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, parsedArg.name);
+        core::NameRef name;
+        if (parsedArg.keyword) {
+            name = parsedArg.name;
+        } else if (parsedArg.block) {
+            name = core::Names::blkArg();
+        } else {
+            name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
+        }
+        core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
         core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
         unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
 
@@ -147,35 +155,33 @@ class NameInserter {
     // desugar into a call to that block, or, if it doesn't exist, synthesize an
     // argument and populate `discovered`; on exit from a method we will insert
     // a block argument if `discovered` exists().
-    struct blockArgs {
-        core::SymbolRef declared;
-        core::NameRef discovered;
+    struct BlockArgs {
+        core::LocalVariable declared;
+        core::LocalVariable discovered;
         core::Loc discoveredLoc;
     };
-    vector<blockArgs> blockArgStack;
+    vector<BlockArgs> blockArgStack;
 
     core::LocalVariable findOrCreateBlockParameter(core::MutableContext ctx, core::Loc loc) {
         ENFORCE(!blockArgStack.empty());
         auto &frame = blockArgStack.back();
-        core::NameRef blockArg;
         if (frame.declared.exists()) {
-            blockArg = frame.declared.data(ctx)->name;
-        } else {
-            // Found yield, and method doesn't have a blk arg, so let's make one.
-            if (!frame.discovered.exists()) {
-                frame.discovered = core::Names::blkArg();
-                frame.discoveredLoc = loc;
-            }
-            blockArg = frame.discovered;
+            return frame.declared;
         }
+        if (frame.discovered.exists()) {
+            return frame.discovered;
+        }
+        // Found yield, and method doesn't have a blk arg, so let's make one.
 
         // Implicit block parameters are always declared as arguments to a
         // method; We take advantage of the fact that method top-level locals
         // always have unique=0 to synthesize the local directly. We can't use
         // `enterLocal` since that will enter it into our current scope, which
         // may be inside an inner block.
-        core::LocalVariable local{blockArg, 0};
-        return local;
+        frame.discovered = core::LocalVariable{core::Names::blkArg(), 0};
+        frame.discoveredLoc = loc;
+
+        return frame.discovered;
     }
 
     bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
@@ -571,7 +577,7 @@ public:
                 }
                 return false;
             }
-            if (symArg->name != methodArg.name) {
+            if (symArg->isKeyword() && symArg->name != methodArg.name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
                                 sym.data(ctx)->show(ctx), symArg->name.toString(ctx), methodArg.name.toString(ctx));
@@ -584,14 +590,12 @@ public:
         return true;
     }
 
-    void pushBlockArg(core::MutableContext ctx, core::SymbolRef method) {
-        core::SymbolRef blockArgSym;
-        auto block = absl::c_find_if(method.data(ctx)->arguments(),
-                                     [ctx](auto arg) { return arg.data(ctx)->isBlockArgument(); });
-        if (block != method.data(ctx)->arguments().end()) {
-            blockArgSym = *block;
+    void pushBlockArg(core::MutableContext ctx, const vector<ParsedArg> &args) {
+        core::LocalVariable blockArgVar;
+        if (!args.empty() && args.back().block) {
+            blockArgVar = core::LocalVariable{args.back().name, 0};
         }
-        blockArgStack.emplace_back(blockArgs{blockArgSym, core::NameRef::noName()});
+        blockArgStack.emplace_back(BlockArgs{blockArgVar, core::LocalVariable::noVariable()});
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
@@ -623,8 +627,8 @@ public:
                 // TODO remove if the paramsMatch is perfect
                 // Reparsing the same file
                 method->symbol = sym;
+                pushBlockArg(ctx, parsedArgs);
                 method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
-                pushBlockArg(ctx, sym);
                 return method;
             }
             if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), method->declLoc, parsedArgs)) {
@@ -634,12 +638,12 @@ public:
             }
         }
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
+        pushBlockArg(ctx, parsedArgs);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
         if (method->isDSLSynthesized()) {
             method->symbol.data(ctx)->setDSLSynthesized();
         }
-        pushBlockArg(ctx, method->symbol);
         return method;
     }
 
@@ -647,13 +651,13 @@ public:
         auto frame = blockArgStack.back();
         blockArgStack.pop_back();
         if (frame.discovered.exists()) {
-            auto blockArg = ctx.state.enterMethodArgumentSymbol(frame.discoveredLoc, method->symbol, frame.discovered);
+            auto blockArg =
+                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), method->symbol, frame.discovered._name);
             blockArg.data(ctx)->setBlockArgument();
             blockArg.data(ctx)->resultType = core::Types::untyped(ctx, blockArg);
             method->symbol.data(ctx)->arguments().emplace_back(blockArg);
 
-            core::LocalVariable local{frame.discovered, 0};
-            method->args.emplace_back(make_unique<ast::Local>(frame.discoveredLoc, local));
+            method->args.emplace_back(make_unique<ast::Local>(frame.discoveredLoc, frame.discovered));
         }
 
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());

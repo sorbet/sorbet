@@ -28,7 +28,6 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://gi
     method ::A#test_override () -> T1 @ test/testdata/resolver/sig_misc.rb:84
     method ::A#test_standard_untyped () @ test/testdata/resolver/sig_misc.rb:102
     method ::A#test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/resolver/sig_misc.rb:68
-      argument ::A#test_yield_no_block_type#<blk><block> -> T.untyped @ test/testdata/resolver/sig_misc.rb:69
       argument ::A#test_yield_no_block_type#x<> -> Integer @ test/testdata/resolver/sig_misc.rb:67
   class ::<Class:A> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/sig_misc.rb:5
     method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:51

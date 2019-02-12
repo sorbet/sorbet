@@ -663,7 +663,7 @@ public:
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
-        return make_unique<Kwoptarg>(tok_loc(name).join(value->loc), gs_.enterNameUTF8(name->string()),
+        return make_unique<Kwoptarg>(tok_loc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tok_loc(name),
                                      std::move(value));
     }
 
@@ -783,7 +783,8 @@ public:
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        return make_unique<Optarg>(tok_loc(name).join(value->loc), gs_.enterNameUTF8(name->string()), std::move(value));
+        return make_unique<Optarg>(tok_loc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tok_loc(name),
+                                   std::move(value));
     }
 
     unique_ptr<Node> pair(unique_ptr<Node> key, const token *assoc, unique_ptr<Node> value) {
@@ -791,8 +792,10 @@ public:
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
+        auto keyLoc = core::Loc{file_, clamp((u4)key->start()), clamp((u4)key->end() - 1)}; // drop the trailing :
+
         return make_unique<Pair>(tok_loc(key).join(value->loc),
-                                 make_unique<Symbol>(tok_loc(key), gs_.enterNameUTF8(key->string())), std::move(value));
+                                 make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->string())), std::move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
@@ -859,14 +862,17 @@ public:
     unique_ptr<Node> restarg(const token *star, const token *name) {
         core::Loc loc = tok_loc(star);
         core::NameRef nm;
+        core::Loc nameLoc = loc;
 
         if (name != nullptr) {
-            loc = loc.join(tok_loc(name));
+            nameLoc = tok_loc(name);
+            loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->string());
         } else {
+            // TODO: give example when this happens
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
         }
-        return make_unique<Restarg>(loc, nm);
+        return make_unique<Restarg>(loc, nm, nameLoc);
     }
 
     unique_ptr<Node> self_(const token *tok) {

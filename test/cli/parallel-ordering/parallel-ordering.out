@@ -1,14 +1,14 @@
-test/cli/parallel-ordering/2.rb:3: Method `Foo#hi` redefined with mismatched argument name. Expected: `a`, got: `b` http://go/e/4010
-     3 |    def hi(b)
-            ^^^^^^^^^
+test/cli/parallel-ordering/2.rb:3: Method `Foo#hi` redefined without matching argument count. Expected: `1`, got: `2` http://go/e/4010
+     3 |    def hi(b, c)
+            ^^^^^^^^^^^^
     test/cli/parallel-ordering/1.rb:3: Previous definition
      3 |    def hi(a)
             ^^^^^^^^^
 
-test/cli/parallel-ordering/3.rb:3: Method `Foo#hi` redefined with mismatched argument name. Expected: `b`, got: `c` http://go/e/4010
-     3 |    def hi(c)
-            ^^^^^^^^^
+test/cli/parallel-ordering/3.rb:3: Method `Foo#hi` redefined without matching argument count. Expected: `2`, got: `3` http://go/e/4010
+     3 |    def hi(c, d, e)
+            ^^^^^^^^^^^^^^^
     test/cli/parallel-ordering/2.rb:3: Previous definition
-     3 |    def hi(b)
-            ^^^^^^^^^
+     3 |    def hi(b, c)
+            ^^^^^^^^^^^^
 Errors: 2

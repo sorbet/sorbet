@@ -103,7 +103,7 @@ InsSeq{
                   argument ::A#take_arguments#<block>#d<keyword> @ test/testdata/namer/arguments.rb:6
                   argument ::A#take_arguments#<block>#e<optional, keyword> @ test/testdata/namer/arguments.rb:6
                   argument ::A#take_arguments#<block>#f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#g<block> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#&g<block> @ test/testdata/namer/arguments.rb:6
                 ]
                 body = Array{
                   elems = [

@@ -30,7 +30,7 @@ class TestClass
   end
 
   def method_with_rest_arg(*arr)
-                         # ^^^^ def: arr
+                          # ^^^ def: arr
     arr.reduce(0, :+)
   # ^^^ usage: arr
   end

@@ -427,6 +427,9 @@ string Symbol::fullName(const GlobalState &gs) const {
 
     bool needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
     string separator = needsColonColon ? "::" : "#";
+    if (this->isMethodArgument()) {
+        return fmt::format("{}{}{}", owner, separator, this->argumentName(gs));
+    }
 
     return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
 }
@@ -510,10 +513,17 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         if (this->superClass.exists()) {
             fmt::format_to(buf, " < {}", this->superClass.data(gs)->fullName(gs));
         }
-        const auto &list = this->isClass() ? this->mixins() : this->arguments();
 
-        fmt::format_to(buf, " ({})",
-                       fmt::map_join(list, ", ", [&](auto symb) { return symb.data(gs)->name.toString(gs); }));
+        if (this->isClass()) {
+            fmt::format_to(buf, " ({})", fmt::map_join(this->mixins(), ", ", [&](auto symb) {
+                               return symb.data(gs)->name.toString(gs);
+                           }));
+
+        } else {
+            fmt::format_to(buf, " ({})", fmt::map_join(this->arguments(), ", ", [&](auto symb) {
+                               return symb.data(gs)->argumentName(gs);
+                           }));
+        }
     }
     if (this->isMethodArgument()) {
         vector<pair<u4, string_view>> methodFlags = {
@@ -589,8 +599,26 @@ string Symbol::show(const GlobalState &gs) const {
 
     auto needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
 
+    if (this->isMethodArgument()) {
+        return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
+                           this->argumentName(gs));
+    }
     return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
                        this->name.data(gs)->show(gs));
+}
+
+string Symbol::argumentName(const GlobalState &gs) const {
+    ENFORCE(isMethodArgument());
+    if (isKeyword()) {
+        return (string)name.data(gs)->shortName(gs);
+    } else {
+        // positional arg
+        if (loc().exists()) {
+            return loc().source(gs);
+        } else {
+            return (string)name.data(gs)->shortName(gs);
+        }
+    }
 }
 
 bool Symbol::isSingletonClass(const GlobalState &gs) const {

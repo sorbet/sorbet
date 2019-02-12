@@ -8,13 +8,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:42
-      method ::AdvancedODM::Mutator#array= (arg0) -> AppliedType {
+      method ::AdvancedODM::Mutator#array= (array) -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:42
-        argument ::AdvancedODM::Mutator#array=#arg0<> -> AppliedType {
+        argument ::AdvancedODM::Mutator#array=#array<> -> AppliedType {
           klass = ::Array
           targs = [
             <constant:Elem> = T.untyped
@@ -26,13 +26,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:44
-      method ::AdvancedODM::Mutator#array_of_explicit= (arg0) -> AppliedType {
+      method ::AdvancedODM::Mutator#array_of_explicit= (array_of_explicit) -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:44
-        argument ::AdvancedODM::Mutator#array_of_explicit=#arg0<> -> AppliedType {
+        argument ::AdvancedODM::Mutator#array_of_explicit=#array_of_explicit<> -> AppliedType {
           klass = ::Array
           targs = [
             <constant:Elem> = T.untyped
@@ -45,7 +45,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           <constant:V> = String
         ]
       } @ test/testdata/dsl/prop.rb:46
-      method ::AdvancedODM::Mutator#hash_of= (arg0) -> AppliedType {
+      method ::AdvancedODM::Mutator#hash_of= (hash_of) -> AppliedType {
         klass = ::Hash
         targs = [
           <constant:K> = Symbol
@@ -56,7 +56,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
             }
         ]
       } @ test/testdata/dsl/prop.rb:46
-        argument ::AdvancedODM::Mutator#hash_of=#arg0<> -> AppliedType {
+        argument ::AdvancedODM::Mutator#hash_of=#hash_of<> -> AppliedType {
           klass = ::Hash
           targs = [
             <constant:K> = Symbol
@@ -73,13 +73,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:56
-      method ::AdvancedODM::Mutator#no_class_arg= (arg0) -> AppliedType {
+      method ::AdvancedODM::Mutator#no_class_arg= (no_class_arg) -> AppliedType {
             klass = ::Array
             targs = [
               <constant:Elem> = T.untyped
             ]
           } | NilClass @ test/testdata/dsl/prop.rb:56
-        argument ::AdvancedODM::Mutator#no_class_arg=#arg0<> -> AppliedType {
+        argument ::AdvancedODM::Mutator#no_class_arg=#no_class_arg<> -> AppliedType {
               klass = ::Array
               targs = [
                 <constant:Elem> = T.untyped
@@ -91,13 +91,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           <constant:Elem> = String
         ]
       } @ test/testdata/dsl/prop.rb:45
-      method ::AdvancedODM::Mutator#t_array= (arg0) -> AppliedType {
+      method ::AdvancedODM::Mutator#t_array= (t_array) -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = String
         ]
       } @ test/testdata/dsl/prop.rb:45
-        argument ::AdvancedODM::Mutator#t_array=#arg0<> -> AppliedType {
+        argument ::AdvancedODM::Mutator#t_array=#t_array<> -> AppliedType {
           klass = ::Array
           targs = [
             <constant:Elem> = String
@@ -121,13 +121,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
         <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:42
-    method ::AdvancedODM#array= (arg0) -> AppliedType {
+    method ::AdvancedODM#array= (array) -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:42
-      argument ::AdvancedODM#array=#arg0<> -> AppliedType {
+      argument ::AdvancedODM#array=#array<> -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = T.untyped
@@ -139,13 +139,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
         <constant:Elem> = String
       ]
     } @ test/testdata/dsl/prop.rb:43
-    method ::AdvancedODM#array_of= (arg0) -> AppliedType {
+    method ::AdvancedODM#array_of= (array_of) -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = String
       ]
     } @ test/testdata/dsl/prop.rb:43
-      argument ::AdvancedODM#array_of=#arg0<> -> AppliedType {
+      argument ::AdvancedODM#array_of=#array_of<> -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = String
@@ -157,13 +157,13 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
         <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:44
-    method ::AdvancedODM#array_of_explicit= (arg0) -> AppliedType {
+    method ::AdvancedODM#array_of_explicit= (array_of_explicit) -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:44
-      argument ::AdvancedODM#array_of_explicit=#arg0<> -> AppliedType {
+      argument ::AdvancedODM#array_of_explicit=#array_of_explicit<> -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = T.untyped
@@ -172,27 +172,27 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::AdvancedODM#const () -> String @ test/testdata/dsl/prop.rb:54
     method ::AdvancedODM#const_explicit () -> String @ test/testdata/dsl/prop.rb:53
     method ::AdvancedODM#default_without_optional_false () -> String | NilClass @ test/testdata/dsl/prop.rb:36
-    method ::AdvancedODM#default_without_optional_false= (arg0) -> String @ test/testdata/dsl/prop.rb:36
-      argument ::AdvancedODM#default_without_optional_false=#arg0<> -> String @ test/testdata/dsl/prop.rb:36
+    method ::AdvancedODM#default_without_optional_false= (default_without_optional_false) -> String @ test/testdata/dsl/prop.rb:36
+      argument ::AdvancedODM#default_without_optional_false=#default_without_optional_false<> -> String @ test/testdata/dsl/prop.rb:36
     method ::AdvancedODM#enum_prop () -> T.untyped @ test/testdata/dsl/prop.rb:58
     method ::AdvancedODM#foreign () -> String | NilClass @ test/testdata/dsl/prop.rb:60
-    method ::AdvancedODM#foreign= (arg0) -> String @ test/testdata/dsl/prop.rb:60
-      argument ::AdvancedODM#foreign=#arg0<> -> String @ test/testdata/dsl/prop.rb:60
+    method ::AdvancedODM#foreign= (foreign) -> String @ test/testdata/dsl/prop.rb:60
+      argument ::AdvancedODM#foreign=#foreign<> -> String @ test/testdata/dsl/prop.rb:60
     method ::AdvancedODM#foreign_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:60
       argument ::AdvancedODM#foreign_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:60
     method ::AdvancedODM#foreign_invalid () -> String | NilClass @ test/testdata/dsl/prop.rb:63
-    method ::AdvancedODM#foreign_invalid= (arg0) -> String @ test/testdata/dsl/prop.rb:63
-      argument ::AdvancedODM#foreign_invalid=#arg0<> -> String @ test/testdata/dsl/prop.rb:63
+    method ::AdvancedODM#foreign_invalid= (foreign_invalid) -> String @ test/testdata/dsl/prop.rb:63
+      argument ::AdvancedODM#foreign_invalid=#foreign_invalid<> -> String @ test/testdata/dsl/prop.rb:63
     method ::AdvancedODM#foreign_invalid_ (opts) -> T.untyped @ test/testdata/dsl/prop.rb:63
       argument ::AdvancedODM#foreign_invalid_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:63
     method ::AdvancedODM#foreign_lazy () -> String | NilClass @ test/testdata/dsl/prop.rb:61
-    method ::AdvancedODM#foreign_lazy= (arg0) -> String @ test/testdata/dsl/prop.rb:61
-      argument ::AdvancedODM#foreign_lazy=#arg0<> -> String @ test/testdata/dsl/prop.rb:61
+    method ::AdvancedODM#foreign_lazy= (foreign_lazy) -> String @ test/testdata/dsl/prop.rb:61
+      argument ::AdvancedODM#foreign_lazy=#foreign_lazy<> -> String @ test/testdata/dsl/prop.rb:61
     method ::AdvancedODM#foreign_lazy_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:61
       argument ::AdvancedODM#foreign_lazy_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:61
     method ::AdvancedODM#foreign_proc () -> String | NilClass @ test/testdata/dsl/prop.rb:62
-    method ::AdvancedODM#foreign_proc= (arg0) -> String @ test/testdata/dsl/prop.rb:62
-      argument ::AdvancedODM#foreign_proc=#arg0<> -> String @ test/testdata/dsl/prop.rb:62
+    method ::AdvancedODM#foreign_proc= (foreign_proc) -> String @ test/testdata/dsl/prop.rb:62
+      argument ::AdvancedODM#foreign_proc=#foreign_proc<> -> String @ test/testdata/dsl/prop.rb:62
     method ::AdvancedODM#foreign_proc_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:62
       argument ::AdvancedODM#foreign_proc_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:62
     method ::AdvancedODM#hash_of () -> AppliedType {
@@ -206,7 +206,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           }
       ]
     } @ test/testdata/dsl/prop.rb:46
-    method ::AdvancedODM#hash_of= (arg0) -> AppliedType {
+    method ::AdvancedODM#hash_of= (hash_of) -> AppliedType {
       klass = ::Hash
       targs = [
         <constant:K> = Symbol
@@ -217,7 +217,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           }
       ]
     } @ test/testdata/dsl/prop.rb:46
-      argument ::AdvancedODM#hash_of=#arg0<> -> AppliedType {
+      argument ::AdvancedODM#hash_of=#hash_of<> -> AppliedType {
         klass = ::Hash
         targs = [
           <constant:K> = Symbol
@@ -235,47 +235,47 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
           ]
         } | NilClass @ test/testdata/dsl/prop.rb:56
     method ::AdvancedODM#nodefault () -> String | NilClass @ test/testdata/dsl/prop.rb:38
-    method ::AdvancedODM#nodefault= (arg0) -> String @ test/testdata/dsl/prop.rb:38
-      argument ::AdvancedODM#nodefault=#arg0<> -> String @ test/testdata/dsl/prop.rb:38
+    method ::AdvancedODM#nodefault= (nodefault) -> String @ test/testdata/dsl/prop.rb:38
+      argument ::AdvancedODM#nodefault=#nodefault<> -> String @ test/testdata/dsl/prop.rb:38
     method ::AdvancedODM#object () -> Object @ test/testdata/dsl/prop.rb:41
-    method ::AdvancedODM#object= (arg0) -> Object @ test/testdata/dsl/prop.rb:41
-      argument ::AdvancedODM#object=#arg0<> -> Object @ test/testdata/dsl/prop.rb:41
+    method ::AdvancedODM#object= (object) -> Object @ test/testdata/dsl/prop.rb:41
+      argument ::AdvancedODM#object=#object<> -> Object @ test/testdata/dsl/prop.rb:41
     method ::AdvancedODM#optional () -> String @ test/testdata/dsl/prop.rb:50
-    method ::AdvancedODM#optional= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:50
-      argument ::AdvancedODM#optional=#arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:50
+    method ::AdvancedODM#optional= (optional) -> String | NilClass @ test/testdata/dsl/prop.rb:50
+      argument ::AdvancedODM#optional=#optional<> -> String | NilClass @ test/testdata/dsl/prop.rb:50
     method ::AdvancedODM#optional_existing () -> String | NilClass @ test/testdata/dsl/prop.rb:49
-    method ::AdvancedODM#optional_existing= (arg0) -> String @ test/testdata/dsl/prop.rb:49
-      argument ::AdvancedODM#optional_existing=#arg0<> -> String @ test/testdata/dsl/prop.rb:49
+    method ::AdvancedODM#optional_existing= (optional_existing) -> String @ test/testdata/dsl/prop.rb:49
+      argument ::AdvancedODM#optional_existing=#optional_existing<> -> String @ test/testdata/dsl/prop.rb:49
     method ::AdvancedODM#optional_explicit () -> String | NilClass @ test/testdata/dsl/prop.rb:48
-    method ::AdvancedODM#optional_explicit= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:48
-      argument ::AdvancedODM#optional_explicit=#arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:48
+    method ::AdvancedODM#optional_explicit= (optional_explicit) -> String | NilClass @ test/testdata/dsl/prop.rb:48
+      argument ::AdvancedODM#optional_explicit=#optional_explicit<> -> String | NilClass @ test/testdata/dsl/prop.rb:48
     method ::AdvancedODM#optional_false () -> String @ test/testdata/dsl/prop.rb:37
-    method ::AdvancedODM#optional_false= (arg0) -> String @ test/testdata/dsl/prop.rb:37
-      argument ::AdvancedODM#optional_false=#arg0<> -> String @ test/testdata/dsl/prop.rb:37
+    method ::AdvancedODM#optional_false= (optional_false) -> String @ test/testdata/dsl/prop.rb:37
+      argument ::AdvancedODM#optional_false=#optional_false<> -> String @ test/testdata/dsl/prop.rb:37
     method ::AdvancedODM#optional_nilable () -> String | NilClass @ test/testdata/dsl/prop.rb:51
-    method ::AdvancedODM#optional_nilable= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:51
-      argument ::AdvancedODM#optional_nilable=#arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:51
+    method ::AdvancedODM#optional_nilable= (optional_nilable) -> String | NilClass @ test/testdata/dsl/prop.rb:51
+      argument ::AdvancedODM#optional_nilable=#optional_nilable<> -> String | NilClass @ test/testdata/dsl/prop.rb:51
     method ::AdvancedODM#t_array () -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = String
       ]
     } @ test/testdata/dsl/prop.rb:45
-    method ::AdvancedODM#t_array= (arg0) -> AppliedType {
+    method ::AdvancedODM#t_array= (t_array) -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = String
       ]
     } @ test/testdata/dsl/prop.rb:45
-      argument ::AdvancedODM#t_array=#arg0<> -> AppliedType {
+      argument ::AdvancedODM#t_array=#t_array<> -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = String
         ]
       } @ test/testdata/dsl/prop.rb:45
     method ::AdvancedODM#type () -> String @ test/testdata/dsl/prop.rb:40
-    method ::AdvancedODM#type= (arg0) -> String @ test/testdata/dsl/prop.rb:40
-      argument ::AdvancedODM#type=#arg0<> -> String @ test/testdata/dsl/prop.rb:40
+    method ::AdvancedODM#type= (type) -> String @ test/testdata/dsl/prop.rb:40
+      argument ::AdvancedODM#type=#type<> -> String @ test/testdata/dsl/prop.rb:40
   class ::<Class:AdvancedODM> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:35
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:41
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:41
@@ -326,11 +326,11 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::EncryptedProp#bar () -> String | NilClass @ test/testdata/dsl/prop.rb:82
     method ::EncryptedProp#encrypted_bar () -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:82
     method ::EncryptedProp#encrypted_foo () -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:81
-    method ::EncryptedProp#encrypted_foo= (arg0) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:81
-      argument ::EncryptedProp#encrypted_foo=#arg0<> -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:81
+    method ::EncryptedProp#encrypted_foo= (foo) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:81
+      argument ::EncryptedProp#encrypted_foo=#foo<> -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:81
     method ::EncryptedProp#foo () -> String | NilClass @ test/testdata/dsl/prop.rb:81
-    method ::EncryptedProp#foo= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:81
-      argument ::EncryptedProp#foo=#arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:81
+    method ::EncryptedProp#foo= (foo) -> String | NilClass @ test/testdata/dsl/prop.rb:81
+      argument ::EncryptedProp#foo=#foo<> -> String | NilClass @ test/testdata/dsl/prop.rb:81
   class ::<Class:EncryptedProp> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:80
     method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:81
     method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:81
@@ -363,11 +363,11 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     class ::Opus::<Class:Param> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:14
   class ::PropHelpers < ::Object () @ test/testdata/dsl/prop.rb:66
     method ::PropHelpers#created () -> Float @ test/testdata/dsl/prop.rb:68
-    method ::PropHelpers#created= (arg0) -> Float @ test/testdata/dsl/prop.rb:68
-      argument ::PropHelpers#created=#arg0<> -> Float @ test/testdata/dsl/prop.rb:68
+    method ::PropHelpers#created= (created) -> Float @ test/testdata/dsl/prop.rb:68
+      argument ::PropHelpers#created=#created<> -> Float @ test/testdata/dsl/prop.rb:68
     method ::PropHelpers#token () -> String @ test/testdata/dsl/prop.rb:67
-    method ::PropHelpers#token= (arg0) -> String @ test/testdata/dsl/prop.rb:67
-      argument ::PropHelpers#token=#arg0<> -> String @ test/testdata/dsl/prop.rb:67
+    method ::PropHelpers#token= (token) -> String @ test/testdata/dsl/prop.rb:67
+      argument ::PropHelpers#token=#token<> -> String @ test/testdata/dsl/prop.rb:67
   class ::<Class:PropHelpers> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:66
     method ::<Class:PropHelpers>#<block> () @ test/testdata/dsl/prop.rb:67
     method ::<Class:PropHelpers>#<block> () @ test/testdata/dsl/prop.rb:67
@@ -377,8 +377,8 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
   class ::PropHelpers2 < ::Object () @ test/testdata/dsl/prop.rb:71
     method ::PropHelpers2#created () -> Float @ test/testdata/dsl/prop.rb:73
     method ::PropHelpers2#token () -> String @ test/testdata/dsl/prop.rb:72
-    method ::PropHelpers2#token= (arg0) -> String @ test/testdata/dsl/prop.rb:72
-      argument ::PropHelpers2#token=#arg0<> -> String @ test/testdata/dsl/prop.rb:72
+    method ::PropHelpers2#token= (token) -> String @ test/testdata/dsl/prop.rb:72
+      argument ::PropHelpers2#token=#token<> -> String @ test/testdata/dsl/prop.rb:72
   class ::<Class:PropHelpers2> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:71
     method ::<Class:PropHelpers2>#<block> () @ test/testdata/dsl/prop.rb:72
     method ::<Class:PropHelpers2>#<block> () @ test/testdata/dsl/prop.rb:72
@@ -394,8 +394,8 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::SomeODM#foo2 () -> String | NilClass @ test/testdata/dsl/prop.rb:27
     method ::SomeODM#foo2= (arg0) -> String @ test/testdata/dsl/prop.rb:29
       argument ::SomeODM#foo2=#arg0<> -> String @ test/testdata/dsl/prop.rb:28
-    method ::SomeODM#foo= (arg0) -> String @ test/testdata/dsl/prop.rb:24
-      argument ::SomeODM#foo=#arg0<> -> String @ test/testdata/dsl/prop.rb:24
+    method ::SomeODM#foo= (foo) -> String @ test/testdata/dsl/prop.rb:24
+      argument ::SomeODM#foo=#foo<> -> String @ test/testdata/dsl/prop.rb:24
   class ::<Class:SomeODM> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/prop.rb:21
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:24
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:24

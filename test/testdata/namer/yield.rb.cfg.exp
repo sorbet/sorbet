@@ -42,7 +42,7 @@ subgraph "cluster_::Main#blockpass" {
     "bb::Main#blockpass_1" [shape = parallelogram];
 
     "bb::Main#blockpass_0" [
-        label = "block[id=0]()\lblk: T.untyped = load_arg(Main#blockpass#blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\lblk: T.untyped = load_arg(Main#blockpass#&blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockpass_0" -> "bb::Main#blockpass_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Main#mixed" {
     "bb::Main#mixed_1" [shape = parallelogram];
 
     "bb::Main#mixed_0" [
-        label = "block[id=0]()\lblk: T.untyped = load_arg(Main#mixed#blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\lblk: T.untyped = load_arg(Main#mixed#&blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#mixed_0" -> "bb::Main#mixed_1" [style="bold"];

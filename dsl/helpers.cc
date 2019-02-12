@@ -14,8 +14,9 @@ unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<
     return ast::MK::Method0(loc, loc, name, move(rhs), ast::MethodDef::DSLSynthesized);
 }
 
-unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::Method1(loc, loc, name, ast::MK::Local(loc, core::Names::arg0()), move(rhs),
+unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, core::Loc argLoc,
+                                  unique_ptr<ast::Expression> rhs) {
+    return ast::MK::Method1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs),
                             ast::MethodDef::DSLSynthesized);
 }
 

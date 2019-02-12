@@ -2,13 +2,13 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
   class ::Test < ::Object () @ test/testdata/dsl/attr_multi.rb:3
     method ::Test#a () -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
     method ::Test#a= (a) -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
-      argument ::Test#a=#a<> -> String | NilClass @ test/testdata/dsl/attr_multi.rb:6
+      argument ::Test#a=#a<> -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
     method ::Test#b () -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
     method ::Test#b= (b) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#b=#b<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:9
+      argument ::Test#b=#b<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
     method ::Test#c () -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
     method ::Test#c= (c) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#c=#c<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:9
+      argument ::Test#c=#c<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
     method ::Test#d () -> String @ test/testdata/dsl/attr_multi.rb:13
     method ::Test#e () -> String @ test/testdata/dsl/attr_multi.rb:16
     method ::Test#f () -> String @ test/testdata/dsl/attr_multi.rb:16
@@ -17,7 +17,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::Test#h= (h) -> String @ test/testdata/dsl/attr_multi.rb:22
       argument ::Test#h=#h<> -> String @ test/testdata/dsl/attr_multi.rb:21
     method ::Test#i= (i) -> String @ test/testdata/dsl/attr_multi.rb:22
-      argument ::Test#i=#i<> -> String @ test/testdata/dsl/attr_multi.rb:21
+      argument ::Test#i=#i<> -> String @ test/testdata/dsl/attr_multi.rb:22
   class ::<Class:Test> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/attr_multi.rb:3
     method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:15
     method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:18

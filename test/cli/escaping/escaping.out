@@ -5,7 +5,7 @@ test/cli/escaping/escaping.rb:7: `String("\n")` doesn't match `Integer` for argu
     10 |)
     test/cli/escaping/escaping.rb:2: Method `Object#foo` has specified `a` as `Integer`
      2 |Sorbet.sig{params(a: Integer).void}
-                          ^^
+                          ^
   Got String("\n") originating from:
     test/cli/escaping/escaping.rb:8:
      8 |'

@@ -7,7 +7,7 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L769: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
      769 |        arg0: String,
-                  ^^^^^
+                  ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
     12 |  def foo(arg)
@@ -18,7 +18,7 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
     11 |  sig {params(arg: Integer).returns(NilClass)}
-                      ^^^^
+                      ^^^
   Got String("foo") originating from:
     test/cli/errors/errors.rb:18:
     18 |    foo("foo")
@@ -29,7 +29,7 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
     35 |  sig {params(a: Integer).returns(Integer)}
-                      ^^
+                      ^
   Got T.nilable(Integer) originating from:
     test/cli/errors/errors.rb:25:
     25 |  def main(foo)
@@ -54,7 +54,7 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L769: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
      769 |        arg0: String,
-                  ^^^^^
+                  ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
     12 |  def foo(arg)
@@ -65,7 +65,7 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
     11 |  sig {params(arg: Integer).returns(NilClass)}
-                      ^^^^
+                      ^^^
   Got String("foo") originating from:
     test/cli/errors/errors.rb:18:
     18 |    foo("foo")
@@ -76,7 +76,7 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
     35 |  sig {params(a: Integer).returns(Integer)}
-                      ^^
+                      ^
   Got T.nilable(Integer) originating from:
     test/cli/errors/errors.rb:25:
     25 |  def main(foo)
@@ -101,7 +101,7 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L769: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
      769 |        arg0: String,
-                  ^^^^^
+                  ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
     12 |  def foo(arg)
@@ -112,7 +112,7 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
     11 |  sig {params(arg: Integer).returns(NilClass)}
-                      ^^^^
+                      ^^^
   Got String("foo") originating from:
     test/cli/errors/errors.rb:18:
     18 |    foo("foo")
@@ -123,7 +123,7 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
     35 |  sig {params(a: Integer).returns(Integer)}
-                      ^^
+                      ^
   Got T.nilable(Integer) originating from:
     test/cli/errors/errors.rb:25:
     25 |  def main(foo)

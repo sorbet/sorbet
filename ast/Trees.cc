@@ -420,7 +420,7 @@ string MethodDef::toString(const core::GlobalState &gs, int tabs) {
                 buf << ", ";
             }
             first = false;
-            buf << a.data(gs)->name.toString(gs);
+            buf << a.data(gs)->argumentName(gs);
         }
     }
     buf << ")" << '\n';
@@ -998,7 +998,7 @@ string Block::toString(const core::GlobalState &gs, int tabs) {
             if (arg->isRepeated()) {
                 buf << "*";
             }
-            buf << arg->name.toString(gs);
+            buf << arg->argumentName(gs);
             if (arg->isKeyword()) {
                 buf << ":";
             }

@@ -220,6 +220,7 @@ NameDef names[] = {{"initialize"},
                    {"forTemp"},
                    {"new_", "new"},
                    {"blockCall", "<block-call>"},
+                   {"arg", "<arg>"},
                    {"blkArg", "<blk>"},
                    {"blockGiven_p", "block_given?"},
 

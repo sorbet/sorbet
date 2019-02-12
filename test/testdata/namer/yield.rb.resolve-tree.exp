@@ -29,14 +29,14 @@ begin
       end
     end
 
-    def blockpass<blockpass>(blk)
+    def blockpass<blockpass>(&blk)
       begin
         a = blk.call(1)
         blk.call(a)
       end
     end
 
-    def mixed<mixed>(blk)
+    def mixed<mixed>(&blk)
       begin
         a = blk.call(1)
         blk.call(a)
@@ -57,16 +57,16 @@ begin
             3
           end
         end
-        self(<constant:Main>).yielder() do |*<block-pass>$2|
+        self(<constant:Main>).yielder() do |*l|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$2$8)
         end
-        self(<constant:Main>).blockpass() do |*<block-pass>$3|
+        self(<constant:Main>).blockpass() do |*l|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$3$9)
         end
-        self(<constant:Main>).mixed() do |*<block-pass>$4|
+        self(<constant:Main>).mixed() do |*l|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$4$10)
         end
-        self(<constant:Main>).blockyield() do |*<block-pass>$5|
+        self(<constant:Main>).blockyield() do |*l|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$5$11)
         end
       end

@@ -15,13 +15,18 @@ unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) 
     return ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
 }
 
-core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
+pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression *name) {
+    core::Loc loc;
     core::NameRef res = core::NameRef::noName();
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol(ctx)) {
             res = lit->asSymbol(ctx);
+            loc = lit->loc;
+            ENFORCE(loc.source(ctx).size() > 1 && loc.source(ctx)[0] == ':');
+            loc = core::Loc(loc.file(), loc.beginPos() + 1, loc.endPos());
         } else if (lit->isString(ctx)) {
             res = lit->asString(ctx);
+            loc = lit->loc;
         }
     }
     if (!res.exists()) {
@@ -29,7 +34,7 @@ core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
             e.setHeader("arg must be a Symbol or String");
         }
     }
-    return res;
+    return make_pair(res, loc);
 }
 
 // Slightly modified from TypeSyntax::isSig.
@@ -62,7 +67,7 @@ bool isSig(const ast::Send *send) {
 //
 // This change is done in place; it's assumed that the caller created a new sig for us.
 unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
-                                               const core::NameRef name) {
+                                               const core::NameRef name, core::Loc nameLoc) {
     ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
@@ -85,7 +90,7 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
         if (ast::isa_tree<ast::Self>(cur->recv.get()) ||
             (recv && recv->typeAliasOrConstantSymbol() == core::Symbols::Sorbet())) {
             auto loc = resultType->loc;
-            auto hash = ast::MK::Hash1(cur->loc, ast::MK::Symbol(cur->loc, name), move(resultType));
+            auto hash = ast::MK::Hash1(cur->loc, ast::MK::Symbol(nameLoc, name), move(resultType));
             auto params = ast::MK::Send1(loc, move(cur->recv), core::Names::params(), move(hash));
             cur->recv = move(params);
             break;
@@ -150,7 +155,7 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
 
     if (makeReader) {
         for (auto &arg : send->args) {
-            auto name = getName(ctx, arg.get());
+            auto [name, argLoc] = getName(ctx, arg.get());
             if (!name.exists()) {
                 return empty;
             }
@@ -167,13 +172,13 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
             }
 
             stats.emplace_back(
-                ast::MK::Method0(loc, loc, name, ast::MK::Instance(loc, varName), ast::MethodDef::DSLSynthesized));
+                ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), ast::MethodDef::DSLSynthesized));
         }
     }
 
     if (makeWriter) {
         for (auto &arg : send->args) {
-            auto name = getName(ctx, arg.get());
+            auto [name, argLoc] = getName(ctx, arg.get());
             if (!name.exists()) {
                 return empty;
             }
@@ -185,14 +190,14 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
                 ENFORCE(sig != nullptr);
 
                 if (usedPrevSig) {
-                    stats.emplace_back(toWriterSigForName(ctx, sig, name));
+                    stats.emplace_back(toWriterSigForName(ctx, sig, name, argLoc));
                 } else {
                     usedPrevSig = true;
                 }
             }
 
-            auto body = ast::MK::Assign(loc, ast::MK::Instance(loc, varName), ast::MK::Local(loc, name));
-            stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(loc, name), move(body),
+            auto body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
+            stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body),
                                                 ast::MethodDef::DSLSynthesized));
         }
     }

@@ -138,14 +138,14 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(ctx, method.data(ctx)->name)) {
-            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym->name.toString(ctx),
+            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym->argumentName(ctx),
                         expectedType->show(ctx));
         } else {
             e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
-                        argSym->name.toString(ctx));
+                        argSym->argumentName(ctx));
             e.addErrorSection(ErrorSection({
                 ErrorLine::from(argSym->loc(), "Method `{}` has specified `{}` as `{}`", method.data(ctx)->show(ctx),
-                                argSym->name.toString(ctx), expectedType->show(ctx)),
+                                argSym->argumentName(ctx), expectedType->show(ctx)),
             }));
         }
         e.addErrorSection(

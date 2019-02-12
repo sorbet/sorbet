@@ -112,7 +112,7 @@ NodeDef nodes[] = {
     // explicit `begin` keyword. Is there a difference between explicit and implicit one?
     {"Kwbegin", vector<FieldDef>({{"stmts", NodeVec}})},
     // optional arg with default value provided
-    {"Kwoptarg", vector<FieldDef>({{"name", Name}, {"default_", Node}})},
+    {"Kwoptarg", vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}, {"default_", Node}})},
     // **kwargs arg
     {"Kwrestarg", vector<FieldDef>({{"name", Name}})},
     // **foo splat
@@ -144,7 +144,7 @@ NodeDef nodes[] = {
     // foo ||= bar
     {"OrAsgn", vector<FieldDef>({{"left", Node}, {"right", Node}})},
     // optional argument inside an (args) list
-    {"Optarg", vector<FieldDef>({{"name", Name}, {"default_", Node}})},
+    {"Optarg", vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}, {"default_", Node}})},
     // entries of Hash
     {"Pair", vector<FieldDef>({{"key", Node}, {"value", Node}})},
     // END {...}
@@ -166,7 +166,7 @@ NodeDef nodes[] = {
     // begin; ..; rescue; end; rescue is an array of Resbody
     {"Rescue", vector<FieldDef>({{"body", Node}, {"rescue", NodeVec}, {"else_", Node}})},
     // *arg argument inside an (args)
-    {"Restarg", vector<FieldDef>({{"name", Name}})},
+    {"Restarg", vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}})},
     // `retry` keyword
     {"Retry", vector<FieldDef>()},
     // `return` keyword
