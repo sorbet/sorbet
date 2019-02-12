@@ -40,6 +40,7 @@ Usage:
       --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup
   -a, --autocorrect             Auto-correct source files with suggested
                                 fixes
+  -r, --relax                   Relax constants resolution
       --suggest-runtime-profiled
                                 When suggesting signatures in `typed: strict`
                                 mode, suggest `::T::Utils::RuntimeProfiled`

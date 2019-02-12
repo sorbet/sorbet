@@ -1011,6 +1011,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->suppressed_error_classes = this->suppressed_error_classes;
     result->only_error_classes = this->only_error_classes;
     result->names.reserve(this->names.capacity());
+    result->relaxConstantResolution = this->relaxConstantResolution;
     if (keepId) {
         result->names.resize(this->names.size());
         ::memcpy(result->names.data(), this->names.data(), this->names.size() * sizeof(Name));

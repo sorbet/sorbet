@@ -231,6 +231,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
+    if (opts.relaxConstantResolution) {
+        gs->relaxConstantResolution = true;
+    }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
     }

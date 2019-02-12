@@ -70,6 +70,7 @@ struct Options {
     bool waitForDebugger = false;
     bool skipDSLPasses = false;
     bool suggestRuntimeProfiledType = false;
+    bool relaxConstantResolution = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;

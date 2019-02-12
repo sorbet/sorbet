@@ -121,6 +121,7 @@ public:
     bool silenceErrors = false;
     bool autocorrect = false;
     bool suggestRuntimeProfiledType = false;
+    bool relaxConstantResolution = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;

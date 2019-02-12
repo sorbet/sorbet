@@ -142,6 +142,7 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
+    options.add_options("advanced")("r,relax", "Relax constants resolution");
     options.add_options("advanced")(
         "suggest-runtime-profiled",
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
@@ -332,6 +333,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressFastPath = raw["stress-fastpath"].as<bool>();
+        opts.relaxConstantResolution = raw["relax"].as<bool>();
         opts.silenceErrors = raw["q"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
