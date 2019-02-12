@@ -233,7 +233,13 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
             if (self) {
                 self->claz = core::Symbols::Sorbet_Private_Builder();
             } else {
-                ENFORCE(sig.seen.proc);
+                if (!sig.seen.proc) {
+                    if (auto e =
+                            ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Method `{}` does not exist on `Sorbet::Private::Builder`",
+                                    send->recv->toString(ctx));
+                    }
+                }
             }
             break;
         }
