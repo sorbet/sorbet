@@ -123,6 +123,30 @@ class <emptyTree><<constant:<root>>> < ()
     self(<constant:<todo sym>>).dsl_optional(:"no_getter_or_setter", <emptyTree>::<constant:String>, {:"skip_getter" => true, :"skip_setter" => true})
 
     ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"class_of" => <emptyTree>::<constant:T>.class_of(<emptyTree>::<constant:Integer>)}).returns(::NilClass)
+    end
+
+    def self.class_of<<constant:<todo sym>>>(class_of)
+      <emptyTree>
+    end
+
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:T>.class_of(<emptyTree>::<constant:Integer>)))
+    end
+
+    def self.get_class_of<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:T>.class_of(<emptyTree>::<constant:Integer>)))
+    end
+
+    def class_of<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
+    ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
     end
 
@@ -165,6 +189,8 @@ class <emptyTree><<constant:<root>>> < ()
     self(<constant:<todo sym>>).no_getter("I\'m setting the value")
 
     self(<constant:<todo sym>>).get_no_getter()
+
+    self(<constant:<todo sym>>).class_of(<emptyTree>::<constant:Integer>)
 
     <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_string(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
 

@@ -47,11 +47,10 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
     auto nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
 
-    auto *klass = ast::cast_tree<ast::UnresolvedConstantLit>(send->args[1].get());
-    if (klass == nullptr) {
+    type = ASTUtil::dupType(send->args[1].get());
+    if (!type) {
         return empty;
     }
-    type = ASTUtil::dupType(send->args[1].get());
 
     ast::Hash *opts = nullptr;
     if (send->args.size() > 2) {

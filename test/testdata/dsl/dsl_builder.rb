@@ -7,6 +7,7 @@ class TestDSLBuilder
   dsl_optional :no_getter, String, skip_getter: true
   dsl_optional :no_setter, String, skip_setter: true
   dsl_optional :no_getter_or_setter, String, skip_getter: true, skip_setter: true # error: does not exist
+  dsl_optional :class_of, T.class_of(Integer)
 
   dsl_optional :root_const, ::Integer
 end
@@ -21,6 +22,7 @@ class TestChild < TestDSLBuilder
   implied_string
   no_getter "I'm setting the value"
   get_no_getter # error: Method `get_no_getter` does not exist on `T.class_of(TestChild)`
+  class_of Integer
 
   T.assert_type!(get_opt_string, T.nilable(String))
   T.assert_type!(get_opt_string, String) # error: does not have asserted type
