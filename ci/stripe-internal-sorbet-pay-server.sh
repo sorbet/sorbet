@@ -107,6 +107,29 @@ fi
 cat "$TIMEFILE"
 
 
+# Make sure we are not order dependent
+get_seeded_random() {
+    seed="$1"
+    openssl enc -aes-256-ctr -pass pass:"$seed" -nosalt \
+        </dev/zero 2>/dev/null
+}
+for i in $(seq 10); do
+  SAVED_FILE_LIST=$(mktemp)
+  FILE_LIST=build/sorbet_file_lists/RUBY_TYPER
+  cp "$FILE_LIST" "$SAVED_FILE_LIST"
+  SEED=$(cat ../ci/stripe-internal-sorbet-pay-server-random)
+  sort --random-source=<(get_seeded_random "$SEED$i") -R "$SAVED_FILE_LIST" > "$FILE_LIST"
+  /usr/local/bin/junit-script-output \
+      typecheck-random \
+      /usr/bin/time -o "$TIMEFILE" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+  if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
+     exit 1
+  fi
+  cat "$TIMEFILE"
+  mv "$SAVED_FILE_LIST" "$FILE_LIST"
+done
+
+
 if [ "$RECORD_STATS" ]; then
     t_user="$(grep user "$TIMEFILE" | cut -d ' ' -f 2)"
     t_wall="$(grep wall "$TIMEFILE" | cut -d ' ' -f 2)"
