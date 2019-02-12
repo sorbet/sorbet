@@ -93,7 +93,7 @@ string Self::toString(core::Context ctx) {
 }
 
 string LoadArg::toString(core::Context ctx) {
-    return fmt::format("load_arg({}, {})", this->receiver.toString(ctx), this->arg.data(ctx)->show(ctx));
+    return fmt::format("load_arg({})", this->arg.data(ctx)->show(ctx));
 }
 
 string LoadYieldParams::toString(core::Context ctx) {

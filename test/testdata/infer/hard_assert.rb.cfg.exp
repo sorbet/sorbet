@@ -6,7 +6,7 @@ subgraph "cluster_::Main#basic" {
     "bb::Main#basic_1" [shape = parallelogram];
 
     "bb::Main#basic_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\la: T.any(Integer, String) = load_arg(<selfMethodTemp>$3, Main#basic#a)\l<statTemp>$5: Main = self\l<statTemp>$8: T.class_of(String) = alias <constant:String>\l<statTemp>$6: T.any(TrueClass, FalseClass) = a: T.any(Integer, String).is_a?(<statTemp>$8: T.class_of(String))\l<statTemp>$4: NilClass = <statTemp>$5: Main.hard_assert(<statTemp>$6: T.any(TrueClass, FalseClass))\l<statTemp>$11: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$12: T.class_of(String) = alias <constant:String>\l<statTemp>$10: RubyTyper::Void = <statTemp>$11: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$12: T.class_of(String))\l<castTemp>$13: String = a\l<statTemp>$9: String = cast(<castTemp>$13: String, String);\l<returnMethodTemp>$2: NilClass = nil\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\la: T.any(Integer, String) = load_arg(Main#basic#a)\l<statTemp>$5: Main = self\l<statTemp>$8: T.class_of(String) = alias <constant:String>\l<statTemp>$6: T.any(TrueClass, FalseClass) = a: T.any(Integer, String).is_a?(<statTemp>$8: T.class_of(String))\l<statTemp>$4: NilClass = <statTemp>$5: Main.hard_assert(<statTemp>$6: T.any(TrueClass, FalseClass))\l<statTemp>$11: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$12: T.class_of(String) = alias <constant:String>\l<statTemp>$10: RubyTyper::Void = <statTemp>$11: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$12: T.class_of(String))\l<castTemp>$13: String = a\l<statTemp>$9: String = cast(<castTemp>$13: String, String);\l<returnMethodTemp>$2: NilClass = nil\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Main#basic_0" -> "bb::Main#basic_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Main#not" {
     "bb::Main#not_1" [shape = parallelogram];
 
     "bb::Main#not_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\la: T.nilable(String) = load_arg(<selfMethodTemp>$3, Main#not#a)\l<statTemp>$5: Main = self\l<statTemp>$7: T.any(TrueClass, FalseClass) = a: T.nilable(String).nil?()\l<statTemp>$6: T.any(TrueClass, FalseClass) = <statTemp>$7: T.any(TrueClass, FalseClass).!()\l<statTemp>$4: NilClass = <statTemp>$5: Main.hard_assert(<statTemp>$6: T.any(TrueClass, FalseClass))\l<statTemp>$11: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$12: T.class_of(String) = alias <constant:String>\l<statTemp>$10: RubyTyper::Void = <statTemp>$11: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$12: T.class_of(String))\l<castTemp>$13: String = a\l<statTemp>$9: String = cast(<castTemp>$13: String, String);\l<returnMethodTemp>$2: NilClass = nil\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\la: T.nilable(String) = load_arg(Main#not#a)\l<statTemp>$5: Main = self\l<statTemp>$7: T.any(TrueClass, FalseClass) = a: T.nilable(String).nil?()\l<statTemp>$6: T.any(TrueClass, FalseClass) = <statTemp>$7: T.any(TrueClass, FalseClass).!()\l<statTemp>$4: NilClass = <statTemp>$5: Main.hard_assert(<statTemp>$6: T.any(TrueClass, FalseClass))\l<statTemp>$11: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$12: T.class_of(String) = alias <constant:String>\l<statTemp>$10: RubyTyper::Void = <statTemp>$11: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$12: T.class_of(String))\l<castTemp>$13: String = a\l<statTemp>$9: String = cast(<castTemp>$13: String, String);\l<returnMethodTemp>$2: NilClass = nil\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Main#not_0" -> "bb::Main#not_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Main#with_and" {
     "bb::Main#with_and_1" [shape = parallelogram];
 
     "bb::Main#with_and_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\la: T.nilable(String) = load_arg(<selfMethodTemp>$3, Main#with_and#a)\l<statTemp>$5: Main = self\l&&$2: T.any(TrueClass, FalseClass) = a: T.nilable(String).nil?()\l&&$2: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\la: T.nilable(String) = load_arg(Main#with_and#a)\l<statTemp>$5: Main = self\l&&$2: T.any(TrueClass, FalseClass) = a: T.nilable(String).nil?()\l&&$2: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Main#with_and_0" -> "bb::Main#with_and_2" [style="bold"];

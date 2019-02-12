@@ -153,15 +153,14 @@ CheckSize(Self, 16, 8);
 
 class LoadArg final : public Instruction {
 public:
-    VariableUseSite receiver;
     core::SymbolRef arg;
 
-    LoadArg(core::LocalVariable receiver, core::SymbolRef arg) : receiver(receiver), arg(arg) {
+    LoadArg(core::SymbolRef arg) : arg(arg) {
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(LoadArg, 48, 8);
+CheckSize(LoadArg, 16, 8);
 
 class LoadYieldParams final : public Instruction {
 public:

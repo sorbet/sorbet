@@ -6,7 +6,7 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_1" [shape = parallelogram];
 
     "bb::A#foo_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: A = self\lt: Time = load_arg(<selfMethodTemp>$3, A#foo#t)\l<statTemp>$5: DateTime = t: Time.to_datetime()\l<statTemp>$4: Date = <statTemp>$5: DateTime.to_date()\l<returnMethodTemp>$2: Time = <statTemp>$4: Date.to_time()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Time\l<unconditional>\l"
+        label = "block[id=0]()\lt: Time = load_arg(A#foo#t)\l<statTemp>$5: DateTime = t: Time.to_datetime()\l<statTemp>$4: Date = <statTemp>$5: DateTime.to_date()\l<returnMethodTemp>$2: Time = <statTemp>$4: Date.to_time()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Time\l<unconditional>\l"
     ];
 
     "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];

@@ -84,7 +84,7 @@ subgraph "cluster_::MyClass#foo=" {
     "bb::MyClass#foo=_1" [shape = parallelogram];
 
     "bb::MyClass#foo=_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: MyClass = self\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::MyClass#foo=_0" -> "bb::MyClass#foo=_1" [style="bold"];

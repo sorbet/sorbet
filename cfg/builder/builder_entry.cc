@@ -35,7 +35,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         i++;
         auto *a = ast::MK::arg2Local(argExpr.get());
         auto argSym = md.symbol.data(ctx)->arguments()[i];
-        auto &inserted = entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, argSym));
+        auto &inserted = entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(argSym));
         inserted.value->isSynthetic = true;
         aliases[argSym] = a->localVariable;
     }

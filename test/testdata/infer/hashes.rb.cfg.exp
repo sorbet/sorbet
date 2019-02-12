@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_1" [shape = parallelogram];
 
     "bb::Foo#bar_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Foo = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3, Foo#bar#cond)\lcond: T.untyped\l"
+        label = "block[id=0]()\lcond: T.untyped = load_arg(Foo#bar#cond)\lcond: T.untyped\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_2" [style="bold"];

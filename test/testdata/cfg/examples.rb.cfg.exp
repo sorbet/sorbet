@@ -183,7 +183,7 @@ subgraph "cluster_::Examples#variables_and_loop" {
     "bb::Examples#variables_and_loop_1" [shape = parallelogram];
 
     "bb::Examples#variables_and_loop_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Examples = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3, Examples#variables_and_loop#cond)\l<ifTemp>$5: TrueClass = true\l<ifTemp>$5: TrueClass\l"
+        label = "block[id=0]()\lcond: T.untyped = load_arg(Examples#variables_and_loop#cond)\l<ifTemp>$5: TrueClass = true\l<ifTemp>$5: TrueClass\l"
     ];
 
     "bb::Examples#variables_and_loop_0" -> "bb::Examples#variables_and_loop_2" [style="bold"];
@@ -242,7 +242,7 @@ subgraph "cluster_::Examples#variables_loop_if" {
     "bb::Examples#variables_loop_if_1" [shape = parallelogram];
 
     "bb::Examples#variables_loop_if_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Examples = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3, Examples#variables_loop_if#cond)\l<unconditional>\l"
+        label = "block[id=0]()\lcond: T.untyped = load_arg(Examples#variables_loop_if#cond)\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_0" -> "bb::Examples#variables_loop_if_2" [style="bold"];
@@ -289,7 +289,7 @@ subgraph "cluster_::Examples#take_arguments" {
     "bb::Examples#take_arguments_1" [shape = parallelogram];
 
     "bb::Examples#take_arguments_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Examples = self\li: T.untyped = load_arg(<selfMethodTemp>$3, Examples#take_arguments#i)\l<ifTemp>$4: FalseClass = false\l<ifTemp>$4: FalseClass\l"
+        label = "block[id=0]()\li: T.untyped = load_arg(Examples#take_arguments#i)\l<ifTemp>$4: FalseClass = false\l<ifTemp>$4: FalseClass\l"
     ];
 
     "bb::Examples#take_arguments_0" -> "bb::Examples#take_arguments_2" [style="bold"];

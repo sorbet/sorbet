@@ -77,7 +77,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Bar = self\l<statTemp>$4: Bar = self\l<returnMethodTemp>$2: Integer = <statTemp>$4: Bar.foo()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: Bar = self\l<returnMethodTemp>$2: Integer = <statTemp>$4: Bar.foo()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];

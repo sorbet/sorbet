@@ -50,8 +50,6 @@ class A
        #
        # <statTemp>$7: T.class_of(String)
        #
-       # <selfMethodTemp>$3: A
-       #
        # x: String | Integer
        #
        # y: Integer

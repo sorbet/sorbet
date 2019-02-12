@@ -78,7 +78,7 @@ subgraph "cluster_::TestRescue#take_arg" {
     "bb::TestRescue#take_arg_1" [shape = parallelogram];
 
     "bb::TestRescue#take_arg_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: TestRescue = self\lx: T.untyped = load_arg(<selfMethodTemp>$3, TestRescue#take_arg#x)\l<returnMethodTemp>$2: T.untyped = x\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\lx: T.untyped = load_arg(TestRescue#take_arg#x)\l<returnMethodTemp>$2: T.untyped = x\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#take_arg_0" -> "bb::TestRescue#take_arg_1" [style="bold"];

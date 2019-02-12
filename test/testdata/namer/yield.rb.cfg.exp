@@ -24,7 +24,7 @@ subgraph "cluster_::Main#yielder" {
     "bb::Main#yielder_1" [shape = parallelogram];
 
     "bb::Main#yielder_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\l<blk>: T.untyped = load_arg(<selfMethodTemp>$3, Main#yielder#<blk>)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = <blk>: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<blk>: T.untyped = load_arg(Main#yielder#<blk>)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = <blk>: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#yielder_0" -> "bb::Main#yielder_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Main#blockpass" {
     "bb::Main#blockpass_1" [shape = parallelogram];
 
     "bb::Main#blockpass_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\lblk: T.untyped = load_arg(<selfMethodTemp>$3, Main#blockpass#blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\lblk: T.untyped = load_arg(Main#blockpass#blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockpass_0" -> "bb::Main#blockpass_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Main#mixed" {
     "bb::Main#mixed_1" [shape = parallelogram];
 
     "bb::Main#mixed_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\lblk: T.untyped = load_arg(<selfMethodTemp>$3, Main#mixed#blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\lblk: T.untyped = load_arg(Main#mixed#blk)\l<statTemp>$6: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#mixed_0" -> "bb::Main#mixed_1" [style="bold"];
@@ -78,7 +78,7 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_1" [shape = parallelogram];
 
     "bb::Main#blockyield_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\l<blk>: T.untyped = load_arg(<selfMethodTemp>$3, Main#blockyield#<blk>)\l<statTemp>$4: Main = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Main.yielder()\l<unconditional>\l"
+        label = "block[id=0]()\l<blk>: T.untyped = load_arg(Main#blockyield#<blk>)\l<statTemp>$4: Main = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Main.yielder()\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_0" -> "bb::Main#blockyield_2" [style="bold"];
