@@ -389,11 +389,10 @@ private:
             auto out = make_unique<ast::ConstantLit>(loc, ctx.contextClass(), std::move(nw), nullptr);
             job.ancestor = out.get();
             ancestor = std::move(out);
-        } else {
-            if (auto e = ctx.state.beginError(ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must not be dynamic");
-            }
+        } else if (ast::isa_tree<ast::EmptyTree>(ancestor.get())) {
             return;
+        } else {
+            ENFORCE(false, "Desugarer should have not allowed this");
         }
 
         if (resolveAncestorJob(ctx, job, typeAliases, false)) {

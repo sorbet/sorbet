@@ -286,6 +286,8 @@ private:
                 ctx, move(v), func);
         }
 
+        // We intentionally do not walk v->ancestors nor v->singleton_ancestors.
+        // They are guaranteed to be simple trees in the desugarer.
         for (auto &def : v->rhs) {
             def = mapIt(move(def), ctx.withOwner(v->symbol));
         }

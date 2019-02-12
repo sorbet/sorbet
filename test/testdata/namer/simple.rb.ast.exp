@@ -42,7 +42,7 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:Child><<constant:<todo sym>>> < (<emptyTree>::<constant:Parent>)
     self(<constant:<todo sym>>).include(<emptyTree>::<constant:Mixin>)
 
-    self(<constant:<todo sym>>).include(3)
+    self(<constant:<todo sym>>).include(<emptyTree>)
 
     self(<constant:<todo sym>>).include(<emptyTree>::<constant:Mixin>) do ||
       <emptyTree>

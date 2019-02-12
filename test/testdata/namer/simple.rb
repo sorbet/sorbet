@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 class NormalClass
   def normal_method
   end
@@ -25,8 +25,8 @@ module OtherMixin
 end
 class Child < Parent
   include Mixin
-  include 3 # error: `include` must be passed a constant literal
+  include 3 # error: `include` must only contain simple expressions
   include Mixin do # error: `include` can not be passed a block
   end
-  whatever.include OtherMixin
+  whatever.include OtherMixin # error: Method `whatever` does not exist on `T.class_of(Child)`
 end

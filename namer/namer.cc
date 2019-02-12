@@ -215,13 +215,11 @@ class NameInserter {
         for (auto it = send->args.rbegin(); it != send->args.rend(); it++) {
             // Reverse order is intentional: that's how Ruby does it.
             auto &arg = *it;
-            auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
-            if (constLit == nullptr) {
-                if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::IncludeNotConstant)) {
-                    e.setHeader("`{}` must be passed a constant literal", send->fun.data(ctx)->show(ctx));
-                }
-                return false;
+            if (ast::isa_tree<ast::EmptyTree>(arg.get())) {
+                continue;
             }
+            auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
+            ENFORCE(constLit, "Desugarer should have not allowed this");
             dest->emplace_back(std::move(arg));
         }
 
