@@ -9,9 +9,9 @@ constexpr ErrorClass InvalidMethodSignature{5003, StrictLevel::Stripe};
 constexpr ErrorClass InvalidTypeDeclaration{5004, StrictLevel::Stripe};
 constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::Typed};
 constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::Typed};
-/* constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict}; */
+// constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
 constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::Typed};
-/* constexpr ErrorClass InvalidAttr{5009, StrictLevel::Typed}; */
+// constexpr ErrorClass InvalidAttr{5009, StrictLevel::Typed};
 constexpr ErrorClass InvalidCast{5010, StrictLevel::Stripe};
 constexpr ErrorClass CircularDependency{5011, StrictLevel::Stripe};
 constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::Stripe};
