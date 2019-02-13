@@ -30,8 +30,12 @@ class NameInserter {
                 // emitted via `class << self` blocks
                 ENFORCE(uid->kind == ast::UnresolvedIdent::Class);
                 ENFORCE(uid->name == core::Names::singleton());
+            } else if (ast::isa_tree<ast::EmptyTree>(node.get())) {
+                // ::Foo
             } else {
-                ENFORCE(ast::isa_tree<ast::EmptyTree>(node.get()), "scope is a ", node->nodeName());
+                if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                    e.setHeader("Dynamic constant references are unsupported");
+                }
             }
             node = ast::MK::EmptyTree();
             return owner;

@@ -89,6 +89,6 @@ def main
     puts E.e
     puts F.f = 91
     puts G.new.wrapper
-    puts H.singleton_class::H2.h # error: Dynamic constant references are unsupported `<emptyTree>::<constant:H>.singleton_class()::<constant:H2>`
+    puts H.singleton_class::H2.h # error: Dynamic constant references are unsupported
 end
 main

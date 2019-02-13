@@ -164,7 +164,7 @@ private:
             return result;
         } else {
             if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
-                e.setHeader("Dynamic constant references are unsupported `{}`", c->toString(ctx));
+                e.setHeader("Dynamic constant references are unsupported");
             }
             return core::Symbols::untyped();
         }
