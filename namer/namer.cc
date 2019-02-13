@@ -677,7 +677,7 @@ public:
         if (owner == core::Symbols::noSymbol() || owner == core::Symbols::root()) {
             // Introduce intermediate host for block.
             ENFORCE(blk->loc.exists());
-            owner = ctx.state.staticInitForFile(blk->loc.file());
+            owner = ctx.state.staticInitForFile(blk->loc);
         } else if (owner.data(ctx)->isClass()) {
             // If we're at class scope, we're actually in the context of the
             // singleton class.

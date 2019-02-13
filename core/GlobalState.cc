@@ -1245,9 +1245,9 @@ vector<shared_ptr<File>> GlobalState::getFiles() const {
     return files;
 }
 
-SymbolRef GlobalState::staticInitForFile(FileRef file) {
-    auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), file.id());
-    return enterMethodSymbol(core::Loc::none(file), core::Symbols::root(), nm);
+SymbolRef GlobalState::staticInitForFile(Loc loc) {
+    auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
+    return enterMethodSymbol(loc, core::Symbols::root(), nm);
 }
 
 } // namespace sorbet::core

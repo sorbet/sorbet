@@ -1167,6 +1167,9 @@ const TestedKnowledge &Environment::getKnowledge(core::LocalVariable symbol, boo
 }
 
 core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
+    // I'd love to have this, but keepForIDE intentionally has Loc::none() and
+    // sometimes ends up here...
+    // ENFORCE(loc.exists());
     core::TypeAndOrigins ret;
     ret.type = core::Types::nilClass();
     ret.origins.emplace_back(loc);

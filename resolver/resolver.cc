@@ -1243,7 +1243,7 @@ public:
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.staticInitForFile(classDef->loc.file());
+            sym = ctx.state.staticInitForFile(inits->loc);
         } else {
             sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol.data(ctx)->lookupSingletonClass(ctx),
                                               core::Names::staticInit());

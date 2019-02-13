@@ -2,7 +2,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/gvar.rb:2, https://git.corp.
   field #$a @ test/testdata/namer/gvar.rb:2
   field #$b @ test/testdata/namer/gvar.rb:5
   field #$c @ test/testdata/namer/gvar.rb:8
-  method #<static-init> () @ ???
+  method #<static-init> () @ test/testdata/namer/gvar.rb:2
   class ::A < ::Object () @ test/testdata/namer/gvar.rb:4
     method ::A#meth () @ test/testdata/namer/gvar.rb:7
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/namer/gvar.rb:4
