@@ -8,7 +8,7 @@ title: Shapes
 ```ruby
 {symbol1: Type1, symbol2: Type2}
 
-{'string1': Type1, 'string2': Type2}
+{'string1' => Type1, 'string2' => Type2}
 ```
 
 This creates a fixed hash type (also referred to as a record), which is a hash
