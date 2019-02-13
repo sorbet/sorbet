@@ -311,7 +311,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             for (const auto scope : candidateScopes) {
                 for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
                     if (member.first.data(gs)->kind == NameKind::CONSTANT &&
-                        member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8) {
+                        member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8 &&
+                        member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
                         if (thisDistance <= best.distance) {
