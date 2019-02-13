@@ -515,6 +515,8 @@ core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
+                result = core::Types::untypedUntracked();
+                return;
             }
 
             InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> holders;
