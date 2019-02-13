@@ -6,9 +6,9 @@ using namespace std;
 
 void emit_proc(ofstream &out, int arity) {
     out << "class Proc" << arity << " < Proc" << '\n';
-    out << "  Return = type_member" << '\n';
+    out << "  Return = type_member(:out)" << '\n';
     for (int i = 0; i < arity; ++i) {
-        out << "  Arg" << i << " = type_member" << '\n';
+        out << "  Arg" << i << " = type_member(:in)" << '\n';
     }
 
     out << '\n';

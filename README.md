@@ -285,6 +285,12 @@ You can optionally create `<name>.rb.<phase>.exp` files that contain pretty
 printed internal state after phase `<phase>`. The tests will ensure that the
 internal state exactly matches this snapshot.
 
+You can run this test with:
+
+```
+bazel test //test:test_PosTests/testdata/<name>
+```
+
 ### CLI tests
 
 Any folder `<name>` that is added to `test/cli/` becomes a test.
