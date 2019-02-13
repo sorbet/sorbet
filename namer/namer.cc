@@ -819,6 +819,14 @@ public:
             }
             return make_unique<ast::EmptyTree>();
         }
+        auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
+        if (oldSym.exists()) {
+            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
+                e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+            }
+            ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name, core::UniqueNameKind::Namer);
+        }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
         if (makeAlias) {
             auto alias =
