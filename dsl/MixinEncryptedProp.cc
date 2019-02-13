@@ -35,6 +35,9 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::replaceDSL(core::Mutable
     if (send->fun._id != core::Names::encrypted_prop()._id) {
         return empty;
     }
+    if (send->args.size() < 1) {
+        return empty;
+    }
 
     auto loc = send->loc;
     auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
