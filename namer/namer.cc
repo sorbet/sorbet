@@ -771,12 +771,21 @@ public:
         return asgn;
     }
 
-    unique_ptr<ast::Expression> handleTypeMemberDefinition(core::MutableContext ctx, bool makeAlias,
-                                                           core::SymbolRef onSymbol, ast::Send *send,
+    unique_ptr<ast::Expression> handleTypeMemberDefinition(core::MutableContext ctx, const ast::Send *send,
                                                            unique_ptr<ast::Assign> asgn,
-                                                           ast::UnresolvedConstantLit *typeName) {
+                                                           const ast::UnresolvedConstantLit *typeName) {
+        ENFORCE(asgn->lhs.get() == typeName &&
+                asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
         core::Variance variance = core::Variance::Invariant;
+        bool isTypeTemplate = send->fun == core::Names::typeTemplate();
+        if (!ctx.owner.data(ctx)->isClass()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                e.setHeader("Types must be defined in class or module scopes");
+            }
+            return make_unique<ast::EmptyTree>();
+        }
 
+        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
         if (!send->args.empty()) {
             if (send->args.size() > 2) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
@@ -828,7 +837,7 @@ public:
             ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name, core::UniqueNameKind::Namer);
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
-        if (makeAlias) {
+        if (isTypeTemplate) {
             auto alias =
                 ctx.state.enterStaticFieldSymbol(asgn->loc, ctx.owner.data(ctx)->enclosingClass(ctx), typeName->cnst);
             alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
@@ -894,12 +903,9 @@ public:
 
         switch (send->fun._id) {
             case core::Names::typeTemplate()._id:
-                return handleTypeMemberDefinition(
-                    ctx, true, ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx), send,
-                    std::move(asgn), typeName);
+                return handleTypeMemberDefinition(ctx, send, std::move(asgn), typeName);
             case core::Names::typeMember()._id:
-                return handleTypeMemberDefinition(ctx, false, ctx.owner.data(ctx)->enclosingClass(ctx), send,
-                                                  std::move(asgn), typeName);
+                return handleTypeMemberDefinition(ctx, send, std::move(asgn), typeName);
             default:
                 return fillAssign(ctx, std::move(asgn));
         }

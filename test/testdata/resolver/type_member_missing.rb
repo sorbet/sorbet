@@ -5,7 +5,7 @@ class Base
   Elem = type_member
 end
 
-class Child < Base # error: Type `Elem` declared by parent `Base` should be declared again
+class Child < Base # error: Type `Elem` declared by parent `Base` must be declared again
   # The resolver should error and copy Elem into this class, as shown
   # by the symbol-table expectation
 end

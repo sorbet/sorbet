@@ -48,7 +48,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     if (!my.exists()) {
         if (!(parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable()))) {
             if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::ParentTypeNotDeclared)) {
-                e.setHeader("Type `{}` declared by parent `{}` should be declared again", name.show(gs),
+                e.setHeader("Type `{}` declared by parent `{}` must be declared again", name.show(gs),
                             parent.data(gs)->show(gs));
             }
             ok = false;

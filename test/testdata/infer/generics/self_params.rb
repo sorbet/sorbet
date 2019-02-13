@@ -15,7 +15,7 @@ class Foo
   end
 end
 
-class FooChild < Foo # error: should be declared again
+class FooChild < Foo # error: must be declared again
   Self_Type_Member = type_template(fixed: String)
 end
 

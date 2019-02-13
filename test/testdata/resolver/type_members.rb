@@ -28,7 +28,7 @@ class BadChild1 < Parent
   Elem = type_member # error: Type members in wrong order
 end
 
-class BadChild2 < Parent # error: should be declared again
+class BadChild2 < Parent # error: must be declared again
   My = type_member
 end
 
