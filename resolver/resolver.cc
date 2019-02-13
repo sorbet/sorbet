@@ -376,9 +376,15 @@ private:
         job.isSuperclass = isSuperclass;
 
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
+            if (cnst->typeAlias) {
+                if (auto e = ctx.state.beginError(cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Superclasses and mixins may not be type aliases");
+                }
+                return;
+            }
             ENFORCE(cnst->constantSymbol().exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope.get()) ||
                     ast::isa_tree<ast::EmptyTree>(cnst->original->scope.get()));
-            if (isSuperclass && cnst->typeAliasOrConstantSymbol() == core::Symbols::todo()) {
+            if (isSuperclass && cnst->constantSymbol() == core::Symbols::todo()) {
                 return;
             }
             job.ancestor = cnst;
