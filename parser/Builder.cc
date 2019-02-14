@@ -953,7 +953,7 @@ public:
             return make_unique<Float>(loc, oper->string() + num->val);
         }
         if (auto *num = parser::cast_node<Rational>(receiver.get())) {
-            Exception::raise("non-implemented");
+            return make_unique<Rational>(loc, oper->string() + num->val);
         }
 
         core::NameRef op;
