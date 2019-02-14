@@ -34,12 +34,14 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else {
-                    fast_sort(bb->backEdges,
-                              [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool { return bb1->id < bb2->id; });
-                    bb->backEdges.erase(unique(bb->backEdges.begin(), bb->backEdges.end()), bb->backEdges.end());
                 }
             }
+
+            // Dedupe back edges
+            fast_sort(bb->backEdges,
+                      [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool { return bb1->id < bb2->id; });
+            bb->backEdges.erase(unique(bb->backEdges.begin(), bb->backEdges.end()), bb->backEdges.end());
+
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
                 bb->bexit.cond = core::LocalVariable::noVariable();
