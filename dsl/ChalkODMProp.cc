@@ -151,7 +151,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // A heuristic for detecting the API Param Spec
         if (isOptional && send->fun != core::Names::squareBrackets()) {
             auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv.get());
-            if (cnst->cnst != core::Symbols::T().data(ctx)->name) {
+            if (cnst == nullptr || cnst->cnst != core::Symbols::T().data(ctx)->name) {
                 return empty;
             }
         }
