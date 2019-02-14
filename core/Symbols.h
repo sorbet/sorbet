@@ -179,6 +179,43 @@ public:
 
     bool isSingletonClass(const GlobalState &gs) const;
 
+    // Is this symbol only partially defined?
+    //
+    // Partial symbols rely on unresolved constants.
+    // For example, `class Foo < UNRESOLVED` is partial if `UNRESOLVED` can't
+    // be resolved by Sorbet.
+    //
+    // Partial definitions are transitive.
+    // `class Bar < Foo` is partial since `Foo` is partial.
+    inline bool isPartial(const GlobalState &gs) const {
+        ENFORCE(isClass());
+        // Class is partial if untyped
+        if (isUnresolved()) {
+            return true;
+        }
+        // Class is partial if is parent is (transitively) partial
+        auto p = parent(gs);
+        if (p.exists() && p.data(gs)->isPartial(gs)) {
+            return true;
+        }
+        // Class is partial if one of its mixin/prepend/extend member is untyped
+        for (auto member : membersStableOrderSlow(gs)) {
+            auto memSym = member.second.data(gs);
+            if (!memSym->isClass()) {
+                continue;
+            }
+            if (memSym->isUnresolved()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Is this symbol unresolved (i.e. is untracked or untyped)?
+    inline bool isUnresolved() const {
+        return resultType == core::Types::untypedUntracked() || resultType->isUntyped();
+    }
+
     inline bool isStaticField() const {
         return (flags & Symbol::Flags::STATIC_FIELD) != 0;
     }
