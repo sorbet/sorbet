@@ -547,14 +547,18 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
 
 SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 num) {
     NameRef name = freshNameUnique(UniqueNameKind::Overload, original.data(*this)->name, num);
-    SymbolRef res = enterMethodSymbol(loc, original.data(*this)->owner, name);
-    res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
-    for (auto &arg : original.data(*this)->arguments()) {
-        Loc loc = arg.data(*this)->loc();
-        NameRef nm = arg.data(*this)->name;
-        SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
-        newArg.data(*this)->flags = arg.data(*this)->flags;
-        res.data(*this)->arguments().emplace_back(newArg);
+    auto &owner = original.data(*this)->owner;
+    SymbolRef res = enterMethodSymbol(loc, owner, name);
+    if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
+        ENFORCE(res.data(*this)->arguments().size() == 0);
+        res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
+        for (auto &arg : original.data(*this)->arguments()) {
+            Loc loc = arg.data(*this)->loc();
+            NameRef nm = arg.data(*this)->name;
+            SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
+            newArg.data(*this)->flags = arg.data(*this)->flags;
+            res.data(*this)->arguments().emplace_back(newArg);
+        }
     }
     return res;
 }
