@@ -1153,11 +1153,11 @@ bool Literal::isString(const core::GlobalState &gs) const {
     return t && t->derivesFrom(gs, core::Symbols::String());
 }
 
-bool Literal::isTrue(const core::GlobalState &gs) {
+bool Literal::isTrue(const core::GlobalState &gs) const {
     return value->derivesFrom(gs, core::Symbols::TrueClass());
 }
 
-bool Literal::isFalse(const core::GlobalState &gs) {
+bool Literal::isFalse(const core::GlobalState &gs) const {
     return value->derivesFrom(gs, core::Symbols::FalseClass());
 }
 

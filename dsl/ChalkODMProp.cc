@@ -105,11 +105,16 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        type = ASTUtil::getHashValue(ctx, rules, core::Names::type());
+        auto [key, value] = ASTUtil::extractHashValue(ctx, *rules, core::Names::type());
+        if (value.get() && !ASTUtil::dupType(value.get())) {
+            ASTUtil::putBackHashValue(ctx, *rules, move(key), move(value));
+        } else {
+            type = move(value);
+        }
     }
 
     if (type == nullptr) {
-        if (ASTUtil::hasHashValue(ctx, rules, core::Names::enum_())) {
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::enum_())) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
             type = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
@@ -119,24 +124,28 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        auto arrayType = ASTUtil::getHashValue(ctx, rules, core::Names::array());
-        if (arrayType) {
+        auto [arrayLit, arrayType] = ASTUtil::extractHashValue(ctx, *rules, core::Names::array());
+        if (!arrayType.get()) {
+            return empty;
+        }
+        if (!ASTUtil::dupType(arrayType.get())) {
+            ASTUtil::putBackHashValue(ctx, *rules, move(arrayLit), move(arrayType));
+            return empty;
+        } else {
             type = ast::MK::Send1(loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
                                   core::Names::squareBrackets(), std::move(arrayType));
         }
     }
 
-    if (type == nullptr) {
-        return empty;
-    }
     if (auto *snd = ast::cast_tree<ast::Send>(type.get())) {
         if (snd->fun == core::Names::coerce()) {
             // TODO: either support T.coerce or remove it from pay-server
             return empty;
         }
     }
-    // Yay, we have a type
     ENFORCE(type != nullptr, "No obvious type AST for this prop");
+    auto getType = ASTUtil::dupType(type.get());
+    ENFORCE(getType != nullptr);
 
     if (auto send = ast::cast_tree<ast::Send>(type.get())) {
         // A heuristic for detecting the API Param Spec
@@ -148,12 +157,15 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         }
     }
 
+    // From this point, we can't `return empty` anymore since we're going to be
+    // consuming the tree.
+
     vector<unique_ptr<ast::Expression>> stats;
 
     // Compute the getters
 
     if (rules) {
-        auto optional = ASTUtil::getHashValue(ctx, rules, core::Names::optional());
+        auto [key, optional] = ASTUtil::extractHashValue(ctx, *rules, core::Names::optional());
         auto optionalLit = ast::cast_tree<ast::Literal>(optional.get());
         if (optionalLit) {
             if (optionalLit->isTrue(ctx)) {
@@ -163,12 +175,13 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             }
         }
 
-        if (ASTUtil::hasHashValue(ctx, rules, core::Names::immutable())) {
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
 
         if (foreign == nullptr) {
-            foreign = ASTUtil::getHashValue(ctx, rules, core::Names::foreign());
+            auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
+            foreign = move(foreignTree);
             if (auto body = thunkBody(ctx, foreign.get())) {
                 foreign = std::move(body);
             }
@@ -178,7 +191,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // we don't falsify any booleans here
     }
 
-    auto getType = ASTUtil::dupType(type.get());
     if (isNilable) {
         getType = mkNilable(loc, std::move(getType));
     }

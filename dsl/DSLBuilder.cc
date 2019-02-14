@@ -57,16 +57,16 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         opts = ast::cast_tree<ast::Hash>(send->args[2].get());
     }
     if (opts != nullptr) {
-        if (ASTUtil::hasHashValue(ctx, opts, core::Names::default_())) {
+        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
         }
-        if (ASTUtil::hasHashValue(ctx, opts, core::Names::implied())) {
+        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::implied())) {
             implied = true;
         }
-        if (ASTUtil::hasHashValue(ctx, opts, core::Names::skipGetter())) {
+        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::skipGetter())) {
             skipGetter = true;
         }
-        if (ASTUtil::hasHashValue(ctx, opts, core::Names::skipSetter())) {
+        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::skipSetter())) {
             skipSetter = true;
         }
     }

@@ -55,7 +55,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::replaceDSL(core::Mutable
     }
 
     if (rules) {
-        if (ASTUtil::hasHashValue(ctx, rules, core::Names::immutable())) {
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
     }

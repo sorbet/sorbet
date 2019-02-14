@@ -549,8 +549,8 @@ public:
     bool isNil(const core::GlobalState &gs) const;
     core::NameRef asString(const core::GlobalState &gs) const;
     core::NameRef asSymbol(const core::GlobalState &gs) const;
-    bool isTrue(const core::GlobalState &gs);
-    bool isFalse(const core::GlobalState &gs);
+    bool isTrue(const core::GlobalState &gs) const;
+    bool isFalse(const core::GlobalState &gs) const;
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
