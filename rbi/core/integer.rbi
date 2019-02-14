@@ -420,13 +420,14 @@ class Integer < Numeric
   end
   def ceil(digits=0); end
 
+  sig {returns(String)}
   sig do
     params(
-        arg0: Encoding,
+        arg0: T.any(Encoding, String),
     )
     .returns(String)
   end
-  def chr(arg0); end
+  def chr(arg0=T.unsafe(nil)); end
 
   sig do
     params(
