@@ -404,6 +404,32 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->toString(ctx),
                             thisType->show(ctx));
+
+                // Add more info about unresolved things when running `--relax`
+                if (ctx.state.relaxConstantResolution && symbol.data(ctx)->isPartial(ctx)) {
+                    auto parent = symbol;
+                    while (parent != Symbols::BasicObject()) {
+                        // Check if ancestors are resolved
+                        if (parent.data(ctx)->isUnresolved()) {
+                            e.addErrorSection(
+                                ErrorSection(
+                                    ErrorColors::format("Note: Type `{}` is incomplete since ancestor `{}` was not resolved.",
+                                    thisType->show(ctx), parent.show(ctx))));
+                        }
+                        // Check if all members (from `include`, `prepend` and `extend`) are resolved
+                        for (auto member : parent.data(ctx)->membersStableOrderSlow(ctx)) {
+                            auto memSym = member.second.data(ctx);
+                            if (memSym->isClass() && memSym->isUnresolved()) {
+                                e.addErrorSection(
+                                    ErrorSection(
+                                        ErrorColors::format("Note: Type `{}` is incomplete since mixin `{}` was not resolved.",
+                                        thisType->show(ctx), memSym->show(ctx))));
+                            }
+                        }
+                        parent = parent.data(ctx)->parent(ctx);
+                    }
+                }
+
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
