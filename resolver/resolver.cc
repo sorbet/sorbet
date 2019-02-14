@@ -786,7 +786,7 @@ private:
     }
 
     void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
-        if (!ctx.owner.data(ctx)->isClassModule()) {
+        if (!ctx.owner.data(ctx)->isClass() || !ctx.owner.data(ctx)->isClassModule()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(ctx)->show(ctx));
             }
