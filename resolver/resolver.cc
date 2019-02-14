@@ -195,7 +195,7 @@ private:
         }
 
         auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
-        if (scope.data(ctx)->isStaticField()) {
+        if (!scope.data(ctx)->isClass()) {
             // most likely an unresolved alias. Well, fill it in and emit an error
             if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
