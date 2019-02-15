@@ -27,9 +27,12 @@ class NameInserter {
                 return id->constantSymbol().data(ctx)->dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
+                if (uid->kind != ast::UnresolvedIdent::Class || uid->name != core::Names::singleton()) {
+                    if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                        e.setHeader("Unsupported constant scope");
+                    }
+                }
                 // emitted via `class << self` blocks
-                ENFORCE(uid->kind == ast::UnresolvedIdent::Class);
-                ENFORCE(uid->name == core::Names::singleton());
             } else if (ast::isa_tree<ast::EmptyTree>(node.get())) {
                 // ::Foo
             } else {
