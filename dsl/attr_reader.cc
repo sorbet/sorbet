@@ -54,7 +54,9 @@ bool isSig(const ast::Send *send) {
     auto block = ast::cast_tree<ast::Block>(send->block.get());
     ENFORCE(block);
     auto body = ast::cast_tree<ast::Send>(block->body.get());
-    ENFORCE(body);
+    if (!body) {
+        return false;
+    }
     if (body->fun != core::Names::returns()) {
         return false;
     }
