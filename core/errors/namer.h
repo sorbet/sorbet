@@ -17,6 +17,7 @@ constexpr ErrorClass InvalidTypeDefinition{4011, StrictLevel::Typed};
 constexpr ErrorClass ModuleKindRedefinition{4012, StrictLevel::Stripe};
 constexpr ErrorClass InterfaceClass{4013, StrictLevel::Stripe};
 constexpr ErrorClass DynamicConstant{4014, StrictLevel::Stripe};
+constexpr ErrorClass InvalidClassOwner{4015, StrictLevel::Stripe};
 } // namespace sorbet::core::errors::Namer
 
 #endif

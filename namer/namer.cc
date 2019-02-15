@@ -44,6 +44,13 @@ class NameInserter {
         auto newOwner = squashNames(ctx, owner, constLit->scope);
         core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
         if (!existing.exists()) {
+            if (!newOwner.data(ctx)->isClass()) {
+                if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::InvalidClassOwner)) {
+                    e.setHeader("Nesting is only permitted inside classes and modules");
+                }
+                node = ast::MK::EmptyTree();
+                return owner;
+            }
             existing = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
