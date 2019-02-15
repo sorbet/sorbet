@@ -15,6 +15,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     int typedSendCount = 0;
     int totalSendCount = 0;
     const int startErrorCount = ctx.state.totalErrors();
+    auto guessTypes = true;
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
     if (cfg->symbol.data(ctx)->isGenericMethod()) {
@@ -27,11 +28,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         if (!constr->solve(ctx)) {
             Exception::raise("should never happen");
         }
+        guessTypes = false;
     }
 
     core::TypePtr methodReturnType = cfg->symbol.data(ctx)->resultType;
     auto missingReturnType = methodReturnType == nullptr;
-    auto guessTypes = true;
 
     if (cfg->symbol.data(ctx)->name.data(ctx)->kind != core::NameKind::UTF8 ||
         cfg->symbol.data(ctx)->name == core::Names::staticInit() || !cfg->symbol.data(ctx)->loc().exists()) {
