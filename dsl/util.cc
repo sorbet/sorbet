@@ -59,7 +59,9 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
             return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
         auto *id = ast::cast_tree_const<ast::ConstantLit>(cons->scope.get());
-        ENFORCE(id != nullptr);
+        if (id == nullptr) {
+            return nullptr;
+        }
         ENFORCE(id->constantSymbol() == core::Symbols::root());
         return ast::MK::UnresolvedConstant(cons->loc, dupType(cons->scope.get()), cons->cnst);
     }
