@@ -1136,15 +1136,29 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
+                        if (parser::isa_node<parser::BlockPass>(stat.get())) {
+                            if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                                e.setHeader("Block argument should not be given");
+                            }
+                            continue;
+                        }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
                     unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
                     unique_ptr<Expression> res = make_unique<Return>(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
-                    unique_ptr<Expression> res =
-                        make_unique<Return>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
-                    result.swap(res);
+                    if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
+                        if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            e.setHeader("Block argument should not be given");
+                        }
+                        unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                        result.swap(res);
+                    } else {
+                        unique_ptr<Expression> res =
+                            make_unique<Return>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                        result.swap(res);
+                    }
                 } else {
                     unique_ptr<Expression> res = make_unique<Return>(loc, MK::EmptyTree());
                     result.swap(res);
@@ -1155,14 +1169,29 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
+                        if (parser::isa_node<parser::BlockPass>(stat.get())) {
+                            if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                                e.setHeader("Block argument should not be given");
+                            }
+                            continue;
+                        }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
                     unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
                     unique_ptr<Expression> res = make_unique<Break>(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
-                    unique_ptr<Expression> res = make_unique<Break>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
-                    result.swap(res);
+                    if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
+                        if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            e.setHeader("Block argument should not be given");
+                        }
+                        unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                        result.swap(res);
+                    } else {
+                        unique_ptr<Expression> res =
+                            make_unique<Break>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                        result.swap(res);
+                    }
                 } else {
                     unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
                     result.swap(res);
@@ -1173,14 +1202,29 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
+                        if (parser::isa_node<parser::BlockPass>(stat.get())) {
+                            if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                                e.setHeader("Block argument should not be given");
+                            }
+                            continue;
+                        }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
                     unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
                     unique_ptr<Expression> res = make_unique<Next>(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
-                    unique_ptr<Expression> res = make_unique<Next>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
-                    result.swap(res);
+                    if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
+                        if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            e.setHeader("Block argument should not be given");
+                        }
+                        unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                        result.swap(res);
+                    } else {
+                        unique_ptr<Expression> res =
+                            make_unique<Next>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                        result.swap(res);
+                    }
                 } else {
                     unique_ptr<Expression> res = make_unique<Next>(loc, MK::EmptyTree());
                     result.swap(res);
