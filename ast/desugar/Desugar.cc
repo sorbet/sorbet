@@ -78,7 +78,7 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     auto end = nodes.end();
     unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
-    if (isStringLit(dctx, first)) {
+    if (isStringLit(dctx, first) || isa_tree<EmptyTree>(first.get())) {
         res = std::move(first);
     } else {
         auto pieceLoc = first->loc;
@@ -88,7 +88,7 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     for (; it != end; ++it) {
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
-        if (!isStringLit(dctx, first)) {
+        if (!isStringLit(dctx, narg) && !isa_tree<EmptyTree>(narg.get())) {
             auto pieceLoc = narg->loc;
             narg = MK::Send0(pieceLoc, std::move(narg), core::Names::to_s());
         }

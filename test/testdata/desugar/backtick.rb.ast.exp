@@ -1,5 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
   self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).`("echo hi"))
 
-  self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).`("echo".concat(" hi".to_s())))
+  self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).`("echo".concat(" hi")))
 end
