@@ -567,8 +567,18 @@ core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast
                         core::ErrorColors::format("`{}` will not work in the runtime type system.",
                                                   recvi->constantSymbol().data(ctx)->show(ctx) + "[...]")));
                 }
+                result = core::Types::untypedUntracked();
+                return;
             } else {
                 corrected = recvi->constantSymbol();
+            }
+
+            if (!corrected.data(ctx)->isClass()) {
+                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Expected a class or module");
+                }
+                result = core::Types::untypedUntracked();
+                return;
             }
 
             auto ctype = core::make_type<core::ClassType>(corrected.data(ctx)->singletonClass(ctx));
