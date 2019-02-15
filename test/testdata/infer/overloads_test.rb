@@ -57,6 +57,7 @@ end
 
 class OverloadAndGenerics
   extend T::Generic
+  extend T::Sig
   Elem = type_member
 
   def _; end

@@ -1,6 +1,7 @@
 # typed: true
 class MyProc1
   extend T::Generic
+  extend T::Sig
 
   Return = type_member
   Arg0 = type_member

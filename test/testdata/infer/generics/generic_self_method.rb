@@ -1,6 +1,7 @@
 # typed: true
 class Identity
   extend T::Generic
+  extend T::Sig
 
   Ty = type_member
 

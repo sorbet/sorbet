@@ -23,6 +23,7 @@ end
 
 class TestSelfGeneric
   extend T::Generic
+  extend T::Sig
 
   Elem = type_member
   sig do

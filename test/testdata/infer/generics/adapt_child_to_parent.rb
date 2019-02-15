@@ -1,6 +1,7 @@
  # typed: true
  class Parent
     extend T::Generic
+    extend T::Sig
 
     A = type_member
     sig {params(a: A).returns(A)}

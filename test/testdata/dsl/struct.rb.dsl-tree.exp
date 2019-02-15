@@ -43,6 +43,8 @@ class <emptyTree><<constant:<root>>> < ()
 
   class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<todo sym>)
     class <emptyTree>::<constant:A><<constant:<todo sym>>> < (<emptyTree>::<constant:Struct>)
+      self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+
       def foo<<constant:<todo sym>>>()
         <emptyTree>
       end

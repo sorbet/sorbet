@@ -9,27 +9,27 @@ class ::<root> < ::Object () @ (test/testdata/resolver/self.rb:3, https://git.co
     method ::<Class:TestSelf>#<block> () @ test/testdata/resolver/self.rb:14
     method ::<Class:TestSelf>#<static-init> () @ test/testdata/resolver/self.rb:3
   class ::TestSelfGeneric[<constant:Elem>] < ::Object () @ test/testdata/resolver/self.rb:24
-    type-member(=) ::TestSelfGeneric::Elem @ test/testdata/resolver/self.rb:27
+    type-member(=) ::TestSelfGeneric::Elem @ test/testdata/resolver/self.rb:28
     method ::TestSelfGeneric#good1 (s) -> AppliedType {
       klass = ::TestSelfGeneric
       targs = [
         <constant:Elem> = SelfTypeParam(::TestSelfGeneric::Elem)
       ]
-    } @ test/testdata/resolver/self.rb:32
+    } @ test/testdata/resolver/self.rb:33
       argument ::TestSelfGeneric#good1#s<> -> AppliedType {
         klass = ::TestSelfGeneric
         targs = [
           <constant:Elem> = SelfTypeParam(::TestSelfGeneric::Elem)
         ]
-      } @ test/testdata/resolver/self.rb:29
+      } @ test/testdata/resolver/self.rb:30
     method ::TestSelfGeneric#pass () -> AppliedType {
       klass = ::TestSelfGeneric
       targs = [
         <constant:Elem> = SelfTypeParam(::TestSelfGeneric::Elem)
       ]
-    } @ test/testdata/resolver/self.rb:40
-  class ::<Class:TestSelfGeneric> < ::<Class:Object> (<constant:Generic>, <constant:Sig>) @ test/testdata/resolver/self.rb:24
-    method ::<Class:TestSelfGeneric>#<block> () @ test/testdata/resolver/self.rb:28
-    method ::<Class:TestSelfGeneric>#<block> () @ test/testdata/resolver/self.rb:36
+    } @ test/testdata/resolver/self.rb:41
+  class ::<Class:TestSelfGeneric> < ::<Class:Object> (<constant:Sig>, <constant:Generic>, <constant:Helpers>) @ test/testdata/resolver/self.rb:24
+    method ::<Class:TestSelfGeneric>#<block> () @ test/testdata/resolver/self.rb:29
+    method ::<Class:TestSelfGeneric>#<block> () @ test/testdata/resolver/self.rb:37
     method ::<Class:TestSelfGeneric>#<static-init> () @ test/testdata/resolver/self.rb:24
 

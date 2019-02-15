@@ -7,6 +7,7 @@ class S
 end
 class C
   extend T::Generic
+  extend T::Sig
   A = type_member
   sig {params(value:A).void}
   def dd(value)

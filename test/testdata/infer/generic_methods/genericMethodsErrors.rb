@@ -1,6 +1,7 @@
 # typed: true
 class Foo
   extend T::Generic
+  extend T::Sig
 
   sig {type_parameters(:A, :A).params(a: T.type_parameter(:A)).returns(T.type_parameter(:A))}  # error: Malformed signature
   def id0(a)

@@ -1,6 +1,7 @@
 # typed: true
 module Mod
   extend T::Generic
+  extend T::Sig
 
   A = type_member
    sig do

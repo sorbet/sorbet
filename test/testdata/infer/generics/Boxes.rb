@@ -4,6 +4,7 @@ def _; end
 
 class Box
   extend T::Generic
+  extend T::Sig
 
   A = type_member
 
@@ -25,6 +26,7 @@ end
 
 class BoxChild < Box
   extend T::Generic
+  extend T::Sig
 
   A = type_member
 

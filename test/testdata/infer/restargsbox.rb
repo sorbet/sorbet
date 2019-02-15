@@ -1,6 +1,7 @@
 # typed: true
 class A
   extend T::Generic
+  extend T::Sig
   E = type_member
 
   # Repeated argument is typed using element type

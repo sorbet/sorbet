@@ -1,6 +1,7 @@
 # typed: true
 class Foo
   extend T::Generic
+  extend T::Sig
   Self_Type_Member = type_template()
   Not_A_Self_Type = type_member()
 

@@ -65,7 +65,7 @@ module T
 end
 
 module T::Generic
-  include T::Sig
+  include T::Helpers
 
   sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def type_parameters(*params); end
@@ -73,6 +73,12 @@ module T::Generic
   def type_member(variance=:invariant, fixed: nil); end
   def type_template(variance=:invariant, fixed: nil); end
   def [](*types); end
+end
+
+module T::Helpers
+  def abstract!;  end
+  def interface!; end
+  def mixes_in_class_methods(mod); end
 end
 
 module T::Array

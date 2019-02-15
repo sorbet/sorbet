@@ -16,6 +16,7 @@ class RealStruct
 end
 class RealStructDesugar
     class A < Struct
+        extend T::Sig
         def foo; end
         def bar; end
         def foo=(arg0); arg0; end

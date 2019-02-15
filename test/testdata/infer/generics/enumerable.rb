@@ -1,6 +1,7 @@
  # typed: true
  module MyEnumerable
     extend T::Generic
+    extend T::Sig
 
     A = type_member
     sig {params(a: MyEnumerable[A]).returns(MyEnumerable[A])}

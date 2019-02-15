@@ -13,6 +13,7 @@ end
 
 class A
   extend T::Generic
+  extend T::Sig
 
   sig do
     type_parameters(:U).params(
@@ -27,6 +28,7 @@ end
 
 class B
   extend T::Generic
+  extend T::Sig
 
   sig do
     type_parameters(:U).params(

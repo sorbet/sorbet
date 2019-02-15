@@ -9,6 +9,7 @@ end
 
 class Parent
   extend T::Generic
+  extend T::Sig
 
   Elem = type_member
 
@@ -29,6 +30,7 @@ end
 
 module Mixin
   extend T::Generic
+  extend T::Sig
   Elem = type_member
 
   sig {params(a: Elem).returns(Elem)}
@@ -50,6 +52,7 @@ end
 
 class ParentWithMultiple
   extend T::Generic
+  extend T::Sig
 
   K = type_member
   V = type_member
@@ -74,6 +77,7 @@ end
 
 class FullChild < HalfChild
   extend T::Generic
+  extend T::Sig
   K = type_member(fixed: Integer)
   V = type_member(fixed: String)
 

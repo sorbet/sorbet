@@ -1,6 +1,7 @@
 # typed: true
 class Foo
   extend T::Generic
+  extend T::Sig
 
   sig do
     type_parameters(:A).params(
