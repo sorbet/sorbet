@@ -84,7 +84,9 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
     auto body = ast::cast_tree<ast::Send>(block->body.get());
 
     ENFORCE(body->fun == core::Names::returns());
-    ENFORCE(body->args.size() == 1);
+    if (body->args.size() != 1) {
+        return nullptr;
+    }
     unique_ptr<ast::Expression> resultType = body->args[0]->deepCopy();
     ast::Send *cur = body;
     while (cur != nullptr) {
@@ -192,7 +194,11 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
                 ENFORCE(sig != nullptr);
 
                 if (usedPrevSig) {
-                    stats.emplace_back(toWriterSigForName(ctx, sig, name, argLoc));
+                    auto writerSig = toWriterSigForName(ctx, sig, name, argLoc);
+                    if (!writerSig) {
+                        return empty;
+                    }
+                    stats.emplace_back(move(writerSig));
                 } else {
                     usedPrevSig = true;
                 }
