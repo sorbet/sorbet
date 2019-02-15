@@ -17,8 +17,6 @@ enum class dlevel {
 	FATAL   = 4,
 };
 
-#include "diagnostic_class.hh"
-
 class diagnostic {
 public:
 	struct range {

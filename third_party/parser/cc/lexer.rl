@@ -111,6 +111,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ruby_parser/driver.hh>
 #include <cassert>
+#include "absl/strings/numbers.h"
 
 %% write data nofinal;
 
@@ -528,13 +529,10 @@ std::string lexer::convert_base(const std::string& num, int num_base) {
     if (num_base == 10) {
         return num;
     }
-    try {
-        // This doesn't match Ruby's parsing but it is better than not handling it
-        result = std::stol(num, NULL, num_base);
-    } catch (std::out_of_range &) {
+    // This doesn't match Ruby's parsing but it is better than not handling it
+    if (!absl::numbers_internal::safe_strtoi_base(num, &result, num_base)) {
         result = 0;
-    } catch (std::invalid_argument &) {
-        result = 0;
+        // dmitry: appartently we assume that outer functions reported all the errors!!!
     }
     return std::to_string(result);
 }

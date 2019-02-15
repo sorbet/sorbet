@@ -43,6 +43,9 @@ cc_library(
             "@com_stripe_ruby_typer//tools/config:linkshared": 0,
             "//conditions:default": 1,
         }),
+   deps = [
+        "@com_google_absl//absl/strings",
+   ],
 )
 
 exports_files(["codegen/diagnostics.rb"])
