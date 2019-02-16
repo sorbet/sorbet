@@ -57,15 +57,24 @@ unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression 
 bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::SymbolRef sym) {
     auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(type);
     if (cnst) {
-        if (cnst->cnst == sym.data(ctx)->name && ast::isa_tree<ast::EmptyTree>(cnst->scope.get())) {
+        if (cnst->cnst != sym.data(ctx)->name) {
+            return false;
+        }
+        if (ast::isa_tree<ast::EmptyTree>(cnst->scope.get())) {
             return true;
         }
 
         auto scope_cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
-        if (cnst->cnst == sym.data(ctx)->name && ast::isa_tree<ast::EmptyTree>(scope_cnst->scope.get()) &&
+        if (scope_cnst && ast::isa_tree<ast::EmptyTree>(scope_cnst->scope.get()) &&
             scope_cnst->cnst == core::Symbols::T().data(ctx)->name) {
             return true;
         }
+
+        auto scope_cnst_lit = ast::cast_tree<ast::ConstantLit>(cnst->scope.get());
+        if (scope_cnst_lit && scope_cnst_lit->constantSymbol() == core::Symbols::root()) {
+            return true;
+        }
+        return false;
     }
 
     auto send = ast::cast_tree<ast::Send>(type);
