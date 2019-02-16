@@ -195,7 +195,9 @@ A prototypical example of code that might trigger this is code that sets a
 variable to `nil`, and then updates it if some value is found inside a loop:
 
 ```ruby
-found = nil list.each do |elem|
+found = nil
+
+list.each do |elem|
   found = elem if want?(elem)
 end
 ```
