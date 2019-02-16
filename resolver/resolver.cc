@@ -174,8 +174,6 @@ private:
     static void stubOneConstantNesting(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases);
         if (resolved.exists() && resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
-            auto fnd = typeAliases.find(resolved);
-            ENFORCE(fnd != typeAliases.end());
             if (auto e = ctx.state.beginError(resolved.data(ctx)->loc(), core::errors::Resolver::RecursiveTypeAlias)) {
                 e.setHeader("Type alias expands to to an infinite type");
             }
