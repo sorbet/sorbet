@@ -36,7 +36,7 @@
 </blockquote>
 <pre><code class="hljs css language-ruby">{<span class="hljs-symbol">symbol1:</span> Type1, <span class="hljs-symbol">symbol2:</span> Type2}
 
-{<span class="hljs-string">'string1'</span>: Type1, <span class="hljs-string">'string2'</span>: Type2}
+{<span class="hljs-string">'string1'</span> =&gt; Type1, <span class="hljs-string">'string2'</span> =&gt; Type2}
 </code></pre>
 <p>This creates a fixed hash type (also referred to as a record), which is a hash
 with known keys and known types for each key. For example, <code>{foo: String, bar: T.nilable(Float)}</code> validates that an object is an hash with exactly those 2 keys
