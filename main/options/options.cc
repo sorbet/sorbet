@@ -108,6 +108,24 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
     return result;
 }
 
+UnorderedMap<string, string> extractDslPlugins(string fileName, shared_ptr<spdlog::logger> logger) {
+    UnorderedMap<string, string> result;
+    YAML::Node config = YAML::LoadFile(fileName);
+    switch (config.Type()) {
+        case YAML::NodeType::Map:
+            for (const auto &child : config) {
+                auto key = child.first.as<string>();
+                auto value = child.second.as<string>();
+                result[key] = value;
+            }
+            break;
+        default:
+            logger->error("Cannot parse DSL plugin format. Map is expected on top level.");
+            throw EarlyReturnWithCode(1);
+    }
+    return result;
+}
+
 cxxopts::Options buildOptions() {
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
@@ -173,6 +191,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
+    options.add_options("dev")("dsl-plugins", "Yaml config that configures external DSL plugins",
+                               cxxopts::value<string>()->default_value(""), "filepath.yaml");
 
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
@@ -406,6 +426,9 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
+        }
+        if (!raw["dsl-plugins"].as<string>().empty()) {
+            opts.dslPlugins = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));

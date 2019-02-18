@@ -1010,6 +1010,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->suppressed_error_classes = this->suppressed_error_classes;
     result->only_error_classes = this->only_error_classes;
+    result->dslPlugins = this->dslPlugins;
     result->names.reserve(this->names.capacity());
     if (keepId) {
         result->names.resize(this->names.size());
@@ -1155,6 +1156,18 @@ void GlobalState::suppressErrorClass(int code) {
 void GlobalState::onlyShowErrorClass(int code) {
     ENFORCE(suppressed_error_classes.empty());
     only_error_classes.insert(code);
+}
+
+void GlobalState::addDslPlugin(string method, string command) {
+    dslPlugins[method] = command;
+}
+
+optional<string> GlobalState::findDslPlugin(string method) const {
+    UnorderedMap<string, string>::const_iterator found = dslPlugins.find(method);
+    if (found != dslPlugins.end()) {
+        return found->second;
+    }
+    return {};
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {

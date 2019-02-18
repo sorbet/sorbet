@@ -9,6 +9,7 @@
 #include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
+#include "dsl/Plugin.h"
 
 using namespace std;
 
@@ -54,6 +55,13 @@ public:
 
                          // This one is different: it gets an extra prevStat argument.
                          nodes = AttrReader::replaceDSL(ctx, send, prevStat);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = std::move(nodes);
+                             return;
+                         }
+
+                         // This one is also different: it gets the classDef.
+                         nodes = Plugin::replaceDSL(ctx, classDef, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = std::move(nodes);
                              return;

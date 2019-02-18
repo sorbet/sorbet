@@ -18,7 +18,9 @@ cc_library(
         "//ast",
         "//ast/treemap",
         "//ast/verifier",
+        "//ast/desugar",
         "//common",
         "//core",
+        "//parser",
     ],
 )

@@ -78,6 +78,7 @@ struct Options {
     std::vector<std::string> configatronDirs;
     std::vector<std::string> configatronFiles;
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
+    UnorderedMap<std::string, std::string> dslPlugins;
     std::string storeState = "";
     bool enableCounters = false;
     std::vector<std::string> someCounters;

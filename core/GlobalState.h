@@ -142,6 +142,9 @@ public:
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
 
+    void addDslPlugin(std::string method, std::string command);
+    std::optional<std::string> findDslPlugin(std::string method) const;
+
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
@@ -155,6 +158,7 @@ private:
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> suppressed_error_classes;
     UnorderedSet<int> only_error_classes;
+    UnorderedMap<std::string, std::string> dslPlugins;
     bool wasModified_ = false;
 
     mutable absl::Mutex annotations_mtx;
