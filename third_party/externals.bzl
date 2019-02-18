@@ -228,3 +228,10 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/jmillikin/rules_m4",
         commit = "ae19f8df57f680c6dbad4887e162ca17ee97a13e",
     )
+
+    new_git_repository(
+        name = "ruby",
+        remote = "https://github.com/ruby/ruby.git",
+        tag = "v2_4_5",
+        build_file = "//third_party:ruby.BUILD",
+    )

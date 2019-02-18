@@ -20,6 +20,7 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
+#include "ruby.h"
 
 #include <csignal>
 #include <poll.h>
@@ -41,6 +42,18 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
 }
 
 shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr_color_sink();
+
+struct RubyVM {
+    RubyVM() {
+        logger->debug("Starting Ruby VM");
+        ruby_init();
+    }
+
+    ~RubyVM() {
+        logger->debug("Stopping Ruby VM");
+        ruby_cleanup(0);
+    }
+};
 
 constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
 
@@ -194,6 +207,9 @@ int realmain(int argc, char *argv[]) {
             logger->trace("Trace logging enabled");
             break;
     }
+
+    // start a Ruby VM
+    RubyVM rubyVM;
 
     {
         string argsConcat(argv[0]);

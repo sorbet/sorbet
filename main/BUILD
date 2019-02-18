@@ -80,5 +80,6 @@ cc_library(
         "//main/pipeline",
         "//payload/binary",
         "//payload/text",
+        "@ruby",
     ],
 )
