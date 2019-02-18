@@ -1,0 +1,3 @@
+Failed to open DSL specification file "a_yaml_file_that_doesnt_exist"
+test/cli/bad-plugin-spec/not-map.yaml: Cannot parse DSL plugin format. Map is expected at top level
+DSL trigger "bad-trigger" in "test/cli/bad-plugin-spec/values-not-scalar.yaml": must map to a command that is a string

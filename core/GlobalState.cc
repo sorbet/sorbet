@@ -1025,6 +1025,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
+    result->dslPlugins = this->dslPlugins;
     result->names.reserve(this->names.capacity());
     if (keepId) {
         result->names.resize(this->names.size());
@@ -1086,6 +1087,24 @@ void GlobalState::suppressErrorClass(int code) {
 void GlobalState::onlyShowErrorClass(int code) {
     ENFORCE(suppressedErrorClasses.empty());
     onlyErrorClasses.insert(code);
+}
+
+void GlobalState::addDslPlugin(string_view method, string_view command) {
+    auto ref = enterNameUTF8(method);
+    auto result = dslPlugins.emplace(ref, command);
+    ENFORCE(result.second, "method trigger should be unique");
+}
+
+optional<string_view> GlobalState::findDslPlugin(NameRef method) const {
+    const auto it = dslPlugins.find(method);
+    if (it != dslPlugins.end()) {
+        return it->second;
+    }
+    return nullopt;
+}
+
+bool GlobalState::hasAnyDslPlugin() const {
+    return !dslPlugins.empty();
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {

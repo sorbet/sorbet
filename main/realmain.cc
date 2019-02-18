@@ -257,6 +257,11 @@ int realmain(int argc, char *argv[]) {
     for (auto code : opts.errorCodeBlackList) {
         gs->suppressErrorClass(code);
     }
+    for (auto &plugin : opts.dslPlugins) {
+        core::UnfreezeNameTable nameTableAccess(*gs);
+        gs->addDslPlugin(plugin.first, plugin.second);
+    }
+
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {

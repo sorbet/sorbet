@@ -146,6 +146,10 @@ public:
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
 
+    void addDslPlugin(std::string_view method, std::string_view command);
+    std::optional<std::string_view> findDslPlugin(NameRef method) const;
+    bool hasAnyDslPlugin() const;
+
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
@@ -159,6 +163,7 @@ private:
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
+    UnorderedMap<NameRef, std::string_view> dslPlugins;
     bool wasModified_ = false;
 
     bool freezeSymbolTable();
