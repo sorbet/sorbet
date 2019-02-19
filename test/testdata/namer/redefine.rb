@@ -62,4 +62,4 @@ end
 def wrong_blockness(&a) # error: redefined without matching argument count. Expected: `1`, got: `0`
   2
 end
-T.reveal_type(wrong_blockness()) # error: Revealed type: `T.untyped`
+T.reveal_type(wrong_blockness() {}) # error: Revealed type: `T.untyped`

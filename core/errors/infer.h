@@ -25,5 +25,6 @@ constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
 constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
 constexpr ErrorClass UntypedSplat{7019, StrictLevel::Typed};
 constexpr ErrorClass GenericMethodConstaintUnsolved{7020, StrictLevel::Typed};
+constexpr ErrorClass BlockNotPassed{7021, StrictLevel::Typed};
 } // namespace sorbet::core::errors::Infer
 #endif

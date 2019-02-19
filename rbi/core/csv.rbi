@@ -31,7 +31,7 @@ class CSV < Object
     params(
         str: String,
         options: T::Hash[Symbol, T.untyped],
-        blk: T.proc.params(arg0: T::Array[T.nilable(String)]).void
+        blk: T.nilable(T.proc.params(arg0: T::Array[T.nilable(String)]).void)
     )
     .returns(T.nilable(T::Array[T::Array[T.nilable(String)]]))
   end

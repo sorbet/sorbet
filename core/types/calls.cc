@@ -691,6 +691,16 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 result.components.front().errors.emplace_back(e.build());
             }
         }
+        if (!data->arguments().empty() && data->arguments().back().data(ctx)->isBlockArgument()) {
+            auto blockType = data->arguments().back().data(ctx)->resultType;
+            if (blockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blockType)) {
+                if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BlockNotPassed)) {
+                    e.setHeader("`{}` declares a block parameter, but no block was passed", args.name.toString(ctx));
+                    e.addErrorLine(method.data(ctx)->loc(), "defined here");
+                    result.components.front().errors.emplace_back(e.build());
+                }
+            }
+        }
     }
 
     if (!resultType) {
