@@ -245,6 +245,7 @@ NameDef names[] = {{"initialize"},
                    {"arg2"},
                    {"opts"},
                    {"Struct"},
+                   {"Elem"},
                    {"keepForIde", "keep_for_ide"},
                    {"keepForTypechecking", "keep_for_typechecking"},
 

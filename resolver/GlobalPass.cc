@@ -44,18 +44,18 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
                        core::SymbolRef sym, vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMember(gs, name);
-    bool ok = true;
     if (!my.exists()) {
-        if (!(parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable()))) {
-            if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::ParentTypeNotDeclared)) {
-                e.setHeader("Type `{}` declared by parent `{}` must be declared again", name.show(gs),
-                            parent.data(gs)->show(gs));
-            }
-            ok = false;
+        auto code =
+            parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
+                ? core::errors::Resolver::EnumerableParentTypeNotDeclared
+                : core::errors::Resolver::ParentTypeNotDeclared;
+        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
+            e.setHeader("Type `{}` declared by parent `{}` must be declared again", name.show(gs),
+                        parent.data(gs)->show(gs));
         }
         my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
-    }
-    if (!ok) {
+        my.data(gs)->setFixed();
+        my.data(gs)->resultType = core::Types::untyped(gs, sym);
         return false;
     }
     const auto &data = my.data(gs);

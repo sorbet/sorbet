@@ -4,6 +4,6 @@ class BadNamespace::Foo < BadParent
   include BadMixin
 
   def foo
-    @foo # error: Use of undeclared variable
+    @foo
   end
 end

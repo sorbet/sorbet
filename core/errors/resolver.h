@@ -39,6 +39,7 @@ constexpr ErrorClass IncludesNonModule{5032, StrictLevel::Stripe};
 constexpr ErrorClass OverridesFinal{5033, StrictLevel::Stripe};
 constexpr ErrorClass ReassignsTypeAlias{5034, StrictLevel::Stripe};
 constexpr ErrorClass BadMethodOverride{5035, StrictLevel::Stripe};
+constexpr ErrorClass EnumerableParentTypeNotDeclared{5036, StrictLevel::Strict};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
