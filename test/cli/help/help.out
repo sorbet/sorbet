@@ -80,6 +80,8 @@ Usage:
       --cache-dir dir           Use the specified folder to cache data
                                 (default: )
       --suppress-non-critical   Exit 0 unless there was a critical error
+      --custom-dsl filepath.json
+                                JSON specification for expanding custom DSLs
       --counter counter         Print internal counter
       --statsd-host host        StatsD sever hostname (default: )
       --counters                Print all internal counters

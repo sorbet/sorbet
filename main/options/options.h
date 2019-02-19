@@ -83,6 +83,7 @@ struct Options {
     std::vector<std::string> someCounters;
     std::vector<int> errorCodeWhiteList;
     std::vector<int> errorCodeBlackList;
+    std::vector<std::string> dslSpecPaths;
 
     u4 reserveMemKiB;
 

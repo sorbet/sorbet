@@ -45,7 +45,8 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     }
 
     vector<string> emptyInputNames;
-    auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, logger);
+    vector<dsl::custom::CustomReplace> noDSLs; // TODO
+    auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, noDSLs, logger);
     int id = t.file.id();
     if (id >= indexed.size()) {
         indexed.resize(id + 1);
@@ -74,6 +75,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
         int job;
         options::Options emptyOpts;
         emptyOpts.runLSP = true;
+        vector<dsl::custom::CustomReplace> noDSLs; // TODO
 
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -97,7 +99,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     vector<ast::ParsedFile> single;
                     unique_ptr<KeyValueStore> kvstore;
 
-                    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
+                    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, noDSLs, logger));
                     auto errs = lgs->errorQueue->drainAllErrors();
                     bool fileParseError = false;
                     for (auto &e : errs) {
@@ -135,7 +137,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 void LSPLoop::reIndexFromFileSystem() {
     indexed.clear();
     vector<core::FileRef> emptyInputFiles;
-    for (auto &t : pipeline::index(initialGS, opts.inputFileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
+    vector<dsl::custom::CustomReplace> empty; // TODO
+    for (auto &t : pipeline::index(initialGS, opts.inputFileNames, emptyInputFiles, opts, workers, kvstore, empty, logger)) {
         int id = t.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
@@ -264,8 +267,9 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         prodCategoryCounterInc("lsp.updates", "fastpath");
         ENFORCE(initialGS->errorQueue->isEmpty());
         vector<ast::ParsedFile> updatedIndexed;
+        vector<dsl::custom::CustomReplace> noDSLs; // TODO
         for (auto &f : subset) {
-            auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
+            auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, noDSLs, logger);
             int id = t.file.id();
             indexed[id] = move(t);
             updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), t.file});

@@ -174,6 +174,9 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
 
+    options.add_options("dev")("custom-dsl", "JSON specification for expanding custom DSLs",
+                               cxxopts::value<vector<string>>(), "filepath.json");
+
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
         defaultThreads = 2;
@@ -271,6 +274,10 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         if (raw.count("files") > 0) {
             opts.inputFileNames = raw["files"].as<vector<string>>();
+        }
+
+        if (raw.count("custom-dsl") > 0) {
+            opts.dslSpecPaths = raw["custom-dsl"].as<vector<string>>();
         }
 
         opts.cacheDir = raw["cache-dir"].as<string>();

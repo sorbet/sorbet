@@ -9,6 +9,7 @@
 #include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
+#include "dsl/custom/CustomReplace.h"
 
 using namespace std;
 
@@ -70,6 +71,14 @@ public:
 
                      [&](ast::Expression *e) {});
 
+            for (auto &dsl : customDSLs) {
+                auto nodes = dsl.matchAndReplace(ctx, stat.get());
+                if (!nodes.empty()) {
+                    replaceNodes[stat.get()] = std::move(nodes);
+                    break; // first match wins
+                }
+            }
+
             prevStat = stat.get();
         }
         if (replaceNodes.empty()) {
@@ -81,8 +90,8 @@ public:
         classDef->rhs.reserve(oldRHS.size());
 
         for (auto &stat : oldRHS) {
-            if (replaceNodes.find(stat.get()) != replaceNodes.end()) {
-                for (auto &newNode : replaceNodes.at(stat.get())) {
+            if (auto it = replaceNodes.find(stat.get()); it != replaceNodes.end()) {
+                for (auto &newNode : it->second) {
                     classDef->rhs.emplace_back(std::move(newNode));
                 }
             } else {
@@ -97,13 +106,15 @@ public:
     }
 
 private:
-    DSLReplacer() = default;
+    vector<custom::CustomReplace> &customDSLs;
+    DSLReplacer(vector<custom::CustomReplace> &customDSLs) : customDSLs(customDSLs){};
 };
 
-unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree,
+                                     vector<custom::CustomReplace> &customDSLs) {
     auto ast = std::move(tree);
 
-    DSLReplacer dslReplacer;
+    DSLReplacer dslReplacer(customDSLs);
     ast = ast::TreeMap::apply(ctx, dslReplacer, std::move(ast));
     auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
     return verifiedResult;

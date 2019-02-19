@@ -355,10 +355,29 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (test.expectations.find("autogen") == test.expectations.end()) {
             // DSL
             {
+                vector<dsl::custom::CustomReplace> dsls;
+                string_view source = file.data(gs).source();
+                auto dslPragma = source.find("# enable_dsl:");
+                if (dslPragma != string::npos) {
+                    auto afterColon = dslPragma + sizeof("# enable_dsl:");
+                    auto pragmaEnd = source.find("\n", afterColon);
+                    auto specFilename = source.substr(afterColon, pragmaEnd - afterColon);
+                    try {
+                        auto dslSpec = FileOps::read(string(test.folder) + "/" + string(specFilename));
+                        auto customReplace = dsl::custom::CustomReplace::parseDefinition(gs, dslSpec);
+                        if (customReplace.has_value()) {
+                            dsls.emplace_back(std::move(*customReplace));
+                        } else {
+                            ADD_FAILURE() << "Fixture custom DSL is invalid: " << specFilename;
+                        }
+                    } catch (FileNotFoundException e) {
+                        ADD_FAILURE() << "DSL not found in the same folder as test: " << specFilename;
+                    }
+                }
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
                 dslUnwound =
-                    testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
+                    testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree), dsls), desugared.file});
             }
 
             expectation = test.expectations.find("dsl-tree");

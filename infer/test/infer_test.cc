@@ -46,7 +46,8 @@ void processSource(core::GlobalState &cb, string str) {
     sorbet::core::MutableContext ctx(cb, core::Symbols::root());
     auto fileId = ast->loc.file();
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
-    tree.tree = dsl::DSL::run(ctx, move(tree.tree));
+    vector<dsl::custom::CustomReplace> noDSLs;
+    tree.tree = dsl::DSL::run(ctx, move(tree.tree), noDSLs);
     tree = namer::Namer::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));

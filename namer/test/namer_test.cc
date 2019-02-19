@@ -44,7 +44,8 @@ ast::ParsedFile getTree(core::GlobalState &gs, string str) {
     file.data(gs).strict = core::StrictLevel::Strict;
     sorbet::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ast::desugar::node2Tree(ctx, move(tree));
-    ast = dsl::DSL::run(ctx, move(ast));
+    vector<dsl::custom::CustomReplace> noDSLs;
+    ast = dsl::DSL::run(ctx, move(ast), noDSLs);
     return ast::ParsedFile{move(ast), file};
 }
 

@@ -1,0 +1,15 @@
+class <emptyTree>::<constant:SomeModel><<constant:<todo sym>>> < (<emptyTree>::<constant:ActiveRecord>::<constant:Base>)
+  self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"new_value" => <emptyTree>::<constant:String>}).void()
+  end
+
+  def some_id=<<constant:<todo sym>>>(new_value)
+    <emptyTree>
+  end
+
+  def assign<<constant:<todo sym>>>()
+    self(<constant:<todo sym>>).some_id=(100)
+  end
+end

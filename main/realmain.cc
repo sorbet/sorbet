@@ -10,6 +10,7 @@
 #include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
+#include "dsl/custom/CustomReplace.h"
 #include "main/autogen/autogen.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
@@ -82,7 +83,8 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
         options::Options emptyOpts;
         WorkerPool workers(emptyOpts.threads, logger);
         vector<string> empty;
-        auto indexed = pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, logger);
+        vector<dsl::custom::CustomReplace> noDSLs;
+        auto indexed = pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, noDSLs, logger);
         pipeline::resolve(*gs, move(indexed), emptyOpts, logger); // result is thrown away
     } else {
         Timer timeit(logger, "read_global_state.binary");
@@ -272,9 +274,30 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        vector<dsl::custom::CustomReplace> customDSLs;
+        {
+            Timer timeit(logger, "build_custom_dsls");
+            string dslSpec;
+            for (const auto &dslSpecPath : opts.dslSpecPaths) {
+                try {
+                    dslSpec = FileOps::read(dslSpecPath);
+                } catch (FileNotFoundException e) {
+                    logger->error("File for DSL spec not found: \"{}\"", dslSpecPath);
+                    return 1;
+                }
+                auto customReplace = dsl::custom::CustomReplace::parseDefinition(*gs, dslSpec);
+                if (customReplace.has_value()) {
+                    customDSLs.emplace_back(std::move(*customReplace));
+                } else {
+                    gs->errorQueue->flushErrors(true);
+                    return 1;
+                }
+            }
+        }
+
         {
             Timer timeit(logger, "index");
-            indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, logger);
+            indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, customDSLs, logger);
         }
 
         if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
@@ -323,7 +346,7 @@ int realmain(int argc, char *argv[]) {
             indexed = pipeline::resolve(*gs, move(indexed), opts, logger);
             if (opts.stressFastPath) {
                 for (auto &f : indexed) {
-                    auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore, logger);
+                    auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore, customDSLs, logger);
                     vector<ast::ParsedFile> toBeReResolved;
                     toBeReResolved.emplace_back(move(reIndexed));
                     auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts, logger);

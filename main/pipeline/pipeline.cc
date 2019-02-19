@@ -84,7 +84,8 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
+                         unique_ptr<KeyValueStore> &kvstore, vector<dsl::custom::CustomReplace> &customDSLs,
+                         shared_ptr<spdlog::logger> logger) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
 
@@ -143,7 +144,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 logger->trace("Inlining DSLs: {}", file.data(lgs).path());
                 core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
                 core::ErrorRegion errs(lgs, file);
-                dslsInlined.tree = dsl::DSL::run(ctx, move(ast));
+                dslsInlined.tree = dsl::DSL::run(ctx, move(ast), customDSLs);
             } else {
                 dslsInlined.tree = move(ast);
             }
@@ -211,7 +212,8 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<string> &frs,
                               vector<core::FileRef> mainThreadFiles, const options::Options &opts, WorkerPool &workers,
-                              unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
+                              unique_ptr<KeyValueStore> &kvstore, vector<dsl::custom::CustomReplace> &customDSLs,
+                              shared_ptr<spdlog::logger> logger) {
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
 
@@ -246,7 +248,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<st
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
         if (!frs.empty()) {
-            workers.multiplexJob("index", [cgs, &opts, fileq, resultq, &kvstore, logger]() {
+            workers.multiplexJob("index", [cgs, &opts, fileq, resultq, &kvstore, &customDSLs, logger]() {
                 logger->trace("worker deep copying global state");
                 auto lgs = cgs->deepCopy();
                 logger->trace("worker done deep copying global state");
@@ -336,7 +338,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<st
                                 file.data(*lgs).sourceType = core::File::PayloadGeneration;
                             }
 
-                            threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore, logger));
+                            threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore, customDSLs, logger));
                         }
                     }
                 }
@@ -354,7 +356,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<st
         }
 
         for (auto f : mainThreadFiles) {
-            ret.emplace_back(indexOne(opts, *gs, f, kvstore, logger));
+            ret.emplace_back(indexOne(opts, *gs, f, kvstore, customDSLs, logger));
         }
 
         thread_result threadResult;

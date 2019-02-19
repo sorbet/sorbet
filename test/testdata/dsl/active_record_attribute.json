@@ -1,0 +1,83 @@
+{
+    "match": {
+        "type": "match_send",
+        "callee": {
+            "type": "match_name",
+            "expected": "attribute",
+            "capture": 1
+        },
+        "block": { "type": "match_wildcard" },
+        "recv": { "type": "match_self" },
+        "args": [
+            {
+                "type": "match_literal",
+                "variant": "symbol",
+                "wildcard": true,
+                "capture": 2
+            },
+            {
+                "type": "match_send",
+                "callee": "new",
+                "block": { "type": "match_wildcard" },
+                "recv": {
+                    "type": "match_literal",
+                    "variant": "constant",
+                    "wildcard": true,
+                    "capture": 3
+                },
+                "args": []
+            }
+        ]
+    },
+    "mappings": [
+        [{
+            "type": "literal",
+            "variant": "constant",
+            "components": ["ActiveRecord", "Type", "String"]
+        }, ["String"]]
+    ],
+    "output": [{
+        "type": "send",
+        "callee": "sig",
+        "recv": {"type": "self"},
+        "args": [],
+        "block": {
+            "type": "block",
+            "args": [],
+            "body": [{
+                "type": "send",
+                "callee": "void",
+                "args": [],
+                "block": null,
+                "recv": {
+                    "type": "send",
+                    "recv": { "type": "self" },
+                    "callee": "params",
+                    "args": [{
+                        "type": "hash",
+                        "pairs": [[{
+                            "type": "literal",
+                            "variant": "symbol",
+                            "value": "new_value"
+                        },
+                        {
+                            "type": "transform",
+                            "instructions": [["map_capture", 3], ["return_as_constant"]]
+                        }]]
+                    }],
+                    "block": null
+                }
+            }]
+        }
+    }, {
+        "type": "method_def",
+        "name": {
+            "type": "transform",
+            "instructions": [["put_capture", 2], ["put_string", "="], ["string_concat"], ["return_as_symbol"]]
+        },
+        "args": [{
+            "type": "local",
+            "name": "new_value"
+        }]
+    }]
+}
