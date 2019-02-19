@@ -19,8 +19,8 @@ also want to see:
 
 - [Sorbet user-facing design principles](#sorbet-user-facing-design-principles)
 - [Quickstart](#quickstart)
-  - [Troubleshooting](#troubleshooting)
 - [Building Sorbet](#building-sorbet)
+  - [Common Compilation Errors](#common-compilation-errors)
 - [Running Sorbet](#running-sorbet)
 - [Running the tests](#running-the-tests)
 - [Testing Sorbet against pay-server](#testing-sorbet-against-pay-server)
@@ -148,6 +148,38 @@ debugging is
 
 In tools/bazel.rc you can find out what all these options (and others) mean.
 
+### Common Compilation Errors
+
+**(Mac) `Xcode version must be specified to use an Apple CROSSTOOL`**
+
+This error typically occurs after an XCode upgrade.
+
+Developer tools must be installed, the XCode license must be accepted, and
+your active XCode command line tools directory must point to an installed
+version of XCode.
+
+The following commands should do the trick:
+
+```shell
+# Install command line tools
+xcode-select --install
+# Ensure that the system finds command line tools in an active XCode directory
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+# Accept the XCode license.
+sudo xcodebuild -license
+# Clear bazel's cache, which may contain files generated from a previous
+# version of XCode command line tools.
+bazel clean --expunge
+```
+
+**(Mac) `fatal error: 'stdio.h' file not found`** (or some other system header)
+
+This error can happen on Macs when the `/usr/include` folder is missing. The
+solution is to install macOS headers via the following package:
+
+```shell
+open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+```
 
 ## Running Sorbet
 
