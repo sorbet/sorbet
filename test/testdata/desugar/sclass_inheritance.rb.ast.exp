@@ -7,7 +7,7 @@ class <emptyTree><<constant:<root>>> < ()
     class <singleton class><<constant:<todo sym>>> < ()
       self(<constant:<todo sym>>).include(<emptyTree>::<constant:MM>)
 
-      def newer<<constant:<todo sym>>>()
+      def newer<<constant:<todo sym>>>(&<blk>)
         self(<constant:<todo sym>>).new()
       end
     end
@@ -16,20 +16,20 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).extend(<emptyTree>::<constant:MM>)
 
-    def self.newer<<constant:<todo sym>>>()
+    def self.newer<<constant:<todo sym>>>(&<blk>)
       self(<constant:<todo sym>>).new()
     end
   end
 
   class <emptyTree>::<constant:C><<constant:<todo sym>>> < (<emptyTree>::<constant:A>)
     class <singleton class><<constant:<todo sym>>> < ()
-      def newerer<<constant:<todo sym>>>()
+      def newerer<<constant:<todo sym>>>(&<blk>)
         self(<constant:<todo sym>>).newer()
       end
     end
   end
 
-  def main<<constant:<todo sym>>>()
+  def main<<constant:<todo sym>>>(&<blk>)
     begin
       self(<constant:<todo sym>>).puts(<emptyTree>::<constant:A>.newer())
       self(<constant:<todo sym>>).puts(<emptyTree>::<constant:B>.newer())

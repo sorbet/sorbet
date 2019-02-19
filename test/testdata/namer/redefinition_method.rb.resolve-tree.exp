@@ -9,19 +9,19 @@ begin
 
     <emptyTree>
 
-    def foo<foo$1>(a)
+    def foo<foo$1>(a, <blk>)
       a
     end
 
-    def foo<foo$2>(a, b)
+    def foo<foo$2>(a, b, <blk>)
       <emptyTree>
     end
 
-    def foo<foo>(a, b, c)
+    def foo<foo>(a, b, c, <blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       self(<singleton class:<constant:Main>>).sig() do ||
         self(<constant:Builder>).params({:"a" => ::Integer}).returns(::Integer)
       end

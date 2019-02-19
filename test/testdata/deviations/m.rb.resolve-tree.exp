@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>()
+    def self.<static-init><<static-init>$87>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Opus::DB::Model::MyModel)

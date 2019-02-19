@@ -5,7 +5,7 @@ begin
       self(<singleton class:<constant:Test>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foo<foo>(x)
+    def foo<foo>(x, <blk>)
       x
     end
 
@@ -13,7 +13,7 @@ begin
       self(<singleton class:<constant:Test>>).params({:"y" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def bar<bar>(y)
+    def bar<bar>(y, <blk>)
       y
     end
 
@@ -21,7 +21,7 @@ begin
       self(<singleton class:<constant:Test>>).params({:"z" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def qux<qux>(z)
+    def qux<qux>(z, <blk>)
       z
     end
 
@@ -29,7 +29,7 @@ begin
       self(<singleton class:<constant:Test>>).params({:"w" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def baz<baz>(w)
+    def baz<baz>(w, <blk>)
       w
     end
   end

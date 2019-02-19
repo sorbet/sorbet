@@ -7,7 +7,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
     class <singleton class><<constant:<todo sym>>> < ()
-      def b<<constant:<todo sym>>>()
+      def b<<constant:<todo sym>>>(&<blk>)
         "b"
       end
     end
@@ -20,7 +20,7 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:D><<constant:<todo sym>>> < (::<todo sym>)
     class <singleton class><<constant:<todo sym>>> < ()
       class <singleton class><<constant:<todo sym>>> < ()
-        def d<<constant:<todo sym>>>()
+        def d<<constant:<todo sym>>>(&<blk>)
           "d"
         end
       end
@@ -29,8 +29,8 @@ class <emptyTree><<constant:<root>>> < ()
 
   class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<todo sym>)
     class <singleton class><<constant:<todo sym>>> < ()
-      def wrapper<<constant:<todo sym>>>()
-        def e<<constant:<todo sym>>>()
+      def wrapper<<constant:<todo sym>>>(&<blk>)
+        def e<<constant:<todo sym>>>(&<blk>)
           "e"
         end
       end
@@ -41,7 +41,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   class <emptyTree>::<constant:F><<constant:<todo sym>>> < (::<todo sym>)
     class <singleton class><<constant:<todo sym>>> < ()
-      def initialize<<constant:<todo sym>>>()
+      def initialize<<constant:<todo sym>>>(&<blk>)
         @f = <emptyTree>::<constant:T>.let(0, <emptyTree>::<constant:Integer>)
       end
 
@@ -56,10 +56,10 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   class <emptyTree>::<constant:G><<constant:<todo sym>>> < (::<todo sym>)
-    def wrapper<<constant:<todo sym>>>()
+    def wrapper<<constant:<todo sym>>>(&<blk>)
       begin
         class <singleton class><<constant:<todo sym>>> < ()
-          def inner<<constant:<todo sym>>>()
+          def inner<<constant:<todo sym>>>(&<blk>)
             <emptyTree>::<constant:T>.reveal_type(self(<constant:<todo sym>>))
           end
         end
@@ -67,7 +67,7 @@ class <emptyTree><<constant:<root>>> < ()
       end
     end
 
-    def self.g<<constant:<todo sym>>>()
+    def self.g<<constant:<todo sym>>>(&<blk>)
       "g"
     end
   end
@@ -75,14 +75,14 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:H><<constant:<todo sym>>> < (::<todo sym>)
     class <singleton class><<constant:<todo sym>>> < ()
       class <emptyTree>::<constant:H2><<constant:<todo sym>>> < (::<todo sym>)
-        def self.h<<constant:<todo sym>>>()
+        def self.h<<constant:<todo sym>>>(&<blk>)
           "h"
         end
       end
     end
   end
 
-  def main<<constant:<todo sym>>>()
+  def main<<constant:<todo sym>>>(&<blk>)
     begin
       self(<constant:<todo sym>>).puts(<emptyTree>::<constant:A>.a())
       self(<constant:<todo sym>>).puts(<emptyTree>::<constant:B>.b())

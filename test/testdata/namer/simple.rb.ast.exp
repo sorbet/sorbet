@@ -1,10 +1,10 @@
 class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:NormalClass><<constant:<todo sym>>> < (::<todo sym>)
-    def normal_method<<constant:<todo sym>>>()
+    def normal_method<<constant:<todo sym>>>(&<blk>)
       <emptyTree>
     end
 
-    def self.normal_static_method<<constant:<todo sym>>>()
+    def self.normal_static_method<<constant:<todo sym>>>(&<blk>)
       <emptyTree>
     end
 

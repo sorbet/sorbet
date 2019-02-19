@@ -4,7 +4,7 @@ begin
 
     <emptyTree>
 
-    def main<main>()
+    def main<main>(<blk>)
       begin
         self(<constant:Object>).puts(::A.newer())
         self(<constant:Object>).puts(::B.newer())
@@ -12,7 +12,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>$87>()
+    def self.<static-init><<static-init>$87>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::MM)
@@ -38,7 +38,7 @@ begin
   end
   module ::MM<<constant:MM>> < ()  end
   class ::A<<constant:A>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::RubyTyper.keep_for_ide(::MM)
         <emptyTree>
@@ -46,12 +46,12 @@ begin
     end
   end
   class <singleton class><<singleton class:<constant:A>>> < (::MM)
-    def newer<newer>()
+    def newer<newer>(<blk>)
       self(<singleton class:<constant:A>>).new()
     end
   end
   class ::B<<constant:B>> < (::<todo sym>)
-    def self.newer<newer>()
+    def self.newer<newer>(<blk>)
       self(<singleton class:<constant:B>>).new()
     end
   end
@@ -59,7 +59,7 @@ begin
     <emptyTree>
   end
   class <singleton class><<singleton class:<constant:C>>> < ()
-    def newerer<newerer>()
+    def newerer<newerer>(<blk>)
       self(<singleton class:<constant:C>>).newer()
     end
   end

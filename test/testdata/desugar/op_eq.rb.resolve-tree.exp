@@ -11,23 +11,23 @@ begin
 
     <emptyTree>
 
-    def b<b>()
+    def b<b>(<blk>)
       <emptyTree>
     end
 
-    def b=<b=>(_)
+    def b=<b=>(_, <blk>)
       <emptyTree>
     end
 
-    def y<y>()
+    def y<y>(<blk>)
       <emptyTree>
     end
 
-    def z<z>()
+    def z<z>(<blk>)
       <emptyTree>
     end
 
-    def example<example>(a)
+    def example<example>(a, <blk>)
       begin
         if a
           a = :"a"

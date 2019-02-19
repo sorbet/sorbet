@@ -1,14 +1,18 @@
 class ::<root> < ::Object () @ (test/testdata/resolver/linearization/linearization3.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init> () @ test/testdata/resolver/linearization/linearization3.rb:2
+  method #<static-init> (<blk>) @ test/testdata/resolver/linearization/linearization3.rb:2
+    argument #<static-init>#<blk><block> @ ???
   class ::A3 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/linearization/linearization3.rb:2
   class ::<Class:A3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:2
   class ::C3 < ::RubyTyper::ImplicitModuleSuperclass (<constant:A3>) @ test/testdata/resolver/linearization/linearization3.rb:3
   class ::<Class:C3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:3
-    method ::<Class:C3>#<static-init> () @ ???
+    method ::<Class:C3>#<static-init> (<blk>) @ ???
+      argument ::<Class:C3>#<static-init>#<blk><block> @ ???
   class ::D3 < ::RubyTyper::ImplicitModuleSuperclass (<constant:A3>) @ test/testdata/resolver/linearization/linearization3.rb:6
   class ::<Class:D3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:6
-    method ::<Class:D3>#<static-init> () @ ???
+    method ::<Class:D3>#<static-init> (<blk>) @ ???
+      argument ::<Class:D3>#<static-init>#<blk><block> @ ???
   class ::E3 < ::RubyTyper::ImplicitModuleSuperclass (<constant:D3>, <constant:C3>, <constant:A3>) @ test/testdata/resolver/linearization/linearization3.rb:9
   class ::<Class:E3> < ::Module () @ test/testdata/resolver/linearization/linearization3.rb:9
-    method ::<Class:E3>#<static-init> () @ test/testdata/resolver/linearization/linearization3.rb:9
+    method ::<Class:E3>#<static-init> (<blk>) @ test/testdata/resolver/linearization/linearization3.rb:9
+      argument ::<Class:E3>#<static-init>#<blk><block> @ ???
 

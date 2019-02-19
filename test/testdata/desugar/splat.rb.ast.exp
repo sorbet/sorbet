@@ -1,28 +1,28 @@
 class <emptyTree><<constant:<root>>> < ()
-  def bar<<constant:<todo sym>>>(a)
+  def bar<<constant:<todo sym>>>(a, &<blk>)
     a
   end
 
   class <emptyTree>::<constant:Splatable><<constant:<todo sym>>> < (::<todo sym>)
-    def to_a<<constant:<todo sym>>>()
+    def to_a<<constant:<todo sym>>>(&<blk>)
       [1]
     end
   end
 
   class <emptyTree>::<constant:Rescueable><<constant:<todo sym>>> < (::<todo sym>)
-    def to_a<<constant:<todo sym>>>()
+    def to_a<<constant:<todo sym>>>(&<blk>)
       [<emptyTree>::<constant:String>, <emptyTree>::<constant:RuntimeError>]
     end
   end
 
   class <emptyTree>::<constant:Parent><<constant:<todo sym>>> < (::<todo sym>)
-    def foo<<constant:<todo sym>>>(a, b)
+    def foo<<constant:<todo sym>>>(a, b, &<blk>)
       [b, a]
     end
   end
 
   class <emptyTree>::<constant:Child><<constant:<todo sym>>> < (<emptyTree>::<constant:Parent>)
-    def foo<<constant:<todo sym>>>()
+    def foo<<constant:<todo sym>>>(&<blk>)
       begin
         a = [1, 2]
         ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"super", a.to_a())
@@ -30,7 +30,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
-  def foo<<constant:<todo sym>>>()
+  def foo<<constant:<todo sym>>>(&<blk>)
     begin
       a = [1]
       a.to_a().concat([2])

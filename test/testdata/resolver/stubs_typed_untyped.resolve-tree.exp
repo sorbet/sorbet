@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>()
+    def self.<static-init><<static-init>$87>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Foo)
@@ -16,7 +16,7 @@ begin
   <emptyTree>
 end
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$88>()
+  def self.<static-init><<static-init>$88>(<blk>)
     begin
       ::Bar
       ::Foo::Bar

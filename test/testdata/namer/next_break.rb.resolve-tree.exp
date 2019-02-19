@@ -1,7 +1,7 @@
 begin
   ::RubyTyper.keep_for_ide(::Test)
   class ::Test<<constant:Test>> < (::<todo sym>)
-    def test_next_break<test_next_break>()
+    def test_next_break<test_next_break>(<blk>)
       self(<constant:Test>).each() do ||
         begin
           if self(<constant:Test>).rand()

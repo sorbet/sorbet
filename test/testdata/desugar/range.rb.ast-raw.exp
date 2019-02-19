@@ -5,7 +5,10 @@ ClassDef{
     MethodDef{
       flags = 0
       name = foo<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = InsSeq{
         stats = [
           Assign{

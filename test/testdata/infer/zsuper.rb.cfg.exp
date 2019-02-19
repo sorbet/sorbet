@@ -42,7 +42,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\lb: T.untyped = load_arg(Bar#baz#b)\l<statTemp>$4: Bar = self\l<block-pre-call-temp>$6: T.untyped = <statTemp>$4: Bar.super(b: T.untyped)\l<unconditional>\l"
+        label = "block[id=0]()\lb: T.untyped = load_arg(Bar#baz#b)\l<blk>: T.untyped = load_arg(Bar#baz#<blk>)\l<statTemp>$4: Bar = self\l<block-pre-call-temp>$7: T.untyped = <statTemp>$4: Bar.super(b: T.untyped, <blk>: T.untyped)\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_2" [style="bold"];
@@ -64,7 +64,7 @@ subgraph "cluster_::Bar#baz" {
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$7: T.untyped = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>)\l<blk>$8: Integer(0) = 0\la$2: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<statTemp>$10: Bar = self\l<blockReturnTemp>$9: NilClass = <statTemp>$10: Bar.puts(a$2: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$9: NilClass\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$8: T.untyped = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>)\l<blk>$9: Integer(0) = 0\la$2: T.untyped = <blk>$8: T.untyped.[](<blk>$9: Integer(0))\l<statTemp>$11: Bar = self\l<blockReturnTemp>$10: NilClass = <statTemp>$11: Bar.puts(a$2: T.untyped)\l<blockReturnTemp>$13: T.noreturn = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$10: NilClass\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_4" -> "bb::Bar#baz_2" [style="bold"];

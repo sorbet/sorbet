@@ -17,5 +17,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
       ]
     } @ test/testdata/namer/constant_types.rb:8
   class ::<Class:Constants> < ::Module () @ test/testdata/namer/constant_types.rb:2
-    method ::<Class:Constants>#<static-init> () @ test/testdata/namer/constant_types.rb:2
+    method ::<Class:Constants>#<static-init> (<blk>) @ test/testdata/namer/constant_types.rb:2
+      argument ::<Class:Constants>#<static-init>#<blk><block> @ ???
 

@@ -710,7 +710,9 @@ private:
                 ++argIt;
             } else {
                 arg.data(ctx)->resultType = core::Types::untyped(ctx, arg);
-                if (sig.seen.params || sig.seen.returns || sig.seen.void_) {
+                // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
+                bool isBlkArg = arg.data(ctx)->name == core::Names::blkArg();
+                if (!isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.data(ctx)->loc(),
                                                       core::errors::Resolver::InvalidMethodSignature)) {
@@ -1252,8 +1254,27 @@ public:
             sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol.data(ctx)->lookupSingletonClass(ctx),
                                               core::Names::staticInit());
         }
-        auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(),
-                                                ast::MethodDef::ARGS_store(), std::move(inits), true);
+
+        // Synthesize a block argument for this <static-init> block. This is rather fiddly,
+        // because we have to know exactly what invariants desugar and namer set up about
+        // methods and block arguments before us.
+        auto blkLoc = core::Loc::none(inits->loc.file());
+        core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
+        ast::MethodDef::ARGS_store args;
+        args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
+
+        if (sym.data(ctx)->arguments().empty()) {
+            auto blkSym = ctx.state.enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
+            blkSym.data(ctx)->setBlockArgument();
+            sym.data(ctx)->arguments().emplace_back(blkSym);
+        } else {
+            // Sometimes the <static-init> symbol already exists, which means we already added a block arg to it.
+            ENFORCE(sym.data(ctx)->arguments().back().data(ctx)->name == core::Names::blkArg());
+        }
+
+        auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(), std::move(args),
+                                                std::move(inits), true);
+
         classDef->rhs.emplace_back(std::move(init));
 
         return classDef;

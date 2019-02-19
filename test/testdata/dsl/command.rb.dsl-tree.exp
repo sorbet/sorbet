@@ -8,7 +8,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def call<<constant:<todo sym>>>(x)
+    def call<<constant:<todo sym>>>(x, &<blk>)
       x.to_s()
     end
 
@@ -16,7 +16,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def self.call<<constant:<todo sym>>>(x)
+    def self.call<<constant:<todo sym>>>(x, &<blk>)
       ::T.untyped()
     end
   end
@@ -28,7 +28,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:Integer>)
     end
 
-    def call<<constant:<todo sym>>>(x)
+    def call<<constant:<todo sym>>>(x, &<blk>)
       self(<constant:<todo sym>>).Integer(x)
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:Integer>)
     end
 
-    def self.call<<constant:<todo sym>>>(x)
+    def self.call<<constant:<todo sym>>>(x, &<blk>)
       ::T.untyped()
     end
   end
@@ -50,7 +50,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:Integer>)
     end
 
-    def call<<constant:<todo sym>>>(x)
+    def call<<constant:<todo sym>>>(x, &<blk>)
       self(<constant:<todo sym>>).Integer(x)
     end
   end
@@ -58,7 +58,7 @@ class <emptyTree><<constant:<root>>> < ()
   <emptyTree>::<constant:NotACommand>.call()
 
   class <emptyTree>::<constant:CallNoSig><<constant:<todo sym>>> < (<emptyTree>::<constant:Opus>::<constant:Command>)
-    def call<<constant:<todo sym>>>(x)
+    def call<<constant:<todo sym>>>(x, &<blk>)
       self(<constant:<todo sym>>).Integer(x)
     end
   end

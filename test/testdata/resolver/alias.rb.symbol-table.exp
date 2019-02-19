@@ -3,7 +3,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     static-field-type-alias ::Foo::A -> T.untyped @ test/testdata/resolver/alias.rb:5
     static-field-type-alias ::Foo::ADDRESS_TYPE -> T.untyped @ test/testdata/resolver/alias.rb:18
     static-field-type-alias ::Foo::Reactions -> T.untyped @ test/testdata/resolver/alias.rb:11
-    method ::Foo#address () -> NilClass | ShapeType {
+    method ::Foo#address (<blk>) -> NilClass | ShapeType {
           Symbol(:"line1") => String | NilClass
           Symbol(:"line2") => String | NilClass
           Symbol(:"city") => String | NilClass
@@ -11,13 +11,18 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
           Symbol(:"postal_code") => String | NilClass
           Symbol(:"country") => String | NilClass
         } @ test/testdata/resolver/alias.rb:28
-    method ::Foo#any () @ test/testdata/resolver/alias.rb:32
-    method ::Foo#bar (a) -> Integer @ test/testdata/resolver/alias.rb:7
+      argument ::Foo#address#<blk><block> -> T.untyped @ ???
+    method ::Foo#any (<blk>) @ test/testdata/resolver/alias.rb:32
+      argument ::Foo#any#<blk><block> @ ???
+    method ::Foo#bar (a, <blk>) -> Integer @ test/testdata/resolver/alias.rb:7
       argument ::Foo#bar#a<> -> Integer @ test/testdata/resolver/alias.rb:6
-    method ::Foo#react () -> String @ test/testdata/resolver/alias.rb:14
+      argument ::Foo#bar#<blk><block> -> T.untyped @ ???
+    method ::Foo#react (<blk>) -> String @ test/testdata/resolver/alias.rb:14
+      argument ::Foo#react#<blk><block> -> T.untyped @ ???
   class ::<Class:Foo> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/alias.rb:2
     method ::<Class:Foo>#<block> () @ test/testdata/resolver/alias.rb:6
     method ::<Class:Foo>#<block> () @ test/testdata/resolver/alias.rb:13
     method ::<Class:Foo>#<block> () @ test/testdata/resolver/alias.rb:27
-    method ::<Class:Foo>#<static-init> () @ test/testdata/resolver/alias.rb:2
+    method ::<Class:Foo>#<static-init> (<blk>) @ test/testdata/resolver/alias.rb:2
+      argument ::<Class:Foo>#<static-init>#<blk><block> @ ???
 

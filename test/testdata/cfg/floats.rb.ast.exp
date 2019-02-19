@@ -1,5 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
-  def test_large_float<<constant:<todo sym>>>()
+  def test_large_float<<constant:<todo sym>>>(&<blk>)
     begin
       a = 3.141593
       a = 0.000001

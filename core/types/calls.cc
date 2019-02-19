@@ -652,6 +652,27 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
     }
 
+    if (args.block != nullptr) {
+        SymbolRef bspec;
+        if (!data->arguments().empty()) {
+            bspec = data->arguments().back();
+        }
+        if (!bspec.exists() || !bspec.data(ctx)->isBlockArgument()) {
+            // TODO(nelhage): passing a block to a function that does not accept one
+        } else {
+            TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
+            if (!blockType) {
+                blockType = Types::untyped(ctx, bspec);
+            }
+
+            args.block->returnTp = Types::getProcReturnType(ctx, blockType);
+            blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
+                                           : Types::approximate(ctx, blockType, *constr);
+
+            args.block->blockPreType = blockType;
+        }
+    }
+
     TypePtr resultType = nullptr;
 
     if (method.data(ctx)->intrinsic != nullptr) {
@@ -680,25 +701,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     resultType = Types::replaceSelfType(ctx, resultType, args.selfType);
 
     if (args.block != nullptr) {
-        SymbolRef bspec;
-        if (!data->arguments().empty()) {
-            bspec = data->arguments().back();
-        }
-        if (!bspec.exists() || !bspec.data(ctx)->isBlockArgument()) {
-            // TODO(nelhage): passing a block to a function that does not accept one
-        } else {
-            TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
-            if (!blockType) {
-                blockType = Types::untyped(ctx, bspec);
-            }
-
-            args.block->returnTp = Types::getProcReturnType(ctx, blockType);
-            blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
-                                           : Types::approximate(ctx, blockType, *constr);
-
-            args.block->blockPreType = blockType;
-            args.block->sendTp = resultType;
-        }
+        args.block->sendTp = resultType;
     }
     result.returnType = std::move(resultType);
     return result;

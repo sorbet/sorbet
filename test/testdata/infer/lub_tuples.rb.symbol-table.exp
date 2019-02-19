@@ -7,15 +7,19 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
                 0 = TrueClass | FalseClass
                 1 = String | NilClass
               } @ test/testdata/infer/lub_tuples.rb:6
-          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#cond () @ test/testdata/infer/lub_tuples.rb:10
-          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#determined_build_group_status_and_which : private () -> TupleType {
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#cond (<blk>) @ test/testdata/infer/lub_tuples.rb:10
+            argument ::Opus::CIBot::Tasks::NotifySlackBuildComplete#cond#<blk><block> @ ???
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#determined_build_group_status_and_which : private (<blk>) -> TupleType {
             0 = TrueClass | FalseClass
             1 = String | NilClass
           } @ test/testdata/infer/lub_tuples.rb:13
-          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#initialize () @ test/testdata/infer/lub_tuples.rb:5
+            argument ::Opus::CIBot::Tasks::NotifySlackBuildComplete#determined_build_group_status_and_which#<blk><block> -> T.untyped @ ???
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#initialize (<blk>) @ test/testdata/infer/lub_tuples.rb:5
+            argument ::Opus::CIBot::Tasks::NotifySlackBuildComplete#initialize#<blk><block> @ ???
         class ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete> < ::<Class:Object> (<constant:Sig>) @ test/testdata/infer/lub_tuples.rb:2
           method ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<block> () @ test/testdata/infer/lub_tuples.rb:12
-          method ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<static-init> () @ test/testdata/infer/lub_tuples.rb:12
+          method ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<static-init> (<blk>) @ test/testdata/infer/lub_tuples.rb:12
+            argument ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<static-init>#<blk><block> @ ???
       class ::Opus::CIBot::<Class:Tasks> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
     class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
 

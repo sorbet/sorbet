@@ -1,6 +1,6 @@
 class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:NotAODM><<constant:<todo sym>>> < (::<todo sym>)
-    def self.prop<<constant:<todo sym>>>(*args)
+    def self.prop<<constant:<todo sym>>>(*args, &<blk>)
       <emptyTree>
     end
 
@@ -32,7 +32,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def foo<<constant:<todo sym>>>()
+    def foo<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -40,7 +40,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foo=<<constant:<todo sym>>>(arg0)
+    def foo=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -48,7 +48,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
     end
 
-    def foo2<<constant:<todo sym>>>()
+    def foo2<<constant:<todo sym>>>(&<blk>)
       <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:T>.unsafe(nil), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -56,7 +56,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foo2=<<constant:<todo sym>>>(arg0)
+    def foo2=<<constant:<todo sym>>>(arg0, &<blk>)
       <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
     end
   end
@@ -70,7 +70,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def default_without_optional_false<<constant:<todo sym>>>()
+    def default_without_optional_false<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -78,7 +78,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def default_without_optional_false=<<constant:<todo sym>>>(arg0)
+    def default_without_optional_false=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -86,7 +86,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
 
-    def optional_false<<constant:<todo sym>>>()
+    def optional_false<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -94,7 +94,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def optional_false=<<constant:<todo sym>>>(arg0)
+    def optional_false=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -102,7 +102,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def nodefault<<constant:<todo sym>>>()
+    def nodefault<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -110,7 +110,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def nodefault=<<constant:<todo sym>>>(arg0)
+    def nodefault=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -118,7 +118,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
 
-    def type<<constant:<todo sym>>>()
+    def type<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -126,7 +126,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def type=<<constant:<todo sym>>>(arg0)
+    def type=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -134,7 +134,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(::Object))
     end
 
-    def object<<constant:<todo sym>>>()
+    def object<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(::Object))
     end
 
@@ -142,7 +142,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::Object}).returns(::Object)
     end
 
-    def object=<<constant:<todo sym>>>(arg0)
+    def object=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::Object)
     end
 
@@ -150,7 +150,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:Array>)
     end
 
-    def array<<constant:<todo sym>>>()
+    def array<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
     end
 
@@ -158,7 +158,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
     end
 
-    def array=<<constant:<todo sym>>>(arg0)
+    def array=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
     end
 
@@ -167,7 +167,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
       end
 
-      def array=<<constant:<todo sym>>>(arg0)
+      def array=<<constant:<todo sym>>>(arg0, &<blk>)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
       end
 
@@ -175,7 +175,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
 
-      def array<<constant:<todo sym>>>()
+      def array<<constant:<todo sym>>>(&<blk>)
         ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
     end
@@ -184,7 +184,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T::Array.[](<emptyTree>::<constant:String>))
     end
 
-    def array_of<<constant:<todo sym>>>()
+    def array_of<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T::Array.[](<emptyTree>::<constant:String>))
     end
 
@@ -192,7 +192,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::T::Array.[](<emptyTree>::<constant:String>)}).returns(::T::Array.[](<emptyTree>::<constant:String>))
     end
 
-    def array_of=<<constant:<todo sym>>>(arg0)
+    def array_of=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::T::Array.[](<emptyTree>::<constant:String>))
     end
 
@@ -200,7 +200,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:Array>)
     end
 
-    def array_of_explicit<<constant:<todo sym>>>()
+    def array_of_explicit<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
     end
 
@@ -208,7 +208,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
     end
 
-    def array_of_explicit=<<constant:<todo sym>>>(arg0)
+    def array_of_explicit=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
     end
 
@@ -217,7 +217,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
       end
 
-      def array_of_explicit=<<constant:<todo sym>>>(arg0)
+      def array_of_explicit=<<constant:<todo sym>>>(arg0, &<blk>)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
       end
 
@@ -225,7 +225,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
 
-      def array_of_explicit<<constant:<todo sym>>>()
+      def array_of_explicit<<constant:<todo sym>>>(&<blk>)
         ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
     end
@@ -234,7 +234,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
     end
 
-    def t_array<<constant:<todo sym>>>()
+    def t_array<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
     end
 
@@ -242,7 +242,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
     end
 
-    def t_array=<<constant:<todo sym>>>(arg0)
+    def t_array=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
     end
 
@@ -251,7 +251,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
       end
 
-      def t_array=<<constant:<todo sym>>>(arg0)
+      def t_array=<<constant:<todo sym>>>(arg0, &<blk>)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
       end
 
@@ -259,7 +259,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
       end
 
-      def t_array<<constant:<todo sym>>>()
+      def t_array<<constant:<todo sym>>>(&<blk>)
         ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
       end
     end
@@ -268,7 +268,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
     end
 
-    def hash_of<<constant:<todo sym>>>()
+    def hash_of<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
     end
 
@@ -276,7 +276,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
     end
 
-    def hash_of=<<constant:<todo sym>>>(arg0)
+    def hash_of=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
     end
 
@@ -285,7 +285,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
-      def hash_of=<<constant:<todo sym>>>(arg0)
+      def hash_of=<<constant:<todo sym>>>(arg0, &<blk>)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
@@ -293,7 +293,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
-      def hash_of<<constant:<todo sym>>>()
+      def hash_of<<constant:<todo sym>>>(&<blk>)
         ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
     end
@@ -302,7 +302,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def optional_explicit<<constant:<todo sym>>>()
+    def optional_explicit<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -310,7 +310,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def optional_explicit=<<constant:<todo sym>>>(arg0)
+    def optional_explicit=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -318,7 +318,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def optional_existing<<constant:<todo sym>>>()
+    def optional_existing<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -326,7 +326,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def optional_existing=<<constant:<todo sym>>>(arg0)
+    def optional_existing=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -334,7 +334,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
 
-    def optional<<constant:<todo sym>>>()
+    def optional<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -342,7 +342,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def optional=<<constant:<todo sym>>>(arg0)
+    def optional=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -350,7 +350,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
     end
 
-    def optional_nilable<<constant:<todo sym>>>()
+    def optional_nilable<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -358,7 +358,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))}).returns(::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
     end
 
-    def optional_nilable=<<constant:<todo sym>>>(arg0)
+    def optional_nilable=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
     end
 
@@ -366,7 +366,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
 
-    def const_explicit<<constant:<todo sym>>>()
+    def const_explicit<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -374,7 +374,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
 
-    def const<<constant:<todo sym>>>()
+    def const<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -382,7 +382,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Array>))
     end
 
-    def no_class_arg<<constant:<todo sym>>>()
+    def no_class_arg<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Array>))
     end
 
@@ -391,7 +391,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:Array>)}).returns(::T.nilable(<emptyTree>::<constant:Array>))
       end
 
-      def no_class_arg=<<constant:<todo sym>>>(arg0)
+      def no_class_arg=<<constant:<todo sym>>>(arg0, &<blk>)
         ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Array>))
       end
 
@@ -399,7 +399,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
 
-      def no_class_arg<<constant:<todo sym>>>()
+      def no_class_arg<<constant:<todo sym>>>(&<blk>)
         ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
     end
@@ -408,7 +408,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.untyped())
     end
 
-    def enum_prop<<constant:<todo sym>>>()
+    def enum_prop<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -416,7 +416,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def foreign<<constant:<todo sym>>>()
+    def foreign<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -424,7 +424,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foreign=<<constant:<todo sym>>>(arg0)
+    def foreign=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -432,7 +432,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
     end
 
-    def foreign_<<constant:<todo sym>>>(*opts:)
+    def foreign_<<constant:<todo sym>>>(*opts:, &<blk>)
       ::T.unsafe(nil)
     end
 
@@ -440,7 +440,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def foreign_lazy<<constant:<todo sym>>>()
+    def foreign_lazy<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -448,7 +448,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foreign_lazy=<<constant:<todo sym>>>(arg0)
+    def foreign_lazy=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -456,7 +456,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
     end
 
-    def foreign_lazy_<<constant:<todo sym>>>(*opts:)
+    def foreign_lazy_<<constant:<todo sym>>>(*opts:, &<blk>)
       ::T.unsafe(nil)
     end
 
@@ -464,7 +464,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def foreign_proc<<constant:<todo sym>>>()
+    def foreign_proc<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -472,7 +472,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foreign_proc=<<constant:<todo sym>>>(arg0)
+    def foreign_proc=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -480,7 +480,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
     end
 
-    def foreign_proc_<<constant:<todo sym>>>(*opts:)
+    def foreign_proc_<<constant:<todo sym>>>(*opts:, &<blk>)
       ::T.unsafe(nil)
     end
 
@@ -488,7 +488,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def foreign_invalid<<constant:<todo sym>>>()
+    def foreign_invalid<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
@@ -496,7 +496,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
-    def foreign_invalid=<<constant:<todo sym>>>(arg0)
+    def foreign_invalid=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
@@ -504,7 +504,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.untyped())
     end
 
-    def foreign_invalid_<<constant:<todo sym>>>(*opts:)
+    def foreign_invalid_<<constant:<todo sym>>>(*opts:, &<blk>)
       ::T.unsafe(nil)
     end
   end
@@ -514,7 +514,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::String)
     end
 
-    def token<<constant:<todo sym>>>()
+    def token<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
 
@@ -522,7 +522,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::String}).returns(::String)
     end
 
-    def token=<<constant:<todo sym>>>(arg0)
+    def token=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
 
@@ -530,7 +530,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::Float)
     end
 
-    def created<<constant:<todo sym>>>()
+    def created<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
 
@@ -538,7 +538,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::Float}).returns(::Float)
     end
 
-    def created=<<constant:<todo sym>>>(arg0)
+    def created=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
   end
@@ -548,7 +548,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::String)
     end
 
-    def token<<constant:<todo sym>>>()
+    def token<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
 
@@ -556,7 +556,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::String}).returns(::String)
     end
 
-    def token=<<constant:<todo sym>>>(arg0)
+    def token=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
 
@@ -564,7 +564,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::Float)
     end
 
-    def created<<constant:<todo sym>>>()
+    def created<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
   end
@@ -574,7 +574,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::String)
     end
 
-    def merchant<<constant:<todo sym>>>()
+    def merchant<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
   end
@@ -584,7 +584,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(::String))
     end
 
-    def foo<<constant:<todo sym>>>()
+    def foo<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
     end
 
@@ -592,7 +592,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
     end
 
-    def encrypted_foo<<constant:<todo sym>>>()
+    def encrypted_foo<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
     end
 
@@ -600,7 +600,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(::String)}).returns(::T.nilable(::String))
     end
 
-    def foo=<<constant:<todo sym>>>(arg0)
+    def foo=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
     end
 
@@ -608,7 +608,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>)}).returns(::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
     end
 
-    def encrypted_foo=<<constant:<todo sym>>>(arg0)
+    def encrypted_foo=<<constant:<todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
     end
 
@@ -616,7 +616,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(::String))
     end
 
-    def bar<<constant:<todo sym>>>()
+    def bar<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
     end
 
@@ -624,12 +624,12 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
     end
 
-    def encrypted_bar<<constant:<todo sym>>>()
+    def encrypted_bar<<constant:<todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
     end
   end
 
-  def main<<constant:<todo sym>>>()
+  def main<<constant:<todo sym>>>(&<blk>)
     begin
       <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
       <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo(), <emptyTree>::<constant:String>)

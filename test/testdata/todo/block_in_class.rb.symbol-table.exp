@@ -10,5 +10,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
   class ::<Class:C> < ::<Class:Object> () @ test/testdata/todo/block_in_class.rb:2
     method ::<Class:C>#<block> (x) @ test/testdata/todo/block_in_class.rb:3
       argument ::<Class:C>#<block>#x<> @ test/testdata/todo/block_in_class.rb:3
-    method ::<Class:C>#<static-init> () @ test/testdata/todo/block_in_class.rb:3
+    method ::<Class:C>#<static-init> (<blk>) @ test/testdata/todo/block_in_class.rb:3
+      argument ::<Class:C>#<static-init>#<blk><block> @ ???
 

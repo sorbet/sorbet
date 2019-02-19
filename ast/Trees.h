@@ -463,6 +463,7 @@ private:
 };
 // CheckSize(Send, 64, 8);
 
+// TODO(jez) Remove ast::Yield from Trees.h
 class Yield final : public Expression {
 public:
     Send::ARGS_store args;

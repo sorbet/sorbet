@@ -13,8 +13,8 @@ class Examples
     end
   end
 
+    # <returnMethodTemp>$2: Integer(1)
     def i_like_exps()
-      # <returnMethodTemp>$2: Integer(1)
       if (true)
           # <ifTemp>$4: TrueClass
         1
@@ -22,11 +22,11 @@ class Examples
       else
         2 # error: This code is unreachable
       end
-      # dead=1
-      # <returnMethodTemp>$2: Integer(1)
-      #
-      # <finalReturn>: T.noreturn
     end
+    # dead=1
+    # <returnMethodTemp>$2: Integer(1)
+    #
+    # <finalReturn>: T.noreturn
 
     def return_in_one_branch1()
       if (true)
@@ -190,8 +190,8 @@ class Examples
       b # error: This code is unreachable
     end
 
+    # <returnMethodTemp>$2: T.untyped
     def take_arguments(i)
-      # <returnMethodTemp>$2: T.untyped
       if(false)
          # <ifTemp>$4: FalseClass
          #
@@ -204,10 +204,10 @@ class Examples
        #
        # i: T.untyped
       end
-      # dead=1
-      # <returnMethodTemp>$2: T.untyped
-      #
-      # <finalReturn>: T.noreturn
     end
+    # dead=1
+    # <returnMethodTemp>$2: T.untyped
+    #
+    # <finalReturn>: T.noreturn
 
 end

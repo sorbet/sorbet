@@ -11,35 +11,35 @@ begin
 
     <emptyTree>
 
-    def foo<foo>(x)
+    def foo<foo>(x, <blk>)
       begin
         T.let(nil, String)
         x
       end
     end
 
-    def bar<bar>(y)
+    def bar<bar>(y, <blk>)
       begin
         T.let(nil, String)
         y
       end
     end
 
-    def qux<qux>(z)
+    def qux<qux>(z, <blk>)
       begin
         T.let("", String)
         z
       end
     end
 
-    def baz<baz>(w)
+    def baz<baz>(w, <blk>)
       begin
         T.let("", String)
         w
       end
     end
 
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         self(<singleton class:<constant:Test>>).sig() do ||
           self(<constant:Builder>).params({:"x" => ::String}).returns(::String)

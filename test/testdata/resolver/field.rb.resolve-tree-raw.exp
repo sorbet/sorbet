@@ -7,6 +7,8 @@ ClassDef{
       name = foo<foo>
       args = [Local{
           localVariable = a
+        }, Local{
+          localVariable = <blk>
         }]
       rhs = Assign{
         lhs = UnresolvedIdent{

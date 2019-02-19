@@ -195,13 +195,18 @@ public:
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                              MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs,
                                              u4 flags = 0) {
+        if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<BlockArg>(args.back().get()))) {
+            auto blkLoc = core::Loc::none(declLoc.file());
+            args.emplace_back(std::make_unique<BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+        }
         return std::make_unique<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs),
                                            flags);
     }
 
     static std::unique_ptr<Expression> Method0(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                                std::unique_ptr<Expression> rhs, u4 flags = 0) {
-        return Method(loc, declLoc, name, {}, std::move(rhs), flags);
+        MethodDef::ARGS_store args;
+        return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 
     static std::unique_ptr<Expression> Method1(core::Loc loc, core::Loc declLoc, core::NameRef name,

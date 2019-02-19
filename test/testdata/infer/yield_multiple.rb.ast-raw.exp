@@ -114,7 +114,13 @@ ClassDef{
             ]
           }
         ],
-        expr = Yield{
+        expr = Send{
+          recv = UnresolvedIdent{
+            kind = Local
+            name = blk
+          }
+          fun = call
+          block = nullptr
           args = [
             Literal{ value = 1 }
             Literal{ value = :"hi" }

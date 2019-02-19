@@ -6,5 +6,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     class ::NS::Dest < ::Object () @ test/testdata/resolver/inherit_alias.rb:6
     class ::NS::<Class:Dest> < ::<Class:Object> () @ test/testdata/resolver/inherit_alias.rb:6
   class ::<Class:NS> < ::Module () @ test/testdata/resolver/inherit_alias.rb:2
-    method ::<Class:NS>#<static-init> () @ test/testdata/resolver/inherit_alias.rb:2
+    method ::<Class:NS>#<static-init> (<blk>) @ test/testdata/resolver/inherit_alias.rb:2
+      argument ::<Class:NS>#<static-init>#<blk><block> @ ???
 

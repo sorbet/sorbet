@@ -112,6 +112,11 @@ suggest-sig.rb:64: This function does not have a `sig` http://go/e/7017
 suggest-sig.rb:74: This function does not have a `sig` http://go/e/7017
     74 |def takesBlock
         ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig.rb:74: Insert `sig {generated.returns(Integer)}
+`
+    74 |def takesBlock
+        ^
 
 suggest-sig.rb:79: This function does not have a `sig` http://go/e/7017
     79 |def list_ints_or_empty_list
@@ -146,6 +151,11 @@ suggest-sig.rb:84: This function does not have a `sig` http://go/e/7017
 suggest-sig.rb:92: This function does not have a `sig` http://go/e/7017
     92 |def with_block
         ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig.rb:92: Insert `sig {generated.returns(NilClass)}
+`
+    92 |def with_block
+        ^
 
 suggest-sig.rb:98: This function does not have a `sig` http://go/e/7017
     98 |def takesRepated(*a); end;
@@ -327,6 +337,7 @@ def fooWhile(a, cond1, cond2)
   end
 end
 
+sig {generated.returns(Integer)}
 def takesBlock
   yield 1
   2
@@ -347,6 +358,7 @@ def dead(x)
   end
 end
 
+sig {generated.returns(NilClass)}
 def with_block
   yield
   nil

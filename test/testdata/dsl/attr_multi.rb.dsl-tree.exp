@@ -5,7 +5,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
   end
 
-  def a<<constant:<todo sym>>>()
+  def a<<constant:<todo sym>>>(&<blk>)
     @a
   end
 
@@ -13,7 +13,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).params({:"a" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
   end
 
-  def a=<<constant:<todo sym>>>(a)
+  def a=<<constant:<todo sym>>>(a, &<blk>)
     @a = a
   end
 
@@ -21,7 +21,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
   end
 
-  def b<<constant:<todo sym>>>()
+  def b<<constant:<todo sym>>>(&<blk>)
     @b
   end
 
@@ -29,7 +29,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
   end
 
-  def c<<constant:<todo sym>>>()
+  def c<<constant:<todo sym>>>(&<blk>)
     @c
   end
 
@@ -37,7 +37,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).params({:"b" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
   end
 
-  def b=<<constant:<todo sym>>>(b)
+  def b=<<constant:<todo sym>>>(b, &<blk>)
     @b = b
   end
 
@@ -45,7 +45,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).params({:"c" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
   end
 
-  def c=<<constant:<todo sym>>>(c)
+  def c=<<constant:<todo sym>>>(c, &<blk>)
     @c = c
   end
 
@@ -53,7 +53,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
   end
 
-  def d<<constant:<todo sym>>>()
+  def d<<constant:<todo sym>>>(&<blk>)
     @d
   end
 
@@ -61,7 +61,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
   end
 
-  def e<<constant:<todo sym>>>()
+  def e<<constant:<todo sym>>>(&<blk>)
     @e
   end
 
@@ -69,7 +69,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
   end
 
-  def f<<constant:<todo sym>>>()
+  def f<<constant:<todo sym>>>(&<blk>)
     @f
   end
 
@@ -77,7 +77,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).params({:"g" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
   end
 
-  def g=<<constant:<todo sym>>>(g)
+  def g=<<constant:<todo sym>>>(g, &<blk>)
     @g = g
   end
 
@@ -85,7 +85,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).params({:"h" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
   end
 
-  def h=<<constant:<todo sym>>>(h)
+  def h=<<constant:<todo sym>>>(h, &<blk>)
     @h = h
   end
 
@@ -93,7 +93,7 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).params({:"i" => <emptyTree>::<constant:String>}).params({:"h" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
   end
 
-  def i=<<constant:<todo sym>>>(i)
+  def i=<<constant:<todo sym>>>(i, &<blk>)
     @i = i
   end
 end

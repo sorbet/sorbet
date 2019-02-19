@@ -4,9 +4,12 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     static-field ::LetErrors::@@cvar -> Integer @ test/testdata/resolver/let_errors.rb:4
     field ::LetErrors#@a -> Integer @ test/testdata/resolver/let_errors.rb:9
     field ::LetErrors#@ivar -> Integer @ test/testdata/resolver/let_errors.rb:5
-    method ::LetErrors#initialize () @ test/testdata/resolver/let_errors.rb:3
-    method ::LetErrors#not_initialize () @ test/testdata/resolver/let_errors.rb:8
+    method ::LetErrors#initialize (<blk>) @ test/testdata/resolver/let_errors.rb:3
+      argument ::LetErrors#initialize#<blk><block> @ ???
+    method ::LetErrors#not_initialize (<blk>) @ test/testdata/resolver/let_errors.rb:8
+      argument ::LetErrors#not_initialize#<blk><block> @ ???
   class ::<Class:LetErrors> < ::<Class:Object> () @ test/testdata/resolver/let_errors.rb:2
-    method ::<Class:LetErrors>#<static-init> () @ test/testdata/resolver/let_errors.rb:2
+    method ::<Class:LetErrors>#<static-init> (<blk>) @ test/testdata/resolver/let_errors.rb:2
+      argument ::<Class:LetErrors>#<static-init>#<blk><block> @ ???
     field ::<Class:LetErrors>#@b -> String @ test/testdata/resolver/let_errors.rb:12
 

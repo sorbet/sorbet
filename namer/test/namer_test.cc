@@ -68,7 +68,7 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto methodSym = objectScope->members.at(ctx.state.enterNameUTF8("hello_world"));
     const auto &symbol = methodSym.data(ctx);
     ASSERT_EQ(core::Symbols::Object(), symbol->owner);
-    ASSERT_EQ(0, symbol->arguments().size());
+    ASSERT_EQ(1, symbol->arguments().size());
 }
 
 TEST_F(NamerFixture, Idempotent) { // NOLINT
@@ -83,12 +83,16 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
         newtree = namer::Namer::run(ctx, move(tree));
     }
-    ASSERT_EQ(baseSymbols + 1, ctx.state.symbolsUsed());
+    auto staticInit = 1;
+    auto staticInitBlockArg = 1;
+    auto extraSymbols = staticInit + staticInitBlockArg;
+
+    ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
 
     // Run it again and get the same numbers
     namer::Namer::run(ctx, move(newtree));
-    ASSERT_EQ(baseSymbols + 1, ctx.state.symbolsUsed());
+    ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
 }
 

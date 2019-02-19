@@ -101,6 +101,12 @@ class NameInserter {
                  [&](ast::ShadowArg *shadow) {
                      parsedArg = parseArg(ctx, move(shadow->expr));
                      parsedArg.shadow = true;
+                 },
+                 [&](ast::Local *local) {
+                     // Namer replaces args with locals, so to make namer idempotent,
+                     // we need to be able to handle Locals here.
+                     parsedArg.name = local->localVariable._name;
+                     parsedArg.loc = local->loc;
                  });
         return parsedArg;
     }
@@ -162,41 +168,6 @@ class NameInserter {
 
     vector<LocalFrame> scopeStack;
     u4 scopeCounter;
-
-    // `yield` needs to know the block argument provided to the enclosing
-    // method. When we enter a method, we push a frame with `declared`
-    // containing any declared block parameter. When we encounter a `yield`, we
-    // desugar into a call to that block, or, if it doesn't exist, synthesize an
-    // argument and populate `discovered`; on exit from a method we will insert
-    // a block argument if `discovered` exists().
-    struct BlockArgs {
-        core::LocalVariable declared;
-        core::LocalVariable discovered;
-        core::Loc discoveredLoc;
-    };
-    vector<BlockArgs> blockArgStack;
-
-    core::LocalVariable findOrCreateBlockParameter(core::MutableContext ctx, core::Loc loc) {
-        ENFORCE(!blockArgStack.empty());
-        auto &frame = blockArgStack.back();
-        if (frame.declared.exists()) {
-            return frame.declared;
-        }
-        if (frame.discovered.exists()) {
-            return frame.discovered;
-        }
-        // Found yield, and method doesn't have a blk arg, so let's make one.
-
-        // Implicit block parameters are always declared as arguments to a
-        // method; We take advantage of the fact that method top-level locals
-        // always have unique=0 to synthesize the local directly. We can't use
-        // `enterLocal` since that will enter it into our current scope, which
-        // may be inside an inner block.
-        frame.discovered = core::LocalVariable{core::Names::blkArg(), 0};
-        frame.discoveredLoc = loc;
-
-        return frame.discovered;
-    }
 
     bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
@@ -520,23 +491,6 @@ public:
                     aliasMethod(ctx, methodOwner(ctx), args[0], meth);
                     break;
                 }
-                case core::Names::blockGiven_p()._id: {
-                    // Desugar block_given? into `blk ? block_given? : false`
-
-                    // This has the property of:
-                    //
-                    // - having the right type (T.any(TrueClass, FalseClass))
-                    // - Typechecking the call to block_given?
-                    // - Letting infer know the expression can only be
-                    //   truthy if `blk` is truthy
-                    if (!blockArgStack.empty()) {
-                        auto loc = original->loc;
-                        auto blockArg = findOrCreateBlockParameter(ctx, loc);
-                        auto iff = ast::MK::If(loc, make_unique<ast::Local>(loc, blockArg), std::move(original),
-                                               ast::MK::False(loc));
-                        return iff;
-                    }
-                }
             }
         }
 
@@ -554,8 +508,10 @@ public:
         auto sym = ctx.owner;
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                // Eventually we should be more principled about how we report this.
                 e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                            sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size(), parsedArgs.size());
+                            sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
                 e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
             }
             return false;
@@ -604,14 +560,6 @@ public:
         return true;
     }
 
-    void pushBlockArg(core::MutableContext ctx, const vector<ParsedArg> &args) {
-        core::LocalVariable blockArgVar;
-        if (!args.empty() && args.back().block) {
-            blockArgVar = core::LocalVariable{args.back().name, 0};
-        }
-        blockArgStack.emplace_back(BlockArgs{blockArgVar, core::LocalVariable::noVariable()});
-    }
-
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         enterScope();
 
@@ -641,7 +589,6 @@ public:
                 // TODO remove if the paramsMatch is perfect
                 // Reparsing the same file
                 method->symbol = sym;
-                pushBlockArg(ctx, parsedArgs);
                 method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
                 return method;
             }
@@ -652,7 +599,6 @@ public:
             }
         }
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
-        pushBlockArg(ctx, parsedArgs);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
         if (method->isDSLSynthesized()) {
@@ -662,18 +608,6 @@ public:
     }
 
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        auto frame = blockArgStack.back();
-        blockArgStack.pop_back();
-        if (frame.discovered.exists()) {
-            auto blockArg =
-                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), method->symbol, frame.discovered._name);
-            blockArg.data(ctx)->setBlockArgument();
-            blockArg.data(ctx)->resultType = core::Types::untyped(ctx, blockArg);
-            method->symbol.data(ctx)->arguments().emplace_back(blockArg);
-
-            method->args.emplace_back(make_unique<ast::Local>(frame.discoveredLoc, frame.discovered));
-        }
-
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         exitScope();
         if (scopeStack.back().moduleFunctionActive) {
@@ -925,22 +859,12 @@ public:
         }
     }
 
-    unique_ptr<ast::Expression> postTransformYield(core::MutableContext ctx, unique_ptr<ast::Yield> yield) {
-        if (!blockArgStack.empty()) {
-            auto recv = make_unique<ast::Local>(yield->loc, findOrCreateBlockParameter(ctx, yield->loc));
-            return make_unique<ast::Send>(yield->loc, std::move(recv), core::Names::call(), std::move(yield->args));
-        } else {
-            return make_unique<ast::Send>(yield->loc, ast::MK::Unsafe(yield->loc, ast::MK::Nil(yield->loc)),
-                                          core::Names::call(), std::move(yield->args));
-        }
-    }
-
 private:
     NameInserter() {
         scopeCounter = 0;
         enterScope();
     }
-}; // namespace namer
+};
 
 ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
     NameInserter nameInserter;

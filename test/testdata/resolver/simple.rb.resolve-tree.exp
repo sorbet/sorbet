@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>()
+    def self.<static-init><<static-init>$87>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Outer1)
@@ -16,7 +16,7 @@ begin
   end
   class ::Outer1<<constant:Outer1>> < (::<todo sym>)  end
   class ::Outer2<<constant:Outer2>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Outer2::C)
@@ -41,7 +41,7 @@ begin
   end
   class ::Outer2::C<<constant:C>> < (::<todo sym>)  end
   class ::Outer2::Inner1<<constant:Inner1>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Outer2::Inner1::A)
@@ -57,7 +57,7 @@ begin
   end
   class ::Outer2::Inner1::A<<constant:A>> < (::<todo sym>)  end
   class ::Outer2::Inner1::Inner2<<constant:Inner2>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::Outer2::Inner1::A
         ::Outer2::Inner1
@@ -68,7 +68,7 @@ begin
     end
   end
   class ::Outer2::Inner1::Inner2<<constant:Inner2>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::Outer2::C
         ::Outer2::Inner1::Inner2::A

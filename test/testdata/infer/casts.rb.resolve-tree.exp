@@ -5,11 +5,11 @@ begin
 
     <emptyTree>
 
-    def untyped<untyped>()
+    def untyped<untyped>(<blk>)
       <emptyTree>
     end
 
-    def test_casts<test_casts>()
+    def test_casts<test_casts>(<blk>)
       begin
         t = begin
           ::RubyTyper.keep_for_typechecking(::Integer)

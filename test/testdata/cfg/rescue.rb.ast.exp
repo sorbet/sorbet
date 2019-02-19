@@ -1,5 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
-  def main<<constant:<todo sym>>>()
+  def main<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).a()
   rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).b()
@@ -9,19 +9,19 @@ class <emptyTree><<constant:<root>>> < ()
     self(<constant:<todo sym>>).d()
   end
 
-  def a<<constant:<todo sym>>>()
+  def a<<constant:<todo sym>>>(&<blk>)
     <emptyTree>
   end
 
-  def b<<constant:<todo sym>>>()
+  def b<<constant:<todo sym>>>(&<blk>)
     <emptyTree>
   end
 
-  def c<<constant:<todo sym>>>()
+  def c<<constant:<todo sym>>>(&<blk>)
     <emptyTree>
   end
 
-  def d<<constant:<todo sym>>>()
+  def d<<constant:<todo sym>>>(&<blk>)
     <emptyTree>
   end
 

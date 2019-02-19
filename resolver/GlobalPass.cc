@@ -287,9 +287,12 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
         }
     }
 
-    if (left.blk.exists() && !right.blk.exists()) {
+    ENFORCE(left.blk.exists() && right.blk.exists(), "Broken assumption: every method has a block argument.");
+    // TODO(jez) This is a raw string comparison on argument names
+    if (left.blk.data(gs)->argumentName(gs) != core::Names::blkArg().data(gs)->shortName(gs) &&
+        right.blk.data(gs)->argumentName(gs) == core::Names::blkArg().data(gs)->shortName(gs)) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of abstract method `{}` must accept a block parameter",
+            e.setHeader("Implementation of abstract method `{}` must explicitly name a block argument",
                         superMethod.data(gs)->show(gs));
             e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
         }

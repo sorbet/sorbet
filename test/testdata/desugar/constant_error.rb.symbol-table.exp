@@ -2,5 +2,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
   class ::Foo < ::Object () @ test/testdata/desugar/constant_error.rb:2
     static-field ::Foo::BAR -> Integer(100) @ test/testdata/desugar/constant_error.rb:3
   class ::<Class:Foo> < ::<Class:Object> () @ test/testdata/desugar/constant_error.rb:2
-    method ::<Class:Foo>#<static-init> () @ test/testdata/desugar/constant_error.rb:3
+    method ::<Class:Foo>#<static-init> (<blk>) @ test/testdata/desugar/constant_error.rb:3
+      argument ::<Class:Foo>#<static-init>#<blk><block> @ ???
 

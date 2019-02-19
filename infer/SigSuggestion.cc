@@ -478,9 +478,6 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
 
     auto isBadArg = [&](const core::SymbolRef &arg) -> bool {
         return
-            // Sometimes we synthesize a block arg, and name it `<blk>` which is not a valid identifier name.
-            arg.data(ctx)->isBlockArgument() ||
-
             // runtime does not support rest args and key-rest args
             arg.data(ctx)->isRepeated() ||
 
@@ -518,12 +515,22 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         return false;
     }
 
-    bool first = true;
-
     fmt::format_to(ss, "sig {{generated.");
-    if (!methodSymbol.data(ctx)->arguments().empty()) {
+
+    ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
+    bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
+                                methodSymbol.data(ctx)->arguments()[0].data(ctx)->name == core::Names::blkArg();
+
+    if (!onlyArgumentIsBlkArg) {
         fmt::format_to(ss, "params(");
+
+        bool first = true;
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
+            if (argSym.data(ctx)->name == core::Names::blkArg()) {
+                // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
+                // (We add a block argument to every method if it doesn't mention one.)
+                continue;
+            }
             if (!first) {
                 fmt::format_to(ss, ", ");
             }

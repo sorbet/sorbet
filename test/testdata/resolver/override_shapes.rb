@@ -42,13 +42,22 @@ class Ok_Optional < Base
   def foo(req=nil, opt=nil, kwreq: nil, kwopt: nil, &blk); end
 end
 
+class Ok_BlockRenamed < Base
+  sig do
+    override
+      .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, my_blk: Proc)
+      .returns(Object)
+  end
+  def foo(req, opt=nil, kwreq:, kwopt: nil, &my_blk); end
+end
+
 class Bad_MissingBlock < Base
   sig do
     override
       .params(req: Object, opt: Object, kwreq: Object, kwopt: Object)
       .returns(Object)
   end
-  def foo(req, opt=nil, kwreq:, kwopt: nil); end  # error: must accept a block
+  def foo(req, opt=nil, kwreq:, kwopt: nil); end  # error: must explicitly name a block argument
 end
 
 class Bad_MissingPositional < Base

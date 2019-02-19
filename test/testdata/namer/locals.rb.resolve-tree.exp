@@ -1,7 +1,7 @@
 begin
   ::RubyTyper.keep_for_ide(::TestLocals)
   class ::TestLocals<<constant:TestLocals>> < (::<todo sym>)
-    def method<method>()
+    def method<method>(<blk>)
       begin
         a = 1
         c = 4

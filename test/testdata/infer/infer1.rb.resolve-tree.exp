@@ -15,29 +15,29 @@ class <emptyTree><<constant:<root>>> < ()
 
   <emptyTree>
 
-  def baz1<baz1>()
+  def baz1<baz1>(<blk>)
     begin
       a = "foo"
       b = a.getbyte(a)
     end
   end
 
-  def baz2<baz2>()
+  def baz2<baz2>(<blk>)
     begin
       a = "foo"
       b = a.getbyte("foo")
     end
   end
 
-  def baz3<baz3>()
+  def baz3<baz3>(<blk>)
     b = "foo".getbyte("foo")
   end
 
-  def baz4<baz4>()
+  def baz4<baz4>(<blk>)
     b = self(<constant:Object>).a().getbyte("foo")
   end
 
-  def baz5<baz5>(cond)
+  def baz5<baz5>(cond, <blk>)
     begin
       if cond
         b = 1
@@ -48,7 +48,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
-  def baz6<baz6>(cond)
+  def baz6<baz6>(cond, <blk>)
     begin
       if cond
         b = 1
@@ -59,7 +59,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
-  def baz7<baz7>(cond)
+  def baz7<baz7>(cond, <blk>)
     begin
       if cond
         b = 1
@@ -70,7 +70,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
-  def baz8<baz8>()
+  def baz8<baz8>(<blk>)
     while true
       b = 1
     end

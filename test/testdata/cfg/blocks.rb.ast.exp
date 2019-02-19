@@ -1,5 +1,5 @@
 class <emptyTree>::<constant:BlockTest><<constant:<todo sym>>> < (::<todo sym>)
-  def block_pass<<constant:<todo sym>>>()
+  def block_pass<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).foo(1, 2, 3) do |x, y|
       x
     end

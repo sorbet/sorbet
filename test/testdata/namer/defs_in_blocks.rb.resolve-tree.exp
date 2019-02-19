@@ -1,7 +1,7 @@
 class <emptyTree><<constant:<root>>> < ()
   <emptyTree>
 
-  def self.<static-init><<static-init>$87>()
+  def self.<static-init><<static-init>$87>(<blk>)
     self(<singleton class:<constant:<root>>>).foobar() do ||
       begin
         <emptyTree>
@@ -11,15 +11,15 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
-  def a_method<a_method>()
+  def a_method<a_method>(<blk>)
     <emptyTree>
   end
 
-  def a_method_with_param<a_method_with_param>(a)
+  def a_method_with_param<a_method_with_param>(a, <blk>)
     <emptyTree>
   end
 
-  def self.a_static_method<a_static_method>()
+  def self.a_static_method<a_static_method>(<blk>)
     <emptyTree>
   end
 end

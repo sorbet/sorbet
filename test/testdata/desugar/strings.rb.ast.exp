@@ -1,5 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
-  def test_strings<<constant:<todo sym>>>()
+  def test_strings<<constant:<todo sym>>>(&<blk>)
     begin
       ""
       "foo"

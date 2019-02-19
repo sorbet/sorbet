@@ -5,11 +5,11 @@ begin
 
     <emptyTree>
 
-    def Foo<Foo>()
+    def Foo<Foo>(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::RubyTyper.keep_for_ide(::A::Foo)
         <emptyTree>

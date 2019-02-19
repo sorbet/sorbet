@@ -1,6 +1,6 @@
 class <emptyTree><<constant:<root>>> < ()
   module <emptyTree>::<constant:Interface><<constant:<todo sym>>> < ()
-    def some_method<<constant:<todo sym>>>()
+    def some_method<<constant:<todo sym>>>(&<blk>)
       <emptyTree>
     end
   end
@@ -8,18 +8,18 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:SomeClass><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).include(<emptyTree>::<constant:Interface>)
 
-    def other_method<<constant:<todo sym>>>()
+    def other_method<<constant:<todo sym>>>(&<blk>)
       <emptyTree>
     end
   end
 
   class <emptyTree>::<constant:Other><<constant:<todo sym>>> < (::<todo sym>)
-    def self.wrap_instance<<constant:<todo sym>>>(x, y = nil)
+    def self.wrap_instance<<constant:<todo sym>>>(x, y = nil, &<blk>)
       <emptyTree>
     end
   end
 
-  def testit<<constant:<todo sym>>>()
+  def testit<<constant:<todo sym>>>(&<blk>)
     begin
       s = <emptyTree>::<constant:SomeClass>.new()
       wrap = ::T.let(s, <emptyTree>::<constant:Interface>)

@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>()
+    def self.<static-init><<static-init>$87>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Main)
@@ -49,7 +49,7 @@ begin
       end
     end
 
-    def main<main>()
+    def main<main>(<blk>)
       begin
         l = self(<constant:Main>).lambda() do |x|
           begin

@@ -5,7 +5,10 @@ ClassDef{
     MethodDef{
       flags = 0
       name = main<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = Rescue{
         body = Send{
           recv = Self{ claz = ::<todo sym> }
@@ -51,28 +54,40 @@ ClassDef{
     MethodDef{
       flags = 0
       name = a<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = EmptyTree
     }
 
     MethodDef{
       flags = 0
       name = b<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = EmptyTree
     }
 
     MethodDef{
       flags = 0
       name = c<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = EmptyTree
     }
 
     MethodDef{
       flags = 0
       name = d<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = EmptyTree
     }
 

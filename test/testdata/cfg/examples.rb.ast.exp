@@ -1,5 +1,5 @@
 class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
-  def i_like_ifs<<constant:<todo sym>>>()
+  def i_like_ifs<<constant:<todo sym>>>(&<blk>)
     if true
       return 1
     else
@@ -7,7 +7,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def i_like_exps<<constant:<todo sym>>>()
+  def i_like_exps<<constant:<todo sym>>>(&<blk>)
     if true
       1
     else
@@ -15,7 +15,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def return_in_one_branch1<<constant:<todo sym>>>()
+  def return_in_one_branch1<<constant:<todo sym>>>(&<blk>)
     if true
       return 1
     else
@@ -23,7 +23,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def return_in_one_branch2<<constant:<todo sym>>>()
+  def return_in_one_branch2<<constant:<todo sym>>>(&<blk>)
     if true
       1
     else
@@ -31,7 +31,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def variables<<constant:<todo sym>>>()
+  def variables<<constant:<todo sym>>>(&<blk>)
     begin
       if true
         a = 1
@@ -47,7 +47,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def variables_and_loop<<constant:<todo sym>>>(cond)
+  def variables_and_loop<<constant:<todo sym>>>(cond, &<blk>)
     begin
       if true
         a = 1
@@ -65,7 +65,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def variables_loop_if<<constant:<todo sym>>>(cond)
+  def variables_loop_if<<constant:<todo sym>>>(cond, &<blk>)
     begin
       while true
         if cond
@@ -78,7 +78,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def take_arguments<<constant:<todo sym>>>(i)
+  def take_arguments<<constant:<todo sym>>>(i, &<blk>)
     if false
       2
     else

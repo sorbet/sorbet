@@ -6,7 +6,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Complex>}).void()
     end
 
-    def foo<<constant:<todo sym>>>(x)
+    def foo<<constant:<todo sym>>>(x, &<blk>)
       <emptyTree>::<constant:Kernel>.puts(x)
     end
 
@@ -14,7 +14,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Complex>)
     end
 
-    def bar<<constant:<todo sym>>>()
+    def bar<<constant:<todo sym>>>(&<blk>)
       ::Kernel.Complex(0, "11")
     end
 
@@ -22,7 +22,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).void()
     end
 
-    def baz<<constant:<todo sym>>>()
+    def baz<<constant:<todo sym>>>(&<blk>)
       <emptyTree>::<constant:Kernel>.puts(::Kernel.Complex(0, "2"))
     end
   end
@@ -34,7 +34,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Complex>}).void()
     end
 
-    def foo<<constant:<todo sym>>>(x)
+    def foo<<constant:<todo sym>>>(x, &<blk>)
       self(<constant:<todo sym>>).puts(x)
     end
   end

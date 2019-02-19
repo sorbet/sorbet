@@ -3,21 +3,31 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     field ::TestAttr#@v1 -> Integer @ test/testdata/dsl/attr.rb:7
     field ::TestAttr#@v2 -> String @ test/testdata/dsl/attr.rb:8
     field ::TestAttr#@v6 -> String @ test/testdata/dsl/attr.rb:9
-    method ::TestAttr#initialize () -> RubyTyper::Void @ test/testdata/dsl/attr.rb:6
-    method ::TestAttr#v1 () -> Integer @ test/testdata/dsl/attr.rb:13
-    method ::TestAttr#v1= (v1) -> Integer @ test/testdata/dsl/attr.rb:15
+    method ::TestAttr#initialize (<blk>) -> RubyTyper::Void @ test/testdata/dsl/attr.rb:6
+      argument ::TestAttr#initialize#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v1 (<blk>) -> Integer @ test/testdata/dsl/attr.rb:13
+      argument ::TestAttr#v1#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v1= (v1, <blk>) -> Integer @ test/testdata/dsl/attr.rb:15
       argument ::TestAttr#v1=#v1<> -> Integer @ test/testdata/dsl/attr.rb:14
-    method ::TestAttr#v2 () -> String @ test/testdata/dsl/attr.rb:18
-    method ::TestAttr#v2= (v2) -> String @ test/testdata/dsl/attr.rb:18
+      argument ::TestAttr#v1=#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v2 (<blk>) -> String @ test/testdata/dsl/attr.rb:18
+      argument ::TestAttr#v2#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v2= (v2, <blk>) -> String @ test/testdata/dsl/attr.rb:18
       argument ::TestAttr#v2=#v2<> -> String @ test/testdata/dsl/attr.rb:18
-    method ::TestAttr#v3 () -> String @ test/testdata/dsl/attr.rb:21
-    method ::TestAttr#v4= (v4) @ test/testdata/dsl/attr.rb:23
+      argument ::TestAttr#v2=#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v3 (<blk>) -> String @ test/testdata/dsl/attr.rb:21
+      argument ::TestAttr#v3#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v4= (v4, <blk>) @ test/testdata/dsl/attr.rb:23
       argument ::TestAttr#v4=#v4<> @ test/testdata/dsl/attr.rb:23
-    method ::TestAttr#v5= (v5) @ test/testdata/dsl/attr.rb:23
+      argument ::TestAttr#v4=#<blk><block> @ ???
+    method ::TestAttr#v5= (v5, <blk>) @ test/testdata/dsl/attr.rb:23
       argument ::TestAttr#v5=#v5<> @ test/testdata/dsl/attr.rb:23
-    method ::TestAttr#v6 () -> String @ test/testdata/dsl/attr.rb:28
-    method ::TestAttr#v6= (v6) -> String @ test/testdata/dsl/attr.rb:28
+      argument ::TestAttr#v5=#<blk><block> @ ???
+    method ::TestAttr#v6 (<blk>) -> String @ test/testdata/dsl/attr.rb:28
+      argument ::TestAttr#v6#<blk><block> -> T.untyped @ ???
+    method ::TestAttr#v6= (v6, <blk>) -> String @ test/testdata/dsl/attr.rb:28
       argument ::TestAttr#v6=#v6<> -> String @ test/testdata/dsl/attr.rb:28
+      argument ::TestAttr#v6=#<blk><block> -> T.untyped @ ???
   class ::<Class:TestAttr> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/attr.rb:2
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:5
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:12
@@ -27,5 +37,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:20
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:27
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:27
-    method ::<Class:TestAttr>#<static-init> () @ test/testdata/dsl/attr.rb:2
+    method ::<Class:TestAttr>#<static-init> (<blk>) @ test/testdata/dsl/attr.rb:2
+      argument ::<Class:TestAttr>#<static-init>#<blk><block> @ ???
 

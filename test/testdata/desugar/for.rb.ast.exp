@@ -1,25 +1,25 @@
 class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
-    def self.each<<constant:<todo sym>>>()
+    def self.each<<constant:<todo sym>>>(&<blk>)
       begin
-        yield(1, 2, 3, 4, 5)
-        yield(6, 7, 8, 9, 0)
+        <blk>.call(1, 2, 3, 4, 5)
+        <blk>.call(6, 7, 8, 9, 0)
       end
     end
   end
 
   class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<todo sym>)
-    def self.e=<<constant:<todo sym>>>(e)
+    def self.e=<<constant:<todo sym>>>(e, &<blk>)
       @e = e
     end
 
-    def self.e<<constant:<todo sym>>>()
+    def self.e<<constant:<todo sym>>>(&<blk>)
       @e
     end
   end
 
   class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<todo sym>)
-    def self.main<<constant:<todo sym>>>()
+    def self.main<<constant:<todo sym>>>(&<blk>)
       begin
         <emptyTree>::<constant:A>.each() do |*forTemp$2|
           begin

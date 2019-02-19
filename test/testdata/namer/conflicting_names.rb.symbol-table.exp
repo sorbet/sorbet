@@ -2,7 +2,9 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
   class ::A < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/conflicting_names.rb:2
     class ::A::Foo < ::Object () @ test/testdata/namer/conflicting_names.rb:6
     class ::A::<Class:Foo> < ::<Class:Object> () @ test/testdata/namer/conflicting_names.rb:6
-    method ::A#Foo () @ test/testdata/namer/conflicting_names.rb:3
+    method ::A#Foo (<blk>) @ test/testdata/namer/conflicting_names.rb:3
+      argument ::A#Foo#<blk><block> @ ???
   class ::<Class:A> < ::Module () @ test/testdata/namer/conflicting_names.rb:2
-    method ::<Class:A>#<static-init> () @ test/testdata/namer/conflicting_names.rb:6
+    method ::<Class:A>#<static-init> (<blk>) @ test/testdata/namer/conflicting_names.rb:6
+      argument ::<Class:A>#<static-init>#<blk><block> @ ???
 

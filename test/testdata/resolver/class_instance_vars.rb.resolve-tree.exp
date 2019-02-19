@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>()
+    def self.<static-init><<static-init>$87>(<blk>)
       begin
         begin
           ::RubyTyper.keep_for_ide(::Parent)
@@ -32,7 +32,7 @@ begin
 
     <emptyTree>
 
-    def initialize<initialize>()
+    def initialize<initialize>(<blk>)
       begin
         @ivar = begin
           ::RubyTyper.keep_for_typechecking(::Integer)
@@ -45,14 +45,14 @@ begin
       end
     end
 
-    def hi<hi>()
+    def hi<hi>(<blk>)
       begin
         @ivar = 1
         @ivar2
       end
     end
 
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       @@class_var = begin
         ::RubyTyper.keep_for_typechecking(::String)
         T.let("hi", String)
@@ -60,7 +60,7 @@ begin
     end
   end
   module ::Mixin<<constant:Mixin>> < ()
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         @@mixin_cvar = begin
           ::RubyTyper.keep_for_typechecking(::Integer)
@@ -76,7 +76,7 @@ begin
 
     <emptyTree>
 
-    def child_method<child_method>()
+    def child_method<child_method>(<blk>)
       begin
         @@class_var
         @@mixin_cvar
@@ -85,7 +85,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         @@class_var
         @@mixin_cvar
@@ -96,7 +96,7 @@ begin
     end
   end
   class ::Child1<<constant:Child1>> < (::Parent)
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       @@class_var
     end
   end

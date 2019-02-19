@@ -1,16 +1,19 @@
 class ::<root> < ::Object () @ (test/testdata/namer/simple.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init> () @ test/testdata/namer/simple.rb:2
+  method #<static-init> (<blk>) @ test/testdata/namer/simple.rb:2
+    argument #<static-init>#<blk><block> @ ???
   class ::ANamespace < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/simple.rb:13
     class ::ANamespace::ClassInNamespace < ::Object () @ test/testdata/namer/simple.rb:17
     class ::ANamespace::<Class:ClassInNamespace> < ::<Class:Object> () @ test/testdata/namer/simple.rb:17
     class ::ANamespace::ObviousChild < ::Object () @ test/testdata/namer/simple.rb:14
     class ::ANamespace::<Class:ObviousChild> < ::<Class:Object> () @ test/testdata/namer/simple.rb:14
   class ::<Class:ANamespace> < ::Module () @ test/testdata/namer/simple.rb:13
-    method ::<Class:ANamespace>#<static-init> () @ test/testdata/namer/simple.rb:14
+    method ::<Class:ANamespace>#<static-init> (<blk>) @ test/testdata/namer/simple.rb:14
+      argument ::<Class:ANamespace>#<static-init>#<blk><block> @ ???
   class ::Child < ::Parent (<constant:Mixin>) @ test/testdata/namer/simple.rb:26
   class ::<Class:Child> < ::<Class:Parent> () @ test/testdata/namer/simple.rb:26
     method ::<Class:Child>#<block> () @ test/testdata/namer/simple.rb:29
-    method ::<Class:Child>#<static-init> () @ test/testdata/namer/simple.rb:26
+    method ::<Class:Child>#<static-init> (<blk>) @ test/testdata/namer/simple.rb:26
+      argument ::<Class:Child>#<static-init>#<blk><block> @ ???
   class ::Mixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/simple.rb:22
   class ::<Class:Mixin> < ::Module () @ test/testdata/namer/simple.rb:22
   class ::NormalClass < ::Object () @ test/testdata/namer/simple.rb:2
@@ -18,10 +21,13 @@ class ::<root> < ::Object () @ (test/testdata/namer/simple.rb:2, https://git.cor
     class ::NormalClass::<Class:InnerClass> < ::<Class:Object> () @ test/testdata/namer/simple.rb:7
     class ::NormalClass::InnerModule < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/simple.rb:9
     class ::NormalClass::<Class:InnerModule> < ::Module () @ test/testdata/namer/simple.rb:9
-    method ::NormalClass#normal_method () @ test/testdata/namer/simple.rb:3
+    method ::NormalClass#normal_method (<blk>) @ test/testdata/namer/simple.rb:3
+      argument ::NormalClass#normal_method#<blk><block> @ ???
   class ::<Class:NormalClass> < ::<Class:Object> () @ test/testdata/namer/simple.rb:2
-    method ::<Class:NormalClass>#<static-init> () @ test/testdata/namer/simple.rb:2
-    method ::<Class:NormalClass>#normal_static_method () @ test/testdata/namer/simple.rb:5
+    method ::<Class:NormalClass>#<static-init> (<blk>) @ test/testdata/namer/simple.rb:2
+      argument ::<Class:NormalClass>#<static-init>#<blk><block> @ ???
+    method ::<Class:NormalClass>#normal_static_method (<blk>) @ test/testdata/namer/simple.rb:5
+      argument ::<Class:NormalClass>#normal_static_method#<blk><block> @ ???
   class ::OtherMixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/simple.rb:24
   class ::<Class:OtherMixin> < ::Module () @ test/testdata/namer/simple.rb:24
   class ::Parent < ::Object () @ test/testdata/namer/simple.rb:20

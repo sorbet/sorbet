@@ -23,7 +23,7 @@ begin
 
     <emptyTree>
 
-    def initialize<initialize>()
+    def initialize<initialize>(<blk>)
       begin
         @v1 = begin
           ::RubyTyper.keep_for_typechecking(::Integer)
@@ -40,43 +40,43 @@ begin
       end
     end
 
-    def v1<v1>()
+    def v1<v1>(<blk>)
       @v1
     end
 
-    def v1=<v1=>(v1)
+    def v1=<v1=>(v1, <blk>)
       @v1 = v1
     end
 
-    def v2<v2>()
+    def v2<v2>(<blk>)
       @v2
     end
 
-    def v2=<v2=>(v2)
+    def v2=<v2=>(v2, <blk>)
       @v2 = v2
     end
 
-    def v3<v3>()
+    def v3<v3>(<blk>)
       @v3
     end
 
-    def v4=<v4=>(v4)
+    def v4=<v4=>(v4, <blk>)
       @v4 = v4
     end
 
-    def v5=<v5=>(v5)
+    def v5=<v5=>(v5, <blk>)
       @v5 = v5
     end
 
-    def v6<v6>()
+    def v6<v6>(<blk>)
       @v6
     end
 
-    def v6=<v6=>(v6)
+    def v6=<v6=>(v6, <blk>)
       @v6 = v6
     end
 
-    def self.<static-init><<static-init>>()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         self(<singleton class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).void()

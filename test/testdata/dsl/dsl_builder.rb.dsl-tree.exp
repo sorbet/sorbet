@@ -4,7 +4,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"opt_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
     end
 
-    def self.opt_string<<constant:<todo sym>>>(opt_string)
+    def self.opt_string<<constant:<todo sym>>>(opt_string, &<blk>)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def self.get_opt_string<<constant:<todo sym>>>()
+    def self.get_opt_string<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def opt_string<<constant:<todo sym>>>()
+    def opt_string<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::NilClass)
     end
 
-    def self.opt_int_defaulted<<constant:<todo sym>>>(opt_int_defaulted)
+    def self.opt_int_defaulted<<constant:<todo sym>>>(opt_int_defaulted, &<blk>)
       <emptyTree>
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Integer>)
     end
 
-    def self.get_opt_int_defaulted<<constant:<todo sym>>>()
+    def self.get_opt_int_defaulted<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Integer>)
     end
 
-    def opt_int_defaulted<<constant:<todo sym>>>()
+    def opt_int_defaulted<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"req_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
     end
 
-    def self.req_string<<constant:<todo sym>>>(req_string)
+    def self.req_string<<constant:<todo sym>>>(req_string, &<blk>)
       <emptyTree>
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
     end
 
-    def self.get_req_string<<constant:<todo sym>>>()
+    def self.get_req_string<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -68,7 +68,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
     end
 
-    def req_string<<constant:<todo sym>>>()
+    def req_string<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -76,7 +76,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"implied_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
     end
 
-    def self.implied_string<<constant:<todo sym>>>(implied_string = ::T.untyped())
+    def self.implied_string<<constant:<todo sym>>>(implied_string = ::T.untyped(), &<blk>)
       <emptyTree>
     end
 
@@ -84,7 +84,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
     end
 
-    def self.get_implied_string<<constant:<todo sym>>>()
+    def self.get_implied_string<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -92,7 +92,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
     end
 
-    def implied_string<<constant:<todo sym>>>()
+    def implied_string<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -100,7 +100,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"no_getter" => <emptyTree>::<constant:String>}).returns(::NilClass)
     end
 
-    def self.no_getter<<constant:<todo sym>>>(no_getter)
+    def self.no_getter<<constant:<todo sym>>>(no_getter, &<blk>)
       <emptyTree>
     end
 
@@ -108,7 +108,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def self.get_no_setter<<constant:<todo sym>>>()
+    def self.get_no_setter<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -116,7 +116,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
-    def no_setter<<constant:<todo sym>>>()
+    def no_setter<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -126,7 +126,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"class_of" => <emptyTree>::<constant:T>.class_of(<emptyTree>::<constant:Integer>)}).returns(::NilClass)
     end
 
-    def self.class_of<<constant:<todo sym>>>(class_of)
+    def self.class_of<<constant:<todo sym>>>(class_of, &<blk>)
       <emptyTree>
     end
 
@@ -134,7 +134,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:T>.class_of(<emptyTree>::<constant:Integer>)))
     end
 
-    def self.get_class_of<<constant:<todo sym>>>()
+    def self.get_class_of<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -142,7 +142,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:T>.class_of(<emptyTree>::<constant:Integer>)))
     end
 
-    def class_of<<constant:<todo sym>>>()
+    def class_of<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -150,7 +150,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).params({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
     end
 
-    def self.root_const<<constant:<todo sym>>>(root_const)
+    def self.root_const<<constant:<todo sym>>>(root_const, &<blk>)
       <emptyTree>
     end
 
@@ -158,7 +158,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(::<root>::<constant:Integer>))
     end
 
-    def self.get_root_const<<constant:<todo sym>>>()
+    def self.get_root_const<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
 
@@ -166,7 +166,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).returns(::T.nilable(::<root>::<constant:Integer>))
     end
 
-    def root_const<<constant:<todo sym>>>()
+    def root_const<<constant:<todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
   end
@@ -200,7 +200,7 @@ class <emptyTree><<constant:<root>>> < ()
 
     <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_req_string(), <emptyTree>::<constant:String>)
 
-    def test_instance_methods<<constant:<todo sym>>>()
+    def test_instance_methods<<constant:<todo sym>>>(&<blk>)
       begin
         <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).opt_string(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).opt_int_defaulted(), <emptyTree>::<constant:Integer>)

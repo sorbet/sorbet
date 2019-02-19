@@ -100,6 +100,9 @@ void Local::_sanityCheck() {
 
 void MethodDef::_sanityCheck() {
     ENFORCE(name.exists());
+    ENFORCE(!args.empty(), "Every method should have at least one arg (the block arg).\n");
+    ENFORCE(isa_tree<BlockArg>(args.back().get()) || isa_tree<Local>(args.back().get()),
+            "Last arg must be a block arg (or a local, if block args have already been removed).");
     for (auto &node : args) {
         ENFORCE(node);
     }

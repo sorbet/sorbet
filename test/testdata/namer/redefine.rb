@@ -59,7 +59,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_blockness(a)
   1
 end
-def wrong_blockness(&a) # error: redefined with mismatched argument attribute `isBlock`. Expected: `false`, got: `true`
+def wrong_blockness(&a) # error: redefined without matching argument count. Expected: `1`, got: `0`
   2
 end
 T.reveal_type(wrong_blockness()) # error: Revealed type: `T.untyped`

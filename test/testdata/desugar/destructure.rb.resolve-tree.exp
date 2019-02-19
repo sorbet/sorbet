@@ -1,7 +1,7 @@
 begin
   ::RubyTyper.keep_for_ide(::Destructure)
   class ::Destructure<<constant:Destructure>> < (::<todo sym>)
-    def f<f>((x,y), z)
+    def f<f>((x,y), z, <blk>)
       begin
         begin
           <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 2, 0)

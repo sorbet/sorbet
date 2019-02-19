@@ -57,7 +57,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   ::Kernel.Complex(0, "1.5")
 
-  def self.classmeth<<constant:<todo sym>>>()
+  def self.classmeth<<constant:<todo sym>>>(&<blk>)
     <emptyTree>
   end
 
@@ -107,7 +107,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   self(<constant:<todo sym>>).super(ZSuperArgs)
 
-  def kwfoo<<constant:<todo sym>>>(x:, y: = 1, *z:)
+  def kwfoo<<constant:<todo sym>>>(x:, y: = 1, *z:, &<blk>)
     <emptyTree>
   end
 
@@ -166,7 +166,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   4
 
-  def optfoo<<constant:<todo sym>>>(x = 1, *y)
+  def optfoo<<constant:<todo sym>>>(x = 1, *y, &<blk>)
     <emptyTree>
   end
 
@@ -216,11 +216,11 @@ rescue <emptyTree>::<constant:E> => x
       <emptyTree>
     end)
 
-  def sfoo<<constant:<todo sym>>>(**$2)
+  def sfoo<<constant:<todo sym>>>(**$2, &<blk>)
     <emptyTree>
   end
 
-  def ssfoo<<constant:<todo sym>>>(***$3:)
+  def ssfoo<<constant:<todo sym>>>(***$3:, &<blk>)
     <emptyTree>
   end
 end

@@ -19,6 +19,9 @@ ClassDef{
           args = [RestArg{ expr = UnresolvedIdent{
               kind = Local
               name = args
+            } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
             } }]
           rhs = EmptyTree
         }
@@ -299,7 +302,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foo<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -389,7 +395,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -454,7 +463,10 @@ ClassDef{
         MethodDef{
           flags = 0
           name = foo2<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = UnresolvedConstantLit{
               scope = EmptyTree
@@ -537,7 +549,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = UnresolvedConstantLit{
               scope = EmptyTree
@@ -633,7 +648,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = default_without_optional_false<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -723,7 +741,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -792,7 +813,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = optional_false<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -871,7 +895,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -951,7 +978,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = nodefault<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1041,7 +1071,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1110,7 +1143,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = type<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1189,7 +1225,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1270,7 +1309,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = object<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1363,7 +1405,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1433,7 +1478,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = array<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1512,7 +1560,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1598,7 +1649,10 @@ ClassDef{
               args = [UnresolvedIdent{
                   kind = Local
                   name = arg0
-                }]
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -1690,7 +1744,10 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = array<<constant:<todo sym>>>
-              args = []
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -1805,7 +1862,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = array_of<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1917,7 +1977,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -1997,7 +2060,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = array_of_explicit<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -2076,7 +2142,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -2162,7 +2231,10 @@ ClassDef{
               args = [UnresolvedIdent{
                   kind = Local
                   name = arg0
-                }]
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -2254,7 +2326,10 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = array_of_explicit<<constant:<todo sym>>>
-              args = []
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -2371,7 +2446,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = t_array<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -2489,7 +2567,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -2614,7 +2695,10 @@ ClassDef{
               args = [UnresolvedIdent{
                   kind = Local
                   name = arg0
-                }]
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -2712,7 +2796,10 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = t_array<<constant:<todo sym>>>
-              args = []
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -2826,7 +2913,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = hash_of<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -2956,7 +3046,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3093,7 +3186,10 @@ ClassDef{
               args = [UnresolvedIdent{
                   kind = Local
                   name = arg0
-                }]
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -3199,7 +3295,10 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = hash_of<<constant:<todo sym>>>
-              args = []
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -3311,7 +3410,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = optional_explicit<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3423,7 +3525,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3514,7 +3619,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = optional_existing<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3604,7 +3712,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3673,7 +3784,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = optional<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3774,7 +3888,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3864,7 +3981,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = optional_nilable<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3995,7 +4115,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4085,7 +4208,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = const_explicit<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4154,7 +4280,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = const<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4234,7 +4363,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = no_class_arg<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4353,7 +4485,10 @@ ClassDef{
               args = [UnresolvedIdent{
                   kind = Local
                   name = arg0
-                }]
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -4456,7 +4591,10 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = no_class_arg<<constant:<todo sym>>>
-              args = []
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <blk>
+                } }]
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
@@ -4567,7 +4705,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = enum_prop<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4632,7 +4773,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4722,7 +4866,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4819,7 +4966,10 @@ ClassDef{
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = opts
-            } } }]
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4884,7 +5034,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_lazy<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -4974,7 +5127,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5071,7 +5227,10 @@ ClassDef{
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = opts
-            } } }]
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5136,7 +5295,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_proc<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5226,7 +5388,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5323,7 +5488,10 @@ ClassDef{
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = opts
-            } } }]
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5388,7 +5556,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_invalid<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5478,7 +5649,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5571,7 +5745,10 @@ ClassDef{
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = opts
-            } } }]
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5639,7 +5816,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = token<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5721,7 +5901,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5792,7 +5975,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = created<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5874,7 +6060,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -5958,7 +6147,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = token<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6040,7 +6232,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6111,7 +6306,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = created<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6195,7 +6393,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = merchant<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6290,7 +6491,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foo<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6397,7 +6601,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = encrypted_foo<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6526,7 +6733,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6669,7 +6879,10 @@ ClassDef{
           args = [UnresolvedIdent{
               kind = Local
               name = arg0
-            }]
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6776,7 +6989,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = bar<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6883,7 +7099,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = encrypted_bar<<constant:<todo sym>>>
-          args = []
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <blk>
+            } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -6944,7 +7163,10 @@ ClassDef{
     MethodDef{
       flags = 0
       name = main<<constant:<todo sym>>>
-      args = []
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <blk>
+        } }]
       rhs = InsSeq{
         stats = [
           Send{

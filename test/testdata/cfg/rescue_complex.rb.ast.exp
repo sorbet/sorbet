@@ -1,29 +1,29 @@
 class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
-  def meth<<constant:<todo sym>>>()
+  def meth<<constant:<todo sym>>>(&<blk>)
     0
   end
 
-  def foo<<constant:<todo sym>>>()
+  def foo<<constant:<todo sym>>>(&<blk>)
     1
   end
 
-  def bar<<constant:<todo sym>>>()
+  def bar<<constant:<todo sym>>>(&<blk>)
     2
   end
 
-  def baz<<constant:<todo sym>>>()
+  def baz<<constant:<todo sym>>>(&<blk>)
     3
   end
 
-  def take_arg<<constant:<todo sym>>>(x)
+  def take_arg<<constant:<todo sym>>>(x, &<blk>)
     x
   end
 
-  def initialize<<constant:<todo sym>>>()
+  def initialize<<constant:<todo sym>>>(&<blk>)
     @ex = <emptyTree>::<constant:T>.let(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:StandardError>))
   end
 
-  def multiple_rescue<<constant:<todo sym>>>()
+  def multiple_rescue<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).baz()
@@ -31,13 +31,13 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).bar()
   end
 
-  def multiple_rescue_classes<<constant:<todo sym>>>()
+  def multiple_rescue_classes<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue <emptyTree>::<constant:Foo>, <emptyTree>::<constant:Bar> => baz
     baz
   end
 
-  def parse_rescue_ensure<<constant:<todo sym>>>()
+  def parse_rescue_ensure<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).baz()
@@ -45,31 +45,31 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).bar()
   end
 
-  def parse_bug_rescue_empty_else<<constant:<todo sym>>>()
+  def parse_bug_rescue_empty_else<<constant:<todo sym>>>(&<blk>)
     <emptyTree>
   rescue <emptyTree>::<constant:LoadError> => <rescueTemp>$2
     <emptyTree>
   end
 
-  def parse_ruby_bug_12686<<constant:<todo sym>>>()
+  def parse_ruby_bug_12686<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).take_arg(self(<constant:<todo sym>>).bar()
     rescue => <rescueTemp>$2
       nil)
   end
 
-  def parse_rescue_mod<<constant:<todo sym>>>()
+  def parse_rescue_mod<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).bar()
   end
 
-  def parse_resbody_list_var<<constant:<todo sym>>>()
+  def parse_resbody_list_var<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue self(<constant:<todo sym>>).foo() => ex
     self(<constant:<todo sym>>).bar()
   end
 
-  def parse_rescue_else_ensure<<constant:<todo sym>>>()
+  def parse_rescue_else_ensure<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).baz()
@@ -79,19 +79,19 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
     self(<constant:<todo sym>>).bar()
   end
 
-  def parse_rescue<<constant:<todo sym>>>()
+  def parse_rescue<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).foo()
   end
 
-  def parse_resbody_var<<constant:<todo sym>>>()
+  def parse_resbody_var<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => ex
     self(<constant:<todo sym>>).bar()
   end
 
-  def parse_resbody_var_1<<constant:<todo sym>>>()
+  def parse_resbody_var_1<<constant:<todo sym>>>(&<blk>)
     self(<constant:<todo sym>>).meth()
   rescue => <rescueTemp>$2
     begin
@@ -100,25 +100,25 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
     end
   end
 
-  def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
+  def parse_rescue_mod_op_assign<<constant:<todo sym>>>(&<blk>)
     foo = foo.+(self(<constant:<todo sym>>).meth()
     rescue => <rescueTemp>$2
       self(<constant:<todo sym>>).bar())
   end
 
-  def parse_ruby_bug_12402<<constant:<todo sym>>>()
+  def parse_ruby_bug_12402<<constant:<todo sym>>>(&<blk>)
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
   rescue => <rescueTemp>$2
     nil
   end
 
-  def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
+  def parse_ruby_bug_12402_1<<constant:<todo sym>>>(&<blk>)
     foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
     rescue => <rescueTemp>$2
       nil)
   end
 
-  def parse_ruby_bug_12402_2<<constant:<todo sym>>>()
+  def parse_ruby_bug_12402_2<<constant:<todo sym>>>(&<blk>)
     begin
       []$3 = self(<constant:<todo sym>>).foo()
       []$4 = 0
