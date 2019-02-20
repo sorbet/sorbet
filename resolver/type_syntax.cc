@@ -100,7 +100,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                                 if (auto e = ctx.state.beginError(arg->loc,
                                                                   core::errors::Resolver::InvalidMethodSignature)) {
                                     e.setHeader("Malformed signature; Type argument `{}` was specified twice",
-                                                name.toString(ctx));
+                                                name.show(ctx));
                                 }
                             }
                             typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todo());

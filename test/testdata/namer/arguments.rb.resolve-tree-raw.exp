@@ -97,13 +97,13 @@ InsSeq{
               fun = proc
               block = Block {
                 args = [
-                  argument ::A#take_arguments#<block>#a<> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#b<optional> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#c<repeated> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#d<keyword> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#e<optional, keyword> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
-                  argument ::A#take_arguments#<block>#&g<block> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#a<> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#b<optional> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#c<repeated> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#d<keyword> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#e<optional, keyword> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
+                  argument ::<constant:A>#take_arguments#<block>$2#&g<block> @ test/testdata/namer/arguments.rb:6
                 ]
                 body = Array{
                   elems = [

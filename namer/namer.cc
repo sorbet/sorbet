@@ -436,7 +436,7 @@ public:
                         if (lit == nullptr || !lit->isSymbol(ctx)) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
                                 e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
-                                            original->fun.toString(ctx));
+                                            original->fun.show(ctx));
                             }
                             continue;
                         }
@@ -460,7 +460,7 @@ public:
                         if (lit == nullptr || !lit->isSymbol(ctx)) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
                                 e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
-                                            original->fun.toString(ctx));
+                                            original->fun.show(ctx));
                             }
                             continue;
                         }
@@ -471,7 +471,7 @@ public:
                     if (original->args.size() != 2) {
                         if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
                             e.setHeader("Wrong number of arguments to `{}`; Expected: `{}`, got: `{}`",
-                                        original->fun.toString(ctx), 2, original->args.size());
+                                        original->fun.show(ctx), 2, original->args.size());
                         }
                         break;
                     }
@@ -548,7 +548,7 @@ public:
             if (symArg->isKeyword() && symArg->name != methodArg.name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), symArg->name.toString(ctx), methodArg.name.toString(ctx));
+                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;
@@ -753,8 +753,8 @@ public:
                 } else {
                     if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Invalid variance kind, only `{}` and `{}` are supported",
-                                    ":" + core::Names::covariant().toString(ctx),
-                                    ":" + core::Names::contravariant().toString(ctx));
+                                    ":" + core::Names::covariant().show(ctx),
+                                    ":" + core::Names::contravariant().show(ctx));
                     }
                 }
             } else {

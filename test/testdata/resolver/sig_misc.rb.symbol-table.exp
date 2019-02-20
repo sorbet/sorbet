@@ -1,84 +1,84 @@
-class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init> (<blk>) @ test/testdata/resolver/sig_misc.rb:2
-    argument #<static-init>#<blk><block> @ ???
-  class ::A < ::Object () @ test/testdata/resolver/sig_misc.rb:5
-    method ::A#f1 (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:26
-      argument ::A#f1#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:26
-      argument ::A#f1#<blk><block> -> T.untyped @ ???
-    method ::A#f2 (x, <blk>) @ test/testdata/resolver/sig_misc.rb:32
-      argument ::A#f2#x<> @ test/testdata/resolver/sig_misc.rb:32
-      argument ::A#f2#<blk><block> @ ???
-    method ::A#f3 (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:37
-      argument ::A#f3#<blk><block> -> T.untyped @ ???
-    method ::A#f4 (y, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:63
-      argument ::A#f4#y<> -> T1 @ test/testdata/resolver/sig_misc.rb:61
-      argument ::A#f4#<blk><block> -> T.untyped @ ???
-    method ::A#no_params (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:13
-      argument ::A#no_params#<blk><block> -> T.untyped @ ???
-    method ::A#noreturn (<blk>) -> T.noreturn @ test/testdata/resolver/sig_misc.rb:8
-      argument ::A#noreturn#<blk><block> -> T.untyped @ ???
-    method ::A#private : private (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:42
-      argument ::A#private#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:41
-      argument ::A#private#<blk><block> -> T.untyped @ ???
-    method ::A#protected : protected (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:47
-      argument ::A#protected#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:46
-      argument ::A#protected#<blk><block> -> T.untyped @ ???
-    method ::A#public (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:52
-      argument ::A#public#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:51
-      argument ::A#public#<blk><block> -> T.untyped @ ???
-    method ::A#test_abstract (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:75
-      argument ::A#test_abstract#<blk><block> -> T.untyped @ ???
-    method ::A#test_abstract_untyped (<blk>) @ test/testdata/resolver/sig_misc.rb:99
-      argument ::A#test_abstract_untyped#<blk><block> -> T.untyped @ ???
-    method ::A#test_implementation (x, <blk>) -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:80
-      argument ::A#test_implementation#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:80
-      argument ::A#test_implementation#<blk><block> -> T.untyped @ ???
-    method ::A#test_junk_inside (<blk>) -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:104
-      argument ::A#test_junk_inside#<blk><block> -> T.untyped @ ???
-    method ::A#test_kwargs (returns, <blk>) -> T2 @ test/testdata/resolver/sig_misc.rb:21
-      argument ::A#test_kwargs#returns<> -> T1 @ test/testdata/resolver/sig_misc.rb:18
-      argument ::A#test_kwargs#<blk><block> -> T.untyped @ ???
-    method ::A#test_overridable (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:89
-      argument ::A#test_overridable#<blk><block> -> T.untyped @ ???
-    method ::A#test_overridable_implementation (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:94
-      argument ::A#test_overridable_implementation#<blk><block> -> T.untyped @ ???
-    method ::A#test_override (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:84
-      argument ::A#test_override#<blk><block> -> T.untyped @ ???
-    method ::A#test_standard_untyped (<blk>) @ test/testdata/resolver/sig_misc.rb:102
-      argument ::A#test_standard_untyped#<blk><block> -> T.untyped @ ???
-    method ::A#test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/resolver/sig_misc.rb:68
-      argument ::A#test_yield_no_block_type#x<> -> Integer @ test/testdata/resolver/sig_misc.rb:67
-      argument ::A#test_yield_no_block_type#<blk><block> -> T.untyped @ ???
-  class ::<Class:A> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/sig_misc.rb:5
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:51
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:56
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:61
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:62
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:67
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:74
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:79
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:83
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:88
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:93
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:7
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:98
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:102
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:104
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:106
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:12
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:17
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:25
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:30
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:36
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:41
-    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:46
-    method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/sig_misc.rb:5
-      argument ::<Class:A>#<static-init>#<blk><block> @ ???
-    method ::<Class:A>#static : private (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:57
-      argument ::<Class:A>#static#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:56
-      argument ::<Class:A>#static#<blk><block> -> T.untyped @ ???
-  class ::T1 < ::Object () @ test/testdata/resolver/sig_misc.rb:2
-  class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_misc.rb:2
-  class ::T2 < ::Object () @ test/testdata/resolver/sig_misc.rb:3
-  class ::<Class:T2> < ::<Class:Object> () @ test/testdata/resolver/sig_misc.rb:3
+class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/resolver/sig_misc.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  method #<static-init>$87 (<blk>) @ test/testdata/resolver/sig_misc.rb:2
+    argument #<static-init>$87#<blk><block> @ ???
+  class ::<constant:A> < ::<constant:Object> () @ test/testdata/resolver/sig_misc.rb:5
+    method ::<constant:A>#f1 (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:26
+      argument ::<constant:A>#f1#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:26
+      argument ::<constant:A>#f1#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#f2 (x, <blk>) @ test/testdata/resolver/sig_misc.rb:32
+      argument ::<constant:A>#f2#x<> @ test/testdata/resolver/sig_misc.rb:32
+      argument ::<constant:A>#f2#<blk><block> @ ???
+    method ::<constant:A>#f3 (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:37
+      argument ::<constant:A>#f3#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#f4 (y, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:63
+      argument ::<constant:A>#f4#y<> -> T1 @ test/testdata/resolver/sig_misc.rb:61
+      argument ::<constant:A>#f4#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#no_params (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:13
+      argument ::<constant:A>#no_params#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#noreturn (<blk>) -> T.noreturn @ test/testdata/resolver/sig_misc.rb:8
+      argument ::<constant:A>#noreturn#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#private : private (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:42
+      argument ::<constant:A>#private#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:41
+      argument ::<constant:A>#private#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#protected : protected (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:47
+      argument ::<constant:A>#protected#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:46
+      argument ::<constant:A>#protected#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#public (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:52
+      argument ::<constant:A>#public#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:51
+      argument ::<constant:A>#public#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_abstract (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:75
+      argument ::<constant:A>#test_abstract#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_abstract_untyped (<blk>) @ test/testdata/resolver/sig_misc.rb:99
+      argument ::<constant:A>#test_abstract_untyped#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_implementation (x, <blk>) -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:80
+      argument ::<constant:A>#test_implementation#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:80
+      argument ::<constant:A>#test_implementation#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_junk_inside (<blk>) -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:104
+      argument ::<constant:A>#test_junk_inside#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_kwargs (returns, <blk>) -> T2 @ test/testdata/resolver/sig_misc.rb:21
+      argument ::<constant:A>#test_kwargs#returns<> -> T1 @ test/testdata/resolver/sig_misc.rb:18
+      argument ::<constant:A>#test_kwargs#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_overridable (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:89
+      argument ::<constant:A>#test_overridable#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_overridable_implementation (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:94
+      argument ::<constant:A>#test_overridable_implementation#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_override (<blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:84
+      argument ::<constant:A>#test_override#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_standard_untyped (<blk>) @ test/testdata/resolver/sig_misc.rb:102
+      argument ::<constant:A>#test_standard_untyped#<blk><block> -> T.untyped @ ???
+    method ::<constant:A>#test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/resolver/sig_misc.rb:68
+      argument ::<constant:A>#test_yield_no_block_type#x<> -> Integer @ test/testdata/resolver/sig_misc.rb:67
+      argument ::<constant:A>#test_yield_no_block_type#<blk><block> -> T.untyped @ ???
+  class ::<singleton_class:<constant:A>> < ::<singleton_class:<constant:Object>> (<constant:Sig>) @ test/testdata/resolver/sig_misc.rb:5
+    method ::<singleton_class:<constant:A>>#<block>$10 () @ test/testdata/resolver/sig_misc.rb:51
+    method ::<singleton_class:<constant:A>>#<block>$11 () @ test/testdata/resolver/sig_misc.rb:56
+    method ::<singleton_class:<constant:A>>#<block>$12 () @ test/testdata/resolver/sig_misc.rb:61
+    method ::<singleton_class:<constant:A>>#<block>$13 () @ test/testdata/resolver/sig_misc.rb:62
+    method ::<singleton_class:<constant:A>>#<block>$14 () @ test/testdata/resolver/sig_misc.rb:67
+    method ::<singleton_class:<constant:A>>#<block>$15 () @ test/testdata/resolver/sig_misc.rb:74
+    method ::<singleton_class:<constant:A>>#<block>$16 () @ test/testdata/resolver/sig_misc.rb:79
+    method ::<singleton_class:<constant:A>>#<block>$17 () @ test/testdata/resolver/sig_misc.rb:83
+    method ::<singleton_class:<constant:A>>#<block>$18 () @ test/testdata/resolver/sig_misc.rb:88
+    method ::<singleton_class:<constant:A>>#<block>$19 () @ test/testdata/resolver/sig_misc.rb:93
+    method ::<singleton_class:<constant:A>>#<block>$2 () @ test/testdata/resolver/sig_misc.rb:7
+    method ::<singleton_class:<constant:A>>#<block>$20 () @ test/testdata/resolver/sig_misc.rb:98
+    method ::<singleton_class:<constant:A>>#<block>$21 () @ test/testdata/resolver/sig_misc.rb:102
+    method ::<singleton_class:<constant:A>>#<block>$22 () @ test/testdata/resolver/sig_misc.rb:104
+    method ::<singleton_class:<constant:A>>#<block>$23 () @ test/testdata/resolver/sig_misc.rb:106
+    method ::<singleton_class:<constant:A>>#<block>$3 () @ test/testdata/resolver/sig_misc.rb:12
+    method ::<singleton_class:<constant:A>>#<block>$4 () @ test/testdata/resolver/sig_misc.rb:17
+    method ::<singleton_class:<constant:A>>#<block>$5 () @ test/testdata/resolver/sig_misc.rb:25
+    method ::<singleton_class:<constant:A>>#<block>$6 () @ test/testdata/resolver/sig_misc.rb:30
+    method ::<singleton_class:<constant:A>>#<block>$7 () @ test/testdata/resolver/sig_misc.rb:36
+    method ::<singleton_class:<constant:A>>#<block>$8 () @ test/testdata/resolver/sig_misc.rb:41
+    method ::<singleton_class:<constant:A>>#<block>$9 () @ test/testdata/resolver/sig_misc.rb:46
+    method ::<singleton_class:<constant:A>>#<static-init> (<blk>) @ test/testdata/resolver/sig_misc.rb:5
+      argument ::<singleton_class:<constant:A>>#<static-init>#<blk><block> @ ???
+    method ::<singleton_class:<constant:A>>#static : private (x, <blk>) -> T1 @ test/testdata/resolver/sig_misc.rb:57
+      argument ::<singleton_class:<constant:A>>#static#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:56
+      argument ::<singleton_class:<constant:A>>#static#<blk><block> -> T.untyped @ ???
+  class ::<constant:T1> < ::<constant:Object> () @ test/testdata/resolver/sig_misc.rb:2
+  class ::<singleton_class:<constant:T1>> < ::<singleton_class:<constant:Object>> () @ test/testdata/resolver/sig_misc.rb:2
+  class ::<constant:T2> < ::<constant:Object> () @ test/testdata/resolver/sig_misc.rb:3
+  class ::<singleton_class:<constant:T2>> < ::<singleton_class:<constant:Object>> () @ test/testdata/resolver/sig_misc.rb:3
 

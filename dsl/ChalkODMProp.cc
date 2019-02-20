@@ -221,7 +221,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         } else {
             type = ast::MK::Nilable(loc, std::move(foreign));
         }
-        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx)->toString(ctx) + "_");
+        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
         // def $fk_method(**opts)
         //  T.unsafe(nil)

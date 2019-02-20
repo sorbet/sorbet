@@ -1,42 +1,42 @@
-class ::<root> < ::Object () @ (test/testdata/resolver/self.rb:3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init> (<blk>) @ test/testdata/resolver/self.rb:3
-    argument #<static-init>#<blk><block> @ ???
-  class ::TestSelf < ::Object () @ test/testdata/resolver/self.rb:3
-    method ::TestSelf#good1 (s, <blk>) -> TestSelf @ test/testdata/resolver/self.rb:10
-      argument ::TestSelf#good1#s<> -> TestSelf @ test/testdata/resolver/self.rb:7
-      argument ::TestSelf#good1#<blk><block> -> T.untyped @ ???
-    method ::TestSelf#pass (<blk>) -> TestSelf @ test/testdata/resolver/self.rb:18
-      argument ::TestSelf#pass#<blk><block> -> T.untyped @ ???
-  class ::<Class:TestSelf> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/self.rb:3
-    method ::<Class:TestSelf>#<block> () @ test/testdata/resolver/self.rb:6
-    method ::<Class:TestSelf>#<block> () @ test/testdata/resolver/self.rb:14
-    method ::<Class:TestSelf>#<static-init> (<blk>) @ test/testdata/resolver/self.rb:3
-      argument ::<Class:TestSelf>#<static-init>#<blk><block> @ ???
-  class ::TestSelfGeneric[<constant:Elem>] < ::Object () @ test/testdata/resolver/self.rb:24
-    type-member(=) ::TestSelfGeneric::Elem @ test/testdata/resolver/self.rb:28
-    method ::TestSelfGeneric#good1 (s, <blk>) -> AppliedType {
-      klass = ::TestSelfGeneric
+class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/resolver/self.rb:3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  method #<static-init>$87 (<blk>) @ test/testdata/resolver/self.rb:3
+    argument #<static-init>$87#<blk><block> @ ???
+  class ::<constant:TestSelf> < ::<constant:Object> () @ test/testdata/resolver/self.rb:3
+    method ::<constant:TestSelf>#good1 (s, <blk>) -> TestSelf @ test/testdata/resolver/self.rb:10
+      argument ::<constant:TestSelf>#good1#s<> -> TestSelf @ test/testdata/resolver/self.rb:7
+      argument ::<constant:TestSelf>#good1#<blk><block> -> T.untyped @ ???
+    method ::<constant:TestSelf>#pass (<blk>) -> TestSelf @ test/testdata/resolver/self.rb:18
+      argument ::<constant:TestSelf>#pass#<blk><block> -> T.untyped @ ???
+  class ::<singleton_class:<constant:TestSelf>> < ::<singleton_class:<constant:Object>> (<constant:Sig>) @ test/testdata/resolver/self.rb:3
+    method ::<singleton_class:<constant:TestSelf>>#<block>$2 () @ test/testdata/resolver/self.rb:6
+    method ::<singleton_class:<constant:TestSelf>>#<block>$3 () @ test/testdata/resolver/self.rb:14
+    method ::<singleton_class:<constant:TestSelf>>#<static-init> (<blk>) @ test/testdata/resolver/self.rb:3
+      argument ::<singleton_class:<constant:TestSelf>>#<static-init>#<blk><block> @ ???
+  class ::<constant:TestSelfGeneric>[<constant:Elem>] < ::<constant:Object> () @ test/testdata/resolver/self.rb:24
+    type-member(=) ::<constant:TestSelfGeneric>::<constant:Elem> @ test/testdata/resolver/self.rb:28
+    method ::<constant:TestSelfGeneric>#good1 (s, <blk>) -> AppliedType {
+      klass = ::<constant:TestSelfGeneric>
       targs = [
-        <constant:Elem> = SelfTypeParam(::TestSelfGeneric::Elem)
+        <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>::<constant:Elem>)
       ]
     } @ test/testdata/resolver/self.rb:33
-      argument ::TestSelfGeneric#good1#s<> -> AppliedType {
-        klass = ::TestSelfGeneric
+      argument ::<constant:TestSelfGeneric>#good1#s<> -> AppliedType {
+        klass = ::<constant:TestSelfGeneric>
         targs = [
-          <constant:Elem> = SelfTypeParam(::TestSelfGeneric::Elem)
+          <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>::<constant:Elem>)
         ]
       } @ test/testdata/resolver/self.rb:30
-      argument ::TestSelfGeneric#good1#<blk><block> -> T.untyped @ ???
-    method ::TestSelfGeneric#pass (<blk>) -> AppliedType {
-      klass = ::TestSelfGeneric
+      argument ::<constant:TestSelfGeneric>#good1#<blk><block> -> T.untyped @ ???
+    method ::<constant:TestSelfGeneric>#pass (<blk>) -> AppliedType {
+      klass = ::<constant:TestSelfGeneric>
       targs = [
-        <constant:Elem> = SelfTypeParam(::TestSelfGeneric::Elem)
+        <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>::<constant:Elem>)
       ]
     } @ test/testdata/resolver/self.rb:41
-      argument ::TestSelfGeneric#pass#<blk><block> -> T.untyped @ ???
-  class ::<Class:TestSelfGeneric> < ::<Class:Object> (<constant:Sig>, <constant:Generic>, <constant:Helpers>) @ test/testdata/resolver/self.rb:24
-    method ::<Class:TestSelfGeneric>#<block> () @ test/testdata/resolver/self.rb:29
-    method ::<Class:TestSelfGeneric>#<block> () @ test/testdata/resolver/self.rb:37
-    method ::<Class:TestSelfGeneric>#<static-init> (<blk>) @ test/testdata/resolver/self.rb:24
-      argument ::<Class:TestSelfGeneric>#<static-init>#<blk><block> @ ???
+      argument ::<constant:TestSelfGeneric>#pass#<blk><block> -> T.untyped @ ???
+  class ::<singleton_class:<constant:TestSelfGeneric>> < ::<singleton_class:<constant:Object>> (<constant:Sig>, <constant:Generic>, <constant:Helpers>) @ test/testdata/resolver/self.rb:24
+    method ::<singleton_class:<constant:TestSelfGeneric>>#<block>$2 () @ test/testdata/resolver/self.rb:29
+    method ::<singleton_class:<constant:TestSelfGeneric>>#<block>$3 () @ test/testdata/resolver/self.rb:37
+    method ::<singleton_class:<constant:TestSelfGeneric>>#<static-init> (<blk>) @ test/testdata/resolver/self.rb:24
+      argument ::<singleton_class:<constant:TestSelfGeneric>>#<static-init>#<blk><block> @ ???
 

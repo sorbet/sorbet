@@ -10,7 +10,7 @@ T.assert_type!(
   T::Hash[Symbol, Integer]
 )
 
-["hi"].to_h # error: doesn't match `T::Enumerable[[U$1, V$1]]`
+["hi"].to_h # error: doesn't match `T::Enumerable[[U, V]]`
 
 T.assert_type!(
   T.cast([], T::Enumerable[[String, Symbol]]).to_h,

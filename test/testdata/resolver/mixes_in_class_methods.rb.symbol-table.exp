@@ -1,42 +1,42 @@
-class ::<root> < ::Object () @ (test/testdata/resolver/mixes_in_class_methods.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
-    argument #<static-init>#<blk><block> @ ???
-  class ::Bad1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class ::<Class:Bad1> < ::Module (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class ::Bad2 < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:29
-    class ::Bad2::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:31
-    class ::Bad2::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:31
-  class ::<Class:Bad2> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
-    method ::<Class:Bad2>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:31
-      argument ::<Class:Bad2>#<static-init>#<blk><block> @ ???
-  class ::Bad3 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:35
-    class ::Bad3::ClassMethods < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:38
-    class ::Bad3::<Class:ClassMethods> < ::<Class:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
-  class ::<Class:Bad3> < ::Module (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
-    method ::<Class:Bad3>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:38
-      argument ::<Class:Bad3>#<static-init>#<blk><block> @ ???
-  class ::Bad4 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:42
-    class ::Bad4::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:45
-    class ::Bad4::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:45
-  class ::<Class:Bad4> < ::Module (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
-    method ::<Class:Bad4>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:45
-      argument ::<Class:Bad4>#<static-init>#<blk><block> @ ???
-  class ::Bad5 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:50
-  class ::<Class:Bad5> < ::Module (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
-  class ::Bad6 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:56
-  class ::<Class:Bad6> < ::Module (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
-  class ::Mixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:2
-    class ::Mixin::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:5
-      method ::Mixin::ClassMethods#mixin_class_method (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:6
-        argument ::Mixin::ClassMethods#mixin_class_method#<blk><block> @ ???
-    class ::Mixin::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:5
-    method ::Mixin#mixin_method (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:12
-      argument ::Mixin#mixin_method#<blk><block> @ ???
-  class ::<Class:Mixin> < ::Module (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
-    method ::<Class:Mixin>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:5
-      argument ::<Class:Mixin>#<static-init>#<blk><block> @ ???
-  class ::Test < ::Object (<constant:Mixin>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
-  class ::<Class:Test> < ::<Class:Object> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
-    method ::<Class:Test>#<static-init> (<blk>) @ ???
-      argument ::<Class:Test>#<static-init>#<blk><block> @ ???
+class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/resolver/mixes_in_class_methods.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  method #<static-init>$87 (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
+    argument #<static-init>$87#<blk><block> @ ???
+  class ::<constant:Bad1> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:24
+  class ::<singleton_class:<constant:Bad1>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
+  class ::<constant:Bad2> < ::<constant:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:29
+    class ::<constant:Bad2>::<constant:ClassMethods> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+    class ::<constant:Bad2>::<singleton_class:<constant:ClassMethods>> < ::<constant:Module> () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+  class ::<singleton_class:<constant:Bad2>> < ::<singleton_class:<constant:Object>> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
+    method ::<singleton_class:<constant:Bad2>>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:31
+      argument ::<singleton_class:<constant:Bad2>>#<static-init>#<blk><block> @ ???
+  class ::<constant:Bad3> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:35
+    class ::<constant:Bad3>::<constant:ClassMethods> < ::<constant:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+    class ::<constant:Bad3>::<singleton_class:<constant:ClassMethods>> < ::<singleton_class:<constant:Object>> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+  class ::<singleton_class:<constant:Bad3>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
+    method ::<singleton_class:<constant:Bad3>>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:38
+      argument ::<singleton_class:<constant:Bad3>>#<static-init>#<blk><block> @ ???
+  class ::<constant:Bad4> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:42
+    class ::<constant:Bad4>::<constant:ClassMethods> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+    class ::<constant:Bad4>::<singleton_class:<constant:ClassMethods>> < ::<constant:Module> () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+  class ::<singleton_class:<constant:Bad4>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
+    method ::<singleton_class:<constant:Bad4>>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:45
+      argument ::<singleton_class:<constant:Bad4>>#<static-init>#<blk><block> @ ???
+  class ::<constant:Bad5> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:50
+  class ::<singleton_class:<constant:Bad5>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
+  class ::<constant:Bad6> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:56
+  class ::<singleton_class:<constant:Bad6>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
+  class ::<constant:Mixin> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:2
+    class ::<constant:Mixin>::<constant:ClassMethods> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/mixes_in_class_methods.rb:5
+      method ::<constant:Mixin>::<constant:ClassMethods>#mixin_class_method (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:6
+        argument ::<constant:Mixin>::<constant:ClassMethods>#mixin_class_method#<blk><block> @ ???
+    class ::<constant:Mixin>::<singleton_class:<constant:ClassMethods>> < ::<constant:Module> () @ test/testdata/resolver/mixes_in_class_methods.rb:5
+    method ::<constant:Mixin>#mixin_method (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:12
+      argument ::<constant:Mixin>#mixin_method#<blk><block> @ ???
+  class ::<singleton_class:<constant:Mixin>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
+    method ::<singleton_class:<constant:Mixin>>#<static-init> (<blk>) @ test/testdata/resolver/mixes_in_class_methods.rb:5
+      argument ::<singleton_class:<constant:Mixin>>#<static-init>#<blk><block> @ ???
+  class ::<constant:Test> < ::<constant:Object> (<constant:Mixin>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+  class ::<singleton_class:<constant:Test>> < ::<singleton_class:<constant:Object>> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+    method ::<singleton_class:<constant:Test>>#<static-init> (<blk>) @ ???
+      argument ::<singleton_class:<constant:Test>>#<static-init>#<blk><block> @ ???
 

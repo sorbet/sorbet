@@ -1,76 +1,76 @@
-class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  class ::TestProc < ::Object () @ test/testdata/resolver/proc.rb:3
-    method ::TestProc#bad (x, y, z, w, <blk>) -> NilClass @ test/testdata/resolver/proc.rb:30
-      argument ::TestProc#bad#x<> -> AppliedType {
-        klass = ::Proc0
+class ::<constant:<root>> < ::<constant:Object> () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  class ::<constant:TestProc> < ::<constant:Object> () @ test/testdata/resolver/proc.rb:3
+    method ::<constant:TestProc>#bad (x, y, z, w, <blk>) -> NilClass @ test/testdata/resolver/proc.rb:30
+      argument ::<constant:TestProc>#bad#x<> -> AppliedType {
+        klass = ::<constant:Proc0>
         targs = [
           <constant:Return> = T.untyped
         ]
       } @ test/testdata/resolver/proc.rb:24
-      argument ::TestProc#bad#y<> -> AppliedType {
-        klass = ::Proc0
+      argument ::<constant:TestProc>#bad#y<> -> AppliedType {
+        klass = ::<constant:Proc0>
         targs = [
           <constant:Return> = Integer
         ]
       } @ test/testdata/resolver/proc.rb:25
-      argument ::TestProc#bad#z<> -> AppliedType {
-        klass = ::Proc1
+      argument ::<constant:TestProc>#bad#z<> -> AppliedType {
+        klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = T.untyped
           <constant:Arg0> = Integer
         ]
       } @ test/testdata/resolver/proc.rb:26
-      argument ::TestProc#bad#w<> -> AppliedType {
-        klass = ::Proc1
+      argument ::<constant:TestProc>#bad#w<> -> AppliedType {
+        klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = T.untyped
         ]
       } @ test/testdata/resolver/proc.rb:27
-      argument ::TestProc#bad#<blk><block> -> T.untyped @ ???
-    method ::TestProc#foo (<blk>) -> Integer @ test/testdata/resolver/proc.rb:34
-      argument ::TestProc#foo#<blk><block> -> T.untyped @ ???
-    method ::TestProc#foo1 (x, <blk>) -> Integer @ test/testdata/resolver/proc.rb:41
-      argument ::TestProc#foo1#x<> -> AppliedType {
-        klass = ::Proc1
+      argument ::<constant:TestProc>#bad#<blk><block> -> T.untyped @ ???
+    method ::<constant:TestProc>#foo (<blk>) -> Integer @ test/testdata/resolver/proc.rb:34
+      argument ::<constant:TestProc>#foo#<blk><block> -> T.untyped @ ???
+    method ::<constant:TestProc>#foo1 (x, <blk>) -> Integer @ test/testdata/resolver/proc.rb:41
+      argument ::<constant:TestProc>#foo1#x<> -> AppliedType {
+        klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = Integer
         ]
       } @ test/testdata/resolver/proc.rb:38
-      argument ::TestProc#foo1#<blk><block> -> T.untyped @ ???
-    method ::TestProc#good1 (blk) -> Integer @ test/testdata/resolver/proc.rb:10
-      argument ::TestProc#good1#blk<block> -> AppliedType {
-        klass = ::Proc1
+      argument ::<constant:TestProc>#foo1#<blk><block> -> T.untyped @ ???
+    method ::<constant:TestProc>#good1 (blk) -> Integer @ test/testdata/resolver/proc.rb:10
+      argument ::<constant:TestProc>#good1#blk<block> -> AppliedType {
+        klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = Integer
         ]
       } @ test/testdata/resolver/proc.rb:7
-    method ::TestProc#good2 (blk) -> Integer @ test/testdata/resolver/proc.rb:18
-      argument ::TestProc#good2#blk<block> -> AppliedType {
-        klass = ::Proc1
+    method ::<constant:TestProc>#good2 (blk) -> Integer @ test/testdata/resolver/proc.rb:18
+      argument ::<constant:TestProc>#good2#blk<block> -> AppliedType {
+        klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = AppliedType {
-              klass = ::Array
+              klass = ::<constant:Array>
               targs = [
                 <constant:Elem> = Integer
               ]
             }
           <constant:Arg0> = AppliedType {
-              klass = ::Array
+              klass = ::<constant:Array>
               targs = [
                 <constant:Elem> = String
               ]
             }
         ]
       } @ test/testdata/resolver/proc.rb:15
-  class ::<Class:TestProc> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/proc.rb:3
-    method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:6
-    method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:14
-    method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:22
-    method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:33
-    method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:36
-    method ::<Class:TestProc>#<static-init> (<blk>) @ test/testdata/resolver/proc.rb:3
-      argument ::<Class:TestProc>#<static-init>#<blk><block> @ ???
+  class ::<singleton_class:<constant:TestProc>> < ::<singleton_class:<constant:Object>> (<constant:Sig>) @ test/testdata/resolver/proc.rb:3
+    method ::<singleton_class:<constant:TestProc>>#<block>$2 () @ test/testdata/resolver/proc.rb:6
+    method ::<singleton_class:<constant:TestProc>>#<block>$3 () @ test/testdata/resolver/proc.rb:14
+    method ::<singleton_class:<constant:TestProc>>#<block>$4 () @ test/testdata/resolver/proc.rb:22
+    method ::<singleton_class:<constant:TestProc>>#<block>$5 () @ test/testdata/resolver/proc.rb:33
+    method ::<singleton_class:<constant:TestProc>>#<block>$6 () @ test/testdata/resolver/proc.rb:36
+    method ::<singleton_class:<constant:TestProc>>#<static-init> (<blk>) @ test/testdata/resolver/proc.rb:3
+      argument ::<singleton_class:<constant:TestProc>>#<static-init>#<blk><block> @ ???
 

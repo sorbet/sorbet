@@ -7,7 +7,7 @@ begin
         T.let(self(<singleton_class:<constant:C>>).lambda() do |x|
           x$1.*(x$1)
         end, AppliedType {
-          klass = ::Proc1
+          klass = ::<constant:Proc1>
           targs = [
             <constant:Return> = Integer
             <constant:Arg0> = Integer

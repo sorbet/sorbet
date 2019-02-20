@@ -1,48 +1,48 @@
-class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  class ::Test < ::Object () @ test/testdata/dsl/attr_multi.rb:3
-    method ::Test#a (<blk>) -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
-      argument ::Test#a#<blk><block> -> T.untyped @ ???
-    method ::Test#a= (a, <blk>) -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
-      argument ::Test#a=#a<> -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
-      argument ::Test#a=#<blk><block> -> T.untyped @ ???
-    method ::Test#b (<blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#b#<blk><block> -> T.untyped @ ???
-    method ::Test#b= (b, <blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#b=#b<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#b=#<blk><block> -> T.untyped @ ???
-    method ::Test#c (<blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#c#<blk><block> -> T.untyped @ ???
-    method ::Test#c= (c, <blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#c=#c<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
-      argument ::Test#c=#<blk><block> -> T.untyped @ ???
-    method ::Test#d (<blk>) -> String @ test/testdata/dsl/attr_multi.rb:13
-      argument ::Test#d#<blk><block> -> T.untyped @ ???
-    method ::Test#e (<blk>) -> String @ test/testdata/dsl/attr_multi.rb:16
-      argument ::Test#e#<blk><block> -> T.untyped @ ???
-    method ::Test#f (<blk>) -> String @ test/testdata/dsl/attr_multi.rb:16
-      argument ::Test#f#<blk><block> -> T.untyped @ ???
-    method ::Test#g= (g, <blk>) -> String @ test/testdata/dsl/attr_multi.rb:19
-      argument ::Test#g=#g<> -> String @ test/testdata/dsl/attr_multi.rb:18
-      argument ::Test#g=#<blk><block> -> T.untyped @ ???
-    method ::Test#h= (h, <blk>) -> String @ test/testdata/dsl/attr_multi.rb:22
-      argument ::Test#h=#h<> -> String @ test/testdata/dsl/attr_multi.rb:21
-      argument ::Test#h=#<blk><block> -> T.untyped @ ???
-    method ::Test#i= (i, <blk>) -> String @ test/testdata/dsl/attr_multi.rb:22
-      argument ::Test#i=#i<> -> String @ test/testdata/dsl/attr_multi.rb:22
-      argument ::Test#i=#<blk><block> -> T.untyped @ ???
-  class ::<Class:Test> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/attr_multi.rb:3
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:15
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:18
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:21
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:21
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:6
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:6
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:12
-    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:15
-    method ::<Class:Test>#<static-init> (<blk>) @ test/testdata/dsl/attr_multi.rb:3
-      argument ::<Class:Test>#<static-init>#<blk><block> @ ???
+class ::<constant:<root>> < ::<constant:Object> () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  class ::<constant:Test> < ::<constant:Object> () @ test/testdata/dsl/attr_multi.rb:3
+    method ::<constant:Test>#a (<blk>) -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
+      argument ::<constant:Test>#a#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#a= (a, <blk>) -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
+      argument ::<constant:Test>#a=#a<> -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
+      argument ::<constant:Test>#a=#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#b (<blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::<constant:Test>#b#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#b= (b, <blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::<constant:Test>#b=#b<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::<constant:Test>#b=#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#c (<blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::<constant:Test>#c#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#c= (c, <blk>) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::<constant:Test>#c=#c<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::<constant:Test>#c=#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#d (<blk>) -> String @ test/testdata/dsl/attr_multi.rb:13
+      argument ::<constant:Test>#d#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#e (<blk>) -> String @ test/testdata/dsl/attr_multi.rb:16
+      argument ::<constant:Test>#e#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#f (<blk>) -> String @ test/testdata/dsl/attr_multi.rb:16
+      argument ::<constant:Test>#f#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#g= (g, <blk>) -> String @ test/testdata/dsl/attr_multi.rb:19
+      argument ::<constant:Test>#g=#g<> -> String @ test/testdata/dsl/attr_multi.rb:18
+      argument ::<constant:Test>#g=#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#h= (h, <blk>) -> String @ test/testdata/dsl/attr_multi.rb:22
+      argument ::<constant:Test>#h=#h<> -> String @ test/testdata/dsl/attr_multi.rb:21
+      argument ::<constant:Test>#h=#<blk><block> -> T.untyped @ ???
+    method ::<constant:Test>#i= (i, <blk>) -> String @ test/testdata/dsl/attr_multi.rb:22
+      argument ::<constant:Test>#i=#i<> -> String @ test/testdata/dsl/attr_multi.rb:22
+      argument ::<constant:Test>#i=#<blk><block> -> T.untyped @ ???
+  class ::<singleton_class:<constant:Test>> < ::<singleton_class:<constant:Object>> (<constant:Sig>) @ test/testdata/dsl/attr_multi.rb:3
+    method ::<singleton_class:<constant:Test>>#<block>$10 () @ test/testdata/dsl/attr_multi.rb:15
+    method ::<singleton_class:<constant:Test>>#<block>$11 () @ test/testdata/dsl/attr_multi.rb:18
+    method ::<singleton_class:<constant:Test>>#<block>$12 () @ test/testdata/dsl/attr_multi.rb:21
+    method ::<singleton_class:<constant:Test>>#<block>$13 () @ test/testdata/dsl/attr_multi.rb:21
+    method ::<singleton_class:<constant:Test>>#<block>$2 () @ test/testdata/dsl/attr_multi.rb:6
+    method ::<singleton_class:<constant:Test>>#<block>$3 () @ test/testdata/dsl/attr_multi.rb:6
+    method ::<singleton_class:<constant:Test>>#<block>$4 () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<singleton_class:<constant:Test>>#<block>$5 () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<singleton_class:<constant:Test>>#<block>$6 () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<singleton_class:<constant:Test>>#<block>$7 () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<singleton_class:<constant:Test>>#<block>$8 () @ test/testdata/dsl/attr_multi.rb:12
+    method ::<singleton_class:<constant:Test>>#<block>$9 () @ test/testdata/dsl/attr_multi.rb:15
+    method ::<singleton_class:<constant:Test>>#<static-init> (<blk>) @ test/testdata/dsl/attr_multi.rb:3
+      argument ::<singleton_class:<constant:Test>>#<static-init>#<blk><block> @ ???
 

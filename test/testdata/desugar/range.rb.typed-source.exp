@@ -36,7 +36,7 @@ def foo
     # <statTemp>$21: TrueClass
     #
     # <statTemp>$23: AppliedType {
-    #   klass = ::Range
+    #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
@@ -49,7 +49,7 @@ def foo
     # <statTemp>$26: Integer(42)
     #
     # <statTemp>$27: AppliedType {
-    #   klass = ::Range
+    #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = String
     #   ]
@@ -66,28 +66,28 @@ def foo
     # <finalReturn>: T.noreturn
     #
     # c: AppliedType {
-    #   klass = ::Range
+    #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
     # }
     #
     # b: AppliedType {
-    #   klass = ::Range
+    #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
     # }
     #
     # a: AppliedType {
-    #   klass = ::Range
+    #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
     # }
     #
     # d: AppliedType {
-    #   klass = ::Range
+    #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]

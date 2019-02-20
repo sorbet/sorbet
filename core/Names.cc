@@ -62,11 +62,11 @@ string Name::show(const GlobalState &gs) const {
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
                 return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
-                return absl::StrCat(this->unique.original.data(gs)->toString(gs), " (overload.", this->unique.num, ")");
+                return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
             }
-            return this->unique.original.data(gs)->toString(gs);
+            return this->unique.original.data(gs)->show(gs);
         case CONSTANT:
-            return this->cnst.original.toString(gs);
+            return this->cnst.original.show(gs);
         default:
             Exception::notImplemented();
     }

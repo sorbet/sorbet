@@ -136,7 +136,7 @@ public:
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
             ENFORCE(name->kind == core::UTF8);
-            if (driver_->lex.is_declared(name->toString(gs_))) {
+            if (driver_->lex.is_declared(name->show(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
                 return make_unique<Send>(node->loc, nullptr, id->name, sorbet::parser::NodeVec());
@@ -181,7 +181,7 @@ public:
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
-            driver_->lex.declare(name->toString(gs_));
+            driver_->lex.declare(name->show(gs_));
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);

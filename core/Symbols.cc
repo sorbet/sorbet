@@ -182,8 +182,8 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-            e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ",
-                        name.toString(gs), this->showFullName(gs));
+            e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ", name.show(gs),
+                        this->showFullName(gs));
         }
         int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
@@ -422,6 +422,19 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     return result;
 }
 
+string Symbol::toStringFullName(const GlobalState &gs) const {
+    bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
+    string owner = includeOwner ? this->owner.data(gs)->toStringFullName(gs) : "";
+
+    bool needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
+    string separator = needsColonColon ? "::" : "#";
+    if (this->isMethodArgument()) {
+        return fmt::format("{}{}{}", owner, separator, this->argumentName(gs));
+    }
+
+    return fmt::format("{}{}{}", owner, separator, this->name.toString(gs));
+}
+
 string Symbol::showFullName(const GlobalState &gs) const {
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
     string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
@@ -490,7 +503,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
     }
 
-    fmt::format_to(buf, "{}{} {}", type, variance, this->showFullName(gs));
+    fmt::format_to(buf, "{}{} {}", type, variance, this->toStringFullName(gs));
 
     if (this->isClass() || this->isMethod()) {
         if (this->isMethod()) {
@@ -512,7 +525,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
 
         if (this->superClass.exists()) {
-            fmt::format_to(buf, " < {}", this->superClass.data(gs)->showFullName(gs));
+            fmt::format_to(buf, " < {}", this->superClass.data(gs)->toStringFullName(gs));
         }
 
         if (this->isClass()) {

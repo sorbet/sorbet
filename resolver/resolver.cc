@@ -717,7 +717,7 @@ private:
                     if (auto e = ctx.state.beginError(arg.data(ctx)->loc(),
                                                       core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    treeArgName.toString(ctx));
+                                    treeArgName.show(ctx));
                         e.addErrorLine(send->block->loc, "Signature");
                     }
                 }
@@ -729,7 +729,7 @@ private:
                 if (auto e =
                         ctx.state.beginError(arg.data(ctx)->loc(), core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                treeArgName.toString(ctx));
+                                treeArgName.show(ctx));
                 }
             }
         }

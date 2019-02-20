@@ -142,7 +142,7 @@ string ShapeType::show(const GlobalState &gs) const {
 }
 
 string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("AliasType {{ symbol = {} }}", this->symbol.data(gs)->showFullName(gs));
+    return fmt::format("AliasType {{ symbol = {} }}", this->symbol.data(gs)->toStringFullName(gs));
 }
 
 string AliasType::show(const GlobalState &gs) const {
@@ -203,7 +203,7 @@ string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string TypeVar::show(const GlobalState &gs) const {
-    return sym.data(gs)->name.toString(gs);
+    return sym.data(gs)->name.show(gs);
 }
 
 string TypeVar::typeName() const {
@@ -216,7 +216,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto twiceNestedTabs = buildTabs(tabs + 2);
     fmt::memory_buffer buf;
     fmt::format_to(buf, "AppliedType {{\n{}klass = {}\n{}targs = [\n", nestedTabs,
-                   this->klass.data(gs)->showFullName(gs), nestedTabs);
+                   this->klass.data(gs)->toStringFullName(gs), nestedTabs);
 
     int i = -1;
     for (auto &targ : this->targs) {
@@ -314,7 +314,7 @@ string AppliedType::typeName() const {
 }
 
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("LambdaParam({})", this->definition.data(gs)->showFullName(gs));
+    return fmt::format("LambdaParam({})", this->definition.data(gs)->toStringFullName(gs));
 }
 
 string LambdaParam::show(const GlobalState &gs) const {
@@ -322,7 +322,7 @@ string LambdaParam::show(const GlobalState &gs) const {
 }
 
 string SelfTypeParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("SelfTypeParam({})", this->definition.data(gs)->showFullName(gs));
+    return fmt::format("SelfTypeParam({})", this->definition.data(gs)->toStringFullName(gs));
 }
 
 string SelfTypeParam::show(const GlobalState &gs) const {
