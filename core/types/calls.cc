@@ -124,16 +124,8 @@ bool isSetter(Context ctx, NameRef fun) {
         return false;
     }
     if (rawName.back() == '=') {
-        const char secondLast = rawName[rawName.size() - 2];
-        switch (secondLast) {
-            case '=':
-            case '>':
-            case '<':
-            case '!':
-                return false;
-            default:
-                return true;
-        }
+        return !(fun == Names::leq() || fun == Names::geq() || fun == Names::tripleEq() || fun == Names::eqeq() ||
+                 fun == Names::neq());
     }
     return false;
 }
