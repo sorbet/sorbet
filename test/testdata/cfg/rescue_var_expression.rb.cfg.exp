@@ -39,7 +39,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_8" [
-        label = "block[id=8](<rescueTemp>$2: Exception)\l<statTemp>$12: T.class_of(MyClass) = alias <constant:MyClass>\l<statTemp>$11: MyClass = <statTemp>$12: T.class_of(MyClass).new()\l<statTemp>$10: T.untyped = <statTemp>$11: MyClass.foo=(<rescueTemp>$2: Exception)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=8](<rescueTemp>$2: Exception)\l<statTemp>$12: T.class_of(MyClass) = alias <constant:MyClass>\l<statTemp>$11: MyClass = <statTemp>$12: T.class_of(MyClass).new()\l<statTemp>$10: Exception = <statTemp>$11: MyClass.foo=(<rescueTemp>$2: Exception)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$14: NilClass\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
