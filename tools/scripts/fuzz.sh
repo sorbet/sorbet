@@ -15,4 +15,4 @@ find ./test/testdata/ -iname "*.rb"|grep -v disable|xargs -n 1 -I % cp % fuzz_co
 mkdir -p fuzz_crashers/original
 
 # fuzz
-nice ./bazel-bin/test/fuzz/fuzz_dash_e -use_value_profile=1 -only_ascii=1 -artifact_prefix=fuzz_crashers/original/ fuzz_corpus/ -jobs=100 --stress-incremental-resolver
+nice ./bazel-bin/test/fuzz/fuzz_dash_e -use_value_profile=1 -only_ascii=1 -dict=test/fuzz/ruby.dict -artifact_prefix=fuzz_crashers/original/ fuzz_corpus/ -jobs=100 --stress-incremental-resolver
