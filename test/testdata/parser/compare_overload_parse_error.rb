@@ -1,3 +1,4 @@
+# typed: false
 class A # error: Parse Error: class definition in method body
   def greater_eqaul>=(foo) # error: Parse Error: unexpected token: syntax error
   end
