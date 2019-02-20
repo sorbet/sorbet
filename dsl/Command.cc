@@ -18,14 +18,14 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (cnst == nullptr) {
         return false;
     }
-    if (cnst->cnst != ctx.state.enterNameConstant(core::Names::Command())) {
+    if (cnst->cnst != core::Names::Constants::Command()) {
         return false;
     }
     auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
     if (scope == nullptr) {
         return false;
     }
-    if (scope->cnst != ctx.state.enterNameConstant(core::Names::Opus())) {
+    if (scope->cnst != core::Names::Constants::Opus()) {
         return false;
     }
     if (ast::isa_tree<ast::EmptyTree>(scope->scope.get())) {

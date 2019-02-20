@@ -251,7 +251,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;
         if (isProbablySymbol(ctx, type.get(), core::Symbols::Hash())) {
-            mutator = mkMutator(ctx, loc, core::Names::HashMutator());
+            mutator = mkMutator(ctx, loc, core::Names::Constants::HashMutator());
             auto send = ast::cast_tree<ast::Send>(type.get());
             if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 2) {
                 mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(),
@@ -261,7 +261,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                                          ast::MK::Untyped(loc));
             }
         } else if (isProbablySymbol(ctx, type.get(), core::Symbols::Array())) {
-            mutator = mkMutator(ctx, loc, core::Names::ArrayMutator());
+            mutator = mkMutator(ctx, loc, core::Names::Constants::ArrayMutator());
             auto send = ast::cast_tree<ast::Send>(type.get());
             if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 1) {
                 mutator = ast::MK::Send1(loc, std::move(mutator), core::Names::squareBrackets(),
@@ -271,8 +271,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             }
         } else if (ast::isa_tree<ast::UnresolvedConstantLit>(type.get())) {
             // In a perfect world we could know if there was a Mutator we could reference instead, like this:
-            // mutator = ast::MK::UnresolvedConstant(loc, ASTUtil::dupType(type.get()), core::Names::Mutator());
-            // For now we're just going to leave these in method_missing.rbi
+            // mutator = ast::MK::UnresolvedConstant(loc, ASTUtil::dupType(type.get()),
+            // core::Names::Constants::Mutator()); For now we're just going to leave these in method_missing.rbi
         }
 
         if (mutator.get()) {
@@ -280,7 +280,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             rhs.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(mutator))));
 
             ast::ClassDef::ANCESTORS_store ancestors;
-            auto name = ctx.state.enterNameConstant(core::Names::Mutator());
+            auto name = core::Names::Constants::Mutator();
             stats.emplace_back(ast::MK::Class(loc, loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
                                               std::move(ancestors), std::move(rhs), ast::ClassDefKind::Class));
         }

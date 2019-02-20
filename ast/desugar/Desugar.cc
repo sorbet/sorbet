@@ -983,14 +983,14 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::Complex *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::Complex();
+                core::NameRef complex_name = core::Names::Constants::Complex().data(dctx.ctx)->cnst.original;
                 core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
                 auto send = MK::Send2(loc, std::move(kernel), complex_name, MK::Int(loc, 0), MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Symbols::Rational().data(dctx.ctx)->name;
+                core::NameRef complex_name = core::Names::Constants::Rational().data(dctx.ctx)->cnst.original;
                 core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->val);
                 auto send = MK::Send1(loc, std::move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);

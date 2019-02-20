@@ -172,7 +172,7 @@ private:
 
     void expandNames(int growBy = 2);
 
-    SymbolRef synthesizeClass(std::string_view name, u4 superclass = Symbols::todo()._id, bool isModule = false);
+    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);

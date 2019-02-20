@@ -11,13 +11,12 @@ using namespace std;
 namespace sorbet::dsl {
 
 unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, core::Loc loc) {
-    auto opus =
-        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), ctx.state.enterNameConstant(core::Names::Opus()));
-    auto db = ast::MK::UnresolvedConstant(loc, move(opus), ctx.state.enterNameConstant(core::Names::DB()));
-    auto model = ast::MK::UnresolvedConstant(loc, move(db), ctx.state.enterNameConstant(core::Names::Model()));
-    auto mixins = ast::MK::UnresolvedConstant(loc, move(model), ctx.state.enterNameConstant(core::Names::Mixins()));
-    auto enc = ast::MK::UnresolvedConstant(loc, move(mixins), ctx.state.enterNameConstant(core::Names::Encryptable()));
-    auto ev = ast::MK::UnresolvedConstant(loc, move(enc), ctx.state.enterNameConstant(core::Names::EncryptedValue()));
+    auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());
+    auto db = ast::MK::UnresolvedConstant(loc, move(opus), core::Names::Constants::DB());
+    auto model = ast::MK::UnresolvedConstant(loc, move(db), core::Names::Constants::Model());
+    auto mixins = ast::MK::UnresolvedConstant(loc, move(model), core::Names::Constants::Mixins());
+    auto enc = ast::MK::UnresolvedConstant(loc, move(mixins), core::Names::Constants::Encryptable());
+    auto ev = ast::MK::UnresolvedConstant(loc, move(enc), core::Names::Constants::EncryptedValue());
     return mkNilable(loc, move(ev));
 }
 

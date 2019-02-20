@@ -20,78 +20,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-namespace {
-constexpr string_view top_str = "<any>"sv;
-constexpr string_view bottom_str = "T.noreturn"sv;
-constexpr string_view untyped_str = "T.untyped"sv;
-constexpr string_view root_str = "<root>"sv;
-constexpr string_view object_str = "Object"sv;
-constexpr string_view string_str = "String"sv;
-constexpr string_view integer_str = "Integer"sv;
-constexpr string_view float_str = "Float"sv;
-constexpr string_view symbol_str = "Symbol"sv;
-constexpr string_view array_str = "Array"sv;
-constexpr string_view hash_str = "Hash"sv;
-constexpr string_view proc_str = "Proc"sv;
-constexpr string_view trueClass_str = "TrueClass"sv;
-constexpr string_view falseClass_str = "FalseClass"sv;
-constexpr string_view nilClass_str = "NilClass"sv;
-constexpr string_view class_str = "Class"sv;
-constexpr string_view module_str = "Module"sv;
-constexpr string_view todo_str = "<todo sym>"sv;
-constexpr string_view no_symbol_str = "<none>"sv;
-constexpr string_view opus_str = "Opus"sv;
-constexpr string_view T_str = "T"sv;
-constexpr string_view basicObject_str = "BasicObject"sv;
-constexpr string_view kernel_str = "Kernel"sv;
-constexpr string_view range_str = "Range"sv;
-constexpr string_view regexp_str = "Regexp"sv;
-constexpr string_view standardError_str = "StandardError"sv;
-constexpr string_view complex_str = "Complex"sv;
-constexpr string_view rational_str = "Rational"sv;
-// A magic non user-creatable class with methods to keep state between passes
-constexpr string_view magic_str = "<Magic>"sv;
-constexpr string_view enumerable_str = "Enumerable"sv;
-constexpr string_view set_str = "Set"sv;
-constexpr string_view struct_str = "Struct"sv;
-constexpr string_view file_str = "File"sv;
-constexpr string_view ruby_typer_str = "RubyTyper"sv;
-constexpr string_view stubClass_str = "StubClass"sv;
-constexpr string_view stubAncestor_str = "StubAncestor"sv;
-constexpr string_view configatron_str = "Configatron"sv;
-constexpr string_view store_str = "Store"sv;
-constexpr string_view root_store_str = "RootStore"sv;
-constexpr string_view sinatra_str = "Sinatra"sv;
-constexpr string_view base_str = "Base"sv;
-constexpr string_view void_str = "Void"sv;
-constexpr string_view typeAliasTemp_str = "<TypeAlias>"sv;
-constexpr string_view chalk_str = "Chalk"sv;
-constexpr string_view tools_str = "Tools"sv;
-constexpr string_view accessible_str = "Accessible"sv;
-constexpr string_view generic_str = "Generic"sv;
-constexpr string_view tuple_str = "Tuple"sv;
-constexpr string_view shape_str = "Shape"sv;
-constexpr string_view subclasses_str = "SUBCLASSES"sv;
-constexpr string_view sorbet_str = "Sorbet"sv;
-constexpr string_view return_type_inference_str = "ReturnTypeInference"sv;
-constexpr string_view inferred_return_type_str = "INFERRED_RETURN_TYPE"sv;
-constexpr string_view inferred_argument_type_str = "INFERRED_ARGUMENT_TYPE"sv;
-constexpr string_view implicit_module_superclass_str = "ImplicitModuleSuperclass"sv;
-constexpr string_view guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder"sv;
-constexpr string_view private_str = "Private"sv;
-constexpr string_view builder_str = "Builder"sv;
-constexpr string_view sig_str = "Sig"sv;
-constexpr string_view utils_str = "Utils"sv;
-constexpr string_view runtime_profiled_str = "RuntimeProfiled"sv;
-constexpr string_view undeclared_field_stub_str = "<undeclared-field-stub>"sv;
-
-// This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
-constexpr string_view reserved_str = "<<RESERVED>>"sv;
-} // namespace
-
-SymbolRef GlobalState::synthesizeClass(string_view name, u4 superclass, bool isModule) {
-    NameRef nameId = enterNameConstant(name);
-
+SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
     SymbolRef symRef = SymbolRef(this, symbols.size());
@@ -137,151 +66,153 @@ void GlobalState::initEmpty() {
     Names::registerNames(*this);
 
     SymbolRef id;
-    id = synthesizeClass(no_symbol_str, 0);
+    id = synthesizeClass(core::Names::Constants::NoSymbol(), 0);
     ENFORCE(id == Symbols::noSymbol());
-    id = synthesizeClass(top_str, 0);
+    id = synthesizeClass(core::Names::Constants::Top(), 0);
     ENFORCE(id == Symbols::top());
-    id = synthesizeClass(bottom_str, 0);
+    id = synthesizeClass(core::Names::Constants::Bottom(), 0);
     ENFORCE(id == Symbols::bottom());
-    id = synthesizeClass(root_str, 0);
+    id = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE(id == Symbols::root());
-    id = synthesizeClass(todo_str, 0);
+    id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
-    id = synthesizeClass(object_str, Symbols::BasicObject()._id);
+    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject()._id);
     ENFORCE(id == Symbols::Object());
-    id = synthesizeClass(integer_str);
+    id = synthesizeClass(core::Names::Constants::Integer());
     ENFORCE(id == Symbols::Integer());
-    id = synthesizeClass(float_str);
+    id = synthesizeClass(core::Names::Constants::Float());
     ENFORCE(id == Symbols::Float());
-    id = synthesizeClass(string_str);
+    id = synthesizeClass(core::Names::Constants::String());
     ENFORCE(id == Symbols::String());
-    id = synthesizeClass(symbol_str);
+    id = synthesizeClass(core::Names::Constants::Symbol());
     ENFORCE(id == Symbols::Symbol());
-    id = synthesizeClass(array_str);
+    id = synthesizeClass(core::Names::Constants::Array());
     ENFORCE(id == Symbols::Array());
-    id = synthesizeClass(hash_str);
+    id = synthesizeClass(core::Names::Constants::Hash());
     ENFORCE(id == Symbols::Hash());
-    id = synthesizeClass(trueClass_str);
+    id = synthesizeClass(core::Names::Constants::TrueClass());
     ENFORCE(id == Symbols::TrueClass());
-    id = synthesizeClass(falseClass_str);
+    id = synthesizeClass(core::Names::Constants::FalseClass());
     ENFORCE(id == Symbols::FalseClass());
-    id = synthesizeClass(nilClass_str);
+    id = synthesizeClass(core::Names::Constants::NilClass());
     ENFORCE(id == Symbols::NilClass());
-    id = synthesizeClass(untyped_str, 0);
+    id = synthesizeClass(core::Names::Constants::Untyped(), 0);
     ENFORCE(id == Symbols::untyped());
-    id = synthesizeClass(opus_str, 0, true);
+    id = synthesizeClass(core::Names::Constants::Opus(), 0, true);
     ENFORCE(id == Symbols::Opus());
-    id = synthesizeClass(T_str, Symbols::todo()._id, true);
+    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo()._id, true);
     ENFORCE(id == Symbols::T());
-    id = synthesizeClass(class_str, 0);
+    id = synthesizeClass(core::Names::Constants::Class(), 0);
     ENFORCE(id == Symbols::Class());
-    id = synthesizeClass(basicObject_str, 0);
+    id = synthesizeClass(core::Names::Constants::BasicObject(), 0);
     ENFORCE(id == Symbols::BasicObject());
-    id = synthesizeClass(kernel_str, 0, true);
+    id = synthesizeClass(core::Names::Constants::Kernel(), 0, true);
     ENFORCE(id == Symbols::Kernel());
-    id = synthesizeClass(range_str);
+    id = synthesizeClass(core::Names::Constants::Range());
     ENFORCE(id == Symbols::Range());
-    id = synthesizeClass(regexp_str);
+    id = synthesizeClass(core::Names::Constants::Regexp());
     ENFORCE(id == Symbols::Regexp());
-    id = synthesizeClass(magic_str);
+    id = synthesizeClass(core::Names::Constants::Magic());
     ENFORCE(id == Symbols::Magic());
-    id = synthesizeClass(module_str);
+    id = synthesizeClass(core::Names::Constants::Module());
     ENFORCE(id == Symbols::Module());
-    id = synthesizeClass(standardError_str);
+    id = synthesizeClass(core::Names::Constants::StandardError());
     ENFORCE(id == Symbols::StandardError());
-    id = synthesizeClass(complex_str);
+    id = synthesizeClass(core::Names::Constants::Complex());
     ENFORCE(id == Symbols::Complex());
-    id = synthesizeClass(rational_str);
+    id = synthesizeClass(core::Names::Constants::Rational());
     ENFORCE(id == Symbols::Rational());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(array_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array());
     ENFORCE(id == Symbols::T_Array());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(hash_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash());
     ENFORCE(id == Symbols::T_Hash());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(proc_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc());
     ENFORCE(id == Symbols::T_Proc());
-    id = synthesizeClass(proc_str);
+    id = synthesizeClass(core::Names::Constants::Proc());
     ENFORCE(id == Symbols::Proc());
-    id = synthesizeClass(enumerable_str, 0, true);
+    id = synthesizeClass(core::Names::Constants::Enumerable(), 0, true);
     ENFORCE(id == Symbols::Enumerable());
-    id = synthesizeClass(set_str);
+    id = synthesizeClass(core::Names::Constants::Set());
     ENFORCE(id == Symbols::Set());
-    id = synthesizeClass(struct_str);
+    id = synthesizeClass(core::Names::Constants::Struct());
     ENFORCE(id == Symbols::Struct());
-    id = synthesizeClass(file_str);
+    id = synthesizeClass(core::Names::Constants::File());
     ENFORCE(id == Symbols::File());
-    id = synthesizeClass(ruby_typer_str, 0, true);
+    id = synthesizeClass(core::Names::Constants::RubyTyper(), 0, true);
     ENFORCE(id == Symbols::RubyTyper());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(stubClass_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::StubClass());
     ENFORCE(id == Symbols::StubClass());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(stubAncestor_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::StubAncestor());
     ENFORCE(id == Symbols::StubAncestor());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(enumerable_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
     ENFORCE(id == Symbols::T_Enumerable());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(range_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
     ENFORCE(id == Symbols::T_Range());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(set_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
     ENFORCE(id == Symbols::T_Set());
-    id = synthesizeClass(configatron_str);
+    id = synthesizeClass(core::Names::Constants::Configatron());
     ENFORCE(id == Symbols::Configatron());
-    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), enterNameConstant(store_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::Store());
     ENFORCE(id == Symbols::Configatron_Store());
-    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), enterNameConstant(root_store_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::RootStore());
     ENFORCE(id == Symbols::Configatron_RootStore());
-    id = synthesizeClass(sinatra_str, 0, true);
+    id = synthesizeClass(core::Names::Constants::Sinatra(), 0, true);
     ENFORCE(id == Symbols::Sinatra());
-    id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), enterNameConstant(base_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), core::Names::Constants::Base());
     ENFORCE(id == Symbols::SinatraBase());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(void_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::Void());
     ENFORCE(id == Symbols::void_());
-    id = synthesizeClass(typeAliasTemp_str, 0);
+    id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE(id == Symbols::typeAliasTemp());
-    id = synthesizeClass(chalk_str, 0, true);
+    id = synthesizeClass(core::Names::Constants::Chalk(), 0, true);
     ENFORCE(id == Symbols::Chalk());
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), enterNameConstant(tools_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), core::Names::Constants::Tools());
     ENFORCE(id == Symbols::Chalk_Tools());
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk_Tools(), enterNameConstant(accessible_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Chalk_Tools(), core::Names::Constants::Accessible());
     ENFORCE(id == Symbols::Chalk_Tools_Accessible());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(generic_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE(id == Symbols::T_Generic());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(tuple_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::Tuple());
     ENFORCE(id == Symbols::Tuple());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(shape_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::Shape());
     ENFORCE(id == Symbols::Shape());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(subclasses_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::Subclasses());
     ENFORCE(id == Symbols::Subclasses());
-    id = synthesizeClass(sorbet_str);
+    id = synthesizeClass(core::Names::Constants::Sorbet());
     ENFORCE(id == Symbols::Sorbet());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(implicit_module_superclass_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::ImplicitModuleSuperclass());
     ENFORCE(id == Symbols::RubyTyper_ImplicitModuleSuperClass());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(return_type_inference_str));
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::ReturnTypeInference());
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference());
-    id = enterMethodSymbol(Loc::none(), Symbols::RubyTyper(), enterNameUTF8(guessed_type_type_parameter_holder_str));
+    id = enterMethodSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::guessedTypeTypeParameterHolder());
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder());
     id = enterTypeArgument(
         Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(),
-        freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_return_type_str), 1),
+        freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredReturnType(), 1),
         core::Variance::ContraVariant);
     id.data(*this)->resultType = make_type<core::TypeVar>(id);
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
     id = enterTypeArgument(
         Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(),
-        freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_argument_type_str), 1),
+        freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredArgumentType(), 1),
         core::Variance::CoVariant);
     id.data(*this)->resultType = make_type<core::TypeVar>(id);
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(private_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
     ENFORCE(id == Symbols::Sorbet_Private());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), enterNameConstant(builder_str));
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Builder());
     ENFORCE(id == Symbols::Sorbet_Private_Builder());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(sig_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE(id == Symbols::T_Sig());
-    id = enterFieldSymbol(Loc::none(), Symbols::Magic(), enterNameConstant(undeclared_field_stub_str));
+
+    // A magic non user-creatable class with methods to keep state between passes
+    id = enterFieldSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UndeclaredFieldStub());
     ENFORCE(id == Symbols::Magic_undeclaredFieldStub());
 
     // Root members
-    Symbols::root().data(*this, true)->members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();
-    Symbols::root().data(*this, true)->members[enterNameConstant(top_str)] = Symbols::top();
-    Symbols::root().data(*this, true)->members[enterNameConstant(bottom_str)] = Symbols::bottom();
+    Symbols::root().data(*this, true)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
+    Symbols::root().data(*this, true)->members[core::Names::Constants::Top()] = Symbols::top();
+    Symbols::root().data(*this, true)->members[core::Names::Constants::Bottom()] = Symbols::bottom();
     Context ctx(*this, Symbols::root());
 
     // Synthesize untyped = T.untyped
@@ -350,11 +281,11 @@ void GlobalState::initEmpty() {
     Symbols::SinatraBase().data(*this)->superClass = Symbols::Object();
 
     // Synthesize T::Utils
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(utils_str));
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
     id.data(*this)->setIsModule(true);
 
     // Synthesize T::Utils::RuntimeProfiled
-    id = enterStaticFieldSymbol(Loc::none(), id, enterNameConstant(runtime_profiled_str));
+    id = enterStaticFieldSymbol(Loc::none(), id, core::Names::Constants::RuntimeProfiled());
     id.data(*this)->resultType = make_type<core::AliasType>(Symbols::untyped());
 
     int reservedCount = 0;
@@ -373,15 +304,17 @@ void GlobalState::initEmpty() {
         sym.data(*this)->singletonClass(*this);
     }
 
+    // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
     ENFORCE(symbols.size() < Symbols::Proc0()._id);
     while (symbols.size() < Symbols::Proc0()._id) {
-        string res = absl::StrCat(reserved_str, reservedCount);
-        synthesizeClass(res);
+        string name = absl::StrCat("<RESERVED_", reservedCount, ">");
+        synthesizeClass(enterNameConstant(name));
         reservedCount++;
     }
 
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
-        auto id = synthesizeClass(absl::StrCat("Proc", arity), Symbols::Proc()._id);
+        string name = absl::StrCat("Proc", arity);
+        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc()._id);
         ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity, " got: ", id._id,
                 " expected: ", Symbols::Proc(arity)._id);
         id.data(*this)->singletonClass(*this);

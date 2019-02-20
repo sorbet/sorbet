@@ -54,7 +54,7 @@ module RubyTyper
     )
     .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
   end
-  def self.Enumerable_to_h(*arg0); end
+  def self.enumerable_to_h(*arg0); end
 end
 
 class RubyTyper::DynamicStruct < Struct

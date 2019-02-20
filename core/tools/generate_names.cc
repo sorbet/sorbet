@@ -12,270 +12,330 @@ struct NameDef {
     int id;
     string srcName;
     string val;
+    bool isConstant;
 
-    NameDef(string_view srcName, string_view val) : srcName(string(srcName)), val(string(val)) {
+    NameDef(string_view srcName, string_view val, bool isConstant)
+        : srcName(string(srcName)), val(string(val)), isConstant(isConstant) {}
+    NameDef(string_view srcName, string_view val) : srcName(string(srcName)), val(string(val)), isConstant(false) {
         if (srcName == val) {
-            sorbet::Exception::raise("Only pass one arg for '", val, "'");
+            throw std::logic_error("Only pass one arg for '" + string(val) + "'");
         }
     }
-    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)) {}
+    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), isConstant(false){};
 };
 
-NameDef names[] = {{"initialize"},
-                   {"andAnd", "&&"},
-                   {"orOr", "||"},
-                   {"to_s"},
-                   {"to_a"},
-                   {"to_h"},
-                   {"to_hash"},
-                   {"to_proc"},
-                   {"concat"},
-                   {"key_p", "key?"},
-                   {"intern"},
-                   {"call"},
-                   {"bang", "!"},
-                   {"squareBrackets", "[]"},
-                   {"squareBracketsEq", "[]="},
-                   {"unaryPlus", "+@"},
-                   {"unaryMinus", "-@"},
-                   {"star", "*"},
-                   {"starStar", "**"},
-                   {"ampersand", "&"},
-                   {"tripleEq", "==="},
-                   {"orOp", "|"},
-                   {"backtick", "`"},
-                   {"slice"},
-                   {"defined_p", "defined?"},
-                   {"each"},
+NameDef names[] = {
+    {"initialize"},
+    {"andAnd", "&&"},
+    {"orOr", "||"},
+    {"to_s"},
+    {"to_a"},
+    {"to_h"},
+    {"to_hash"},
+    {"to_proc"},
+    {"concat"},
+    {"key_p", "key?"},
+    {"intern"},
+    {"call"},
+    {"bang", "!"},
+    {"squareBrackets", "[]"},
+    {"squareBracketsEq", "[]="},
+    {"unaryPlus", "+@"},
+    {"unaryMinus", "-@"},
+    {"star", "*"},
+    {"starStar", "**"},
+    {"ampersand", "&"},
+    {"tripleEq", "==="},
+    {"orOp", "|"},
+    {"backtick", "`"},
+    {"slice"},
+    {"defined_p", "defined?"},
+    {"each"},
 
-                   // used in CFG for temporaries
-                   {"whileTemp", "<whileTemp>"},
-                   {"ifTemp", "<ifTemp>"},
-                   {"returnTemp", "<returnTemp>"},
-                   {"statTemp", "<statTemp>"},
-                   {"assignTemp", "<assignTemp>"},
-                   {"returnMethodTemp", "<returnMethodTemp>"},
-                   {"debugEnvironmentTemp", "<debugEnvironmentTemp>"},
-                   {"blockReturnTemp", "<blockReturnTemp>"},
-                   {"nextTemp", "<nextTemp>"},
-                   {"selfMethodTemp", "<selfMethodTemp>"},
-                   {"hashTemp", "<hashTemp>"},
-                   {"arrayTemp", "<arrayTemp>"},
-                   {"rescueTemp", "<rescueTemp>"},
-                   {"rescueStartTemp", "<rescueStartTemp>"},
-                   {"rescueEndTemp", "<rescueEndTemp>"},
-                   {"gotoDeadTemp", "<gotoDeadTemp>"},
-                   {"exceptionClassTemp", "<exceptionClassTemp>"},
-                   {"isaCheckTemp", "<isaCheckTemp>"},
-                   {"throwAwayTemp", "<throwAwayTemp>"},
-                   {"castTemp", "<castTemp>"},
-                   {"finalReturn", "<finalReturn>"},
-                   {"cfgAlias", "<cfgAlias>"},
-                   {"magic", "<magic>"},
-                   // end CFG temporaries
+    // used in CFG for temporaries
+    {"whileTemp", "<whileTemp>"},
+    {"ifTemp", "<ifTemp>"},
+    {"returnTemp", "<returnTemp>"},
+    {"statTemp", "<statTemp>"},
+    {"assignTemp", "<assignTemp>"},
+    {"returnMethodTemp", "<returnMethodTemp>"},
+    {"debugEnvironmentTemp", "<debugEnvironmentTemp>"},
+    {"blockReturnTemp", "<blockReturnTemp>"},
+    {"nextTemp", "<nextTemp>"},
+    {"selfMethodTemp", "<selfMethodTemp>"},
+    {"hashTemp", "<hashTemp>"},
+    {"arrayTemp", "<arrayTemp>"},
+    {"rescueTemp", "<rescueTemp>"},
+    {"rescueStartTemp", "<rescueStartTemp>"},
+    {"rescueEndTemp", "<rescueEndTemp>"},
+    {"gotoDeadTemp", "<gotoDeadTemp>"},
+    {"exceptionClassTemp", "<exceptionClassTemp>"},
+    {"isaCheckTemp", "<isaCheckTemp>"},
+    {"throwAwayTemp", "<throwAwayTemp>"},
+    {"castTemp", "<castTemp>"},
+    {"finalReturn", "<finalReturn>"},
+    {"cfgAlias", "<cfgAlias>"},
+    {"magic", "<magic>"},
+    // end CFG temporaries
 
-                   {"include"},
-                   {"extend"},
-                   {"currentFile", "__FILE__"},
-                   {"merge"},
+    {"include"},
+    {"extend"},
+    {"currentFile", "__FILE__"},
+    {"merge"},
 
-                   // T keywords
-                   {"sig"},
-                   {"typeParameters", "type_parameters"},
-                   {"typeParameter", "type_parameter"},
-                   {"abstract"},
-                   {"implementation"},
-                   {"override_", "override"},
-                   {"overridable"},
+    // T keywords
+    {"sig"},
+    {"typeParameters", "type_parameters"},
+    {"typeParameter", "type_parameter"},
+    {"abstract"},
+    {"implementation"},
+    {"override_", "override"},
+    {"overridable"},
 
-                   // Sig builders
-                   {"params"},
-                   {"final"},
-                   {"returns"},
-                   {"void_", "void"},
-                   {"checked"},
-                   {"soft"},
-                   {"generated"},
+    // Sig builders
+    {"params"},
+    {"final"},
+    {"returns"},
+    {"void_", "void"},
+    {"checked"},
+    {"soft"},
+    {"generated"},
 
-                   {"all"},
-                   {"any"},
-                   {"enum_", "enum"},
-                   {"nilable"},
-                   {"proc"},
-                   {"untyped"},
-                   {"Array"},
-                   {"Hash"},
-                   {"noreturn"},
-                   {"singletonClass", "singleton_class"},
-                   {"class_", "class"},
-                   {"classOf", "class_of"},
-                   {"selfType", "self_type"},
-                   {"coerce"},
+    {"all"},
+    {"any"},
+    {"enum_", "enum"},
+    {"nilable"},
+    {"proc"},
+    {"untyped"},
+    {"noreturn"},
+    {"singletonClass", "singleton_class"},
+    {"class_", "class"},
+    {"classOf", "class_of"},
+    {"selfType", "self_type"},
+    {"coerce"},
 
-                   {"assertType", "assert_type!"},
-                   {"cast"},
-                   {"let"},
-                   {"unsafe"},
-                   {"must"},
-                   {"declareInterface", "interface!"},
-                   {"declareAbstract", "abstract!"},
-                   {"revealType", "reveal_type"},
-                   // end T keywords
+    {"assertType", "assert_type!"},
+    {"cast"},
+    {"let"},
+    {"unsafe"},
+    {"must"},
+    {"declareInterface", "interface!"},
+    {"declareAbstract", "abstract!"},
+    {"revealType", "reveal_type"},
+    // end T keywords
 
-                   // Ruby DSL methods which we understand
-                   {"attr"},
-                   {"attrAccessor", "attr_accessor"},
-                   {"attrWriter", "attr_writer"},
-                   {"attrReader", "attr_reader"},
-                   {"private_", "private"},
-                   {"protected_", "protected"},
-                   {"public_", "public"},
-                   {"privateClassMethod", "private_class_method"},
-                   {"moduleFunction", "module_function"},
-                   {"aliasMethod", "alias_method"},
-                   {"typeAlias", "type_alias"},
-                   {"typeMember", "type_member"},
-                   {"typeTemplate", "type_template"},
-                   {"T"},
-                   {"covariant", "out"},
-                   {"contravariant", "in"},
-                   {"invariant", "<invariant>"},
-                   {"fixed"},
+    // Ruby DSL methods which we understand
+    {"attr"},
+    {"attrAccessor", "attr_accessor"},
+    {"attrWriter", "attr_writer"},
+    {"attrReader", "attr_reader"},
+    {"private_", "private"},
+    {"protected_", "protected"},
+    {"public_", "public"},
+    {"privateClassMethod", "private_class_method"},
+    {"moduleFunction", "module_function"},
+    {"aliasMethod", "alias_method"},
+    {"typeAlias", "type_alias"},
+    {"typeMember", "type_member"},
+    {"typeTemplate", "type_template"},
+    {"covariant", "out"},
+    {"contravariant", "in"},
+    {"invariant", "<invariant>"},
+    {"fixed"},
 
-                   {"prop"},
-                   {"token_prop"},
-                   {"timestamped_token_prop"},
-                   {"created_prop"},
-                   {"merchant_prop"},
-                   {"encrypted_prop"},
-                   {"array"},
-                   {"type"},
-                   {"optional"},
-                   {"immutable"},
-                   {"migrate"},
-                   {"default_", "default"},
-                   {"const_", "const"},
-                   {"token"},
-                   {"created"},
-                   {"merchant"},
-                   {"foreign"},
-                   {"Chalk"},
-                   {"ODM"},
-                   {"Mutator"},
-                   {"Private"},
-                   {"HashMutator"},
-                   {"ArrayMutator"},
-                   {"DocumentMutator"},
+    {"prop"},
+    {"token_prop"},
+    {"timestamped_token_prop"},
+    {"created_prop"},
+    {"merchant_prop"},
+    {"encrypted_prop"},
+    {"array"},
+    {"type"},
+    {"optional"},
+    {"immutable"},
+    {"migrate"},
+    {"default_", "default"},
+    {"const_", "const"},
+    {"token"},
+    {"created"},
+    {"merchant"},
+    {"foreign"},
+    {"Chalk", "Chalk", true},
+    {"ODM", "ODM", true},
+    {"Mutator", "Mutator", true},
+    {"Private", "Private", true},
+    {"HashMutator", "HashMutator", true},
+    {"ArrayMutator", "ArrayMutator", true},
+    {"DocumentMutator", "DocumentMutator", true},
 
-                   {"describe"},
-                   {"it"},
-                   {"before"},
+    {"describe"},
+    {"it"},
+    {"before"},
 
-                   {"dslOptional", "dsl_optional"},
-                   {"dslRequired", "dsl_required"},
-                   {"implied"},
-                   {"skipGetter", "skip_getter"},
-                   {"skipSetter", "skip_setter"},
+    {"dslOptional", "dsl_optional"},
+    {"dslRequired", "dsl_required"},
+    {"implied"},
+    {"skipGetter", "skip_getter"},
+    {"skipSetter", "skip_setter"},
 
-                   {"wrapInstance", "wrap_instance"},
+    {"wrapInstance", "wrap_instance"},
 
-                   {"registered"},
-                   {"instanceRegistered", "<instance_registered>"},
-                   {"helpers"},
+    {"registered"},
+    {"instanceRegistered", "<instance_registered>"},
+    {"helpers"},
 
-                   {"Opus"},
-                   {"DB"},
-                   {"Model"},
-                   {"Mixins"},
-                   {"Encryptable"},
-                   {"EncryptedValue"},
-                   {"Command"},
-                   // end DSL methods
+    {"DB", "DB", true},
+    {"Model", "Model", true},
+    {"Mixins", "Mixins", true},
+    {"Encryptable", "Encryptable", true},
+    {"EncryptedValue", "EncryptedValue", true},
+    {"Command", "Command", true},
+    // end DSL methods
 
-                   // Our own special methods which have special meaning
-                   {"hardAssert", "hard_assert"}, // Kernel.hard_assert
-                   // end special methods
+    // Our own special methods which have special meaning
+    {"hardAssert", "hard_assert"}, // Kernel.hard_assert
+    // end special methods
 
-                   // The next two names are used as keys in SymbolInfo::members to store
-                   // pointers up and down the singleton-class hierarchy. If A's singleton
-                   // class is B, then A will have a `singletonClass` entry in its members
-                   // table which references B, and B will have an `attachedClass` entry
-                   // pointing at A.
-                   //
-                   // The "attached class" terminology is borrowed from MRI, which refers
-                   // to the unique instance attached to a singleton class as the "attached
-                   // object"
-                   {"singleton", "<singleton class>"},
-                   {"attached", "<attached class>"},
+    // The next two names are used as keys in SymbolInfo::members to store
+    // pointers up and down the singleton-class hierarchy. If A's singleton
+    // class is B, then A will have a `singletonClass` entry in its members
+    // table which references B, and B will have an `attachedClass` entry
+    // pointing at A.
+    //
+    // The "attached class" terminology is borrowed from MRI, which refers
+    // to the unique instance attached to a singleton class as the "attached
+    // object"
+    {"singleton", "<singleton class>"},
+    {"attached", "<attached class>"},
 
-                   // This name is used as a key in SymbolInfo::members to store the module
-                   // registered via the `mixes_in_class_method` name.
-                   {"classMethods", "<class methods>"},
-                   {"mixesInClassMethods", "mixes_in_class_methods"},
+    // This name is used as a key in SymbolInfo::members to store the module
+    // registered via the `mixes_in_class_method` name.
+    {"classMethods", "<class methods>"},
+    {"mixesInClassMethods", "mixes_in_class_methods"},
 
-                   {"blockTemp", "<block>"},
-                   {"blockRetrunType", "<block-return-type>"},
-                   {"blockPreCallTemp", "<block-pre-call-temp>"},
-                   {"blockPassTemp", "<block-pass>"},
-                   {"forTemp"},
-                   {"new_", "new"},
-                   {"blockCall", "<block-call>"},
-                   {"arg", "<arg>"},
-                   {"blkArg", "<blk>"},
-                   {"blockGiven_p", "block_given?"},
+    {"blockTemp", "<block>"},
+    {"blockRetrunType", "<block-return-type>"},
+    {"blockPreCallTemp", "<block-pre-call-temp>"},
+    {"blockPassTemp", "<block-pass>"},
+    {"forTemp"},
+    {"new_", "new"},
+    {"blockCall", "<block-call>"},
+    {"arg", "<arg>"},
+    {"blkArg", "<blk>"},
+    {"blockGiven_p", "block_given?"},
 
-                   // Used to generate temporary names for destructuring arguments ala proc do
-                   //  |(x,y)|; end
-                   {"destructureArg", "<destructure>"},
+    // Used to generate temporary names for destructuring arguments ala proc do
+    //  |(x,y)|; end
+    {"destructureArg", "<destructure>"},
 
-                   {"lambda"},
-                   {"nil_p", "nil?"},
-                   {"present_p", "present?"},
-                   {"nil"},
-                   {"NilClass"},
-                   {"super"},
-                   {"empty", ""},
+    {"lambda"},
+    {"nil_p", "nil?"},
+    {"present_p", "present?"},
+    {"nil"},
+    {"super"},
+    {"empty", ""},
 
-                   {"buildHash", "<build-hash>"},
-                   {"buildArray", "<build-array>"},
-                   {"splat", "<splat>"},
-                   {"expandSplat", "<expand-splat>"},
-                   {"arg0"},
-                   {"arg1"},
-                   {"arg2"},
-                   {"opts"},
-                   {"Struct"},
-                   {"Elem"},
-                   {"keepForIde", "keep_for_ide"},
-                   {"keepForTypechecking", "keep_for_typechecking"},
+    {"buildHash", "<build-hash>"},
+    {"buildArray", "<build-array>"},
+    {"splat", "<splat>"},
+    {"expandSplat", "<expand-splat>"},
+    {"arg0"},
+    {"arg1"},
+    {"arg2"},
+    {"opts"},
+    {"Elem", "Elem", true},
+    {"keepForIde", "keep_for_ide"},
+    {"keepForTypechecking", "keep_for_typechecking"},
 
-                   {"is_a_p", "is_a?"},
-                   {"kind_of", "kind_of?"},
-                   {"lessThan", "<"},
-                   {"eqeq", "=="},
-                   {"neq", "!="},
+    {"is_a_p", "is_a?"},
+    {"kind_of", "kind_of?"},
+    {"lessThan", "<"},
+    {"eqeq", "=="},
+    {"neq", "!="},
 
-                   // methods that are known by tuple and\or shape types
-                   {"freeze"},
-                   {"last"},
-                   {"first"},
-                   {"min"},
-                   {"max"},
+    // methods that are known by tuple and\or shape types
+    {"freeze"},
+    {"last"},
+    {"first"},
+    {"min"},
+    {"max"},
 
-                   // Enumerable#flat_map has special-case logic in Infer
-                   {"flatMap", "flat_map"},
+    // Enumerable#flat_map has special-case logic in Infer
+    {"flatMap", "flat_map"},
 
-                   // Array#flatten and #compact are also custom-implemented
-                   {"flatten"},
-                   {"compact"},
+    // Array#flatten and #compact are also custom-implemented
+    {"flatten"},
+    {"compact"},
 
-                   {"staticInit", "<static-init>"},
+    {"staticInit", "<static-init>"},
 
-                   {"require"},
-                   {"callWithSplat", "<call-with-splat>"},
-                   {"Enumerable_to_h"},
+    {"require"},
+    {"callWithSplat", "<call-with-splat>"},
+    {"enumerable_to_h"},
 
-                   {"Complex"}};
+    // GlobalState initEmpty()
+    {"Top", "<any>", true},
+    {"Bottom", "T.noreturn", true},
+    {"Untyped", "T.untyped", true},
+    {"Root", "<root>", true},
+    {"Object", "Object", true},
+    {"String", "String", true},
+    {"Integer", "Integer", true},
+    {"Float", "Float", true},
+    {"Symbol", "Symbol", true},
+    {"Array", "Array", true},
+    {"Hash", "Hash", true},
+    {"Proc", "Proc", true},
+    {"TrueClass", "TrueClass", true},
+    {"FalseClass", "FalseClass", true},
+    {"NilClass", "NilClass", true},
+    {"Class", "Class", true},
+    {"Module", "Module", true},
+    {"Todo", "<todo sym>", true},
+    {"NoSymbol", "<none>", true},
+    {"Opus", "Opus", true},
+    {"T", "T", true},
+    {"BasicObject", "BasicObject", true},
+    {"Kernel", "Kernel", true},
+    {"Range", "Range", true},
+    {"Regexp", "Regexp", true},
+    {"StandardError", "StandardError", true},
+    {"Complex", "Complex", true},
+    {"Rational", "Rational", true},
+    // A magic non user-creatable class with methods to keep state between passes
+    {"Magic", "<Magic>", true},
+    {"Enumerable", "Enumerable", true},
+    {"Set", "Set", true},
+    {"Struct", "Struct", true},
+    {"File", "File", true},
+    {"RubyTyper", "RubyTyper", true},
+    {"StubClass", "StubClass", true},
+    {"StubAncestor", "StubAncestor", true},
+    {"Configatron", "Configatron", true},
+    {"Store", "Store", true},
+    {"RootStore", "RootStore", true},
+    {"Sinatra", "Sinatra", true},
+    {"Base", "Base", true},
+    {"Void", "Void", true},
+    {"TypeAlias", "<TypeAlias>", true},
+    {"Tools", "Tools", true},
+    {"Accessible", "Accessible", true},
+    {"Generic", "Generic", true},
+    {"Tuple", "Tuple", true},
+    {"Shape", "Shape", true},
+    {"Subclasses", "SUBCLASSES", true},
+    {"Sorbet", "Sorbet", true},
+    {"ReturnTypeInference", "ReturnTypeInference", true},
+    {"InferredReturnType", "INFERRED_RETURN_TYPE", true},
+    {"InferredArgumentType", "INFERRED_ARGUMENT_TYPE", true},
+    {"ImplicitModuleSuperclass", "ImplicitModuleSuperclass", true},
+    {"guessedTypeTypeParameterHolder", "guessed_type_type_parameter_holder"},
+    {"Builder", "Builder", true},
+    {"Sig", "Sig", true},
+    {"Utils", "Utils", true},
+    {"RuntimeProfiled", "RuntimeProfiled", true},
+    {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
+};
 
 void emit_name_header(ostream &out, NameDef &name) {
     out << "#ifndef NAME_" << name.srcName << '\n';
@@ -298,13 +358,14 @@ void emit_name_string(ostream &out, NameDef &name) {
 }
 
 void emit_register(ostream &out) {
-    out << "void Names::registerNames(GlobalState &gs) {" << '\n';
+    out << "void registerNames(GlobalState &gs) {" << '\n';
     for (auto &name : names) {
-        out << "    NameRef " << name.srcName << "_id = gs.enterNameUTF8(" << name.srcName << "_DESC);" << '\n';
+        auto fun = name.isConstant ? "enterNameConstant" : "enterNameUTF8";
+        out << "    NameRef " << name.srcName << "_id = gs." << fun << "(" << name.srcName << "_DESC);" << '\n';
     }
     out << '\n';
     for (auto &name : names) {
-        out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* Names::" << name.srcName << "() */"
+        out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* " << name.srcName << "() */"
             << '\n';
     }
     out << '\n';
@@ -314,9 +375,12 @@ void emit_register(ostream &out) {
 int main(int argc, char **argv) {
     int i = 1;
     for (auto &name : names) {
+        if (name.isConstant) {
+            i++;
+        }
         name.id = i++;
     }
-    int lastId = i - 1;
+    int lastId = i;
 
     // emit header file
     {
@@ -332,8 +396,18 @@ int main(int argc, char **argv) {
         header << "namespace Names {" << '\n';
 
         for (auto &name : names) {
-            emit_name_header(header, name);
+            if (!name.isConstant) {
+                emit_name_header(header, name);
+            }
         }
+
+        header << "namespace Constants {" << '\n';
+        for (auto &name : names) {
+            if (name.isConstant) {
+                emit_name_header(header, name);
+            }
+        }
+        header << "}" << '\n';
 
         header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
         header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
@@ -358,6 +432,7 @@ int main(int argc, char **argv) {
         classfile << "#include \"core/Names_gen.h\"" << '\n' << '\n';
         classfile << "namespace sorbet {" << '\n';
         classfile << "namespace core {" << '\n';
+        classfile << "namespace Names {" << '\n';
         classfile << "namespace {" << '\n';
         for (auto &name : names) {
             emit_name_string(classfile, name);
@@ -367,6 +442,7 @@ int main(int argc, char **argv) {
 
         emit_register(classfile);
 
+        classfile << "}" << '\n';
         classfile << "}" << '\n';
         classfile << "}" << '\n';
     }

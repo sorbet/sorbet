@@ -56,7 +56,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
 
     // Elem = type_member(fixed: T.untyped)
     body.emplace_back(ast::MK::Assign(
-        loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), ctx.state.enterNameConstant(core::Names::Elem())),
+        loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
         ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::typeMember(),
                        ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
 
@@ -84,7 +84,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
-                                                       ctx.state.enterNameConstant(core::Names::Struct())));
+                                                       core::Names::Constants::Struct()));
 
     vector<unique_ptr<ast::Expression>> stats;
     stats.emplace_back(make_unique<ast::ClassDef>(loc, loc, core::Symbols::todo(), std::move(asgn->lhs),

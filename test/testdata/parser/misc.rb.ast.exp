@@ -176,7 +176,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   <emptyTree>
 
-  ::Kernel.<constant:Rational>("4")
+  ::Kernel.Rational("4")
 
   ::Kernel.Complex(0, "5")
 
