@@ -647,7 +647,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
             e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
                         prettyArity(ctx, method), args.args.size());
-            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.toString(ctx));
+            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
             result.components.front().errors.emplace_back(e.build());
         }
     }
