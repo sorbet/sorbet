@@ -25,6 +25,11 @@ class A
     1
   end
 
+  sig { params(other: A).returns(FalseClass) }
+  def ==(other)
+    false
+  end
+
   sig { params(other: A).returns(Float) }
   def ===(other)
     0.1
@@ -36,4 +41,5 @@ T.assert_type!(A.new[:hows_your_day_going] = 400, Integer)
 T.assert_type!(A.new <= A.new, Symbol)
 T.assert_type!(A.new != A.new, String)
 T.assert_type!(A.new >= A.new, Integer)
+T.assert_type!(A.new == A.new, FalseClass)
 T.assert_type!(A.new === A.new, Float)
