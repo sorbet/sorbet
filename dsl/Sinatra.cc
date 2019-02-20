@@ -40,7 +40,8 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
         for (auto &stat : stats) {
             typecase(stat.get(),
                      [&](ast::Send *send) {
-                         if (send->fun == core::Names::helpers() && send->args.size() == 1) {
+                         if (send->fun == core::Names::helpers() && send->args.size() == 1 &&
+                             ast::isa_tree<ast::UnresolvedConstantLit>(send->args[0].get())) {
                              ret.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(loc), core::Names::include(),
                                                              std::move(send->args[0])));
                          } else {
