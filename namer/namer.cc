@@ -445,8 +445,7 @@ public:
                         core::SymbolRef meth = methodOwner(ctx).data(ctx)->findMember(ctx, name);
                         if (!meth.exists()) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
-                                e.setHeader("`{}`: no such method: `{}`", original->fun.toString(ctx),
-                                            name.toString(ctx));
+                                e.setHeader("`{}`: no such method: `{}`", original->fun.show(ctx), name.show(ctx));
                             }
                             continue;
                         }
@@ -483,8 +482,7 @@ public:
                     if (!meth.exists()) {
                         if (auto e =
                                 ctx.state.beginError(original->args[1]->loc, core::errors::Namer::MethodNotFound)) {
-                            e.setHeader("`{}`: no such method: `{}`", original->fun.toString(ctx),
-                                        args[1].toString(ctx));
+                            e.setHeader("`{}`: no such method: `{}`", original->fun.show(ctx), args[1].show(ctx));
                         }
                         break;
                     }

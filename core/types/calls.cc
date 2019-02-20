@@ -163,7 +163,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
 
 unique_ptr<Error> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRef method, SymbolRef arg) {
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx)->name.toString(ctx),
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx)->name.show(ctx),
                     method.data(ctx)->show(ctx));
         return e.build();
     }
@@ -373,7 +373,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                               Symbols::untyped());
     } else if (symbol == Symbols::void_()) {
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
-            e.setHeader("Can not call method `{}` on void type", args.name.data(ctx)->toString(ctx));
+            e.setHeader("Can not call method `{}` on void type", args.name.data(ctx)->show(ctx));
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
@@ -399,11 +399,10 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
             if (args.fullType.get() != thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx)->toString(ctx),
+                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx)->show(ctx),
                             thisType->show(ctx), args.fullType->show(ctx));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->toString(ctx),
-                            thisType->show(ctx));
+                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisType->show(ctx));
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
@@ -615,7 +614,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 NameRef arg(ctx.state, key->value);
 
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.toString(ctx),
+                    e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(ctx),
                                 data->show(ctx));
                     result.components.front().errors.emplace_back(e.build());
                 }
@@ -695,7 +694,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             auto blockType = data->arguments().back().data(ctx)->resultType;
             if (blockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blockType)) {
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BlockNotPassed)) {
-                    e.setHeader("`{}` declares a block parameter, but no block was passed", args.name.toString(ctx));
+                    e.setHeader("`{}` declares a block parameter, but no block was passed", args.name.show(ctx));
                     e.addErrorLine(method.data(ctx)->loc(), "defined here");
                     result.components.front().errors.emplace_back(e.build());
                 }

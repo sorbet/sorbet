@@ -88,7 +88,7 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
         auto fnd = cctx.discoveredUndeclaredFields.find(id->name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
             if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
-                e.setHeader("Use of undeclared variable `{}`", id->name.toString(cctx.ctx));
+                e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
             }
             auto ret = cctx.newTemporary(id->name);
             cctx.discoveredUndeclaredFields[id->name] = ret;

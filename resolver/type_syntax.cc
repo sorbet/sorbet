@@ -133,7 +133,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
             case core::Names::params()._id: {
                 if (sig.seen.params) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.toString(ctx));
+                        e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
                     }
                     sig.argTypes.clear();
                 }
@@ -145,7 +145,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
                 if (send->args.size() > 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.toString(ctx),
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
                                     "0-1", send->args.size());
                     }
                 }
@@ -223,7 +223,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Method `{}` does not exist on `Sorbet::Private::Builder`", send->fun.toString(ctx));
+                    e.setHeader("Method `{}` does not exist on `Sorbet::Private::Builder`", send->fun.show(ctx));
                 }
         }
         auto recv = ast::cast_tree<ast::Send>(send->recv.get());
@@ -389,7 +389,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
 
         default:
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported method `{}`", "T." + send->fun.toString(ctx));
+                e.setHeader("Unsupported method `{}`", "T." + send->fun.show(ctx));
             }
             return core::Types::untypedUntracked();
     }

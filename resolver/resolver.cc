@@ -736,7 +736,7 @@ private:
 
         for (auto spec : sig.argTypes) {
             if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Unknown argument name `{}`", spec.name.toString(ctx));
+                e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
         }
     }
