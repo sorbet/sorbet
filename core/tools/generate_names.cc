@@ -255,7 +255,6 @@ NameDef names[] = {
     {"leq", "<="},
     {"geq", ">="},
 
-
     // methods that are known by tuple and\or shape types
     {"freeze"},
     {"last"},
