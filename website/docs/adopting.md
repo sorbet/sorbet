@@ -92,6 +92,9 @@ test/runner.rb
 ...
 ```
 
+> **Warning**: Every file in our project should be accounted for in the file
+> list. Sorbet is not designed to work if files are withheld.
+
 
 ## Step 3: Run `sorbet` for the first time
 
