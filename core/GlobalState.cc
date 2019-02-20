@@ -331,6 +331,8 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
+
+    isInitialized = true;
 }
 
 void GlobalState::installIntrinsics() {
@@ -512,6 +514,12 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
 }
 
 string_view GlobalState::enterString(string_view nm) {
+    DEBUG_ONLY(if (isInitialized) {
+        if (nm != "<" && nm != "<<" && nm != "<=" && nm != "<=>" && nm != ">" && nm != ">>" && nm != ">=") {
+            ENFORCE(nm.find("<") == string::npos);
+            ENFORCE(nm.find(">") == string::npos);
+        }
+    });
     char *from = nullptr;
     if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
         auto &inserted = strings.emplace_back(make_unique<vector<char>>(nm.size()));
@@ -928,6 +936,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     auto result = make_unique<GlobalState>(this->errorQueue);
     result->silenceErrors = this->silenceErrors;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
+    result->isInitialized = this->isInitialized;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
