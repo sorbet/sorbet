@@ -14,7 +14,6 @@ template class std::unique_ptr<sorbet::ast::Break>;
 template class std::unique_ptr<sorbet::ast::Retry>;
 template class std::unique_ptr<sorbet::ast::Next>;
 template class std::unique_ptr<sorbet::ast::Return>;
-template class std::unique_ptr<sorbet::ast::Yield>;
 template class std::unique_ptr<sorbet::ast::RescueCase>;
 template class std::unique_ptr<sorbet::ast::Rescue>;
 template class std::unique_ptr<sorbet::ast::Field>;
@@ -131,11 +130,6 @@ Next::Next(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(s
 
 Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "return");
-    _sanityCheck();
-}
-
-Yield::Yield(core::Loc loc, Send::ARGS_store args) : Expression(loc), args(std::move(args)) {
-    categoryCounterInc("trees", "yield");
     _sanityCheck();
 }
 
@@ -679,31 +673,6 @@ string Return::toString(const core::GlobalState &gs, int tabs) {
     return "return " + this->expr->toString(gs, tabs + 1);
 }
 
-string Yield::toString(const core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "yield";
-    printArgs(gs, buf, this->args, tabs);
-
-    return buf.str();
-}
-
-string Yield::showRaw(const core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << nodeName() << "{" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "args = [" << '\n';
-    for (auto &a : args) {
-        printTabs(buf, tabs + 2);
-        buf << a->showRaw(gs, tabs + 2) << '\n';
-    }
-    printTabs(buf, tabs + 1);
-    buf << "]" << '\n';
-    printTabs(buf, tabs);
-    buf << "}";
-
-    return buf.str();
-}
-
 string Next::toString(const core::GlobalState &gs, int tabs) {
     return "next(" + this->expr->toString(gs, tabs + 1) + ")";
 }
@@ -1061,9 +1030,6 @@ string RescueCase::nodeName() {
 }
 string Rescue::nodeName() {
     return "Rescue";
-}
-string Yield::nodeName() {
-    return "Yield";
 }
 string Next::nodeName() {
     return "Next";

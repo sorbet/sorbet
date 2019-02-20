@@ -463,22 +463,6 @@ private:
 };
 // CheckSize(Send, 64, 8);
 
-// TODO(jez) Remove ast::Yield from Trees.h
-class Yield final : public Expression {
-public:
-    Send::ARGS_store args;
-
-    Yield(core::Loc loc, Send::ARGS_store args);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-// CheckSize(Yield, 24, 8);
-
 class Cast final : public Expression {
 public:
     // The name of the cast operator.

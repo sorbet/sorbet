@@ -857,21 +857,14 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  pickleTree(p, file, a->expr);
                  pickle(p, file, a->default_);
              },
-             [&](ast::Yield *a) {
-                 pickleAstHeader(p, 30, a);
-                 p.putU4(a->args.size());
-                 for (auto &arg : a->args) {
-                     pickle(p, file, arg);
-                 }
-             },
-             [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 31, a); },
+             [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 30, a); },
              [&](ast::UnresolvedIdent *a) {
-                 pickleAstHeader(p, 32, a);
+                 pickleAstHeader(p, 31, a);
                  p.putU1((int)a->kind);
                  p.putU4(a->name._id);
              },
              [&](ast::ConstantLit *a) {
-                 pickleAstHeader(p, 33, a);
+                 pickleAstHeader(p, 32, a);
                  p.putU4(a->symbol._id);
                  pickleTree(p, file, a->original);
                  pickleTree(p, file, a->typeAlias);
@@ -1098,23 +1091,14 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::OptionalArg>(loc, std::move(ref), std::move(default_));
         }
         case 30: {
-            auto narg = p.getU4();
-            ast::Send::ARGS_store args(narg);
-            for (auto &arg : args) {
-                arg = unpickleExpr(p, gs, file);
-            }
-
-            return ast::MK::Yield(loc, std::move(args));
-        }
-        case 31: {
             return make_unique<ast::ZSuperArgs>(loc);
         }
-        case 32: {
+        case 31: {
             auto kind = (ast::UnresolvedIdent::VarKind)p.getU1();
             NameRef name = unpickleNameRef(p, gs);
             return make_unique<ast::UnresolvedIdent>(loc, kind, name);
         }
-        case 33: {
+        case 32: {
             SymbolRef sym(gs, p.getU4());
             auto origTmp = unpickleExpr(p, gs, file);
             unique_ptr<ast::UnresolvedConstantLit> orig(static_cast<ast::UnresolvedConstantLit *>(origTmp.release()));

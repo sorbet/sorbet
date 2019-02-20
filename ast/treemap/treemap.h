@@ -41,9 +41,6 @@ public:
     unique_ptr<Return> preTransformReturn(core::MutableContext ctx, unique_ptr<Return> original);
     unique_ptr<Expression> postTransformReturn(core::MutableContext ctx, unique_ptr<Return> original);
 
-    unique_ptr<Yield> preTransformYield(core::MutableContext ctx, unique_ptr<Yield> original);
-    unique_ptr<Expression> postTransformYield(core::MutableContext ctx, unique_ptr<Yield> original);
-
     unique_ptr<RescueCase> preTransformRescueCase(core::MutableContext ctx, unique_ptr<RescueCase> original);
     unique_ptr<Expression> postTransformRescueCase(core::MutableContext ctx, unique_ptr<RescueCase> original);
 
@@ -110,7 +107,6 @@ GENERATE_HAS_MEMBER(preTransformBreak);
 GENERATE_HAS_MEMBER(preTransformRetry);
 GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformReturn);
-GENERATE_HAS_MEMBER(preTransformYield);
 GENERATE_HAS_MEMBER(preTransformRescueCase);
 GENERATE_HAS_MEMBER(preTransformRescue);
 GENERATE_HAS_MEMBER(preTransformAssign);
@@ -138,7 +134,6 @@ GENERATE_HAS_MEMBER(postTransformBreak);
 GENERATE_HAS_MEMBER(postTransformRetry);
 GENERATE_HAS_MEMBER(postTransformNext);
 GENERATE_HAS_MEMBER(postTransformReturn);
-GENERATE_HAS_MEMBER(postTransformYield);
 GENERATE_HAS_MEMBER(postTransformRescueCase);
 GENERATE_HAS_MEMBER(postTransformRescue);
 GENERATE_HAS_MEMBER(postTransformField);
@@ -215,7 +210,6 @@ GENERATE_POSTPONE_PRECLASS(Break);
 GENERATE_POSTPONE_PRECLASS(Retry);
 GENERATE_POSTPONE_PRECLASS(Next);
 GENERATE_POSTPONE_PRECLASS(Return);
-GENERATE_POSTPONE_PRECLASS(Yield);
 GENERATE_POSTPONE_PRECLASS(RescueCase);
 GENERATE_POSTPONE_PRECLASS(Rescue);
 GENERATE_POSTPONE_PRECLASS(Assign);
@@ -234,7 +228,6 @@ GENERATE_POSTPONE_POSTCLASS(Break);
 GENERATE_POSTPONE_POSTCLASS(Retry);
 GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
-GENERATE_POSTPONE_POSTCLASS(Yield);
 GENERATE_POSTPONE_POSTCLASS(RescueCase);
 GENERATE_POSTPONE_POSTCLASS(Rescue);
 GENERATE_POSTPONE_POSTCLASS(Field);
@@ -397,24 +390,6 @@ private:
 
         if constexpr (HAS_MEMBER_postTransformReturn<FUNC>::value) {
             return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(
-                ctx, move(v), func);
-        }
-
-        return v;
-    }
-
-    unique_ptr<Expression> mapYield(unique_ptr<Yield> v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformYield<FUNC>::value) {
-            v = PostPonePreTransform_Yield<FUNC, CTX, HAS_MEMBER_preTransformYield<FUNC>::value>::call(ctx, move(v),
-                                                                                                       func);
-        }
-
-        for (auto &arg : v->args) {
-            arg = mapIt(move(arg), ctx);
-        }
-
-        if constexpr (HAS_MEMBER_postTransformYield<FUNC>::value) {
-            return PostPonePostTransform_Yield<FUNC, CTX, HAS_MEMBER_postTransformYield<FUNC>::value>::call(
                 ctx, move(v), func);
         }
 
@@ -724,8 +699,6 @@ private:
                 return mapNext(std::unique_ptr<Next>(static_cast<Next *>(what.release())), ctx);
             } else if (isa_tree<Return>(what.get())) {
                 return mapReturn(std::unique_ptr<Return>(static_cast<Return *>(what.release())), ctx);
-            } else if (isa_tree<Yield>(what.get())) {
-                return mapYield(std::unique_ptr<Yield>(static_cast<Yield *>(what.release())), ctx);
             } else if (isa_tree<Rescue>(what.get())) {
                 return mapRescue(std::unique_ptr<Rescue>(static_cast<Rescue *>(what.release())), ctx);
             } else if (isa_tree<Field>(what.get())) {

@@ -173,12 +173,6 @@ void While::_sanityCheck() {
     ENFORCE(body);
 }
 
-void Yield::_sanityCheck() {
-    for (auto &node : args) {
-        ENFORCE(node);
-    }
-}
-
 void ZSuperArgs::_sanityCheck() {}
 
 } // namespace sorbet::ast

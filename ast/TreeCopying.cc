@@ -83,13 +83,6 @@ unique_ptr<Expression> Return::_deepCopy(const Expression *avoid, bool root) con
     return make_unique<Return>(this->loc, this->expr->_deepCopy(avoid));
 }
 
-unique_ptr<Expression> Yield::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    return make_unique<Yield>(this->loc, deepCopyVec(avoid, args));
-}
-
 unique_ptr<Expression> RescueCase::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
