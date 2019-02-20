@@ -791,7 +791,14 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     // into an insseq with an If in the expression.
                     res.swap(recv);
                     auto *is = cast_tree<InsSeq>(res.get());
-                    ENFORCE(is != nullptr, "DesugarBlock: failed to find InsSeq");
+                    if (!is) {
+                        if (auto e = dctx.ctx.state.beginError(block->loc, core::errors::Desugar::UnsupportedNode)) {
+                            e.setHeader("No body in block");
+                        }
+                        auto res = MK::EmptyTree();
+                        result.swap(res);
+                        return;
+                    }
                     auto *iff = cast_tree<If>(is->expr.get());
                     ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
                     send = cast_tree<Send>(iff->elsep.get());
