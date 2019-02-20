@@ -1,0 +1,22 @@
+class <emptyTree><<constant:<root>>> < ()
+  self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"blk" => <emptyTree>::<constant:T>.proc().params({:"args" => <emptyTree>::<constant:Integer>}).void()}).void()
+  end
+
+  def foo<<constant:<todo sym>>>(&blk)
+    <emptyTree>
+  end
+
+  self(<constant:<todo sym>>).foo() do |<destructure>$2|
+    begin
+      begin
+        <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 1, 0)
+        args = <assignTemp>$3.[](0)
+        <assignTemp>$3
+      end
+      <emptyTree>::<constant:T>.reveal_type(args)
+    end
+  end
+end

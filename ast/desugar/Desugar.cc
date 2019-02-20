@@ -233,6 +233,12 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, std::move(val)));
             } else {
                 unique_ptr<Expression> lh = node2TreeImpl(dctx, std::move(c));
+                if (auto restArg = ast::cast_tree<ast::RestArg>(lh.get())) {
+                    if (auto e = dctx.ctx.state.beginError(lh->loc, core::errors::Desugar::UnsupportedNode)) {
+                        e.setHeader("Unsupported rest args in destructure");
+                    }
+                    lh = move(restArg->expr);
+                }
                 auto lhloc = lh->loc;
                 stats.emplace_back(MK::Assign(lhloc, std::move(lh), std::move(val)));
             }
