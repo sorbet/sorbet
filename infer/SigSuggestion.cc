@@ -135,8 +135,8 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     // The high level idea is the following: we will use a covariant type parameter to extract the type from dispatch
     // logic
     auto constr = make_shared<core::TypeConstraint>();
-    auto linkCopy =
-        send.link ? send.link->duplicate() : make_shared<core::SendAndBlockLink>(core::Symbols::noSymbol(), send.fun);
+    auto linkCopy = send.link ? send.link->duplicate()
+                              : make_shared<core::SendAndBlockLink>(core::Symbols::noSymbol(), send.fun, std::nullopt);
 
     auto probeTypeSym =
         core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant();

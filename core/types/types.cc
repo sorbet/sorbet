@@ -724,8 +724,9 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun)
-    : block(block), fun(fun), constr(make_shared<TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams)
+    : block(block), fun(fun), numberOfPositionalBlockParams(numberOfPositionalBlockParams),
+      constr(make_shared<TypeConstraint>()) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;

@@ -93,6 +93,26 @@ void CFG::sanityCheck(core::Context ctx) {
         } else {
             ENFORCE(bb->bexit.cond.variable.exists());
         }
+
+        for (auto &binding : bb->exprs) {
+            if (auto send_binding = cast_instruction<Send>(binding.value.get())) {
+                if (send_binding->link && send_binding->link->block != core::Symbols::noSymbol()) {
+                    const core::SymbolData data = send_binding->link->block.data(ctx);
+
+                    std::optional<int> arity = 0;
+                    auto &gs = ctx.state;
+                    for (auto &arg : data->arguments()) {
+                        if (arg.data(gs)->isKeyword() || arg.data(gs)->isBlockArgument() ||
+                            arg.data(gs)->isOptional() || arg.data(gs)->isRepeated()) {
+                            arity = std::nullopt;
+                            break;
+                        }
+                        arity = arity.value() + 1;
+                    }
+                    ENFORCE(arity == send_binding->link->numberOfPositionalBlockParams);
+                }
+            }
+        }
     }
 
     // check that synthetic variable that is read is ever written to.

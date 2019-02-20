@@ -594,11 +594,12 @@ public:
     SymbolRef block;
     TypePtr receiver;
     NameRef fun;
+    std::optional<int> numberOfPositionalBlockParams;
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
     TypePtr sendTp;
-    SendAndBlockLink(SymbolRef block, NameRef fun);
+    SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams);
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
 

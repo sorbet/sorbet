@@ -1392,19 +1392,12 @@ public:
             return core::Types::untypedUntracked();
         }
 
-        int arity = 0;
-        for (auto arg : args.block->block.data(ctx)->arguments()) {
-            if (arg.data(ctx)->isKeyword() || arg.data(ctx)->isBlockArgument() || arg.data(ctx)->isOptional() ||
-                arg.data(ctx)->isRepeated()) {
-                return core::Types::procClass();
-            }
-            ++arity;
-        }
-        if (arity > core::Symbols::MAX_PROC_ARITY) {
+        std::optional<int> numberOfPositionalBlockParams = args.block->numberOfPositionalBlockParams;
+        if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
             return core::Types::procClass();
         }
-        vector<core::TypePtr> targs(arity + 1, core::Types::untypedUntracked());
-        auto procClass = core::Symbols::Proc(arity);
+        vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, core::Types::untypedUntracked());
+        auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         return make_type<core::AppliedType>(procClass, targs);
     }
 } Kernel_proc;

@@ -259,7 +259,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (s->block != nullptr) {
                     core::SymbolRef sym = s->block->symbol;
-                    auto link = make_shared<core::SendAndBlockLink>(sym, s->fun);
+                    const core::SymbolData data = sym.data(cctx.ctx);
+
+                    std::optional<int> arity = 0;
+                    auto &gs = cctx.ctx.state;
+                    for (auto &arg : data->arguments()) {
+                        if (arg.data(gs)->isKeyword() || arg.data(gs)->isBlockArgument() ||
+                            arg.data(gs)->isOptional() || arg.data(gs)->isRepeated()) {
+                            arity = std::nullopt;
+                            break;
+                        }
+                        arity = arity.value() + 1;
+                    }
+                    auto link = make_shared<core::SendAndBlockLink>(sym, s->fun, arity);
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -267,8 +279,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
-
-                    const core::SymbolData data = sym.data(cctx.ctx);
 
                     core::LocalVariable argTemp = cctx.newTemporary(core::Names::blkArg());
                     core::LocalVariable idxTmp = cctx.newTemporary(core::Names::blkArg());
