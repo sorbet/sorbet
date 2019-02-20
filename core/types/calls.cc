@@ -698,7 +698,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (args.args.size() == 1 && isSetter(ctx, method.data(ctx)->name)) {
             // assignments always return their right hand side
             resultType = args.args.front()->type;
-        } else if (args.args.size() == 2 && method.data(ctx)->name.data(ctx)->raw.utf8 == "[]="sv) {
+        } else if (args.args.size() == 2 && method.data(ctx)->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
             resultType = Types::resultTypeAsSeenFrom(ctx, method, symbol, targs);
