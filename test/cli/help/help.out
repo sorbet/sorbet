@@ -60,7 +60,9 @@ Usage:
       --no-stdlib               Do not load included rbi files for stdlib
       --skip-dsl-passes         Do not run DSL passess
       --wait-for-dbg            Wait for debugger on start
-      --stress-fastpath         Stress fastpath
+      --stress-incremental-resolver
+                                Force incremental updates to discover
+                                resolver & namer bugs
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message

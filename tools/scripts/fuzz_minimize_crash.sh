@@ -6,8 +6,7 @@ if (( $# != 1 )); then
     echo "Illegal number of parameters. Need a single file to minimize"
 fi
 
-FUZZ_ARG=
-# FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
+FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
 
 dir="$( dirname "${BASH_SOURCE[0]}" )"
 

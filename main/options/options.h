@@ -64,7 +64,7 @@ struct Options {
     bool suggestSig = false;
     bool supressNonCriticalErrors = false;
     bool runLSP = false;
-    bool stressFastPath = false;
+    bool stressIncrementalResolver = false;
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;

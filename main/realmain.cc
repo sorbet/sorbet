@@ -321,7 +321,7 @@ int realmain(int argc, char *argv[]) {
             }
         } else {
             indexed = pipeline::resolve(*gs, move(indexed), opts, logger);
-            if (opts.stressFastPath) {
+            if (opts.stressIncrementalResolver) {
                 for (auto &f : indexed) {
                     auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore, logger);
                     vector<ast::ParsedFile> toBeReResolved;

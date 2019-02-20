@@ -17,11 +17,9 @@ const realmain::options::Options opts = [] {
 
 unique_ptr<KeyValueStore> kvstore;
 
-unique_ptr<core::GlobalState> buildInitialGlobalState() {
-    realmain::logger = spdlog::stdout_logger_mt("console");
-    realmain::logger->set_level(spd::level::critical);
-    fatalLogger = realmain::logger;
+bool stressIncrementalResolver = false;
 
+unique_ptr<core::GlobalState> buildInitialGlobalState() {
     auto typeErrorsConsole = spdlog::stdout_logger_mt("typeErrorsConsole");
     typeErrorsConsole->set_level(spd::level::critical);
 
@@ -32,6 +30,24 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
 
     realmain::createInitialGlobalState(gs, realmain::logger, opts, kvstore);
     return gs;
+}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    realmain::logger = spdlog::stdout_logger_mt("console");
+    realmain::logger->set_level(spd::level::critical);
+    fatalLogger = realmain::logger;
+    // Huh, I wish we could use cxxopts, but libfuzzer & cxxopts choke on each other argument formats
+    // thus we do it manually
+    for (int i = 0; i < *argc; i++) {
+        if (string((*argv)[i]) == "--stress-incremental-resolver") {
+            stressIncrementalResolver = true;
+        }
+    }
+
+    if (stressIncrementalResolver) {
+        realmain::logger->critical("Enabling incremental resolver");
+    }
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
@@ -52,6 +68,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     indexed = realmain::pipeline::index(gs, {}, inputFiles, opts, workers, kvstore, realmain::logger);
     indexed = realmain::pipeline::resolve(*gs, move(indexed), opts, realmain::logger);
+    if (stressIncrementalResolver) {
+        for (auto &f : indexed) {
+            auto reIndexed = realmain::pipeline::indexOne(opts, *gs, f.file, kvstore, realmain::logger);
+            vector<ast::ParsedFile> toBeReResolved;
+            toBeReResolved.emplace_back(move(reIndexed));
+            auto reresolved = realmain::pipeline::incrementalResolve(*gs, move(toBeReResolved), opts, realmain::logger);
+            ENFORCE(reresolved.size() == 1);
+            f = move(reresolved[0]);
+        }
+    }
     indexed = realmain::pipeline::typecheck(gs, move(indexed), opts, workers, realmain::logger);
     return 0;
 }
