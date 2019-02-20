@@ -60,10 +60,10 @@ string Literal::toString(core::Context ctx) {
                  } else if (l->symbol == core::Symbols::TrueClass()) {
                      res = "true";
                  } else {
-                     res = fmt::format("literal({})", this->value->toString(ctx, 0));
+                     res = fmt::format("literal({})", this->value->toStringWithTabs(ctx, 0));
                  }
              },
-             [&](core::Type *t) { res = fmt::format("literal({})", this->value->toString(ctx, 0)); });
+             [&](core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(ctx, 0)); });
     return res;
 }
 

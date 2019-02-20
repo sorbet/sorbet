@@ -32,7 +32,10 @@ class Expression {
 public:
     Expression(core::Loc loc);
     virtual ~Expression() = default;
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const = 0;
+    std::string toString(const core::GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
     virtual std::string nodeName() = 0;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
     std::unique_ptr<Expression> deepCopy() const;
@@ -107,7 +110,7 @@ public:
     ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, std::unique_ptr<Expression> name,
              ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind);
 
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -135,16 +138,16 @@ public:
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
               std::unique_ptr<Expression> rhs, u4 flags);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
-    bool isSelf() {
+    bool isSelf() const {
         return (flags & SelfMethod) != 0;
     }
 
-    bool isDSLSynthesized() {
+    bool isDSLSynthesized() const {
         return (flags & DSLSynthesized) != 0;
     }
 
@@ -161,7 +164,7 @@ public:
 
     If(core::Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp,
        std::unique_ptr<Expression> elsep);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -177,7 +180,7 @@ public:
     std::unique_ptr<Expression> body;
 
     While(core::Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> body);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -192,7 +195,7 @@ public:
     std::unique_ptr<Expression> expr;
 
     Break(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -205,7 +208,7 @@ private:
 class Retry final : public Expression {
 public:
     Retry(core::Loc loc);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -220,7 +223,7 @@ public:
     std::unique_ptr<Expression> expr;
 
     Next(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -235,7 +238,7 @@ public:
     std::unique_ptr<Expression> expr;
 
     Return(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -259,7 +262,7 @@ public:
 
     RescueCase(core::Loc loc, EXCEPTION_store exceptions, std::unique_ptr<Expression> var,
                std::unique_ptr<Expression> body);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -281,7 +284,7 @@ public:
 
     Rescue(core::Loc loc, std::unique_ptr<Expression> body, RESCUE_CASE_store rescueCases,
            std::unique_ptr<Expression> else_, std::unique_ptr<Expression> ensure);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -296,7 +299,7 @@ public:
     core::SymbolRef symbol;
 
     Field(core::Loc loc, core::SymbolRef symbol);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -311,7 +314,7 @@ public:
     core::LocalVariable localVariable;
 
     Local(core::Loc loc, core::LocalVariable localVariable1);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -333,7 +336,7 @@ public:
     VarKind kind;
 
     UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -348,7 +351,7 @@ public:
     std::unique_ptr<Reference> expr;
 
     RestArg(core::Loc loc, std::unique_ptr<Reference> arg);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -363,7 +366,7 @@ public:
     std::unique_ptr<Reference> expr;
 
     KeywordArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -379,7 +382,7 @@ public:
     std::unique_ptr<Expression> default_;
 
     OptionalArg(core::Loc loc, std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -394,7 +397,7 @@ public:
     std::unique_ptr<Reference> expr;
 
     BlockArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -409,7 +412,7 @@ public:
     std::unique_ptr<Reference> expr;
 
     ShadowArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -425,7 +428,7 @@ public:
     std::unique_ptr<Expression> rhs;
 
     Assign(core::Loc loc, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -453,7 +456,7 @@ public:
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
          std::unique_ptr<Block> block = nullptr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -472,7 +475,7 @@ public:
     std::unique_ptr<Expression> arg;
 
     Cast(core::Loc loc, const core::TypePtr &ty, std::unique_ptr<Expression> arg, core::NameRef cast);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -492,7 +495,7 @@ public:
 
     Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values);
 
-    virtual std::string toString(const core::GlobalState &gs, int tabs);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -511,7 +514,7 @@ public:
 
     Array(core::Loc loc, ENTRY_store elems);
 
-    virtual std::string toString(const core::GlobalState &gs, int tabs);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -526,7 +529,7 @@ public:
     core::TypePtr value;
 
     Literal(core::Loc loc, const core::TypePtr &value);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     bool isString(const core::GlobalState &gs) const;
@@ -549,7 +552,7 @@ public:
     std::unique_ptr<Expression> scope;
 
     UnresolvedConstantLit(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef cnst);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -568,7 +571,7 @@ public:
 
     ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original,
                 std::unique_ptr<Expression> resolved);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -606,7 +609,7 @@ class ZSuperArgs final : public Expression {
 public:
     // null if no block passed
     ZSuperArgs(core::Loc loc);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -621,7 +624,7 @@ public:
     core::SymbolRef claz;
 
     Self(core::Loc loc, core::SymbolRef claz);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -638,7 +641,7 @@ public:
     std::unique_ptr<Expression> body;
 
     Block(core::Loc loc, MethodDef::ARGS_store args, std::unique_ptr<Expression> body);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -659,7 +662,7 @@ public:
     std::unique_ptr<Expression> expr;
 
     InsSeq(core::Loc loc, STATS_store stats, std::unique_ptr<Expression> expr);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
@@ -672,7 +675,7 @@ private:
 class EmptyTree final : public Expression {
 public:
     EmptyTree();
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;

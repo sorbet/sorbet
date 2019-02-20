@@ -111,7 +111,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 nodes = parser::Parser::run(lgs, file);
             }
             if (print.ParseTree) {
-                fmt::print("{}\n", nodes->toString(lgs, 0));
+                fmt::print("{}\n", nodes->toStringWithTabs(lgs, 0));
             }
             if (print.ParseTreeJSON) {
                 fmt::print("{}\n", nodes->toJSON(lgs, 0));
@@ -130,7 +130,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 ast = ast::desugar::node2Tree(ctx, move(nodes));
             }
             if (print.Desugared) {
-                fmt::print("{}\n", ast->toString(lgs, 0));
+                fmt::print("{}\n", ast->toStringWithTabs(lgs, 0));
             }
             if (print.DesugaredRaw) {
                 fmt::print("{}\n", ast->showRaw(lgs));
@@ -149,7 +149,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             }
         }
         if (print.DSLTree) {
-            fmt::print("{}\n", dslsInlined.tree->toString(lgs, 0));
+            fmt::print("{}\n", dslsInlined.tree->toStringWithTabs(lgs, 0));
         }
         if (print.DSLTreeRaw) {
             fmt::print("{}\n", dslsInlined.tree->showRaw(lgs));
@@ -486,7 +486,7 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
 
         for (auto &named : what) {
             if (opts.print.NameTree) {
-                fmt::print("{}\n", named.tree->toString(gs, 0));
+                fmt::print("{}\n", named.tree->toStringWithTabs(gs, 0));
             }
             if (opts.print.NameTreeRaw) {
                 fmt::print("{}\n", named.tree->showRaw(gs));

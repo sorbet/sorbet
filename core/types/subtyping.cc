@@ -1253,7 +1253,7 @@ TypePtr AliasType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &
     Exception::raise("should never happen");
 }
 
-string MetaType::toString(const GlobalState &gs, int tabs) const {
+string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
 

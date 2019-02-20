@@ -249,7 +249,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
         out << "    " << field_type(arg.type) << " " << arg.name << ";" << '\n';
     }
     out << '\n';
-    out << "  virtual std::string toString(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
     out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
     out << "  virtual std::string nodeName();" << '\n';
 
@@ -262,7 +262,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     out << "    return \"" << node.name << "\";" << '\n';
     out << "  };" << '\n' << '\n';
 
-    out << "  std::string " << node.name << "::toString(const core::GlobalState &gs, int tabs) {" << '\n'
+    out << "  std::string " << node.name << "::toStringWithTabs(const core::GlobalState &gs, int tabs) const {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
     out << "    fmt::format_to(buf, \"" << node.name << " {{\\n\");" << '\n';
     // Generate fields

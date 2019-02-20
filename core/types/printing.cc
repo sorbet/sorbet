@@ -20,7 +20,7 @@ string buildTabs(int count) {
 
 } // namespace
 
-string ClassType::toString(const GlobalState &gs, int tabs) const {
+string ClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return this->symbol.data(gs)->show(gs);
 }
 
@@ -36,8 +36,8 @@ string LiteralType::typeName() const {
     return "LiteralType";
 }
 
-string LiteralType::toString(const GlobalState &gs, int tabs) const {
-    return fmt::format("{}({})", this->underlying()->toString(gs, tabs), showValue(gs));
+string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return fmt::format("{}({})", this->underlying()->toStringWithTabs(gs, tabs), showValue(gs));
 }
 
 string LiteralType::show(const GlobalState &gs) const {
@@ -83,7 +83,7 @@ string OrType::typeName() const {
     return "OrType";
 }
 
-string TupleType::toString(const GlobalState &gs, int tabs) const {
+string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     auto thisTabs = buildTabs(tabs);
     auto nestedTabs = buildTabs(tabs + 1);
@@ -91,7 +91,7 @@ string TupleType::toString(const GlobalState &gs, int tabs) const {
     int i = -1;
     for (auto &el : this->elems) {
         i++;
-        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el->toString(gs, tabs + 3));
+        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el->toStringWithTabs(gs, tabs + 3));
     }
     fmt::format_to(buf, "{}}}", thisTabs);
     return to_string(buf);
@@ -102,15 +102,15 @@ string TupleType::show(const GlobalState &gs) const {
                        fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el->show(gs); }));
 }
 
-string ShapeType::toString(const GlobalState &gs, int tabs) const {
+string ShapeType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     auto thisTabs = buildTabs(tabs);
     auto nestedTabs = buildTabs(tabs + 1);
     fmt::format_to(buf, "ShapeType {{\n");
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
-        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el->toString(gs, tabs + 2),
-                       (*valueIterator)->toString(gs, tabs + 3));
+        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el->toStringWithTabs(gs, tabs + 2),
+                       (*valueIterator)->toStringWithTabs(gs, tabs + 3));
         ++valueIterator;
     }
     fmt::format_to(buf, "{}}}", thisTabs);
@@ -141,7 +141,7 @@ string ShapeType::show(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string AliasType::toString(const GlobalState &gs, int tabs) const {
+string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("AliasType {{ symbol = {} }}", this->symbol.data(gs)->showFullName(gs));
 }
 
@@ -149,12 +149,12 @@ string AliasType::show(const GlobalState &gs) const {
     return fmt::format("<Alias: {} >", this->symbol.data(gs)->showFullName(gs));
 }
 
-string AndType::toString(const GlobalState &gs, int tabs) const {
+string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     bool leftBrace = isa_type<OrType>(this->left.get());
     bool rightBrace = isa_type<OrType>(this->right.get());
 
-    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left->toString(gs, tabs + 2),
-                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toString(gs, tabs + 2),
+    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
@@ -162,12 +162,12 @@ string AndType::show(const GlobalState &gs) const {
     return fmt::format("T.all({}, {})", this->left->show(gs), this->right->show(gs));
 }
 
-string OrType::toString(const GlobalState &gs, int tabs) const {
+string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     bool leftBrace = isa_type<AndType>(this->left.get());
     bool rightBrace = isa_type<AndType>(this->right.get());
 
-    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left->toString(gs, tabs + 2),
-                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toString(gs, tabs + 2),
+    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
@@ -198,7 +198,7 @@ string OrType::show(const GlobalState &gs) const {
     return fmt::format("T.any({})", showOrs(gs, this->left, this->right));
 }
 
-string TypeVar::toString(const GlobalState &gs, int tabs) const {
+string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("TypeVar({})", sym.data(gs)->name.toString(gs));
 }
 
@@ -210,7 +210,7 @@ string TypeVar::typeName() const {
     return "TypeVar";
 }
 
-string AppliedType::toString(const GlobalState &gs, int tabs) const {
+string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto thisTabs = buildTabs(tabs);
     auto nestedTabs = buildTabs(tabs + 1);
     auto twiceNestedTabs = buildTabs(tabs + 2);
@@ -224,7 +224,7 @@ string AppliedType::toString(const GlobalState &gs, int tabs) const {
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
             fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.toString(gs),
-                           targ->toString(gs, tabs + 3));
+                           targ->toStringWithTabs(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib
             fmt::format_to(buf, "{}EARLY_TYPE_MEMBER\n", twiceNestedTabs);
@@ -313,7 +313,7 @@ string AppliedType::typeName() const {
     return "AppliedType";
 }
 
-string LambdaParam::toString(const GlobalState &gs, int tabs) const {
+string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("LambdaParam({})", this->definition.data(gs)->showFullName(gs));
 }
 
@@ -321,7 +321,7 @@ string LambdaParam::show(const GlobalState &gs) const {
     return this->definition.data(gs)->show(gs);
 }
 
-string SelfTypeParam::toString(const GlobalState &gs, int tabs) const {
+string SelfTypeParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("SelfTypeParam({})", this->definition.data(gs)->showFullName(gs));
 }
 
@@ -337,7 +337,7 @@ string SelfTypeParam::typeName() const {
     return "SelfTypeParam";
 }
 
-string SelfType::toString(const GlobalState &gs, int tabs) const {
+string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return show(gs);
 }
 

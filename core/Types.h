@@ -155,7 +155,10 @@ public:
     Type(const Type &obj) = delete;
     virtual ~Type() = default;
     // Internal printer.
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const = 0;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const = 0;
+    std::string toString(const GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
     // User visible type. Should exactly match what the user can write.
     virtual std::string show(const GlobalState &gs) const = 0;
     virtual std::string typeName() const = 0;
@@ -225,7 +228,7 @@ public:
     ClassType(SymbolRef symbol);
     virtual int kind() final;
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
@@ -245,7 +248,7 @@ public:
     SymbolRef definition;
 
     LambdaParam(const SymbolRef definition);
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
@@ -267,7 +270,7 @@ public:
     SymbolRef definition;
 
     SelfTypeParam(const SymbolRef definition);
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
@@ -287,7 +290,7 @@ CheckSize(SelfTypeParam, 16, 8);
 class AliasType final : public Type {
 public:
     AliasType(SymbolRef other);
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
@@ -311,7 +314,7 @@ CheckSize(AliasType, 16, 8);
 class SelfType final : public Type {
 public:
     SelfType();
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showValue(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
@@ -344,7 +347,7 @@ public:
     LiteralType(bool val);
     virtual TypePtr underlying() const override;
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showValue(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
@@ -362,7 +365,7 @@ class TypeVar final : public Type {
 public:
     SymbolRef sym;
     TypeVar(SymbolRef sym);
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
@@ -385,7 +388,7 @@ public:
     TypePtr right;
     virtual int kind() final;
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
@@ -433,7 +436,7 @@ public:
     TypePtr right;
     virtual int kind() final;
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
@@ -477,7 +480,7 @@ public:
     ShapeType();
     ShapeType(const TypePtr &underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
@@ -505,7 +508,7 @@ public:
     TupleType(const TypePtr &underlying, std::vector<TypePtr> elements);
     static TypePtr build(Context ctx, std::vector<TypePtr> elements);
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
     void _sanityCheck(Context ctx) final;
@@ -531,7 +534,7 @@ public:
     std::vector<TypePtr> targs;
     AppliedType(SymbolRef klass, std::vector<TypePtr> targs);
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
@@ -565,7 +568,7 @@ public:
 
     MetaType(const TypePtr &wrapped);
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 

@@ -64,7 +64,7 @@ string ErrorLine::toString(const GlobalState &gs, bool color) const {
     }
 
     if (loc.exists()) {
-        buf << '\n' << loc.toString(gs, 2);
+        buf << '\n' << loc.toStringWithTabs(gs, 2);
     }
     return buf.str();
 }
@@ -96,7 +96,7 @@ string Error::toString(const GlobalState &gs) const {
         << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code
         << RESET_COLOR;
     if (loc.exists()) {
-        buf << '\n' << loc.toString(gs, 2);
+        buf << '\n' << loc.toStringWithTabs(gs, 2);
     }
 
     for (auto &section : this->sections) {

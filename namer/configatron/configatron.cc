@@ -150,7 +150,7 @@ struct Path {
                 auto method = gs.enterMethodSymbol(core::Loc::none(), classSym, gs.enterNameUTF8(child->selector));
                 child->enter(gs, method, owner);
             }
-            //            cout << classSym.toString(gs, 1, 1);
+            //            cout << classSym.toStringWithTabs(gs, 1, 1);
         }
     }
 };
@@ -233,6 +233,6 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
         gs.enterMethodSymbol(core::Loc::none(), core::Symbols::Kernel(), gs.enterNameUTF8("configatron"));
     rootNode->enter(gs, configatron, core::Symbols::root());
 
-    //    cout << configatron.toString(gs, 1, 1);
+    //    cout << configatron.toStringWithTabs(gs, 1, 1);
 }
 } // namespace sorbet::namer

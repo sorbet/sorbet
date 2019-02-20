@@ -179,10 +179,12 @@ string KnowledgeFact::toString(core::Context ctx) const {
     vector<string> buf1, buf2;
 
     for (auto &el : yesTypeTests) {
-        buf1.emplace_back(fmt::format("    {} to be {}\n", el.first.toString(ctx), el.second->toString(ctx, 0)));
+        buf1.emplace_back(
+            fmt::format("    {} to be {}\n", el.first.toString(ctx), el.second->toStringWithTabs(ctx, 0)));
     }
     for (auto &el : noTypeTests) {
-        buf2.emplace_back(fmt::format("    {} NOT to be {}\n", el.first.toString(ctx), el.second->toString(ctx, 0)));
+        buf2.emplace_back(
+            fmt::format("    {} NOT to be {}\n", el.first.toString(ctx), el.second->toStringWithTabs(ctx, 0)));
     }
     fast_sort(buf1);
     fast_sort(buf2);
@@ -248,7 +250,7 @@ string Environment::toString(core::Context ctx) const {
         if (var._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        fmt::format_to(buf, "{}: {}{}\n{}\n", var.toString(ctx), state.typeAndOrigins.type->toString(ctx, 0),
+        fmt::format_to(buf, "{}: {}{}\n{}\n", var.toString(ctx), state.typeAndOrigins.type->toStringWithTabs(ctx, 0),
                        state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(ctx));
     }
     return to_string(buf);

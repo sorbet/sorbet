@@ -120,8 +120,8 @@ void printTabs(fmt::memory_buffer &to, int count) {
 SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
 SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
 
-string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) const {
-    return data(gs, true)->toString(gs, tabs, showHidden);
+string SymbolRef::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden) const {
+    return data(gs, true)->toStringWithTabs(gs, tabs, showHidden);
 }
 string SymbolRef::show(const GlobalState &gs) const {
     return data(gs, true)->show(gs);
@@ -450,7 +450,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     return false;
 }
 
-string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const {
+string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden) const {
     fmt::memory_buffer buf;
 
     printTabs(buf, tabs);
@@ -548,7 +548,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         fmt::format_to(buf, ">");
     }
     if (this->resultType) {
-        fmt::format_to(buf, " -> {}", this->resultType->toString(gs, tabs));
+        fmt::format_to(buf, " -> {}", this->resultType->toStringWithTabs(gs, tabs));
     }
     if (!locs_.empty()) {
         fmt::format_to(buf, " @ ");
@@ -567,7 +567,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
             continue;
         }
 
-        auto str = pair.second.toString(gs, tabs + 1, showHidden);
+        auto str = pair.second.toStringWithTabs(gs, tabs + 1, showHidden);
         if (!str.empty()) {
             hadPrintableChild = true;
             fmt::format_to(buf, "{}", move(str));

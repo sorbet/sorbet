@@ -91,7 +91,7 @@ void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int po
 }
 } // namespace
 
-string Loc::toString(const GlobalState &gs, int tabs) const {
+string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &filed = this->file().data(gs);
     auto pos = this->position(gs);
