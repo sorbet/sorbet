@@ -1,32 +1,32 @@
 begin
   ::RubyTyper.keep_for_ide(::Test)
   class ::Test<<constant:Test>> < (::<todo sym>)
-    self(<singleton class:<constant:Test>>).sig() do ||
-      self(<singleton class:<constant:Test>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<singleton_class:<constant:Test>>).sig() do ||
+      self(<singleton_class:<constant:Test>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
     def foo<foo>(x, <blk>)
       x
     end
 
-    self(<singleton class:<constant:Test>>).sig() do ||
-      self(<singleton class:<constant:Test>>).params({:"y" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<singleton_class:<constant:Test>>).sig() do ||
+      self(<singleton_class:<constant:Test>>).params({:"y" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
     def bar<bar>(y, <blk>)
       y
     end
 
-    self(<singleton class:<constant:Test>>).sig() do ||
-      self(<singleton class:<constant:Test>>).params({:"z" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<singleton_class:<constant:Test>>).sig() do ||
+      self(<singleton_class:<constant:Test>>).params({:"z" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
     def qux<qux>(z, <blk>)
       z
     end
 
-    self(<singleton class:<constant:Test>>).sig() do ||
-      self(<singleton class:<constant:Test>>).params({:"w" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<singleton_class:<constant:Test>>).sig() do ||
+      self(<singleton_class:<constant:Test>>).params({:"w" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
     end
 
     def baz<baz>(w, <blk>)

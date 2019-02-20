@@ -78,22 +78,22 @@ begin
 
     def self.<static-init><<static-init>>(<blk>)
       begin
-        self(<singleton class:<constant:TestAttr>>).sig() do ||
+        self(<singleton_class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).void()
         end
-        self(<singleton class:<constant:TestAttr>>).sig() do ||
+        self(<singleton_class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).returns(::Integer)
         end
-        self(<singleton class:<constant:TestAttr>>).sig() do ||
+        self(<singleton_class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).params({:"v1" => ::Integer}).returns(::Integer)
         end
-        self(<singleton class:<constant:TestAttr>>).sig() do ||
+        self(<singleton_class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).returns(::String)
         end
-        self(<singleton class:<constant:TestAttr>>).sig() do ||
+        self(<singleton_class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).params({:"v2" => ::String}).returns(::String)
         end
-        self(<singleton class:<constant:TestAttr>>).sig() do ||
+        self(<singleton_class:<constant:TestAttr>>).sig() do ||
           self(<constant:Builder>).returns(::String)
         end
         ::Sorbet.sig() do ||

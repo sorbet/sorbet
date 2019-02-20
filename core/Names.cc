@@ -41,9 +41,9 @@ string Name::toString(const GlobalState &gs) const {
             return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return fmt::format("<singleton class:{}>", this->unique.original.data(gs)->toString(gs));
+                return fmt::format("<singleton_class:{}>", this->unique.original.data(gs)->toString(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
-                return fmt::format("<overload N.{} : {}>", to_string(this->unique.num),
+                return fmt::format("<overload_N.{}:{}>", to_string(this->unique.num),
                                    this->unique.original.data(gs)->toString(gs));
             }
             return fmt::format("{}${}", this->unique.original.data(gs)->toString(gs), this->unique.num);

@@ -10,7 +10,7 @@ begin
     end
 
     def self.<static-init><<static-init>>(<blk>)
-      self(<singleton class:<constant:TestSig>>).sig() do ||
+      self(<singleton_class:<constant:TestSig>>).sig() do ||
         self(<constant:Builder>).returns(::T2)
       end
     end

@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>>(<blk>)
       ::C::L = begin
         ::RubyTyper.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
-        T.let(self(<singleton class:<constant:C>>).lambda() do |x|
+        T.let(self(<singleton_class:<constant:C>>).lambda() do |x|
           x$1.*(x$1)
         end, AppliedType {
           klass = ::Proc1

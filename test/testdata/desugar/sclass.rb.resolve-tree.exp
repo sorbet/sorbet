@@ -48,7 +48,7 @@ begin
           ::RubyTyper.keep_for_ide(::H)
           <emptyTree>
         end
-        self(<singleton class:<constant:<root>>>).main()
+        self(<singleton_class:<constant:<root>>>).main()
         <emptyTree>
       end
     end
@@ -57,7 +57,7 @@ begin
   class ::B<<constant:B>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton class:<constant:B>>> < ()
+  class <singleton class><<singleton_class:<constant:B>>> < ()
     def b<b>(<blk>)
       "b"
     end
@@ -65,10 +65,10 @@ begin
   class ::D<<constant:D>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton class:<constant:D>>> < ()
+  class <singleton class><<singleton_class:<constant:D>>> < ()
     <emptyTree>
   end
-  class <singleton class><<singleton class:<singleton class:<constant:D>>>> < ()
+  class <singleton class><<singleton_class:<singleton_class:<constant:D>>>> < ()
     def d<d>(<blk>)
       "d"
     end
@@ -79,10 +79,10 @@ begin
     <emptyTree>
 
     def self.<static-init><<static-init>>(<blk>)
-      self(<singleton class:<constant:E>>).wrapper()
+      self(<singleton_class:<constant:E>>).wrapper()
     end
   end
-  class <singleton class><<singleton class:<constant:E>>> < ()
+  class <singleton class><<singleton_class:<constant:E>>> < ()
     <emptyTree>
 
     def wrapper<wrapper>(<blk>)
@@ -96,7 +96,7 @@ begin
   class ::F<<constant:F>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton class:<constant:F>>> < ()
+  class <singleton class><<singleton_class:<constant:F>>> < ()
     <emptyTree>
 
     <emptyTree>
@@ -115,7 +115,7 @@ begin
     end
 
     def self.<static-init><<static-init>>(<blk>)
-      self(<singleton class:<singleton class:<constant:F>>>).sig() do ||
+      self(<singleton_class:<singleton_class:<constant:F>>>).sig() do ||
         self(<constant:Builder>).params({:"f" => ::Integer}).returns(::Integer)
       end
     end
@@ -136,15 +136,15 @@ begin
       "g"
     end
   end
-  class <singleton class><<singleton class:<constant:G>>> < ()
+  class <singleton class><<singleton_class:<constant:G>>> < ()
     def inner<inner>(<blk>)
-      ::T.reveal_type(self(<singleton class:<constant:G>>))
+      ::T.reveal_type(self(<singleton_class:<constant:G>>))
     end
   end
   class ::H<<constant:H>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton class:<constant:H>>> < ()
+  class <singleton class><<singleton_class:<constant:H>>> < ()
     def self.<static-init><<static-init>>(<blk>)
       begin
         ::RubyTyper.keep_for_ide(::<Class:H>::H2)

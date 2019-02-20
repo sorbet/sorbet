@@ -82,10 +82,10 @@ begin
   class ::Child<<constant:Child>> < (::Parent, ::Mixin)
     def self.<static-init><<static-init>>(<blk>)
       begin
-        self(<singleton class:<constant:Child>>).include(::Mixin) do ||
+        self(<singleton_class:<constant:Child>>).include(::Mixin) do ||
           <emptyTree>
         end
-        self(<singleton class:<constant:Child>>).whatever().include(::OtherMixin)
+        self(<singleton_class:<constant:Child>>).whatever().include(::OtherMixin)
         ::RubyTyper.keep_for_ide(::Mixin)
         <emptyTree>
       end

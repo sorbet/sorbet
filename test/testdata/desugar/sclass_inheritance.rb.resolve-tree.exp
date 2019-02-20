@@ -31,7 +31,7 @@ begin
           ::RubyTyper.keep_for_ide(::A)
           <emptyTree>
         end
-        self(<singleton class:<constant:<root>>>).main()
+        self(<singleton_class:<constant:<root>>>).main()
         <emptyTree>
       end
     end
@@ -45,22 +45,22 @@ begin
       end
     end
   end
-  class <singleton class><<singleton class:<constant:A>>> < (::MM)
+  class <singleton class><<singleton_class:<constant:A>>> < (::MM)
     def newer<newer>(<blk>)
-      self(<singleton class:<constant:A>>).new()
+      self(<singleton_class:<constant:A>>).new()
     end
   end
   class ::B<<constant:B>> < (::<todo sym>)
     def self.newer<newer>(<blk>)
-      self(<singleton class:<constant:B>>).new()
+      self(<singleton_class:<constant:B>>).new()
     end
   end
   class ::C<<constant:C>> < (::A)
     <emptyTree>
   end
-  class <singleton class><<singleton class:<constant:C>>> < ()
+  class <singleton class><<singleton_class:<constant:C>>> < ()
     def newerer<newerer>(<blk>)
-      self(<singleton class:<constant:C>>).newer()
+      self(<singleton_class:<constant:C>>).newer()
     end
   end
   <emptyTree>
