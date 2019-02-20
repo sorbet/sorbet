@@ -24,7 +24,8 @@ Loc Loc::join(Loc other) const {
 Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
     Loc::Detail pos;
 
-    ENFORCE(off <= file.source().size(), "file offset out of bounds in file: " + (string)file.path());
+    ENFORCE(off <= file.source().size(), "file offset out of bounds in file: " + string(file.path()) + " @ " +
+                                             to_string(off) + " <= " + to_string(file.source().size()));
     if (off >= file.source().size()) {
         // parser generate positions out of file \facepalm.
         off = file.source().size() - 1;
@@ -149,6 +150,9 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string Loc::showRaw(const GlobalState &gs) const {
     auto path = file().data(gs).path();
+    if (!exists()) {
+        return fmt::format("Loc {{file={} start=??? end=???}}", path);
+    }
     auto [start, end] = this->position(gs);
     return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
 }
