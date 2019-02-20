@@ -317,7 +317,18 @@ private:
             return false;
         }
 
-        core::SymbolRef resolved = job.ancestor->constantSymbol().data(ctx)->dealias(ctx);
+        core::SymbolRef resolved;
+        if (job.ancestor->typeAlias) {
+            if (!lastRun) {
+                return false;
+            }
+            if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixin to unresolved type alias");
+            }
+            resolved = core::Symbols::StubAncestor();
+        } else {
+            resolved = job.ancestor->constantSymbol().data(ctx)->dealias(ctx);
+        }
 
         if (!resolved.data(ctx)->isClass()) {
             if (!lastRun) {
