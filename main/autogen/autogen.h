@@ -83,7 +83,7 @@ struct ParsedFile {
     std::string toMsgpack(core::Context ctx, int version);
 
 private:
-    std::vector<core::NameRef> fullName(core::Context ctx, DefinitionRef def);
+    std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef def);
     friend class MsgpackWriter;
 };
 

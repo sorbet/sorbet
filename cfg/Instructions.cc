@@ -15,7 +15,7 @@ Return::Return(core::LocalVariable what) : what(what) {
 }
 
 string SolveConstraint::toString(core::Context ctx) {
-    return fmt::format("Solve<{}>", this->link->block.data(ctx)->fullName(ctx));
+    return fmt::format("Solve<{}>", this->link->block.data(ctx)->showFullName(ctx));
 }
 
 string Return::toString(core::Context ctx) {
@@ -28,7 +28,7 @@ BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::L
 }
 
 string BlockReturn::toString(core::Context ctx) {
-    return fmt::format("blockreturn<{}> {}", this->link->block.data(ctx)->fullName(ctx), this->what.toString(ctx));
+    return fmt::format("blockreturn<{}> {}", this->link->block.data(ctx)->showFullName(ctx), this->what.toString(ctx));
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
@@ -97,7 +97,8 @@ string LoadArg::toString(core::Context ctx) {
 }
 
 string LoadYieldParams::toString(core::Context ctx) {
-    return fmt::format("load_yield_params({}, {})", this->link->block.data(ctx)->fullName(ctx), this->block.show(ctx));
+    return fmt::format("load_yield_params({}, {})", this->link->block.data(ctx)->showFullName(ctx),
+                       this->block.show(ctx));
 }
 
 string Unanalyzable::toString(core::Context ctx) {

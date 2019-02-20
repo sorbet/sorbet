@@ -14,7 +14,7 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
 
     auto result = make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef),
                                                  loc2Location(gs, sym->loc()));
-    result->containerName = sym->owner.data(gs)->fullName(gs);
+    result->containerName = sym->owner.data(gs)->showFullName(gs);
     return result;
 }
 

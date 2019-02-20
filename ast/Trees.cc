@@ -566,7 +566,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 
 string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
     if (symbol.exists()) {
-        return this->symbol.data(gs, true)->fullName(gs);
+        return this->symbol.data(gs, true)->showFullName(gs);
     }
     if (this->typeAlias) {
         return this->typeAlias->toString(gs, tabs);
@@ -581,7 +581,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
-    buf << "symbol = " << this->symbol.data(gs, true)->fullName(gs) << '\n';
+    buf << "symbol = " << this->symbol.data(gs, true)->showFullName(gs) << '\n';
     printTabs(buf, tabs + 1);
     buf << "typeAlias = " << (this->typeAlias ? this->typeAlias->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs);
@@ -590,7 +590,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string Field::toString(const core::GlobalState &gs, int tabs) {
-    return this->symbol.data(gs, true)->fullName(gs);
+    return this->symbol.data(gs, true)->showFullName(gs);
 }
 
 string Local::toString(const core::GlobalState &gs, int tabs) {
@@ -1164,7 +1164,7 @@ string RestArg::nodeName() {
 }
 
 string Self::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ claz = " + this->claz.data(gs)->fullName(gs) + " }";
+    return nodeName() + "{ claz = " + this->claz.data(gs)->showFullName(gs) + " }";
 }
 string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";

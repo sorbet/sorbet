@@ -107,7 +107,7 @@ void CFG::sanityCheck(core::Context ctx) {
 
 string CFG::toString(core::Context ctx) {
     fmt::memory_buffer buf;
-    string symbolName = this->symbol.data(ctx)->fullName(ctx);
+    string symbolName = this->symbol.data(ctx)->showFullName(ctx);
     fmt::format_to(buf,
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"

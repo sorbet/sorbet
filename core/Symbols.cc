@@ -183,19 +183,19 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ",
-                        name.toString(gs), this->fullName(gs));
+                        name.toString(gs), this->showFullName(gs));
         }
         int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
             i++;
             if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-                e.setHeader("`{}`:- `{}`", i, it->data(gs)->fullName(gs));
+                e.setHeader("`{}`:- `{}`", i, it->data(gs)->showFullName(gs));
             }
             int j = 0;
             for (auto it2 = it->data(gs)->argumentsOrMixins.rbegin(); it2 != it->data(gs)->argumentsOrMixins.rend();
                  ++it2) {
                 if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-                    e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs)->fullName(gs));
+                    e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs)->showFullName(gs));
                 }
                 j++;
             }
@@ -422,9 +422,9 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     return result;
 }
 
-string Symbol::fullName(const GlobalState &gs) const {
+string Symbol::showFullName(const GlobalState &gs) const {
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
-    string owner = includeOwner ? this->owner.data(gs)->fullName(gs) : "";
+    string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
 
     bool needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
     string separator = needsColonColon ? "::" : "#";
@@ -490,7 +490,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         }
     }
 
-    fmt::format_to(buf, "{}{} {}", type, variance, this->fullName(gs));
+    fmt::format_to(buf, "{}{} {}", type, variance, this->showFullName(gs));
 
     if (this->isClass() || this->isMethod()) {
         if (this->isMethod()) {
@@ -512,7 +512,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         }
 
         if (this->superClass.exists()) {
-            fmt::format_to(buf, " < {}", this->superClass.data(gs)->fullName(gs));
+            fmt::format_to(buf, " < {}", this->superClass.data(gs)->showFullName(gs));
         }
 
         if (this->isClass()) {
@@ -683,7 +683,7 @@ SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
                             "expansion would have been to {}",
-                            fullName(gs), alias->symbol.data(gs)->fullName(gs));
+                            showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
             }
             return alias->symbol;
         }

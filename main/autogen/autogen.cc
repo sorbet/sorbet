@@ -313,13 +313,13 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
     return pf;
 }
 
-vector<core::NameRef> ParsedFile::fullName(core::Context ctx, DefinitionRef id) {
+vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef id) {
     auto &def = id.data(*this);
     if (!def.defining_ref.exists()) {
         return {};
     }
     auto &ref = def.defining_ref.data(*this);
-    auto scope = fullName(ctx, ref.scope);
+    auto scope = showFullName(ctx, ref.scope);
     scope.insert(scope.end(), ref.name.begin(), ref.name.end());
     return scope;
 }
@@ -375,11 +375,11 @@ string ParsedFile::toString(core::Context ctx) {
     for (auto &ref : refs) {
         vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
-            auto fullScopeName = fullName(ctx, scope);
+            auto fullScopeName = showFullName(ctx, scope);
             nestingStrings.emplace_back(fmt::format("[{}]", fmt::map_join(fullScopeName, " ", nameToString)));
         }
 
-        auto refFullName = fullName(ctx, ref.scope);
+        auto refFullName = showFullName(ctx, ref.scope);
         fmt::format_to(out,
                        "[ref id={}]\n"
                        " scope=[{}]\n"
@@ -395,7 +395,7 @@ string ParsedFile::toString(core::Context ctx) {
                        (int)ref.is_defining_ref);
 
         if (ref.parent_of.exists()) {
-            auto parentOfFullName = fullName(ctx, ref.parent_of);
+            auto parentOfFullName = showFullName(ctx, ref.parent_of);
             fmt::format_to(out, " parent_of=[{}]\n", fmt::map_join(parentOfFullName, " ", nameToString));
         }
     }
@@ -466,7 +466,7 @@ private:
         packer.pack_array(def_attrs[version].size());
 
         // raw_full_name
-        auto raw_full_name = pf.fullName(ctx, def.id);
+        auto raw_full_name = pf.showFullName(ctx, def.id);
         packNames(raw_full_name);
 
         // type

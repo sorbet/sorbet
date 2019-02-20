@@ -535,7 +535,7 @@ public:
 
     std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
 
-    std::string fullName(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
 
     // Not printed when showing name table
     bool isHiddenFromPrinting(const GlobalState &gs) const;

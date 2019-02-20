@@ -184,7 +184,7 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
              },
              [&](Type *) { result = from; });
     ENFORCE(Types::isSubType(ctx, result, from), "dropSubtypesOf(" + from->toString(ctx) + "," +
-                                                     klass.data(ctx)->fullName(ctx) + ") returned " +
+                                                     klass.data(ctx)->showFullName(ctx) + ") returned " +
                                                      result->toString(ctx) + ", which is not a subtype of the input");
     return result;
 }
