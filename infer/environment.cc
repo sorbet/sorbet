@@ -295,6 +295,12 @@ void Environment::propagateKnowledge(core::Context ctx, core::LocalVariable to, 
         toState.knownTruthy = fromState.knownTruthy;
         auto &toKnowledge = toState.knowledge;
         auto &fromKnowledge = fromState.knowledge;
+        if (fromState.typeAndOrigins.type.get() == nullptr) {
+            fromState.typeAndOrigins.type = core::Types::nilClass();
+        }
+        if (toState.typeAndOrigins.type.get() == nullptr) {
+            toState.typeAndOrigins.type = core::Types::nilClass();
+        }
 
         toKnowledge = fromKnowledge;
         toKnowledge.truthy.mutate().noTypeTests.emplace_back(from, core::Types::falsyTypes());
