@@ -119,10 +119,11 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             }
         }
     }
-
-    for (core::SymbolRef mixin : sym.data(gs)->mixins()) {
+    auto mixins = sym.data(gs)->mixins();
+    for (core::SymbolRef mixin : mixins) {
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
-        for (core::SymbolRef tp : mixin.data(gs)->typeMembers()) {
+        auto typeMembers = mixin.data(gs)->typeMembers();
+        for (core::SymbolRef tp : typeMembers) {
             resolveTypeMember(gs, mixin, tp, sym, typeAliases);
         }
     }
