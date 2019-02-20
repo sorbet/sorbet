@@ -785,54 +785,6 @@ private:
         }
     }
 
-    void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
-        if (!ctx.owner.data(ctx)->isClass() || !ctx.owner.data(ctx)->isClassModule()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(ctx)->show(ctx));
-            }
-            // Keep processing it anyways
-        }
-
-        if (send->args.size() != 1) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Wrong number of arguments to `{}`: Expected: `{}`, got: `{}`",
-                            send->fun.data(ctx)->show(ctx), 1, send->args.size());
-            }
-            return;
-        }
-        auto *front = send->args.front().get();
-        auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->constantSymbol().exists() || !id->constantSymbol().data(ctx)->isClass()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                            send->fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        if (id->constantSymbol().data(ctx)->isClassClass()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                            id->constantSymbol().data(ctx)->show(ctx));
-            }
-            return;
-        }
-        if (id->constantSymbol() == ctx.owner) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send->fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
-        if (existing.exists()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared once per module", send->fun.data(ctx)->show(ctx));
-                e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous definition in this class");
-            }
-            return;
-        }
-        ctx.owner.data(ctx)->members[core::Names::classMethods()] = id->constantSymbol();
-    }
-
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
         InlinedVector<ast::Expression *, 1> lastSig;
         for (auto &stat : klass->rhs) {
@@ -890,19 +842,7 @@ private:
                     lastSig.emplace_back(stat.get());
                     return;
                 }
-
-                if (!ast::isa_tree<ast::Self>(send->recv.get())) {
-                    return;
-                }
-
-                switch (send->fun._id) {
-                    case core::Names::mixesInClassMethods()._id: {
-                        processMixesInClassMethods(ctx, send);
-                    } break;
-                    default:
-                        return;
-                }
-                stat.reset(nullptr);
+                return;
             },
 
             [&](ast::MethodDef *mdef) {
@@ -1423,6 +1363,65 @@ private:
     vector<int> classStack;
 };
 
+class ResolveMixesInClassMethodsWalk {
+    void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
+        if (!ctx.owner.data(ctx)->isClass() || !ctx.owner.data(ctx)->isClassModule()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(ctx)->show(ctx));
+            }
+            // Keep processing it anyways
+        }
+
+        if (send->args.size() != 1) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Wrong number of arguments to `{}`: Expected: `{}`, got: `{}`",
+                            send->fun.data(ctx)->show(ctx), 1, send->args.size());
+            }
+            return;
+        }
+        auto *front = send->args.front().get();
+        auto *id = ast::cast_tree<ast::ConstantLit>(front);
+        if (id == nullptr || !id->constantSymbol().exists() || !id->constantSymbol().data(ctx)->isClass()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Argument to `{}` must be statically resolvable to a module",
+                            send->fun.data(ctx)->show(ctx));
+            }
+            return;
+        }
+        if (id->constantSymbol().data(ctx)->isClassClass()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
+                            id->constantSymbol().data(ctx)->show(ctx));
+            }
+            return;
+        }
+        if (id->constantSymbol() == ctx.owner) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Must not pass your self to `{}`", send->fun.data(ctx)->show(ctx));
+            }
+            return;
+        }
+        auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
+        if (existing.exists()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` can only be declared once per module", send->fun.data(ctx)->show(ctx));
+                e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous definition in this class");
+            }
+            return;
+        }
+        ctx.owner.data(ctx)->members[core::Names::classMethods()] = id->constantSymbol();
+    }
+
+public:
+    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
+        if (ast::isa_tree<ast::Self>(original->recv.get()) && original->fun == core::Names::mixesInClassMethods()) {
+            processMixesInClassMethods(ctx, original.get());
+            return ast::MK::EmptyTree();
+        }
+        return original;
+    }
+};
+
 class ResolveSanityCheckWalk {
 public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
@@ -1461,8 +1460,10 @@ public:
 vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     finalizeAncestors(ctx.state);
+    trees = resolveMixesInClassMethods(ctx, std::move(trees));
+    finalizeSymbols(ctx.state);
     trees = resolveSigs(ctx, std::move(trees));
-    finalizeResolution(ctx.state);
+    validateSymbols(ctx.state);
     sanityCheck(ctx, trees);
 
     return trees;
@@ -1484,6 +1485,15 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<a
     return trees;
 }
 
+vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
+    ResolveMixesInClassMethodsWalk mixesInClassMethods;
+    Timer timeit(ctx.state.errorQueue->logger, "resolver.mixes_in_class_methods");
+    for (auto &tree : trees) {
+        tree.tree = ast::TreeMap::apply(ctx, mixesInClassMethods, std::move(tree.tree));
+    }
+    return trees;
+}
+
 void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.sanity_check");
@@ -1496,6 +1506,7 @@ void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &tr
 
 vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
+    trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
 

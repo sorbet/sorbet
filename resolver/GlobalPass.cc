@@ -553,7 +553,7 @@ void computeLinearization(core::GlobalState &gs) {
     }
 }
 
-void Resolver::finalizeResolution(core::GlobalState &gs) {
+void Resolver::finalizeSymbols(core::GlobalState &gs) {
     Timer timer(gs.errorQueue->logger, "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
@@ -591,7 +591,9 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
         }
     }
+}
 
+void Resolver::validateSymbols(core::GlobalState &gs) {
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
     for (int i = 1; i < gs.symbolsUsed(); ++i) {

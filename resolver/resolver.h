@@ -21,8 +21,11 @@ public:
 
 private:
     static void finalizeAncestors(core::GlobalState &gs);
-    static void finalizeResolution(core::GlobalState &gs);
+    static void finalizeSymbols(core::GlobalState &gs);
     static std::vector<ast::ParsedFile> resolveSigs(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
+    static std::vector<ast::ParsedFile> resolveMixesInClassMethods(core::MutableContext ctx,
+                                                                   std::vector<ast::ParsedFile> trees);
+    static void validateSymbols(core::GlobalState &gs);
     static void sanityCheck(core::MutableContext ctx, std::vector<ast::ParsedFile> &trees);
 };
 
