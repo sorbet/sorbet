@@ -47,9 +47,9 @@ string LiteralType::show(const GlobalState &gs) const {
 string LiteralType::showValue(const GlobalState &gs) const {
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying().get())->symbol;
     if (undSymbol == Symbols::String()) {
-        return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).toString(gs)));
+        return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
-        return fmt::format(":\"{}\"", absl::CEscape(NameRef(gs, this->value).toString(gs)));
+        return fmt::format(":\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
     } else if (undSymbol == Symbols::Integer()) {
         return to_string(this->value);
     } else if (undSymbol == Symbols::Float()) {
