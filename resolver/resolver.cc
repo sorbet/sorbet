@@ -452,7 +452,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
-        if (id == nullptr || !id->typeAliasOrConstantSymbol().data(ctx, true)->isStaticField()) {
+        if (id == nullptr || !id->typeAliasOrConstantSymbol().dataAllowingNone(ctx)->isStaticField()) {
             return asgn;
         }
 

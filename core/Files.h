@@ -39,8 +39,10 @@ public:
         return _id > 0;
     }
 
-    const File &data(const GlobalState &gs, bool allowTombStones = false) const;
-    File &data(GlobalState &gs, bool allowTombStones = false) const;
+    const File &data(const GlobalState &gs) const;
+    File &data(GlobalState &gs) const;
+    const File &dataAllowingTombstone(const GlobalState &gs) const;
+    File &dataAllowingTombstone(GlobalState &gs) const;
 
 private:
     u2 _id;

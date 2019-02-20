@@ -44,8 +44,10 @@ public:
 
     bool isSynthetic() const;
 
-    SymbolData data(GlobalState &gs, bool allowNone = false) const;
-    const SymbolData data(const GlobalState &gs, bool allowNone = false) const;
+    SymbolData data(GlobalState &gs) const;
+    const SymbolData data(const GlobalState &gs) const;
+    SymbolData dataAllowingNone(GlobalState &gs) const;
+    const SymbolData dataAllowingNone(const GlobalState &gs) const;
 
     bool operator==(const SymbolRef &rhs) const;
 

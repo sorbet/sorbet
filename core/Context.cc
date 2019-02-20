@@ -44,7 +44,7 @@ bool MutableContext::permitOverloadDefinitions() const {
 
 SymbolRef Context::contextClass() const {
     SymbolRef owner = this->owner;
-    while (!owner.data(this->state, false)->isClass()) {
+    while (!owner.data(this->state)->isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
         owner = owner.data(this->state)->owner;
     }

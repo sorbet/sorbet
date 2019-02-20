@@ -25,7 +25,7 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     // These will be added to Symbols::root().members later.
     SymbolRef symRef = SymbolRef(this, symbols.size());
     symbols.emplace_back();
-    SymbolData data = symRef.data(*this, true); // allowing noSymbol is needed because this enters noSymbol.
+    SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = nameId;
     data->owner = Symbols::root();
     data->superClass = SymbolRef(this, superclass);
@@ -34,7 +34,7 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     data->setIsModule(isModule);
 
     if (symRef._id > Symbols::root()._id) {
-        Symbols::root().data(*this, true)->members[nameId] = symRef;
+        Symbols::root().dataAllowingNone(*this)->members[nameId] = symRef;
     }
     return symRef;
 }
@@ -210,9 +210,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Magic_undeclaredFieldStub());
 
     // Root members
-    Symbols::root().data(*this, true)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
-    Symbols::root().data(*this, true)->members[core::Names::Constants::Top()] = Symbols::top();
-    Symbols::root().data(*this, true)->members[core::Names::Constants::Bottom()] = Symbols::bottom();
+    Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
+    Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Top()] = Symbols::top();
+    Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Bottom()] = Symbols::bottom();
     Context ctx(*this, Symbols::root());
 
     // Synthesize untyped = T.untyped
@@ -382,7 +382,7 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
-    SymbolData ownerScope = owner.data(*this, true);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members.size());
 
     auto &store = ownerScope->members[name];
@@ -397,7 +397,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     SymbolRef ret = SymbolRef(this, symbols.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on symbol invalidates `store`
     symbols.emplace_back();
-    SymbolData data = ret.data(*this, true);
+    SymbolData data = ret.dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
@@ -1151,7 +1151,7 @@ void GlobalState::markAsPayload() {
 unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                  const shared_ptr<File> &withWhat) {
     ENFORCE(whatFile.id() < inWhat->filesUsed());
-    ENFORCE(whatFile.data(*inWhat, true).path() == withWhat->path());
+    ENFORCE(whatFile.dataAllowingTombstone(*inWhat).path() == withWhat->path());
     inWhat->files[whatFile.id()] = withWhat;
     return inWhat;
 }

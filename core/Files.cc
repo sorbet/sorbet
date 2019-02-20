@@ -81,15 +81,23 @@ FileRef::FileRef(unsigned int id) : _id(id) {
     ENFORCE(((u2)id) == id, "FileRef overflow. Do you have 2^16 files?");
 }
 
-const File &FileRef::data(const GlobalState &gs, bool allowTombStones) const {
+const File &FileRef::data(const GlobalState &gs) const {
+    ENFORCE(gs.files[_id]->sourceType != File::TombStone);
+    return dataAllowingTombstone(gs);
+}
+
+File &FileRef::data(GlobalState &gs) const {
+    ENFORCE(gs.files[_id]->sourceType != File::TombStone);
+    return dataAllowingTombstone(gs);
+}
+
+const File &FileRef::dataAllowingTombstone(const GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
-    ENFORCE(allowTombStones || gs.files[_id]->sourceType != File::TombStone);
     return *(gs.files[_id]);
 }
 
-File &FileRef::data(GlobalState &gs, bool allowTombStones) const {
+File &FileRef::dataAllowingTombstone(GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
-    ENFORCE(allowTombStones || gs.files[_id]->sourceType != File::TombStone);
     return *(gs.files[_id]);
 }
 

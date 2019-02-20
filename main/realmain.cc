@@ -53,7 +53,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
-                if (fref.data(*gs, true).sourceType == core::File::Type::Normal) {
+                if (fref.dataAllowingTombstone(*gs).sourceType == core::File::Type::Normal) {
                     gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
                 }
             }
@@ -365,7 +365,8 @@ int realmain(int argc, char *argv[]) {
             vector<pair<string, int>> withNames;
             long sum = 0;
             for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef(*gs, e.first).data(*gs, true)->showFullName(*gs), e.second);
+                withNames.emplace_back(core::SymbolRef(*gs, e.first).dataAllowingNone(*gs)->showFullName(*gs),
+                                       e.second);
                 sum += e.second;
             }
             fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });

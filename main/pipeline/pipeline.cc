@@ -259,7 +259,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<st
                         if (result.gotItem()) {
                             core::FileRef file = job;
                             processedByThread++;
-                            auto fileName = file.data(*lgs, true).path();
+                            auto fileName = file.dataAllowingTombstone(*lgs).path();
                             logger->trace("Reading: {}", fileName);
                             string src;
                             try {

@@ -90,21 +90,23 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     return SymbolRef(gs, distance);
 }
 
-SymbolData SymbolRef::data(GlobalState &gs, bool allowNone) const {
-    ENFORCE(_id < gs.symbols.size());
-    if (!allowNone) {
-        ENFORCE(this->exists());
-    }
+SymbolData SymbolRef::data(GlobalState &gs) const {
+    ENFORCE(this->exists());
+    return dataAllowingNone(gs);
+}
 
+SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
+    ENFORCE(_id < gs.symbols.size());
     return SymbolData(gs.symbols[this->_id], gs);
 }
 
-const SymbolData SymbolRef::data(const GlobalState &gs, bool allowNone) const {
-    ENFORCE(_id < gs.symbols.size());
-    if (!allowNone) {
-        ENFORCE(this->exists());
-    }
+const SymbolData SymbolRef::data(const GlobalState &gs) const {
+    ENFORCE(this->exists());
+    return dataAllowingNone(gs);
+}
 
+const SymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
+    ENFORCE(_id < gs.symbols.size());
     return SymbolData(const_cast<Symbol &>(gs.symbols[this->_id]), gs);
 }
 
@@ -121,10 +123,10 @@ SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
 SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
 
 string SymbolRef::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden) const {
-    return data(gs, true)->toStringWithTabs(gs, tabs, showHidden);
+    return dataAllowingNone(gs)->toStringWithTabs(gs, tabs, showHidden);
 }
 string SymbolRef::show(const GlobalState &gs) const {
-    return data(gs, true)->show(gs);
+    return dataAllowingNone(gs)->show(gs);
 }
 
 TypePtr Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
@@ -761,7 +763,7 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
         return ref(gs);
     }
     SymbolRef owner = this->owner;
-    while (owner != Symbols::root() && !owner.data(gs, false)->isMethod()) {
+    while (owner != Symbols::root() && !owner.data(gs)->isMethod()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
         owner = owner.data(gs)->owner;
     }
@@ -770,7 +772,7 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
 
 SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (!owner.data(gs, false)->isClass()) {
+    while (!owner.data(gs)->isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs)->owner;
     }

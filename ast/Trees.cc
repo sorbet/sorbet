@@ -305,7 +305,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     } else {
         buf << "class ";
     }
-    buf << name->toStringWithTabs(gs, tabs) << "<" << this->symbol.data(gs, true)->name.data(gs)->toString(gs)
+    buf << name->toStringWithTabs(gs, tabs) << "<" << this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs)
         << "> < ";
     printArgs(gs, buf, this->ancestors, tabs);
 
@@ -324,8 +324,8 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "name = " << name->showRaw(gs, tabs + 1) << "<" << this->symbol.data(gs, true)->name.data(gs)->toString(gs)
-        << ">" << '\n';
+    buf << "name = " << name->showRaw(gs, tabs + 1) << "<"
+        << this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs) << ">" << '\n';
     printTabs(buf, tabs + 1);
     buf << "ancestors = [";
     bool first = true;
@@ -397,7 +397,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     } else {
         buf << "def ";
     }
-    auto &data = this->symbol.data(gs, true);
+    auto &data = this->symbol.dataAllowingNone(gs);
     buf << name.data(gs)->toString(gs) << "<" << data->name.data(gs)->toString(gs) << ">";
     buf << "(";
     bool first = true;
@@ -447,8 +447,8 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     buf << '\n';
 
     printTabs(buf, tabs + 1);
-    buf << "name = " << name.data(gs)->toString(gs) << "<" << this->symbol.data(gs, true)->name.data(gs)->toString(gs)
-        << ">" << '\n';
+    buf << "name = " << name.data(gs)->toString(gs) << "<"
+        << this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs) << ">" << '\n';
     printTabs(buf, tabs + 1);
     buf << "args = [";
     bool first = true;
@@ -567,7 +567,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 
 string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     if (symbol.exists()) {
-        return this->symbol.data(gs, true)->showFullName(gs);
+        return this->symbol.dataAllowingNone(gs)->showFullName(gs);
     }
     if (this->typeAlias) {
         return this->typeAlias->toStringWithTabs(gs, tabs);
@@ -582,7 +582,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
-    buf << "symbol = " << this->symbol.data(gs, true)->showFullName(gs) << '\n';
+    buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
     printTabs(buf, tabs + 1);
     buf << "typeAlias = " << (this->typeAlias ? this->typeAlias->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs);
@@ -591,7 +591,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string Field::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->symbol.data(gs, true)->showFullName(gs);
+    return this->symbol.dataAllowingNone(gs)->showFullName(gs);
 }
 
 string Local::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -606,7 +606,7 @@ string Field::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "symbol = " << this->symbol.data(gs, true)->name.data(gs)->toString(gs) << '\n';
+    buf << "symbol = " << this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs) << '\n';
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
