@@ -260,6 +260,12 @@ public:
                 auto origName = klass->symbol.data(ctx)->name;
                 ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name, core::UniqueNameKind::Namer);
                 klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
+
+                auto oldSymCount = ctx.state.symbolsUsed();
+                auto newSignleton =
+                    klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+                ENFORCE(newSignleton._id >= oldSymCount,
+                        "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
@@ -324,7 +330,7 @@ public:
         }
 
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
-        klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
                                   [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });

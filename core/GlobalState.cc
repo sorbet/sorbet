@@ -825,19 +825,28 @@ FileRef GlobalState::reserveFileRef(string path) {
 }
 
 void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {
-    auto &owner = what.data(*this)->owner;
-    auto &members = owner.data(*this)->members;
-    auto fnd = members.find(origName);
-    ENFORCE(fnd != members.end());
-    auto oldSym = fnd->second;
+    auto whatData = what.data(*this);
+    auto owner = whatData->owner;
+    auto ownerData = owner.data(*this);
+    auto &ownerMembers = ownerData->members;
+    auto fnd = ownerMembers.find(origName);
+    ENFORCE(fnd != ownerMembers.end());
+    ENFORCE(fnd->second == what);
+    ENFORCE(whatData->name == origName);
     u2 collisionCount = 1;
     NameRef name;
     do {
         name = freshNameUnique(kind, origName, collisionCount++);
-    } while (owner.data(*this)->findMember(*this, name).exists());
-    members.erase(fnd);
-    members[name] = oldSym;
-    oldSym.data(*this)->name = name;
+    } while (ownerData->findMember(*this, name).exists());
+    ownerMembers.erase(fnd);
+    ownerMembers[name] = what;
+    whatData->name = name;
+    if (whatData->isClass()) {
+        auto singleton = whatData->lookupSingletonClass(*this);
+        if (singleton.exists()) {
+            mangleRenameSymbol(singleton, singleton.data(*this)->name, kind);
+        }
+    }
 }
 
 unsigned int GlobalState::symbolsUsed() const {

@@ -6,5 +6,5 @@ class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/namer/class_
   class ::<singleton_class:<constant:A>> < ::<constant:Module> () @ test/testdata/namer/class_and_alias.rb:3
   static-field ::<constant:B> -> Integer(91) @ test/testdata/namer/class_and_alias.rb:8
   class ::<constant:B>$1 < ::<constant:Object> () @ test/testdata/namer/class_and_alias.rb:6
-  class ::<singleton_class:<constant:B>> < ::<singleton_class:<constant:Object>> () @ test/testdata/namer/class_and_alias.rb:6
+  class ::<singleton_class:<constant:B>>$1 < ::<singleton_class:<constant:Object>> () @ test/testdata/namer/class_and_alias.rb:6
 

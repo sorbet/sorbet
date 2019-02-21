@@ -637,9 +637,19 @@ string Symbol::argumentName(const GlobalState &gs) const {
     }
 }
 
+namespace {
+bool isSingletonName(const GlobalState &gs, core::NameRef name) {
+    return name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+}
+
+bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
+    return name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Namer &&
+           isSingletonName(gs, name.data(gs)->unique.original);
+}
+} // namespace
+
 bool Symbol::isSingletonClass(const GlobalState &gs) const {
-    bool isSingleton =
-        isClass() && name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+    bool isSingleton = isClass() && (isSingletonName(gs, name) || isMangledSingletonName(gs, name));
     DEBUG_ONLY(if (ref(gs) != Symbols::untyped()) { // Symbol::untyped is attached to itself
         if (isSingleton) {
             ENFORCE(attachedClass(gs).exists());
