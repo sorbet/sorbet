@@ -69,7 +69,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
                     makeField("method", JSONString), makeField("params", makeOptional(JSONAny)),
                     // Sorbet-custom property added to requests that have been canceled.
-                    makeField("canceled", makeOptional(JSONBool))},
+                    makeField("canceled", makeOptional(JSONBool)), makeField("sorbet_counter", makeOptional(JSONInt)),
+                    makeField("sorbet_receive_timestamp", makeOptional(JSONDouble))},
                    classTypes);
     auto ResponseError = makeObject("ResponseError",
                                     {
@@ -78,21 +79,20 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         makeField("data", makeOptional(JSONAny)),
                                     },
                                     classTypes);
-    auto ResponseMessage = makeObject("ResponseMessage",
-                                      {
-                                          makeField("jsonrpc", JSONRPCConstant),
-                                          makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
-                                          makeField("result", makeOptional(JSONAny)),
-                                          makeField("error", makeOptional(ResponseError)),
-                                      },
-                                      classTypes);
+    auto ResponseMessage = makeObject(
+        "ResponseMessage",
+        {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
+         makeField("result", makeOptional(JSONAny)), makeField("error", makeOptional(ResponseError)),
+         makeField("sorbet_counter", makeOptional(JSONInt)),
+         makeField("sorbet_receive_timestamp", makeOptional(JSONDouble))},
+        classTypes);
     auto NotificationMessage =
         makeObject("NotificationMessage",
-                   {
-                       makeField("jsonrpc", JSONRPCConstant),
-                       makeField("method", JSONString),
-                       makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject}))),
-                   },
+                   {makeField("jsonrpc", JSONRPCConstant), makeField("method", JSONString),
+                    makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject}))),
+                    // Sorbet-specific fields; used internally.
+                    makeField("sorbet_counter", makeOptional(JSONInt)),
+                    makeField("sorbet_receive_timestamp", makeOptional(JSONDouble))},
                    classTypes);
 
     auto CancelParams = makeObject("CancelParams",

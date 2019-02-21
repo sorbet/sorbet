@@ -6,6 +6,7 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
 #include "core/core.h"
+#include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 #include "main/options/options.h"
 #include "rapidjson/document.h"
@@ -141,19 +142,6 @@ enum class LSPErrorCodes {
     RequestCancelled = -32800,
 };
 
-class MessageId {
-private:
-    const std::variant<int, std::string> id;
-
-public:
-    MessageId(int id);
-    MessageId(const std::variant<int, std::string> id);
-
-    // Responses can have a null id, but requests cannot. C++ doesn't let you implicitly
-    // widen a variant, hence this function.
-    operator std::variant<int, std::string, JSONNullObject>() const;
-};
-
 class LSPLoop {
     int requestCounter = 1;
     struct ResponseHandler {
@@ -219,7 +207,7 @@ class LSPLoop {
 
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/
-    bool handleReplies(rapidjson::Document &d);
+    bool handleReplies(const LSPMessage &d);
 
     core::FileRef addNewFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.
@@ -241,7 +229,7 @@ class LSPLoop {
     std::unique_ptr<core::GlobalState> pushDiagnostics(TypecheckRun filesTypechecked);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
-    bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
+    bool ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
                            const std::unique_ptr<core::GlobalState> &currentGs);
 
     core::FileRef uri2FileRef(std::string_view uri);
@@ -286,21 +274,22 @@ class LSPLoop {
     std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
                                                                const MessageId &id,
                                                                const TextDocumentPositionParams &params);
-    static void mergeDidChanges(std::deque<rapidjson::Document> &pendingRequests);
-    static std::deque<rapidjson::Document>::iterator
-    findRequestToBeCancelled(std::deque<rapidjson::Document> &pendingRequests,
-                             rapidjson::Document &cancellationRequest);
-    static std::deque<rapidjson::Document>::iterator
-    findFirstPositionAfterLSPInitialization(std::deque<rapidjson::Document> &pendingRequests);
+    static void mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
+                                std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
+    static std::deque<std::unique_ptr<LSPMessage>>::iterator
+    findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
+                             const CancelParams &cancellationRequest);
+    static std::deque<std::unique_ptr<LSPMessage>>::iterator
+    findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs,
-                                                              rapidjson::Document &d);
+                                                              const LSPMessage &msg);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
             WorkerPool &workers, std::istream &input, std::ostream &output, bool typecheckTestFiles = false,
             bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
-    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
 };
 

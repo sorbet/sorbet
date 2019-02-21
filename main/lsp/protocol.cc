@@ -1,7 +1,6 @@
 #include "absl/synchronization/mutex.h"
 #include "common/Timer.h"
 #include "lsp.h"
-#include <deque>
 #include <iostream>
 
 using namespace std;
@@ -83,7 +82,7 @@ public:
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     struct GuardedState {
-        deque<rapidjson::Document> pendingRequests;
+        std::deque<std::unique_ptr<LSPMessage>> pendingRequests;
         bool terminate = false;
         bool paused = false;
     } guardedState;
@@ -105,53 +104,52 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                     break;
                 }
 
-                d.AddMember("sorbet_counter", requestCounter++, d.GetAllocator());
-                d.AddMember("sorbet_recieve_timestamp", (int64_t)Timer::currentTimeNanos(), d.GetAllocator());
-
                 absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
-                const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
+                try {
+                    auto msg = make_unique<LSPMessage>(inner_alloc, d);
+                    msg->setCounter(requestCounter++);
+                    msg->setTimestamp((double)Timer::currentTimeNanos());
 
-                if (method == LSPMethod::Pause()) {
-                    ENFORCE(!guardedState.paused);
-                    logger->error("Pausing");
-                    guardedState.paused = true;
-                    continue;
-                } else if (method == LSPMethod::Resume()) {
-                    logger->error("Resuming");
-                    ENFORCE(guardedState.paused);
-                    guardedState.paused = false;
-                    continue;
-                }
-
-                if (method == LSPMethod::CancelRequest()) {
-                    // see if they are canceling request that we didn't yet even start processing.
-                    rapidjson::Document canceledRequest;
-                    auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
-                    if (it != guardedState.pendingRequests.end()) {
-                        auto &requestToBeCancelled = *it;
-                        requestToBeCancelled.AddMember("canceled", rapidjson::Value(true),
-                                                       requestToBeCancelled.GetAllocator());
-                        canceledRequest = move(requestToBeCancelled);
-                        guardedState.pendingRequests.erase(it);
-                        // move the canceled request to the front
-                        auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
-                        guardedState.pendingRequests.insert(itFront, move(canceledRequest));
-                        LSPLoop::mergeDidChanges(guardedState.pendingRequests);
+                    const LSPMethod method = LSPMethod::getByName(msg->method());
+                    if (method == LSPMethod::CancelRequest()) {
+                        // see if they are canceling request that we didn't yet even start processing.
+                        auto it = findRequestToBeCancelled(
+                            guardedState.pendingRequests,
+                            *CancelParams::fromJSONValue(inner_alloc, msg->params(), "root.params"));
+                        if (it != guardedState.pendingRequests.end() && (*it)->isRequest()) {
+                            auto &requestToBeCancelled = (*it)->asRequest();
+                            requestToBeCancelled.canceled = true;
+                            auto canceledRequest = move(*it);
+                            guardedState.pendingRequests.erase(it);
+                            // move the canceled request to the front
+                            auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
+                            guardedState.pendingRequests.insert(itFront, move(canceledRequest));
+                            LSPLoop::mergeDidChanges(inner_alloc, guardedState.pendingRequests);
+                        }
+                        // if we started processing it already, well... swallow the cancellation request and
+                        // continue computing.
+                    } else if (method == LSPMethod::Pause()) {
+                        ENFORCE(!guardedState.paused);
+                        logger->error("Pausing");
+                        guardedState.paused = true;
+                    } else if (method == LSPMethod::Resume()) {
+                        logger->error("Resuming");
+                        ENFORCE(guardedState.paused);
+                        guardedState.paused = false;
+                    } else {
+                        guardedState.pendingRequests.emplace_back(move(msg));
+                        LSPLoop::mergeDidChanges(inner_alloc, guardedState.pendingRequests);
                     }
-                    // if we started processing it already, well... swallow the cancellation request and continue
-                    // computing.
-                    continue;
+                } catch (DeserializationError e) {
+                    logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));
                 }
-
-                guardedState.pendingRequests.emplace_back(move(d));
-                LSPLoop::mergeDidChanges(guardedState.pendingRequests);
             }
         });
 
     unique_ptr<core::GlobalState> gs;
     while (true) {
-        rapidjson::Document doc;
+        unique_ptr<LSPMessage> msg;
         {
             absl::MutexLock lck(&mtx);
             mtx.Await(absl::Condition(
@@ -163,14 +161,14 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             if (guardedState.terminate) {
                 break;
             }
-            doc.CopyFrom(guardedState.pendingRequests.front(), alloc);
+            msg = move(guardedState.pendingRequests.front());
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.requests.received");
-        long requestRecieveTimeNanos = doc["sorbet_recieve_timestamp"].GetInt64();
+        long requestReceiveTimeNanos = (long)msg->timestamp();
 
-        gs = processRequest(move(gs), doc);
-        timingAdd("processing_time", (Timer::currentTimeNanos() - requestRecieveTimeNanos));
+        gs = processRequest(move(gs), *msg);
+        timingAdd("processing_time", (Timer::currentTimeNanos() - requestReceiveTimeNanos));
     }
     if (gs) {
         return gs;
@@ -179,7 +177,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     }
 }
 
-void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
+void LSPLoop::mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
+                              std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
     // make pass through pendingRequests and squish any consecutive didChanges that are for the same
     // file together
     // TODO: if we ever support diffs, this would need to be extended
@@ -187,25 +186,25 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
     int originalSize = pendingRequests.size();
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
-        auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
+        auto method = LSPMethod::getByName(current->method());
         if (method == LSPMethod::TextDocumentDidChange()) {
-            string_view thisURI(current["params"]["textDocument"]["uri"].GetString(),
-                                current["params"]["textDocument"]["uri"].GetStringLength());
+            auto currentChanges = DidChangeTextDocumentParams::fromJSONValue(alloc, current->params(), "root.params");
+            string_view thisURI = currentChanges->textDocument->uri;
             auto nextIt = it + 1;
             if (nextIt != pendingRequests.end()) {
                 auto &next = *nextIt;
-                auto nextMethod = LSPMethod::getByName({next["method"].GetString(), next["method"].GetStringLength()});
+                auto nextMethod = LSPMethod::getByName(next->method());
                 if (nextMethod == LSPMethod::TextDocumentDidChange()) {
-                    string_view nextURI(next["params"]["textDocument"]["uri"].GetString(),
-                                        next["params"]["textDocument"]["uri"].GetStringLength());
+                    auto nextChanges = DidChangeTextDocumentParams::fromJSONValue(alloc, next->params(), "root.params");
+                    string_view nextURI = nextChanges->textDocument->uri;
                     if (nextURI == thisURI) {
-                        auto currentUpdates = move(current["params"]["contentChanges"]);
-                        for (auto &newUpdate : next["params"]["contentChanges"].GetArray()) {
-                            currentUpdates.PushBack(move(newUpdate), current.GetAllocator());
-                        }
-                        next["params"]["contentChanges"] = move(currentUpdates);
-                        it = pendingRequests.erase(it);
+                        auto &currentUpdates = currentChanges->contentChanges;
+                        auto &nextUpdates = nextChanges->contentChanges;
+                        std::move(std::begin(nextUpdates), std::end(nextUpdates), std::back_inserter(currentUpdates));
+                        nextChanges->contentChanges = move(currentUpdates);
                         requestsMerged += 1;
+                        next->setParams(nextChanges->toJSONValue(alloc));
+                        it = pendingRequests.erase(it);
                         continue;
                     }
                 }
@@ -216,34 +215,26 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
     ENFORCE(pendingRequests.size() + requestsMerged == originalSize);
 }
 
-deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(deque<rapidjson::Document> &pendingRequests,
-                                                                       rapidjson::Document &cancellationRequest) {
+std::deque<std::unique_ptr<LSPMessage>>::iterator
+LSPLoop::findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
+                                  const CancelParams &cancelParams) {
     for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
         auto &current = *it;
-        auto fnd = current.FindMember("id");
-        if (fnd != current.MemberEnd()) {
-            if (cancellationRequest["params"]["id"].IsString()) {
-                if (current["id"].IsString() &&
-                    current["id"].GetString() == cancellationRequest["params"]["id"].GetString()) {
-                    return it;
-                }
-            } else if (cancellationRequest["params"]["id"].IsInt()) {
-                if (current["id"].IsInt() && current["id"].GetInt() == cancellationRequest["params"]["id"].GetInt()) {
-                    return it;
-                }
-            } else {
-                Exception::raise("should never happen. Request id is neither int nor string.");
+        if (current->isRequest()) {
+            auto &request = current->asRequest();
+            if (request.id == cancelParams.id) {
+                return it;
             }
         }
     }
     return pendingRequests.end();
 }
 
-deque<rapidjson::Document>::iterator
-LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pendingRequests) {
+std::deque<std::unique_ptr<LSPMessage>>::iterator
+LSPLoop::findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
     for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
         auto &current = *it;
-        auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
+        auto method = LSPMethod::getByName(current->method());
         if (method != LSPMethod::LSPMethod::Initialize() && method != LSPMethod::LSPMethod::Initialized()) {
             return it;
         }
@@ -293,28 +284,23 @@ unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &po
     return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 
-bool LSPLoop::handleReplies(rapidjson::Document &d) {
-    if (d.FindMember("result") != d.MemberEnd()) {
-        if (d.FindMember("id") != d.MemberEnd()) {
-            string key(d["id"].GetString(), d["id"].GetStringLength());
-            auto fnd = awaitingResponse.find(key);
+bool LSPLoop::handleReplies(const LSPMessage &msg) {
+    if (msg.isResponse()) {
+        auto &resp = msg.asResponse();
+        auto id = resp.id;
+        if (auto stringId = get_if<string>(&id)) {
+            auto fnd = awaitingResponse.find(*stringId);
             if (fnd != awaitingResponse.end()) {
                 auto func = move(fnd->second.onResult);
                 awaitingResponse.erase(fnd);
-                func(d["result"]);
-            }
-        }
-        return true;
-    }
 
-    if (d.FindMember("error") != d.MemberEnd()) {
-        if (d.FindMember("id") != d.MemberEnd()) {
-            string key(d["id"].GetString(), d["id"].GetStringLength());
-            auto fnd = awaitingResponse.find(key);
-            if (fnd != awaitingResponse.end()) {
-                auto func = move(fnd->second.onError);
-                awaitingResponse.erase(fnd);
-                func(d["error"]);
+                if (resp.error.has_value()) {
+                    auto &error = *resp.error;
+                    func(*error->toJSONValue(alloc));
+                } else if (resp.result.has_value()) {
+                    auto &result = *resp.result;
+                    func(*result);
+                }
             }
         }
         return true;

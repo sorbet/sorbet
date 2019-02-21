@@ -7,38 +7,32 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
-    rapidjson::Document d(&alloc);
-    if (d.Parse(json.c_str()).HasParseError()) {
-        Exception::raise("Last LSP request: `{}` is not a valid json object", json);
-    }
-    return LSPLoop::processRequest(move(gs), d);
+    return LSPLoop::processRequest(move(gs), LSPMessage(alloc, json));
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, rapidjson::Document &d) {
-    // Recover from parsing errors.
-    int id = d.HasMember("id") && d["id"].IsInt() ? d["id"].GetInt() : -1;
+unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    auto id = msg.id();
     try {
-        return processRequestInternal(move(gs), d);
+        return processRequestInternal(move(gs), msg);
     } catch (const DeserializationError &e) {
-        if (id != -1) {
-            sendError(id, (int)LSPErrorCodes::InvalidParams, e.what());
+        if (id.has_value()) {
+            sendError(*id, (int)LSPErrorCodes::InvalidParams, e.what());
         }
         // Run the slow path so that the caller still has a GlobalState.
         return runSlowPath({}).gs;
     }
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs,
-                                                              rapidjson::Document &d) {
-    if (handleReplies(d)) {
+unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    if (handleReplies(msg)) {
         return gs;
     }
 
-    const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
+    const LSPMethod method = LSPMethod::getByName(msg.method());
 
     ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
 
-    if (!ensureInitialized(method, d, gs)) {
+    if (!ensureInitialized(method, msg, gs)) {
         return gs;
     }
     if (method.isNotification) {
@@ -47,7 +41,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
             Timer timeit(logger, "text_document_did_change");
             vector<shared_ptr<core::File>> files;
-            auto edits = DidChangeTextDocumentParams::fromJSONValue(alloc, d["params"], "root.params");
+            auto edits = DidChangeTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
 
             string_view uri = edits->textDocument->uri;
             // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
@@ -97,7 +91,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             prodCategoryCounterInc("requests.processed", "textDocument.didOpen");
             Timer timeit(logger, "text_document_did_open");
             vector<shared_ptr<core::File>> files;
-            auto edits = DidOpenTextDocumentParams::fromJSONValue(alloc, d["params"], "root.params");
+            auto edits = DidOpenTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
             string_view uri = edits->textDocument->uri;
             if (absl::StartsWith(uri, rootUri)) {
                 files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(edits->textDocument->text),
@@ -124,24 +118,24 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         if (method == LSPMethod::Exit()) {
             return gs;
         }
-    } else {
+    } else if (msg.isRequest()) {
         logger->debug("Processing request {}", method.name);
-        auto requestMessage = RequestMessage::fromJSONValue(alloc, d.GetObject());
-        auto id = requestMessage->id;
+        auto &requestMessage = msg.asRequest();
+        auto id = requestMessage.id;
 
         // LSP hack: We add the property 'canceled' to requests that were canceled before
         // they hit processRequest.
-        if (requestMessage->canceled.value_or(false)) {
+        if (requestMessage.canceled.value_or(false)) {
             prodCounterInc("lsp.requests.canceled");
             sendError(id, (int)LSPErrorCodes::RequestCancelled, "Request was canceled");
             return gs;
         }
 
-        if (!requestMessage->params) {
+        if (!requestMessage.params) {
             sendError(id, (int)LSPErrorCodes::InternalError, "Expected parameters, but found none.");
             return gs;
         }
-        auto &rawParams = *requestMessage->params;
+        auto &rawParams = *requestMessage.params;
 
         if (method == LSPMethod::Initialize()) {
             prodCategoryCounterInc("lsp.requests.processed", "initialize");
@@ -206,6 +200,8 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             ENFORCE(!method.isSupported, "failing a supported method");
             sendError(id, (int)LSPErrorCodes::MethodNotFound, fmt::format("Unknown method: {}", method.name));
         }
+    } else {
+        logger->debug("Unable to process request {}; LSP message is not a request.", method.name);
     }
     return gs;
 }

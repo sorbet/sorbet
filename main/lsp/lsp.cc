@@ -7,21 +7,6 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-MessageId::MessageId(int id) : id(id) {}
-MessageId::MessageId(const std::variant<int, string> id) : id(id) {}
-
-MessageId::operator variant<int, string, JSONNullObject>() const {
-    variant<int, string, JSONNullObject> newId;
-    if (auto intId = get_if<int>(&id)) {
-        newId = *intId;
-    } else if (auto stringId = get_if<string>(&id)) {
-        newId = *stringId;
-    } else {
-        throw invalid_argument("LSP request message ID must be a number or a string!");
-    }
-    return newId;
-}
-
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
                  WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool typecheckTestFiles,
                  bool skipConfigatron, bool disableFastPath)
@@ -91,7 +76,7 @@ bool silenceError(bool disableFastPath, core::ErrorClass what) {
     return false;
 }
 
-bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
+bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
                                 const unique_ptr<core::GlobalState> &currentGs) {
     if (currentGs) {
         return true;
@@ -102,7 +87,7 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
     }
     logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
     if (!forMethod.isNotification) {
-        int id = d.HasMember("id") && d["id"].IsInt() ? d["id"].GetInt() : 0;
+        auto id = msg.id().value_or(0);
         sendError(id, (int)LSPErrorCodes::ServerNotInitialized,
                   "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
                   "have been completed");
