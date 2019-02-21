@@ -173,7 +173,17 @@ export LSAN_OPTIONS
     /usr/bin/time -o "$TIMEFILE" \
     ./scripts/bin/typecheck --suppress-non-critical --typed=strict --suggest-typed \
     --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
-    --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/sorbet --metrics-sha="$GIT_SHA" --error-white-list=1000
+    --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/sorbet --metrics-sha="$GIT_SHA" \
+    --error-white-list=1001 --error-white-list=1002 --error-white-list=1003
+
+cat "$TIMEFILE"
+
+/usr/local/bin/junit-script-output \
+    typecheck-sanitized-with-incremental-resolver \
+    /usr/bin/time -o "$TIMEFILE" \
+    ./scripts/bin/typecheck --suppress-non-critical --typed=strict --suggest-typed \
+    --error-white-list=1001 --error-white-list=1002 --error-white-list=1003 \
+    --stress-incremental-resolver
 
 cat "$TIMEFILE"
 
