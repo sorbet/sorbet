@@ -794,8 +794,16 @@ public:
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
         if (isTypeTemplate) {
-            auto alias =
-                ctx.state.enterStaticFieldSymbol(asgn->loc, ctx.owner.data(ctx)->enclosingClass(ctx), typeName->cnst);
+            auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
+            oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
+            if (oldSym.exists()) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Redefining constant `{}`", context.data(ctx)->show(ctx));
+                    e.addErrorLine(context.data(ctx)->loc(), "Previous definition");
+                }
+                ctx.state.mangleRenameSymbol(oldSym, typeName->cnst, core::UniqueNameKind::Namer);
+            }
+            auto alias = ctx.state.enterStaticFieldSymbol(asgn->loc, context, typeName->cnst);
             alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
         }
 
