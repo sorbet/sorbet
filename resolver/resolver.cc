@@ -449,12 +449,12 @@ public:
         for (auto &ancst : original->ancestors) {
             bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front() &&
                                  !klass.data(ctx)->isSingletonClass(ctx));
-            transformAncestor(ctx, klass, ancst, isSuperclass);
+            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isSuperclass);
         }
 
         auto singleton = klass.data(ctx)->singletonClass(ctx);
         for (auto &ancst : original->singleton_ancestors) {
-            transformAncestor(ctx, singleton, ancst);
+            transformAncestor(ctx.withOwner(klass), singleton, ancst);
         }
 
         nesting_ = nesting_->parent;

@@ -209,6 +209,10 @@ class NameInserter {
             if (ast::isa_tree<ast::EmptyTree>(arg.get())) {
                 continue;
             }
+            if (ast::isa_tree<ast::Self>(arg.get())) {
+                dest->emplace_back(std::move(arg));
+                continue;
+            }
             auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
             ENFORCE(constLit, "Desugarer should have not allowed this");
             dest->emplace_back(std::move(arg));
