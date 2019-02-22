@@ -88,7 +88,6 @@ abstractions exist.
 
 ## Phases
 
-<!-- TOOD(jez) Linkify all these things. -->
 <!-- TODO(jez) Which GlobalState data structures are populated/frozen when? -->
 <!-- TODO(jez) Consider talking about GlobalState, Symbols, etc. first -->
 

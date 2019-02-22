@@ -472,7 +472,9 @@ In general,
 - to debug something in pay-server?
   - See the section on “Local development” using `typecheck_devel`
 - to debug an existing Sorbet process (i.e., LSP)
+  - launch Sorbet with the `--wait-for-dbg` flag
   - `lldb -p <pid>`
+  - set breakpoints and then `continue`
 
 Also, it’s good to get in the practice of fixing bugs by first adding an
 `ENFORCE` (assertion) that would have caught the bug before actually fixing the
