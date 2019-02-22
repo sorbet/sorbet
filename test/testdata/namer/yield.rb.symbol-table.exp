@@ -1,28 +1,28 @@
-class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/namer/yield.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init>$87 (<blk>) @ test/testdata/namer/yield.rb:2
-    argument #<static-init>$87#<blk><block> @ ???
-  class ::<constant:Main> < ::<constant:Object> () @ test/testdata/namer/yield.rb:2
-    method ::<constant:Main>#blockpass (&blk) @ test/testdata/namer/yield.rb:7
-      argument ::<constant:Main>#blockpass#&blk<block> @ test/testdata/namer/yield.rb:7
-    method ::<constant:Main>#blockyield (<blk>) @ test/testdata/namer/yield.rb:15
-      argument ::<constant:Main>#blockyield#<blk><block> @ ???
-      method ::<constant:Main>#blockyield#<block>$2 (i) @ test/testdata/namer/yield.rb:16
-        argument ::<constant:Main>#blockyield#<block>$2#i<> @ test/testdata/namer/yield.rb:16
-    method ::<constant:Main>#main (<blk>) @ test/testdata/namer/yield.rb:19
-      argument ::<constant:Main>#main#<blk><block> @ ???
-      method ::<constant:Main>#main#<block>$2 (x) @ test/testdata/namer/yield.rb:20
-        argument ::<constant:Main>#main#<block>$2#x<> @ test/testdata/namer/yield.rb:20
-      method ::<constant:Main>#main#<block>$3 (l) @ test/testdata/namer/yield.rb:21
-        argument ::<constant:Main>#main#<block>$3#l<repeated> @ test/testdata/namer/yield.rb:21
-      method ::<constant:Main>#main#<block>$4 (l) @ test/testdata/namer/yield.rb:22
-        argument ::<constant:Main>#main#<block>$4#l<repeated> @ test/testdata/namer/yield.rb:22
-      method ::<constant:Main>#main#<block>$5 (l) @ test/testdata/namer/yield.rb:23
-        argument ::<constant:Main>#main#<block>$5#l<repeated> @ test/testdata/namer/yield.rb:23
-      method ::<constant:Main>#main#<block>$6 (l) @ test/testdata/namer/yield.rb:24
-        argument ::<constant:Main>#main#<block>$6#l<repeated> @ test/testdata/namer/yield.rb:24
-    method ::<constant:Main>#mixed (&blk) @ test/testdata/namer/yield.rb:11
-      argument ::<constant:Main>#mixed#&blk<block> @ test/testdata/namer/yield.rb:11
-    method ::<constant:Main>#yielder (<blk>) @ test/testdata/namer/yield.rb:3
-      argument ::<constant:Main>#yielder#<blk><block> @ ???
-  class ::<singleton_class:<constant:Main>> < ::<singleton_class:<constant:Object>> () @ test/testdata/namer/yield.rb:2
+class ::<root> < ::Object () @ (test/testdata/namer/yield.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  method #<static-init> (<blk>) @ test/testdata/namer/yield.rb:2
+    argument #<static-init>#<blk><block> @ ???
+  class ::Main < ::Object () @ test/testdata/namer/yield.rb:2
+    method ::Main#blockpass (&blk) @ test/testdata/namer/yield.rb:7
+      argument ::Main#blockpass#&blk<block> @ test/testdata/namer/yield.rb:7
+    method ::Main#blockyield (<blk>) @ test/testdata/namer/yield.rb:15
+      argument ::Main#blockyield#<blk><block> @ ???
+      method ::Main#blockyield#<block> (i) @ test/testdata/namer/yield.rb:16
+        argument ::Main#blockyield#<block>#i<> @ test/testdata/namer/yield.rb:16
+    method ::Main#main (<blk>) @ test/testdata/namer/yield.rb:19
+      argument ::Main#main#<blk><block> @ ???
+      method ::Main#main#<block> (x) @ test/testdata/namer/yield.rb:20
+        argument ::Main#main#<block>#x<> @ test/testdata/namer/yield.rb:20
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:21
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:21
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:22
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:22
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:23
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:23
+      method ::Main#main#<block> (l) @ test/testdata/namer/yield.rb:24
+        argument ::Main#main#<block>#l<repeated> @ test/testdata/namer/yield.rb:24
+    method ::Main#mixed (&blk) @ test/testdata/namer/yield.rb:11
+      argument ::Main#mixed#&blk<block> @ test/testdata/namer/yield.rb:11
+    method ::Main#yielder (<blk>) @ test/testdata/namer/yield.rb:3
+      argument ::Main#yielder#<blk><block> @ ???
+  class ::<Class:Main> < ::<Class:Object> () @ test/testdata/namer/yield.rb:2
 

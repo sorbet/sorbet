@@ -1,12 +1,12 @@
 No errors! Great job.
-class ::<constant:<root>> ()
+class ::<root> ()
   field #$global @ test/cli/stop-after-namer/stop-after-namer.rb:7
-  class ::<constant:A> < ::<constant:<todo sym>> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
-    method ::<constant:A>#method (method_arg, <blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:4
-      argument ::<constant:A>#method#method_arg<> @ test/cli/stop-after-namer/stop-after-namer.rb:4
-      argument ::<constant:A>#method#<blk><block> @ ???
-  class ::<singleton_class:<constant:A>> < ::<constant:<todo sym>> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
-    method ::<singleton_class:<constant:A>>#singleton_method (singleton_method_arg, <blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:10
-      argument ::<singleton_class:<constant:A>>#singleton_method#singleton_method_arg<> @ test/cli/stop-after-namer/stop-after-namer.rb:10
-      argument ::<singleton_class:<constant:A>>#singleton_method#<blk><block> @ ???
+  class ::A < ::<todo sym> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
+    method ::A#method (method_arg, <blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:4
+      argument ::A#method#method_arg<> @ test/cli/stop-after-namer/stop-after-namer.rb:4
+      argument ::A#method#<blk><block> @ ???
+  class ::<Class:A> < ::<todo sym> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
+    method ::<Class:A>#singleton_method (singleton_method_arg, <blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:10
+      argument ::<Class:A>#singleton_method#singleton_method_arg<> @ test/cli/stop-after-namer/stop-after-namer.rb:10
+      argument ::<Class:A>#singleton_method#<blk><block> @ ???
 

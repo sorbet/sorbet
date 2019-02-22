@@ -1,54 +1,54 @@
-class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/resolver/resolution_order.rb:8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init>$87 (<blk>) @ test/testdata/resolver/resolution_order.rb:8
-    argument #<static-init>$87#<blk><block> @ ???
-  class ::<constant:A> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/resolution_order.rb:34
-    static-field ::<constant:A>::<constant:AB> -> AliasType { symbol = ::<constant:B> } @ test/testdata/resolver/resolution_order.rb:35
-    static-field ::<constant:A>::<constant:AV> -> Integer @ test/testdata/resolver/resolution_order.rb:37
-    class ::<constant:A>::<constant:DOES_NOT_EXIST> < ::<constant:RubyTyper>::<constant:StubClass> () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
-    class ::<constant:A>::<singleton_class:<constant:DOES_NOT_EXIST>> < ::<constant:RubyTyper>::<singleton_class:<constant:StubClass>> () @ test/testdata/resolver/resolution_order.rb:11
-  class ::<singleton_class:<constant:A>> < ::<constant:Module> () @ test/testdata/resolver/resolution_order.rb:34
-    method ::<singleton_class:<constant:A>>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:34
-      argument ::<singleton_class:<constant:A>>#<static-init>#<blk><block> @ ???
-  class ::<constant:B> < ::<constant:Object> () @ test/testdata/resolver/resolution_order.rb:40
-    static-field ::<constant:B>::<constant:BC> -> AliasType { symbol = ::<constant:C> } @ test/testdata/resolver/resolution_order.rb:41
-  class ::<singleton_class:<constant:B>> < ::<singleton_class:<constant:Object>> () @ test/testdata/resolver/resolution_order.rb:40
-    method ::<singleton_class:<constant:B>>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:41
-      argument ::<singleton_class:<constant:B>>#<static-init>#<blk><block> @ ???
-  class ::<constant:C> < ::<constant:B> () @ test/testdata/resolver/resolution_order.rb:44
-  class ::<singleton_class:<constant:C>> < ::<singleton_class:<constant:B>> () @ test/testdata/resolver/resolution_order.rb:44
-  class ::<constant:D> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/resolver/resolution_order.rb:62
-    static-field ::<constant:D>::<constant:DA> -> AliasType { symbol = ::<constant:A> } @ test/testdata/resolver/resolution_order.rb:63
-  class ::<singleton_class:<constant:D>> < ::<constant:Module> () @ test/testdata/resolver/resolution_order.rb:62
-    method ::<singleton_class:<constant:D>>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:63
-      argument ::<singleton_class:<constant:D>>#<static-init>#<blk><block> @ ???
-  class ::<constant:E> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> (<constant:D>) @ test/testdata/resolver/resolution_order.rb:56
-    static-field ::<constant:E>::<constant:EA> -> AliasType { symbol = ::<constant:A> } @ test/testdata/resolver/resolution_order.rb:58
-    static-field ::<constant:E>::<constant:EC> -> AliasType { symbol = ::<constant:C> } @ test/testdata/resolver/resolution_order.rb:59
-  class ::<singleton_class:<constant:E>> < ::<constant:Module> () @ test/testdata/resolver/resolution_order.rb:56
-    method ::<singleton_class:<constant:E>>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:56
-      argument ::<singleton_class:<constant:E>>#<static-init>#<blk><block> @ ???
-  class ::<constant:F> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> (<constant:E>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:47
-  class ::<singleton_class:<constant:F>> < ::<constant:Module> () @ test/testdata/resolver/resolution_order.rb:47
-    method ::<singleton_class:<constant:F>>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:47
-      argument ::<singleton_class:<constant:F>>#<static-init>#<blk><block> @ ???
-  class ::<constant:HasError> < ::<constant:Object> (<constant:DOES_NOT_EXIST>) @ test/testdata/resolver/resolution_order.rb:10
-  class ::<singleton_class:<constant:HasError>> < ::<singleton_class:<constant:Object>> () @ test/testdata/resolver/resolution_order.rb:10
-    method ::<singleton_class:<constant:HasError>>#<static-init> (<blk>) @ ???
-      argument ::<singleton_class:<constant:HasError>>#<static-init>#<blk><block> @ ???
-  class ::<constant:IsGood> < ::<constant:Object> () @ test/testdata/resolver/resolution_order.rb:14
-    method ::<constant:IsGood>#foo1 (a, <blk>) -> Integer @ test/testdata/resolver/resolution_order.rb:18
-      argument ::<constant:IsGood>#foo1#a<> -> C @ test/testdata/resolver/resolution_order.rb:17
-      argument ::<constant:IsGood>#foo1#<blk><block> -> T.untyped @ ???
-    method ::<constant:IsGood>#foo2 (a, <blk>) -> Integer @ test/testdata/resolver/resolution_order.rb:23
-      argument ::<constant:IsGood>#foo2#a<> -> A @ test/testdata/resolver/resolution_order.rb:22
-      argument ::<constant:IsGood>#foo2#<blk><block> -> T.untyped @ ???
-  class ::<singleton_class:<constant:IsGood>> < ::<singleton_class:<constant:Object>> (<constant:Sig>) @ test/testdata/resolver/resolution_order.rb:14
-    method ::<singleton_class:<constant:IsGood>>#<block>$2 () @ test/testdata/resolver/resolution_order.rb:17
-    method ::<singleton_class:<constant:IsGood>>#<block>$3 () @ test/testdata/resolver/resolution_order.rb:22
-    method ::<singleton_class:<constant:IsGood>>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:14
-      argument ::<singleton_class:<constant:IsGood>>#<static-init>#<blk><block> @ ???
-  class ::<constant:TestInheritace1> < ::<constant:B> () @ test/testdata/resolver/resolution_order.rb:28
-  class ::<singleton_class:<constant:TestInheritace1>> < ::<singleton_class:<constant:B>> () @ test/testdata/resolver/resolution_order.rb:28
-  class ::<constant:TestInheritace2> < ::<constant:A> () @ test/testdata/resolver/resolution_order.rb:31
-  class ::<singleton_class:<constant:TestInheritace2>> < ::<singleton_class:<constant:A>> () @ test/testdata/resolver/resolution_order.rb:31
+class ::<root> < ::Object () @ (test/testdata/resolver/resolution_order.rb:8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  method #<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:8
+    argument #<static-init>#<blk><block> @ ???
+  class ::A < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_order.rb:34
+    static-field ::A::AB -> AliasType { symbol = ::<constant:B> } @ test/testdata/resolver/resolution_order.rb:35
+    static-field ::A::AV -> Integer @ test/testdata/resolver/resolution_order.rb:37
+    class ::A::DOES_NOT_EXIST < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
+    class ::A::<Class:DOES_NOT_EXIST> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/resolution_order.rb:11
+  class ::<Class:A> < ::Module () @ test/testdata/resolver/resolution_order.rb:34
+    method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:34
+      argument ::<Class:A>#<static-init>#<blk><block> @ ???
+  class ::B < ::Object () @ test/testdata/resolver/resolution_order.rb:40
+    static-field ::B::BC -> AliasType { symbol = ::<constant:C> } @ test/testdata/resolver/resolution_order.rb:41
+  class ::<Class:B> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:40
+    method ::<Class:B>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:41
+      argument ::<Class:B>#<static-init>#<blk><block> @ ???
+  class ::C < ::B () @ test/testdata/resolver/resolution_order.rb:44
+  class ::<Class:C> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:44
+  class ::D < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_order.rb:62
+    static-field ::D::DA -> AliasType { symbol = ::<constant:A> } @ test/testdata/resolver/resolution_order.rb:63
+  class ::<Class:D> < ::Module () @ test/testdata/resolver/resolution_order.rb:62
+    method ::<Class:D>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:63
+      argument ::<Class:D>#<static-init>#<blk><block> @ ???
+  class ::E < ::RubyTyper::ImplicitModuleSuperclass (<constant:D>) @ test/testdata/resolver/resolution_order.rb:56
+    static-field ::E::EA -> AliasType { symbol = ::<constant:A> } @ test/testdata/resolver/resolution_order.rb:58
+    static-field ::E::EC -> AliasType { symbol = ::<constant:C> } @ test/testdata/resolver/resolution_order.rb:59
+  class ::<Class:E> < ::Module () @ test/testdata/resolver/resolution_order.rb:56
+    method ::<Class:E>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:56
+      argument ::<Class:E>#<static-init>#<blk><block> @ ???
+  class ::F < ::RubyTyper::ImplicitModuleSuperclass (<constant:E>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:47
+  class ::<Class:F> < ::Module () @ test/testdata/resolver/resolution_order.rb:47
+    method ::<Class:F>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:47
+      argument ::<Class:F>#<static-init>#<blk><block> @ ???
+  class ::HasError < ::Object (<constant:DOES_NOT_EXIST>) @ test/testdata/resolver/resolution_order.rb:10
+  class ::<Class:HasError> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:10
+    method ::<Class:HasError>#<static-init> (<blk>) @ ???
+      argument ::<Class:HasError>#<static-init>#<blk><block> @ ???
+  class ::IsGood < ::Object () @ test/testdata/resolver/resolution_order.rb:14
+    method ::IsGood#foo1 (a, <blk>) -> Integer @ test/testdata/resolver/resolution_order.rb:18
+      argument ::IsGood#foo1#a<> -> C @ test/testdata/resolver/resolution_order.rb:17
+      argument ::IsGood#foo1#<blk><block> -> T.untyped @ ???
+    method ::IsGood#foo2 (a, <blk>) -> Integer @ test/testdata/resolver/resolution_order.rb:23
+      argument ::IsGood#foo2#a<> -> A @ test/testdata/resolver/resolution_order.rb:22
+      argument ::IsGood#foo2#<blk><block> -> T.untyped @ ???
+  class ::<Class:IsGood> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/resolution_order.rb:14
+    method ::<Class:IsGood>#<block> () @ test/testdata/resolver/resolution_order.rb:17
+    method ::<Class:IsGood>#<block> () @ test/testdata/resolver/resolution_order.rb:22
+    method ::<Class:IsGood>#<static-init> (<blk>) @ test/testdata/resolver/resolution_order.rb:14
+      argument ::<Class:IsGood>#<static-init>#<blk><block> @ ???
+  class ::TestInheritace1 < ::B () @ test/testdata/resolver/resolution_order.rb:28
+  class ::<Class:TestInheritace1> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:28
+  class ::TestInheritace2 < ::A () @ test/testdata/resolver/resolution_order.rb:31
+  class ::<Class:TestInheritace2> < ::<Class:A> () @ test/testdata/resolver/resolution_order.rb:31
 

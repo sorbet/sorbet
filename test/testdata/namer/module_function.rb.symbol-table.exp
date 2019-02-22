@@ -1,29 +1,29 @@
-class ::<constant:<root>> < ::<constant:Object> () @ (test/testdata/namer/module_function.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init>$87 (<blk>) @ test/testdata/namer/module_function.rb:2
-    argument #<static-init>$87#<blk><block> @ ???
-  class ::<constant:C> < ::<constant:Object> (<constant:Funcs>) @ test/testdata/namer/module_function.rb:19
-    method ::<constant:C>#test_calls (<blk>) @ test/testdata/namer/module_function.rb:22
-      argument ::<constant:C>#test_calls#<blk><block> @ ???
-  class ::<singleton_class:<constant:C>> < ::<singleton_class:<constant:Object>> () @ test/testdata/namer/module_function.rb:19
-    method ::<singleton_class:<constant:C>>#<static-init> (<blk>) @ ???
-      argument ::<singleton_class:<constant:C>>#<static-init>#<blk><block> @ ???
-  class ::<constant:Funcs> < ::<constant:RubyTyper>::<constant:ImplicitModuleSuperclass> () @ test/testdata/namer/module_function.rb:2
-    method ::<constant:Funcs>#f (x, <blk>) -> Integer @ test/testdata/namer/module_function.rb:6
-      argument ::<constant:Funcs>#f#x<> -> Integer @ test/testdata/namer/module_function.rb:5
-      argument ::<constant:Funcs>#f#<blk><block> -> T.untyped @ ???
-    method ::<constant:Funcs>#g (s, <blk>) -> Symbol @ test/testdata/namer/module_function.rb:11
-      argument ::<constant:Funcs>#g#s<> -> Symbol @ test/testdata/namer/module_function.rb:10
-      argument ::<constant:Funcs>#g#<blk><block> -> T.untyped @ ???
-    method ::<constant:Funcs>#h (s, <blk>) -> String @ test/testdata/namer/module_function.rb:16
-      argument ::<constant:Funcs>#h#s<> -> String @ test/testdata/namer/module_function.rb:15
-      argument ::<constant:Funcs>#h#<blk><block> -> T.untyped @ ???
-  class ::<singleton_class:<constant:Funcs>> < ::<constant:Module> (<constant:Sig>) @ test/testdata/namer/module_function.rb:2
-    method ::<singleton_class:<constant:Funcs>>#<block>$2 () @ test/testdata/namer/module_function.rb:5
-    method ::<singleton_class:<constant:Funcs>>#<block>$3 () @ test/testdata/namer/module_function.rb:10
-    method ::<singleton_class:<constant:Funcs>>#<block>$4 () @ test/testdata/namer/module_function.rb:15
-    method ::<singleton_class:<constant:Funcs>>#<static-init> (<blk>) @ test/testdata/namer/module_function.rb:2
-      argument ::<singleton_class:<constant:Funcs>>#<static-init>#<blk><block> @ ???
-    method ::<singleton_class:<constant:Funcs>>#f () -> AliasType { symbol = ::<constant:Funcs>#f } @ test/testdata/namer/module_function.rb:6
-    method ::<singleton_class:<constant:Funcs>>#g () -> AliasType { symbol = ::<constant:Funcs>#g } @ test/testdata/namer/module_function.rb:11
-    method ::<singleton_class:<constant:Funcs>>#h () -> AliasType { symbol = ::<constant:Funcs>#h } @ test/testdata/namer/module_function.rb:16
+class ::<root> < ::Object () @ (test/testdata/namer/module_function.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  method #<static-init> (<blk>) @ test/testdata/namer/module_function.rb:2
+    argument #<static-init>#<blk><block> @ ???
+  class ::C < ::Object (<constant:Funcs>) @ test/testdata/namer/module_function.rb:19
+    method ::C#test_calls (<blk>) @ test/testdata/namer/module_function.rb:22
+      argument ::C#test_calls#<blk><block> @ ???
+  class ::<Class:C> < ::<Class:Object> () @ test/testdata/namer/module_function.rb:19
+    method ::<Class:C>#<static-init> (<blk>) @ ???
+      argument ::<Class:C>#<static-init>#<blk><block> @ ???
+  class ::Funcs < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/module_function.rb:2
+    method ::Funcs#f (x, <blk>) -> Integer @ test/testdata/namer/module_function.rb:6
+      argument ::Funcs#f#x<> -> Integer @ test/testdata/namer/module_function.rb:5
+      argument ::Funcs#f#<blk><block> -> T.untyped @ ???
+    method ::Funcs#g (s, <blk>) -> Symbol @ test/testdata/namer/module_function.rb:11
+      argument ::Funcs#g#s<> -> Symbol @ test/testdata/namer/module_function.rb:10
+      argument ::Funcs#g#<blk><block> -> T.untyped @ ???
+    method ::Funcs#h (s, <blk>) -> String @ test/testdata/namer/module_function.rb:16
+      argument ::Funcs#h#s<> -> String @ test/testdata/namer/module_function.rb:15
+      argument ::Funcs#h#<blk><block> -> T.untyped @ ???
+  class ::<Class:Funcs> < ::Module (<constant:Sig>) @ test/testdata/namer/module_function.rb:2
+    method ::<Class:Funcs>#<block> () @ test/testdata/namer/module_function.rb:5
+    method ::<Class:Funcs>#<block> () @ test/testdata/namer/module_function.rb:10
+    method ::<Class:Funcs>#<block> () @ test/testdata/namer/module_function.rb:15
+    method ::<Class:Funcs>#<static-init> (<blk>) @ test/testdata/namer/module_function.rb:2
+      argument ::<Class:Funcs>#<static-init>#<blk><block> @ ???
+    method ::<Class:Funcs>#f () -> AliasType { symbol = ::<constant:Funcs>#f } @ test/testdata/namer/module_function.rb:6
+    method ::<Class:Funcs>#g () -> AliasType { symbol = ::<constant:Funcs>#g } @ test/testdata/namer/module_function.rb:11
+    method ::<Class:Funcs>#h () -> AliasType { symbol = ::<constant:Funcs>#h } @ test/testdata/namer/module_function.rb:16
 

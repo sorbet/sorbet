@@ -505,7 +505,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
     }
 
-    fmt::format_to(buf, "{}{} {}", type, variance, this->toStringFullName(gs));
+    fmt::format_to(buf, "{}{} {}", type, variance, this->showFullName(gs));
 
     if (this->isClass() || this->isMethod()) {
         if (this->isMethod()) {
@@ -527,7 +527,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
 
         if (this->superClass.exists()) {
-            fmt::format_to(buf, " < {}", this->superClass.data(gs)->toStringFullName(gs));
+            fmt::format_to(buf, " < {}", this->superClass.data(gs)->showFullName(gs));
         }
 
         if (this->isClass()) {
