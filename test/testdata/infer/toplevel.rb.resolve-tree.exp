@@ -1,5 +1,5 @@
 class <emptyTree><<C <U <root>>>> < ()
-  def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
+  def self.<U <static-init>><<N <U <static-init>> $86>>(<blk>)
     1.<U +>("hi")
   end
 end

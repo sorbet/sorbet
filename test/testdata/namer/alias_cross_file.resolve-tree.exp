@@ -19,7 +19,7 @@ begin
 end
 begin
   class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $88>>(<blk>)
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
           ::RubyTyper.<U keep_for_ide>(::T1)

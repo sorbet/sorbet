@@ -12,7 +12,7 @@ begin
       end
     end
 
-    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
+    def self.<U <static-init>><<N <U <static-init>> $86>>(<blk>)
       begin
         begin
           ::RubyTyper.<U keep_for_ide>(::MM)
