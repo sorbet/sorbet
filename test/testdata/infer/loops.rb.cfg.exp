@@ -16,7 +16,7 @@ subgraph "cluster_::HasLoops#variable_only_inside_loop" {
 
     "bb::HasLoops#variable_only_inside_loop_1" -> "bb::HasLoops#variable_only_inside_loop_1" [style="bold"];
     "bb::HasLoops#variable_only_inside_loop_2" [
-        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$3: TrueClass = true\l<whileTemp>$3: TrueClass\l"
     ];
 
     "bb::HasLoops#variable_only_inside_loop_2" -> "bb::HasLoops#variable_only_inside_loop_4" [style="bold"];
@@ -51,7 +51,7 @@ subgraph "cluster_::HasLoops#incorrect_assignment" {
 
     "bb::HasLoops#incorrect_assignment_1" -> "bb::HasLoops#incorrect_assignment_1" [style="bold"];
     "bb::HasLoops#incorrect_assignment_2" [
-        label = "block[id=2](a: String(\"s\"))\louterLoops: 1\l<whileTemp>$5: TrueClass = true\l<whileTemp>$5: TrueClass\l"
+        label = "block[id=2](a: String(\"s\"))\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
     ];
 
     "bb::HasLoops#incorrect_assignment_2" -> "bb::HasLoops#incorrect_assignment_4" [style="bold"];
@@ -86,7 +86,7 @@ subgraph "cluster_::HasLoops#correct_assignment" {
 
     "bb::HasLoops#correct_assignment_1" -> "bb::HasLoops#correct_assignment_1" [style="bold"];
     "bb::HasLoops#correct_assignment_2" [
-        label = "block[id=2](a: String(\"s\"))\louterLoops: 1\l<whileTemp>$5: TrueClass = true\l<whileTemp>$5: TrueClass\l"
+        label = "block[id=2](a: String(\"s\"))\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
     ];
 
     "bb::HasLoops#correct_assignment_2" -> "bb::HasLoops#correct_assignment_4" [style="bold"];

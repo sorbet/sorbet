@@ -24,11 +24,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
                     discoveredUndeclaredFields, temporaryCounter);
 
     core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());
-    core::LocalVariable selfSym = cctx.newTemporary(core::Names::selfMethodTemp());
 
     BasicBlock *entry = res->entry();
-
-    entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.data(ctx)->owner));
 
     int i = -1;
     for (auto &argExpr : md.args) {

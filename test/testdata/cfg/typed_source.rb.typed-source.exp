@@ -2,10 +2,10 @@
 class Examples
   def i_like_ifs()
     if true
-       # <ifTemp>$4: TrueClass
+       # <ifTemp>$3: TrueClass
       return 1
       # dead=1
-      # <returnTemp>$5: Integer(1)
+      # <returnTemp>$4: Integer(1)
       #
       # <returnMethodTemp>$2: T.noreturn
     else
@@ -16,7 +16,7 @@ class Examples
     # <returnMethodTemp>$2: Integer(1)
     def i_like_exps()
       if (true)
-          # <ifTemp>$4: TrueClass
+          # <ifTemp>$3: TrueClass
         1
         # <returnMethodTemp>$2: Integer(1)
       else
@@ -30,10 +30,10 @@ class Examples
 
     def return_in_one_branch1()
       if (true)
-          # <ifTemp>$4: TrueClass
+          # <ifTemp>$3: TrueClass
         return 1
         # dead=1
-        # <returnTemp>$5: Integer(1)
+        # <returnTemp>$4: Integer(1)
         #
         # <returnMethodTemp>$2: T.noreturn
       else
@@ -43,7 +43,7 @@ class Examples
 
     def variables()
       if (true)
-          # <ifTemp>$5: TrueClass
+          # <ifTemp>$4: TrueClass
         a = 1
             # a: Integer(1)
       else
@@ -52,7 +52,7 @@ class Examples
 
           # a: Integer(1)
       if (false)
-          # <ifTemp>$7: FalseClass
+          # <ifTemp>$6: FalseClass
           #
           # a: Integer(1)
         b = 1 # error: This code is unreachable
@@ -81,7 +81,7 @@ class Examples
 
     def variables_and_loop(cond)
       if (true)
-          # <ifTemp>$5: TrueClass
+          # <ifTemp>$4: TrueClass
           #
           # cond: T.untyped
             # cond: T.untyped
@@ -103,7 +103,7 @@ class Examples
             #     <debugEnvironmentTemp> to be NilClass
             #     a to be Integer(1)
       while true
-            # <whileTemp>$7: TrueClass
+            # <whileTemp>$6: TrueClass
             #
             # b: NilClass
             #
@@ -163,7 +163,7 @@ class Examples
             #   Being falsy entails:
             #     <debugEnvironmentTemp> to be NilClass
       while true
-            # <whileTemp>$5: TrueClass
+            # <whileTemp>$4: TrueClass
             #
             # b: NilClass
             #
@@ -193,7 +193,7 @@ class Examples
     # <returnMethodTemp>$2: T.untyped
     def take_arguments(i)
       if(false)
-         # <ifTemp>$4: FalseClass
+         # <ifTemp>$3: FalseClass
          #
          # i: T.untyped
        2 # error: This code is unreachable

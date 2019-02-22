@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
+        label = "block[id=0]()\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,14 +18,14 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<returnMethodTemp>$2: T.nilable(Integer))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
+        label = "block[id=3](<returnMethodTemp>$2: T.nilable(Integer))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$6: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$7: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$6: T.class_of(StandardError))\l<isaCheckTemp>$7: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_12" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4]()\l<returnMethodTemp>$2: Integer(1) = 1\l<ifTemp>$5: Integer(2) = 2\l<ifTemp>$5: Integer(2)\l"
+        label = "block[id=4]()\l<returnMethodTemp>$2: Integer(1) = 1\l<ifTemp>$4: Integer(2) = 2\l<ifTemp>$4: Integer(2)\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_6" [style="bold"];
@@ -37,21 +37,21 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="bold"];
     "bb::Object#foo_9" [
-        label = "block[id=9](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$9: NilClass)\l<gotoDeadTemp>$9: NilClass\l"
+        label = "block[id=9](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$8: NilClass)\l<gotoDeadTemp>$8: NilClass\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" -> "bb::Object#foo_13" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10](<returnMethodTemp>$2: Integer(3))\l<rescueEndTemp>$6: T.untyped = <unanalyzable>\l<rescueEndTemp>$6: T.untyped\l"
+        label = "block[id=10](<returnMethodTemp>$2: Integer(3))\l<rescueEndTemp>$5: T.untyped = <unanalyzable>\l<rescueEndTemp>$5: T.untyped\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_10" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_12" [
-        label = "block[id=12](<returnMethodTemp>$2: T.nilable(Integer))\l<gotoDeadTemp>$9: TrueClass(true) = true\l<gotoDeadTemp>$9: TrueClass(true)\l"
+        label = "block[id=12](<returnMethodTemp>$2: T.nilable(Integer))\l<gotoDeadTemp>$8: TrueClass(true) = true\l<gotoDeadTemp>$8: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_12" -> "bb::Object#foo_1" [style="bold"];

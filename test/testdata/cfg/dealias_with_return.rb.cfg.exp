@@ -6,7 +6,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_1" [shape = parallelogram];
 
     "bb::Object#a_0" [
-        label = "block[id=0]()\l<rescueStartTemp>$5: T.untyped = <unanalyzable>\l<rescueStartTemp>$5: T.untyped\l"
+        label = "block[id=0]()\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
     ];
 
     "bb::Object#a_0" -> "bb::Object#a_3" [style="bold"];
@@ -18,33 +18,33 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_3" [
-        label = "block[id=3]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$8: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$9: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(StandardError))\l<isaCheckTemp>$9: T.untyped\l"
+        label = "block[id=3]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::Object#a_3" -> "bb::Object#a_8" [style="bold"];
     "bb::Object#a_3" -> "bb::Object#a_9" [style="tapered"];
 
     "bb::Object#a_4" [
-        label = "block[id=4]()\l<returnTemp>$6: Integer(1) = 1\l<statTemp>$4: T.noreturn = return <returnTemp>$6: Integer(1)\l<unconditional>\l"
+        label = "block[id=4]()\l<returnTemp>$5: Integer(1) = 1\l<statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_8" [
-        label = "block[id=8]()\la: Integer(2) = 2\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=8]()\la: Integer(2) = 2\l<gotoDeadTemp>$9: NilClass\l"
     ];
 
     "bb::Object#a_8" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_8" -> "bb::Object#a_10" [style="tapered"];
 
     "bb::Object#a_9" [
-        label = "block[id=9]()\l<gotoDeadTemp>$10: TrueClass(true) = true\l<gotoDeadTemp>$10: TrueClass(true)\l"
+        label = "block[id=9]()\l<gotoDeadTemp>$9: TrueClass(true) = true\l<gotoDeadTemp>$9: TrueClass(true)\l"
     ];
 
     "bb::Object#a_9" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_9" -> "bb::Object#a_10" [style="tapered"];
 
     "bb::Object#a_10" [
-        label = "block[id=10](a: Integer(2))\l<statTemp>$13: Integer(3) = 3\l<returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$13: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=10](a: Integer(2))\l<statTemp>$12: Integer(3) = 3\l<returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$12: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Object#a_10" -> "bb::Object#a_1" [style="bold"];

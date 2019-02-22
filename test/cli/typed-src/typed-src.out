@@ -2,53 +2,53 @@ class A
   extend T::Sig
 
   sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
-  # <statTemp>$4: T.class_of(A)
+  # <statTemp>$3: T.class_of(A)
   #
-  # <block-pre-call-temp>$5: RubyTyper::Void
+  # <block-pre-call-temp>$4: RubyTyper::Void
   # dead=1
   # <returnMethodTemp>$2: RubyTyper::Void
   #
   # <finalReturn>: T.noreturn
   # dead=1
+  # <statTemp>$8: Sorbet::Private::Builder
+  #
   # <statTemp>$9: Sorbet::Private::Builder
   #
-  # <statTemp>$10: Sorbet::Private::Builder
-  #
-  # <statTemp>$11: ShapeType {
+  # <statTemp>$10: ShapeType {
   #   Symbol(:"x") => MetaType
   #   Symbol(:"y") => T.class_of(Integer)
   # }
   #
-  # <statTemp>$14: T.class_of(T)
+  # <statTemp>$13: T.class_of(T)
   #
-  # <statTemp>$15: T.class_of(String)
+  # <statTemp>$14: T.class_of(String)
   #
-  # <statTemp>$16: T.class_of(Integer)
+  # <statTemp>$15: T.class_of(Integer)
   #
-  # <statTemp>$20: T.class_of(Integer)
+  # <statTemp>$19: T.class_of(Integer)
   #
-  # <blockReturnTemp>$8: Sorbet::Private::Builder
+  # <blockReturnTemp>$7: Sorbet::Private::Builder
   #
-  # <blockReturnTemp>$21: T.noreturn
+  # <blockReturnTemp>$20: T.noreturn
   #
-  # <hashTemp>$12: Symbol(:"x")
+  # <hashTemp>$11: Symbol(:"x")
   #
-  # <hashTemp>$13: MetaType
+  # <hashTemp>$12: MetaType
   #
-  # <hashTemp>$17: Symbol(:"y")
+  # <hashTemp>$16: Symbol(:"y")
   #
-  # <hashTemp>$18: T.class_of(Integer)
+  # <hashTemp>$17: T.class_of(Integer)
   #
-  # <magic>$19: <Magic>
+  # <magic>$18: <Magic>
   def a_method(x, y)
     if x.is_a?(String)
-       # <ifTemp>$5: TrueClass | FalseClass
+       # <ifTemp>$4: TrueClass | FalseClass
        #   Being truthy entails:
        #     x to be String
        #   Being falsy entails:
        #     x NOT to be String
        #
-       # <statTemp>$7: T.class_of(String)
+       # <statTemp>$6: T.class_of(String)
        #
        # x: String | Integer
        #
@@ -57,7 +57,7 @@ class A
           #
           # y: Integer
       x = x.to_i
-          # <statTemp>$8: String
+          # <statTemp>$7: String
           #
           # x: Integer
           #

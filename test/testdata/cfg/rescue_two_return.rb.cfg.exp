@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<rescueStartTemp>$5: T.untyped = <unanalyzable>\l<rescueStartTemp>$5: T.untyped\l"
+        label = "block[id=0]()\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,31 +18,31 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$8: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$9: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(StandardError))\l<isaCheckTemp>$9: T.untyped\l"
+        label = "block[id=3]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4]()\l<returnTemp>$6: Integer(1) = 1\l<statTemp>$4: T.noreturn = return <returnTemp>$6: Integer(1)\l<unconditional>\l"
+        label = "block[id=4]()\l<returnTemp>$5: Integer(1) = 1\l<statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" [
-        label = "block[id=8]()\l<returnTemp>$10: Integer(2) = 2\l<statTemp>$4: T.noreturn = return <returnTemp>$10: Integer(2)\l<unconditional>\l"
+        label = "block[id=8]()\l<returnTemp>$9: Integer(2) = 2\l<statTemp>$3: T.noreturn = return <returnTemp>$9: Integer(2)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" [
-        label = "block[id=9]()\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=9]()\l<gotoDeadTemp>$10: TrueClass(true) = true\l<gotoDeadTemp>$10: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10]()\l<statTemp>$13 = self\l<returnMethodTemp>$2 = <statTemp>$13.deadcode()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+        label = "block[id=10]()\l<statTemp>$12 = self\l<returnMethodTemp>$2 = <statTemp>$12.deadcode()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];

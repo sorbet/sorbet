@@ -7,59 +7,59 @@ def foo
     e = (1..42).first
     f = ('a'..'z').last
     # dead=1
-    # <statTemp>$5: T.class_of(Range)
+    # <statTemp>$4: T.class_of(Range)
     #
-    # <statTemp>$6: Integer(1)
+    # <statTemp>$5: Integer(1)
     #
-    # <statTemp>$7: Integer(2)
+    # <statTemp>$6: Integer(2)
     #
-    # <statTemp>$9: T.class_of(Range)
+    # <statTemp>$8: T.class_of(Range)
     #
-    # <statTemp>$10: Integer(1)
+    # <statTemp>$9: Integer(1)
     #
-    # <statTemp>$11: Integer(2)
+    # <statTemp>$10: Integer(2)
     #
-    # <statTemp>$13: T.class_of(Range)
+    # <statTemp>$12: T.class_of(Range)
     #
-    # <statTemp>$14: Integer(1)
+    # <statTemp>$13: Integer(1)
     #
-    # <statTemp>$15: Integer(2)
+    # <statTemp>$14: Integer(2)
     #
-    # <statTemp>$16: TrueClass
+    # <statTemp>$15: TrueClass
     #
-    # <statTemp>$18: T.class_of(Range)
+    # <statTemp>$17: T.class_of(Range)
     #
-    # <statTemp>$19: Integer(1)
+    # <statTemp>$18: Integer(1)
     #
-    # <statTemp>$20: Integer(2)
+    # <statTemp>$19: Integer(2)
     #
-    # <statTemp>$21: TrueClass
+    # <statTemp>$20: TrueClass
     #
-    # <statTemp>$23: AppliedType {
+    # <statTemp>$22: AppliedType {
     #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
     # }
     #
-    # <statTemp>$24: T.class_of(Range)
+    # <statTemp>$23: T.class_of(Range)
     #
-    # <statTemp>$25: Integer(1)
+    # <statTemp>$24: Integer(1)
     #
-    # <statTemp>$26: Integer(42)
+    # <statTemp>$25: Integer(42)
     #
-    # <statTemp>$27: AppliedType {
+    # <statTemp>$26: AppliedType {
     #   klass = ::<constant:Range>
     #   targs = [
     #     <constant:Elem> = String
     #   ]
     # }
     #
-    # <statTemp>$28: T.class_of(Range)
+    # <statTemp>$27: T.class_of(Range)
     #
-    # <statTemp>$29: String("a")
+    # <statTemp>$28: String("a")
     #
-    # <statTemp>$30: String("z")
+    # <statTemp>$29: String("z")
     #
     # <returnMethodTemp>$2: String
     #

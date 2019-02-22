@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$8: T.class_of(T) = alias <constant:T>\l<statTemp>$9: T.class_of(String) = alias <constant:String>\l<statTemp>$7: <Type: T.nilable(String)> = <statTemp>$8: T.class_of(T).nilable(<statTemp>$9: T.class_of(String))\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$7: <Type: T.nilable(String)>)\l<castTemp>$10: NilClass = nil\lname: T.nilable(String) = cast(<castTemp>$10: NilClass, String | NilClass);\l<ifTemp>$12: T.any(TrueClass, FalseClass) = name: T.nilable(String).nil?()\l<ifTemp>$12: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<statTemp>$5: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(T) = alias <constant:T>\l<statTemp>$8: T.class_of(String) = alias <constant:String>\l<statTemp>$6: <Type: T.nilable(String)> = <statTemp>$7: T.class_of(T).nilable(<statTemp>$8: T.class_of(String))\l<statTemp>$4: RubyTyper::Void = <statTemp>$5: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$6: <Type: T.nilable(String)>)\l<castTemp>$9: NilClass = nil\lname: T.nilable(String) = cast(<castTemp>$9: NilClass, String | NilClass);\l<ifTemp>$11: T.any(TrueClass, FalseClass) = name: T.nilable(String).nil?()\l<ifTemp>$11: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
@@ -18,12 +18,12 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2]()\l<returnTemp>$14: String(\"missing name\") = \"missing name\"\l<statTemp>$11: T.noreturn = return <returnTemp>$14: String(\"missing name\")\l<unconditional>\l"
+        label = "block[id=2]()\l<returnTemp>$13: String(\"missing name\") = \"missing name\"\l<statTemp>$10: T.noreturn = return <returnTemp>$13: String(\"missing name\")\l<unconditional>\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3](name: String)\l<statTemp>$16: String(\"foo\") = \"foo\"\l<returnMethodTemp>$2: T.any(TrueClass, FalseClass) = name: String.include?(<statTemp>$16: String(\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(TrueClass, FalseClass)\l<unconditional>\l"
+        label = "block[id=3](name: String)\l<statTemp>$15: String(\"foo\") = \"foo\"\l<returnMethodTemp>$2: T.any(TrueClass, FalseClass) = name: String.include?(<statTemp>$15: String(\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(TrueClass, FalseClass)\l<unconditional>\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_1" [style="bold"];

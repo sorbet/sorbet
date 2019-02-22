@@ -6,12 +6,12 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<statTemp>$4: Object = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Object.outer()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$3: Object = self\l<block-pre-call-temp>$4: T.untyped = <statTemp>$3: Object.outer()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<statTemp>$11 = self\l<block-pre-call-temp>$12 = <statTemp>$11.inner()\l<unconditional>\l"
+        label = "block[id=1]()\l<statTemp>$10 = self\l<block-pre-call-temp>$11 = <statTemp>$10.inner()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
@@ -28,7 +28,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: T.noreturn = return <returnTemp>$10: NilClass\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8: T.noreturn = return <returnTemp>$9: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];

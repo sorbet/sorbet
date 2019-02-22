@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
+        label = "block[id=0]()\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,35 +18,35 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<returnMethodTemp>$2: NilClass)\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$8: T.class_of(Exception) = alias <constant:Exception>\l<isaCheckTemp>$9: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(Exception))\l<isaCheckTemp>$9: T.untyped\l"
+        label = "block[id=3](<returnMethodTemp>$2: NilClass)\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(Exception) = alias <constant:Exception>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(Exception))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4]()\l<statTemp>$5: Object = self\l<statTemp>$6: String(\"boop\") = \"boop\"\l<returnMethodTemp>$2: T.noreturn = <statTemp>$5: Object.raise(<statTemp>$6: String(\"boop\"))\l<rescueEndTemp>$7 = <unanalyzable>\l<rescueEndTemp>$7\l"
+        label = "block[id=4]()\l<statTemp>$4: Object = self\l<statTemp>$5: String(\"boop\") = \"boop\"\l<returnMethodTemp>$2: T.noreturn = <statTemp>$4: Object.raise(<statTemp>$5: String(\"boop\"))\l<rescueEndTemp>$6 = <unanalyzable>\l<rescueEndTemp>$6\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_4" -> "bb::Object#foo_6" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$14: NilClass)\l<gotoDeadTemp>$14\l"
+        label = "block[id=6](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$13: NilClass)\l<gotoDeadTemp>$13\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_8" [
-        label = "block[id=8](<rescueTemp>$2: Exception)\l<statTemp>$12: T.class_of(MyClass) = alias <constant:MyClass>\l<statTemp>$11: MyClass = <statTemp>$12: T.class_of(MyClass).new()\l<statTemp>$10: T.untyped = <statTemp>$11: MyClass.foo=(<rescueTemp>$2: Exception)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=8](<rescueTemp>$2: Exception)\l<statTemp>$11: T.class_of(MyClass) = alias <constant:MyClass>\l<statTemp>$10: MyClass = <statTemp>$11: T.class_of(MyClass).new()\l<statTemp>$9: T.untyped = <statTemp>$10: MyClass.foo=(<rescueTemp>$2: Exception)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$13: NilClass\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_9" [
-        label = "block[id=9](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$14: TrueClass(true) = true\l<gotoDeadTemp>$14: TrueClass(true)\l"
+        label = "block[id=9](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
@@ -66,7 +66,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(MyClass) = alias <constant:MyClass>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(MyClass))\l<statTemp>$9: T.class_of(<root>) = self\l<statTemp>$11: T.class_of(<root>) = self\l<statTemp>$10: T.untyped = <statTemp>$11: T.class_of(<root>).foo()\l<statTemp>$8: NilClass = <statTemp>$9: T.class_of(<root>).puts(<statTemp>$10: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$6: T.class_of(MyClass) = alias <constant:MyClass>\l<statTemp>$4: RubyTyper::Void = <statTemp>$5: T.class_of(RubyTyper).keep_for_ide(<statTemp>$6: T.class_of(MyClass))\l<statTemp>$8: T.class_of(<root>) = self\l<statTemp>$10: T.class_of(<root>) = self\l<statTemp>$9: T.untyped = <statTemp>$10: T.class_of(<root>).foo()\l<statTemp>$7: NilClass = <statTemp>$8: T.class_of(<root>).puts(<statTemp>$9: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

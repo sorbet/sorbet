@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_1" [shape = parallelogram];
 
     "bb::Foo#bar_0" [
-        label = "block[id=0]()\l<blk>: T.untyped = load_arg(Foo#bar#<blk>)\l<statTemp>$5: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<blk>: T.untyped = load_arg(Foo#bar#<blk>)\l<statTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$4: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_1" [shape = parallelogram];
 
     "bb::Foo#baz_0" [
-        label = "block[id=0]()\l<statTemp>$4: Foo = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Foo.bar()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$3: Foo = self\l<block-pre-call-temp>$4: T.untyped = <statTemp>$3: Foo.bar()\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_2" [style="bold"];
@@ -46,7 +46,7 @@ subgraph "cluster_::Foo#baz" {
 
     "bb::Foo#baz_3" -> "bb::Foo#baz_1" [style="bold"];
     "bb::Foo#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$6: T.untyped = load_yield_params(::Foo#baz#<block>, Foo#baz#<block>)\l<blk>$7: Integer(0) = 0\lr$3: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<statTemp>$9: Foo = self\l<blockReturnTemp>$8: NilClass = <statTemp>$9: Foo.puts(r$3: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$8: NilClass\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$5: T.untyped = load_yield_params(::Foo#baz#<block>, Foo#baz#<block>)\l<blk>$6: Integer(0) = 0\lr$3: T.untyped = <blk>$5: T.untyped.[](<blk>$6: Integer(0))\l<statTemp>$8: Foo = self\l<blockReturnTemp>$7: NilClass = <statTemp>$8: Foo.puts(r$3: T.untyped)\l<blockReturnTemp>$10: T.noreturn = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$7: NilClass\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_4" -> "bb::Foo#baz_2" [style="bold"];

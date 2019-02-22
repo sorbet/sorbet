@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2](foo: T.untyped)\l<statTemp>$8: T.class_of(StandardError) = alias <constant:StandardError>\lbar: T.untyped = foo: T.untyped.is_a?(<statTemp>$8: T.class_of(StandardError))\lbar: T.untyped\l"
+        label = "block[id=2](foo: T.untyped)\l<statTemp>$7: T.class_of(StandardError) = alias <constant:StandardError>\lbar: T.untyped = foo: T.untyped.is_a?(<statTemp>$7: T.class_of(StandardError))\lbar: T.untyped\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];

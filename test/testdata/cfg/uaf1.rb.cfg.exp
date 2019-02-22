@@ -6,7 +6,7 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_1" [shape = parallelogram];
 
     "bb::A#initialize_0" [
-        label = "block[id=0]()\l<statTemp>$5: A = self\l<statTemp>$4: T.untyped = <statTemp>$5: A.spec_list()\l<block-pre-call-temp>$6: T.untyped = <statTemp>$4: T.untyped.map()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: A = self\l<statTemp>$3: T.untyped = <statTemp>$4: A.spec_list()\l<block-pre-call-temp>$5: T.untyped = <statTemp>$3: T.untyped.map()\l<unconditional>\l"
     ];
 
     "bb::A#initialize_0" -> "bb::A#initialize_2" [style="bold"];
@@ -16,7 +16,7 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_1" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_2" [
-        label = "block[id=2](<blockReturnTemp>$9: NilClass, <gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2](<blockReturnTemp>$8: NilClass, <gotoDeadTemp>$13: NilClass)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::A#initialize_2" -> "bb::A#initialize_5" [style="bold"];
@@ -28,49 +28,49 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_5" [
-        label = "block[id=5](<blockReturnTemp>$9: NilClass, <gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<rescueStartTemp>$10: T.untyped = <unanalyzable>\l<rescueStartTemp>$10: T.untyped\l"
+        label = "block[id=5](<blockReturnTemp>$8: NilClass, <gotoDeadTemp>$13: NilClass)\louterLoops: 1\l<rescueStartTemp>$9: T.untyped = <unanalyzable>\l<rescueStartTemp>$9: T.untyped\l"
     ];
 
     "bb::A#initialize_5" -> "bb::A#initialize_6" [style="bold"];
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="tapered"];
 
     "bb::A#initialize_6" [
-        label = "block[id=6](<blockReturnTemp>$9: T.nilable(Integer), <gotoDeadTemp>$14: NilClass)\louterLoops: 1\lse$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$12: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$13: T.untyped = se$2: T.untyped.is_a?(<exceptionClassTemp>$12: T.class_of(StandardError))\l<isaCheckTemp>$13: T.untyped\l"
+        label = "block[id=6](<blockReturnTemp>$8: T.nilable(Integer), <gotoDeadTemp>$13: NilClass)\louterLoops: 1\lse$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$11: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$12: T.untyped = se$2: T.untyped.is_a?(<exceptionClassTemp>$11: T.class_of(StandardError))\l<isaCheckTemp>$12: T.untyped\l"
     ];
 
     "bb::A#initialize_6" -> "bb::A#initialize_11" [style="bold"];
     "bb::A#initialize_6" -> "bb::A#initialize_12" [style="tapered"];
 
     "bb::A#initialize_7" [
-        label = "block[id=7](<gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<blockReturnTemp>$9: Integer(1) = 1\l<rescueEndTemp>$11: T.untyped = <unanalyzable>\l<rescueEndTemp>$11: T.untyped\l"
+        label = "block[id=7](<gotoDeadTemp>$13: NilClass)\louterLoops: 1\l<blockReturnTemp>$8: Integer(1) = 1\l<rescueEndTemp>$10: T.untyped = <unanalyzable>\l<rescueEndTemp>$10: T.untyped\l"
     ];
 
     "bb::A#initialize_7" -> "bb::A#initialize_6" [style="bold"];
     "bb::A#initialize_7" -> "bb::A#initialize_9" [style="tapered"];
 
     "bb::A#initialize_9" [
-        label = "block[id=9](<blockReturnTemp>$9: Integer(1), <gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=9](<blockReturnTemp>$8: Integer(1), <gotoDeadTemp>$13: NilClass)\louterLoops: 1\l<gotoDeadTemp>$13: NilClass\l"
     ];
 
     "bb::A#initialize_9" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_9" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_11" [
-        label = "block[id=11](<gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<blockReturnTemp>$9: Integer(2) = 2\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=11](<gotoDeadTemp>$13: NilClass)\louterLoops: 1\l<blockReturnTemp>$8: Integer(2) = 2\l<gotoDeadTemp>$13: NilClass\l"
     ];
 
     "bb::A#initialize_11" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_11" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_12" [
-        label = "block[id=12](<blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$14: TrueClass(true) = true\l<gotoDeadTemp>$14: TrueClass(true)\l"
+        label = "block[id=12](<blockReturnTemp>$8: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
     ];
 
     "bb::A#initialize_12" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_12" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_13" [
-        label = "block[id=13](<blockReturnTemp>$9: Integer, <gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<blockReturnTemp>$16: T.noreturn = blockreturn<::A#initialize#<block>> <blockReturnTemp>$9: Integer\l<unconditional>\l"
+        label = "block[id=13](<blockReturnTemp>$8: Integer, <gotoDeadTemp>$13: NilClass)\louterLoops: 1\l<blockReturnTemp>$15: T.noreturn = blockreturn<::A#initialize#<block>> <blockReturnTemp>$8: Integer\l<unconditional>\l"
     ];
 
     "bb::A#initialize_13" -> "bb::A#initialize_2" [style="bold"];
