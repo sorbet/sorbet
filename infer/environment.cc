@@ -798,33 +798,28 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     send->link->sendTp = core::Types::untypedUntracked();
                     checkFullyDefined = false;
                 }
-                if (send->fun == core::Names::super()) {
-                    // TODO
-                    tp.type = core::Types::untypedUntracked();
-                } else {
-                    core::CallLocs locs{
-                        bind.loc,
-                        send->receiverLoc,
-                        send->argLocs,
-                    };
-                    core::DispatchArgs dispatchArgs{send->fun, locs, args, recvType.type, recvType.type, send->link};
-                    auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
+                core::CallLocs locs{
+                    bind.loc,
+                    send->receiverLoc,
+                    send->argLocs,
+                };
+                core::DispatchArgs dispatchArgs{send->fun, locs, args, recvType.type, recvType.type, send->link};
+                auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
 
-                    histogramInc("dispatchCall.components", dispatched.components.size());
-                    tp.type = dispatched.returnType;
-                    for (auto &comp : dispatched.components) {
-                        for (auto &err : comp.errors) {
-                            ctx.state._error(std::move(err));
-                        }
-                        lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(comp.method);
+                histogramInc("dispatchCall.components", dispatched.components.size());
+                tp.type = dispatched.returnType;
+                for (auto &comp : dispatched.components) {
+                    for (auto &err : comp.errors) {
+                        ctx.state._error(std::move(err));
                     }
+                    lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(comp.method);
+                }
 
-                    if (lspQueryMatch) {
-                        core::lsp::QueryResponse::pushQueryResponse(
-                            ctx, core::lsp::SendResponse(std::move(dispatched.components),
-                                                         send->link ? send->link->constr : nullptr, bind.loc, send->fun,
-                                                         recvType, tp));
-                    }
+                if (lspQueryMatch) {
+                    core::lsp::QueryResponse::pushQueryResponse(
+                        ctx, core::lsp::SendResponse(std::move(dispatched.components),
+                                                     send->link ? send->link->constr : nullptr, bind.loc, send->fun,
+                                                     recvType, tp));
                 }
 
                 tp.origins.emplace_back(bind.loc);
