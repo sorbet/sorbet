@@ -56,7 +56,7 @@ struct Options {
     // workaround for https://bugzilla.mindrot.org/show_bug.cgi?id=2863
     bool stdoutHUPHack = false;
 
-    core::StrictLevel forceMinStrict = core::StrictLevel::Stripe;
+    core::StrictLevel forceMinStrict = core::StrictLevel::Ignore;
     core::StrictLevel forceMaxStrict = core::StrictLevel::Strong;
 
     bool showProgress = false;

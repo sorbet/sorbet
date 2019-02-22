@@ -103,6 +103,10 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         if (!dslsInlined.tree) {
             // tree isn't cached. Need to start from parser
 
+            if (file.data(lgs).sigil == core::StrictLevel::Ignore) {
+                return {make_unique<ast::EmptyTree>(), file};
+            }
+
             unique_ptr<parser::Node> nodes;
             {
                 logger->trace("Parsing: {}", file.data(lgs).path());
@@ -289,6 +293,9 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, const vector<st
                             }
 
                             switch (file.data(*lgs).strict) {
+                                case core::StrictLevel::Ignore:
+                                    prodCounterInc("types.input.files.sigil.ignore");
+                                    break;
                                 case core::StrictLevel::Internal:
                                     Exception::raise("Should never happen");
                                     break;

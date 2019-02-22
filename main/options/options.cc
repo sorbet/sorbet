@@ -61,7 +61,9 @@ const vector<StopAfterOptions> stop_after_options({
 });
 
 core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> logger) {
-    if (key == "ruby" || key == "stripe") {
+    if (key == "ignore") {
+        return core::StrictLevel::Ignore;
+    } else if (key == "ruby" || key == "stripe") {
         return core::StrictLevel::Stripe;
     } else if (key == "true") {
         return core::StrictLevel::Typed;

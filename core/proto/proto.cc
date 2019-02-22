@@ -213,6 +213,8 @@ com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict
     switch (strict) {
         case core::StrictLevel::Internal:
             Exception::raise("Should never happen");
+        case core::StrictLevel::Ignore:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Ignore;
         case core::StrictLevel::Stripe:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Stripe;
         case core::StrictLevel::Typed:

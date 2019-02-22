@@ -53,7 +53,9 @@ StrictLevel fileSigil(string_view source) {
         }
 
         string_view suffix = source.substr(start, end - start);
-        if (suffix == "false") {
+        if (suffix == "ignore") {
+            return StrictLevel::Ignore;
+        } else if (suffix == "false") {
             return StrictLevel::Stripe;
         } else if (suffix == "true") {
             return StrictLevel::Typed;
