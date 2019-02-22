@@ -61,7 +61,7 @@ InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedTy
 
 const std::string JSONBaseType::defaultFieldName = "root";
 
-string JSONBaseType::toJSON() {
+string JSONBaseType::toJSON() const {
     rapidjson::MemoryPoolAllocator<> alloc;
     auto v = toJSONValue(alloc);
     rapidjson::StringBuffer buffer;

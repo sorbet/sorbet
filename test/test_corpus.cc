@@ -605,21 +605,22 @@ TEST_P(LSPTest, All) {
     // Send 'initialize' message.
     {
         unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(rootPath, rootUri);
-        auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "initialize", nextId++, *initializeParams));
+        auto responses = lspWrapper->getLSPResponsesFor(
+            *makeRequestMessage(lspWrapper->alloc, "initialize", nextId++, *initializeParams));
 
         // Should just have an 'initialize' response.
         ASSERT_EQ(1, responses.size());
-        auto lspResponse = move(responses.at(0));
 
-        if (auto maybeRespMsg = assertResponseMessage(0, lspResponse)) {
-            auto &respMsg = *maybeRespMsg;
-            ASSERT_FALSE(respMsg->error.has_value());
-            ASSERT_TRUE(respMsg->result.has_value());
+        if (assertResponseMessage(0, *responses.at(0))) {
+            auto &respMsg = responses.at(0)->asResponse();
+            ASSERT_FALSE(respMsg.error.has_value());
+            ASSERT_TRUE(respMsg.result.has_value());
 
-            auto &result = *respMsg->result;
+            auto &result = *respMsg.result;
             // TODO(jvilk): Need a better way to unwrap these.
-            auto initializeResult = InitializeResult::fromJSONValue(alloc, *result.get(), "ResponseMessage.result");
-            checkServerCapabilities(initializeResult->capabilities);
+            auto initializeResult =
+                InitializeResult::fromJSONValue(lspWrapper->alloc, *result.get(), "ResponseMessage.result");
+            checkServerCapabilities(*initializeResult->capabilities);
         }
     }
 
@@ -628,26 +629,24 @@ TEST_P(LSPTest, All) {
         rapidjson::Value emptyObject(rapidjson::kObjectType);
         auto initialized = make_unique<NotificationMessage>("2.0", "initialized");
         initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
-        auto initializedResponses = getLSPResponsesFor(move(initialized));
+        auto initializedResponses = lspWrapper->getLSPResponsesFor(LSPMessage(move(initialized)));
         EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
     }
-
-    // LSPLoop is now initialized.
-    initialized = true;
 
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {
         for (auto &filename : filenames) {
             unique_ptr<JSONBaseType> params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = getLSPResponsesFor(makeRequestMessage(alloc, "textDocument/didOpen", nextId++, *params));
+            auto responses = lspWrapper->getLSPResponsesFor(
+                *makeRequestMessage(lspWrapper->alloc, "textDocument/didOpen", nextId++, *params));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
 
     // Tell LSP that the new files now have the contents from the test files on disk.
     {
-        vector<unique_ptr<JSONBaseType>> allResponses;
+        vector<unique_ptr<LSPMessage>> allResponses;
         for (auto &filename : filenames) {
             auto textDoc = make_unique<VersionedTextDocumentIdentifier>(testFileUris[filename], 2);
             auto textDocContents = test.sourceFileContents[filename]->source();
@@ -659,9 +658,9 @@ TEST_P(LSPTest, All) {
 
             auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
             auto didChangeNotif = make_unique<NotificationMessage>("2.0", "textDocument/didChange");
-            didChangeNotif->params = didChangeParams->toJSONValue(alloc);
+            didChangeNotif->params = didChangeParams->toJSONValue(lspWrapper->alloc);
 
-            auto responses = getLSPResponsesFor(move(didChangeNotif));
+            auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(didChangeNotif)));
             allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
                                 make_move_iterator(responses.end()));
         }
@@ -673,19 +672,18 @@ TEST_P(LSPTest, All) {
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         {
             for (auto &response : allResponses) {
-                auto maybeNotifMsg = assertNotificationMessage("textDocument/publishDiagnostics", response);
-                if (!maybeNotifMsg) {
-                    continue;
-                }
-                auto maybeDiagnosticParams = getPublishDiagnosticParams(alloc, **maybeNotifMsg);
-                ASSERT_TRUE(maybeDiagnosticParams.has_value());
-                auto &diagnosticParams = *maybeDiagnosticParams;
-                auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
-                EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
-                    << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+                if (assertNotificationMessage("textDocument/publishDiagnostics", *response)) {
+                    auto maybeDiagnosticParams =
+                        getPublishDiagnosticParams(lspWrapper->alloc, response->asNotification());
+                    ASSERT_TRUE(maybeDiagnosticParams.has_value());
+                    auto &diagnosticParams = *maybeDiagnosticParams;
+                    auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+                    EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+                        << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
-                // Will explicitly overwrite older diagnostics that are irrelevant.
-                diagnostics[filename] = move(diagnosticParams->diagnostics);
+                    // Will explicitly overwrite older diagnostics that are irrelevant.
+                    diagnostics[filename] = move(diagnosticParams->diagnostics);
+                }
             }
         }
         checkErrors(test, assertions, diagnostics);

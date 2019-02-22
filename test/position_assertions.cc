@@ -345,20 +345,20 @@ void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &q
     unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
         make_unique<TextDocumentIdentifier>(queryLoc.uri), make_unique<Position>(line, character));
     int id = test.nextId++;
-    auto responses = test.getLSPResponsesFor(
-        makeRequestMessage(test.alloc, "textDocument/definition", id, *textDocumentPositionParams));
+    auto responses = test.lspWrapper->getLSPResponsesFor(
+        *makeRequestMessage(test.lspWrapper->alloc, "textDocument/definition", id, *textDocumentPositionParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
         return;
     }
 
-    if (auto maybeRespMsg = assertResponseMessage(id, responses.at(0))) {
-        auto &respMsg = *maybeRespMsg;
-        ASSERT_TRUE(respMsg->result.has_value());
-        ASSERT_FALSE(respMsg->error.has_value());
+    if (assertResponseMessage(id, *responses.at(0))) {
+        auto &respMsg = responses.at(0)->asResponse();
+        ASSERT_TRUE(respMsg.result.has_value());
+        ASSERT_FALSE(respMsg.error.has_value());
 
-        auto &result = *(respMsg->result);
-        vector<unique_ptr<Location>> locations = extractLocations(test.alloc, result);
+        auto &result = *(respMsg.result);
+        vector<unique_ptr<Location>> locations = extractLocations(test.lspWrapper->alloc, result);
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -412,20 +412,20 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
     int id = test.nextId++;
-    auto responses =
-        test.getLSPResponsesFor(makeRequestMessage(test.alloc, "textDocument/references", id, *referenceParams));
+    auto responses = test.lspWrapper->getLSPResponsesFor(
+        *makeRequestMessage(test.lspWrapper->alloc, "textDocument/references", id, *referenceParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
     }
 
-    if (auto maybeRespMsg = assertResponseMessage(id, responses.at(0))) {
-        auto &respMsg = *maybeRespMsg;
-        ASSERT_TRUE(respMsg->result.has_value());
-        ASSERT_FALSE(respMsg->error.has_value());
-        auto &result = *(respMsg->result);
+    if (assertResponseMessage(id, *responses.at(0))) {
+        auto &respMsg = responses.at(0)->asResponse();
+        ASSERT_TRUE(respMsg.result.has_value());
+        ASSERT_FALSE(respMsg.error.has_value());
+        auto &result = *(respMsg.result);
 
-        vector<unique_ptr<Location>> locations = extractLocations(test.alloc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(test.lspWrapper->alloc, result);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });

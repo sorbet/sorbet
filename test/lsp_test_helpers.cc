@@ -109,29 +109,29 @@ unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
     return initializeParams;
 }
 
-unique_ptr<RequestMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, string method, int id,
-                                              const JSONBaseType &params) {
+unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, string method, int id,
+                                          const JSONBaseType &params) {
     auto initialize = make_unique<RequestMessage>("2.0", id, method);
     initialize->params = params.toJSONValue(alloc);
-    return initialize;
+    return make_unique<LSPMessage>(move(initialize));
 }
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
-void checkServerCapabilities(const unique_ptr<ServerCapabilities> &capabilities) {
+void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // Properties checked in the same order they are described in the LSP spec.
-    EXPECT_TRUE(capabilities->textDocumentSync.has_value());
-    auto &textDocumentSync = *(capabilities->textDocumentSync);
+    EXPECT_TRUE(capabilities.textDocumentSync.has_value());
+    auto &textDocumentSync = *(capabilities.textDocumentSync);
     auto textDocumentSyncValue = get_if<TextDocumentSyncKind>(&textDocumentSync);
     EXPECT_NE(nullptr, textDocumentSyncValue);
     if (textDocumentSyncValue != nullptr) {
         EXPECT_EQ(TextDocumentSyncKind::Full, *(textDocumentSyncValue));
     }
 
-    EXPECT_TRUE(capabilities->hoverProvider.value_or(false));
+    EXPECT_TRUE(capabilities.hoverProvider.value_or(false));
 
-    EXPECT_TRUE(capabilities->completionProvider.has_value());
-    if (capabilities->completionProvider.has_value()) {
-        auto &completionProvider = *(capabilities->completionProvider);
+    EXPECT_TRUE(capabilities.completionProvider.has_value());
+    if (capabilities.completionProvider.has_value()) {
+        auto &completionProvider = *(capabilities.completionProvider);
         auto triggerCharacters = completionProvider->triggerCharacters.value_or(vector<string>({}));
         EXPECT_EQ(1, triggerCharacters.size());
         if (triggerCharacters.size() == 1) {
@@ -139,9 +139,9 @@ void checkServerCapabilities(const unique_ptr<ServerCapabilities> &capabilities)
         }
     }
 
-    EXPECT_TRUE(capabilities->signatureHelpProvider.has_value());
-    if (capabilities->signatureHelpProvider.has_value()) {
-        auto &sigHelpProvider = *(capabilities->signatureHelpProvider);
+    EXPECT_TRUE(capabilities.signatureHelpProvider.has_value());
+    if (capabilities.signatureHelpProvider.has_value()) {
+        auto &sigHelpProvider = *(capabilities.signatureHelpProvider);
         auto sigHelpTriggerChars = sigHelpProvider->triggerCharacters.value_or(vector<string>({}));
         EXPECT_EQ(2, sigHelpTriggerChars.size());
         UnorderedSet<string> sigHelpTriggerSet(sigHelpTriggerChars.begin(), sigHelpTriggerChars.end());
@@ -150,34 +150,34 @@ void checkServerCapabilities(const unique_ptr<ServerCapabilities> &capabilities)
     }
 
     // We don't support all possible features. Make sure we don't make any false claims.
-    EXPECT_TRUE(capabilities->definitionProvider.value_or(false));
-    EXPECT_FALSE(capabilities->typeDefinitionProvider.has_value());
-    EXPECT_FALSE(capabilities->implementationProvider.has_value());
-    EXPECT_TRUE(capabilities->referencesProvider.value_or(false));
-    EXPECT_FALSE(capabilities->documentHighlightProvider.has_value());
-    EXPECT_TRUE(capabilities->documentSymbolProvider.value_or(false));
-    EXPECT_TRUE(capabilities->workspaceSymbolProvider.value_or(false));
-    EXPECT_FALSE(capabilities->codeActionProvider.has_value());
-    EXPECT_FALSE(capabilities->codeLensProvider.has_value());
-    EXPECT_FALSE(capabilities->documentFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities->documentRangeFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities->documentRangeFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities->documentOnTypeFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities->renameProvider.has_value());
-    EXPECT_FALSE(capabilities->documentLinkProvider.has_value());
-    EXPECT_FALSE(capabilities->colorProvider.has_value());
-    EXPECT_FALSE(capabilities->foldingRangeProvider.has_value());
-    EXPECT_FALSE(capabilities->executeCommandProvider.has_value());
-    EXPECT_FALSE(capabilities->workspace.has_value());
+    EXPECT_TRUE(capabilities.definitionProvider.value_or(false));
+    EXPECT_FALSE(capabilities.typeDefinitionProvider.has_value());
+    EXPECT_FALSE(capabilities.implementationProvider.has_value());
+    EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
+    EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
+    EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
+    EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
+    EXPECT_FALSE(capabilities.codeActionProvider.has_value());
+    EXPECT_FALSE(capabilities.codeLensProvider.has_value());
+    EXPECT_FALSE(capabilities.documentFormattingProvider.has_value());
+    EXPECT_FALSE(capabilities.documentRangeFormattingProvider.has_value());
+    EXPECT_FALSE(capabilities.documentRangeFormattingProvider.has_value());
+    EXPECT_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
+    EXPECT_FALSE(capabilities.renameProvider.has_value());
+    EXPECT_FALSE(capabilities.documentLinkProvider.has_value());
+    EXPECT_FALSE(capabilities.colorProvider.has_value());
+    EXPECT_FALSE(capabilities.foldingRangeProvider.has_value());
+    EXPECT_FALSE(capabilities.executeCommandProvider.has_value());
+    EXPECT_FALSE(capabilities.workspace.has_value());
 }
 
-void failWithUnexpectedLSPResponse(JSONBaseType &item) {
-    if (auto rootPtr = dynamic_cast<ResponseMessage *>(&item)) {
+void failWithUnexpectedLSPResponse(const LSPMessage &item) {
+    if (item.isResponse()) {
         FAIL() << fmt::format("Expected a notification, but received the following response message instead: {}",
-                              rootPtr->toJSON());
-    } else if (auto rootPtr = dynamic_cast<NotificationMessage *>(&item)) {
+                              item.asResponse().toJSON());
+    } else if (item.isNotification()) {
         FAIL() << fmt::format("Expected a response message, but received the following notification instead: {}",
-                              rootPtr->toJSON());
+                              item.asNotification().toJSON());
     } else {
         // Received something else! This can *only* happen if our test logic is buggy. Any invalid LSP responses
         // are rejected before they reach this point.
@@ -185,36 +185,28 @@ void failWithUnexpectedLSPResponse(JSONBaseType &item) {
     }
 }
 
-optional<unique_ptr<ResponseMessage>> assertResponseMessage(int expectedId, unique_ptr<JSONBaseType> &response) {
-    auto respMsg = dynamic_cast<ResponseMessage *>(response.get());
-    if (!respMsg) {
-        failWithUnexpectedLSPResponse(*response);
-        return nullopt;
+bool assertResponseMessage(int expectedId, const LSPMessage &response) {
+    if (!response.isResponse()) {
+        failWithUnexpectedLSPResponse(response);
+        return false;
     }
 
-    auto idIntPtr = get_if<int>(&respMsg->id);
+    auto &respMsg = response.asResponse();
+    auto idIntPtr = get_if<int>(&respMsg.id);
     EXPECT_NE(nullptr, idIntPtr) << "Response message lacks an integer ID field.";
     if (idIntPtr != nullptr) {
         EXPECT_EQ(expectedId, *idIntPtr) << "Response message's ID does not match expected value.";
     }
-    std::unique_ptr<ResponseMessage> respMsgPtr(respMsg);
-    response.release();
-    return respMsgPtr;
+    return true;
 }
 
-optional<unique_ptr<NotificationMessage>> assertNotificationMessage(string expectedMethod,
-                                                                    unique_ptr<JSONBaseType> &response) {
-    auto notifMsg = dynamic_cast<NotificationMessage *>(response.get());
-    if (!notifMsg) {
-        failWithUnexpectedLSPResponse(*response);
-        return nullopt;
+bool assertNotificationMessage(const string &expectedMethod, const LSPMessage &response) {
+    if (!response.isNotification()) {
+        failWithUnexpectedLSPResponse(response);
+        return false;
     }
-
-    EXPECT_EQ(expectedMethod, notifMsg->method) << "Unexpected method on notification message.";
-
-    std::unique_ptr<NotificationMessage> notifMsgPtr(notifMsg);
-    response.release();
-    return notifMsgPtr;
+    EXPECT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
+    return true;
 }
 
 optional<unique_ptr<PublishDiagnosticsParams>> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,

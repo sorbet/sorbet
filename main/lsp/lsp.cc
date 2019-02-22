@@ -7,7 +7,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, const shared_ptr<spd::logger> &logger,
                  WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool typecheckTestFiles,
                  bool skipConfigatron, bool disableFastPath)
     : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputStream(inputStream),

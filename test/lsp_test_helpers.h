@@ -2,6 +2,7 @@
 #define TEST_LSP_TEST_HELPERS_H
 
 #include "common/common.h"
+#include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 #include "test/LSPTest.h"
 
@@ -28,22 +29,20 @@ std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
 std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::string rootUri);
 
-/** Creates a RequestMessage object from the given items. */
-std::unique_ptr<RequestMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, std::string method, int id,
-                                                   const JSONBaseType &params);
+/** Creates an LSPMessage containing a request message constructed from the given items. */
+std::unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, std::string method, int id,
+                                               const JSONBaseType &params);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
-void checkServerCapabilities(const std::unique_ptr<ServerCapabilities> &capabilities);
+void checkServerCapabilities(const ServerCapabilities &capabilities);
 
-/** Asserts that the JSONBaseType is a ResponseMessage with the given id. Returns the response message on success, fails
+/** Asserts that the JSONBaseType is a ResponseMessage with the given id. Returns true on success, fails
  * the test otherwise. */
-std::optional<std::unique_ptr<ResponseMessage>> assertResponseMessage(int expectedId,
-                                                                      std::unique_ptr<JSONBaseType> &response);
+bool assertResponseMessage(int expectedId, const LSPMessage &response);
 
-/** Asserts that the JSONBaseType is a NotificationMessage with the given method. Returns the notification message on
+/** Asserts that the JSONBaseType is a NotificationMessage with the given method. Returns true on
  * success, fails the test otherwise. */
-std::optional<std::unique_ptr<NotificationMessage>> assertNotificationMessage(std::string expectedMethod,
-                                                                              std::unique_ptr<JSONBaseType> &response);
+bool assertNotificationMessage(const std::string &expectedMethod, const LSPMessage &response);
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */

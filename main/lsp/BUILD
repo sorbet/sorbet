@@ -12,6 +12,7 @@ cc_library(
         "lsp.h",
         "lsp_messages_gen.h",
         "lsp_messages_gen_helpers.h",
+        "wrapper.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,

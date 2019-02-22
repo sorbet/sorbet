@@ -172,7 +172,7 @@ class LSPLoop {
     std::unique_ptr<core::GlobalState> initialGS;
     const options::Options &opts;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
-    std::shared_ptr<spdlog::logger> &logger;
+    std::shared_ptr<spdlog::logger> logger;
     WorkerPool &workers;
     /**
      * Whether or not the active client has support for snippets in CompletionItems.
@@ -285,9 +285,9 @@ class LSPLoop {
                                                               const LSPMessage &msg);
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
-            WorkerPool &workers, std::istream &input, std::ostream &output, bool typecheckTestFiles = false,
-            bool skipConfigatron = false, bool disableFastPath = false);
+    LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
+            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, std::istream &input, std::ostream &output,
+            bool typecheckTestFiles = false, bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
