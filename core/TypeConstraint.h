@@ -42,6 +42,7 @@ public:
     std::shared_ptr<TypeConstraint> deepCopy() const;
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;
+    std::string toString(Context ctx) const;
 };
 
 } // namespace sorbet::core
