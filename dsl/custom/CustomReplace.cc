@@ -474,7 +474,7 @@ private:
             }
         }
         MethodDef::ARGS_store argsStore(make_move_iterator(argsArray.begin()), make_move_iterator(argsArray.end()));
-        return ast::MK::Method(loc, loc, nameRef, std::move(argsStore), ast::MK::EmptyTree(),
+        return ast::MK::Method(loc, loc, nameRef, std::move(argsStore), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
                                ast::MethodDef::DSLSynthesized);
     }
 
@@ -524,7 +524,22 @@ private:
             auto name = enterName(def["value"], ctx);
             return ast::MK::Symbol(loc, name);
         } else if (!strcmp(variantString, "constant")) {
-            // todo
+            auto components = def["components"].GetArray();
+            unique_ptr<Expression> constant;
+            int offset = 0;
+            if (components.Size() > 0 && !strcmp(components[0].GetString(), "::")) {
+                constant = ast::MK::Constant(loc, core::Symbols::root());
+                offset = 1;
+            } else {
+                constant = ast::MK::EmptyTree();
+            }
+            for (auto it = components.begin() + offset; it != components.end(); it++) {
+                auto ref = ctx.enterNameConstant(string_view(it->GetString(), it->GetStringLength()));
+                constant = ast::MK::UnresolvedConstant(loc, std::move(constant), ref);
+            }
+            return constant;
+        } else if (!strcmp(variantString, "nil")) {
+            return ast::MK::Nil(loc);
         }
         return nullptr;
     }
@@ -700,12 +715,15 @@ const string CustomReplace::specSchema = R"(
         }
     },
     "literal": {
+        "type": "object",
+        "required": ["type", "variant"],
+        "properties": {
+            "type": { "enum": ["literal"] }
+        },
         "oneOf": [
             {
-                "type": "object",
-                "required": ["type", "variant", "components"],
+                "required": ["components"],
                 "properties": {
-                    "type": { "enum": ["literal"] },
                     "variant": { "enum": ["constant"] },
                     "components": {
                         "type": "array",
@@ -716,14 +734,20 @@ const string CustomReplace::specSchema = R"(
             },
             {
                 "type": "object",
-                "required": ["type", "variant", "value"],
+                "required": ["value"],
                 "properties": {
-                    "type": { "enum": ["literal"] },
                     "variant": { "enum": ["symbol"] },
                     "value": {
                         "type": "string",
                         "minLength": 1
                     }
+                }
+            },
+            {
+                "type": "object",
+                "required": ["type", "variant"],
+                "properties": {
+                    "variant": { "enum": ["nil"] }
                 }
             }
         ]
@@ -745,7 +769,7 @@ const string CustomReplace::specSchema = R"(
     },
     "output_send": {
         "type": "object",
-        "required": ["type"],
+        "required": ["type", "callee", "recv", "args", "block"],
         "properties": {
             "type": { "enum": ["send"] },
             "callee": { "type": "string" },
