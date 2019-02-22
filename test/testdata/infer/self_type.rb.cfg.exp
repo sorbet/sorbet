@@ -6,7 +6,7 @@ subgraph "cluster_::Object#rnd" {
     "bb::Object#rnd_1" [shape = parallelogram];
 
     "bb::Object#rnd_0" [
-        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#rnd_0" -> "bb::Object#rnd_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$6: T.class_of(Parent) = alias <constant:Parent>\l<statTemp>$4: RubyTyper::Void = <statTemp>$5: T.class_of(RubyTyper).keep_for_ide(<statTemp>$6: T.class_of(Parent))\l<statTemp>$9: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$10: T.class_of(Normal) = alias <constant:Normal>\l<statTemp>$8: RubyTyper::Void = <statTemp>$9: T.class_of(RubyTyper).keep_for_ide(<statTemp>$10: T.class_of(Normal))\l<statTemp>$12: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$13: T.class_of(Parent) = alias <constant:Parent>\l<statTemp>$11: RubyTyper::Void = <statTemp>$12: T.class_of(RubyTyper).keep_for_ide(<statTemp>$13: T.class_of(Parent))\l<statTemp>$16: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$17: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$15: RubyTyper::Void = <statTemp>$16: T.class_of(RubyTyper).keep_for_ide(<statTemp>$17: T.class_of(Generic))\l<statTemp>$19: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$20: T.class_of(Parent) = alias <constant:Parent>\l<statTemp>$18: RubyTyper::Void = <statTemp>$19: T.class_of(RubyTyper).keep_for_ide(<statTemp>$20: T.class_of(Parent))\l<statTemp>$23: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$24: T.class_of(Normal) = alias <constant:Normal>\l<statTemp>$22: RubyTyper::Void = <statTemp>$23: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$24: T.class_of(Normal))\l<statTemp>$27: T.class_of(Normal) = alias <constant:Normal>\l<statTemp>$26: Normal = <statTemp>$27: T.class_of(Normal).new()\l<castTemp>$25: Normal = <statTemp>$26: Normal.returns_self()\l<statTemp>$21: Normal = cast(<castTemp>$25: Normal, Normal);\l<statTemp>$30: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$32: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$33: T.class_of(String) = alias <constant:String>\l<statTemp>$31: <Type: Generic[String]> = <statTemp>$32: T.class_of(Generic).[](<statTemp>$33: T.class_of(String))\l<statTemp>$29: RubyTyper::Void = <statTemp>$30: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$31: <Type: Generic[String]>)\l<statTemp>$37: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$38: T.class_of(String) = alias <constant:String>\l<statTemp>$36: <Type: Generic[String]> = <statTemp>$37: T.class_of(Generic).[](<statTemp>$38: T.class_of(String))\l<statTemp>$35: Generic[String] = <statTemp>$36: <Type: Generic[String]>.new()\l<castTemp>$34: Generic[String] = <statTemp>$35: Generic[String].returns_self()\l<statTemp>$28: Generic[String] = cast(<castTemp>$34: Generic[String], AppliedType {\l  klass = ::<constant:Generic>\l  targs = [\l    <constant:TM> = String\l  ]\l});\l<statTemp>$41: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$42: T.class_of(B) = alias <constant:B>\l<statTemp>$40: RubyTyper::Void = <statTemp>$41: T.class_of(RubyTyper).keep_for_ide(<statTemp>$42: T.class_of(B))\l<statTemp>$45: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$46: T.class_of(String) = alias <constant:String>\l<statTemp>$44: <Type: Generic[String]> = <statTemp>$45: T.class_of(Generic).[](<statTemp>$46: T.class_of(String))\la: Generic[String] = <statTemp>$44: <Type: Generic[String]>.new()\l<statTemp>$50: T.class_of(B) = alias <constant:B>\l<ifTemp>$48: T.any(TrueClass, FalseClass) = a: Generic[String].is_a?(<statTemp>$50: T.class_of(B))\l<ifTemp>$48: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Parent) = alias <C <U Parent>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Parent))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Normal) = alias <C <U Normal>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Normal))\l<U <statTemp>>$12: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$13: T.class_of(Parent) = alias <C <U Parent>>\l<U <statTemp>>$11: RubyTyper::Void = <U <statTemp>>$12: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(Parent))\l<U <statTemp>>$16: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$17: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$15: RubyTyper::Void = <U <statTemp>>$16: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$17: T.class_of(Generic))\l<U <statTemp>>$19: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$20: T.class_of(Parent) = alias <C <U Parent>>\l<U <statTemp>>$18: RubyTyper::Void = <U <statTemp>>$19: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$20: T.class_of(Parent))\l<U <statTemp>>$23: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$24: T.class_of(Normal) = alias <C <U Normal>>\l<U <statTemp>>$22: RubyTyper::Void = <U <statTemp>>$23: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$24: T.class_of(Normal))\l<U <statTemp>>$27: T.class_of(Normal) = alias <C <U Normal>>\l<U <statTemp>>$26: Normal = <U <statTemp>>$27: T.class_of(Normal).<U new>()\l<U <castTemp>>$25: Normal = <U <statTemp>>$26: Normal.<U returns_self>()\l<U <statTemp>>$21: Normal = cast(<U <castTemp>>$25: Normal, Normal);\l<U <statTemp>>$30: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$32: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$33: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$31: <Type: Generic[String]> = <U <statTemp>>$32: T.class_of(Generic).<U []>(<U <statTemp>>$33: T.class_of(String))\l<U <statTemp>>$29: RubyTyper::Void = <U <statTemp>>$30: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$31: <Type: Generic[String]>)\l<U <statTemp>>$37: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$38: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$36: <Type: Generic[String]> = <U <statTemp>>$37: T.class_of(Generic).<U []>(<U <statTemp>>$38: T.class_of(String))\l<U <statTemp>>$35: Generic[String] = <U <statTemp>>$36: <Type: Generic[String]>.<U new>()\l<U <castTemp>>$34: Generic[String] = <U <statTemp>>$35: Generic[String].<U returns_self>()\l<U <statTemp>>$28: Generic[String] = cast(<U <castTemp>>$34: Generic[String], AppliedType {\l  klass = <C <U Generic>>\l  targs = [\l    <C <U TM>> = String\l  ]\l});\l<U <statTemp>>$41: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$42: T.class_of(B) = alias <C <U B>>\l<U <statTemp>>$40: RubyTyper::Void = <U <statTemp>>$41: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$42: T.class_of(B))\l<U <statTemp>>$45: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$46: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$44: <Type: Generic[String]> = <U <statTemp>>$45: T.class_of(Generic).<U []>(<U <statTemp>>$46: T.class_of(String))\l<U a>: Generic[String] = <U <statTemp>>$44: <Type: Generic[String]>.<U new>()\l<U <statTemp>>$50: T.class_of(B) = alias <C <U B>>\l<U <ifTemp>>$48: T.any(TrueClass, FalseClass) = <U a>: Generic[String].<U is_a?>(<U <statTemp>>$50: T.class_of(B))\l<U <ifTemp>>$48: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
@@ -36,36 +36,36 @@ subgraph "cluster_#<static-init>" {
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_2" [
-        label = "block[id=2](a: T.all(Generic[String], B))\l<statTemp>$52: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$54: T.class_of(T) = alias <constant:T>\l<statTemp>$56: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$57: T.class_of(String) = alias <constant:String>\l<statTemp>$55: <Type: Generic[String]> = <statTemp>$56: T.class_of(Generic).[](<statTemp>$57: T.class_of(String))\l<statTemp>$58: T.class_of(B) = alias <constant:B>\l<statTemp>$53: <Type: T.all(Generic[String], B)> = <statTemp>$54: T.class_of(T).all(<statTemp>$55: <Type: Generic[String]>, <statTemp>$58: T.class_of(B))\l<statTemp>$51: RubyTyper::Void = <statTemp>$52: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$53: <Type: T.all(Generic[String], B)>)\l<castTemp>$59: T.all(Generic[String], B) = a: T.all(Generic[String], B).returns_self()\l<statTemp>$47: T.all(Generic[String], B) = cast(<castTemp>$59: T.all(Generic[String], B), AppliedType {\l      klass = ::<constant:Generic>\l      targs = [\l        <constant:TM> = String\l      ]\l    } & B);\l<unconditional>\l"
+        label = "block[id=2](<U a>: T.all(Generic[String], B))\l<U <statTemp>>$52: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$54: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$56: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$57: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$55: <Type: Generic[String]> = <U <statTemp>>$56: T.class_of(Generic).<U []>(<U <statTemp>>$57: T.class_of(String))\l<U <statTemp>>$58: T.class_of(B) = alias <C <U B>>\l<U <statTemp>>$53: <Type: T.all(Generic[String], B)> = <U <statTemp>>$54: T.class_of(T).<U all>(<U <statTemp>>$55: <Type: Generic[String]>, <U <statTemp>>$58: T.class_of(B))\l<U <statTemp>>$51: RubyTyper::Void = <U <statTemp>>$52: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$53: <Type: T.all(Generic[String], B)>)\l<U <castTemp>>$59: T.all(Generic[String], B) = <U a>: T.all(Generic[String], B).<U returns_self>()\l<U <statTemp>>$47: T.all(Generic[String], B) = cast(<U <castTemp>>$59: T.all(Generic[String], B), AppliedType {\l      klass = <C <U Generic>>\l      targs = [\l        <C <U TM>> = String\l      ]\l    } & B);\l<unconditional>\l"
     ];
 
     "bb#<static-init>_2" -> "bb#<static-init>_4" [style="bold"];
     "bb#<static-init>_4" [
-        label = "block[id=4]()\l<statTemp>$63: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$64: T.class_of(Array) = alias <constant:Array>\l<statTemp>$62: RubyTyper::Void = <statTemp>$63: T.class_of(RubyTyper).keep_for_ide(<statTemp>$64: T.class_of(Array))\l<statTemp>$67: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<arrayTemp>$69: T.class_of(Integer) = alias <constant:Integer>\l<arrayTemp>$70: T.class_of(Integer) = alias <constant:Integer>\l<magic>$71: <Magic> = alias <constant:<Magic>>\l<statTemp>$68: [T.class_of(Integer), T.class_of(Integer)] = <magic>$71: <Magic>.<build-array>(<arrayTemp>$69: T.class_of(Integer), <arrayTemp>$70: T.class_of(Integer))\l<statTemp>$66: RubyTyper::Void = <statTemp>$67: T.class_of(RubyTyper).keep_for_typechecking(<statTemp>$68: [T.class_of(Integer), T.class_of(Integer)])\l<arrayTemp>$74: Integer(1) = 1\l<arrayTemp>$75: Integer(2) = 2\l<magic>$76: <Magic> = alias <constant:<Magic>>\l<statTemp>$73: [Integer(1), Integer(2)] = <magic>$76: <Magic>.<build-array>(<arrayTemp>$74: Integer(1), <arrayTemp>$75: Integer(2))\l<castTemp>$72: [Integer(1), Integer(2)] = <statTemp>$73: [Integer(1), Integer(2)].returns_self()\l<statTemp>$65: [Integer, Integer] = cast(<castTemp>$72: [Integer(1), Integer(2)], TupleType {\l  0 = Integer\l  1 = Integer\l});\l<statTemp>$79: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$80: T.class_of(A) = alias <constant:A>\l<statTemp>$78: RubyTyper::Void = <statTemp>$79: T.class_of(RubyTyper).keep_for_ide(<statTemp>$80: T.class_of(A))\l<statTemp>$83: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$84: T.class_of(B) = alias <constant:B>\l<statTemp>$82: RubyTyper::Void = <statTemp>$83: T.class_of(RubyTyper).keep_for_ide(<statTemp>$84: T.class_of(B))\l<statTemp>$86: T.class_of(A) = alias <constant:A>\ls: A = <statTemp>$86: T.class_of(A).new()\l<unconditional>\l"
+        label = "block[id=4]()\l<U <statTemp>>$63: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$64: T.class_of(Array) = alias <C <U Array>>\l<U <statTemp>>$62: RubyTyper::Void = <U <statTemp>>$63: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$64: T.class_of(Array))\l<U <statTemp>>$67: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <arrayTemp>>$69: T.class_of(Integer) = alias <C <U Integer>>\l<U <arrayTemp>>$70: T.class_of(Integer) = alias <C <U Integer>>\l<U <magic>>$71: <Magic> = alias <C <U <Magic>>>\l<U <statTemp>>$68: [T.class_of(Integer), T.class_of(Integer)] = <U <magic>>$71: <Magic>.<U <build-array>>(<U <arrayTemp>>$69: T.class_of(Integer), <U <arrayTemp>>$70: T.class_of(Integer))\l<U <statTemp>>$66: RubyTyper::Void = <U <statTemp>>$67: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$68: [T.class_of(Integer), T.class_of(Integer)])\l<U <arrayTemp>>$74: Integer(1) = 1\l<U <arrayTemp>>$75: Integer(2) = 2\l<U <magic>>$76: <Magic> = alias <C <U <Magic>>>\l<U <statTemp>>$73: [Integer(1), Integer(2)] = <U <magic>>$76: <Magic>.<U <build-array>>(<U <arrayTemp>>$74: Integer(1), <U <arrayTemp>>$75: Integer(2))\l<U <castTemp>>$72: [Integer(1), Integer(2)] = <U <statTemp>>$73: [Integer(1), Integer(2)].<U returns_self>()\l<U <statTemp>>$65: [Integer, Integer] = cast(<U <castTemp>>$72: [Integer(1), Integer(2)], TupleType {\l  0 = Integer\l  1 = Integer\l});\l<U <statTemp>>$79: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$80: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$78: RubyTyper::Void = <U <statTemp>>$79: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$80: T.class_of(A))\l<U <statTemp>>$83: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$84: T.class_of(B) = alias <C <U B>>\l<U <statTemp>>$82: RubyTyper::Void = <U <statTemp>>$83: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$84: T.class_of(B))\l<U <statTemp>>$86: T.class_of(A) = alias <C <U A>>\l<U s>: A = <U <statTemp>>$86: T.class_of(A).<U new>()\l<unconditional>\l"
     ];
 
     "bb#<static-init>_4" -> "bb#<static-init>_5" [style="bold"];
     "bb#<static-init>_5" [
-        label = "block[id=5](s: A)\louterLoops: 1\l<statTemp>$89: T.class_of(<root>) = self\l<whileTemp>$88: T.untyped = <statTemp>$89: T.class_of(<root>).rnd()\l<whileTemp>$88: T.untyped\l"
+        label = "block[id=5](<U s>: A)\louterLoops: 1\l<U <statTemp>>$89: T.class_of(<root>) = self\l<U <whileTemp>>$88: T.untyped = <U <statTemp>>$89: T.class_of(<root>).<U rnd>()\l<U <whileTemp>>$88: T.untyped\l"
     ];
 
     "bb#<static-init>_5" -> "bb#<static-init>_7" [style="bold"];
     "bb#<static-init>_5" -> "bb#<static-init>_6" [style="tapered"];
 
     "bb#<static-init>_6" [
-        label = "block[id=6](s: A)\l<statTemp>$96: T.class_of(<root>) = self\l<statTemp>$95: NilClass = <statTemp>$96: T.class_of(<root>).puts(s: A)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=6](<U s>: A)\l<U <statTemp>>$96: T.class_of(<root>) = self\l<U <statTemp>>$95: NilClass = <U <statTemp>>$96: T.class_of(<root>).<U puts>(<U s>: A)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_6" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_7" [
-        label = "block[id=7](s: A)\louterLoops: 1\l<statTemp>$93: T.class_of(B) = alias <constant:B>\l<ifTemp>$91: T.any(TrueClass, FalseClass) = s: A.is_a?(<statTemp>$93: T.class_of(B))\l<ifTemp>$91: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=7](<U s>: A)\louterLoops: 1\l<U <statTemp>>$93: T.class_of(B) = alias <C <U B>>\l<U <ifTemp>>$91: T.any(TrueClass, FalseClass) = <U s>: A.<U is_a?>(<U <statTemp>>$93: T.class_of(B))\l<U <ifTemp>>$91: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb#<static-init>_7" -> "bb#<static-init>_8" [style="bold"];
     "bb#<static-init>_7" -> "bb#<static-init>_5" [style="tapered"];
 
     "bb#<static-init>_8" [
-        label = "block[id=8](s: T.all(A, B))\louterLoops: 1\l<statTemp>$94: T.all(A, B) = s\ls: T.all(A, B) = <statTemp>$94: T.all(A, B).returns_self()\l<unconditional>\l"
+        label = "block[id=8](<U s>: T.all(A, B))\louterLoops: 1\l<U <statTemp>>$94: T.all(A, B) = <U s>\l<U s>: T.all(A, B) = <U <statTemp>>$94: T.all(A, B).<U returns_self>()\l<unconditional>\l"
     ];
 
     "bb#<static-init>_8" -> "bb#<static-init>_5" [style="bold"];
@@ -78,7 +78,7 @@ subgraph "cluster_::Parent#returns_self" {
     "bb::Parent#returns_self_1" [shape = parallelogram];
 
     "bb::Parent#returns_self_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$2: Parent = self\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Parent\l<unconditional>\l"
+        label = "block[id=0]()\l<U <returnMethodTemp>>$2: Parent = self\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Parent\l<unconditional>\l"
     ];
 
     "bb::Parent#returns_self_0" -> "bb::Parent#returns_self_1" [style="bold"];
@@ -96,7 +96,7 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
     "bb::<Class:Parent>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Parent>#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(Parent) = self\l<block-pre-call-temp>$4: RubyTyper::Void = <statTemp>$3: T.class_of(Parent).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(Parent) = self\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <statTemp>>$3: T.class_of(Parent).<U sig>()\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_0" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
@@ -106,19 +106,19 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
 
     "bb::<Class:Parent>#<static-init>_1" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
     "bb::<Class:Parent>#<static-init>_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_4" [style="bold"];
     "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Parent>#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Parent>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Parent>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_3" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
     "bb::<Class:Parent>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8: Sorbet::Private::Builder = self\l<statTemp>$10: T.class_of(T) = alias <constant:T>\l<statTemp>$9: T.untyped = <statTemp>$10: T.class_of(T).self_type()\l<blockReturnTemp>$7: Sorbet::Private::Builder = <statTemp>$8: Sorbet::Private::Builder.returns(<statTemp>$9: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<::<Class:Parent>#<block>> <blockReturnTemp>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Parent>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_4" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
@@ -131,7 +131,7 @@ subgraph "cluster_::Generic#bad" {
     "bb::Generic#bad_1" [shape = parallelogram];
 
     "bb::Generic#bad_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$6: T.class_of(T) = alias <constant:T>\l<statTemp>$5: T.untyped = <statTemp>$6: T.class_of(T).untyped()\l<statTemp>$3: <Type: Generic[T.untyped]> = <statTemp>$4: T.class_of(Generic).[](<statTemp>$5: T.untyped)\l<returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: <Type: Generic[T.untyped]>.new()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$4: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$6: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$5: T.untyped = <U <statTemp>>$6: T.class_of(T).<U untyped>()\l<U <statTemp>>$3: <Type: Generic[T.untyped]> = <U <statTemp>>$4: T.class_of(Generic).<U []>(<U <statTemp>>$5: T.untyped)\l<U <returnMethodTemp>>$2: Generic[T.untyped] = <U <statTemp>>$3: <Type: Generic[T.untyped]>.<U new>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Generic[T.untyped]\l<unconditional>\l"
     ];
 
     "bb::Generic#bad_0" -> "bb::Generic#bad_1" [style="bold"];
@@ -149,7 +149,7 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
     "bb::<Class:Generic>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Generic>#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(Generic) = self\l<block-pre-call-temp>$4: RubyTyper::Void = <statTemp>$3: T.class_of(Generic).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(Generic) = self\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <statTemp>>$3: T.class_of(Generic).<U sig>()\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_0" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
@@ -159,19 +159,19 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
 
     "bb::<Class:Generic>#<static-init>_1" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
     "bb::<Class:Generic>#<static-init>_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_4" [style="bold"];
     "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Generic>#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Generic>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Generic>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_3" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
     "bb::<Class:Generic>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8: Sorbet::Private::Builder = self\l<statTemp>$10: T.class_of(Generic) = alias <constant:Generic>\l<statTemp>$12: T.class_of(T) = alias <constant:T>\l<statTemp>$11: T.untyped = <statTemp>$12: T.class_of(T).self_type()\l<statTemp>$9: <Type: Generic[T.untyped]> = <statTemp>$10: T.class_of(Generic).[](<statTemp>$11: T.untyped)\l<blockReturnTemp>$7: Sorbet::Private::Builder = <statTemp>$8: Sorbet::Private::Builder.returns(<statTemp>$9: <Type: Generic[T.untyped]>)\l<blockReturnTemp>$13: T.noreturn = blockreturn<::<Class:Generic>#<block>> <blockReturnTemp>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$12: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$11: T.untyped = <U <statTemp>>$12: T.class_of(T).<U self_type>()\l<U <statTemp>>$9: <Type: Generic[T.untyped]> = <U <statTemp>>$10: T.class_of(Generic).<U []>(<U <statTemp>>$11: T.untyped)\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::<Class:Generic>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_4" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
@@ -184,7 +184,7 @@ subgraph "cluster_::Array#returns_self" {
     "bb::Array#returns_self_1" [shape = parallelogram];
 
     "bb::Array#returns_self_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$2: T::Array[Array::Elem] = self\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Array::Elem]\l<unconditional>\l"
+        label = "block[id=0]()\l<U <returnMethodTemp>>$2: T::Array[Array::Elem] = self\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T::Array[Array::Elem]\l<unconditional>\l"
     ];
 
     "bb::Array#returns_self_0" -> "bb::Array#returns_self_1" [style="bold"];
@@ -202,7 +202,7 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
     "bb::<Class:Array>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Array>#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(Array) = self\l<block-pre-call-temp>$4: RubyTyper::Void = <statTemp>$3: T.class_of(Array).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(Array) = self\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <statTemp>>$3: T.class_of(Array).<U sig>()\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_0" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
@@ -212,19 +212,19 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
 
     "bb::<Class:Array>#<static-init>_1" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
     "bb::<Class:Array>#<static-init>_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_4" [style="bold"];
     "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Array>#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Array>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Array>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_3" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
     "bb::<Class:Array>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8: Sorbet::Private::Builder = self\l<statTemp>$10: T.class_of(T) = alias <constant:T>\l<statTemp>$9: T.untyped = <statTemp>$10: T.class_of(T).self_type()\l<blockReturnTemp>$7: Sorbet::Private::Builder = <statTemp>$8: Sorbet::Private::Builder.returns(<statTemp>$9: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<::<Class:Array>#<block>> <blockReturnTemp>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Array>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_4" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
@@ -237,7 +237,7 @@ subgraph "cluster_::B#returns_self" {
     "bb::B#returns_self_1" [shape = parallelogram];
 
     "bb::B#returns_self_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$2: B = self\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: B\l<unconditional>\l"
+        label = "block[id=0]()\l<U <returnMethodTemp>>$2: B = self\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: B\l<unconditional>\l"
     ];
 
     "bb::B#returns_self_0" -> "bb::B#returns_self_1" [style="bold"];
@@ -255,7 +255,7 @@ subgraph "cluster_::<Class:B>#<static-init>" {
     "bb::<Class:B>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:B>#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(B) = self\l<block-pre-call-temp>$4: RubyTyper::Void = <statTemp>$3: T.class_of(B).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(B) = self\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <statTemp>>$3: T.class_of(B).<U sig>()\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_0" -> "bb::<Class:B>#<static-init>_2" [style="bold"];
@@ -265,19 +265,19 @@ subgraph "cluster_::<Class:B>#<static-init>" {
 
     "bb::<Class:B>#<static-init>_1" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
     "bb::<Class:B>#<static-init>_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_4" [style="bold"];
     "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:B>#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:B>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:B>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_3" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
     "bb::<Class:B>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8: Sorbet::Private::Builder = self\l<statTemp>$10: T.class_of(T) = alias <constant:T>\l<statTemp>$9: T.untyped = <statTemp>$10: T.class_of(T).self_type()\l<blockReturnTemp>$7: Sorbet::Private::Builder = <statTemp>$8: Sorbet::Private::Builder.returns(<statTemp>$9: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<::<Class:B>#<block>> <blockReturnTemp>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:B>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_4" -> "bb::<Class:B>#<static-init>_2" [style="bold"];

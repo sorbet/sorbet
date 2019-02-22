@@ -1,21 +1,21 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
   {}
 
   {:"a" => "a"}
 
-  self(<constant:<todo sym>>).x().to_hash()
+  self(<C <U <todo sym>>>).<U x>().<U to_hash>()
 
-  self(<constant:<todo sym>>).x()
+  self(<C <U <todo sym>>>).<U x>()
 
-  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash())
+  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>())
 
-  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash())
+  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>())
 
-  self(<constant:<todo sym>>).x().to_hash().merge({:"a" => "a"})
+  self(<C <U <todo sym>>>).<U x>().<U to_hash>().<U merge>({:"a" => "a"})
 
-  self(<constant:<todo sym>>).x().to_hash().merge({:"a" => "a"})
+  self(<C <U <todo sym>>>).<U x>().<U to_hash>().<U merge>({:"a" => "a"})
 
-  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash()).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"d" => "d"})
+  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>()).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
 
-  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash()).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"d" => "d"})
+  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>()).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
 end

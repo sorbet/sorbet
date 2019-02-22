@@ -6,126 +6,126 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\ltry: Integer(0) = 0\l<unconditional>\l"
+        label = "block[id=0]()\l<U try>: Integer(0) = 0\l<unconditional>\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_1" [
-        label = "block[id=1]()\l<returnMethodTemp>$2 = 1\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
+        label = "block[id=1]()\l<U <returnMethodTemp>>$2 = 1\l<U <returnMethodTemp>>$2 = 2\l<unconditional>\l"
     ];
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
+        label = "block[id=2](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <rescueStartTemp>>$4: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$4: T.untyped\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$37: T.class_of(B) = alias <constant:B>\l<isaCheckTemp>$38: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$37: T.class_of(B))\l<isaCheckTemp>$38: T.untyped\l"
+        label = "block[id=3](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<D <U <rescueTemp>> $2>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$37: T.class_of(B) = alias <C <U B>>\l<U <isaCheckTemp>>$38: T.untyped = <D <U <rescueTemp>> $2>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$37: T.class_of(B))\l<U <isaCheckTemp>>$38: T.untyped\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_23" [style="bold"];
     "bb::Object#main_3" -> "bb::Object#main_24" [style="tapered"];
 
     "bb::Object#main_4" [
-        label = "block[id=4](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$6: Object = self\l<statTemp>$7: String(\"top\") = \"top\"\l<statTemp>$5: NilClass = <statTemp>$6: Object.puts(<statTemp>$7: String(\"top\"))\l<unconditional>\l"
+        label = "block[id=4](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$6: Object = self\l<U <statTemp>>$7: String(\"top\") = \"top\"\l<U <statTemp>>$5: NilClass = <U <statTemp>>$6: Object.<U puts>(<U <statTemp>>$7: String(\"top\"))\l<unconditional>\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_5" [
-        label = "block[id=5](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<rescueStartTemp>$8: T.untyped = <unanalyzable>\l<rescueStartTemp>$8: T.untyped\l"
+        label = "block[id=5](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <rescueStartTemp>>$8: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$8: T.untyped\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_5" -> "bb::Object#main_7" [style="tapered"];
 
     "bb::Object#main_6" [
-        label = "block[id=6](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<rescueTemp>$3: T.untyped = <unanalyzable>\l<exceptionClassTemp>$28: T.class_of(A) = alias <constant:A>\l<isaCheckTemp>$29: T.untyped = <rescueTemp>$3: T.untyped.is_a?(<exceptionClassTemp>$28: T.class_of(A))\l<isaCheckTemp>$29: T.untyped\l"
+        label = "block[id=6](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<D <U <rescueTemp>> $3>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$28: T.class_of(A) = alias <C <U A>>\l<U <isaCheckTemp>>$29: T.untyped = <D <U <rescueTemp>> $3>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$28: T.class_of(A))\l<U <isaCheckTemp>>$29: T.untyped\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_17" [style="bold"];
     "bb::Object#main_6" -> "bb::Object#main_18" [style="tapered"];
 
     "bb::Object#main_7" [
-        label = "block[id=7](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$11: Integer(3) = 3\l<ifTemp>$9: T.any(TrueClass, FalseClass) = try: Integer(0).<(<statTemp>$11: Integer(3))\l<ifTemp>$9: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=7](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$11: Integer(3) = 3\l<U <ifTemp>>$9: T.any(TrueClass, FalseClass) = <U try>: Integer(0).<U <>(<U <statTemp>>$11: Integer(3))\l<U <ifTemp>>$9: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_8" [style="bold"];
     "bb::Object#main_7" -> "bb::Object#main_9" [style="tapered"];
 
     "bb::Object#main_8" [
-        label = "block[id=8](<gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$13: Integer(0) = try\l<statTemp>$14: Integer(1) = 1\ltry: Integer = <statTemp>$13: Integer(0).+(<statTemp>$14: Integer(1))\l<statTemp>$15: Object = self\l<statTemp>$17: T.class_of(A) = alias <constant:A>\l<statTemp>$16: A = <statTemp>$17: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <statTemp>$15: Object.raise(<statTemp>$16: A)\l<unconditional>\l"
+        label = "block[id=8](<U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$13: Integer(0) = <U try>\l<U <statTemp>>$14: Integer(1) = 1\l<U try>: Integer = <U <statTemp>>$13: Integer(0).<U +>(<U <statTemp>>$14: Integer(1))\l<U <statTemp>>$15: Object = self\l<U <statTemp>>$17: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$16: A = <U <statTemp>>$17: T.class_of(A).<U new>()\l<U <returnMethodTemp>>$2: T.noreturn = <U <statTemp>>$15: Object.<U raise>(<U <statTemp>>$16: A)\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_16" [style="bold"];
     "bb::Object#main_9" [
-        label = "block[id=9](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$20: Integer(6) = 6\l<ifTemp>$18: T.any(TrueClass, FalseClass) = try: Integer(0).<(<statTemp>$20: Integer(6))\l<ifTemp>$18: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=9](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$20: Integer(6) = 6\l<U <ifTemp>>$18: T.any(TrueClass, FalseClass) = <U try>: Integer(0).<U <>(<U <statTemp>>$20: Integer(6))\l<U <ifTemp>>$18: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#main_9" -> "bb::Object#main_10" [style="bold"];
     "bb::Object#main_9" -> "bb::Object#main_16" [style="tapered"];
 
     "bb::Object#main_10" [
-        label = "block[id=10](<gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$22: Integer(0) = try\l<statTemp>$23: Integer(1) = 1\ltry: Integer = <statTemp>$22: Integer(0).+(<statTemp>$23: Integer(1))\l<statTemp>$24: Object = self\l<statTemp>$26: T.class_of(B) = alias <constant:B>\l<statTemp>$25: B = <statTemp>$26: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <statTemp>$24: Object.raise(<statTemp>$25: B)\l<unconditional>\l"
+        label = "block[id=10](<U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$22: Integer(0) = <U try>\l<U <statTemp>>$23: Integer(1) = 1\l<U try>: Integer = <U <statTemp>>$22: Integer(0).<U +>(<U <statTemp>>$23: Integer(1))\l<U <statTemp>>$24: Object = self\l<U <statTemp>>$26: T.class_of(B) = alias <C <U B>>\l<U <statTemp>>$25: B = <U <statTemp>>$26: T.class_of(B).<U new>()\l<U <returnMethodTemp>>$2: T.noreturn = <U <statTemp>>$24: Object.<U raise>(<U <statTemp>>$25: B)\l<unconditional>\l"
     ];
 
     "bb::Object#main_10" -> "bb::Object#main_16" [style="bold"];
     "bb::Object#main_15" [
-        label = "block[id=15](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<gotoDeadTemp>$34: NilClass\l"
+        label = "block[id=15](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <gotoDeadTemp>>$34: NilClass\l"
     ];
 
     "bb::Object#main_15" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_15" -> "bb::Object#main_22" [style="tapered"];
 
     "bb::Object#main_16" [
-        label = "block[id=16](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<rescueEndTemp>$27: T.untyped = <unanalyzable>\l<rescueEndTemp>$27: T.untyped\l"
+        label = "block[id=16](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <rescueEndTemp>>$27: T.untyped = <unanalyzable>\l<U <rescueEndTemp>>$27: T.untyped\l"
     ];
 
     "bb::Object#main_16" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_16" -> "bb::Object#main_15" [style="tapered"];
 
     "bb::Object#main_17" [
-        label = "block[id=17](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$31: Object = self\l<statTemp>$32: String(\"rescue A\") = \"rescue A\"\l<statTemp>$30: NilClass = <statTemp>$31: Object.puts(<statTemp>$32: String(\"rescue A\"))\l<unconditional>\l"
+        label = "block[id=17](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$31: Object = self\l<U <statTemp>>$32: String(\"rescue A\") = \"rescue A\"\l<U <statTemp>>$30: NilClass = <U <statTemp>>$31: Object.<U puts>(<U <statTemp>>$32: String(\"rescue A\"))\l<unconditional>\l"
     ];
 
     "bb::Object#main_17" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_18" [
-        label = "block[id=18](<returnMethodTemp>$2: NilClass, try: Integer(0))\l<gotoDeadTemp>$34: TrueClass(true) = true\l<gotoDeadTemp>$34: TrueClass(true)\l"
+        label = "block[id=18](<U <returnMethodTemp>>$2: NilClass, <U try>: Integer(0))\l<U <gotoDeadTemp>>$34: TrueClass(true) = true\l<U <gotoDeadTemp>>$34: TrueClass(true)\l"
     ];
 
     "bb::Object#main_18" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_18" -> "bb::Object#main_22" [style="tapered"];
 
     "bb::Object#main_21" [
-        label = "block[id=21](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$43: NilClass)\l<gotoDeadTemp>$43: NilClass\l"
+        label = "block[id=21](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$43: NilClass)\l<U <gotoDeadTemp>>$43: NilClass\l"
     ];
 
     "bb::Object#main_21" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_21" -> "bb::Object#main_25" [style="tapered"];
 
     "bb::Object#main_22" [
-        label = "block[id=22](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<rescueEndTemp>$36: T.untyped = <unanalyzable>\l<rescueEndTemp>$36: T.untyped\l"
+        label = "block[id=22](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <rescueEndTemp>>$36: T.untyped = <unanalyzable>\l<U <rescueEndTemp>>$36: T.untyped\l"
     ];
 
     "bb::Object#main_22" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_22" -> "bb::Object#main_21" [style="tapered"];
 
     "bb::Object#main_23" [
-        label = "block[id=23](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$34: NilClass, try: Integer(0))\l<statTemp>$40: Object = self\l<statTemp>$41: String(\"rescue B \") = \"rescue B \"\l<statTemp>$39: NilClass = <statTemp>$40: Object.puts(<statTemp>$41: String(\"rescue B \"))\l<unconditional>\l"
+        label = "block[id=23](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$40: Object = self\l<U <statTemp>>$41: String(\"rescue B \") = \"rescue B \"\l<U <statTemp>>$39: NilClass = <U <statTemp>>$40: Object.<U puts>(<U <statTemp>>$41: String(\"rescue B \"))\l<unconditional>\l"
     ];
 
     "bb::Object#main_23" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_24" [
-        label = "block[id=24](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$43: TrueClass(true) = true\l<gotoDeadTemp>$43: TrueClass(true)\l"
+        label = "block[id=24](<U <returnMethodTemp>>$2: NilClass)\l<U <gotoDeadTemp>>$43: TrueClass(true) = true\l<U <gotoDeadTemp>>$43: TrueClass(true)\l"
     ];
 
     "bb::Object#main_24" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_24" -> "bb::Object#main_25" [style="tapered"];
 
     "bb::Object#main_25" [
-        label = "block[id=25](<returnMethodTemp>$2: NilClass)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=25](<U <returnMethodTemp>>$2: NilClass)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#main_25" -> "bb::Object#main_1" [style="bold"];
@@ -138,7 +138,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$6: T.class_of(A) = alias <constant:A>\l<statTemp>$4: RubyTyper::Void = <statTemp>$5: T.class_of(RubyTyper).keep_for_ide(<statTemp>$6: T.class_of(A))\l<statTemp>$8: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$9: T.class_of(Exception) = alias <constant:Exception>\l<statTemp>$7: RubyTyper::Void = <statTemp>$8: T.class_of(RubyTyper).keep_for_ide(<statTemp>$9: T.class_of(Exception))\l<statTemp>$12: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$13: T.class_of(B) = alias <constant:B>\l<statTemp>$11: RubyTyper::Void = <statTemp>$12: T.class_of(RubyTyper).keep_for_ide(<statTemp>$13: T.class_of(B))\l<statTemp>$15: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$16: T.class_of(Exception) = alias <constant:Exception>\l<statTemp>$14: RubyTyper::Void = <statTemp>$15: T.class_of(RubyTyper).keep_for_ide(<statTemp>$16: T.class_of(Exception))\l<statTemp>$18: T.class_of(<root>) = self\l<statTemp>$17: T.untyped = <statTemp>$18: T.class_of(<root>).main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(A))\l<U <statTemp>>$8: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$9: T.class_of(Exception) = alias <C <U Exception>>\l<U <statTemp>>$7: RubyTyper::Void = <U <statTemp>>$8: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$9: T.class_of(Exception))\l<U <statTemp>>$12: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$13: T.class_of(B) = alias <C <U B>>\l<U <statTemp>>$11: RubyTyper::Void = <U <statTemp>>$12: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(B))\l<U <statTemp>>$15: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$16: T.class_of(Exception) = alias <C <U Exception>>\l<U <statTemp>>$14: RubyTyper::Void = <U <statTemp>>$15: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$16: T.class_of(Exception))\l<U <statTemp>>$18: T.class_of(<root>) = self\l<U <statTemp>>$17: T.untyped = <U <statTemp>>$18: T.class_of(<root>).<U main>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

@@ -1,23 +1,23 @@
-class <emptyTree><<constant:<root>>> < ()
-  def main<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      try = 0
-      if try.<(3)
+      <U try> = 0
+      if <U try>.<U <>(3)
         begin
-          try = try.+(1)
-          self(<constant:<todo sym>>).raise("e")
+          <U try> = <U try>.<U +>(1)
+          self(<C <U <todo sym>>>).<U raise>("e")
         end
       else
         <emptyTree>
       end
-    rescue => <rescueTemp>$2
+    rescue => <D <U <rescueTemp>> $2>
       begin
-        self(<constant:<todo sym>>).puts("rescue")
+        self(<C <U <todo sym>>>).<U puts>("rescue")
         retry
         1
       end
     end
   end
 
-  self(<constant:<todo sym>>).main()
+  self(<C <U <todo sym>>>).<U main>()
 end

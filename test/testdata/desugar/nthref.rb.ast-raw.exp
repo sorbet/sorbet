@@ -1,15 +1,15 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     UnresolvedIdent{
       kind = Global
-      name = 1
+      name = <U 1>
     }
 
     UnresolvedIdent{
       kind = Global
-      name = 314159
+      name = <U 314159>
     }
   ]
 }

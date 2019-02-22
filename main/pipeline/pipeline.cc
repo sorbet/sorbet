@@ -597,12 +597,18 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.SymbolTable) {
             fmt::print("{}\n", gs->toString());
         }
+        if (opts.print.SymbolTableRaw) {
+            fmt::print("{}\n", gs->toStringWithOptions(false, true));
+        }
         if (opts.print.SymbolTableJson) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root());
             core::Proto::toJSON(root, cout);
         }
         if (opts.print.SymbolTableFull) {
-            fmt::print("{}\n", gs->toString(true));
+            fmt::print("{}\n", gs->toStringWithOptions(true, false));
+        }
+        if (opts.print.SymbolTableFullRaw) {
+            fmt::print("{}\n", gs->toStringWithOptions(true, true));
         }
         if (opts.print.FileTableJson) {
             auto files = core::Proto::filesToProto(*gs);

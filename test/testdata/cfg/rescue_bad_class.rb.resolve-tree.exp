@@ -1,7 +1,7 @@
-class <emptyTree><<constant:<root>>> < ()
-  def foo<foo>(<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  def <U foo><<U foo>>(<blk>)
     <emptyTree>
-  rescue ::NotAClass => e
+  rescue ::NotAClass => <U e>
     <emptyTree>
   end
 end

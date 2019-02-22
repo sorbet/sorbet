@@ -6,7 +6,7 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_1" [shape = parallelogram];
 
     "bb::A#foo_0" [
-        label = "block[id=0]()\lt: Time = load_arg(A#foo#t)\l<statTemp>$4: DateTime = t: Time.to_datetime()\l<statTemp>$3: Date = <statTemp>$4: DateTime.to_date()\l<returnMethodTemp>$2: Time = <statTemp>$3: Date.to_time()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Time\l<unconditional>\l"
+        label = "block[id=0]()\l<U t>: Time = load_arg(A#foo#t)\l<U <statTemp>>$4: DateTime = <U t>: Time.<U to_datetime>()\l<U <statTemp>>$3: Date = <U <statTemp>>$4: DateTime.<U to_date>()\l<U <returnMethodTemp>>$2: Time = <U <statTemp>>$3: Date.<U to_time>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Time\l<unconditional>\l"
     ];
 
     "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:A>#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(A) = self\l<block-pre-call-temp>$4: RubyTyper::Void = <statTemp>$3: T.class_of(A).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(A) = self\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <statTemp>>$3: T.class_of(A).<U sig>()\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_2" [style="bold"];
@@ -34,19 +34,19 @@ subgraph "cluster_::<Class:A>#<static-init>" {
 
     "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
     "bb::<Class:A>#<static-init>_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_4" [style="bold"];
     "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:A>#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:A>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:A>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_3" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
     "bb::<Class:A>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<hashTemp>$11: Symbol(:\"t\") = :\"t\"\l<hashTemp>$12: T.class_of(Time) = alias <constant:Time>\l<magic>$13: <Magic> = alias <constant:<Magic>>\l<statTemp>$10: {t: T.class_of(Time)} = <magic>$13: <Magic>.<build-hash>(<hashTemp>$11: Symbol(:\"t\"), <hashTemp>$12: T.class_of(Time))\l<statTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.params(<statTemp>$10: {t: T.class_of(Time)})\l<statTemp>$14: T.class_of(Time) = alias <constant:Time>\l<blockReturnTemp>$7: Sorbet::Private::Builder = <statTemp>$8: Sorbet::Private::Builder.returns(<statTemp>$14: T.class_of(Time))\l<blockReturnTemp>$15: T.noreturn = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$9: Sorbet::Private::Builder = self\l<U <hashTemp>>$11: Symbol(:\"t\") = :\"t\"\l<U <hashTemp>>$12: T.class_of(Time) = alias <C <U Time>>\l<U <magic>>$13: <Magic> = alias <C <U <Magic>>>\l<U <statTemp>>$10: {<U t>: T.class_of(Time)} = <U <magic>>$13: <Magic>.<U <build-hash>>(<U <hashTemp>>$11: Symbol(:\"t\"), <U <hashTemp>>$12: T.class_of(Time))\l<U <statTemp>>$8: Sorbet::Private::Builder = <U <statTemp>>$9: Sorbet::Private::Builder.<U params>(<U <statTemp>>$10: {<U t>: T.class_of(Time)})\l<U <statTemp>>$14: T.class_of(Time) = alias <C <U Time>>\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$14: T.class_of(Time))\l<U <blockReturnTemp>>$15: T.noreturn = blockreturn<::<Class:A>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_4" -> "bb::<Class:A>#<static-init>_2" [style="bold"];

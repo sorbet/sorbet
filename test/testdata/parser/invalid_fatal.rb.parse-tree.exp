@@ -1,7 +1,7 @@
 DString {
   nodes = [
     String {
-      val = \xg3
+      val = <U \xg3>
     }
   ]
 }

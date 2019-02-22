@@ -1,41 +1,41 @@
-class <emptyTree><<constant:<root>>> < ()
-  module <emptyTree>::<constant:MM><<constant:<todo sym>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
+  module <emptyTree>::<C <U MM>><<C <U <todo sym>>>> < ()
     <emptyTree>
   end
 
-  class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      self(<constant:<todo sym>>).include(<emptyTree>::<constant:MM>)
+  class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U MM>>)
 
-      def newer<<constant:<todo sym>>>(&<blk>)
-        self(<constant:<todo sym>>).new()
+      def <U newer><<C <U <todo sym>>>>(&<U <blk>>)
+        self(<C <U <todo sym>>>).<U new>()
       end
     end
   end
 
-  class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
-    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:MM>)
+  class <emptyTree>::<C <U B>><<C <U <todo sym>>>> < (::<todo sym>)
+    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U MM>>)
 
-    def self.newer<<constant:<todo sym>>>(&<blk>)
-      self(<constant:<todo sym>>).new()
+    def self.<U newer><<C <U <todo sym>>>>(&<U <blk>>)
+      self(<C <U <todo sym>>>).<U new>()
     end
   end
 
-  class <emptyTree>::<constant:C><<constant:<todo sym>>> < (<emptyTree>::<constant:A>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      def newerer<<constant:<todo sym>>>(&<blk>)
-        self(<constant:<todo sym>>).newer()
+  class <emptyTree>::<C <U C>><<C <U <todo sym>>>> < (<emptyTree>::<C <U A>>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      def <U newerer><<C <U <todo sym>>>>(&<U <blk>>)
+        self(<C <U <todo sym>>>).<U newer>()
       end
     end
   end
 
-  def main<<constant:<todo sym>>>(&<blk>)
+  def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:A>.newer())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:B>.newer())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:C>.newerer())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U A>>.<U newer>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U B>>.<U newer>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U C>>.<U newerer>())
     end
   end
 
-  self(<constant:<todo sym>>).main()
+  self(<C <U <todo sym>>>).<U main>()
 end

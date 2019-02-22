@@ -1,58 +1,58 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
   begin
-    <assignTemp>$2 = ::<Magic>.<expand-splat>(self(<constant:<todo sym>>).some_array(), 3, 0)
-    <emptyTree>::<constant:A> = <assignTemp>$2.[](0)
-    <emptyTree>::<constant:B> = <assignTemp>$2.[](1)
-    <emptyTree>::<constant:C> = <assignTemp>$2.[](2)
-    <assignTemp>$2
+    <D <U <assignTemp>> $2> = ::<Magic>.<U <expand-splat>>(self(<C <U <todo sym>>>).<U some_array>(), 3, 0)
+    <emptyTree>::<C <U A>> = <D <U <assignTemp>> $2>.<U []>(0)
+    <emptyTree>::<C <U B>> = <D <U <assignTemp>> $2>.<U []>(1)
+    <emptyTree>::<C <U C>> = <D <U <assignTemp>> $2>.<U []>(2)
+    <D <U <assignTemp>> $2>
   end
 
-  class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
-    def some_method<<constant:<todo sym>>>(array, &<blk>)
+  class <emptyTree>::<C <U Test>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U some_method><<C <U <todo sym>>>>(<U array>, &<U <blk>>)
       begin
         begin
-          <assignTemp>$2 = ::<Magic>.<expand-splat>(array, 3, 0)
-          a = <assignTemp>$2.[](0)
-          b = <assignTemp>$2.[](1)
+          <D <U <assignTemp>> $2> = ::<Magic>.<U <expand-splat>>(<U array>, 3, 0)
+          <U a> = <D <U <assignTemp>> $2>.<U []>(0)
+          <U b> = <D <U <assignTemp>> $2>.<U []>(1)
           begin
-            <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2.[](2), 2, 0)
-            c = <assignTemp>$3.[](0)
-            d = <assignTemp>$3.[](1)
-            <assignTemp>$3
+            <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<D <U <assignTemp>> $2>.<U []>(2), 2, 0)
+            <U c> = <D <U <assignTemp>> $3>.<U []>(0)
+            <U d> = <D <U <assignTemp>> $3>.<U []>(1)
+            <D <U <assignTemp>> $3>
           end
-          <assignTemp>$2
+          <D <U <assignTemp>> $2>
         end
         begin
-          <assignTemp>$4 = ::<Magic>.<expand-splat>(array, 2, 0)
-          a.[]=(b, <assignTemp>$4.[](0))
-          c = <assignTemp>$4.[](1)
-          <assignTemp>$4
+          <D <U <assignTemp>> $4> = ::<Magic>.<U <expand-splat>>(<U array>, 2, 0)
+          <U a>.<U []=>(<U b>, <D <U <assignTemp>> $4>.<U []>(0))
+          <U c> = <D <U <assignTemp>> $4>.<U []>(1)
+          <D <U <assignTemp>> $4>
         end
         begin
-          <assignTemp>$5 = ::<Magic>.<expand-splat>(array, 1, 0)
-          a = <assignTemp>$5.[](0)
-          b = <assignTemp>$5.slice(::Range.new(1, -1, false))
-          <assignTemp>$5
+          <D <U <assignTemp>> $5> = ::<Magic>.<U <expand-splat>>(<U array>, 1, 0)
+          <U a> = <D <U <assignTemp>> $5>.<U []>(0)
+          <U b> = <D <U <assignTemp>> $5>.<U slice>(::Range.<U new>(1, -1, false))
+          <D <U <assignTemp>> $5>
         end
         begin
-          <assignTemp>$6 = ::<Magic>.<expand-splat>(array, 0, 1)
-          a = <assignTemp>$6.slice(::Range.new(0, -1, true))
-          b = <assignTemp>$6.[](-1)
-          <assignTemp>$6
+          <D <U <assignTemp>> $6> = ::<Magic>.<U <expand-splat>>(<U array>, 0, 1)
+          <U a> = <D <U <assignTemp>> $6>.<U slice>(::Range.<U new>(0, -1, true))
+          <U b> = <D <U <assignTemp>> $6>.<U []>(-1)
+          <D <U <assignTemp>> $6>
         end
         begin
-          <assignTemp>$7 = ::<Magic>.<expand-splat>(array, 2, 2)
-          a = <assignTemp>$7.[](0)
-          b = <assignTemp>$7.[](1)
-          c = <assignTemp>$7.slice(::Range.new(2, -2, true))
-          d = <assignTemp>$7.[](-2)
-          e = <assignTemp>$7.[](-1)
-          <assignTemp>$7
+          <D <U <assignTemp>> $7> = ::<Magic>.<U <expand-splat>>(<U array>, 2, 2)
+          <U a> = <D <U <assignTemp>> $7>.<U []>(0)
+          <U b> = <D <U <assignTemp>> $7>.<U []>(1)
+          <U c> = <D <U <assignTemp>> $7>.<U slice>(::Range.<U new>(2, -2, true))
+          <U d> = <D <U <assignTemp>> $7>.<U []>(-2)
+          <U e> = <D <U <assignTemp>> $7>.<U []>(-1)
+          <D <U <assignTemp>> $7>
         end
         begin
-          <assignTemp>$8 = ::<Magic>.<expand-splat>(array, 1, 0)
-          a = <assignTemp>$8.[](0)
-          <assignTemp>$8
+          <D <U <assignTemp>> $8> = ::<Magic>.<U <expand-splat>>(<U array>, 1, 0)
+          <U a> = <D <U <assignTemp>> $8>.<U []>(0)
+          <D <U <assignTemp>> $8>
         end
       end
     end

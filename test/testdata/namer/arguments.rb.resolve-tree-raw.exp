@@ -6,13 +6,13 @@ InsSeq{
         symbol = ::RubyTyper
         typeAlias = nullptr
       }
-      fun = keep_for_ide
+      fun = <U keep_for_ide>
       block = nullptr
       args = [
         ConstantLit{
           orig = UnresolvedConstantLit{
             scope = EmptyTree
-            cnst = <constant:A>
+            cnst = <C <U A>>
           }
           symbol = ::A
           typeAlias = nullptr
@@ -23,11 +23,11 @@ InsSeq{
       name = ConstantLit{
         orig = UnresolvedConstantLit{
           scope = EmptyTree
-          cnst = <constant:A>
+          cnst = <C <U A>>
         }
         symbol = ::A
         typeAlias = nullptr
-      }<<constant:A>>
+      }<<C <U A>>>
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
@@ -36,65 +36,65 @@ InsSeq{
       rhs = [
         MethodDef{
           flags = 0
-          name = take_arguments<take_arguments>
+          name = <U take_arguments><<U take_arguments>>
           args = [Local{
-              localVariable = a
+              localVariable = <U a>
             }, OptionalArg{
               expr = Local{
-                localVariable = b
+                localVariable = <U b>
               }
               default_ = Literal{ value = 1 }
             }, Local{
-              localVariable = c
+              localVariable = <U c>
             }, Local{
-              localVariable = d
+              localVariable = <U d>
             }, OptionalArg{
               expr = Local{
-                localVariable = e
+                localVariable = <U e>
               }
               default_ = Literal{ value = 2 }
             }, Local{
-              localVariable = f
+              localVariable = <U f>
             }, Local{
-              localVariable = g
+              localVariable = <U g>
             }]
           rhs = InsSeq{
             stats = [
               Array{
                 elems = [
                   Local{
-                    localVariable = a
+                    localVariable = <U a>
                   }
                   Local{
-                    localVariable = b
+                    localVariable = <U b>
                   }
                   Local{
-                    localVariable = c
+                    localVariable = <U c>
                   }
                   Local{
-                    localVariable = d
+                    localVariable = <U d>
                   }
                   Local{
-                    localVariable = e
+                    localVariable = <U e>
                   }
                   Local{
-                    localVariable = f
+                    localVariable = <U f>
                   }
                   Local{
-                    localVariable = g
+                    localVariable = <U g>
                   }
                 ]
               }
               Assign{
                 lhs = Local{
-                  localVariable = h
+                  localVariable = <U h>
                 }
                 rhs = Literal{ value = 1 }
               }
             ],
             expr = Send{
               recv = Self{ claz = ::A }
-              fun = proc
+              fun = <U proc>
               block = Block {
                 args = [
                   argument ::A#take_arguments#<block>#a<> @ test/testdata/namer/arguments.rb:6
@@ -108,28 +108,28 @@ InsSeq{
                 body = Array{
                   elems = [
                     Local{
-                      localVariable = a$2
+                      localVariable = <U a>$2
                     }
                     Local{
-                      localVariable = b$2
+                      localVariable = <U b>$2
                     }
                     Local{
-                      localVariable = c$2
+                      localVariable = <U c>$2
                     }
                     Local{
-                      localVariable = d$2
+                      localVariable = <U d>$2
                     }
                     Local{
-                      localVariable = e$2
+                      localVariable = <U e>$2
                     }
                     Local{
-                      localVariable = f$2
+                      localVariable = <U f>$2
                     }
                     Local{
-                      localVariable = g$2
+                      localVariable = <U g>$2
                     }
                     Local{
-                      localVariable = h$2
+                      localVariable = <U h>$2
                     }
                   ]
                 }

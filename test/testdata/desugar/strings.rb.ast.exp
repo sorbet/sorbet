@@ -1,9 +1,9 @@
-class <emptyTree><<constant:<root>>> < ()
-  def test_strings<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  def <U test_strings><<C <U <todo sym>>>>(&<U <blk>>)
     begin
       ""
       "foo"
-      "foo".concat(1.to_s()).to_s()
+      "foo".<U concat>(1.<U to_s>()).<U to_s>()
     end
   end
 end

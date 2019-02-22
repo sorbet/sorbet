@@ -1,95 +1,95 @@
-class <emptyTree><<constant:<root>>> < ()
-  self(<constant:<todo sym>>).alias_method(:"afoo", :"bar")
+class <emptyTree><<C <U <root>>>> < ()
+  self(<C <U <todo sym>>>).<U alias_method>(:"afoo", :"bar")
 
-  @iv = 1
+  <U @iv> = 1
 
-  @@cv = 1
+  <U @@cv> = 1
 
-  $gv = 1
+  <U $gv> = 1
 
   begin
-    <assignTemp>$2 = ::<Magic>.<expand-splat>([nil, nil], 2, 0)
-    self(<constant:<todo sym>>).x().var=(<assignTemp>$2.[](0))
-    y = <assignTemp>$2.[](1)
-    <assignTemp>$2
+    <D <U <assignTemp>> $2> = ::<Magic>.<U <expand-splat>>([nil, nil], 2, 0)
+    self(<C <U <todo sym>>>).<U x>().<U var=>(<D <U <assignTemp>> $2>.<U []>(0))
+    <U y> = <D <U <assignTemp>> $2>.<U []>(1)
+    <D <U <assignTemp>> $2>
   end
 
   begin
-    <assignTemp>$3 = ::<Magic>.<expand-splat>(self(<constant:<todo sym>>).zaaaz(), 2, 0)
-    baaaar = <assignTemp>$3.[](0)
-    naaar = <assignTemp>$3.[](1)
-    <assignTemp>$3
+    <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(self(<C <U <todo sym>>>).<U zaaaz>(), 2, 0)
+    <U baaaar> = <D <U <assignTemp>> $3>.<U []>(0)
+    <U naaar> = <D <U <assignTemp>> $3>.<U []>(1)
+    <D <U <assignTemp>> $3>
   end
 
-  xaaaaz = [self(<constant:<todo sym>>).yayayaya(), self(<constant:<todo sym>>).tutututu()]
+  <U xaaaaz> = [self(<C <U <todo sym>>>).<U yayayaya>(), self(<C <U <todo sym>>>).<U tutututu>()]
 
   <emptyTree>
 
   nil
 
   begin
-    self(<constant:<todo sym>>).a()
-    self(<constant:<todo sym>>).b()
+    self(<C <U <todo sym>>>).<U a>()
+    self(<C <U <todo sym>>>).<U b>()
   end
 
-  def bfoo<<constant:<todo sym>>>(&x)
+  def <U bfoo><<C <U <todo sym>>>>(&<U x>)
     <emptyTree>
   end
 
-  self(<constant:<todo sym>>).lambda() do ||
+  self(<C <U <todo sym>>>).<U lambda>() do ||
     <emptyTree>
   end
 
   begin
-    <assignTemp>$4 = self(<constant:<todo sym>>).x()
-    if y.===(<assignTemp>$4)
+    <D <U <assignTemp>> $4> = self(<C <U <todo sym>>>).<U x>()
+    if <U y>.<U ===>(<D <U <assignTemp>> $4>)
       1
     else
-      self(<constant:<todo sym>>).z()
+      self(<C <U <todo sym>>>).<U z>()
     end
   end
 
   "x"
 
-  1.+(::Kernel.Complex(0, "4"))
+  1.<U +>(::Kernel.<U Complex>(0, "4"))
 
   0.500000
 
-  ::Kernel.Complex(0, "1.5")
+  ::Kernel.<U Complex>(0, "1.5")
 
-  def self.classmeth<<constant:<todo sym>>>(&<blk>)
+  def self.<U classmeth><<C <U <todo sym>>>>(&<U <blk>>)
     <emptyTree>
   end
 
-  class <singleton class><<constant:<todo sym>>> < ()
+  class <U <singleton class>><<C <U <todo sym>>>> < ()
     <emptyTree>
   end
 
   begin
-    ||$5 = true
-    if ||$5
-      ||$5
+    <D <U ||> $5> = true
+    if <D <U ||> $5>
+      <D <U ||> $5>
     else
       false
     end
   end
 
-  self(<constant:<todo sym>>).arr().each() do |*forTemp$6|
+  self(<C <U <todo sym>>>).<U arr>().<U each>() do |*<D <U forTemp> $6>|
     begin
       begin
-        <assignTemp>$7 = ::<Magic>.<expand-splat>(forTemp$6, 1, 0)
-        x = <assignTemp>$7.[](0)
-        <assignTemp>$7
+        <D <U <assignTemp>> $7> = ::<Magic>.<U <expand-splat>>(<D <U forTemp> $6>, 1, 0)
+        <U x> = <D <U <assignTemp>> $7>.<U []>(0)
+        <D <U <assignTemp>> $7>
       end
       <emptyTree>
     end
   end
 
-  while 0.!=(1)
+  while 0.<U !=>(1)
     <emptyTree>
   end
 
-  x.[]=(1, 0)
+  <U x>.<U []=>(1, 0)
 
   break(<emptyTree>)
 
@@ -103,15 +103,15 @@ class <emptyTree><<constant:<root>>> < ()
 
   next([1, 2])
 
-  ::<Magic>.defined?(<emptyTree>::<constant:X>)
+  ::<Magic>.<U defined?>(<emptyTree>::<C <U X>>)
 
-  self(<constant:<todo sym>>).super(ZSuperArgs)
+  self(<C <U <todo sym>>>).<U super>(ZSuperArgs)
 
-  def kwfoo<<constant:<todo sym>>>(x:, y: = 1, *z:, &<blk>)
+  def <U kwfoo><<C <U <todo sym>>>>(<U x>:, <U y>: = 1, *<U z>:, &<U <blk>>)
     <emptyTree>
   end
 
-  x.to_hash()
+  <U x>.<U to_hash>()
 
   86
 
@@ -123,19 +123,19 @@ class <emptyTree><<constant:<root>>> < ()
     nil
   end
 
-  while true.!()
+  while true.<U !>()
     nil
   end
 
-  while true.!()
+  while true.<U !>()
     nil
   end
 
   while true
     begin
-      forTemp$8 = self(<constant:<todo sym>>).puts(1)
-      if false.!()
-        break(forTemp$8)
+      <D <U forTemp> $8> = self(<C <U <todo sym>>>).<U puts>(1)
+      if false.<U !>()
+        break(<D <U forTemp> $8>)
       else
         <emptyTree>
       end
@@ -144,9 +144,9 @@ class <emptyTree><<constant:<root>>> < ()
 
   while true
     begin
-      forTemp$9 = self(<constant:<todo sym>>).puts(1)
+      <D <U forTemp> $9> = self(<C <U <todo sym>>>).<U puts>(1)
       if true
-        break(forTemp$9)
+        break(<D <U forTemp> $9>)
       else
         <emptyTree>
       end
@@ -154,47 +154,47 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   begin
-    <assignTemp>$10 = ::<Magic>.<expand-splat>(1, 2, 0)
-    a = <assignTemp>$10.[](0)
+    <D <U <assignTemp>> $10> = ::<Magic>.<U <expand-splat>>(1, 2, 0)
+    <U a> = <D <U <assignTemp>> $10>.<U []>(0)
     begin
-      <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10.[](1), 1, 0)
-      x = <assignTemp>$11.[](0)
-      <assignTemp>$11
+      <D <U <assignTemp>> $11> = ::<Magic>.<U <expand-splat>>(<D <U <assignTemp>> $10>.<U []>(1), 1, 0)
+      <U x> = <D <U <assignTemp>> $11>.<U []>(0)
+      <D <U <assignTemp>> $11>
     end
-    <assignTemp>$10
+    <D <U <assignTemp>> $10>
   end
 
-  4
+  <U 4>
 
-  def optfoo<<constant:<todo sym>>>(x = 1, *y, &<blk>)
+  def <U optfoo><<C <U <todo sym>>>>(<U x> = 1, *<U y>, &<U <blk>>)
     <emptyTree>
   end
 
-  {x => y, "foo".intern() => 1}
+  {<U x> => <U y>, "foo".<U intern>() => 1}
 
   <emptyTree>
 
   <emptyTree>
 
-  ::Kernel.Rational("4")
+  ::Kernel.<U Rational>("4")
 
-  ::Kernel.Complex(0, "5")
+  ::Kernel.<U Complex>(0, "5")
 
   <emptyTree>
-rescue <emptyTree>::<constant:E> => x
+rescue <emptyTree>::<C <U E>> => <U x>
   nil
 
   begin
-    <assignTemp>$12 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
-    x = <assignTemp>$12.slice(::Range.new(0, -1, false))
-    <assignTemp>$12
+    <D <U <assignTemp>> $12> = ::<Magic>.<U <expand-splat>>(<U y>.<U to_a>(), 0, 0)
+    <U x> = <D <U <assignTemp>> $12>.<U slice>(::Range.<U new>(0, -1, false))
+    <D <U <assignTemp>> $12>
   end
 
-  "foo".concat(self(<constant:<todo sym>>).bar().to_s()).intern()
+  "foo".<U concat>(self(<C <U <todo sym>>>).<U bar>().<U to_s>()).<U intern>()
 
   [:"sym"]
 
-  if x
+  if <U x>
     1
   else
     7
@@ -206,21 +206,21 @@ rescue <emptyTree>::<constant:E> => x
 
   ["a", "b"]
 
-  self(<constant:<todo sym>>).`("true")
+  self(<C <U <todo sym>>>).<U `>("true")
 
-  self(<constant:<todo sym>>).proc() do |x|
+  self(<C <U <todo sym>>>).<U proc>() do |<U x>|
     <emptyTree>
   end
 
-  break(self(<constant:<todo sym>>).cfoo(1) do ||
+  break(self(<C <U <todo sym>>>).<U cfoo>(1) do ||
       <emptyTree>
     end)
 
-  def sfoo<<constant:<todo sym>>>(**$2, &<blk>)
+  def <U sfoo><<C <U <todo sym>>>>(*<P <U *> $2>, &<U <blk>>)
     <emptyTree>
   end
 
-  def ssfoo<<constant:<todo sym>>>(***$3:, &<blk>)
+  def <U ssfoo><<C <U <todo sym>>>>(*<P <U **> $3>:, &<U <blk>>)
     <emptyTree>
   end
 end

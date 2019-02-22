@@ -1,0 +1,60 @@
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi start=3:1 end=41:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi start=2:1 end=990:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi start=2:1 end=21:39}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi start=1:1 end=1:1}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi start=1:0 end=1:0}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi start=2:1 end=57:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi start=2:1 end=80:54}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi start=2:1 end=23:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi start=2:1 end=313:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi start=2:1 end=798:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi start=2:1 end=51:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi start=3:1 end=3:17}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi start=2:1 end=61:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi start=2:1 end=133:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi start=2:1 end=598:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi start=2:1 end=182:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi start=3:1 end=35:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi start=2:1 end=408:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi start=8:1 end=9:22}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi start=4:1 end=221:2}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi start=4:1 end=46:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi start=3:1 end=509:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi start=2:1 end=514:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi start=3:1 end=232:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi start=3:1 end=498:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi start=3:1 end=1852:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi start=3:1 end=34:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi start=6:1 end=48:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi start=3:1 end=2363:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi start=2:1 end=98:4})
+  field <U $c> @ Loc {file=test/testdata/desugar/sclass.rb start=19:1 end=19:3}
+  method <N <U <static-init>> $87> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}
+    argument <N <U <static-init>> $87><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=2:8}
+  class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:7 end=2:8}
+  class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=11:1 end=11:8}
+  class <S <C <U B>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
+    method <S <C <U B>> $1><U b> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=13:9 end=13:14}
+      argument <S <C <U B>> $1><U b><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <S <C <U B>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
+  class <C <U D>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=26:1 end=26:8}
+  class <S <C <U D>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=27:5 end=27:10}
+  class <S <S <C <U D>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
+    method <S <S <C <U D>> $1> $1><U d> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=29:13 end=29:18}
+      argument <S <S <C <U D>> $1> $1><U d><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <S <S <C <U D>> $1> $1> $1> < <S <S <S <C <U Object>> $1> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
+  class <C <U E>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=36:1 end=36:8}
+  class <S <C <U E>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
+    method <S <C <U E>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=44:5 end=44:12}
+      argument <S <C <U E>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+    method <S <C <U E>> $1><U e> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=39:13 end=39:18}
+      argument <S <C <U E>> $1><U e><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+    method <S <C <U E>> $1><U wrapper> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=38:9 end=38:20}
+      argument <S <C <U E>> $1><U wrapper><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <S <C <U E>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
+  class <C <U F>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=47:1 end=47:8}
+  class <S <C <U F>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
+    field <S <C <U F>> $1><U @f> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=50:11 end=50:13}
+    method <S <C <U F>> $1><U f=> (f, <blk>) -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=56:9 end=56:23}
+      argument <S <C <U F>> $1><U f=>f<> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=55:21 end=55:22}
+      argument <S <C <U F>> $1><U f=><blk><block> -> T.untyped @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+    method <S <C <U F>> $1><U initialize> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=49:9 end=49:23}
+      argument <S <C <U F>> $1><U initialize><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <S <C <U F>> $1> $1> < <S <S <C <U Object>> $1> $1> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=47:7 end=47:8}
+    method <S <S <C <U F>> $1> $1><N <U <block>> $2> () @ Loc {file=test/testdata/desugar/sclass.rb start=55:9 end=55:50}
+    method <S <S <C <U F>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=55:9 end=55:50}
+      argument <S <S <C <U F>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <C <U G>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=60:1 end=60:8}
+    method <C <U G>><U wrapper> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=61:5 end=61:16}
+      argument <C <U G>><U wrapper><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <C <U G>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
+    method <S <C <U G>> $1><U g> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=69:5 end=69:15}
+      argument <S <C <U G>> $1><U g><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+    method <S <C <U G>> $1><U inner> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=63:13 end=63:22}
+      argument <S <C <U G>> $1><U inner><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <S <C <U G>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
+  class <C <U H>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=74:1 end=74:8}
+  class <S <C <U H>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
+    class <S <C <U H>> $1><C <U H2>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=76:17}
+    class <S <C <U H>> $1><S <C <U H2>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:15 end=76:17}
+      method <S <C <U H>> $1><S <C <U H2>> $1><U h> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=77:13 end=77:23}
+        argument <S <C <U H>> $1><S <C <U H2>> $1><U h><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <S <S <C <U H>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
+    method <S <S <C <U H>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=76:17}
+      argument <S <S <C <U H>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi start=848:1 end=848:27}
+    method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=84:1 end=84:9}
+      argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+

@@ -1,92 +1,92 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::NormalClass)
+          ::RubyTyper.<U keep_for_ide>(::NormalClass)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::ANamespace)
+          ::RubyTyper.<U keep_for_ide>(::ANamespace)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::ANamespace::ClassInNamespace)
+          ::RubyTyper.<U keep_for_ide>(::ANamespace::ClassInNamespace)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::Parent)
+          ::RubyTyper.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::Mixin)
+          ::RubyTyper.<U keep_for_ide>(::Mixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::OtherMixin)
+          ::RubyTyper.<U keep_for_ide>(::OtherMixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::Child)
-          ::RubyTyper.keep_for_ide(::Parent)
+          ::RubyTyper.<U keep_for_ide>(::Child)
+          ::RubyTyper.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::NormalClass<<constant:NormalClass>> < (::<todo sym>)
+  class ::NormalClass<<C <U NormalClass>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
     <emptyTree>
 
-    def normal_method<normal_method>(<blk>)
+    def <U normal_method><<U normal_method>>(<blk>)
       <emptyTree>
     end
 
-    def self.normal_static_method<normal_static_method>(<blk>)
+    def self.<U normal_static_method><<U normal_static_method>>(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::NormalClass::InnerClass)
+          ::RubyTyper.<U keep_for_ide>(::NormalClass::InnerClass)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::NormalClass::InnerModule)
+          ::RubyTyper.<U keep_for_ide>(::NormalClass::InnerModule)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::NormalClass::InnerClass<<constant:InnerClass>> < (::<todo sym>)  end
-  module ::NormalClass::InnerModule<<constant:InnerModule>> < ()  end
-  module ::ANamespace<<constant:ANamespace>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+  class ::NormalClass::InnerClass<<C <U InnerClass>>> < (::<todo sym>)  end
+  module ::NormalClass::InnerModule<<C <U InnerModule>>> < ()  end
+  module ::ANamespace<<C <U ANamespace>>> < ()
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.keep_for_ide(::ANamespace::ObviousChild)
+        ::RubyTyper.<U keep_for_ide>(::ANamespace::ObviousChild)
         <emptyTree>
       end
     end
   end
-  class ::ANamespace::ObviousChild<<constant:ObviousChild>> < (::<todo sym>)  end
-  class ::ANamespace::ClassInNamespace<<constant:ClassInNamespace>> < (::<todo sym>)  end
-  class ::Parent<<constant:Parent>> < (::<todo sym>)  end
-  module ::Mixin<<constant:Mixin>> < ()  end
-  module ::OtherMixin<<constant:OtherMixin>> < ()  end
-  class ::Child<<constant:Child>> < (::Parent, ::Mixin)
-    def self.<static-init><<static-init>>(<blk>)
+  class ::ANamespace::ObviousChild<<C <U ObviousChild>>> < (::<todo sym>)  end
+  class ::ANamespace::ClassInNamespace<<C <U ClassInNamespace>>> < (::<todo sym>)  end
+  class ::Parent<<C <U Parent>>> < (::<todo sym>)  end
+  module ::Mixin<<C <U Mixin>>> < ()  end
+  module ::OtherMixin<<C <U OtherMixin>>> < ()  end
+  class ::Child<<C <U Child>>> < (::Parent, ::Mixin)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        self(<singleton_class:<constant:Child>>).include(::Mixin) do ||
+        self(<S <C <U Child>> $1>).<U include>(::Mixin) do ||
           <emptyTree>
         end
-        self(<singleton_class:<constant:Child>>).whatever().include(::OtherMixin)
-        ::RubyTyper.keep_for_ide(::Mixin)
+        self(<S <C <U Child>> $1>).<U whatever>().<U include>(::OtherMixin)
+        ::RubyTyper.<U keep_for_ide>(::Mixin)
         <emptyTree>
       end
     end

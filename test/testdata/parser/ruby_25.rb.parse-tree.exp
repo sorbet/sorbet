@@ -3,11 +3,11 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = <constant:Toto>
+        name = <C <U Toto>>
       }
       superclass = NULL
       body = DefMethod {
-        name = toto
+        name = <U toto>
         args = NULL
         body = Block {
           send = Send {
@@ -18,14 +18,14 @@ Begin {
                 }
               ]
             }
-            method = each
+            method = <U each>
             args = [
             ]
           }
           args = Args {
             args = [
               Arg {
-                name = n
+                name = <U n>
               }
             ]
           }
@@ -47,26 +47,26 @@ Begin {
       }
     }
     DefMethod {
-      name = main
+      name = <U main>
       args = NULL
       body = Send {
         receiver = Send {
           receiver = Const {
             scope = NULL
-            name = <constant:Toto>
+            name = <C <U Toto>>
           }
-          method = new
+          method = <U new>
           args = [
           ]
         }
-        method = toto
+        method = <U toto>
         args = [
         ]
       }
     }
     Send {
       receiver = NULL
-      method = main
+      method = <U main>
       args = [
       ]
     }

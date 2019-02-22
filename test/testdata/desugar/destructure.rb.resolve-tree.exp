@@ -1,23 +1,23 @@
 begin
-  ::RubyTyper.keep_for_ide(::Destructure)
-  class ::Destructure<<constant:Destructure>> < (::<todo sym>)
-    def f<f>((x,y), z, <blk>)
+  ::RubyTyper.<U keep_for_ide>(::Destructure)
+  class ::Destructure<<C <U Destructure>>> < (::<todo sym>)
+    def <U f><<U f>>((x,y), z, <blk>)
       begin
         begin
-          <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 2, 0)
-          x = <assignTemp>$3.[](0)
-          y = <assignTemp>$3.[](1)
-          <assignTemp>$3
+          <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $2>, 2, 0)
+          <U x> = <D <U <assignTemp>> $3>.<U []>(0)
+          <U y> = <D <U <assignTemp>> $3>.<U []>(1)
+          <D <U <assignTemp>> $3>
         end
         begin
-          x.+(y)
-          self(<constant:Destructure>).lambda() do |(a,b)|
+          <U x>.<U +>(<U y>)
+          self(<C <U Destructure>>).<U lambda>() do |(a,b)|
             begin
               begin
-                <assignTemp>$5$2 = ::<Magic>.<expand-splat>(<destructure>$4$2, 2, 0)
-                a$2 = <assignTemp>$5$2.[](0)
-                b$2 = <assignTemp>$5$2.[](1)
-                <assignTemp>$5$2
+                <D <U <assignTemp>> $5>$2 = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $4>$2, 2, 0)
+                <U a>$2 = <D <U <assignTemp>> $5>$2.<U []>(0)
+                <U b>$2 = <D <U <assignTemp>> $5>$2.<U []>(1)
+                <D <U <assignTemp>> $5>$2
               end
               <emptyTree>
             end

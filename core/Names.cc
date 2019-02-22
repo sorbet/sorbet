@@ -38,17 +38,39 @@ unsigned int Name::hash(const GlobalState &gs) const {
 string Name::toString(const GlobalState &gs) const {
     switch (this->kind) {
         case UTF8:
-            return string(raw.utf8.begin(), raw.utf8.end());
-        case UNIQUE:
-            if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return fmt::format("<singleton_class:{}>", this->unique.original.data(gs)->toString(gs));
-            } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
-                return fmt::format("<overload_N.{}:{}>", to_string(this->unique.num),
-                                   this->unique.original.data(gs)->toString(gs));
+            return fmt::format("<U {}>", string(raw.utf8.begin(), raw.utf8.end()));
+        case UNIQUE: {
+            string kind;
+            switch (this->unique.uniqueNameKind) {
+                case UniqueNameKind::Parser:
+                    kind = "P";
+                    break;
+                case UniqueNameKind::Desugar:
+                    kind = "D";
+                    break;
+                case UniqueNameKind::Namer:
+                    kind = "N";
+                    break;
+                case UniqueNameKind::Singleton:
+                    kind = "S";
+                    break;
+                case UniqueNameKind::Overload:
+                    kind = "O";
+                    break;
+                case UniqueNameKind::TypeVarName:
+                    kind = "T";
+                    break;
+                case UniqueNameKind::PositionalArg:
+                    kind = "A";
+                    break;
+                case UniqueNameKind::ResolverMissingClass:
+                    kind = "R";
+                    break;
             }
-            return fmt::format("{}${}", this->unique.original.data(gs)->toString(gs), this->unique.num);
+            return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->toString(gs), this->unique.num);
+        }
         case CONSTANT:
-            return fmt::format("<constant:{}>", this->cnst.original.toString(gs));
+            return fmt::format("<C {}>", this->cnst.original.toString(gs));
         default:
             Exception::notImplemented();
     }

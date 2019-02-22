@@ -1,62 +1,62 @@
-class <emptyTree><<constant:<root>>> < ()
-  def baz1<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  def <U baz1><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      a = "foo"
-      b = a.getbyte(a)
+      <U a> = "foo"
+      <U b> = <U a>.<U getbyte>(<U a>)
     end
   end
 
-  def baz2<<constant:<todo sym>>>(&<blk>)
+  def <U baz2><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      a = "foo"
-      b = a.getbyte("foo")
+      <U a> = "foo"
+      <U b> = <U a>.<U getbyte>("foo")
     end
   end
 
-  def baz3<<constant:<todo sym>>>(&<blk>)
-    b = "foo".getbyte("foo")
+  def <U baz3><<C <U <todo sym>>>>(&<U <blk>>)
+    <U b> = "foo".<U getbyte>("foo")
   end
 
-  def baz4<<constant:<todo sym>>>(&<blk>)
-    b = self(<constant:<todo sym>>).a().getbyte("foo")
+  def <U baz4><<C <U <todo sym>>>>(&<U <blk>>)
+    <U b> = self(<C <U <todo sym>>>).<U a>().<U getbyte>("foo")
   end
 
-  def baz5<<constant:<todo sym>>>(cond, &<blk>)
+  def <U baz5><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
     begin
-      if cond
-        b = 1
+      if <U cond>
+        <U b> = 1
       else
-        b = "foo"
+        <U b> = "foo"
       end
-      b = b.getbyte(1)
+      <U b> = <U b>.<U getbyte>(1)
     end
   end
 
-  def baz6<<constant:<todo sym>>>(cond, &<blk>)
+  def <U baz6><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
     begin
-      if cond
-        b = 1
+      if <U cond>
+        <U b> = 1
       else
-        b = "foo"
+        <U b> = "foo"
       end
-      b = "foo".getbyte(b)
+      <U b> = "foo".<U getbyte>(<U b>)
     end
   end
 
-  def baz7<<constant:<todo sym>>>(cond, &<blk>)
+  def <U baz7><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
     begin
-      if cond
-        b = 1
+      if <U cond>
+        <U b> = 1
       else
         <emptyTree>
       end
-      b = "foo".getbyte(b)
+      <U b> = "foo".<U getbyte>(<U b>)
     end
   end
 
-  def baz8<<constant:<todo sym>>>(&<blk>)
+  def <U baz8><<C <U <todo sym>>>>(&<U <blk>>)
     while true
-      b = 1
+      <U b> = 1
     end
   end
 end

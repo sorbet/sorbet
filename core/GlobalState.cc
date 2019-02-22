@@ -861,8 +861,8 @@ unsigned int GlobalState::namesUsed() const {
     return names.size();
 }
 
-string GlobalState::toString(bool showHidden) const {
-    return Symbols::root().toStringWithTabs(*this, 0, showHidden);
+string GlobalState::toStringWithOptions(bool showHidden, bool useToString) const {
+    return Symbols::root().toStringWithTabs(*this, 0, showHidden, useToString);
 }
 
 void GlobalState::sanityCheck() const {

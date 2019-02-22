@@ -1,21 +1,21 @@
 begin
-  ::RubyTyper.keep_for_ide(::A)
-  module ::A<<constant:A>> < ()
+  ::RubyTyper.<U keep_for_ide>(::A)
+  module ::A<<C <U A>>> < ()
     <emptyTree>
 
     <emptyTree>
 
-    def Foo<Foo>(<blk>)
+    def <U Foo><<U Foo>>(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.keep_for_ide(::A::Foo)
+        ::RubyTyper.<U keep_for_ide>(::A::Foo)
         <emptyTree>
       end
     end
   end
-  class ::A::Foo<<constant:Foo>> < (::<todo sym>)  end
+  class ::A::Foo<<C <U Foo>>> < (::<todo sym>)  end
   <emptyTree>
 end

@@ -1,691 +1,691 @@
-class <emptyTree><<constant:<root>>> < ()
-  class <emptyTree>::<constant:NotAODM><<constant:<todo sym>>> < (::<todo sym>)
-    def self.prop<<constant:<todo sym>>>(*args, &<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U NotAODM>><<C <U <todo sym>>>> < (::<todo sym>)
+    def self.<U prop><<C <U <todo sym>>>>(*<U args>, &<U <blk>>)
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).prop()
+    self(<C <U <todo sym>>>).<U prop>()
 
-    self(<constant:<todo sym>>).prop(:"foo", :"not_a_string")
+    self(<C <U <todo sym>>>).<U prop>(:"foo", :"not_a_string")
 
-    self(<constant:<todo sym>>).prop("not_a_symbol", <emptyTree>::<constant:String>)
+    self(<C <U <todo sym>>>).<U prop>("not_a_symbol", <emptyTree>::<C <U String>>)
 
-    self(<constant:<todo sym>>).prop(:"foo", <emptyTree>::<constant:String>, "not_a_hash")
+    self(<C <U <todo sym>>>).<U prop>(:"foo", <emptyTree>::<C <U String>>, "not_a_hash")
 
-    self(<constant:<todo sym>>).prop("too", <emptyTree>::<constant:String>, {}, "many")
+    self(<C <U <todo sym>>>).<U prop>("too", <emptyTree>::<C <U String>>, {}, "many")
 
-    self(<constant:<todo sym>>).optional(:"company_name", <emptyTree>::<constant:String>, :"nonempty_string")
+    self(<C <U <todo sym>>>).<U optional>(:"company_name", <emptyTree>::<C <U String>>, :"nonempty_string")
 
-    self(<constant:<todo sym>>).optional(:"day", <emptyTree>::<constant:IntegerParam>.new({:"min" => 1, :"max" => 31}))
+    self(<C <U <todo sym>>>).<U optional>(:"day", <emptyTree>::<C <U IntegerParam>>.<U new>({:"min" => 1, :"max" => 31}))
 
-    self(<constant:<todo sym>>).optional(:"name", <emptyTree>::<constant:StringParam>.alphanumeric())
+    self(<C <U <todo sym>>>).<U optional>(:"name", <emptyTree>::<C <U StringParam>>.<U alphanumeric>())
 
-    self(<constant:<todo sym>>).optional(:"how_many", <emptyTree>::<constant:Opus>::<constant:Param>::<constant:CaseParam>.new(self(<constant:<todo sym>>).how_many_cases(), <emptyTree>::<constant:Opus>::<constant:Param>::<constant:ParamSpecsParam>.new(<emptyTree>::<constant:Default>)))
+    self(<C <U <todo sym>>>).<U optional>(:"how_many", <emptyTree>::<C <U Opus>>::<C <U Param>>::<C <U CaseParam>>.<U new>(self(<C <U <todo sym>>>).<U how_many_cases>(), <emptyTree>::<C <U Opus>>::<C <U Param>>::<C <U ParamSpecsParam>>.<U new>(<emptyTree>::<C <U Default>>)))
 
-    self(<constant:<todo sym>>).optional(:"optional_param", <emptyTree>::<constant:IntegerParam>.new())
+    self(<C <U <todo sym>>>).<U optional>(:"optional_param", <emptyTree>::<C <U IntegerParam>>.<U new>())
   end
 
-  class <emptyTree>::<constant:SomeODM><<constant:<todo sym>>> < (::<todo sym>)
-    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+  class <emptyTree>::<C <U SomeODM>><<C <U <todo sym>>>> < (::<todo sym>)
+    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foo<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foo2<<constant:<todo sym>>>(&<blk>)
-      <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:T>.unsafe(nil), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+    def <U foo2><<C <U <todo sym>>>>(&<U <blk>>)
+      <emptyTree>::<C <U T>>.<U cast>(<emptyTree>::<C <U T>>.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def foo2=<<constant:<todo sym>>>(arg0, &<blk>)
-      <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+    def <U foo2=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      <emptyTree>::<C <U T>>.<U cast>(nil, <emptyTree>::<C <U String>>)
     end
   end
 
-  class <emptyTree>::<constant:ForeignClass><<constant:<todo sym>>> < (::<todo sym>)
+  class <emptyTree>::<C <U ForeignClass>><<C <U <todo sym>>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  class <emptyTree>::<constant:AdvancedODM><<constant:<todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+  class <emptyTree>::<C <U AdvancedODM>><<C <U <todo sym>>>> < (::<todo sym>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def default_without_optional_false<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    def <U default_without_optional_false><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def default_without_optional_false=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U default_without_optional_false=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def optional_false<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U optional_false><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def optional_false=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U optional_false=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def nodefault<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    def <U nodefault><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def nodefault=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U nodefault=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def type<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U type><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def type=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    def <U type=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(::Object))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(::Object))
     end
 
-    def object<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(::Object))
+    def <U object><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(::Object))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::Object}).returns(::Object)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::Object}).<U returns>(::Object)
     end
 
-    def object=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::Object)
+    def <U object=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::Object)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:Array>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
-    def array<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
+    def <U array><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
-    def array=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
+    def <U array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
     end
 
-    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
+    class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
       end
 
-      def array=<<constant:<todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
+      def <U array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
 
-      def array<<constant:<todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
-      end
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T::Array.[](<emptyTree>::<constant:String>))
-    end
-
-    def array_of<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T::Array.[](<emptyTree>::<constant:String>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::T::Array.[](<emptyTree>::<constant:String>)}).returns(::T::Array.[](<emptyTree>::<constant:String>))
-    end
-
-    def array_of=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::T::Array.[](<emptyTree>::<constant:String>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:Array>)
-    end
-
-    def array_of_explicit<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
-    end
-
-    def array_of_explicit=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
-    end
-
-    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
-      end
-
-      def array_of_explicit=<<constant:<todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
-      end
-
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
-      end
-
-      def array_of_explicit<<constant:<todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      def <U array><<C <U <todo sym>>>>(&<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), ::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T::Array.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    def t_array<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+    def <U array_of><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T::Array.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T::Array.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(::T::Array.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    def t_array=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+    def <U array_of=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T::Array.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
+    end
+
+    def <U array_of_explicit><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
+    end
+
+    def <U array_of_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
+    end
+
+    class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
       end
 
-      def t_array=<<constant:<todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+      def <U array_of_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
 
-      def t_array<<constant:<todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
-      end
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-    end
-
-    def hash_of<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-    end
-
-    def hash_of=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-    end
-
-    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-      end
-
-      def hash_of=<<constant:<todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-      end
-
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-      end
-
-      def hash_of<<constant:<todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+      def <U array_of_explicit><<C <U <todo sym>>>>(&<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), ::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    def optional_explicit<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    def <U t_array><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    def optional_explicit=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    def <U t_array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
-    end
-
-    def optional_existing<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
-    end
-
-    def optional_existing=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
-    end
-
-    def optional<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
-    end
-
-    def optional=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-    end
-
-    def optional_nilable<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))}).returns(::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
-    end
-
-    def optional_nilable=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
-    end
-
-    def const_explicit<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
-    end
-
-    def const<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Array>))
-    end
-
-    def no_class_arg<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Array>))
-    end
-
-    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:Array>)}).returns(::T.nilable(<emptyTree>::<constant:Array>))
+    class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
       end
 
-      def no_class_arg=<<constant:<todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Array>))
+      def <U t_array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(<emptyTree>::<C <U String>>))
       end
 
-      def no_class_arg<<constant:<todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      def <U t_array><<C <U <todo sym>>>>(&<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), ::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(<emptyTree>::<C <U String>>))
       end
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.untyped())
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
     end
 
-    def enum_prop<<constant:<todo sym>>>(&<blk>)
-      ::T.unsafe(nil)
+    def <U hash_of><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
     end
 
-    def foreign<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    def <U hash_of=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      end
+
+      def <U hash_of=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      end
+
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U HashMutator>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      end
+
+      def <U hash_of><<C <U <todo sym>>>>(&<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), ::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U HashMutator>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      end
     end
 
-    def foreign=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
+    def <U optional_explicit><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foreign_<<constant:<todo sym>>>(*opts:, &<blk>)
-      ::T.unsafe(nil)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    def <U optional_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foreign_lazy<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    def <U optional_existing><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foreign_lazy=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
+    def <U optional_existing=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    def foreign_lazy_<<constant:<todo sym>>>(*opts:, &<blk>)
-      ::T.unsafe(nil)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    def <U optional><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    def foreign_proc<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    def <U optional=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foreign_proc=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
+    def <U optional_nilable><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    def foreign_proc_<<constant:<todo sym>>>(*opts:, &<blk>)
-      ::T.unsafe(nil)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)))
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+    def <U optional_nilable=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)))
     end
 
-    def foreign_invalid<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    def <U const_explicit><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    def foreign_invalid=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"opts" => ::T.untyped()}).returns(::T.untyped())
+    def <U const><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    def foreign_invalid_<<constant:<todo sym>>>(*opts:, &<blk>)
-      ::T.unsafe(nil)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Array>>))
+    end
+
+    def <U no_class_arg><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Array>>))
+    end
+
+    class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U Array>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Array>>))
+      end
+
+      def <U no_class_arg=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Array>>))
+      end
+
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
+      end
+
+      def <U no_class_arg><<C <U <todo sym>>>>(&<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), ::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
+      end
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U untyped>())
+    end
+
+    def <U enum_prop><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U foreign><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    end
+
+    def <U foreign=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+    end
+
+    def <U foreign_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U foreign_lazy><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    end
+
+    def <U foreign_lazy=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+    end
+
+    def <U foreign_lazy_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U foreign_proc><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    end
+
+    def <U foreign_proc=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+    end
+
+    def <U foreign_proc_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U foreign_invalid><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    end
+
+    def <U foreign_invalid=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U untyped>())
+    end
+
+    def <U foreign_invalid_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
     end
   end
 
-  class <emptyTree>::<constant:PropHelpers><<constant:<todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::String)
+  class <emptyTree>::<C <U PropHelpers>><<C <U <todo sym>>>> < (::<todo sym>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::String)
     end
 
-    def token<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::String)
+    def <U token><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::String)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::String}).returns(::String)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::String}).<U returns>(::String)
     end
 
-    def token=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::String)
+    def <U token=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::String)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::Float)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::Float)
     end
 
-    def created<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::Float)
+    def <U created><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::Float)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::Float}).returns(::Float)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::Float}).<U returns>(::Float)
     end
 
-    def created=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::Float)
-    end
-  end
-
-  class <emptyTree>::<constant:PropHelpers2><<constant:<todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::String)
-    end
-
-    def token<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::String)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::String}).returns(::String)
-    end
-
-    def token=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::String)
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::Float)
-    end
-
-    def created<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::Float)
+    def <U created=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::Float)
     end
   end
 
-  class <emptyTree>::<constant:ShardingProp><<constant:<todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::String)
+  class <emptyTree>::<C <U PropHelpers2>><<C <U <todo sym>>>> < (::<todo sym>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::String)
     end
 
-    def merchant<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::String)
-    end
-  end
-
-  class <emptyTree>::<constant:EncryptedProp><<constant:<todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(::String))
+    def <U token><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::String)
     end
 
-    def foo<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::String}).<U returns>(::String)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
+    def <U token=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::String)
     end
 
-    def encrypted_foo<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::Float)
     end
 
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(::String)}).returns(::T.nilable(::String))
-    end
-
-    def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>)}).returns(::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
-    end
-
-    def encrypted_foo=<<constant:<todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(::String))
-    end
-
-    def bar<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
-    end
-
-    ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
-    end
-
-    def encrypted_bar<<constant:<todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
+    def <U created><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::Float)
     end
   end
 
-  def main<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U ShardingProp>><<C <U <todo sym>>>> < (::<todo sym>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::String)
+    end
+
+    def <U merchant><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::String)
+    end
+  end
+
+  class <emptyTree>::<C <U EncryptedProp>><<C <U <todo sym>>>> < (::<todo sym>)
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(::String))
+    end
+
+    def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(::String))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+    end
+
+    def <U encrypted_foo><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(::String)}).<U returns>(::T.<U nilable>(::String))
+    end
+
+    def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(::String))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+    end
+
+    def <U encrypted_foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(::String))
+    end
+
+    def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(::String))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+    end
+
+    def <U encrypted_bar><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+    end
+  end
+
+  def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo=("b"), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo2(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo2(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo2=("b"), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().default_without_optional_false(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_false(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().nodefault(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().nodefault(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().type(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().object(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Object>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().array(), <emptyTree>::<constant:Array>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().array_of(), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().array_of_explicit(), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().t_array(), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().hash_of(), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_explicit(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_existing(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:AdvancedODM>.new().optional_existing=("b")
-      <emptyTree>::<constant:AdvancedODM>.new().optional_existing=(nil)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_false(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:AdvancedODM>.new().optional=("b")
-      <emptyTree>::<constant:AdvancedODM>.new().optional=(nil)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_nilable(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().const_explicit(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:AdvancedODM>.new().const_explicit=("b")
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().const(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:AdvancedODM>.new().const=("b")
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().no_class_arg(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)))
-      <emptyTree>::<constant:AdvancedODM>.new().no_class_arg=(["b"])
-      <emptyTree>::<constant:AdvancedODM>.new().enum_prop=("hello")
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().foreign_(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:ForeignClass>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().foreign_(), <emptyTree>::<constant:ForeignClass>)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().foreign_lazy_(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:ForeignClass>))
-      <emptyTree>::<constant:AdvancedODM>.new().foreign_invalid_()
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:PropHelpers>.new().token(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:PropHelpers>.new().token=("tok_token")
-      <emptyTree>::<constant:PropHelpers>.new().token=(nil)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:PropHelpers>.new().created(), <emptyTree>::<constant:Float>)
-      <emptyTree>::<constant:PropHelpers>.new().created=(0.000000)
-      <emptyTree>::<constant:PropHelpers>.new().created=(nil)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:PropHelpers2>.new().token(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:PropHelpers2>.new().token=("tok_token")
-      <emptyTree>::<constant:PropHelpers2>.new().token=(nil)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:PropHelpers2>.new().created(), <emptyTree>::<constant:Float>)
-      <emptyTree>::<constant:PropHelpers2>.new().created=(0.000000)
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:ShardingProp>.new().merchant(), <emptyTree>::<constant:String>)
-      <emptyTree>::<constant:ShardingProp>.new().merchant=("hi")
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:EncryptedProp>.new().foo(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:EncryptedProp>.new().encrypted_foo(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:Mixins>::<constant:Encryptable>::<constant:EncryptedValue>))
-      <emptyTree>::<constant:EncryptedProp>.new().foo=("hello")
-      <emptyTree>::<constant:EncryptedProp>.new().foo=(nil)
-      <emptyTree>::<constant:EncryptedProp>.new().bar=("hello")
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo=>("b"), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2=>("b"), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U default_without_optional_false>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_false>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U nodefault>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U nodefault>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U type>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U object>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Object>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array>(), <emptyTree>::<C <U Array>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array_of>(), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array_of_explicit>(), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U t_array>(), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U hash_of>(), <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_explicit>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_existing>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_existing=>("b")
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_existing=>(nil)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_false>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional=>("b")
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional=>(nil)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_nilable>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U const_explicit>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U const_explicit=>("b")
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U const>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U const=>("b")
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U no_class_arg>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)))
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U no_class_arg=>(["b"])
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U enum_prop=>("hello")
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_>(), <emptyTree>::<C <U ForeignClass>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_lazy_>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_invalid_>()
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U token>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U PropHelpers>>.<U new>().<U token=>("tok_token")
+      <emptyTree>::<C <U PropHelpers>>.<U new>().<U token=>(nil)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U created>(), <emptyTree>::<C <U Float>>)
+      <emptyTree>::<C <U PropHelpers>>.<U new>().<U created=>(0.000000)
+      <emptyTree>::<C <U PropHelpers>>.<U new>().<U created=>(nil)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers2>>.<U new>().<U token>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U PropHelpers2>>.<U new>().<U token=>("tok_token")
+      <emptyTree>::<C <U PropHelpers2>>.<U new>().<U token=>(nil)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers2>>.<U new>().<U created>(), <emptyTree>::<C <U Float>>)
+      <emptyTree>::<C <U PropHelpers2>>.<U new>().<U created=>(0.000000)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U ShardingProp>>.<U new>().<U merchant>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U ShardingProp>>.<U new>().<U merchant=>("hi")
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U EncryptedProp>>.<U new>().<U encrypted_foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+      <emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo=>("hello")
+      <emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo=>(nil)
+      <emptyTree>::<C <U EncryptedProp>>.<U new>().<U bar=>("hello")
     end
   end
 end

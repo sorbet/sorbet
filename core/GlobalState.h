@@ -96,7 +96,10 @@ public:
     void sanityCheck() const;
     void markAsPayload();
 
-    std::string toString(bool showHidden = false) const;
+    std::string toStringWithOptions(bool showHidden = false, bool useToString = false) const;
+    std::string toString() {
+        return toStringWithOptions();
+    }
     std::string showAnnotatedSource(FileRef file) const;
     enum AnnotationPos { BEFORE, AFTER };
     struct Annotation {

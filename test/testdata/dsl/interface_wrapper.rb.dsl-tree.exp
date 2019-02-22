@@ -1,34 +1,34 @@
-class <emptyTree><<constant:<root>>> < ()
-  module <emptyTree>::<constant:Interface><<constant:<todo sym>>> < ()
-    def some_method<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  module <emptyTree>::<C <U Interface>><<C <U <todo sym>>>> < ()
+    def <U some_method><<C <U <todo sym>>>>(&<U <blk>>)
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<constant:SomeClass><<constant:<todo sym>>> < (::<todo sym>)
-    self(<constant:<todo sym>>).include(<emptyTree>::<constant:Interface>)
+  class <emptyTree>::<C <U SomeClass>><<C <U <todo sym>>>> < (::<todo sym>)
+    self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Interface>>)
 
-    def other_method<<constant:<todo sym>>>(&<blk>)
+    def <U other_method><<C <U <todo sym>>>>(&<U <blk>>)
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<constant:Other><<constant:<todo sym>>> < (::<todo sym>)
-    def self.wrap_instance<<constant:<todo sym>>>(x, y = nil, &<blk>)
+  class <emptyTree>::<C <U Other>><<C <U <todo sym>>>> < (::<todo sym>)
+    def self.<U wrap_instance><<C <U <todo sym>>>>(<U x>, <U y> = nil, &<U <blk>>)
       <emptyTree>
     end
   end
 
-  def testit<<constant:<todo sym>>>(&<blk>)
+  def <U testit><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      s = <emptyTree>::<constant:SomeClass>.new()
-      wrap = ::T.let(s, <emptyTree>::<constant:Interface>)
-      <emptyTree>::<constant:T>.assert_type!(wrap, <emptyTree>::<constant:Interface>)
-      wrap.other_method()
-      wrap.some_method()
-      <emptyTree>::<constant:Other>.wrap_instance("hi", "there")
-      o = <emptyTree>::<constant:Other>
-      o.wrap_instance("hi")
+      <U s> = <emptyTree>::<C <U SomeClass>>.<U new>()
+      <U wrap> = ::T.<U let>(<U s>, <emptyTree>::<C <U Interface>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<U wrap>, <emptyTree>::<C <U Interface>>)
+      <U wrap>.<U other_method>()
+      <U wrap>.<U some_method>()
+      <emptyTree>::<C <U Other>>.<U wrap_instance>("hi", "there")
+      <U o> = <emptyTree>::<C <U Other>>
+      <U o>.<U wrap_instance>("hi")
     end
   end
 end

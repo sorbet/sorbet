@@ -1,9 +1,9 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::Opus::DB::Model::MyModel)
+          ::RubyTyper.<U keep_for_ide>(::Opus::DB::Model::MyModel)
           <emptyTree>
         end
         ::Opus::DB::Model::MyModel
@@ -11,6 +11,6 @@ begin
       end
     end
   end
-  class ::Opus::DB::Model::MyModel<<constant:MyModel>> < (::<todo sym>)  end
+  class ::Opus::DB::Model::MyModel<<C <U MyModel>>> < (::<todo sym>)  end
   <emptyTree>
 end

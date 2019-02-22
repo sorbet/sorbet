@@ -10,19 +10,19 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
 
 --print=ast is incompatible with --cacheDir. Ignoring cache
 No errors! Great job.
-class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
+class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
   <emptyTree>
 end
 --print=ast is incompatible with --cacheDir. Ignoring cache
 No errors! Great job.
-class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
+class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
   <emptyTree>
 end
 No errors! Great job.
-class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
+class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
   <emptyTree>
 end
 No errors! Great job.
-class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
+class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
   <emptyTree>
 end

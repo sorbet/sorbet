@@ -1,6 +1,6 @@
 begin
-  ::RubyTyper.keep_for_ide(::Test)
-  class ::Test<<constant:Test>> < (::<todo sym>)
+  ::RubyTyper.<U keep_for_ide>(::Test)
+  class ::Test<<C <U Test>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -11,47 +11,47 @@ begin
 
     <emptyTree>
 
-    def foo<foo>(x, <blk>)
+    def <U foo><<U foo>>(x, <blk>)
       begin
-        T.let(nil, String)
-        x
+        T.<U let>(nil, String)
+        <U x>
       end
     end
 
-    def bar<bar>(y, <blk>)
+    def <U bar><<U bar>>(y, <blk>)
       begin
-        T.let(nil, String)
-        y
+        T.<U let>(nil, String)
+        <U y>
       end
     end
 
-    def qux<qux>(z, <blk>)
+    def <U qux><<U qux>>(z, <blk>)
       begin
-        T.let("", String)
-        z
+        T.<U let>("", String)
+        <U z>
       end
     end
 
-    def baz<baz>(w, <blk>)
+    def <U baz><<U baz>>(w, <blk>)
       begin
-        T.let("", String)
-        w
+        T.<U let>("", String)
+        <U w>
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        self(<singleton_class:<constant:Test>>).sig() do ||
-          self(<constant:Builder>).params({:"x" => ::String}).returns(::String)
+        self(<S <C <U Test>> $1>).<U sig>() do ||
+          self(<C <U Builder>>).<U params>({:"x" => ::String}).<U returns>(::String)
         end
-        self(<singleton_class:<constant:Test>>).sig() do ||
-          self(<constant:Builder>).params({:"y" => ::String}).returns(::String)
+        self(<S <C <U Test>> $1>).<U sig>() do ||
+          self(<C <U Builder>>).<U params>({:"y" => ::String}).<U returns>(::String)
         end
-        self(<singleton_class:<constant:Test>>).sig() do ||
-          self(<constant:Builder>).params({:"z" => ::String}).returns(::String)
+        self(<S <C <U Test>> $1>).<U sig>() do ||
+          self(<C <U Builder>>).<U params>({:"z" => ::String}).<U returns>(::String)
         end
-        self(<singleton_class:<constant:Test>>).sig() do ||
-          self(<constant:Builder>).params({:"w" => ::String}).returns(::String)
+        self(<S <C <U Test>> $1>).<U sig>() do ||
+          self(<C <U Builder>>).<U params>({:"w" => ::String}).<U returns>(::String)
         end
         <emptyTree>
       end

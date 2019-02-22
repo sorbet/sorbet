@@ -1,18 +1,18 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     MethodDef{
       flags = 0
-      name = main<<constant:<todo sym>>>
+      name = <U main><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = Rescue{
         body = Send{
           recv = Self{ claz = ::<todo sym> }
-          fun = a
+          fun = <U a>
           block = nullptr
           args = [
           ]
@@ -23,11 +23,11 @@ ClassDef{
             ]
             var = UnresolvedIdent{
               kind = Local
-              name = <rescueTemp>$2
+              name = <D <U <rescueTemp>> $2>
             }
             body = Send{
               recv = Self{ claz = ::<todo sym> }
-              fun = b
+              fun = <U b>
               block = nullptr
               args = [
               ]
@@ -36,14 +36,14 @@ ClassDef{
         ]
         else = Send{
           recv = Self{ claz = ::<todo sym> }
-          fun = c
+          fun = <U c>
           block = nullptr
           args = [
           ]
         }
         ensure = Send{
           recv = Self{ claz = ::<todo sym> }
-          fun = d
+          fun = <U d>
           block = nullptr
           args = [
           ]
@@ -53,52 +53,52 @@ ClassDef{
 
     MethodDef{
       flags = 0
-      name = a<<constant:<todo sym>>>
+      name = <U a><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = EmptyTree
     }
 
     MethodDef{
       flags = 0
-      name = b<<constant:<todo sym>>>
+      name = <U b><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = EmptyTree
     }
 
     MethodDef{
       flags = 0
-      name = c<<constant:<todo sym>>>
+      name = <U c><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = EmptyTree
     }
 
     MethodDef{
       flags = 0
-      name = d<<constant:<todo sym>>>
+      name = <U d><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = EmptyTree
     }
 
     Send{
       recv = Self{ claz = ::<todo sym> }
-      fun = puts
+      fun = <U puts>
       block = nullptr
       args = [
         Send{
           recv = Self{ claz = ::<todo sym> }
-          fun = foo
+          fun = <U foo>
           block = nullptr
           args = [
           ]

@@ -1,67 +1,67 @@
-class <emptyTree><<constant:<root>>> < ()
-  class <emptyTree>::<constant:Opus>::<constant:Command><<constant:<todo sym>>> < (::<todo sym>)
-    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U Opus>>::<C <U Command>><<C <U <todo sym>>>> < (::<todo sym>)
+    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
   end
 
-  class <emptyTree>::<constant:MyCommand><<constant:<todo sym>>> < (<emptyTree>::<constant:Opus>::<constant:Command>)
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:String>)
+  class <emptyTree>::<C <U MyCommand>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Opus>>::<C <U Command>>)
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def call<<constant:<todo sym>>>(x, &<blk>)
-      x.to_s()
+    def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+      <U x>.<U to_s>()
     end
 
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:String>)
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def self.call<<constant:<todo sym>>>(x, &<blk>)
-      ::T.untyped()
-    end
-  end
-
-  <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:MyCommand>.call(7), <emptyTree>::<constant:String>)
-
-  class <emptyTree>::<constant:OtherCommand><<constant:<todo sym>>> < (::<root>::<constant:Opus>::<constant:Command>)
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:Integer>)
-    end
-
-    def call<<constant:<todo sym>>>(x, &<blk>)
-      self(<constant:<todo sym>>).Integer(x)
-    end
-
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:Integer>)
-    end
-
-    def self.call<<constant:<todo sym>>>(x, &<blk>)
-      ::T.untyped()
+    def self.<U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+      ::T.<U untyped>()
     end
   end
 
-  <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:OtherCommand>.call("8"), <emptyTree>::<constant:Integer>)
+  <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U MyCommand>>.<U call>(7), <emptyTree>::<C <U String>>)
 
-  class <emptyTree>::<constant:NotACommand><<constant:<todo sym>>> < (<emptyTree>::<constant:Llamas>::<constant:Opus>::<constant:Command>)
-    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
-
-    self(<constant:<todo sym>>).sig() do ||
-      self(<constant:<todo sym>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:Integer>)
+  class <emptyTree>::<C <U OtherCommand>><<C <U <todo sym>>>> < (::<root>::<C <U Opus>>::<C <U Command>>)
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
     end
 
-    def call<<constant:<todo sym>>>(x, &<blk>)
-      self(<constant:<todo sym>>).Integer(x)
+    def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+      self(<C <U <todo sym>>>).<U Integer>(<U x>)
     end
-  end
 
-  <emptyTree>::<constant:NotACommand>.call()
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
+    end
 
-  class <emptyTree>::<constant:CallNoSig><<constant:<todo sym>>> < (<emptyTree>::<constant:Opus>::<constant:Command>)
-    def call<<constant:<todo sym>>>(x, &<blk>)
-      self(<constant:<todo sym>>).Integer(x)
+    def self.<U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+      ::T.<U untyped>()
     end
   end
 
-  <emptyTree>::<constant:CallNoSig>.call()
+  <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U OtherCommand>>.<U call>("8"), <emptyTree>::<C <U Integer>>)
+
+  class <emptyTree>::<C <U NotACommand>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Llamas>>::<C <U Opus>>::<C <U Command>>)
+    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+
+    self(<C <U <todo sym>>>).<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
+    end
+
+    def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+      self(<C <U <todo sym>>>).<U Integer>(<U x>)
+    end
+  end
+
+  <emptyTree>::<C <U NotACommand>>.<U call>()
+
+  class <emptyTree>::<C <U CallNoSig>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Opus>>::<C <U Command>>)
+    def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+      self(<C <U <todo sym>>>).<U Integer>(<U x>)
+    end
+  end
+
+  <emptyTree>::<C <U CallNoSig>>.<U call>()
 end

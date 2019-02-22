@@ -1,6 +1,6 @@
 Send {
   receiver = NULL
-  method = j
+  method = <U j>
   args = [
   ]
 }

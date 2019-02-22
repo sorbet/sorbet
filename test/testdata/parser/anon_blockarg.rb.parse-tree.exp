@@ -1,9 +1,9 @@
 DefMethod {
-  name = foo
+  name = <U foo>
   args = Args {
     args = [
       Blockarg {
-        name = &$2
+        name = <P <U &> $2>
       }
     ]
   }

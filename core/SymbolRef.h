@@ -53,7 +53,8 @@ public:
 
     bool operator!=(const SymbolRef &rhs) const;
 
-    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0, bool showHidden = false,
+                                 bool useToString = false) const;
     std::string toString(const GlobalState &gs) const {
         return toStringWithTabs(gs);
     }

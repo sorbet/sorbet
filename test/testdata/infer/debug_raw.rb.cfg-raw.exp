@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\la: T.untyped = load_arg(Object#main#a)\la: T.untyped\l\la: T.untyped\l"
+        label = "block[id=0]()\l<U a>: T.untyped = load_arg(Object#main#a)\l<U a>: T.untyped\l\l<U a>: T.untyped\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
@@ -18,12 +18,12 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2]()\la: Integer(2) = 2\l<returnMethodTemp>$2: Integer(2) = a\l<returnMethodTemp>$2: Integer(2)\l\la: Integer(2)\l\l<unconditional>\l"
+        label = "block[id=2]()\l<U a>: Integer(2) = 2\l<U <returnMethodTemp>>$2: Integer(2) = <U a>\l<U <returnMethodTemp>>$2: Integer(2)\l\l<U a>: Integer(2)\l\l<unconditional>\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_4" [style="bold"];
     "bb::Object#main_4" [
-        label = "block[id=4](<returnMethodTemp>$2: T.nilable(Integer))\l<returnMethodTemp>$2: NilClass | Integer\l\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\ldead=1\l<returnMethodTemp>$2: NilClass | Integer\l\l<finalReturn>: T.noreturn\l\l<unconditional>\l"
+        label = "block[id=4](<U <returnMethodTemp>>$2: T.nilable(Integer))\l<U <returnMethodTemp>>$2: NilClass | Integer\l\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.nilable(Integer)\ldead=1\l<U <returnMethodTemp>>$2: NilClass | Integer\l\l<U <finalReturn>>: T.noreturn\l\l<unconditional>\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_1" [style="bold"];

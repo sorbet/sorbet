@@ -2,40 +2,40 @@
 class Examples
   def i_like_ifs()
     if true
-       # <ifTemp>$3: TrueClass
+       # <U <ifTemp>>$3: TrueClass
       return 1
       # dead=1
-      # <returnTemp>$4: Integer(1)
+      # <U <returnTemp>>$4: Integer(1)
       #
-      # <returnMethodTemp>$2: T.noreturn
+      # <U <returnMethodTemp>>$2: T.noreturn
     else
       return 2 # error: This code is unreachable
     end
   end
 
-    # <returnMethodTemp>$2: Integer(1)
+    # <U <returnMethodTemp>>$2: Integer(1)
     def i_like_exps()
       if (true)
-          # <ifTemp>$3: TrueClass
+          # <U <ifTemp>>$3: TrueClass
         1
-        # <returnMethodTemp>$2: Integer(1)
+        # <U <returnMethodTemp>>$2: Integer(1)
       else
         2 # error: This code is unreachable
       end
     end
     # dead=1
-    # <returnMethodTemp>$2: Integer(1)
+    # <U <returnMethodTemp>>$2: Integer(1)
     #
-    # <finalReturn>: T.noreturn
+    # <U <finalReturn>>: T.noreturn
 
     def return_in_one_branch1()
       if (true)
-          # <ifTemp>$3: TrueClass
+          # <U <ifTemp>>$3: TrueClass
         return 1
         # dead=1
-        # <returnTemp>$4: Integer(1)
+        # <U <returnTemp>>$4: Integer(1)
         #
-        # <returnMethodTemp>$2: T.noreturn
+        # <U <returnMethodTemp>>$2: T.noreturn
       else
         2 # error: This code is unreachable
       end
@@ -43,109 +43,109 @@ class Examples
 
     def variables()
       if (true)
-          # <ifTemp>$4: TrueClass
+          # <U <ifTemp>>$4: TrueClass
         a = 1
-            # a: Integer(1)
+            # <U a>: Integer(1)
       else
         a = 2 # error: This code is unreachable
       end
 
-          # a: Integer(1)
+          # <U a>: Integer(1)
       if (false)
-          # <ifTemp>$6: FalseClass
+          # <U <ifTemp>>$6: FalseClass
           #
-          # a: Integer(1)
+          # <U a>: Integer(1)
         b = 1 # error: This code is unreachable
       else
-            # a: Integer(1)
+            # <U a>: Integer(1)
         b = 2
-            # b: Integer(2)
+            # <U b>: Integer(2)
             #
-            # a: Integer(1)
+            # <U a>: Integer(1)
       end
 
-      # b: Integer(2)
+      # <U b>: Integer(2)
       #
-      # a: Integer(1)
+      # <U a>: Integer(1)
       a + b
       # dead=1
-      # <returnMethodTemp>$2: Integer
+      # <U <returnMethodTemp>>$2: Integer
       #
-      # <finalReturn>: T.noreturn
+      # <U <finalReturn>>: T.noreturn
       #
-      # b: Integer(2)
+      # <U b>: Integer(2)
       #
-      # a: Integer(1)
+      # <U a>: Integer(1)
     end
 
 
     def variables_and_loop(cond)
       if (true)
-          # <ifTemp>$4: TrueClass
+          # <U <ifTemp>>$4: TrueClass
           #
-          # cond: T.untyped
-            # cond: T.untyped
+          # <U cond>: T.untyped
+            # <U cond>: T.untyped
         a = 1
-            # a: Integer(1)
+            # <U a>: Integer(1)
             #
-            # cond: T.untyped
+            # <U cond>: T.untyped
       else
         a = 2 # error: This code is unreachable
       end
 
-            # b: NilClass
+            # <U b>: NilClass
             #
-            # cond: T.untyped
+            # <U cond>: T.untyped
             #   Being truthy entails:
-            #     <debugEnvironmentTemp> to be NilClass
-            #     a to be Integer(1)
+            #     <U <debugEnvironmentTemp>> to be NilClass
+            #     <U a> to be Integer(1)
             #   Being falsy entails:
-            #     <debugEnvironmentTemp> to be NilClass
-            #     a to be Integer(1)
+            #     <U <debugEnvironmentTemp>> to be NilClass
+            #     <U a> to be Integer(1)
       while true
-            # <whileTemp>$6: TrueClass
+            # <U <whileTemp>>$6: TrueClass
             #
-            # b: NilClass
+            # <U b>: NilClass
             #
-            # cond: T.untyped
+            # <U cond>: T.untyped
             #   Being truthy entails:
-            #     a to be Integer(1)
+            #     <U a> to be Integer(1)
             #   Being falsy entails:
-            #     a to be Integer(1)
+            #     <U a> to be Integer(1)
         if (cond)
-              # b: NilClass
+              # <U b>: NilClass
               #
-              # cond: T.untyped (and truthy)
+              # <U cond>: T.untyped (and truthy)
               #
               #   Being truthy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
               #   Being falsy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
           b = 1 # error: Changing the type of a variable in a loop is not permitted
-              # b: T.untyped
+              # <U b>: T.untyped
               #
-              # cond: T.untyped (and truthy)
+              # <U cond>: T.untyped (and truthy)
               #
               #   Being truthy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
               #   Being falsy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
         else
-              # b: NilClass
+              # <U b>: NilClass
               #
-              # cond: NilClass | FalseClass
+              # <U cond>: NilClass | FalseClass
               #   Being truthy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
               #   Being falsy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
           b = 2 # error: Changing the type of a variable in a loop is not permitted
-              # b: T.untyped
+              # <U b>: T.untyped
               #
-              # cond: NilClass | FalseClass
+              # <U cond>: NilClass | FalseClass
               #   Being truthy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
               #   Being falsy entails:
-              #     a to be Integer(1)
+              #     <U a> to be Integer(1)
         end
       end
 
@@ -154,60 +154,60 @@ class Examples
 
 
     def variables_loop_if(cond)
-                          # cond: T.untyped
-            # b: NilClass
+                          # <U cond>: T.untyped
+            # <U b>: NilClass
             #
-            # cond: T.untyped
+            # <U cond>: T.untyped
             #   Being truthy entails:
-            #     <debugEnvironmentTemp> to be NilClass
+            #     <U <debugEnvironmentTemp>> to be NilClass
             #   Being falsy entails:
-            #     <debugEnvironmentTemp> to be NilClass
+            #     <U <debugEnvironmentTemp>> to be NilClass
       while true
-            # <whileTemp>$4: TrueClass
+            # <U <whileTemp>>$4: TrueClass
             #
-            # b: NilClass
+            # <U b>: NilClass
             #
-            # cond: T.untyped
+            # <U cond>: T.untyped
         if (cond)
-              # b: NilClass
+              # <U b>: NilClass
               #
-              # cond: T.untyped (and truthy)
+              # <U cond>: T.untyped (and truthy)
           b = 1 # error: Changing the type of a variable in a loop is not permitted
-              # b: T.untyped
+              # <U b>: T.untyped
               #
-              # cond: T.untyped (and truthy)
+              # <U cond>: T.untyped (and truthy)
         else
-              # b: NilClass
+              # <U b>: NilClass
               #
-              # cond: NilClass | FalseClass
+              # <U cond>: NilClass | FalseClass
           b = 2 # error: Changing the type of a variable in a loop is not permitted
-              # b: T.untyped
+              # <U b>: T.untyped
               #
-              # cond: NilClass | FalseClass
+              # <U cond>: NilClass | FalseClass
         end
       end
 
       b # error: This code is unreachable
     end
 
-    # <returnMethodTemp>$2: T.untyped
+    # <U <returnMethodTemp>>$2: T.untyped
     def take_arguments(i)
       if(false)
-         # <ifTemp>$3: FalseClass
+         # <U <ifTemp>>$3: FalseClass
          #
-         # i: T.untyped
+         # <U i>: T.untyped
        2 # error: This code is unreachable
       else
-       # i: T.untyped
+       # <U i>: T.untyped
        i
-       # <returnMethodTemp>$2: T.untyped
+       # <U <returnMethodTemp>>$2: T.untyped
        #
-       # i: T.untyped
+       # <U i>: T.untyped
       end
     end
     # dead=1
-    # <returnMethodTemp>$2: T.untyped
+    # <U <returnMethodTemp>>$2: T.untyped
     #
-    # <finalReturn>: T.noreturn
+    # <U <finalReturn>>: T.noreturn
 
 end

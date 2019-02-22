@@ -1,8 +1,8 @@
-class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$87>(<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
     begin
-      ::Foo::Bar.baz(1)
-      ::Foo::Bar.baz(2)
+      ::Foo::Bar.<U baz>(1)
+      ::Foo::Bar.<U baz>(2)
       <emptyTree>
     end
   end

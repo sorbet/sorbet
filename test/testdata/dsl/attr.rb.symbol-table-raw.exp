@@ -1,0 +1,42 @@
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi start=3:1 end=41:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi start=2:1 end=990:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi start=2:1 end=21:39}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi start=1:1 end=1:1}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi start=1:0 end=1:0}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi start=2:1 end=57:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi start=2:1 end=80:54}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi start=2:1 end=23:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi start=2:1 end=313:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi start=2:1 end=798:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi start=2:1 end=51:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi start=3:1 end=3:17}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi start=2:1 end=61:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi start=2:1 end=133:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi start=2:1 end=598:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi start=2:1 end=182:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi start=3:1 end=35:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi start=2:1 end=408:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi start=8:1 end=9:22}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi start=4:1 end=221:2}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi start=4:1 end=46:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi start=3:1 end=509:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi start=2:1 end=514:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi start=3:1 end=232:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi start=3:1 end=498:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi start=3:1 end=1852:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi start=3:1 end=34:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi start=6:1 end=48:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi start=3:1 end=2363:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi start=2:1 end=98:4})
+  class <C <U TestAttr>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/attr.rb start=2:1 end=2:15}
+    field <C <U TestAttr>><U @v1> -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=7:5 end=7:8}
+    field <C <U TestAttr>><U @v2> -> String @ Loc {file=test/testdata/dsl/attr.rb start=8:5 end=8:8}
+    field <C <U TestAttr>><U @v6> -> String @ Loc {file=test/testdata/dsl/attr.rb start=9:5 end=9:8}
+    method <C <U TestAttr>><U initialize> (<blk>) -> RubyTyper::Void @ Loc {file=test/testdata/dsl/attr.rb start=6:3 end=6:17}
+      argument <C <U TestAttr>><U initialize><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v1> (<blk>) -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=13:3 end=13:11}
+      argument <C <U TestAttr>><U v1><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v1=> (v1, <blk>) -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=15:3 end=15:18}
+      argument <C <U TestAttr>><U v1=>v1<> -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=14:15 end=14:17}
+      argument <C <U TestAttr>><U v1=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v2> (<blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:3 end=18:20}
+      argument <C <U TestAttr>><U v2><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v2=> (v2, <blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:3 end=18:20}
+      argument <C <U TestAttr>><U v2=>v2<> -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:18 end=18:20}
+      argument <C <U TestAttr>><U v2=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v3> (<blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=21:3 end=21:18}
+      argument <C <U TestAttr>><U v3><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v4=> (v4, <blk>) @ Loc {file=test/testdata/dsl/attr.rb start=23:3 end=23:23}
+      argument <C <U TestAttr>><U v4=>v4<> @ Loc {file=test/testdata/dsl/attr.rb start=23:16 end=23:18}
+      argument <C <U TestAttr>><U v4=><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v5=> (v5, <blk>) @ Loc {file=test/testdata/dsl/attr.rb start=23:3 end=23:23}
+      argument <C <U TestAttr>><U v5=>v5<> @ Loc {file=test/testdata/dsl/attr.rb start=23:21 end=23:23}
+      argument <C <U TestAttr>><U v5=><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v6> (<blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=28:3 end=28:20}
+      argument <C <U TestAttr>><U v6><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+    method <C <U TestAttr>><U v6=> (v6, <blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=28:3 end=28:20}
+      argument <C <U TestAttr>><U v6=>v6<> -> String @ Loc {file=test/testdata/dsl/attr.rb start=28:18 end=28:20}
+      argument <C <U TestAttr>><U v6=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+  class <S <C <U TestAttr>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr.rb start=2:7 end=2:15}
+    method <S <C <U TestAttr>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/dsl/attr.rb start=5:3 end=5:13}
+    method <S <C <U TestAttr>> $1><N <U <block>> $3> () @ Loc {file=test/testdata/dsl/attr.rb start=12:3 end=12:25}
+    method <S <C <U TestAttr>> $1><N <U <block>> $4> () @ Loc {file=test/testdata/dsl/attr.rb start=14:3 end=14:45}
+    method <S <C <U TestAttr>> $1><N <U <block>> $5> () @ Loc {file=test/testdata/dsl/attr.rb start=17:3 end=17:24}
+    method <S <C <U TestAttr>> $1><N <U <block>> $6> () @ Loc {file=test/testdata/dsl/attr.rb start=17:3 end=17:24}
+    method <S <C <U TestAttr>> $1><N <U <block>> $7> () @ Loc {file=test/testdata/dsl/attr.rb start=20:3 end=20:24}
+    method <S <C <U TestAttr>> $1><N <U <block>> $8> () @ Loc {file=test/testdata/dsl/attr.rb start=27:3 end=27:31}
+    method <S <C <U TestAttr>> $1><N <U <block>> $9> () @ Loc {file=test/testdata/dsl/attr.rb start=27:3 end=27:31}
+    method <S <C <U TestAttr>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr.rb start=2:1 end=2:15}
+      argument <S <C <U TestAttr>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+

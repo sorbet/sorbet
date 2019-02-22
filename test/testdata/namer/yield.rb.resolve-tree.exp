@@ -1,17 +1,17 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::Main)
+          ::RubyTyper.<U keep_for_ide>(::Main)
           <emptyTree>
         end
-        ::Main.new().main()
+        ::Main.<U new>().<U main>()
         <emptyTree>
       end
     end
   end
-  class ::Main<<constant:Main>> < (::<todo sym>)
+  class ::Main<<C <U Main>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -22,52 +22,52 @@ begin
 
     <emptyTree>
 
-    def yielder<yielder>(<blk>)
+    def <U yielder><<U yielder>>(<blk>)
       begin
-        a = <blk>.call(1)
-        <blk>.call(a)
+        <U a> = <U <blk>>.<U call>(1)
+        <U <blk>>.<U call>(<U a>)
       end
     end
 
-    def blockpass<blockpass>(&blk)
+    def <U blockpass><<U blockpass>>(&blk)
       begin
-        a = blk.call(1)
-        blk.call(a)
+        <U a> = <U blk>.<U call>(1)
+        <U blk>.<U call>(<U a>)
       end
     end
 
-    def mixed<mixed>(&blk)
+    def <U mixed><<U mixed>>(&blk)
       begin
-        a = blk.call(1)
-        blk.call(a)
+        <U a> = <U blk>.<U call>(1)
+        <U blk>.<U call>(<U a>)
       end
     end
 
-    def blockyield<blockyield>(<blk>)
-      self(<constant:Main>).yielder() do |i|
-        <blk>.call(i$5)
+    def <U blockyield><<U blockyield>>(<blk>)
+      self(<C <U Main>>).<U yielder>() do |i|
+        <U <blk>>.<U call>(<U i>$5)
       end
     end
 
-    def main<main>(<blk>)
+    def <U main><<U main>>(<blk>)
       begin
-        l = self(<constant:Main>).lambda() do |x|
+        <U l> = self(<C <U Main>>).<U lambda>() do |x|
           begin
-            self(<constant:Main>).puts(x$7)
+            self(<C <U Main>>).<U puts>(<U x>$7)
             3
           end
         end
-        self(<constant:Main>).yielder() do |*l|
-          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$2$8)
+        self(<C <U Main>>).<U yielder>() do |*l|
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $2>$8)
         end
-        self(<constant:Main>).blockpass() do |*l|
-          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$3$9)
+        self(<C <U Main>>).<U blockpass>() do |*l|
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $3>$9)
         end
-        self(<constant:Main>).mixed() do |*l|
-          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$4$10)
+        self(<C <U Main>>).<U mixed>() do |*l|
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $4>$10)
         end
-        self(<constant:Main>).blockyield() do |*l|
-          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$5$11)
+        self(<C <U Main>>).<U blockyield>() do |*l|
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $5>$11)
         end
       end
     end

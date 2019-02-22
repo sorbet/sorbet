@@ -11,7 +11,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+        label = "block[id=1]()\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];

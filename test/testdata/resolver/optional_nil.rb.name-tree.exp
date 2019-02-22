@@ -1,36 +1,36 @@
 begin
-  ::RubyTyper.keep_for_ide(::Test)
-  class ::Test<<constant:Test>> < (::<todo sym>)
-    self(<singleton_class:<constant:Test>>).sig() do ||
-      self(<singleton_class:<constant:Test>>).params({:"x" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  ::RubyTyper.<U keep_for_ide>(::Test)
+  class ::Test<<C <U Test>>> < (::<todo sym>)
+    self(<S <C <U Test>> $1>).<U sig>() do ||
+      self(<S <C <U Test>> $1>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def foo<foo>(x, <blk>)
-      x
+    def <U foo><<U foo>>(x, <blk>)
+      <U x>
     end
 
-    self(<singleton_class:<constant:Test>>).sig() do ||
-      self(<singleton_class:<constant:Test>>).params({:"y" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<S <C <U Test>> $1>).<U sig>() do ||
+      self(<S <C <U Test>> $1>).<U params>({:"y" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def bar<bar>(y, <blk>)
-      y
+    def <U bar><<U bar>>(y, <blk>)
+      <U y>
     end
 
-    self(<singleton_class:<constant:Test>>).sig() do ||
-      self(<singleton_class:<constant:Test>>).params({:"z" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<S <C <U Test>> $1>).<U sig>() do ||
+      self(<S <C <U Test>> $1>).<U params>({:"z" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def qux<qux>(z, <blk>)
-      z
+    def <U qux><<U qux>>(z, <blk>)
+      <U z>
     end
 
-    self(<singleton_class:<constant:Test>>).sig() do ||
-      self(<singleton_class:<constant:Test>>).params({:"w" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+    self(<S <C <U Test>> $1>).<U sig>() do ||
+      self(<S <C <U Test>> $1>).<U params>({:"w" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def baz<baz>(w, <blk>)
-      w
+    def <U baz><<U baz>>(w, <blk>)
+      <U w>
     end
   end
 end

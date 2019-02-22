@@ -1,16 +1,16 @@
 Class {
   name = Const {
     scope = NULL
-    name = <constant:BlockTest>
+    name = <C <U BlockTest>>
   }
   superclass = NULL
   body = DefMethod {
-    name = block_pass
+    name = <U block_pass>
     args = NULL
     body = Block {
       send = Send {
         receiver = NULL
-        method = foo
+        method = <U foo>
         args = [
           Integer {
             val = "1"
@@ -26,15 +26,15 @@ Class {
       args = Args {
         args = [
           Arg {
-            name = x
+            name = <U x>
           }
           Arg {
-            name = y
+            name = <U y>
           }
         ]
       }
       body = LVar {
-        name = x
+        name = <U x>
       }
     }
   }

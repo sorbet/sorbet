@@ -2,15 +2,15 @@ Begin {
   stmts = [
     Alias {
       from = Symbol {
-        val = afoo
+        val = <U afoo>
       }
       to = Symbol {
-        val = bar
+        val = <U bar>
       }
     }
     Assign {
       lhs = IVarLhs {
-        name = @iv
+        name = <U @iv>
       }
       rhs = Integer {
         val = "1"
@@ -18,7 +18,7 @@ Begin {
     }
     Assign {
       lhs = CVarLhs {
-        name = @@cv
+        name = <U @@cv>
       }
       rhs = Integer {
         val = "1"
@@ -26,7 +26,7 @@ Begin {
     }
     Assign {
       lhs = GVarLhs {
-        name = $gv
+        name = <U $gv>
       }
       rhs = Integer {
         val = "1"
@@ -38,16 +38,16 @@ Begin {
           Send {
             receiver = Send {
               receiver = NULL
-              method = x
+              method = <U x>
               args = [
               ]
             }
-            method = var=
+            method = <U var=>
             args = [
             ]
           }
           LVarLhs {
-            name = y
+            name = <U y>
           }
         ]
       }
@@ -64,35 +64,35 @@ Begin {
       lhs = Mlhs {
         exprs = [
           LVarLhs {
-            name = baaaar
+            name = <U baaaar>
           }
           LVarLhs {
-            name = naaar
+            name = <U naaar>
           }
         ]
       }
       rhs = Send {
         receiver = NULL
-        method = zaaaz
+        method = <U zaaaz>
         args = [
         ]
       }
     }
     Assign {
       lhs = LVarLhs {
-        name = xaaaaz
+        name = <U xaaaaz>
       }
       rhs = Array {
         elts = [
           Send {
             receiver = NULL
-            method = yayayaya
+            method = <U yayayaya>
             args = [
             ]
           }
           Send {
             receiver = NULL
-            method = tutututu
+            method = <U tutututu>
             args = [
             ]
           }
@@ -113,24 +113,24 @@ Begin {
       stmts = [
         Send {
           receiver = NULL
-          method = a
+          method = <U a>
           args = [
           ]
         }
         Send {
           receiver = NULL
-          method = b
+          method = <U b>
           args = [
           ]
         }
       ]
     }
     DefMethod {
-      name = bfoo
+      name = <U bfoo>
       args = Args {
         args = [
           Blockarg {
-            name = x
+            name = <U x>
           }
         ]
       }
@@ -139,7 +139,7 @@ Begin {
     Block {
       send = Send {
         receiver = NULL
-        method = lambda
+        method = <U lambda>
         args = [
         ]
       }
@@ -149,7 +149,7 @@ Begin {
     Case {
       condition = Send {
         receiver = NULL
-        method = x
+        method = <U x>
         args = [
         ]
       }
@@ -157,7 +157,7 @@ Begin {
         When {
           patterns = [
             LVar {
-              name = y
+              name = <U y>
             }
           ]
           body = Integer {
@@ -167,7 +167,7 @@ Begin {
       ]
       else_ = Send {
         receiver = NULL
-        method = z
+        method = <U z>
         args = [
         ]
       }
@@ -175,7 +175,7 @@ Begin {
     DString {
       nodes = [
         String {
-          val = x
+          val = <U x>
         }
       ]
     }
@@ -183,7 +183,7 @@ Begin {
       receiver = Integer {
         val = "1"
       }
-      method = +
+      method = <U +>
       args = [
         Complex {
           value = "4"
@@ -199,7 +199,7 @@ Begin {
     DefS {
       singleton = Self {
       }
-      name = classmeth
+      name = <U classmeth>
       args = NULL
       body = NULL
     }
@@ -216,11 +216,11 @@ Begin {
     }
     For {
       vars = LVarLhs {
-        name = x
+        name = <U x>
       }
       expr = Send {
         receiver = NULL
-        method = arr
+        method = <U arr>
         args = [
         ]
       }
@@ -231,7 +231,7 @@ Begin {
         receiver = Integer {
           val = "0"
         }
-        method = !=
+        method = <U !=>
         args = [
           Integer {
             val = "1"
@@ -242,9 +242,9 @@ Begin {
     }
     Send {
       receiver = LVar {
-        name = x
+        name = <U x>
       }
-      method = []=
+      method = <U []=>
       args = [
         Integer {
           val = "1"
@@ -299,26 +299,26 @@ Begin {
     Defined {
       value = Const {
         scope = NULL
-        name = <constant:X>
+        name = <C <U X>>
       }
     }
     ZSuper {
     }
     DefMethod {
-      name = kwfoo
+      name = <U kwfoo>
       args = Args {
         args = [
           Kwarg {
-            name = x
+            name = <U x>
           }
           Kwoptarg {
-            name = y
+            name = <U y>
             default_ = Integer {
               val = "1"
             }
           }
           Kwrestarg {
-            name = z
+            name = <U z>
           }
         ]
       }
@@ -328,7 +328,7 @@ Begin {
       pairs = [
         Kwsplat {
           expr = LVar {
-            name = x
+            name = <U x>
           }
         }
       ]
@@ -366,7 +366,7 @@ Begin {
         stmts = [
           Send {
             receiver = NULL
-            method = puts
+            method = <U puts>
             args = [
               Integer {
                 val = "1"
@@ -383,7 +383,7 @@ Begin {
         stmts = [
           Send {
             receiver = NULL
-            method = puts
+            method = <U puts>
             args = [
               Integer {
                 val = "1"
@@ -397,12 +397,12 @@ Begin {
       lhs = Mlhs {
         exprs = [
           LVarLhs {
-            name = a
+            name = <U a>
           }
           Mlhs {
             exprs = [
               LVarLhs {
-                name = x
+                name = <U x>
               }
             ]
           }
@@ -416,17 +416,17 @@ Begin {
       ref = 4
     }
     DefMethod {
-      name = optfoo
+      name = <U optfoo>
       args = Args {
         args = [
           Optarg {
-            name = x
+            name = <U x>
             default_ = Integer {
               val = "1"
             }
           }
           Restarg {
-            name = y
+            name = <U y>
           }
         ]
       }
@@ -436,17 +436,17 @@ Begin {
       pairs = [
         Pair {
           key = LVar {
-            name = x
+            name = <U x>
           }
           value = LVar {
-            name = y
+            name = <U y>
           }
         }
         Pair {
           key = DSymbol {
             nodes = [
               String {
-                val = foo
+                val = <U foo>
               }
             ]
           }
@@ -459,7 +459,7 @@ Begin {
     Preexe {
       body = Send {
         receiver = NULL
-        method = foo
+        method = <U foo>
         args = [
         ]
       }
@@ -467,7 +467,7 @@ Begin {
     Postexe {
       body = Send {
         receiver = NULL
-        method = bar
+        method = <U bar>
         args = [
         ]
       }
@@ -488,12 +488,12 @@ Begin {
                 elts = [
                   Const {
                     scope = NULL
-                    name = <constant:E>
+                    name = <C <U E>>
                   }
                 ]
               }
               var = LVarLhs {
-                name = x
+                name = <U x>
               }
               body = Nil {
               }
@@ -508,7 +508,7 @@ Begin {
         exprs = [
           SplatLhs {
             var = LVarLhs {
-              name = x
+              name = <U x>
             }
           }
         ]
@@ -517,7 +517,7 @@ Begin {
         elts = [
           Splat {
             var = LVar {
-              name = y
+              name = <U y>
             }
           }
         ]
@@ -526,13 +526,13 @@ Begin {
     DSymbol {
       nodes = [
         String {
-          val = foo
+          val = <U foo>
         }
         Begin {
           stmts = [
             Send {
               receiver = NULL
-              method = bar
+              method = <U bar>
               args = [
               ]
             }
@@ -543,13 +543,13 @@ Begin {
     Array {
       elts = [
         Symbol {
-          val = sym
+          val = <U sym>
         }
       ]
     }
     If {
       condition = LVar {
-        name = x
+        name = <U x>
       }
       then_ = Integer {
         val = "1"
@@ -561,20 +561,20 @@ Begin {
     Undef {
       exprs = [
         Symbol {
-          val = x
+          val = <U x>
         }
         Symbol {
-          val = y
+          val = <U y>
         }
       ]
     }
     Array {
       elts = [
         String {
-          val = a
+          val = <U a>
         }
         String {
-          val = b
+          val = <U b>
         }
       ]
     }
@@ -583,14 +583,14 @@ Begin {
         DString {
           nodes = [
             String {
-              val = a
+              val = <U a>
             }
           ]
         }
         DString {
           nodes = [
             String {
-              val = b
+              val = <U b>
             }
           ]
         }
@@ -599,21 +599,21 @@ Begin {
     XString {
       nodes = [
         String {
-          val = true
+          val = <U true>
         }
       ]
     }
     Block {
       send = Send {
         receiver = NULL
-        method = proc
+        method = <U proc>
         args = [
         ]
       }
       args = Args {
         args = [
           Shadowarg {
-            name = x
+            name = <U x>
           }
         ]
       }
@@ -624,7 +624,7 @@ Begin {
         Block {
           send = Send {
             receiver = NULL
-            method = cfoo
+            method = <U cfoo>
             args = [
               Integer {
                 val = "1"
@@ -637,22 +637,22 @@ Begin {
       ]
     }
     DefMethod {
-      name = sfoo
+      name = <U sfoo>
       args = Args {
         args = [
           Restarg {
-            name = *$2
+            name = <P <U *> $2>
           }
         ]
       }
       body = NULL
     }
     DefMethod {
-      name = ssfoo
+      name = <U ssfoo>
       args = Args {
         args = [
           Kwrestarg {
-            name = **$3
+            name = <P <U **> $3>
           }
         ]
       }

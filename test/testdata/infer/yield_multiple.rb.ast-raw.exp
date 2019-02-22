@@ -1,32 +1,32 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     Send{
       recv = Self{ claz = ::<todo sym> }
-      fun = extend
+      fun = <U extend>
       block = nullptr
       args = [
         UnresolvedConstantLit{
           scope = UnresolvedConstantLit{
             scope = EmptyTree
-            cnst = <constant:T>
+            cnst = <C <U T>>
           }
-          cnst = <constant:Sig>
+          cnst = <C <U Sig>>
         }
       ]
     }
 
     Send{
       recv = Self{ claz = ::<todo sym> }
-      fun = sig
+      fun = <U sig>
       block = Block {
         args = [
         ]
         body = Send{
           recv = Send{
             recv = Self{ claz = ::<todo sym> }
-            fun = params
+            fun = <U params>
             block = nullptr
             args = [
               Hash{
@@ -38,14 +38,14 @@ ClassDef{
                         recv = Send{
                           recv = UnresolvedConstantLit{
                             scope = EmptyTree
-                            cnst = <constant:T>
+                            cnst = <C <U T>>
                           }
-                          fun = proc
+                          fun = <U proc>
                           block = nullptr
                           args = [
                           ]
                         }
-                        fun = params
+                        fun = <U params>
                         block = nullptr
                         args = [
                           Hash{
@@ -54,26 +54,26 @@ ClassDef{
                                 key = Literal{ value = :"x" }
                                 value = UnresolvedConstantLit{
                                   scope = EmptyTree
-                                  cnst = <constant:Integer>
+                                  cnst = <C <U Integer>>
                                 }
                               ]
                               [
                                 key = Literal{ value = :"y" }
                                 value = UnresolvedConstantLit{
                                   scope = EmptyTree
-                                  cnst = <constant:Symbol>
+                                  cnst = <C <U Symbol>>
                                 }
                               ]
                             ]
                           }
                         ]
                       }
-                      fun = returns
+                      fun = <U returns>
                       block = nullptr
                       args = [
                         UnresolvedConstantLit{
                           scope = EmptyTree
-                          cnst = <constant:Integer>
+                          cnst = <C <U Integer>>
                         }
                       ]
                     }
@@ -82,7 +82,7 @@ ClassDef{
               }
             ]
           }
-          fun = void
+          fun = <U void>
           block = nullptr
           args = [
           ]
@@ -94,19 +94,19 @@ ClassDef{
 
     MethodDef{
       flags = 0
-      name = yield_two<<constant:<todo sym>>>
+      name = <U yield_two><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = blk
+          name = <U blk>
         } }]
       rhs = InsSeq{
         stats = [
           Send{
             recv = UnresolvedIdent{
               kind = Local
-              name = blk
+              name = <U blk>
             }
-            fun = call
+            fun = <U call>
             block = nullptr
             args = [
               Literal{ value = 1 }
@@ -117,9 +117,9 @@ ClassDef{
         expr = Send{
           recv = UnresolvedIdent{
             kind = Local
-            name = blk
+            name = <U blk>
           }
-          fun = call
+          fun = <U call>
           block = nullptr
           args = [
             Literal{ value = 1 }

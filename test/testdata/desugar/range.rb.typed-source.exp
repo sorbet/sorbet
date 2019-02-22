@@ -7,93 +7,93 @@ def foo
     e = (1..42).first
     f = ('a'..'z').last
     # dead=1
-    # <statTemp>$4: T.class_of(Range)
+    # <U <statTemp>>$4: T.class_of(Range)
     #
-    # <statTemp>$5: Integer(1)
+    # <U <statTemp>>$5: Integer(1)
     #
-    # <statTemp>$6: Integer(2)
+    # <U <statTemp>>$6: Integer(2)
     #
-    # <statTemp>$8: T.class_of(Range)
+    # <U <statTemp>>$8: T.class_of(Range)
     #
-    # <statTemp>$9: Integer(1)
+    # <U <statTemp>>$9: Integer(1)
     #
-    # <statTemp>$10: Integer(2)
+    # <U <statTemp>>$10: Integer(2)
     #
-    # <statTemp>$12: T.class_of(Range)
+    # <U <statTemp>>$12: T.class_of(Range)
     #
-    # <statTemp>$13: Integer(1)
+    # <U <statTemp>>$13: Integer(1)
     #
-    # <statTemp>$14: Integer(2)
+    # <U <statTemp>>$14: Integer(2)
     #
-    # <statTemp>$15: TrueClass
+    # <U <statTemp>>$15: TrueClass
     #
-    # <statTemp>$17: T.class_of(Range)
+    # <U <statTemp>>$17: T.class_of(Range)
     #
-    # <statTemp>$18: Integer(1)
+    # <U <statTemp>>$18: Integer(1)
     #
-    # <statTemp>$19: Integer(2)
+    # <U <statTemp>>$19: Integer(2)
     #
-    # <statTemp>$20: TrueClass
+    # <U <statTemp>>$20: TrueClass
     #
-    # <statTemp>$22: AppliedType {
-    #   klass = ::<constant:Range>
+    # <U <statTemp>>$22: AppliedType {
+    #   klass = <C <U Range>>
     #   targs = [
-    #     <constant:Elem> = Integer
+    #     <C <U Elem>> = Integer
     #   ]
     # }
     #
-    # <statTemp>$23: T.class_of(Range)
+    # <U <statTemp>>$23: T.class_of(Range)
     #
-    # <statTemp>$24: Integer(1)
+    # <U <statTemp>>$24: Integer(1)
     #
-    # <statTemp>$25: Integer(42)
+    # <U <statTemp>>$25: Integer(42)
     #
-    # <statTemp>$26: AppliedType {
-    #   klass = ::<constant:Range>
+    # <U <statTemp>>$26: AppliedType {
+    #   klass = <C <U Range>>
     #   targs = [
-    #     <constant:Elem> = String
+    #     <C <U Elem>> = String
     #   ]
     # }
     #
-    # <statTemp>$27: T.class_of(Range)
+    # <U <statTemp>>$27: T.class_of(Range)
     #
-    # <statTemp>$28: String("a")
+    # <U <statTemp>>$28: String("a")
     #
-    # <statTemp>$29: String("z")
+    # <U <statTemp>>$29: String("z")
     #
-    # <returnMethodTemp>$2: String
+    # <U <returnMethodTemp>>$2: String
     #
-    # <finalReturn>: T.noreturn
+    # <U <finalReturn>>: T.noreturn
     #
-    # c: AppliedType {
-    #   klass = ::<constant:Range>
+    # <U c>: AppliedType {
+    #   klass = <C <U Range>>
     #   targs = [
-    #     <constant:Elem> = Integer
+    #     <C <U Elem>> = Integer
     #   ]
     # }
     #
-    # b: AppliedType {
-    #   klass = ::<constant:Range>
+    # <U b>: AppliedType {
+    #   klass = <C <U Range>>
     #   targs = [
-    #     <constant:Elem> = Integer
+    #     <C <U Elem>> = Integer
     #   ]
     # }
     #
-    # a: AppliedType {
-    #   klass = ::<constant:Range>
+    # <U a>: AppliedType {
+    #   klass = <C <U Range>>
     #   targs = [
-    #     <constant:Elem> = Integer
+    #     <C <U Elem>> = Integer
     #   ]
     # }
     #
-    # d: AppliedType {
-    #   klass = ::<constant:Range>
+    # <U d>: AppliedType {
+    #   klass = <C <U Range>>
     #   targs = [
-    #     <constant:Elem> = Integer
+    #     <C <U Elem>> = Integer
     #   ]
     # }
     #
-    # e: Integer
+    # <U e>: Integer
     #
-    # f: String
+    # <U f>: String
 end

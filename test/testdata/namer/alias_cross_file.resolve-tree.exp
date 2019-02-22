@@ -1,28 +1,28 @@
 begin
-  ::RubyTyper.keep_for_ide(::TestSig)
-  class ::TestSig<<constant:TestSig>> < (::<todo sym>)
+  ::RubyTyper.<U keep_for_ide>(::TestSig)
+  class ::TestSig<<C <U TestSig>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def test_resolve<test_resolve>(<blk>)
+    def <U test_resolve><<U test_resolve>>(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
-      self(<singleton_class:<constant:TestSig>>).sig() do ||
-        self(<constant:Builder>).returns(::T2)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
+      self(<S <C <U TestSig>> $1>).<U sig>() do ||
+        self(<C <U Builder>>).<U returns>(::T2)
       end
     end
   end
   <emptyTree>
 end
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$88>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $88>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::T1)
+          ::RubyTyper.<U keep_for_ide>(::T1)
           <emptyTree>
         end
         ::T2 = ::T1
@@ -30,6 +30,6 @@ begin
       end
     end
   end
-  class ::T1<<constant:T1>> < (::<todo sym>)  end
+  class ::T1<<C <U T1>>> < (::<todo sym>)  end
   <emptyTree>
 end

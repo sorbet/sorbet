@@ -1,13 +1,13 @@
 Class {
   name = Const {
     scope = NULL
-    name = <constant:Examples>
+    name = <C <U Examples>>
   }
   superclass = NULL
   body = Begin {
     stmts = [
       DefMethod {
-        name = i_like_ifs
+        name = <U i_like_ifs>
         args = Args {
           args = [
           ]
@@ -32,7 +32,7 @@ Class {
         }
       }
       DefMethod {
-        name = i_like_exps
+        name = <U i_like_exps>
         args = Args {
           args = [
           ]
@@ -53,7 +53,7 @@ Class {
         }
       }
       DefMethod {
-        name = return_in_one_branch1
+        name = <U return_in_one_branch1>
         args = Args {
           args = [
           ]
@@ -78,7 +78,7 @@ Class {
         }
       }
       DefMethod {
-        name = return_in_one_branch2
+        name = <U return_in_one_branch2>
         args = Args {
           args = [
           ]
@@ -103,7 +103,7 @@ Class {
         }
       }
       DefMethod {
-        name = variables
+        name = <U variables>
         args = Args {
           args = [
           ]
@@ -119,7 +119,7 @@ Class {
               }
               then_ = Assign {
                 lhs = LVarLhs {
-                  name = a
+                  name = <U a>
                 }
                 rhs = Integer {
                   val = "1"
@@ -127,7 +127,7 @@ Class {
               }
               else_ = Assign {
                 lhs = LVarLhs {
-                  name = a
+                  name = <U a>
                 }
                 rhs = Integer {
                   val = "2"
@@ -143,7 +143,7 @@ Class {
               }
               then_ = Assign {
                 lhs = LVarLhs {
-                  name = b
+                  name = <U b>
                 }
                 rhs = Integer {
                   val = "1"
@@ -151,7 +151,7 @@ Class {
               }
               else_ = Assign {
                 lhs = LVarLhs {
-                  name = b
+                  name = <U b>
                 }
                 rhs = Integer {
                   val = "2"
@@ -160,12 +160,12 @@ Class {
             }
             Send {
               receiver = LVar {
-                name = a
+                name = <U a>
               }
-              method = +
+              method = <U +>
               args = [
                 LVar {
-                  name = b
+                  name = <U b>
                 }
               ]
             }
@@ -173,11 +173,11 @@ Class {
         }
       }
       DefMethod {
-        name = variables_and_loop
+        name = <U variables_and_loop>
         args = Args {
           args = [
             Arg {
-              name = cond
+              name = <U cond>
             }
           ]
         }
@@ -192,7 +192,7 @@ Class {
               }
               then_ = Assign {
                 lhs = LVarLhs {
-                  name = a
+                  name = <U a>
                 }
                 rhs = Integer {
                   val = "1"
@@ -200,7 +200,7 @@ Class {
               }
               else_ = Assign {
                 lhs = LVarLhs {
-                  name = a
+                  name = <U a>
                 }
                 rhs = Integer {
                   val = "2"
@@ -214,13 +214,13 @@ Class {
                 condition = Begin {
                   stmts = [
                     LVar {
-                      name = cond
+                      name = <U cond>
                     }
                   ]
                 }
                 then_ = Assign {
                   lhs = LVarLhs {
-                    name = b
+                    name = <U b>
                   }
                   rhs = Integer {
                     val = "1"
@@ -228,7 +228,7 @@ Class {
                 }
                 else_ = Assign {
                   lhs = LVarLhs {
-                    name = b
+                    name = <U b>
                   }
                   rhs = Integer {
                     val = "2"
@@ -237,17 +237,17 @@ Class {
               }
             }
             LVar {
-              name = b
+              name = <U b>
             }
           ]
         }
       }
       DefMethod {
-        name = variables_loop_if
+        name = <U variables_loop_if>
         args = Args {
           args = [
             Arg {
-              name = cond
+              name = <U cond>
             }
           ]
         }
@@ -260,13 +260,13 @@ Class {
                 condition = Begin {
                   stmts = [
                     LVar {
-                      name = cond
+                      name = <U cond>
                     }
                   ]
                 }
                 then_ = Assign {
                   lhs = LVarLhs {
-                    name = b
+                    name = <U b>
                   }
                   rhs = Integer {
                     val = "1"
@@ -274,7 +274,7 @@ Class {
                 }
                 else_ = Assign {
                   lhs = LVarLhs {
-                    name = b
+                    name = <U b>
                   }
                   rhs = Integer {
                     val = "2"
@@ -283,17 +283,17 @@ Class {
               }
             }
             LVar {
-              name = b
+              name = <U b>
             }
           ]
         }
       }
       DefMethod {
-        name = take_arguments
+        name = <U take_arguments>
         args = Args {
           args = [
             Arg {
-              name = i
+              name = <U i>
             }
           ]
         }
@@ -308,7 +308,7 @@ Class {
             val = "2"
           }
           else_ = LVar {
-            name = i
+            name = <U i>
           }
         }
       }

@@ -1,8 +1,8 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>
 
-  def self.<static-init><<static-init>$87>(<blk>)
-    self(<singleton_class:<constant:<root>>>).foobar() do ||
+  def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
+    self(<S <C <U <root>>> $1>).<U foobar>() do ||
       begin
         <emptyTree>
         <emptyTree>
@@ -11,15 +11,15 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
-  def a_method<a_method>(<blk>)
+  def <U a_method><<U a_method>>(<blk>)
     <emptyTree>
   end
 
-  def a_method_with_param<a_method_with_param>(a, <blk>)
+  def <U a_method_with_param><<U a_method_with_param>>(a, <blk>)
     <emptyTree>
   end
 
-  def self.a_static_method<a_static_method>(<blk>)
+  def self.<U a_static_method><<U a_static_method>>(<blk>)
     <emptyTree>
   end
 end

@@ -1,20 +1,20 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     MethodDef{
       flags = 0
-      name = main<<constant:<todo sym>>>
+      name = <U main><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = try
+              name = <U try>
             }
             rhs = Literal{ value = 0 }
           }
@@ -24,9 +24,9 @@ ClassDef{
             cond = Send{
               recv = UnresolvedIdent{
                 kind = Local
-                name = try
+                name = <U try>
               }
-              fun = <
+              fun = <U <>
               block = nullptr
               args = [
                 Literal{ value = 3 }
@@ -37,14 +37,14 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = try
+                    name = <U try>
                   }
                   rhs = Send{
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = try
+                      name = <U try>
                     }
-                    fun = +
+                    fun = <U +>
                     block = nullptr
                     args = [
                       Literal{ value = 1 }
@@ -54,7 +54,7 @@ ClassDef{
               ],
               expr = Send{
                 recv = Self{ claz = ::<todo sym> }
-                fun = raise
+                fun = <U raise>
                 block = nullptr
                 args = [
                   Literal{ value = "e" }
@@ -69,13 +69,13 @@ ClassDef{
               ]
               var = UnresolvedIdent{
                 kind = Local
-                name = <rescueTemp>$2
+                name = <D <U <rescueTemp>> $2>
               }
               body = InsSeq{
                 stats = [
                   Send{
                     recv = Self{ claz = ::<todo sym> }
-                    fun = puts
+                    fun = <U puts>
                     block = nullptr
                     args = [
                       Literal{ value = "rescue" }
@@ -95,7 +95,7 @@ ClassDef{
 
     Send{
       recv = Self{ claz = ::<todo sym> }
-      fun = main
+      fun = <U main>
       block = nullptr
       args = [
       ]

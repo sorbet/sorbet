@@ -1,28 +1,28 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::B)
+          ::RubyTyper.<U keep_for_ide>(::B)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::A)
+          ::RubyTyper.<U keep_for_ide>(::A)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  module ::B<<constant:B>> < ()  end
-  module ::A<<constant:A>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+  module ::B<<C <U B>>> < ()  end
+  module ::A<<C <U A>>> < ()
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.keep_for_ide(::A::B::C)
+        ::RubyTyper.<U keep_for_ide>(::A::B::C)
         <emptyTree>
       end
     end
   end
-  class ::A::B::C<<constant:C>> < (::<todo sym>)  end
+  class ::A::B::C<<C <U C>>> < (::<todo sym>)  end
   <emptyTree>
 end

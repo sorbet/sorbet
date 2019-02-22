@@ -540,7 +540,8 @@ public:
 
     // Not printed when showing name table
     bool isHiddenFromPrinting(const GlobalState &gs) const;
-    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0, bool showHidden = false,
+                                 bool useToString = false) const;
     std::string toString(const GlobalState &gs) const {
         return toStringWithTabs(gs);
     }

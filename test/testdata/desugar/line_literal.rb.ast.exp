@@ -1,3 +1,3 @@
-class <emptyTree><<constant:<root>>> < ()
-  self(<constant:<todo sym>>).puts("\n".concat(3.to_s()).to_s())
+class <emptyTree><<C <U <root>>>> < ()
+  self(<C <U <todo sym>>>).<U puts>("\n".<U concat>(3.<U to_s>()).<U to_s>())
 end

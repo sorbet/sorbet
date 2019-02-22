@@ -1,5 +1,5 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     UnresolvedConstantLit{
@@ -8,7 +8,7 @@ ClassDef{
         symbol = ::<root>
         typeAlias = nullptr
       }
-      cnst = <constant:TopLevelConst>
+      cnst = <C <U TopLevelConst>>
     }
   ]
 }

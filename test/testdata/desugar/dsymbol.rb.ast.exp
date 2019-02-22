@@ -1,9 +1,9 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
   :"foo"
 
-  "foo".intern()
+  "foo".<U intern>()
 
   :""
 
-  "hello_".concat(self(<constant:<todo sym>>).name().to_s()).concat("!").intern()
+  "hello_".<U concat>(self(<C <U <todo sym>>>).<U name>().<U to_s>()).<U concat>("!").<U intern>()
 end

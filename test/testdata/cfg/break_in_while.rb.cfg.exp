@@ -11,17 +11,17 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<statTemp>$8 = self\l<statTemp>$4 = <statTemp>$8.dead()\l<unconditional>\l"
+        label = "block[id=1]()\l<U <statTemp>>$8 = self\l<U <statTemp>>$4 = <U <statTemp>>$8.<U dead>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$3: TrueClass = true\l<unconditional>\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <whileTemp>>$3: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: NilClass = nil\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: NilClass = nil\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
@@ -34,7 +34,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(<root>) = self\l<statTemp>$5: T.class_of(<root>) = self\l<statTemp>$4: T.untyped = <statTemp>$5: T.class_of(<root>).foo()\l<returnMethodTemp>$2: NilClass = <statTemp>$3: T.class_of(<root>).puts(<statTemp>$4: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(<root>) = self\l<U <statTemp>>$5: T.class_of(<root>) = self\l<U <statTemp>>$4: T.untyped = <U <statTemp>>$5: T.class_of(<root>).<U foo>()\l<U <returnMethodTemp>>$2: NilClass = <U <statTemp>>$3: T.class_of(<root>).<U puts>(<U <statTemp>>$4: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

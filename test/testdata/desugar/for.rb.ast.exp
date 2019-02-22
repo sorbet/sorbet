@@ -1,114 +1,114 @@
-class <emptyTree><<constant:<root>>> < ()
-  class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
-    def self.each<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
+    def self.<U each><<C <U <todo sym>>>>(&<U <blk>>)
       begin
-        <blk>.call(1, 2, 3, 4, 5)
-        <blk>.call(6, 7, 8, 9, 0)
+        <U <blk>>.<U call>(1, 2, 3, 4, 5)
+        <U <blk>>.<U call>(6, 7, 8, 9, 0)
       end
     end
   end
 
-  class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<todo sym>)
-    def self.e=<<constant:<todo sym>>>(e, &<blk>)
-      @e = e
+  class <emptyTree>::<C <U E>><<C <U <todo sym>>>> < (::<todo sym>)
+    def self.<U e=><<C <U <todo sym>>>>(<U e>, &<U <blk>>)
+      <U @e> = <U e>
     end
 
-    def self.e<<constant:<todo sym>>>(&<blk>)
-      @e
+    def self.<U e><<C <U <todo sym>>>>(&<U <blk>>)
+      <U @e>
     end
   end
 
-  class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<todo sym>)
-    def self.main<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U Main>><<C <U <todo sym>>>> < (::<todo sym>)
+    def self.<U main><<C <U <todo sym>>>>(&<U <blk>>)
       begin
-        <emptyTree>::<constant:A>.each() do |*forTemp$2|
+        <emptyTree>::<C <U A>>.<U each>() do |*<D <U forTemp> $2>|
           begin
             begin
-              <assignTemp>$3 = ::<Magic>.<expand-splat>(forTemp$2, 1, 0)
-              a = <assignTemp>$3.[](0)
-              <assignTemp>$3
+              <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<D <U forTemp> $2>, 1, 0)
+              <U a> = <D <U <assignTemp>> $3>.<U []>(0)
+              <D <U <assignTemp>> $3>
             end
-            self(<constant:<todo sym>>).puts(a.inspect())
+            self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
           end
         end
-        <emptyTree>::<constant:A>.each() do |*forTemp|
+        <emptyTree>::<C <U A>>.<U each>() do |*<U forTemp>|
           begin
             begin
-              <assignTemp>$4 = ::<Magic>.<expand-splat>(forTemp.to_a(), 1, 0)
-              a = <assignTemp>$4.[](0)
-              <assignTemp>$4
+              <D <U <assignTemp>> $4> = ::<Magic>.<U <expand-splat>>(<U forTemp>.<U to_a>(), 1, 0)
+              <U a> = <D <U <assignTemp>> $4>.<U []>(0)
+              <D <U <assignTemp>> $4>
             end
-            self(<constant:<todo sym>>).puts(a.inspect())
+            self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
           end
         end
-        <emptyTree>::<constant:A>.each() do |*forTemp$5|
+        <emptyTree>::<C <U A>>.<U each>() do |*<D <U forTemp> $5>|
           begin
             begin
-              <assignTemp>$6 = ::<Magic>.<expand-splat>(forTemp$5, 2, 0)
-              a = <assignTemp>$6.[](0)
-              b = <assignTemp>$6.[](1)
-              <assignTemp>$6
+              <D <U <assignTemp>> $6> = ::<Magic>.<U <expand-splat>>(<D <U forTemp> $5>, 2, 0)
+              <U a> = <D <U <assignTemp>> $6>.<U []>(0)
+              <U b> = <D <U <assignTemp>> $6>.<U []>(1)
+              <D <U <assignTemp>> $6>
             end
             begin
-              self(<constant:<todo sym>>).puts(a.inspect())
-              self(<constant:<todo sym>>).puts(b.inspect())
-            end
-          end
-        end
-        <emptyTree>::<constant:A>.each() do |*forTemp|
-          begin
-            begin
-              <assignTemp>$7 = ::<Magic>.<expand-splat>(forTemp.to_a(), 2, 0)
-              a = <assignTemp>$7.[](0)
-              b = <assignTemp>$7.[](1)
-              <assignTemp>$7
-            end
-            self(<constant:<todo sym>>).puts(a.inspect())
-            self(<constant:<todo sym>>).puts(b.inspect())
-          end
-        end
-        self(<constant:<todo sym>>).puts("main")
-        <emptyTree>::<constant:A>.each() do |*forTemp$8|
-          begin
-            begin
-              <assignTemp>$9 = ::<Magic>.<expand-splat>(forTemp$8, 5, 0)
-              @a = <assignTemp>$9.[](0)
-              @@b = <assignTemp>$9.[](1)
-              $c = <assignTemp>$9.[](2)
-              d = <assignTemp>$9.[](3)
-              <emptyTree>::<constant:E>.e=(<assignTemp>$9.[](4))
-              <assignTemp>$9
-            end
-            begin
-              self(<constant:<todo sym>>).puts(@a.inspect())
-              self(<constant:<todo sym>>).puts(@@b.inspect())
-              self(<constant:<todo sym>>).puts($c.inspect())
-              self(<constant:<todo sym>>).puts(d.inspect())
-              self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e().inspect())
+              self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
+              self(<C <U <todo sym>>>).<U puts>(<U b>.<U inspect>())
             end
           end
         end
-        <emptyTree>::<constant:A>.each() do |*forTemp|
+        <emptyTree>::<C <U A>>.<U each>() do |*<U forTemp>|
           begin
             begin
-              <assignTemp>$10 = ::<Magic>.<expand-splat>(forTemp.to_a(), 5, 0)
-              @a = <assignTemp>$10.[](0)
-              @@b = <assignTemp>$10.[](1)
-              $c = <assignTemp>$10.[](2)
-              d = <assignTemp>$10.[](3)
-              <emptyTree>::<constant:E>.e=(<assignTemp>$10.[](4))
-              <assignTemp>$10
+              <D <U <assignTemp>> $7> = ::<Magic>.<U <expand-splat>>(<U forTemp>.<U to_a>(), 2, 0)
+              <U a> = <D <U <assignTemp>> $7>.<U []>(0)
+              <U b> = <D <U <assignTemp>> $7>.<U []>(1)
+              <D <U <assignTemp>> $7>
             end
-            self(<constant:<todo sym>>).puts(@a.inspect())
-            self(<constant:<todo sym>>).puts(@@b.inspect())
-            self(<constant:<todo sym>>).puts($c.inspect())
-            self(<constant:<todo sym>>).puts(d.inspect())
-            self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e().inspect())
+            self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
+            self(<C <U <todo sym>>>).<U puts>(<U b>.<U inspect>())
+          end
+        end
+        self(<C <U <todo sym>>>).<U puts>("main")
+        <emptyTree>::<C <U A>>.<U each>() do |*<D <U forTemp> $8>|
+          begin
+            begin
+              <D <U <assignTemp>> $9> = ::<Magic>.<U <expand-splat>>(<D <U forTemp> $8>, 5, 0)
+              <U @a> = <D <U <assignTemp>> $9>.<U []>(0)
+              <U @@b> = <D <U <assignTemp>> $9>.<U []>(1)
+              <U $c> = <D <U <assignTemp>> $9>.<U []>(2)
+              <U d> = <D <U <assignTemp>> $9>.<U []>(3)
+              <emptyTree>::<C <U E>>.<U e=>(<D <U <assignTemp>> $9>.<U []>(4))
+              <D <U <assignTemp>> $9>
+            end
+            begin
+              self(<C <U <todo sym>>>).<U puts>(<U @a>.<U inspect>())
+              self(<C <U <todo sym>>>).<U puts>(<U @@b>.<U inspect>())
+              self(<C <U <todo sym>>>).<U puts>(<U $c>.<U inspect>())
+              self(<C <U <todo sym>>>).<U puts>(<U d>.<U inspect>())
+              self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U E>>.<U e>().<U inspect>())
+            end
+          end
+        end
+        <emptyTree>::<C <U A>>.<U each>() do |*<U forTemp>|
+          begin
+            begin
+              <D <U <assignTemp>> $10> = ::<Magic>.<U <expand-splat>>(<U forTemp>.<U to_a>(), 5, 0)
+              <U @a> = <D <U <assignTemp>> $10>.<U []>(0)
+              <U @@b> = <D <U <assignTemp>> $10>.<U []>(1)
+              <U $c> = <D <U <assignTemp>> $10>.<U []>(2)
+              <U d> = <D <U <assignTemp>> $10>.<U []>(3)
+              <emptyTree>::<C <U E>>.<U e=>(<D <U <assignTemp>> $10>.<U []>(4))
+              <D <U <assignTemp>> $10>
+            end
+            self(<C <U <todo sym>>>).<U puts>(<U @a>.<U inspect>())
+            self(<C <U <todo sym>>>).<U puts>(<U @@b>.<U inspect>())
+            self(<C <U <todo sym>>>).<U puts>(<U $c>.<U inspect>())
+            self(<C <U <todo sym>>>).<U puts>(<U d>.<U inspect>())
+            self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U E>>.<U e>().<U inspect>())
           end
         end
       end
     end
   end
 
-  <emptyTree>::<constant:Main>.main()
+  <emptyTree>::<C <U Main>>.<U main>()
 end

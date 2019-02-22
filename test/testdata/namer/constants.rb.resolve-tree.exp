@@ -1,9 +1,9 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::A)
+          ::RubyTyper.<U keep_for_ide>(::A)
           <emptyTree>
         end
         ::A::B::C
@@ -13,20 +13,20 @@ begin
       end
     end
   end
-  module ::A<<constant:A>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+  module ::A<<C <U A>>> < ()
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         ::A::B::C = 1
         begin
-          ::RubyTyper.keep_for_ide(::A::B)
+          ::RubyTyper.<U keep_for_ide>(::A::B)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  module ::A::B<<constant:B>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+  module ::A::B<<C <U B>>> < ()
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         ::A::B::C
         ::A::B::D = 1

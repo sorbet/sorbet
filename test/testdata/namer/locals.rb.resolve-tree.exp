@@ -1,22 +1,22 @@
 begin
-  ::RubyTyper.keep_for_ide(::TestLocals)
-  class ::TestLocals<<constant:TestLocals>> < (::<todo sym>)
-    def method<method>(<blk>)
+  ::RubyTyper.<U keep_for_ide>(::TestLocals)
+  class ::TestLocals<<C <U TestLocals>>> < (::<todo sym>)
+    def <U method><<U method>>(<blk>)
       begin
-        a = 1
-        c = 4
-        self(<constant:TestLocals>).proc() do ||
+        <U a> = 1
+        <U c> = 4
+        self(<C <U TestLocals>>).<U proc>() do ||
           begin
-            b$2 = 2
-            a.+(b$2)
-            self(<constant:TestLocals>).proc() do ||
-              b$2.+(c)
+            <U b>$2 = 2
+            <U a>.<U +>(<U b>$2)
+            self(<C <U TestLocals>>).<U proc>() do ||
+              <U b>$2.<U +>(<U c>)
             end
           end
         end
-        b = 3
-        self(<constant:TestLocals>).proc() do |a|
-          a$4.+(b$4)
+        <U b> = 3
+        self(<C <U TestLocals>>).<U proc>() do |a|
+          <U a>$4.<U +>(<U b>$4)
         end
       end
     end

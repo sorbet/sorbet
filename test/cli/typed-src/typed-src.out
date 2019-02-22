@@ -2,78 +2,78 @@ class A
   extend T::Sig
 
   sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
-  # <statTemp>$3: T.class_of(A)
+  # <U <statTemp>>$3: T.class_of(A)
   #
-  # <block-pre-call-temp>$4: RubyTyper::Void
+  # <U <block-pre-call-temp>>$4: RubyTyper::Void
   # dead=1
-  # <returnMethodTemp>$2: RubyTyper::Void
+  # <U <returnMethodTemp>>$2: RubyTyper::Void
   #
-  # <finalReturn>: T.noreturn
+  # <U <finalReturn>>: T.noreturn
   # dead=1
-  # <statTemp>$8: Sorbet::Private::Builder
+  # <U <statTemp>>$8: Sorbet::Private::Builder
   #
-  # <statTemp>$9: Sorbet::Private::Builder
+  # <U <statTemp>>$9: Sorbet::Private::Builder
   #
-  # <statTemp>$10: ShapeType {
+  # <U <statTemp>>$10: ShapeType {
   #   Symbol(:"x") => MetaType
   #   Symbol(:"y") => T.class_of(Integer)
   # }
   #
-  # <statTemp>$13: T.class_of(T)
+  # <U <statTemp>>$13: T.class_of(T)
   #
-  # <statTemp>$14: T.class_of(String)
+  # <U <statTemp>>$14: T.class_of(String)
   #
-  # <statTemp>$15: T.class_of(Integer)
+  # <U <statTemp>>$15: T.class_of(Integer)
   #
-  # <statTemp>$19: T.class_of(Integer)
+  # <U <statTemp>>$19: T.class_of(Integer)
   #
-  # <blockReturnTemp>$7: Sorbet::Private::Builder
+  # <U <blockReturnTemp>>$7: Sorbet::Private::Builder
   #
-  # <blockReturnTemp>$20: T.noreturn
+  # <U <blockReturnTemp>>$20: T.noreturn
   #
-  # <hashTemp>$11: Symbol(:"x")
+  # <U <hashTemp>>$11: Symbol(:"x")
   #
-  # <hashTemp>$12: MetaType
+  # <U <hashTemp>>$12: MetaType
   #
-  # <hashTemp>$16: Symbol(:"y")
+  # <U <hashTemp>>$16: Symbol(:"y")
   #
-  # <hashTemp>$17: T.class_of(Integer)
+  # <U <hashTemp>>$17: T.class_of(Integer)
   #
-  # <magic>$18: <Magic>
+  # <U <magic>>$18: <Magic>
   def a_method(x, y)
     if x.is_a?(String)
-       # <ifTemp>$4: TrueClass | FalseClass
+       # <U <ifTemp>>$4: TrueClass | FalseClass
        #   Being truthy entails:
-       #     x to be String
+       #     <U x> to be String
        #   Being falsy entails:
-       #     x NOT to be String
+       #     <U x> NOT to be String
        #
-       # <statTemp>$6: T.class_of(String)
+       # <U <statTemp>>$6: T.class_of(String)
        #
-       # x: String | Integer
+       # <U x>: String | Integer
        #
-       # y: Integer
-          # x: String
+       # <U y>: Integer
+          # <U x>: String
           #
-          # y: Integer
+          # <U y>: Integer
       x = x.to_i
-          # <statTemp>$7: String
+          # <U <statTemp>>$7: String
           #
-          # x: Integer
+          # <U x>: Integer
           #
-          # y: Integer
+          # <U y>: Integer
     end
-    # x: Integer
+    # <U x>: Integer
     #
-    # y: Integer
+    # <U y>: Integer
     x + y
     # dead=1
-    # <returnMethodTemp>$2: Integer
+    # <U <returnMethodTemp>>$2: Integer
     #
-    # <finalReturn>: T.noreturn
+    # <U <finalReturn>>: T.noreturn
     #
-    # x: Integer
+    # <U x>: Integer
     #
-    # y: Integer
+    # <U y>: Integer
   end
 end

@@ -1,53 +1,53 @@
-class <emptyTree><<constant:<root>>> < ()
-  class <emptyTree>::<constant:NormalClass><<constant:<todo sym>>> < (::<todo sym>)
-    def normal_method<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U NormalClass>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U normal_method><<C <U <todo sym>>>>(&<U <blk>>)
       <emptyTree>
     end
 
-    def self.normal_static_method<<constant:<todo sym>>>(&<blk>)
+    def self.<U normal_static_method><<C <U <todo sym>>>>(&<U <blk>>)
       <emptyTree>
     end
 
-    class <emptyTree>::<constant:InnerClass><<constant:<todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C <U InnerClass>><<C <U <todo sym>>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    module <emptyTree>::<constant:InnerModule><<constant:<todo sym>>> < ()
-      <emptyTree>
-    end
-  end
-
-  module <emptyTree>::<constant:ANamespace><<constant:<todo sym>>> < ()
-    class <emptyTree>::<constant:ObviousChild><<constant:<todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C <U InnerModule>><<C <U <todo sym>>>> < ()
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:<todo sym>>> < (::<todo sym>)
+  module <emptyTree>::<C <U ANamespace>><<C <U <todo sym>>>> < ()
+    class <emptyTree>::<C <U ObviousChild>><<C <U <todo sym>>>> < (::<todo sym>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C <U ANamespace>>::<C <U ClassInNamespace>><<C <U <todo sym>>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  class <emptyTree>::<constant:Parent><<constant:<todo sym>>> < (::<todo sym>)
+  class <emptyTree>::<C <U Parent>><<C <U <todo sym>>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  module <emptyTree>::<constant:Mixin><<constant:<todo sym>>> < ()
+  module <emptyTree>::<C <U Mixin>><<C <U <todo sym>>>> < ()
     <emptyTree>
   end
 
-  module <emptyTree>::<constant:OtherMixin><<constant:<todo sym>>> < ()
+  module <emptyTree>::<C <U OtherMixin>><<C <U <todo sym>>>> < ()
     <emptyTree>
   end
 
-  class <emptyTree>::<constant:Child><<constant:<todo sym>>> < (<emptyTree>::<constant:Parent>)
-    self(<constant:<todo sym>>).include(<emptyTree>::<constant:Mixin>)
+  class <emptyTree>::<C <U Child>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Parent>>)
+    self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Mixin>>)
 
-    self(<constant:<todo sym>>).include(<emptyTree>)
+    self(<C <U <todo sym>>>).<U include>(<emptyTree>)
 
-    self(<constant:<todo sym>>).include(<emptyTree>::<constant:Mixin>) do ||
+    self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Mixin>>) do ||
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).whatever().include(<emptyTree>::<constant:OtherMixin>)
+    self(<C <U <todo sym>>>).<U whatever>().<U include>(<emptyTree>::<C <U OtherMixin>>)
   end
 end

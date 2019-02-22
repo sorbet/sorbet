@@ -1,26 +1,26 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         #$a = 1
         begin
-          ::RubyTyper.keep_for_ide(::A)
+          ::RubyTyper.<U keep_for_ide>(::A)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::A<<constant:A>> < (::<todo sym>)
+  class ::A<<C <U A>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def meth<meth>(<blk>)
+    def <U meth><<U meth>>(<blk>)
       [#$a, #$b, #$c]
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         #$b = 2
         #$a

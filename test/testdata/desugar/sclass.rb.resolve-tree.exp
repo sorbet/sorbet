@@ -1,159 +1,159 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
+  class <emptyTree><<C <U <root>>>> < ()
     <emptyTree>
 
     <emptyTree>
 
-    def main<main>(<blk>)
+    def <U main><<U main>>(<blk>)
       begin
-        self(<constant:Object>).puts(::A.a())
-        self(<constant:Object>).puts(::B.b())
-        self(<constant:Object>).puts(#$c.c())
-        self(<constant:Object>).puts(::D.singleton_class().d())
-        self(<constant:Object>).puts(::E.e())
-        self(<constant:Object>).puts(::F.f=(91))
-        self(<constant:Object>).puts(::G.new().wrapper())
-        self(<constant:Object>).puts(::T.untyped.h())
+        self(<C <U Object>>).<U puts>(::A.<U a>())
+        self(<C <U Object>>).<U puts>(::B.<U b>())
+        self(<C <U Object>>).<U puts>(#$c.<U c>())
+        self(<C <U Object>>).<U puts>(::D.<U singleton_class>().<U d>())
+        self(<C <U Object>>).<U puts>(::E.<U e>())
+        self(<C <U Object>>).<U puts>(::F.<U f=>(91))
+        self(<C <U Object>>).<U puts>(::G.<U new>().<U wrapper>())
+        self(<C <U Object>>).<U puts>(::T.untyped.<U h>())
       end
     end
 
-    def self.<static-init><<static-init>$87>(<blk>)
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::A)
+          ::RubyTyper.<U keep_for_ide>(::A)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::B)
+          ::RubyTyper.<U keep_for_ide>(::B)
           <emptyTree>
         end
-        #$c = ::Object.new()
+        #$c = ::Object.<U new>()
         begin
-          ::RubyTyper.keep_for_ide(::D)
-          <emptyTree>
-        end
-        begin
-          ::RubyTyper.keep_for_ide(::E)
+          ::RubyTyper.<U keep_for_ide>(::D)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::F)
+          ::RubyTyper.<U keep_for_ide>(::E)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::G)
+          ::RubyTyper.<U keep_for_ide>(::F)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::H)
+          ::RubyTyper.<U keep_for_ide>(::G)
           <emptyTree>
         end
-        self(<singleton_class:<constant:<root>>>).main()
+        begin
+          ::RubyTyper.<U keep_for_ide>(::H)
+          <emptyTree>
+        end
+        self(<S <C <U <root>>> $1>).<U main>()
         <emptyTree>
       end
     end
   end
-  class ::A<<constant:A>> < (::<todo sym>)  end
-  class ::B<<constant:B>> < (::<todo sym>)
+  class ::A<<C <U A>>> < (::<todo sym>)  end
+  class ::B<<C <U B>>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton_class:<constant:B>>> < ()
-    def b<b>(<blk>)
+  class <U <singleton class>><<S <C <U B>> $1>> < ()
+    def <U b><<U b>>(<blk>)
       "b"
     end
   end
-  class ::D<<constant:D>> < (::<todo sym>)
+  class ::D<<C <U D>>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton_class:<constant:D>>> < ()
+  class <U <singleton class>><<S <C <U D>> $1>> < ()
     <emptyTree>
   end
-  class <singleton class><<singleton_class:<singleton_class:<constant:D>>>> < ()
-    def d<d>(<blk>)
+  class <U <singleton class>><<S <S <C <U D>> $1> $1>> < ()
+    def <U d><<U d>>(<blk>)
       "d"
     end
   end
-  class ::E<<constant:E>> < (::<todo sym>)
+  class ::E<<C <U E>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def self.<static-init><<static-init>>(<blk>)
-      self(<singleton_class:<constant:E>>).wrapper()
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
+      self(<S <C <U E>> $1>).<U wrapper>()
     end
   end
-  class <singleton class><<singleton_class:<constant:E>>> < ()
+  class <U <singleton class>><<S <C <U E>> $1>> < ()
     <emptyTree>
 
-    def wrapper<wrapper>(<blk>)
+    def <U wrapper><<U wrapper>>(<blk>)
       <emptyTree>
     end
 
-    def e<e>(<blk>)
+    def <U e><<U e>>(<blk>)
       "e"
     end
   end
-  class ::F<<constant:F>> < (::<todo sym>)
+  class ::F<<C <U F>>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton_class:<constant:F>>> < ()
+  class <U <singleton class>><<S <C <U F>> $1>> < ()
     <emptyTree>
 
     <emptyTree>
 
     <emptyTree>
 
-    def initialize<initialize>(<blk>)
-      @f = begin
-        ::RubyTyper.keep_for_typechecking(::Integer)
-        T.let(0, Integer)
+    def <U initialize><<U initialize>>(<blk>)
+      <U @f> = begin
+        ::RubyTyper.<U keep_for_typechecking>(::Integer)
+        T.<U let>(0, Integer)
       end
     end
 
-    def f=<f=>(f, <blk>)
-      @f = f
+    def <U f=><<U f=>>(f, <blk>)
+      <U @f> = <U f>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
-      self(<singleton_class:<singleton_class:<constant:F>>>).sig() do ||
-        self(<constant:Builder>).params({:"f" => ::Integer}).returns(::Integer)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
+      self(<S <S <C <U F>> $1> $1>).<U sig>() do ||
+        self(<C <U Builder>>).<U params>({:"f" => ::Integer}).<U returns>(::Integer)
       end
     end
   end
-  class ::G<<constant:G>> < (::<todo sym>)
+  class ::G<<C <U G>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def wrapper<wrapper>(<blk>)
+    def <U wrapper><<U wrapper>>(<blk>)
       begin
         <emptyTree>
-        self(<constant:G>).inner()
+        self(<C <U G>>).<U inner>()
       end
     end
 
-    def self.g<g>(<blk>)
+    def self.<U g><<U g>>(<blk>)
       "g"
     end
   end
-  class <singleton class><<singleton_class:<constant:G>>> < ()
-    def inner<inner>(<blk>)
-      ::T.reveal_type(self(<singleton_class:<constant:G>>))
+  class <U <singleton class>><<S <C <U G>> $1>> < ()
+    def <U inner><<U inner>>(<blk>)
+      ::T.<U reveal_type>(self(<S <C <U G>> $1>))
     end
   end
-  class ::H<<constant:H>> < (::<todo sym>)
+  class ::H<<C <U H>>> < (::<todo sym>)
     <emptyTree>
   end
-  class <singleton class><<singleton_class:<constant:H>>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+  class <U <singleton class>><<S <C <U H>> $1>> < ()
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.keep_for_ide(::<Class:H>::H2)
+        ::RubyTyper.<U keep_for_ide>(::<Class:H>::H2)
         <emptyTree>
       end
     end
   end
-  class ::<Class:H>::H2<<constant:H2>> < (::<todo sym>)
-    def self.h<h>(<blk>)
+  class ::<Class:H>::H2<<C <U H2>>> < (::<todo sym>)
+    def self.<U h><<U h>>(<blk>)
       "h"
     end
   end

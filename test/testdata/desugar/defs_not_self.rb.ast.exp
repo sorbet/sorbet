@@ -1,3 +1,3 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>
 end

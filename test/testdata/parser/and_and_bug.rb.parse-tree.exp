@@ -2,13 +2,13 @@ If {
   condition = And {
     left = Send {
       receiver = NULL
-      method = a
+      method = <U a>
       args = [
       ]
     }
     right = Send {
       receiver = NULL
-      method = a
+      method = <U a>
       args = [
       ]
     }

@@ -6,7 +6,7 @@ subgraph "cluster_::Side#foo" {
     "bb::Side#foo_1" [shape = parallelogram];
 
     "bb::Side#foo_0" [
-        label = "block[id=0]()\lcond: T.untyped = load_arg(Side#foo#cond)\la: Integer(1) = 1\l<statTemp>$4: Integer(1) = a\l<statTemp>$5: Integer(1) = a\lcond: T.untyped\l"
+        label = "block[id=0]()\l<U cond>: T.untyped = load_arg(Side#foo#cond)\l<U a>: Integer(1) = 1\l<U <statTemp>>$4: Integer(1) = <U a>\l<U <statTemp>>$5: Integer(1) = <U a>\l<U cond>: T.untyped\l"
     ];
 
     "bb::Side#foo_0" -> "bb::Side#foo_2" [style="bold"];
@@ -18,17 +18,17 @@ subgraph "cluster_::Side#foo" {
 
     "bb::Side#foo_1" -> "bb::Side#foo_1" [style="bold"];
     "bb::Side#foo_2" [
-        label = "block[id=2](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1))\la: TrueClass = true\l<unconditional>\l"
+        label = "block[id=2](<U <statTemp>>$4: Integer(1), <U <statTemp>>$5: Integer(1))\l<U a>: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::Side#foo_2" -> "bb::Side#foo_4" [style="bold"];
     "bb::Side#foo_3" [
-        label = "block[id=3](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1))\la: Integer(2) = 2\l<unconditional>\l"
+        label = "block[id=3](<U <statTemp>>$4: Integer(1), <U <statTemp>>$5: Integer(1))\l<U a>: Integer(2) = 2\l<unconditional>\l"
     ];
 
     "bb::Side#foo_3" -> "bb::Side#foo_4" [style="bold"];
     "bb::Side#foo_4" [
-        label = "block[id=4](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1), a: T.any(TrueClass, Integer))\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: Integer(1).foo(<statTemp>$5: Integer(1), a: T.any(TrueClass, Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4](<U <statTemp>>$4: Integer(1), <U <statTemp>>$5: Integer(1), <U a>: T.any(TrueClass, Integer))\l<U <returnMethodTemp>>$2: T.untyped = <U <statTemp>>$4: Integer(1).<U foo>(<U <statTemp>>$5: Integer(1), <U a>: T.any(TrueClass, Integer))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Side#foo_4" -> "bb::Side#foo_1" [style="bold"];

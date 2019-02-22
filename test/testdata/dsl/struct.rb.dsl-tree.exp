@@ -1,167 +1,167 @@
-class <emptyTree><<constant:<root>>> < ()
-  self(<constant:<todo sym>>).require_relative("../../t")
+class <emptyTree><<C <U <root>>>> < ()
+  self(<C <U <todo sym>>>).<U require_relative>("../../t")
 
-  module <emptyTree>::<constant:Foo><<constant:<todo sym>>> < ()
-    class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
+  module <emptyTree>::<C <U Foo>><<C <U <todo sym>>>> < ()
+    class <emptyTree>::<C <U Struct>><<C <U <todo sym>>>> < (::<todo sym>)
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<constant:NotStruct><<constant:<todo sym>>> < (::<todo sym>)
-    <emptyTree>::<constant:B> = <emptyTree>::<constant:T>.let(<emptyTree>::<constant:Foo>::<constant:Struct>.new(), <emptyTree>::<constant:Foo>::<constant:Struct>)
+  class <emptyTree>::<C <U NotStruct>><<C <U <todo sym>>>> < (::<todo sym>)
+    <emptyTree>::<C <U B>> = <emptyTree>::<C <U T>>.<U let>(<emptyTree>::<C <U Foo>>::<C <U Struct>>.<U new>(), <emptyTree>::<C <U Foo>>::<C <U Struct>>)
 
-    var = <emptyTree>::<constant:Struct>.new(:"foo")
+    <U var> = <emptyTree>::<C <U Struct>>.<U new>(:"foo")
   end
 
-  class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
-      <emptyTree>::<constant:Elem> = self(<constant:<todo sym>>).type_member({:"fixed" => ::T.untyped()})
+  class <emptyTree>::<C <U RealStruct>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <emptyTree>::<C <U Elem>> = self(<C <U <todo sym>>>).<U type_member>({:"fixed" => ::T.<U untyped>()})
 
-      def foo<<constant:<todo sym>>>(&<blk>)
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      def bar<<constant:<todo sym>>>(&<blk>)
+      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def bar=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U returns>(<emptyTree>::<C <U A>>)
       end
 
-      def self.new<<constant:<todo sym>>>(foo = nil, bar = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
+      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
   end
 
-  class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (<emptyTree>::<constant:Struct>)
-      self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+  class <emptyTree>::<C <U RealStructDesugar>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Struct>>)
+      self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-      def foo<<constant:<todo sym>>>(&<blk>)
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def bar<<constant:<todo sym>>>(&<blk>)
+      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      def bar=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      self(<constant:<todo sym>>).sig() do ||
-        self(<constant:<todo sym>>).params({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+      self(<C <U <todo sym>>>).<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"foo" => <emptyTree>::<C <U BasicObject>>, :"bar" => <emptyTree>::<C <U BasicObject>>}).<U returns>(<emptyTree>::<C <U A>>)
       end
 
-      def self.new<<constant:<todo sym>>>(foo = nil, bar = nil, &<blk>)
-        <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
+      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
+        <emptyTree>::<C <U T>>.<U cast>(nil, <emptyTree>::<C <U A>>)
       end
     end
   end
 
-  class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
-      <emptyTree>::<constant:Elem> = self(<constant:<todo sym>>).type_member({:"fixed" => ::T.untyped()})
+  class <emptyTree>::<C <U TwoStructs>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <emptyTree>::<C <U Elem>> = self(<C <U <todo sym>>>).<U type_member>({:"fixed" => ::T.<U untyped>()})
 
-      def foo<<constant:<todo sym>>>(&<blk>)
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"foo" => ::BasicObject}).<U returns>(<emptyTree>::<C <U A>>)
       end
 
-      def self.new<<constant:<todo sym>>>(foo = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
+      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
 
-    class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
-      <emptyTree>::<constant:Elem> = self(<constant:<todo sym>>).type_member({:"fixed" => ::T.untyped()})
+    class <emptyTree>::<C <U B>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <emptyTree>::<C <U Elem>> = self(<C <U <todo sym>>>).<U type_member>({:"fixed" => ::T.<U untyped>()})
 
-      def foo<<constant:<todo sym>>>(&<blk>)
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"foo" => ::BasicObject}).<U returns>(<emptyTree>::<C <U B>>)
       end
 
-      def self.new<<constant:<todo sym>>>(foo = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:B>)
+      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U B>>)
       end
     end
   end
 
-  class <emptyTree>::<constant:AccidentallyStruct><<constant:<todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
+  class <emptyTree>::<C <U AccidentallyStruct>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <emptyTree>::<C <U Struct>><<C <U <todo sym>>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
-      <emptyTree>::<constant:Elem> = self(<constant:<todo sym>>).type_member({:"fixed" => ::T.untyped()})
+    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <emptyTree>::<C <U Elem>> = self(<C <U <todo sym>>>).<U type_member>({:"fixed" => ::T.<U untyped>()})
 
-      def foo<<constant:<todo sym>>>(&<blk>)
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def foo=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      def bar<<constant:<todo sym>>>(&<blk>)
+      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
         <emptyTree>
       end
 
-      def bar=<<constant:<todo sym>>>(arg0, &<blk>)
-        arg0
+      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
       end
 
-      ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      ::Sorbet.<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U returns>(<emptyTree>::<C <U A>>)
       end
 
-      def self.new<<constant:<todo sym>>>(foo = nil, bar = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
+      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
   end
 
-  class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<todo sym>)
-    def main<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U Main>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U main><<C <U <todo sym>>>>(&<U <blk>>)
       begin
-        a = <emptyTree>::<constant:Struct>.new(:"foo")
-        <emptyTree>::<constant:T>.assert_type!(a, <emptyTree>::<constant:Class>)
-        <emptyTree>::<constant:T>.assert_type!(a.new(), <emptyTree>::<constant:Struct>)
-        <emptyTree>::<constant:T>.assert_type!(a.new(2), <emptyTree>::<constant:Struct>)
-        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStruct>::<constant:A>.new(2, 3), <emptyTree>::<constant:RealStruct>::<constant:A>)
-        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStruct>::<constant:A>.new(2), <emptyTree>::<constant:RealStruct>::<constant:A>)
-        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStructDesugar>::<constant:A>.new(2, 3), <emptyTree>::<constant:RealStructDesugar>::<constant:A>)
+        <U a> = <emptyTree>::<C <U Struct>>.<U new>(:"foo")
+        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>, <emptyTree>::<C <U Class>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(), <emptyTree>::<C <U Struct>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(2), <emptyTree>::<C <U Struct>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStruct>>::<C <U A>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2), <emptyTree>::<C <U RealStruct>>::<C <U A>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStructDesugar>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStructDesugar>>::<C <U A>>)
       end
     end
   end
 
-  self(<constant:<todo sym>>).puts(<emptyTree>::<constant:Main>.new().main())
+  self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U Main>>.<U new>().<U main>())
 end

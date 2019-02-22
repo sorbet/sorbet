@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<arrayTemp>$4: Integer(1) = 1\l<arrayTemp>$5: Integer(2) = 2\l<magic>$6: <Magic> = alias <constant:<Magic>>\l<statTemp>$3: [Integer(1), Integer(2)] = <magic>$6: <Magic>.<build-array>(<arrayTemp>$4: Integer(1), <arrayTemp>$5: Integer(2))\l<block-pre-call-temp>$7: T::Array[U] = <statTemp>$3: [Integer(1), Integer(2)].map()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <arrayTemp>>$4: Integer(1) = 1\l<U <arrayTemp>>$5: Integer(2) = 2\l<U <magic>>$6: <Magic> = alias <C <U <Magic>>>\l<U <statTemp>>$3: [Integer(1), Integer(2)] = <U <magic>>$6: <Magic>.<U <build-array>>(<U <arrayTemp>>$4: Integer(1), <U <arrayTemp>>$5: Integer(2))\l<U <block-pre-call-temp>>$7: T::Array[U] = <U <statTemp>>$3: [Integer(1), Integer(2)].<U map>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -16,19 +16,19 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T::Array[T.noreturn] = Solve<::Object#foo#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[T.noreturn]\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: T::Array[T.noreturn] = Solve<::Object#foo#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T::Array[T.noreturn]\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$8: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<blk>$9: Integer(0) = 0\lx$2: Integer = <blk>$8: [Integer].[](<blk>$9: Integer(0))\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$8: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$2: Integer = <U <blk>>$8: [Integer].<U []>(<U <blk>>$9: Integer(0))\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
@@ -41,7 +41,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$3: T.class_of(<root>) = self\l<statTemp>$5: T.class_of(<root>) = self\l<statTemp>$4: T.untyped = <statTemp>$5: T.class_of(<root>).foo()\l<returnMethodTemp>$2: NilClass = <statTemp>$3: T.class_of(<root>).puts(<statTemp>$4: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(<root>) = self\l<U <statTemp>>$5: T.class_of(<root>) = self\l<U <statTemp>>$4: T.untyped = <U <statTemp>>$5: T.class_of(<root>).<U foo>()\l<U <returnMethodTemp>>$2: NilClass = <U <statTemp>>$3: T.class_of(<root>).<U puts>(<U <statTemp>>$4: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

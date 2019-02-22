@@ -1,5 +1,5 @@
-class <emptyTree><<constant:<root>>> < ()
-  ::<Magic>.defined?(self(<constant:<todo sym>>).foo())
+class <emptyTree><<C <U <root>>>> < ()
+  ::<Magic>.<U defined?>(self(<C <U <todo sym>>>).<U foo>())
 
-  self(<constant:<todo sym>>).defined_(self(<constant:<todo sym>>).foo())
+  self(<C <U <todo sym>>>).<U defined_>(self(<C <U <todo sym>>>).<U foo>())
 end

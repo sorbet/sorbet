@@ -1,99 +1,99 @@
-class <emptyTree><<constant:<root>>> < ()
-  class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
     <emptyTree>
   end
 
   <emptyTree>
 
-  class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      def b<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U B>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      def <U b><<C <U <todo sym>>>>(&<U <blk>>)
         "b"
       end
     end
   end
 
-  $c = <emptyTree>::<constant:Object>.new()
+  <U $c> = <emptyTree>::<C <U Object>>.<U new>()
 
   <emptyTree>
 
-  class <emptyTree>::<constant:D><<constant:<todo sym>>> < (::<todo sym>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      class <singleton class><<constant:<todo sym>>> < ()
-        def d<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U D>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      class <U <singleton class>><<C <U <todo sym>>>> < ()
+        def <U d><<C <U <todo sym>>>>(&<U <blk>>)
           "d"
         end
       end
     end
   end
 
-  class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<todo sym>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      def wrapper<<constant:<todo sym>>>(&<blk>)
-        def e<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U E>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      def <U wrapper><<C <U <todo sym>>>>(&<U <blk>>)
+        def <U e><<C <U <todo sym>>>>(&<U <blk>>)
           "e"
         end
       end
     end
 
-    self(<constant:<todo sym>>).wrapper()
+    self(<C <U <todo sym>>>).<U wrapper>()
   end
 
-  class <emptyTree>::<constant:F><<constant:<todo sym>>> < (::<todo sym>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      def initialize<<constant:<todo sym>>>(&<blk>)
-        @f = <emptyTree>::<constant:T>.let(0, <emptyTree>::<constant:Integer>)
+  class <emptyTree>::<C <U F>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      def <U initialize><<C <U <todo sym>>>>(&<U <blk>>)
+        <U @f> = <emptyTree>::<C <U T>>.<U let>(0, <emptyTree>::<C <U Integer>>)
       end
 
-      self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+      self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-      self(<constant:<todo sym>>).sig() do ||
-        self(<constant:<todo sym>>).params({:"f" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:Integer>)
+      self(<C <U <todo sym>>>).<U sig>() do ||
+        self(<C <U <todo sym>>>).<U params>({:"f" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U Integer>>)
       end
 
-      self(<constant:<todo sym>>).attr_writer(:"f")
+      self(<C <U <todo sym>>>).<U attr_writer>(:"f")
     end
   end
 
-  class <emptyTree>::<constant:G><<constant:<todo sym>>> < (::<todo sym>)
-    def wrapper<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U G>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U wrapper><<C <U <todo sym>>>>(&<U <blk>>)
       begin
-        class <singleton class><<constant:<todo sym>>> < ()
-          def inner<<constant:<todo sym>>>(&<blk>)
-            <emptyTree>::<constant:T>.reveal_type(self(<constant:<todo sym>>))
+        class <U <singleton class>><<C <U <todo sym>>>> < ()
+          def <U inner><<C <U <todo sym>>>>(&<U <blk>>)
+            <emptyTree>::<C <U T>>.<U reveal_type>(self(<C <U <todo sym>>>))
           end
         end
-        self(<constant:<todo sym>>).inner()
+        self(<C <U <todo sym>>>).<U inner>()
       end
     end
 
-    def self.g<<constant:<todo sym>>>(&<blk>)
+    def self.<U g><<C <U <todo sym>>>>(&<U <blk>>)
       "g"
     end
   end
 
-  class <emptyTree>::<constant:H><<constant:<todo sym>>> < (::<todo sym>)
-    class <singleton class><<constant:<todo sym>>> < ()
-      class <emptyTree>::<constant:H2><<constant:<todo sym>>> < (::<todo sym>)
-        def self.h<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U H>><<C <U <todo sym>>>> < (::<todo sym>)
+    class <U <singleton class>><<C <U <todo sym>>>> < ()
+      class <emptyTree>::<C <U H2>><<C <U <todo sym>>>> < (::<todo sym>)
+        def self.<U h><<C <U <todo sym>>>>(&<U <blk>>)
           "h"
         end
       end
     end
   end
 
-  def main<<constant:<todo sym>>>(&<blk>)
+  def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:A>.a())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:B>.b())
-      self(<constant:<todo sym>>).puts($c.c())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:D>.singleton_class().d())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:F>.f=(91))
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:G>.new().wrapper())
-      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:H>.singleton_class()::<constant:H2>.h())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U A>>.<U a>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U B>>.<U b>())
+      self(<C <U <todo sym>>>).<U puts>(<U $c>.<U c>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U D>>.<U singleton_class>().<U d>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U E>>.<U e>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U F>>.<U f=>(91))
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U G>>.<U new>().<U wrapper>())
+      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U H>>.<U singleton_class>()::<C <U H2>>.<U h>())
     end
   end
 
-  self(<constant:<todo sym>>).main()
+  self(<C <U <todo sym>>>).<U main>()
 end

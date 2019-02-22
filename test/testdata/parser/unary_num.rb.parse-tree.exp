@@ -2,7 +2,7 @@ Begin {
   stmts = [
     Assign {
       lhs = LVarLhs {
-        name = a
+        name = <U a>
       }
       rhs = Integer {
         val = "+42"
@@ -10,7 +10,7 @@ Begin {
     }
     Assign {
       lhs = LVarLhs {
-        name = b
+        name = <U b>
       }
       rhs = Integer {
         val = "-42"
@@ -18,7 +18,7 @@ Begin {
     }
     Assign {
       lhs = LVarLhs {
-        name = c
+        name = <U c>
       }
       rhs = Float {
         val = "+42.01"
@@ -26,7 +26,7 @@ Begin {
     }
     Assign {
       lhs = LVarLhs {
-        name = d
+        name = <U d>
       }
       rhs = Float {
         val = "-42.01"

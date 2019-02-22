@@ -1,6 +1,6 @@
 begin
-  ::RubyTyper.keep_for_ide(::Main)
-  class ::Main<<constant:Main>> < (::<todo sym>)
+  ::RubyTyper.<U keep_for_ide>(::Main)
+  class ::Main<<C <U Main>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -9,21 +9,21 @@ begin
 
     <emptyTree>
 
-    def foo<foo$1>(a, <blk>)
-      a
+    def <U foo><<N <U foo> $1>>(a, <blk>)
+      <U a>
     end
 
-    def foo<foo$2>(a, b, <blk>)
+    def <U foo><<N <U foo> $2>>(a, b, <blk>)
       <emptyTree>
     end
 
-    def foo<foo>(a, b, c, <blk>)
+    def <U foo><<U foo>>(a, b, c, <blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
-      self(<singleton_class:<constant:Main>>).sig() do ||
-        self(<constant:Builder>).params({:"a" => ::Integer}).returns(::Integer)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
+      self(<S <C <U Main>> $1>).<U sig>() do ||
+        self(<C <U Builder>>).<U params>({:"a" => ::Integer}).<U returns>(::Integer)
       end
     end
   end

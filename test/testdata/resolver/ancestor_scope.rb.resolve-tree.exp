@@ -1,51 +1,51 @@
 begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$87>(<blk>)
+  class <emptyTree><<C <U <root>>>> < ()
+    def self.<U <static-init>><<N <U <static-init>> $87>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::Other)
+          ::RubyTyper.<U keep_for_ide>(::Other)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::Test)
-          ::RubyTyper.keep_for_ide(::Other)
+          ::RubyTyper.<U keep_for_ide>(::Test)
+          ::RubyTyper.<U keep_for_ide>(::Other)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_typechecking(::Test::Mixin)
-          T.assert_type!(::Test.new(), Test::Mixin)
+          ::RubyTyper.<U keep_for_typechecking>(::Test::Mixin)
+          T.<U assert_type!>(::Test.<U new>(), Test::Mixin)
         end
         begin
-          ::RubyTyper.keep_for_typechecking(::Test::Other)
-          T.assert_type!(::Test.new(), Test::Other)
+          ::RubyTyper.<U keep_for_typechecking>(::Test::Other)
+          T.<U assert_type!>(::Test.<U new>(), Test::Other)
         end
         begin
-          ::RubyTyper.keep_for_typechecking(::Other)
-          T.assert_type!(::Test.new(), Other)
+          ::RubyTyper.<U keep_for_typechecking>(::Other)
+          T.<U assert_type!>(::Test.<U new>(), Other)
         end
         <emptyTree>
       end
     end
   end
-  class ::Other<<constant:Other>> < (::<todo sym>)  end
-  class ::Test<<constant:Test>> < (::Other, ::Test::Mixin, ::Test::Other)
-    def self.<static-init><<static-init>>(<blk>)
+  class ::Other<<C <U Other>>> < (::<todo sym>)  end
+  class ::Test<<C <U Test>>> < (::Other, ::Test::Mixin, ::Test::Other)
+    def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         begin
-          ::RubyTyper.keep_for_ide(::Test::Mixin)
+          ::RubyTyper.<U keep_for_ide>(::Test::Mixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::Test::Other)
+          ::RubyTyper.<U keep_for_ide>(::Test::Other)
           <emptyTree>
         end
-        ::RubyTyper.keep_for_ide(::Test::Mixin)
-        ::RubyTyper.keep_for_ide(::Test::Other)
+        ::RubyTyper.<U keep_for_ide>(::Test::Mixin)
+        ::RubyTyper.<U keep_for_ide>(::Test::Other)
         <emptyTree>
       end
     end
   end
-  module ::Test::Mixin<<constant:Mixin>> < ()  end
-  module ::Test::Other<<constant:Other>> < ()  end
+  module ::Test::Mixin<<C <U Mixin>>> < ()  end
+  module ::Test::Other<<C <U Other>>> < ()  end
   <emptyTree>
 end

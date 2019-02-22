@@ -1,16 +1,16 @@
 DefMethod {
-  name = test_brackets
+  name = <U test_brackets>
   args = NULL
   body = Begin {
     stmts = [
       Send {
         receiver = Send {
           receiver = NULL
-          method = a
+          method = <U a>
           args = [
           ]
         }
-        method = []=
+        method = <U []=>
         args = [
           Integer {
             val = "0"
@@ -23,11 +23,11 @@ DefMethod {
       Send {
         receiver = Send {
           receiver = NULL
-          method = a
+          method = <U a>
           args = [
           ]
         }
-        method = []=
+        method = <U []=>
         args = [
           Integer {
             val = "1"

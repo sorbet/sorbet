@@ -1,98 +1,98 @@
-class <emptyTree><<constant:<root>>> < ()
-  class <emptyTree>::<constant:HasMeth><<constant:<todo sym>>> < (::<todo sym>)
-    def meth<<constant:<todo sym>>>(&<blk>)
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U HasMeth>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U meth><<C <U <todo sym>>>>(&<U <blk>>)
       "meth"
     end
   end
 
-  def returns_lambda<<constant:<todo sym>>>(&<blk>)
-    self(<constant:<todo sym>>).lambda() do |x|
+  def <U returns_lambda><<C <U <todo sym>>>>(&<U <blk>>)
+    self(<C <U <todo sym>>>).<U lambda>() do |<U x>|
       "returns_lambda"
     end
   end
 
-  class <emptyTree>::<constant:HasToProc><<constant:<todo sym>>> < (::<todo sym>)
-    def to_proc<<constant:<todo sym>>>(&<blk>)
-      self(<constant:<todo sym>>).returns_lambda()
+  class <emptyTree>::<C <U HasToProc>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U to_proc><<C <U <todo sym>>>>(&<U <blk>>)
+      self(<C <U <todo sym>>>).<U returns_lambda>()
     end
   end
 
-  def calls_arg_with_object<<constant:<todo sym>>>(arg, &blk)
-    blk.call(arg)
+  def <U calls_arg_with_object><<C <U <todo sym>>>>(<U arg>, &<U blk>)
+    <U blk>.<U call>(<U arg>)
   end
 
-  def calls_with_object<<constant:<todo sym>>>(&blk)
-    self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |*<block-pass>$2|
-      ::<Magic>.<call-with-splat>(blk.to_proc(), :"call", <block-pass>$2)
+  def <U calls_with_object><<C <U <todo sym>>>>(&<U blk>)
+    self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |*<D <U <block-pass>> $2>|
+      ::<Magic>.<U <call-with-splat>>(<U blk>.<U to_proc>(), :"call", <D <U <block-pass>> $2>)
     end
   end
 
-  class <emptyTree>::<constant:CallsWithObject><<constant:<todo sym>>> < (::<todo sym>)
-    def self.calls_with_object<<constant:<todo sym>>>(&blk)
-      blk.call(<emptyTree>::<constant:HasMeth>.new())
+  class <emptyTree>::<C <U CallsWithObject>><<C <U <todo sym>>>> < (::<todo sym>)
+    def self.<U calls_with_object><<C <U <todo sym>>>>(&<U blk>)
+      <U blk>.<U call>(<emptyTree>::<C <U HasMeth>>.<U new>())
     end
   end
 
-  class <emptyTree>::<constant:CallsWithObjectChild><<constant:<todo sym>>> < (<emptyTree>::<constant:CallsWithObject>)
-    def self.calls_with_object<<constant:<todo sym>>>(&blk)
-      self(<constant:<todo sym>>).super() do |*<block-pass>$2|
-        ::<Magic>.<call-with-splat>(blk.to_proc(), :"call", <block-pass>$2)
+  class <emptyTree>::<C <U CallsWithObjectChild>><<C <U <todo sym>>>> < (<emptyTree>::<C <U CallsWithObject>>)
+    def self.<U calls_with_object><<C <U <todo sym>>>>(&<U blk>)
+      self(<C <U <todo sym>>>).<U super>() do |*<D <U <block-pass>> $2>|
+        ::<Magic>.<U <call-with-splat>>(<U blk>.<U to_proc>(), :"call", <D <U <block-pass>> $2>)
       end
     end
   end
 
-  def foo<<constant:<todo sym>>>(&blk)
+  def <U foo><<C <U <todo sym>>>>(&<U blk>)
     begin
-      self(<constant:<todo sym>>).calls_with_object() do |<block-pass>$2|
-        <block-pass>$2.meth()
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |<D <U <block-pass>> $2>|
+        <D <U <block-pass>> $2>.<U meth>()
       end
-      self(<constant:<todo sym>>).calls_with_object() do |*args|
-        ::<Magic>.<call-with-splat>(:"meth".to_proc(), :"call", args.to_a())
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<U args>|
+        ::<Magic>.<U <call-with-splat>>(:"meth".<U to_proc>(), :"call", <U args>.<U to_a>())
       end
-      self(<constant:<todo sym>>).calls_with_object() do |x|
-        :"meth".to_proc().call(x)
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |<U x>|
+        :"meth".<U to_proc>().<U call>(<U x>)
       end
-      self(<constant:<todo sym>>).calls_with_object() do |x|
-        x.meth()
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |<U x>|
+        <U x>.<U meth>()
       end
-      self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$3|
-        ::<Magic>.<call-with-splat>(blk.to_proc(), :"call", <block-pass>$3)
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<D <U <block-pass>> $3>|
+        ::<Magic>.<U <call-with-splat>>(<U blk>.<U to_proc>(), :"call", <D <U <block-pass>> $3>)
       end
-      self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$4|
-        ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>).returns_lambda().to_proc(), :"call", <block-pass>$4)
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<D <U <block-pass>> $4>|
+        ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>).<U returns_lambda>().<U to_proc>(), :"call", <D <U <block-pass>> $4>)
       end
-      self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$5|
-        ::<Magic>.<call-with-splat>(<emptyTree>::<constant:HasToProc>.new().to_proc(), :"call", <block-pass>$5)
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<D <U <block-pass>> $5>|
+        ::<Magic>.<U <call-with-splat>>(<emptyTree>::<C <U HasToProc>>.<U new>().<U to_proc>(), :"call", <D <U <block-pass>> $5>)
       end
-      self(<constant:<todo sym>>).calls_with_object() do |*args|
-        ::<Magic>.<call-with-splat>(<emptyTree>::<constant:HasToProc>.new().to_proc(), :"call", args.to_a())
+      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<U args>|
+        ::<Magic>.<U <call-with-splat>>(<emptyTree>::<C <U HasToProc>>.<U new>().<U to_proc>(), :"call", <U args>.<U to_a>())
       end
-      <emptyTree>::<constant:CallsWithObject>.calls_with_object() do |<block-pass>$6|
-        <block-pass>$6.meth()
+      <emptyTree>::<C <U CallsWithObject>>.<U calls_with_object>() do |<D <U <block-pass>> $6>|
+        <D <U <block-pass>> $6>.<U meth>()
       end
       begin
-        <assignTemp>$7 = <emptyTree>::<constant:CallsWithObject>
-        if <assignTemp>$7.nil?()
+        <D <U <assignTemp>> $7> = <emptyTree>::<C <U CallsWithObject>>
+        if <D <U <assignTemp>> $7>.<U nil?>()
           nil
         else
-          <assignTemp>$7.calls_with_object() do |<block-pass>$8|
-            <block-pass>$8.meth()
+          <D <U <assignTemp>> $7>.<U calls_with_object>() do |<D <U <block-pass>> $8>|
+            <D <U <block-pass>> $8>.<U meth>()
           end
         end
       end
-      <emptyTree>::<constant:CallsWithObjectChild>.calls_with_object() do |<block-pass>$9|
-        <block-pass>$9.meth()
+      <emptyTree>::<C <U CallsWithObjectChild>>.<U calls_with_object>() do |<D <U <block-pass>> $9>|
+        <D <U <block-pass>> $9>.<U meth>()
       end
-      self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |<block-pass>$10|
-        <block-pass>$10.meth()
+      self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |<D <U <block-pass>> $10>|
+        <D <U <block-pass>> $10>.<U meth>()
       end
-      self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |x|
-        x.meth()
+      self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |<U x>|
+        <U x>.<U meth>()
       end
     end
   end
 
-  self(<constant:<todo sym>>).foo() do |x|
+  self(<C <U <todo sym>>>).<U foo>() do |<U x>|
     "foo"
   end
 end

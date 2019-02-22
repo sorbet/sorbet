@@ -1,22 +1,22 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     MethodDef{
       flags = 0
-      name = foo<foo>
+      name = <U foo><<U foo>>
       args = [Local{
-          localVariable = a
+          localVariable = <U a>
         }, Local{
-          localVariable = <blk>
+          localVariable = <U <blk>>
         }]
       rhs = Assign{
         lhs = UnresolvedIdent{
           kind = Instance
-          name = @a
+          name = <U @a>
         }
         rhs = Local{
-          localVariable = a
+          localVariable = <U a>
         }
       }
     }

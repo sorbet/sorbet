@@ -6,7 +6,7 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_1" [shape = parallelogram];
 
     "bb::Test#normalize_params_0" [
-        label = "block[id=0]()\lv: T.untyped = load_arg(Test#normalize_params#v)\l<statTemp>$5: T.class_of(Hash) = alias <constant:Hash>\l<ifTemp>$3: T.untyped = v: T.untyped.is_a?(<statTemp>$5: T.class_of(Hash))\l<ifTemp>$3: T.untyped\l"
+        label = "block[id=0]()\l<U v>: T.untyped = load_arg(Test#normalize_params#v)\l<U <statTemp>>$5: T.class_of(Hash) = alias <C <U Hash>>\l<U <ifTemp>>$3: T.untyped = <U v>: T.untyped.<U is_a?>(<U <statTemp>>$5: T.class_of(Hash))\l<U <ifTemp>>$3: T.untyped\l"
     ];
 
     "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_2" [style="bold"];
@@ -18,46 +18,46 @@ subgraph "cluster_::Test#normalize_params" {
 
     "bb::Test#normalize_params_1" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_2" [
-        label = "block[id=2](v: T::Hash[T.untyped, T.untyped])\l<statTemp>$7: Test = self\l<statTemp>$8: T::Array[[T.untyped, T.untyped]] = v: T::Hash[T.untyped, T.untyped].to_a()\l<statTemp>$6: T.untyped = <statTemp>$7: Test.normalize_params(<statTemp>$8: T::Array[[T.untyped, T.untyped]])\l<returnMethodTemp>$2: T.untyped = <statTemp>$6: T.untyped.sort()\l<unconditional>\l"
+        label = "block[id=2](<U v>: T::Hash[T.untyped, T.untyped])\l<U <statTemp>>$7: Test = self\l<U <statTemp>>$8: T::Array[[T.untyped, T.untyped]] = <U v>: T::Hash[T.untyped, T.untyped].<U to_a>()\l<U <statTemp>>$6: T.untyped = <U <statTemp>>$7: Test.<U normalize_params>(<U <statTemp>>$8: T::Array[[T.untyped, T.untyped]])\l<U <returnMethodTemp>>$2: T.untyped = <U <statTemp>>$6: T.untyped.<U sort>()\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_10" [style="bold"];
     "bb::Test#normalize_params_3" [
-        label = "block[id=3](v: T.untyped)\l<statTemp>$12: T.class_of(Array) = alias <constant:Array>\l<ifTemp>$10: T.untyped = v: T.untyped.is_a?(<statTemp>$12: T.class_of(Array))\l<ifTemp>$10: T.untyped\l"
+        label = "block[id=3](<U v>: T.untyped)\l<U <statTemp>>$12: T.class_of(Array) = alias <C <U Array>>\l<U <ifTemp>>$10: T.untyped = <U v>: T.untyped.<U is_a?>(<U <statTemp>>$12: T.class_of(Array))\l<U <ifTemp>>$10: T.untyped\l"
     ];
 
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_4" [style="bold"];
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_5" [style="tapered"];
 
     "bb::Test#normalize_params_4" [
-        label = "block[id=4](v: T::Array[T.untyped])\l<block-pre-call-temp>$14: T::Array[U] = v: T::Array[T.untyped].map()\l<unconditional>\l"
+        label = "block[id=4](<U v>: T::Array[T.untyped])\l<U <block-pre-call-temp>>$14: T::Array[U] = <U v>: T::Array[T.untyped].<U map>()\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_4" -> "bb::Test#normalize_params_6" [style="bold"];
     "bb::Test#normalize_params_5" [
-        label = "block[id=5](v: T.untyped)\l<returnMethodTemp>$2: T.untyped = v\l<unconditional>\l"
+        label = "block[id=5](<U v>: T.untyped)\l<U <returnMethodTemp>>$2: T.untyped = <U v>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_10" [style="bold"];
     "bb::Test#normalize_params_6" [
-        label = "block[id=6]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=6]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_8" [style="bold"];
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_7" [style="tapered"];
 
     "bb::Test#normalize_params_7" [
-        label = "block[id=7]()\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<::Test#normalize_params#<block>>\l<unconditional>\l"
+        label = "block[id=7]()\l<U <returnMethodTemp>>$2: T::Array[T.untyped] = Solve<::Test#normalize_params#<block>>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_10" [style="bold"];
     "bb::Test#normalize_params_8" [
-        label = "block[id=8]()\louterLoops: 1\l<blk>$15: [T.untyped] = load_yield_params(::Test#normalize_params#<block>, Test#normalize_params#<block>)\l<blk>$16: Integer(0) = 0\le$2: T.untyped = <blk>$15: [T.untyped].[](<blk>$16: Integer(0))\l<statTemp>$18: Test = self\l<blockReturnTemp>$17: T.untyped = <statTemp>$18: Test.normalize_params(e$2: T.untyped)\l<blockReturnTemp>$20: T.noreturn = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$17: T.untyped\l<unconditional>\l"
+        label = "block[id=8]()\louterLoops: 1\l<U <blk>>$15: [T.untyped] = load_yield_params(::Test#normalize_params#<block>, Test#normalize_params#<block>)\l<U <blk>>$16: Integer(0) = 0\l<U e>$2: T.untyped = <U <blk>>$15: [T.untyped].<U []>(<U <blk>>$16: Integer(0))\l<U <statTemp>>$18: Test = self\l<U <blockReturnTemp>>$17: T.untyped = <U <statTemp>>$18: Test.<U normalize_params>(<U e>$2: T.untyped)\l<U <blockReturnTemp>>$20: T.noreturn = blockreturn<::Test#normalize_params#<block>> <U <blockReturnTemp>>$17: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_8" -> "bb::Test#normalize_params_6" [style="bold"];
     "bb::Test#normalize_params_10" [
-        label = "block[id=10](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=10](<U <returnMethodTemp>>$2: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_10" -> "bb::Test#normalize_params_1" [style="bold"];

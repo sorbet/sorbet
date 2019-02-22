@@ -3,27 +3,27 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = <constant:NormalClass>
+        name = <C <U NormalClass>>
       }
       superclass = NULL
       body = Begin {
         stmts = [
           DefMethod {
-            name = normal_method
+            name = <U normal_method>
             args = NULL
             body = NULL
           }
           DefS {
             singleton = Self {
             }
-            name = normal_static_method
+            name = <U normal_static_method>
             args = NULL
             body = NULL
           }
           Class {
             name = Const {
               scope = NULL
-              name = <constant:InnerClass>
+              name = <C <U InnerClass>>
             }
             superclass = NULL
             body = NULL
@@ -31,7 +31,7 @@ Begin {
           Module {
             name = Const {
               scope = NULL
-              name = <constant:InnerModule>
+              name = <C <U InnerModule>>
             }
             body = NULL
           }
@@ -41,12 +41,12 @@ Begin {
     Module {
       name = Const {
         scope = NULL
-        name = <constant:ANamespace>
+        name = <C <U ANamespace>>
       }
       body = Class {
         name = Const {
           scope = NULL
-          name = <constant:ObviousChild>
+          name = <C <U ObviousChild>>
         }
         superclass = NULL
         body = NULL
@@ -56,9 +56,9 @@ Begin {
       name = Const {
         scope = Const {
           scope = NULL
-          name = <constant:ANamespace>
+          name = <C <U ANamespace>>
         }
-        name = <constant:ClassInNamespace>
+        name = <C <U ClassInNamespace>>
       }
       superclass = NULL
       body = NULL
@@ -66,7 +66,7 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = <constant:Parent>
+        name = <C <U Parent>>
       }
       superclass = NULL
       body = NULL
@@ -74,41 +74,41 @@ Begin {
     Module {
       name = Const {
         scope = NULL
-        name = <constant:Mixin>
+        name = <C <U Mixin>>
       }
       body = NULL
     }
     Module {
       name = Const {
         scope = NULL
-        name = <constant:OtherMixin>
+        name = <C <U OtherMixin>>
       }
       body = NULL
     }
     Class {
       name = Const {
         scope = NULL
-        name = <constant:Child>
+        name = <C <U Child>>
       }
       superclass = Const {
         scope = NULL
-        name = <constant:Parent>
+        name = <C <U Parent>>
       }
       body = Begin {
         stmts = [
           Send {
             receiver = NULL
-            method = include
+            method = <U include>
             args = [
               Const {
                 scope = NULL
-                name = <constant:Mixin>
+                name = <C <U Mixin>>
               }
             ]
           }
           Send {
             receiver = NULL
-            method = include
+            method = <U include>
             args = [
               Integer {
                 val = "3"
@@ -118,11 +118,11 @@ Begin {
           Block {
             send = Send {
               receiver = NULL
-              method = include
+              method = <U include>
               args = [
                 Const {
                   scope = NULL
-                  name = <constant:Mixin>
+                  name = <C <U Mixin>>
                 }
               ]
             }
@@ -132,15 +132,15 @@ Begin {
           Send {
             receiver = Send {
               receiver = NULL
-              method = whatever
+              method = <U whatever>
               args = [
               ]
             }
-            method = include
+            method = <U include>
             args = [
               Const {
                 scope = NULL
-                name = <constant:OtherMixin>
+                name = <C <U OtherMixin>>
               }
             ]
           }

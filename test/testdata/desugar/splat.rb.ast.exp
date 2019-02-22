@@ -1,61 +1,61 @@
-class <emptyTree><<constant:<root>>> < ()
-  def bar<<constant:<todo sym>>>(a, &<blk>)
-    a
+class <emptyTree><<C <U <root>>>> < ()
+  def <U bar><<C <U <todo sym>>>>(<U a>, &<U <blk>>)
+    <U a>
   end
 
-  class <emptyTree>::<constant:Splatable><<constant:<todo sym>>> < (::<todo sym>)
-    def to_a<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U Splatable>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U to_a><<C <U <todo sym>>>>(&<U <blk>>)
       [1]
     end
   end
 
-  class <emptyTree>::<constant:Rescueable><<constant:<todo sym>>> < (::<todo sym>)
-    def to_a<<constant:<todo sym>>>(&<blk>)
-      [<emptyTree>::<constant:String>, <emptyTree>::<constant:RuntimeError>]
+  class <emptyTree>::<C <U Rescueable>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U to_a><<C <U <todo sym>>>>(&<U <blk>>)
+      [<emptyTree>::<C <U String>>, <emptyTree>::<C <U RuntimeError>>]
     end
   end
 
-  class <emptyTree>::<constant:Parent><<constant:<todo sym>>> < (::<todo sym>)
-    def foo<<constant:<todo sym>>>(a, b, &<blk>)
-      [b, a]
+  class <emptyTree>::<C <U Parent>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U foo><<C <U <todo sym>>>>(<U a>, <U b>, &<U <blk>>)
+      [<U b>, <U a>]
     end
   end
 
-  class <emptyTree>::<constant:Child><<constant:<todo sym>>> < (<emptyTree>::<constant:Parent>)
-    def foo<<constant:<todo sym>>>(&<blk>)
+  class <emptyTree>::<C <U Child>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Parent>>)
+    def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
       begin
-        a = [1, 2]
-        ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"super", a.to_a())
+        <U a> = [1, 2]
+        ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>), :"super", <U a>.<U to_a>())
       end
     end
   end
 
-  def foo<<constant:<todo sym>>>(&<blk>)
+  def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      a = [1]
-      a.to_a().concat([2])
-      [1].concat(a.to_a())
-      [1].concat(a.to_a()).concat([2])
-      ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"bar", a.to_a())
-      ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"bar", <emptyTree>::<constant:Splatable>.new().to_a())
-      <emptyTree>::<constant:Child>.new().foo()
-      b = <emptyTree>::<constant:Splatable>.new().to_a()
+      <U a> = [1]
+      <U a>.<U to_a>().<U concat>([2])
+      [1].<U concat>(<U a>.<U to_a>())
+      [1].<U concat>(<U a>.<U to_a>()).<U concat>([2])
+      ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>), :"bar", <U a>.<U to_a>())
+      ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>), :"bar", <emptyTree>::<C <U Splatable>>.<U new>().<U to_a>())
+      <emptyTree>::<C <U Child>>.<U new>().<U foo>()
+      <U b> = <emptyTree>::<C <U Splatable>>.<U new>().<U to_a>()
       begin
-        <assignTemp>$2 = 1
-        if ::<Magic>.<splat>(<emptyTree>::<constant:Integer>.to_a()).===(<assignTemp>$2)
+        <D <U <assignTemp>> $2> = 1
+        if ::<Magic>.<U <splat>>(<emptyTree>::<C <U Integer>>.<U to_a>()).<U ===>(<D <U <assignTemp>> $2>)
           <emptyTree>
         else
           <emptyTree>
         end
       end
-      self(<constant:<todo sym>>).raise("a")
-    rescue <emptyTree>::<constant:Rescueable>.new().to_a() => <rescueTemp>$3
+      self(<C <U <todo sym>>>).<U raise>("a")
+    rescue <emptyTree>::<C <U Rescueable>>.<U new>().<U to_a>() => <D <U <rescueTemp>> $3>
       <emptyTree>
-      self(<constant:<todo sym>>).raise("a")
-    rescue [<emptyTree>::<constant:Array>].concat(<emptyTree>::<constant:Rescueable>.new().to_a()).concat([<emptyTree>::<constant:Float>]) => <rescueTemp>$4
+      self(<C <U <todo sym>>>).<U raise>("a")
+    rescue [<emptyTree>::<C <U Array>>].<U concat>(<emptyTree>::<C <U Rescueable>>.<U new>().<U to_a>()).<U concat>([<emptyTree>::<C <U Float>>]) => <D <U <rescueTemp>> $4>
       <emptyTree>
     end
   end
 
-  self(<constant:<todo sym>>).foo()
+  self(<C <U <todo sym>>>).<U foo>()
 end

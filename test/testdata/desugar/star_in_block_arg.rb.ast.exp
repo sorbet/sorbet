@@ -1,22 +1,22 @@
-class <emptyTree><<constant:<root>>> < ()
-  self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
+class <emptyTree><<C <U <root>>>> < ()
+  self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-  self(<constant:<todo sym>>).sig() do ||
-    self(<constant:<todo sym>>).params({:"blk" => <emptyTree>::<constant:T>.proc().params({:"args" => <emptyTree>::<constant:Integer>}).void()}).void()
+  self(<C <U <todo sym>>>).<U sig>() do ||
+    self(<C <U <todo sym>>>).<U params>({:"blk" => <emptyTree>::<C <U T>>.<U proc>().<U params>({:"args" => <emptyTree>::<C <U Integer>>}).<U void>()}).<U void>()
   end
 
-  def foo<<constant:<todo sym>>>(&blk)
+  def <U foo><<C <U <todo sym>>>>(&<U blk>)
     <emptyTree>
   end
 
-  self(<constant:<todo sym>>).foo() do |<destructure>$2|
+  self(<C <U <todo sym>>>).<U foo>() do |<D <U <destructure>> $2>|
     begin
       begin
-        <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 1, 0)
-        args = <assignTemp>$3.[](0)
-        <assignTemp>$3
+        <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $2>, 1, 0)
+        <U args> = <D <U <assignTemp>> $3>.<U []>(0)
+        <D <U <assignTemp>> $3>
       end
-      <emptyTree>::<constant:T>.reveal_type(args)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<U args>)
     end
   end
 end

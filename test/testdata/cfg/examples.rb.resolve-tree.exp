@@ -1,6 +1,6 @@
 begin
-  ::RubyTyper.keep_for_ide(::Examples)
-  class ::Examples<<constant:Examples>> < (::<todo sym>)
+  ::RubyTyper.<U keep_for_ide>(::Examples)
+  class ::Examples<<C <U Examples>>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -17,7 +17,7 @@ begin
 
     <emptyTree>
 
-    def i_like_ifs<i_like_ifs>(<blk>)
+    def <U i_like_ifs><<U i_like_ifs>>(<blk>)
       if true
         return 1
       else
@@ -25,7 +25,7 @@ begin
       end
     end
 
-    def i_like_exps<i_like_exps>(<blk>)
+    def <U i_like_exps><<U i_like_exps>>(<blk>)
       if true
         1
       else
@@ -33,7 +33,7 @@ begin
       end
     end
 
-    def return_in_one_branch1<return_in_one_branch1>(<blk>)
+    def <U return_in_one_branch1><<U return_in_one_branch1>>(<blk>)
       if true
         return 1
       else
@@ -41,7 +41,7 @@ begin
       end
     end
 
-    def return_in_one_branch2<return_in_one_branch2>(<blk>)
+    def <U return_in_one_branch2><<U return_in_one_branch2>>(<blk>)
       if true
         1
       else
@@ -49,58 +49,58 @@ begin
       end
     end
 
-    def variables<variables>(<blk>)
+    def <U variables><<U variables>>(<blk>)
       begin
         if true
-          a = 1
+          <U a> = 1
         else
-          a = 2
+          <U a> = 2
         end
         if false
-          b = 1
+          <U b> = 1
         else
-          b = 2
+          <U b> = 2
         end
-        a.+(b)
+        <U a>.<U +>(<U b>)
       end
     end
 
-    def variables_and_loop<variables_and_loop>(cond, <blk>)
+    def <U variables_and_loop><<U variables_and_loop>>(cond, <blk>)
       begin
         if true
-          a = 1
+          <U a> = 1
         else
-          a = 2
+          <U a> = 2
         end
         while true
-          if cond
-            b = 1
+          if <U cond>
+            <U b> = 1
           else
-            b = 2
+            <U b> = 2
           end
         end
-        b
+        <U b>
       end
     end
 
-    def variables_loop_if<variables_loop_if>(cond, <blk>)
+    def <U variables_loop_if><<U variables_loop_if>>(cond, <blk>)
       begin
         while true
-          if cond
-            b = 1
+          if <U cond>
+            <U b> = 1
           else
-            b = 2
+            <U b> = 2
           end
         end
-        b
+        <U b>
       end
     end
 
-    def take_arguments<take_arguments>(i, <blk>)
+    def <U take_arguments><<U take_arguments>>(i, <blk>)
       if false
         2
       else
-        i
+        <U i>
       end
     end
   end

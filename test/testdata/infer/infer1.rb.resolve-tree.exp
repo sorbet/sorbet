@@ -1,4 +1,4 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>
 
   <emptyTree>
@@ -15,64 +15,64 @@ class <emptyTree><<constant:<root>>> < ()
 
   <emptyTree>
 
-  def baz1<baz1>(<blk>)
+  def <U baz1><<U baz1>>(<blk>)
     begin
-      a = "foo"
-      b = a.getbyte(a)
+      <U a> = "foo"
+      <U b> = <U a>.<U getbyte>(<U a>)
     end
   end
 
-  def baz2<baz2>(<blk>)
+  def <U baz2><<U baz2>>(<blk>)
     begin
-      a = "foo"
-      b = a.getbyte("foo")
+      <U a> = "foo"
+      <U b> = <U a>.<U getbyte>("foo")
     end
   end
 
-  def baz3<baz3>(<blk>)
-    b = "foo".getbyte("foo")
+  def <U baz3><<U baz3>>(<blk>)
+    <U b> = "foo".<U getbyte>("foo")
   end
 
-  def baz4<baz4>(<blk>)
-    b = self(<constant:Object>).a().getbyte("foo")
+  def <U baz4><<U baz4>>(<blk>)
+    <U b> = self(<C <U Object>>).<U a>().<U getbyte>("foo")
   end
 
-  def baz5<baz5>(cond, <blk>)
+  def <U baz5><<U baz5>>(cond, <blk>)
     begin
-      if cond
-        b = 1
+      if <U cond>
+        <U b> = 1
       else
-        b = "foo"
+        <U b> = "foo"
       end
-      b = b.getbyte(1)
+      <U b> = <U b>.<U getbyte>(1)
     end
   end
 
-  def baz6<baz6>(cond, <blk>)
+  def <U baz6><<U baz6>>(cond, <blk>)
     begin
-      if cond
-        b = 1
+      if <U cond>
+        <U b> = 1
       else
-        b = "foo"
+        <U b> = "foo"
       end
-      b = "foo".getbyte(b)
+      <U b> = "foo".<U getbyte>(<U b>)
     end
   end
 
-  def baz7<baz7>(cond, <blk>)
+  def <U baz7><<U baz7>>(cond, <blk>)
     begin
-      if cond
-        b = 1
+      if <U cond>
+        <U b> = 1
       else
         <emptyTree>
       end
-      b = "foo".getbyte(b)
+      <U b> = "foo".<U getbyte>(<U b>)
     end
   end
 
-  def baz8<baz8>(<blk>)
+  def <U baz8><<U baz8>>(<blk>)
     while true
-      b = 1
+      <U b> = 1
     end
   end
 end

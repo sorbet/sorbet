@@ -1,27 +1,27 @@
 ClassDef{
-  name = EmptyTree<<constant:<root>>>
+  name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     MethodDef{
       flags = 0
-      name = foo<<constant:<todo sym>>>
+      name = <U foo><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <blk>
+          name = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = a
+              name = <U a>
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
                 scope = EmptyTree
-                cnst = <constant:Range>
+                cnst = <C <U Range>>
               }
-              fun = new
+              fun = <U new>
               block = nullptr
               args = [
                 Literal{ value = 1 }
@@ -32,14 +32,14 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = b
+              name = <U b>
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
                 scope = EmptyTree
-                cnst = <constant:Range>
+                cnst = <C <U Range>>
               }
-              fun = new
+              fun = <U new>
               block = nullptr
               args = [
                 Literal{ value = 1 }
@@ -50,7 +50,7 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = c
+              name = <U c>
             }
             rhs = Send{
               recv = ConstantLit{
@@ -58,7 +58,7 @@ ClassDef{
                 symbol = ::Range
                 typeAlias = nullptr
               }
-              fun = new
+              fun = <U new>
               block = nullptr
               args = [
                 Literal{ value = 1 }
@@ -70,14 +70,14 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = d
+              name = <U d>
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
                 scope = EmptyTree
-                cnst = <constant:Range>
+                cnst = <C <U Range>>
               }
-              fun = new
+              fun = <U new>
               block = nullptr
               args = [
                 Literal{ value = 1 }
@@ -89,22 +89,22 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = e
+              name = <U e>
             }
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
                   scope = EmptyTree
-                  cnst = <constant:Range>
+                  cnst = <C <U Range>>
                 }
-                fun = new
+                fun = <U new>
                 block = nullptr
                 args = [
                   Literal{ value = 1 }
                   Literal{ value = 42 }
                 ]
               }
-              fun = first
+              fun = <U first>
               block = nullptr
               args = [
               ]
@@ -114,22 +114,22 @@ ClassDef{
         expr = Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = f
+            name = <U f>
           }
           rhs = Send{
             recv = Send{
               recv = UnresolvedConstantLit{
                 scope = EmptyTree
-                cnst = <constant:Range>
+                cnst = <C <U Range>>
               }
-              fun = new
+              fun = <U new>
               block = nullptr
               args = [
                 Literal{ value = "a" }
                 Literal{ value = "z" }
               ]
             }
-            fun = last
+            fun = <U last>
             block = nullptr
             args = [
             ]

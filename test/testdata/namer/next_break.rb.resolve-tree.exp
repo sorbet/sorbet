@@ -1,15 +1,15 @@
 begin
-  ::RubyTyper.keep_for_ide(::Test)
-  class ::Test<<constant:Test>> < (::<todo sym>)
-    def test_next_break<test_next_break>(<blk>)
-      self(<constant:Test>).each() do ||
+  ::RubyTyper.<U keep_for_ide>(::Test)
+  class ::Test<<C <U Test>>> < (::<todo sym>)
+    def <U test_next_break><<U test_next_break>>(<blk>)
+      self(<C <U Test>>).<U each>() do ||
         begin
-          if self(<constant:Test>).rand()
+          if self(<C <U Test>>).<U rand>()
             next(::Test::Foo)
           else
             <emptyTree>
           end
-          if self(<constant:Test>).rand()
+          if self(<C <U Test>>).<U rand>()
             break(::Test::Bar)
           else
             <emptyTree>

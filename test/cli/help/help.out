@@ -50,7 +50,8 @@ Usage:
  dev options:
   -p, --print type              Print: [parse-tree, parse-tree-json, ast,
                                 ast-raw, dsl-tree, dsl-tree-raw, symbol-table,
-                                symbol-table-json, symbol-table-full, name-tree,
+                                symbol-table-raw, symbol-table-json,
+                                symbol-table-full, symbol-table-full-raw, name-tree,
                                 name-tree-raw, file-table-json, resolve-tree,
                                 resolve-tree-raw, cfg, cfg-raw, typed-source,
                                 autogen, autogen-msgpack]
