@@ -498,7 +498,9 @@ void lexer::emit_table(const token_table_entry* table) {
     }
   }
 
-  abort();
+  // whitequark emits a `nil` token here, but if we do `yylex` hits an assert,
+  // so just drop the token.
+  return;
 }
 
 void lexer::emit_num(const std::string& num) {
