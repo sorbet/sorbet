@@ -38,6 +38,7 @@ also want to see:
 - [Debugging and profiling](#debugging-and-profiling)
   - [Debugging](#debugging)
   - [Profiling](#profiling)
+- [Writing docs](#writing-docs)
 - [Updating sorbet.run](#updating-sorbetrun)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
@@ -484,6 +485,18 @@ invariant you’ve violated. `ENFORCE`s are free in the release build.
 ### Profiling
 
 - [ ] TODO(jez) Write about how to profile Sorbet
+
+
+## Writing docs
+
+The sources for Sorbet's documentation website live in the
+[`website/`](website/) folder. Specifically, the docs live in
+[`website/docs/`](website/docs/), are all authored with Markdown, and are built
+using [Docusaurus](https://docusaurus.io/).
+
+[→ website/README.md](website/README.md)
+
+^ See here for how to work with the documentation site locally.
 
 
 ## Updating sorbet.run

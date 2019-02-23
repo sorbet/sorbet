@@ -1,205 +1,104 @@
-# 🚧 WORK IN PROGRESS PLEASE IGNORE 🚧
+# Writing docs
 
-This whole folder is a work in progress and migth change at any time for any
-reason. Please ignore it until further notice 🙂
+This is the source for Sorbet's documentation site. It was scaffolded with and
+is currently built with [Docusaurus](https://docusaurus.io/). While some things
+are documented here, most of the Docusaurus user docs lives on their site.
 
-TODO(jez) website/README.md
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of Contents
 
-- - -
+- [Getting started](#getting-started)
+- [Editing existing docs](#editing-existing-docs)
+- [Adding a new doc](#adding-a-new-doc)
+- [Docusaurus blog](#docusaurus-blog)
 
-This website was created with [Docusaurus](https://docusaurus.io/).
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-You can have multiple top-level keys in the sidebars.json. Each document ID can
-only show up in one of the top-level keys in sidebars.json
+## Getting started
 
-# What's In This Document
+All commands must be run from within Sorbet's top-level `website/` folder.
 
-* [Get Started in 5 Minutes](#get-started-in-5-minutes)
-* [Directory Structure](#directory-structure)
-* [Editing Content](#editing-content)
-* [Adding Content](#adding-content)
-* [Full Documentation](#full-documentation)
+1.  Install the dependencies:
 
-# Get Started in 5 Minutes
+    ```sh
+    ❯ yarn
+    ```
 
-1. Make sure all the dependencies for the website are installed:
+1.  Run the dev server (watch mode):
 
-```sh
-# Install dependencies
-$ yarn
-```
-2. Run your dev server:
+    ```sh
+    ❯ yarn start
+    ```
 
-```sh
-# Start the site
-$ yarn start
-```
+1.  To deploy the site to GitHub pages:
 
-## Directory Structure
+    ```sh
+    # Build site into website/build/sorbet
+    ❯ yarn build
 
-Your project file structure should look something like this
+    # Publish
+    ❯ git remote add github.com git@github.com:stripe/sorbet.git
+    ❯ git checkout gh-pages
+    ❯ cp -r website/build/sorbet/* super-secret-private-beta/
+    ❯ git add super-secret-private-beta
+    ❯ git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+    ❯ git push github.com gh-pages
 
-```
-my-docusaurus/
-  docs/
-    doc-1.md
-    doc-2.md
-    doc-3.md
-  website/
-    blog/
-      2016-3-11-oldest-post.md
-      2017-10-24-newest-post.md
-    core/
-    node_modules/
-    pages/
-    static/
-      css/
-      img/
-    package.json
-    sidebar.json
-    siteConfig.js
-```
+    # TODO(jez) Automate gh-pages deploys from CI
+    ```
 
-# Editing Content
 
-## Editing an existing docs page
+## Editing existing docs
 
-Edit docs by navigating to `docs/` and editing the corresponding document:
+External docs live in the `website/docs/` folder (make sure you're not adding
+docs to the top-level `docs/` folder, which is for Sorbet internal docs).
 
-`docs/doc-to-be-edited.md`
+For more information about docs, click
+[here](https://docusaurus.io/docs/en/navigation).
 
-```markdown
----
-id: page-needs-edit
-title: This Doc Needs To Be Edited
----
 
-Edit me...
-```
+## Adding a new doc
 
-For more information about docs, click [here](https://docusaurus.io/docs/en/navigation)
+1.  Create a new markdown doc:
 
-## Editing an existing blog post
+    ```sh
+    ❯ touch docs/my-new-doc.md
+    ```
 
-Edit blog posts by navigating to `website/blog` and editing the corresponding post:
+1.  Initialize the doc with a header, and start writing!
 
-`website/blog/post-to-be-edited.md`
-```markdown
----
-id: post-needs-edit
-title: This Blog Post Needs To Be Edited
----
+    ```
+    ---
+    id: my-new-doc
+    title: My New Doc
+    ---
 
-Edit me...
-```
+    My content...
+    ```
 
-For more information about blog posts, click [here](https://docusaurus.io/docs/en/adding-blog)
+    The filename is what will be used for your doc's URL.
+    The id is what will be used to refer to your doc in the sidebar.
 
-# Adding Content
+1.  Add the doc to the sidebar:
 
-## Adding a new docs page to an existing sidebar
+    [→ sidebars.json](sidebars.json)
 
-1. Create the doc as a new markdown file in `/docs`, example `docs/newly-created-doc.md`:
+    Docusaurus allows for multiple sidebars, so we could potentially have
+    different sidebars for different major sections of the docs. For now, we
+    have all the docs referenced in a single sidebar.
 
-```md
----
-id: newly-created-doc
-title: This Doc Needs To Be Edited
----
+For more information about adding new docs, click
+[here](https://docusaurus.io/docs/en/navigation).
 
-My new content here..
-```
 
-1. Refer to that doc's ID in an existing sidebar in `website/sidebar.json`:
+## Docusaurus blog
 
-```javascript
-// Add newly-created-doc to the Getting Started category of docs
-{
-  "docs": {
-    "Getting Started": [
-      "quick-start",
-      "newly-created-doc" // new doc here
-    ],
-    ...
-  },
-  ...
-}
-```
+Docusaurus supports having a blog, which are basically docs with release dates,
+and they show up in a separate section.
 
-For more information about adding new docs, click [here](https://docusaurus.io/docs/en/navigation)
+We're currently not using the blog for anything, but we could use it in the
+future for release notes, communicating roadmaps, etc.
 
-## Adding a new blog post
-
-1. Make sure there is a header link to your blog in `website/siteConfig.js`:
-
-`website/siteConfig.js`
-```javascript
-headerLinks: [
-    ...
-    { blog: true, label: 'Blog' },
-    ...
-]
-```
-
-2. Create the blog post with the format `YYYY-MM-DD-My-Blog-Post-Title.md` in `website/blog`:
-
-`website/blog/2018-05-21-New-Blog-Post.md`
-
-```markdown
----
-author: Frank Li
-authorURL: https://twitter.com/foobarbaz
-authorFBID: 503283835
-title: New Blog Post
----
-
-Lorem Ipsum...
-```
-
-For more information about blog posts, click [here](https://docusaurus.io/docs/en/adding-blog)
-
-## Adding items to your site's top navigation bar
-
-1. Add links to docs, custom pages or external links by editing the headerLinks field of `website/siteConfig.js`:
-
-`website/siteConfig.js`
-```javascript
-{
-  headerLinks: [
-    ...
-    /* you can add docs */
-    { doc: 'my-examples', label: 'Examples' },
-    /* you can add custom pages */
-    { page: 'help', label: 'Help' },
-    /* you can add external links */
-    { href: 'https://github.com/facebook/Docusaurus', label: 'GitHub' },
-    ...
-  ],
-  ...
-}
-```
-
-For more information about the navigation bar, click [here](https://docusaurus.io/docs/en/navigation)
-
-## Adding custom pages
-
-1. Docusaurus uses React components to build pages. The components are saved as .js files in `website/pages/en`:
-1. If you want your page to show up in your navigation header, you will need to update `website/siteConfig.js` to add to the `headerLinks` element:
-
-`website/siteConfig.js`
-```javascript
-{
-  headerLinks: [
-    ...
-    { page: 'my-new-custom-page', label: 'My New Custom Page' },
-    ...
-  ],
-  ...
-}
-```
-
-For more information about custom pages, click [here](https://docusaurus.io/docs/en/custom-pages).
-
-# Full Documentation
-
-Full documentation can be found on the [website](https://docusaurus.io/).
+For more information about blog posts, click
+[here](https://docusaurus.io/docs/en/adding-blog).
