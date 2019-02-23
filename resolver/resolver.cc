@@ -714,7 +714,16 @@ private:
                 ++it;
                 ++argIt;
             } else if (isOverloaded) {
-                it = methodInfo->arguments().erase(it);
+                if (arg.data(ctx)->isBlockArgument()) {
+                    // It's ok for an overloaded sig to not mention the implicit block arg:
+                    // the method argument symbol for the block should still appear on the overload,
+                    // but we should make the loc for it not exist.
+                    const auto blkLoc = core::Loc::none(arg.data(ctx)->loc().file());
+                    arg.data(ctx)->addLoc(ctx, blkLoc);
+                    ++it;
+                } else {
+                    it = methodInfo->arguments().erase(it);
+                }
                 ++argIt;
             } else if (arg.data(ctx)->resultType != nullptr) {
                 ++it;
@@ -1202,9 +1211,20 @@ public:
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.staticInitForFile(inits->loc);
         } else {
+            auto prevCount = ctx.state.symbolsUsed();
             sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol.data(ctx)->lookupSingletonClass(ctx),
                                               core::Names::staticInit());
+            if (prevCount != ctx.state.symbolsUsed()) {
+                auto blkLoc = core::Loc::none(inits->loc.file());
+                auto blkSym = ctx.state.enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
+                blkSym.data(ctx)->setBlockArgument();
+                sym.data(ctx)->arguments().emplace_back(blkSym);
+            }
         }
+        ENFORCE(!sym.data(ctx)->arguments().empty(),
+                "<static-init> method should already have a block arg symbol: " + sym.data(ctx)->show(ctx));
+        ENFORCE(sym.data(ctx)->arguments().back().data(ctx)->isBlockArgument(),
+                "Last argument symbol is not a block arg: " + sym.data(ctx)->show(ctx));
 
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
@@ -1213,15 +1233,6 @@ public:
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
         ast::MethodDef::ARGS_store args;
         args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
-
-        if (sym.data(ctx)->arguments().empty()) {
-            auto blkSym = ctx.state.enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
-            blkSym.data(ctx)->setBlockArgument();
-            sym.data(ctx)->arguments().emplace_back(blkSym);
-        } else {
-            // Sometimes the <static-init> symbol already exists, which means we already added a block arg to it.
-            ENFORCE(sym.data(ctx)->arguments().back().data(ctx)->name == core::Names::blkArg());
-        }
 
         auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(), std::move(args),
                                                 std::move(inits), true);
@@ -1520,6 +1531,9 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
+    // This check is FAR to slow to run on large codebases, especially with sanitizers on.
+    // But it can be super useful to uncomment when debugging certain issues.
+    // ctx.state.sanityCheck();
 
     return trees;
 }

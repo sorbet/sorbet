@@ -258,6 +258,8 @@ public:
         return (flags & Symbol::Flags::ARGUMENT_BLOCK) != 0;
     }
 
+    bool isSyntheticBlockArgument() const;
+
     inline bool isCovariant() const {
         ENFORCE(isTypeArgument() || isTypeMember());
         return (flags & Symbol::Flags::TYPE_COVARIANT) != 0;

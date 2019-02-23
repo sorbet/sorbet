@@ -208,6 +208,11 @@ void GlobalState::initEmpty() {
     // A magic non user-creatable class with methods to keep state between passes
     id = enterFieldSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UndeclaredFieldStub());
     ENFORCE(id == Symbols::Magic_undeclaredFieldStub());
+    id = enterMethodArgumentSymbol(
+        Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(), Names::blkArg());
+    Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder().data(*this)->arguments().emplace_back(
+        id);
+    id.data(*this)->setBlockArgument();
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -228,6 +233,9 @@ void GlobalState::initEmpty() {
     arg.data(*this)->resultType = Types::untyped(*this, arg);
     method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::hashOfUntyped();
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildArray());
@@ -236,6 +244,9 @@ void GlobalState::initEmpty() {
     arg.data(*this)->resultType = Types::untyped(*this, arg);
     method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::arrayOfUntyped();
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::splat());
@@ -243,6 +254,9 @@ void GlobalState::initEmpty() {
     arg.data(*this)->resultType = Types::arrayOfUntyped();
     method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
@@ -250,6 +264,9 @@ void GlobalState::initEmpty() {
     arg.data(*this)->resultType = Types::Object();
     method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
@@ -263,6 +280,9 @@ void GlobalState::initEmpty() {
     arg.data(*this)->resultType = Types::Integer();
     method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-splat>(args: *T.untyped) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithSplat());
@@ -271,6 +291,9 @@ void GlobalState::initEmpty() {
     arg.data(*this)->setRepeated();
     method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
 
     // Some of these are Modules
     Symbols::T().data(*this)->setIsModule(true);
@@ -341,8 +364,14 @@ void GlobalState::installIntrinsics() {
         if (entry.singleton) {
             symbol = symbol.data(*this)->singletonClass(*this);
         }
+        auto countBefore = symbolsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this)->intrinsic = entry.impl;
+        if (countBefore != symbolsUsed()) {
+            SymbolRef blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+            blkArg.data(*this)->setBlockArgument();
+            method.data(*this)->arguments().emplace_back(blkArg);
+        }
     }
 }
 
@@ -1202,7 +1231,15 @@ vector<shared_ptr<File>> GlobalState::getFiles() const {
 
 SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
-    return enterMethodSymbol(loc, core::Symbols::root(), nm);
+    auto prevCount = this->symbolsUsed();
+    auto sym = enterMethodSymbol(loc, core::Symbols::root(), nm);
+    auto blkLoc = core::Loc::none(loc.file());
+    if (prevCount != this->symbolsUsed()) {
+        auto blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
+        blkSym.data(*this)->setBlockArgument();
+        sym.data(*this)->arguments().emplace_back(blkSym);
+    }
+    return sym;
 }
 
 } // namespace sorbet::core

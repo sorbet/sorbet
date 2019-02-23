@@ -253,13 +253,14 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
             SymbolRef candidate = *it;
             auto args = candidate.data(ctx)->arguments();
             if (args.empty()) {
+                // TODO(jez) We should be able to ENFORCE that this never happens.
                 if (hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
             } else {
                 auto lastArg = args.back().data(ctx);
-                if (lastArg->isBlockArgument() != hasBlock) {
+                if (lastArg->isSyntheticBlockArgument() != hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
@@ -293,7 +294,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
         return leftCandidates[0];
     }
     return fallback;
-}
+} // namespace sorbet::core
 
 TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     if (auto *metaType = cast_type<MetaType>(tp.get())) {
@@ -473,6 +474,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     }
     bool hasKwargs = absl::c_any_of(data->arguments(), [&ctx](SymbolRef arg) { return arg.data(ctx)->isKeyword(); });
 
+    // p -> params, i.e., what was mentioned in the defintiion
     auto pit = data->arguments().begin();
     auto pend = data->arguments().end();
 
@@ -480,6 +482,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         --pend;
     }
 
+    // a -> args, i.e., what was passed at the call site
     auto ait = args.args.begin();
     auto aend = args.args.end();
 
@@ -659,7 +662,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             bspec = data->arguments().back();
         }
         if (!bspec.exists() || !bspec.data(ctx)->isBlockArgument()) {
-            // TODO(nelhage): passing a block to a function that does not accept one
+            // TODO(jez): We should be able to ENFORCE that this never happens.
         } else {
             TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
             if (!blockType) {

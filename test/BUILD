@@ -162,6 +162,7 @@ test_corpus_lsp_tests_slowpath = pipeline_tests(
     "LSPSlowPathTests",
     extra_args = ["--lsp-disable-fastpath"],
     filter = "LSPTests",
+    tags = ["manual"],
 )
 
 test_suite(
@@ -176,6 +177,7 @@ test_suite(
 
 test_suite(
     name = "test_corpus_lsp_slowpath",
+    tags = ["manual"],
     tests = test_corpus_lsp_tests_slowpath,
 )
 

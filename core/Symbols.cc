@@ -726,6 +726,11 @@ bool Symbol::isBlockSymbol(const GlobalState &gs) const {
     return nm->kind == NameKind::UNIQUE && nm->unique.original == Names::blockTemp();
 }
 
+bool Symbol::isSyntheticBlockArgument() const {
+    // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
+    return isBlockArgument() && loc().exists();
+}
+
 Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     Symbol result;
     result.owner = this->owner;
@@ -769,6 +774,15 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         SymbolRef current2 =
             const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
         ENFORCE(current == current2);
+    }
+    if (this->isMethod() && !this->isBlockSymbol(gs)) {
+        if (isa_type<AliasType>(this->resultType.get())) {
+            // If we have an alias method, we should never look at it's arguments;
+            // we should instead look at the arguments of whatever we're aliasing.
+            ENFORCE(this->arguments().empty(), this->show(gs));
+        } else {
+            ENFORCE(!this->arguments().empty(), this->show(gs));
+        }
     }
 }
 

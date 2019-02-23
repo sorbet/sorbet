@@ -370,6 +370,13 @@ public:
         ast::MethodDef::ARGS_store args;
         bool inShadows = false;
 
+        if (isIntrinsic(ctx, ctx.owner)) {
+            // When we're filling in an intrinsic method, we want to overwrite the block arg that used
+            // to exist with the block arg that we got from desugaring the method def in the RBI files.
+            ENFORCE(ctx.owner.data(ctx)->arguments().back().data(ctx)->isBlockArgument());
+            ctx.owner.data(ctx)->arguments().clear();
+        }
+
         int i = -1;
         for (auto &arg : parsedArgs) {
             i++;
@@ -509,7 +516,7 @@ public:
     // with real types from code
     bool isIntrinsic(core::Context ctx, core::SymbolRef sym) {
         auto data = sym.data(ctx);
-        return data->intrinsic != nullptr && data->arguments().empty() && data->resultType == nullptr;
+        return data->intrinsic != nullptr && data->resultType == nullptr;
     }
 
     bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
@@ -885,6 +892,9 @@ private:
 ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
     NameInserter nameInserter;
     tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
+    // This check is FAR to slow to run on large codebases, especially with sanitizers on.
+    // But it can be super useful to uncomment when debugging certain issues.
+    // ctx.state.sanityCheck();
     return tree;
 }
 
