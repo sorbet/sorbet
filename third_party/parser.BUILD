@@ -10,6 +10,7 @@ ragel(
 bison(
     name = "typedruby_bison",
     src = "cc/grammars/typedruby.ypp",
+    opts = ["-Wno-empty-rule", "-Wno-precedence"],
 )
 
 genrule(
