@@ -107,7 +107,7 @@ void CFG::sanityCheck(core::Context ctx) {
                             arity = std::nullopt;
                             break;
                         }
-                        arity = arity.value() + 1;
+                        arity = *arity + 1;
                     }
                     ENFORCE(arity == send_binding->link->numberOfPositionalBlockParams);
                 }

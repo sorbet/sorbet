@@ -6,6 +6,7 @@
 #include "core/Error.h"
 #include "core/SymbolRef.h"
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace sorbet::core {

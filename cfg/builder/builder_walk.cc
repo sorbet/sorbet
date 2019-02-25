@@ -269,7 +269,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                             arity = std::nullopt;
                             break;
                         }
-                        arity = arity.value() + 1;
+                        arity = *arity + 1;
                     }
                     auto link = make_shared<core::SendAndBlockLink>(sym, s->fun, arity);
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, link);
