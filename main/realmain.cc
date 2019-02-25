@@ -271,6 +271,12 @@ int realmain(int argc, char *argv[]) {
                 file.data(*gs).strict = core::StrictLevel::Typed;
             }
         }
+        if (opts.print.Autogen || opts.print.AutogenMsgPack) {
+            // Autogen stops before infer
+            for (auto file : inputFiles) {
+                file.data(*gs).strict = core::StrictLevel::Stripe;
+            }
+        }
 
         {
             Timer timeit(logger, "index");
