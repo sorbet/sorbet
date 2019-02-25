@@ -84,31 +84,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         threadResult.emplace_back(make_pair(job, 0));
                         continue;
                     }
-                    shared_ptr<core::GlobalState> lgs =
-                        make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
-                    lgs->initEmpty();
-                    lgs->errorQueue->ignoreFlushes = true;
-                    lgs->silenceErrors = true;
-                    core::FileRef fref;
-                    {
-                        core::UnfreezeFileTable fileTableAccess(*lgs);
-                        fref = lgs->enterFile(files[job]);
-                    }
-                    vector<ast::ParsedFile> single;
-                    unique_ptr<KeyValueStore> kvstore;
-
-                    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
-                    auto errs = lgs->errorQueue->drainAllErrors();
-                    bool fileParseError = false;
-                    for (auto &e : errs) {
-                        if (e->what == core::errors::Parser::ParserError) {
-                            fileParseError = true;
-                        }
-                    }
-                    pipeline::resolve(*lgs, move(single), emptyOpts, logger, true);
-
-                    unsigned int ret = (fileParseError) ? core::GlobalState::HASH_STATE_INVALID : lgs->hash();
-                    threadResult.emplace_back(make_pair(job, ret));
+                    threadResult.emplace_back(make_pair(job, pipeline::computeFileHash(files[job], logger)));
                 }
             }
         }

@@ -34,5 +34,7 @@ std::vector<ast::ParsedFile> typecheck(std::unique_ptr<core::GlobalState> &gs, s
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
                              std::shared_ptr<spdlog::logger> logger);
+unsigned int computeFileHash(std::shared_ptr<core::File> forWhat, std::shared_ptr<spdlog::logger> logger);
+
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

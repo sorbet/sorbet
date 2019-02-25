@@ -625,4 +625,32 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         return typecheck_result;
     }
 }
+
+unsigned int computeFileHash(shared_ptr<core::File> forWhat, shared_ptr<spdlog::logger> logger) {
+    const static options::Options emptyOpts{};
+    shared_ptr<core::GlobalState> lgs =
+        make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
+    lgs->initEmpty();
+    lgs->errorQueue->ignoreFlushes = true;
+    lgs->silenceErrors = true;
+    core::FileRef fref;
+    {
+        core::UnfreezeFileTable fileTableAccess(*lgs);
+        fref = lgs->enterFile(forWhat);
+    }
+    vector<ast::ParsedFile> single;
+    unique_ptr<KeyValueStore> kvstore;
+
+    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
+    auto errs = lgs->errorQueue->drainAllErrors();
+    for (auto &e : errs) {
+        if (e->what == core::errors::Parser::ParserError) {
+            return core::GlobalState::HASH_STATE_INVALID;
+        }
+    }
+    pipeline::resolve(*lgs, move(single), emptyOpts, logger, true);
+
+    return lgs->hash();
+}
+
 } // namespace sorbet::realmain::pipeline
