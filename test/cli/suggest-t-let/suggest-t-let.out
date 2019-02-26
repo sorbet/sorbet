@@ -4,8 +4,8 @@ suggest-t-let.rb:5: Changing the type of a variable in a loop is not permitted h
   Existing variable has type: `FalseClass`
   Attempting to change type to: `TrueClass`
 
-  Autocorrect: Use `-a` to autocorrect
-    suggest-t-let.rb:3: Replace with `T.let(false, T.any(TrueClass, FalseClass))`
+  Autocorrect: Done
+    suggest-t-let.rb:3: Replaced with `T.let(false, T.any(TrueClass, FalseClass))`
      3 |x = false
             ^^^^^
 
@@ -15,8 +15,8 @@ suggest-t-let.rb:10: Changing the type of a variable in a loop is not permitted 
   Existing variable has type: `NilClass`
   Attempting to change type to: `String("")`
 
-  Autocorrect: Use `-a` to autocorrect
-    suggest-t-let.rb:8: Replace with `T.let(nil, T.nilable(String))`
+  Autocorrect: Done
+    suggest-t-let.rb:8: Replaced with `T.let(nil, T.nilable(String))`
      8 |y = nil
             ^^^
 Errors: 2

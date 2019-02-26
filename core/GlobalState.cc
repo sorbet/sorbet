@@ -828,7 +828,7 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
 FileRef GlobalState::enterNewFileAt(const shared_ptr<File> &file, FileRef id) {
     ENFORCE(!fileTableFrozen);
     ENFORCE(id.id() < this->files.size());
-    ENFORCE(this->files[id.id()]->sourceType == File::Type::TombStone);
+    ENFORCE(this->files[id.id()]->sourceType == File::Type::NotYetRead);
     ENFORCE(this->files[id.id()]->path() == file->path());
 
     // was a tombstone before.
@@ -838,7 +838,7 @@ FileRef GlobalState::enterNewFileAt(const shared_ptr<File> &file, FileRef id) {
 }
 
 FileRef GlobalState::reserveFileRef(string path) {
-    return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::TombStone));
+    return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }
 
 void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {
@@ -961,6 +961,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
     result->silenceErrors = this->silenceErrors;
+    result->autocorrect = this->autocorrect;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
     result->isInitialized = this->isInitialized;
 
@@ -1177,7 +1178,7 @@ void GlobalState::markAsPayload() {
 unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                  const shared_ptr<File> &withWhat) {
     ENFORCE(whatFile.id() < inWhat->filesUsed());
-    ENFORCE(whatFile.dataAllowingTombstone(*inWhat).path() == withWhat->path());
+    ENFORCE(whatFile.dataAllowingUnsafe(*inWhat).path() == withWhat->path());
     inWhat->files[whatFile.id()] = withWhat;
     return inWhat;
 }

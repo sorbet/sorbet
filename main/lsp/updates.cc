@@ -110,8 +110,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
 void LSPLoop::reIndexFromFileSystem() {
     indexed.clear();
-    vector<core::FileRef> emptyInputFiles;
-    for (auto &t : pipeline::index(initialGS, opts.inputFileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
+    vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames, logger);
+    for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore, logger)) {
         int id = t.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);

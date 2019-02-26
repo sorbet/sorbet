@@ -41,8 +41,8 @@ public:
 
     const File &data(const GlobalState &gs) const;
     File &data(GlobalState &gs) const;
-    const File &dataAllowingTombstone(const GlobalState &gs) const;
-    File &dataAllowingTombstone(GlobalState &gs) const;
+    const File &dataAllowingUnsafe(const GlobalState &gs) const;
+    File &dataAllowingUnsafe(GlobalState &gs) const;
 
 private:
     u2 _id;
@@ -52,6 +52,7 @@ CheckSize(FileRef, 2, 2);
 class File final {
 public:
     enum Type {
+        NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
         Normal,

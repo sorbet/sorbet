@@ -22,7 +22,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
-                if (fref.dataAllowingTombstone(*gs).sourceType == core::File::Type::Normal) {
+                if (fref.dataAllowingUnsafe(*gs).sourceType == core::File::Type::Normal) {
                     gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
                 }
             }
@@ -50,8 +50,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
         }
         realmain::options::Options emptyOpts;
         WorkerPool workers(emptyOpts.threads, logger);
-        vector<string> empty;
-        auto indexed = realmain::pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, logger);
+        auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, workers, kvstore, logger);
         realmain::pipeline::resolve(*gs, move(indexed), emptyOpts, logger); // result is thrown away
     } else {
         Timer timeit(logger, "read_global_state.binary");

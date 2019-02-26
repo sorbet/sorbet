@@ -1,8 +1,8 @@
 suggest-sig-garbage.rb:5: This function does not have a `sig` http://go/e/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:5: Insert `sig {generated.params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:5: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
 `
      5 |def hazTwoArgs(a, b); 1; end;
         ^
@@ -14,8 +14,8 @@ suggest-sig-garbage.rb:8: Method `someCondition` does not exist on `Object` http
 suggest-sig-garbage.rb:7: This function does not have a `sig` http://go/e/7017
      7 |def baz
         ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:7: Insert `sig {generated.returns(T.any(T::Array[T.untyped], String))}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:7: Replaced with `sig {generated.returns(T.any(T::Array[T.untyped], String))}
 `
      7 |def baz
         ^
@@ -23,8 +23,8 @@ suggest-sig-garbage.rb:7: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:18: This function does not have a `sig` http://go/e/7017
     18 |def bla; give_me_void; end
         ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:18: Insert `sig {generated.void}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:18: Replaced with `sig {generated.void}
 `
     18 |def bla; give_me_void; end
         ^
@@ -36,8 +36,8 @@ suggest-sig-garbage.rb:21: Method `someCondition` does not exist on `Object` htt
 suggest-sig-garbage.rb:20: This function does not have a `sig` http://go/e/7017
     20 |def bbq
         ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:20: Insert `sig {generated.void}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:20: Replaced with `sig {generated.void}
 `
     20 |def bbq
         ^
@@ -45,8 +45,8 @@ suggest-sig-garbage.rb:20: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:28: This function does not have a `sig` http://go/e/7017
     28 |def idk(a); a / a + a * a; end
         ^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:28: Insert `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:28: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
 `
     28 |def idk(a); a / a + a * a; end
         ^
@@ -54,8 +54,8 @@ suggest-sig-garbage.rb:28: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:30: This function does not have a `sig` http://go/e/7017
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:30: Insert `sig {generated.returns(Integer)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:30: Replaced with `sig {generated.returns(Integer)}
 `
     30 |def give_me_literal; 1; end;
         ^
@@ -63,8 +63,8 @@ suggest-sig-garbage.rb:30: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:32: This function does not have a `sig` http://go/e/7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:32: Insert `sig {generated.returns(T::Array[T::Array[Integer]])}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:32: Replaced with `sig {generated.returns(T::Array[T::Array[Integer]])}
 `
     32 |def give_me_literal_nested; [[1]]; end;
         ^
@@ -72,8 +72,8 @@ suggest-sig-garbage.rb:32: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:34: This function does not have a `sig` http://go/e/7017
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:34: Insert `sig {generated.returns(NilClass)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:34: Replaced with `sig {generated.returns(NilClass)}
 `
     34 |private def root_private; end
         ^
@@ -81,8 +81,8 @@ suggest-sig-garbage.rb:34: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:36: This function does not have a `sig` http://go/e/7017
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:36: Insert `sig {generated.returns(NilClass)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:36: Replaced with `sig {generated.returns(NilClass)}
 `
     36 |protected def root_protected; end
         ^
@@ -90,8 +90,8 @@ suggest-sig-garbage.rb:36: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:46: This function does not have a `sig` http://go/e/7017
     46 |def foo(a)
         ^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:46: Insert `sig {generated.params(a: Integer).returns(Integer)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:46: Replaced with `sig {generated.params(a: Integer).returns(Integer)}
 `
     46 |def foo(a)
         ^
@@ -99,8 +99,8 @@ suggest-sig-garbage.rb:46: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:56: This function does not have a `sig` http://go/e/7017
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:56: Insert `sig {generated.params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:56: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
 `
     56 |def fooCond(a, cond)
         ^
@@ -108,8 +108,8 @@ suggest-sig-garbage.rb:56: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:64: This function does not have a `sig` http://go/e/7017
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:64: Insert `sig {generated.params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:64: Replaced with `sig {generated.params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
 `
     64 |def fooWhile(a, cond1, cond2)
         ^
@@ -117,8 +117,8 @@ suggest-sig-garbage.rb:64: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:74: This function does not have a `sig` http://go/e/7017
     74 |def takesBlock
         ^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:74: Insert `sig {generated.returns(Integer)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:74: Replaced with `sig {generated.returns(Integer)}
 `
     74 |def takesBlock
         ^
@@ -126,8 +126,8 @@ suggest-sig-garbage.rb:74: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:79: This function does not have a `sig` http://go/e/7017
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:79: Insert `sig {generated.returns(T::Array[T.untyped])}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:79: Replaced with `sig {generated.returns(T::Array[T.untyped])}
 `
     79 |def list_ints_or_empty_list
         ^
@@ -147,8 +147,8 @@ suggest-sig-garbage.rb:88: This code is unreachable http://go/e/7006
 suggest-sig-garbage.rb:84: This function does not have a `sig` http://go/e/7017
     84 |def dead(x)
         ^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:84: Insert `sig {generated.params(x: Integer).void}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:84: Replaced with `sig {generated.params(x: Integer).void}
 `
     84 |def dead(x)
         ^
@@ -156,8 +156,8 @@ suggest-sig-garbage.rb:84: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:92: This function does not have a `sig` http://go/e/7017
     92 |def with_block
         ^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:92: Insert `sig {generated.returns(NilClass)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:92: Replaced with `sig {generated.returns(NilClass)}
 `
     92 |def with_block
         ^
@@ -173,8 +173,8 @@ suggest-sig-garbage.rb:99: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:118: This function does not have a `sig` http://go/e/7017
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:118: Insert `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:118: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
 `
      118 |def cantRun(a)
           ^
@@ -182,8 +182,8 @@ suggest-sig-garbage.rb:118: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:125: This function does not have a `sig` http://go/e/7017
      125 |def fooCondGeneratedCurly(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:124: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      124 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
@@ -191,8 +191,8 @@ suggest-sig-garbage.rb:125: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:139: This function does not have a `sig` http://go/e/7017
      139 |def fooCondGeneratedDo(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:134: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      134 |sig do
      135 |  params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).
@@ -204,8 +204,8 @@ suggest-sig-garbage.rb:139: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
      148 |def updatesUntypedToProfiled(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:147: Replace with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:147: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      147 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
      148 |def updatesUntypedToProfiled(a, cond)
@@ -213,8 +213,8 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:152: This function does not have a `sig` http://go/e/7017
      152 |def recur
           ^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:152: Insert `sig {generated.returns(::T::Utils::RuntimeProfiled)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:152: Replaced with `sig {generated.returns(::T::Utils::RuntimeProfiled)}
 `
      152 |def recur
           ^
@@ -222,8 +222,8 @@ suggest-sig-garbage.rb:152: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:41: This function does not have a `sig` http://go/e/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:41: Insert `sig {generated.returns(NilClass)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:41: Replaced with `sig {generated.returns(NilClass)}
   `
     41 |  private def a_private; end
           ^
@@ -231,8 +231,8 @@ suggest-sig-garbage.rb:41: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:43: This function does not have a `sig` http://go/e/7017
     43 |  protected def a_protected; end
                     ^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:43: Insert `sig {generated.returns(NilClass)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:43: Replaced with `sig {generated.returns(NilClass)}
   `
     43 |  protected def a_protected; end
           ^
@@ -256,13 +256,13 @@ suggest-sig-garbage.rb:102: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:112: This function does not have a `sig` http://go/e/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:112: Insert `sig {generated.params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
+  Autocorrect: Done
+    suggest-sig-garbage.rb:112: Replaced with `sig {generated.params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:105: Insert `  extend T::Sig
+  Autocorrect: Done
+    suggest-sig-garbage.rb:105: Replaced with `  extend T::Sig
 `
      105 |  class Merchant
           ^

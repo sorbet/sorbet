@@ -208,6 +208,12 @@ int realmain(int argc, char *argv[]) {
         Timer timeall(logger, "wall_time");
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
+
+        {
+            Timer timeit(logger, "reserveFiles");
+            inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames, logger);
+        }
+
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
@@ -223,16 +229,10 @@ int realmain(int argc, char *argv[]) {
                 file.data(*gs).strict = core::StrictLevel::Typed;
             }
         }
-        if (opts.print.Autogen || opts.print.AutogenMsgPack) {
-            // Autogen stops before infer
-            for (auto file : inputFiles) {
-                file.data(*gs).strict = core::StrictLevel::Stripe;
-            }
-        }
 
         {
             Timer timeit(logger, "index");
-            indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, logger);
+            indexed = pipeline::index(gs, inputFiles, opts, workers, kvstore, logger);
         }
 
         payload::retainGlobalState(gs, logger, opts, kvstore);

@@ -1,0 +1,20 @@
+# ParsedFile: test/testdata/autogen/strong_sigil.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=class
+ defines_behavior=0
+ is_empty=1
+ defining_ref=[A]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[A]
+ nesting=[]
+ resolved=[A]
+ loc=test/testdata/autogen/strong_sigil.rb:2
+ is_defining_ref=1

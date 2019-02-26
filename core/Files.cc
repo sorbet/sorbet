@@ -95,20 +95,22 @@ FileRef::FileRef(unsigned int id) : _id(id) {
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(gs.files[_id]->sourceType != File::TombStone);
-    return dataAllowingTombstone(gs);
+    ENFORCE(gs.files[_id]->sourceType != File::NotYetRead);
+    return dataAllowingUnsafe(gs);
 }
 
 File &FileRef::data(GlobalState &gs) const {
     ENFORCE(gs.files[_id]->sourceType != File::TombStone);
-    return dataAllowingTombstone(gs);
+    ENFORCE(gs.files[_id]->sourceType != File::NotYetRead);
+    return dataAllowingUnsafe(gs);
 }
 
-const File &FileRef::dataAllowingTombstone(const GlobalState &gs) const {
+const File &FileRef::dataAllowingUnsafe(const GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
     return *(gs.files[_id]);
 }
 
-File &FileRef::dataAllowingTombstone(GlobalState &gs) const {
+File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
     return *(gs.files[_id]);
 }
@@ -119,6 +121,7 @@ string_view File::path() const {
 
 string_view File::source() const {
     ENFORCE(this->sourceType != Type::TombStone);
+    ENFORCE(this->sourceType != File::NotYetRead);
     return this->source_;
 }
 
@@ -136,6 +139,7 @@ bool File::isRBI() const {
 
 vector<int> &File::line_breaks() const {
     ENFORCE(this->sourceType != Type::TombStone);
+    ENFORCE(this->sourceType != File::NotYetRead);
     auto ptr = atomic_load(&line_breaks_);
     if (ptr) {
         return *ptr;
