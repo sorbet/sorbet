@@ -172,14 +172,11 @@ unique_ptr<Error> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRe
 }; // namespace
 
 int getArity(Context ctx, SymbolRef method) {
-    int arity = method.data(ctx)->arguments().size();
-    if (arity == 0) {
-        return 0;
-    }
-    if (method.data(ctx)->arguments().back().data(ctx)->isBlockArgument()) {
-        --arity;
-    }
-    return arity;
+    ENFORCE(!method.data(ctx)->arguments().empty(), "Every method should have at least a block arg.");
+    ENFORCE(method.data(ctx)->arguments().back().data(ctx)->isBlockArgument(), "Last arg should be the block arg.");
+
+    // Don't count the block arg in the arity
+    return method.data(ctx)->arguments().size() - 1;
 }
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
@@ -252,18 +249,11 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             SymbolRef candidate = *it;
             auto args = candidate.data(ctx)->arguments();
-            if (args.empty()) {
-                // TODO(jez) We should be able to ENFORCE that this never happens.
-                if (hasBlock) {
-                    it = leftCandidates.erase(it);
-                    continue;
-                }
-            } else {
-                auto mentionsBlockArg = !args.back().data(ctx)->isSyntheticBlockArgument();
-                if (mentionsBlockArg != hasBlock) {
-                    it = leftCandidates.erase(it);
-                    continue;
-                }
+            ENFORCE(!args.empty(), "Should at least have a block argument.");
+            auto mentionsBlockArg = !args.back().data(ctx)->isSyntheticBlockArgument();
+            if (mentionsBlockArg != hasBlock) {
+                it = leftCandidates.erase(it);
+                continue;
             }
             ++it;
         }
@@ -478,9 +468,11 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     auto pit = data->arguments().begin();
     auto pend = data->arguments().end();
 
-    if (pit != pend && (pend - 1)->data(ctx)->isBlockArgument()) {
-        --pend;
-    }
+    ENFORCE(pit != pend, "Should at least have the block arg.");
+    ENFORCE((pend - 1)->data(ctx)->isBlockArgument(),
+            "Last arg should be the block arg: " + (pend - 1)->data(ctx)->show(ctx));
+    // We'll type check the block arg separately from the rest of the args.
+    --pend;
 
     // a -> args, i.e., what was passed at the call site
     auto ait = args.args.begin();
@@ -657,24 +649,20 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     }
 
     if (args.block != nullptr) {
-        SymbolRef bspec;
-        if (!data->arguments().empty()) {
-            bspec = data->arguments().back();
-        }
-        if (!bspec.exists() || !bspec.data(ctx)->isBlockArgument()) {
-            // TODO(jez): We should be able to ENFORCE that this never happens.
-        } else {
-            TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
-            if (!blockType) {
-                blockType = Types::untyped(ctx, bspec);
-            }
+        ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: " + data->show(ctx));
+        SymbolRef bspec = data->arguments().back();
+        ENFORCE(bspec.data(ctx)->isBlockArgument(), "The last symbol must be the block arg: " + data->show(ctx));
 
-            args.block->returnTp = Types::getProcReturnType(ctx, blockType);
-            blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
-                                           : Types::approximate(ctx, blockType, *constr);
-
-            args.block->blockPreType = blockType;
+        TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
+        if (!blockType) {
+            blockType = Types::untyped(ctx, bspec);
         }
+
+        args.block->returnTp = Types::getProcReturnType(ctx, blockType);
+        blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
+                                       : Types::approximate(ctx, blockType, *constr);
+
+        args.block->blockPreType = blockType;
     }
 
     TypePtr resultType = nullptr;
@@ -695,14 +683,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 result.components.front().errors.emplace_back(e.build());
             }
         }
-        if (!data->arguments().empty() && data->arguments().back().data(ctx)->isBlockArgument()) {
-            auto blockType = data->arguments().back().data(ctx)->resultType;
-            if (blockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blockType)) {
-                if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BlockNotPassed)) {
-                    e.setHeader("`{}` declares a block parameter, but no block was passed", args.name.show(ctx));
-                    e.addErrorLine(method.data(ctx)->loc(), "defined here");
-                    result.components.front().errors.emplace_back(e.build());
-                }
+        ENFORCE(!data->arguments().empty(), "Every method should at least have a block arg.");
+        ENFORCE(data->arguments().back().data(ctx)->isBlockArgument(), "The last arg should be the block arg.");
+        auto blockType = data->arguments().back().data(ctx)->resultType;
+        if (blockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blockType)) {
+            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BlockNotPassed)) {
+                e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "defined here");
+                result.components.front().errors.emplace_back(e.build());
             }
         }
     }

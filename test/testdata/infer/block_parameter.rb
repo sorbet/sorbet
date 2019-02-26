@@ -17,7 +17,7 @@ end
 optional_block(1)
 optional_block(1) {}
 
-required_block(1) # error: `required_block` declares a block parameter, but no block was passed
+required_block(1) # error: `required_block` requires a block parameter, but no block was passed
 required_block(1) {}
 
 no_params()
