@@ -806,12 +806,12 @@ private:
     }
 
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
-        InlinedVector<ast::Expression *, 1> lastSig;
+        InlinedVector<ast::Send *, 1> lastSigs;
         for (auto &stat : klass->rhs) {
-            processStatement(ctx, stat, lastSig);
+            processStatement(ctx, stat, lastSigs);
         }
-        if (!lastSig.empty()) {
-            if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
+        if (!lastSigs.empty()) {
+            if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`. No method def following it", "sig");
             }
         }
@@ -822,15 +822,15 @@ private:
     }
 
     void processInSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> &seq) {
-        InlinedVector<ast::Expression *, 1> lastSig;
+        InlinedVector<ast::Send *, 1> lastSigs;
         for (auto &stat : seq->stats) {
-            processStatement(ctx, stat, lastSig);
+            processStatement(ctx, stat, lastSigs);
         }
         if (!ast::isa_tree<ast::EmptyTree>(seq->expr.get())) {
-            processStatement(ctx, seq->expr, lastSig);
+            processStatement(ctx, seq->expr, lastSigs);
         }
-        if (!lastSig.empty()) {
-            if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
+        if (!lastSigs.empty()) {
+            if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`. No method def following it", "sig");
             }
         }
@@ -840,15 +840,15 @@ private:
     }
 
     void processStatement(core::MutableContext ctx, unique_ptr<ast::Expression> &stat,
-                          InlinedVector<ast::Expression *, 1> &lastSig) {
+                          InlinedVector<ast::Send *, 1> &lastSigs) {
         typecase(
             stat.get(),
 
             [&](ast::Send *send) {
                 if (TypeSyntax::isSig(ctx, send)) {
-                    if (!lastSig.empty()) {
+                    if (!lastSigs.empty()) {
                         if (!ctx.permitOverloadDefinitions()) {
-                            if (auto e = ctx.state.beginError(lastSig[0]->loc,
+                            if (auto e = ctx.state.beginError(lastSigs[0]->loc,
                                                               core::errors::Resolver::InvalidMethodSignature)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
                                 e.addErrorLine(send->loc, "Type annotation that will be used instead");
@@ -859,7 +859,7 @@ private:
                     // parsing the sig will transform the sig into a format we can use
                     TypeSyntax::parseSig(ctx, send, nullptr, true, core::Symbols::untyped());
 
-                    lastSig.emplace_back(stat.get());
+                    lastSigs.emplace_back(send);
                     return;
                 }
                 return;
@@ -867,7 +867,7 @@ private:
 
             [&](ast::MethodDef *mdef) {
                 if (debug_mode) {
-                    bool hasSig = !lastSig.empty();
+                    bool hasSig = !lastSigs.empty();
                     bool DSL = mdef->isDSLSynthesized();
                     bool isRBI = mdef->loc.file().data(ctx).isRBI();
                     if (hasSig) {
@@ -890,27 +890,26 @@ private:
                     }
                 }
 
-                if (!lastSig.empty()) {
+                if (!lastSigs.empty()) {
                     prodCounterInc("types.sig.count");
 
-                    bool isOverloaded = lastSig.size() > 1 && ctx.permitOverloadDefinitions();
+                    bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions();
 
                     if (isOverloaded) {
                         mdef->symbol.data(ctx)->setOverloaded();
                         int i = 1;
 
-                        while (i < lastSig.size()) {
-                            auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
-                            fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded,
-                                              *mdef);
-                            if (i + 1 < lastSig.size()) {
+                        while (i < lastSigs.size()) {
+                            auto overload = ctx.state.enterNewMethodOverload(lastSigs[i]->loc, mdef->symbol, i);
+                            fillInInfoFromSig(ctx, overload, lastSigs[i], isOverloaded, *mdef);
+                            if (i + 1 < lastSigs.size()) {
                                 overload.data(ctx)->setOverloaded();
                             }
                             i++;
                         }
                     }
 
-                    fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded, *mdef);
+                    fillInInfoFromSig(ctx, mdef->symbol, lastSigs[0], isOverloaded, *mdef);
 
                     // TODO(jez) Should we handle isOverloaded?
                     if (!isOverloaded) {
@@ -918,7 +917,7 @@ private:
                     }
 
                     // OVERLOAD
-                    lastSig.clear();
+                    lastSigs.clear();
                 }
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
