@@ -728,7 +728,7 @@ bool Symbol::isBlockSymbol(const GlobalState &gs) const {
 
 bool Symbol::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
-    return isBlockArgument() && loc().exists();
+    return isBlockArgument() && !loc().exists();
 }
 
 Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {

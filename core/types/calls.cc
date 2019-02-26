@@ -259,8 +259,8 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
                     continue;
                 }
             } else {
-                auto lastArg = args.back().data(ctx);
-                if (lastArg->isSyntheticBlockArgument() != hasBlock) {
+                auto mentionsBlockArg = !args.back().data(ctx)->isSyntheticBlockArgument();
+                if (mentionsBlockArg != hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
