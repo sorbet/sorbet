@@ -12,6 +12,7 @@
 namespace sorbet::core {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
+class AppliedType;
 class IntrinsicMethod;
 class TypeConstraint;
 struct DispatchArgs;
@@ -140,6 +141,7 @@ public:
 
     /** Recursively replaces proxies with their underlying types */
     static TypePtr widen(Context ctx, const TypePtr &type);
+    static std::optional<int> getProcArity(const AppliedType &type);
 };
 
 struct Intrinsic {

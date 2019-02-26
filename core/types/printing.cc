@@ -248,27 +248,17 @@ string AppliedType::show(const GlobalState &gs) const {
     } else if (this->klass == Symbols::Set()) {
         fmt::format_to(buf, "T::Set");
     } else {
-        bool isProc = false;
-        int proc_arity = 0;
-        for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
-            if (this->klass == Symbols::Proc(i)) {
-                isProc = true;
-                proc_arity = i;
-                break;
-            }
-        }
-
-        if (isProc) {
+        if (std::optional<int> procArity = Types::getProcArity(*this)) {
             fmt::format_to(buf, "T.proc");
 
             // The first element in targs is the return type.
             // The rest are the arguments (in the correct order)
-            ENFORCE(this->targs.size() == proc_arity + 1, "Proc must have exactly arity + 1 targs");
+            ENFORCE(this->targs.size() == *procArity + 1, "Proc must have exactly arity + 1 targs");
             auto targs_it = this->targs.begin();
             auto return_type = *targs_it;
             targs_it++;
 
-            if (proc_arity > 0) {
+            if (*procArity > 0) {
                 fmt::format_to(buf, ".params(");
             }
 
@@ -277,7 +267,7 @@ string AppliedType::show(const GlobalState &gs) const {
                                return fmt::format("arg{}: {}", arg_num++, targ->show(gs));
                            }));
 
-            if (proc_arity > 0) {
+            if (*procArity > 0) {
                 fmt::format_to(buf, ")");
             }
 

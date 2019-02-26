@@ -244,6 +244,15 @@ TypePtr Types::hashOf(Context ctx, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), targs);
 }
 
+std::optional<int> Types::getProcArity(const AppliedType &type) {
+    for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
+        if (type.klass == Symbols::Proc(i)) {
+            return i;
+        }
+    }
+    return std::nullopt;
+}
+
 ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
     categoryCounterInc("types.allocated", "classtype");
     ENFORCE(symbol.exists());
