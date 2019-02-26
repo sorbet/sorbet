@@ -138,7 +138,10 @@ public:
 
     void trace(std::string_view msg) const;
 
-    static constexpr int HASH_STATE_INVALID = 0;
+    static constexpr int HASH_STATE_NOT_COMPUTED = 0;
+    static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
+    static constexpr int HASH_STATE_INVALID = 2;
+    static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
     unsigned int hash() const;
     std::vector<std::shared_ptr<File>> getFiles() const;
 

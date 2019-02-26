@@ -60,6 +60,15 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
 
 void retainGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd::logger> &logger,
                        const realmain::options::Options &options, unique_ptr<KeyValueStore> &kvstore) {
+    if (!options.storeState.empty()) {
+        auto files = gs->getFiles();
+        for (const auto &f : files) {
+            if (f && f->sourceType != core::File::Type::TombStone && !f->getDefinitionHash().has_value()) {
+                f->setDefinitionHash(realmain::pipeline::computeFileHash(f, logger));
+            }
+        }
+    }
+
     if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
         Timer timeit(logger, "write_global_state.kvstore");
         kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));

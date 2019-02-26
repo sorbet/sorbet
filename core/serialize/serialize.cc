@@ -231,13 +231,17 @@ void SerializerImpl::pickle(Pickler &p, const File &what) {
     p.putU1((u1)what.sourceType);
     p.putStr(what.path());
     p.putStr(what.source());
+    p.putU4(what.globalStateHash.load());
 }
 
 shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
     auto t = (File::Type)p.getU1();
     auto path = string(p.getStr());
     auto source = string(p.getStr());
-    return make_shared<File>(std::move(path), std::move(source), t);
+    auto hash = p.getU4();
+    auto ret = make_shared<File>(std::move(path), std::move(source), t);
+    ret->setDefinitionHash(hash);
+    return ret;
 }
 
 void SerializerImpl::pickle(Pickler &p, const Name &what) {

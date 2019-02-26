@@ -3,11 +3,15 @@
 
 #include "core/Names.h"
 #include "core/StrictLevel.h"
+#include <atomic>
 #include <string>
 
 namespace sorbet::core {
 class GlobalState;
 class File;
+namespace serialize {
+class SerializerImpl;
+}
 
 class FileRef final {
 public:
@@ -62,6 +66,7 @@ public:
     bool cachedParseTree = false;
 
     friend class GlobalState;
+    friend class ::sorbet::core::serialize::SerializerImpl;
 
     std::string_view path() const;
     std::string_view source() const;
@@ -79,6 +84,8 @@ public:
     int lineCount() const;
     bool hadErrors() const;
 
+    std::optional<unsigned int> getDefinitionHash() const;
+    void setDefinitionHash(unsigned int) const;
     /** Given a 1-based line number, returns a string view of the line. */
     std::string_view getLine(int i);
 
@@ -87,6 +94,7 @@ private:
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> line_breaks_;
     mutable bool hadErrors_ = false;
+    mutable std::atomic<unsigned int> globalStateHash = 0;
 
 public:
     const StrictLevel sigil;

@@ -1211,7 +1211,12 @@ unsigned int GlobalState::hash() const {
         }
     }
 
-    return (result == GlobalState::HASH_STATE_INVALID) ? GlobalState::HASH_STATE_INVALID + 1 : result;
+    if (result == GlobalState::HASH_STATE_NOT_COMPUTED) {
+        result = GlobalState::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
+    } else if (result == GlobalState::HASH_STATE_INVALID) {
+        result = GlobalState::HASH_STATE_INVALID_COLLISION_AVOID;
+    }
+    return result;
 }
 
 vector<shared_ptr<File>> GlobalState::getFiles() const {

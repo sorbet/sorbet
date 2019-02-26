@@ -84,7 +84,11 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         threadResult.emplace_back(make_pair(job, 0));
                         continue;
                     }
-                    threadResult.emplace_back(make_pair(job, pipeline::computeFileHash(files[job], logger)));
+                    auto hash = files[job]->getDefinitionHash();
+                    if (!hash.has_value()) {
+                        hash = pipeline::computeFileHash(files[job], logger);
+                    }
+                    threadResult.emplace_back(make_pair(job, hash.value()));
                 }
             }
         }
