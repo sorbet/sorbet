@@ -1,7 +1,9 @@
 #include "wrapper.h"
 #include "main/pipeline/pipeline.h"
+#include "payload/payload.h"
 #include <iostream>
 #include <regex>
+
 using namespace std;
 namespace sorbet::realmain::lsp {
 
@@ -75,14 +77,34 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &mess
     return getLSPResponsesFor(LSPMessage(alloc, message));
 }
 
-LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&options,
-                       const shared_ptr<spdlog::logger> &logger, bool disableFastPath)
-    : opts(move(options)) {
+void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
+                             bool disableFastPath) {
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = make_unique<WorkerPool>(0, logger);
     // N.B.: cin will not actually be used the way we are driving LSP.
-    // Configure LSPLoop to run on test files (as all test input files are "test" files) and disable configatron.
+    // Configure LSPLoop to run on test files and disable configatron.
     lspLoop =
         make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), cin, lspOstream, true, true, disableFastPath);
+}
+
+LSPWrapper::LSPWrapper(bool disableFastPath) {
+    // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
+    stderrColorSink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
+    auto logger = make_shared<spd::logger>("console", stderrColorSink);
+    typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
+    typeErrorsConsole->set_pattern("%v");
+    auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+    unique_ptr<KeyValueStore> kvstore;
+    payload::createInitialGlobalState(gs, logger, opts, kvstore);
+
+    // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
+    gs->errorQueue->ignoreFlushes = true;
+    instantiate(std::move(gs), logger, disableFastPath);
+}
+
+LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&options,
+                       const shared_ptr<spdlog::logger> &logger, bool disableFastPath)
+    : opts(std::move(options)) {
+    instantiate(std::move(gs), logger, disableFastPath);
 }
 } // namespace sorbet::realmain::lsp

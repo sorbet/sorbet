@@ -1,6 +1,9 @@
+#include "spdlog/spdlog.h"
+// has to come before the next spdlog include. This comment stops formatter from reordering them
 #include "lsp.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <sstream>
 namespace sorbet::realmain::lsp {
 
@@ -19,9 +22,15 @@ private:
      * Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
      */
     std::unique_ptr<WorkerPool> workers;
+    std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
+    std::shared_ptr<spd::logger> typeErrorsConsole;
 
     /** The output stream used by LSP. Lets us drain all response messages after sending messages to LSP. */
     std::stringstream lspOstream;
+
+    /** Contains shared constructor logic. */
+    void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,
+                     bool disableFastPath);
 
 public:
     /** Memory allocator for rapidjson objects. */
@@ -30,6 +39,7 @@ public:
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     options::Options opts;
 
+    LSPWrapper(bool disableFastPath = false);
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&opts,
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
 

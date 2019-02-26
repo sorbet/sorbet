@@ -28,6 +28,7 @@ cc_library(
         "//core/serialize",
         "//main/options",
         "//main/pipeline",
+        "//payload:interface",
         "//payload/binary",
         "//payload/text",
         "@com_google_absl//absl/synchronization",

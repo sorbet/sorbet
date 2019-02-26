@@ -4,29 +4,13 @@
 
 #include "main/lsp/json_types.h"
 #include "payload/payload.h"
-#include "spdlog/sinks/basic_file_sink.h"
 
 namespace sorbet::test {
 using namespace std;
 
 void LSPTest::SetUp() {
     test = GetParam();
-    // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
-    // Cargo-culting from realmain.cc and other test runners.
-    stderrColorSink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
-    auto logger = make_shared<spd::logger>("console", stderrColorSink);
-    typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
-    typeErrorsConsole->set_pattern("%v");
-    unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
-    unique_ptr<KeyValueStore> kvstore;
-    realmain::options::Options opts;
-    payload::createInitialGlobalState(gs, logger, opts, kvstore);
-    // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
-    gs->errorQueue->ignoreFlushes = true;
-
-    lspWrapper = make_unique<LSPWrapper>(move(gs), move(opts), logger, fastpathDisabled);
-
+    lspWrapper = make_unique<LSPWrapper>(fastpathDisabled);
     parseTestFile();
 }
 

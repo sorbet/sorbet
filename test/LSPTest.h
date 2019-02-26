@@ -4,10 +4,7 @@
 #include "gtest/gtest.h"
 // ^ Violates linting rules, so include first.
 
-#include "spdlog/spdlog.h"
-// has to come before the next one. This comment stops formatter from reordering them
 #include "main/lsp/wrapper.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include "test/expectations.h"
 #include "test/position_assertions.h"
 
@@ -20,10 +17,6 @@ using namespace sorbet::realmain::lsp;
  */
 class LSPTest : public testing::TestWithParam<Expectations> {
 private:
-    // Note: LSPTest must keep these objects alive, as LSPLoop captures a reference to it.
-    std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
-    std::shared_ptr<spd::logger> typeErrorsConsole;
-
     /** Parses the test file and its assertions. */
     void parseTestFile();
 
