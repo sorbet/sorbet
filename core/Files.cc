@@ -79,6 +79,16 @@ StrictLevel fileSigil(string_view source) {
 File::File(string &&path_, string &&source_, Type sourceType)
     : sourceType(sourceType), path_(path_), source_(source_), sigil(fileSigil(this->source_)), strict(sigil) {}
 
+unique_ptr<File> File::deepCopy(GlobalState &gs) const {
+    string sourceCopy = source_;
+    string pathCopy = path_;
+    auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType);
+    ret->line_breaks_ = line_breaks_;
+    ret->hadErrors_ = hadErrors_;
+    ret->strict = strict;
+    return ret;
+}
+
 FileRef::FileRef(unsigned int id) : _id(id) {
     ENFORCE(((u2)id) == id, "FileRef overflow. Do you have 2^16 files?");
 }

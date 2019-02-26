@@ -58,7 +58,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> 
     }
 
     vector<shared_ptr<core::File>> files;
-    files.emplace_back(make_shared<core::File>(std::move(fref.data(*gs))));
+    files.emplace_back(fref.data(*gs).deepCopy(*gs));
     return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym,

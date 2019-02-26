@@ -73,6 +73,7 @@ public:
     File(File &&other) = default;
     File(const File &other) = delete;
     File() = delete;
+    std::unique_ptr<File> deepCopy(GlobalState &) const;
     std::vector<int> &line_breaks() const;
     int lineCount() const;
     bool hadErrors() const;
