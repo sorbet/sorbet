@@ -825,18 +825,6 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
 }
 
-FileRef GlobalState::enterFileAt(string_view path, string_view source, FileRef id) {
-    if (this->files[id.id()] && this->files[id.id()]->sourceType != File::Type::TombStone) {
-        Exception::raise("should never happen");
-    }
-
-    auto ret = GlobalState::enterNewFileAt(
-        make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal),
-        id);
-    ENFORCE(ret == id);
-    return ret;
-}
-
 FileRef GlobalState::enterNewFileAt(const shared_ptr<File> &file, FileRef id) {
     ENFORCE(!fileTableFrozen);
     ENFORCE(id.id() < this->files.size());

@@ -77,7 +77,6 @@ public:
     NameRef enterNameConstant(std::string_view original);
 
     FileRef enterFile(std::string_view path, std::string_view source);
-    FileRef enterFileAt(std::string_view path, std::string_view source, FileRef id);
     FileRef enterFile(const std::shared_ptr<File> &file);
     FileRef enterNewFileAt(const std::shared_ptr<File> &file, FileRef id);
     FileRef reserveFileRef(std::string path);
