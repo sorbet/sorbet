@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+require_relative '../lib/gem-generator-tracepoint'
+
+if $PROGRAM_NAME == __FILE__
+  RbiGenerator.start
+  RbiGenerator.require_eveything
+  RbiGenerator.finish
+end

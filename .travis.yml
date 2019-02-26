@@ -68,6 +68,17 @@ matrix:
     deploy:
       <<: *deploy_base
       file: runtime/sorbet-runtime.gem
+  - name: "Release: rbi-generation on Ruby 2.4 & Release"
+    language: ruby
+    rvm: 2.4
+    script:
+    - cd rbi-generation
+    - gem build sorbet-rbi-generation.gemspec
+    - mv sorbet-rbi-generation-*.gem sorbet-rbi-generation.gem
+    - cd .. # cd above breaks deploy step
+    deploy:
+      <<: *deploy_base
+      file: rbi-generation/sorbet-rbi-generation.gem
   - name: "Test: runtime on Ruby 2.5"
     language: ruby
     rvm: 2.5

@@ -1,0 +1,394 @@
+#!/usr/bin/env ruby
+require 'set'
+
+alias DelegateClass_without_rbi_generator DelegateClass
+def DelegateClass(superclass)
+  result = DelegateClass_without_rbi_generator(superclass)
+  RbiGenerator.register_delegate_class(superclass, result)
+  result
+end
+
+# TODO switch the Struct handling to:
+#
+# class Subclass < Struct(:key1, :key2)
+# end
+#
+# generating:
+#
+# TemporaryStruct = Struct(:key1, :key2)
+# class Subclass < TemporaryStruct
+# end
+#
+# instead of manually defining every getter/setter
+
+class RbiGenerator
+  SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
+
+  module ModuleOverride
+    def include(mod, *smth)
+      result = super
+      RbiGenerator.module_included(mod, self)
+      result
+    end
+  end
+  Module.prepend(ModuleOverride)
+
+  module ObjectOverride
+    def extend(mod, *args)
+      result = super
+      RbiGenerator.module_extended(mod, self)
+      result
+    end
+  end
+  Object.prepend(ObjectOverride)
+
+  module ClassOverride
+    def new(*)
+      result = super
+      RbiGenerator.module_created(result)
+      result
+    end
+  end
+  Class.prepend(ClassOverride)
+
+  class << self
+    def start
+      pre_cache_module_methods
+      install_tracepoints
+    end
+
+    def finish(output_dir = './rbi')
+      disable_tracepoints
+      generate_rbis(output_dir)
+    end
+
+    def register_delegate_class(klass, delegate)
+      delegate_classes[delegate.object_id] = klass
+    end
+
+    def module_created(mod)
+      add_to_context(type: :module, module: mod)
+    end
+
+    def module_included(included, includer)
+      add_to_context(type: :include, module: includer, include: included)
+    end
+
+    def module_extended(extended, extender)
+      add_to_context(type: :extend, module: extender, extend: extended)
+    end
+
+    def method_added(mod, method, singleton)
+      add_to_context(type: :method, module: mod, method: method, singleton: singleton)
+    end
+
+    def require_eveything
+      require_bundler
+      require_rails
+      hack_things_which_dont_tracepoint
+    end
+
+    private
+
+    def modules
+      @modules ||= {}
+    end
+
+    def context_stack
+      @context_stack ||= [[]]
+    end
+
+    def new_anonymous_id
+      @anonymous_id ||= 0
+      @anonymous_id += 1
+      @anonymous_id
+    end
+
+    def anonymous_map
+      @anonymous_map ||= {}
+    end
+
+    def add_to_context(item)
+      # The stack can be empty because we start the :c_return TracePoint inside a 'require' call.
+      # In this case, it's okay to simply add something to the stack; it will be popped off when
+      # the :c_return is traced.
+      context_stack << [] if context_stack.empty?
+      context_stack.last << item
+    end
+
+    def files
+      @files ||= {}
+    end
+
+    def delegate_classes
+      @delegate_classes ||= {}
+    end
+
+    def pre_cache_module_methods
+      ObjectSpace.each_object(Module) do |mod|
+        modules[mod.object_id] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
+      end
+    end
+
+    def install_tracepoints
+      @class_tracepoint = TracePoint.new(:class) do |tp|
+        module_created(tp.self)
+      end
+      @c_call_tracepoint = TracePoint.new(:c_call) do |tp|
+        case tp.method_id
+        when :require, :require_relative
+          context_stack << []
+        end
+      end
+      @c_return_tracepoint = TracePoint.new(:c_return) do |tp|
+        case tp.method_id
+        when :require, :require_relative
+          popped = context_stack.pop
+
+          next if popped.empty?
+
+          path = $LOADED_FEATURES.last
+          if tp.return_value != true # intentional true check
+            warn("Unexpected: constants or methods were defined when #{tp.method_id} didn't return true; adding to #{path} instead")
+          end
+
+          # raise 'Unexpected: constants or methods were defined without a file added to $LOADED_FEATURES' if path.nil?
+          # raise "Unexpected: #{path} is already defined in files" if files.key?(path)
+
+          files[path] ||= []
+          files[path] += popped
+
+          # popped.each { |item| item[:path] = path }
+        when :method_added, :singleton_method_added
+          begin
+            tp.disable
+
+            singleton = tp.method_id == :singleton_method_added
+            receiver = singleton ? tp.self.singleton_class : tp.self
+            methods = receiver.instance_methods(false) + receiver.private_instance_methods(false)
+            set = modules[receiver.object_id] ||= Set.new
+            added = methods.find { |m| !set.include?(m) }
+            if added.nil?
+              # warn("Warning: could not find method added to #{tp.self} at #{tp.path}:#{tp.lineno}")
+              next
+            end
+            set << added
+
+            method_added(tp.self, added, singleton)
+          ensure
+            tp.enable
+          end
+        end
+      end
+      @class_tracepoint.enable
+      @c_call_tracepoint.enable
+      @c_return_tracepoint.enable
+    end
+
+    def disable_tracepoints
+      @class_tracepoint.disable
+      @c_call_tracepoint.disable
+      @c_return_tracepoint.disable
+    end
+
+    def gem_from_location(location)
+      match = location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
+        location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
+        location&.match(/^.*\/gems\/[\d.]+(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
+      if match.nil?
+        # uncomment to generate files for methods outside of gems
+        # {
+        #   path: location,
+        #   gem: location.gsub(/[\/\.]/, '_'),
+        #   version: '1.0.0',
+        # }
+        nil
+      else
+        {
+          path: match[0],
+          gem: match[1],
+          version: match[2],
+        }
+      end
+    end
+
+    def class_name(klass)
+      klass = delegate_classes[klass.object_id] || klass
+      name = klass.name.to_s if klass.is_a?(Module)
+
+      # class/module has no name; it must be anonymous
+      if name.nil? || name == ""
+        middle = klass.is_a?(Class) ? klass.superclass : klass.class
+        id = anonymous_map[klass.object_id] ||= new_anonymous_id
+        return "Anonymous_#{class_name(middle).gsub('::', '_')}_#{id}"
+      end
+
+      # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
+      if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
+        warn("Invalid class name: #{name}")
+        id = anonymous_map[klass.object_id] ||= new_anonymous_id
+        return "InvalidName_#{name.gsub(/[^\w]/, '_')}_#{id}"
+      end
+
+      name
+    end
+
+    def used?(klass, used)
+      used_by = used[klass] || []
+      used_by.any? { |user| user == true || used?(user, used) }
+    end
+
+    def valid_method_name?(symbol)
+      string = symbol.to_s
+      return true if SPECIAL_METHOD_NAMES.include?(string)
+      string =~ /^[[:word:]]+[?!=]?$/
+    end
+
+    def generate_rbis(output_dir)
+      grouped = {}
+      used = {} # subclassed, included, or extended
+      files.each do |path, defined|
+        gem = gem_from_location(path)
+        if gem.nil?
+          warn("Can't find gem for #{path}")
+          next
+        end
+        grouped[gem] ||= {}
+        defined.each do |item|
+          klass = item[:module]
+
+          begin
+            is_a_module = klass.is_a?(Module)
+          rescue ArgumentError => e
+            # active_support/option_merger.rb passes additional arguments to is_a?, so rescue and ignore
+            warn("Ignoring #{klass.class}: #{e.message}")
+            next
+          end
+
+          klass_id = klass.object_id
+          values = grouped[gem][klass_id] ||= []
+          values << item unless item[:type] == :module
+
+          # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
+          used_value = is_a_module && !klass.name.nil? ? true : klass.object_id # if non-anon, set it to true, otherwise link to next anon class
+          (used[klass.superclass.object_id] ||= Set.new) << used_value if klass.is_a?(Class)
+          (used[item[item[:type]].object_id] ||= Set.new) << used_value if [:extend, :include].include?(item[:type])
+        end
+      end
+
+      require 'fileutils'
+      FileUtils.mkdir_p(output_dir)
+
+      grouped.each do |gem, klass_ids|
+        File.open("#{File.join(output_dir, gem[:gem])}.rbi", 'w') do |f|
+          f.write("# #{gem[:gem]}-#{gem[:version]}\n")
+          klass_ids.each do |klass_id, defined|
+            klass = ObjectSpace._id2ref(klass_id)
+
+            next if !((klass.is_a?(Module) && !klass.name.nil?) || used?(klass_id, used))
+            next if klass.is_a?(Class) && klass.superclass == Delegator && !klass.name
+
+            # next if [Object, BasicObject, Hash].include?(klass) # TODO should this be here?
+
+            f.write("#{klass.is_a?(Class) ? 'class' : 'module'} #{class_name(klass)}")
+            f.write(" < #{class_name(klass.superclass)}") if klass.is_a?(Class) && ![Object, nil].include?(klass.superclass)
+            f.write("\n")
+
+            rows = defined.map do |item|
+              case item[:type]
+              when :method
+                if !valid_method_name?(item[:method])
+                  warn("Invalid method name: #{klass}.#{item[:method]}")
+                  next
+                end
+                begin
+                  method = item[:singleton] ? klass.method(item[:method]) : klass.instance_method(item[:method])
+                  "#{generate_method(method, !item[:singleton])}"
+                rescue NameError
+                end
+              when :include, :extend
+                name = class_name(item[item[:type]])
+                "  #{item[:type]} #{name}"
+              end
+            end
+            rows = rows.compact.sort
+            f.write(rows.join("\n"))
+            f.write("\n") if !rows.empty?
+            f.write("end\n")
+          end
+        end
+      end
+    end
+
+    def generate_method(method, instance, spaces = 2)
+      # method.parameters is an array of:
+      # a      [:req, :a]
+      # b = 1  [:opt, :b]
+      # c:     [:keyreq, :c]
+      # d: 1   [:key, :d]
+      # *e     [:rest, :e]
+      # **f    [:keyrest, :f]
+      # &g     [:block, :g]
+      prefix = ' ' * spaces
+      parameters = method.parameters.map.with_index do |(type, name), index|
+        name = "arg#{index}" if name.nil? || name.empty?
+        case type
+        when :req
+          name
+        when :opt
+          "#{name} = nil"
+        when :keyreq
+          "#{name}:"
+        when :key
+          "#{name}: nil"
+        when :rest
+          "*#{name}"
+        when :keyrest
+          "**#{name}"
+        when :block
+          "&#{name}"
+        else
+          raise "Unknown parameter type: #{type}"
+        end
+      end
+      parameters = parameters.join(', ')
+      parameters = "(#{parameters})" unless parameters.empty?
+      "#{prefix}def #{instance ? '' : 'self.'}#{method.name}#{parameters}; end"
+    end
+
+    def require_bundler
+      begin
+        require 'bundler'
+      rescue
+        return
+      end
+      Bundler.require
+    end
+
+    def require_rails
+      begin
+        require 'rails'
+      rescue
+        return
+      end
+      require './config/application'
+      Rails.application.require_environment!
+      Rails.application.load_runner
+      ActionCable::Connection::Base
+      ActionController::Base
+      ActionDispatch::SystemTestCase
+      ActionMailer::Base
+      ActionMailer::MessageDelivery
+      ActiveJob::Base
+    end
+
+    def hack_things_which_dont_tracepoint
+      files.each do |path, defined|
+        gem = gem_from_location(path)
+        if gem && gem[:gem] == 'ruby'
+          files[path] += [{type: :module, module: Zlib::Error}]
+        end
+      end
+    end
+  end
+end
