@@ -5,11 +5,11 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U SomeDataInterface>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -32,10 +32,8 @@ class <emptyTree><<C <U <root>>>> < ()
   def <U test><<C <U <todo sym>>>>(&<U <blk>>)
     begin
       <U di> = <emptyTree>::<C <U SomeDataInterface>>.<U new>()
-      <emptyTree>::<C <U T>>.<U assert_type!>(<U di>.<U foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<U di>.<U foo>(), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<U di>.<U foo_>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Other>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<U di>.<U foo_>(), <emptyTree>::<C <U Other>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo_>())
     end
   end
 end

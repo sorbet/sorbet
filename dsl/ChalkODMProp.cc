@@ -14,7 +14,6 @@ namespace sorbet::dsl {
 vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     bool isOptional = false;  // Can the setter be passed nil?
     bool isImmutable = false; // Are there no setters?
-    bool isNilable = true;    // Can the getter return nil?
     vector<unique_ptr<ast::Expression>> empty;
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
@@ -26,6 +25,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             // Nothing special
             break;
         case core::Names::optional()._id:
+            // TODO(jez) Remove this
             isOptional = true;
             break;
         case core::Names::const_()._id:
@@ -33,7 +33,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             break;
         case core::Names::token_prop()._id:
         case core::Names::timestamped_token_prop()._id:
-            isNilable = false;
             name = core::Names::token();
             nameLoc =
                 core::Loc(send->loc.file(),
@@ -42,14 +41,12 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::created_prop()._id:
-            isNilable = false;
             name = core::Names::created();
             nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
                                 send->loc.endPos() - 5); // 5 is the difference between `created_prop` and `created`
             type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
         case core::Names::merchant_prop()._id:
-            isNilable = false;
             isImmutable = true;
             name = core::Names::merchant();
             nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
@@ -118,7 +115,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
             type = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
-            isNilable = false;
             isImmutable = true;
         }
     }
@@ -165,16 +161,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     // Compute the getters
 
     if (rules) {
-        auto [key, optional] = ASTUtil::extractHashValue(ctx, *rules, core::Names::optional());
-        auto optionalLit = ast::cast_tree<ast::Literal>(optional.get());
-        if (optionalLit) {
-            if (optionalLit->isTrue(ctx)) {
-                isOptional = true;
-            } else if (optionalLit->isFalse(ctx)) {
-                isNilable = false;
-            }
-        }
-
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
@@ -186,14 +172,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                 foreign = std::move(body);
             }
         }
-
-        // In Chalk::ODM `optional String, optional: false` IS optional so
-        // we don't falsify any booleans here
     }
 
-    if (isNilable) {
-        getType = mkNilable(loc, std::move(getType));
-    }
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
     stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
 

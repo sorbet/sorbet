@@ -36,6 +36,7 @@ class AdvancedODM
     prop :default_without_optional_false, String, default: ""
     prop :optional_false, String, optional: false
     prop :nodefault, String
+    prop :t_nilable, T.nilable(String)
 
     prop :type, type: String, optional: false
     prop :object
@@ -61,6 +62,9 @@ class AdvancedODM
     prop :foreign_lazy, String, foreign: -> {ForeignClass}
     prop :foreign_proc, String, foreign: proc {ForeignClass}
     prop :foreign_invalid, String, foreign: proc { :not_a_type }
+
+    prop :ifunset, String, ifunset: ''
+    prop :ifunset_nilable, T.nilable(String), ifunset: ''
 end
 
 class PropHelpers
@@ -83,8 +87,8 @@ class EncryptedProp
 end
 
 def main
-    T.assert_type!(SomeODM.new.foo, T.nilable(String))
-    T.assert_type!(SomeODM.new.foo, String) # error: Argument does not have asserted type
+    T.assert_type!(SomeODM.new.foo, T.nilable(String)) # TODO(jez) This some of these are redundant
+    T.assert_type!(SomeODM.new.foo, String)
     T.assert_type!(SomeODM.new.foo = 'b', String)
     T.assert_type!(SomeODM.new.foo2, T.nilable(String))
     T.assert_type!(SomeODM.new.foo2, String) # error: Argument does not have asserted type
@@ -93,7 +97,8 @@ def main
     T.assert_type!(AdvancedODM.new.default_without_optional_false, T.nilable(String))
     T.assert_type!(AdvancedODM.new.optional_false, String)
     T.assert_type!(AdvancedODM.new.nodefault, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.nodefault, String) # error: Argument does not have asserted type
+    T.assert_type!(AdvancedODM.new.nodefault, String)
+    T.reveal_type(AdvancedODM.new.t_nilable) # error: Revealed type: `T.nilable(String)`
 
     T.assert_type!(AdvancedODM.new.type, String)
     T.assert_type!(AdvancedODM.new.object, T.nilable(Object))
@@ -156,4 +161,9 @@ def main
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
     EncryptedProp.new.bar = "hello" # error: Method `bar=` does not exist
+
+    T.reveal_type(AdvancedODM.new.ifunset) # error: Revealed type: `String`
+    T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`
+    AdvancedODM.new.ifunset = nil # error: does not match expected type
+    AdvancedODM.new.ifunset_nilable = nil
 end

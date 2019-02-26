@@ -29,11 +29,11 @@ class <emptyTree><<C <U <root>>>> < ()
     self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -67,11 +67,11 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U AdvancedODM>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U default_without_optional_false><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -99,11 +99,11 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U nodefault><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -112,6 +112,22 @@ class <emptyTree><<C <U <root>>>> < ()
 
     def <U nodefault=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
       ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U t_nilable><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U t_nilable=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
     ::Sorbet.<U sig>() do ||
@@ -131,11 +147,11 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(::Object))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::Object)
     end
 
     def <U object><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(::Object))
+      ::T.<U cast>(::T.<U unsafe>(nil), ::Object)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -299,27 +315,27 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U optional_explicit><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U optional_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U optional_existing><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -379,20 +395,20 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Array>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
     def <U no_class_arg><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Array>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
     end
 
     class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U Array>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Array>>))
+        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
       end
 
       def <U no_class_arg=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U Array>>))
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U Array>>)
       end
 
       ::Sorbet.<U sig>() do ||
@@ -413,11 +429,11 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -437,11 +453,11 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_lazy><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -461,11 +477,11 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_proc><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -485,11 +501,11 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_invalid><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
     ::Sorbet.<U sig>() do ||
@@ -506,6 +522,38 @@ class <emptyTree><<C <U <root>>>> < ()
 
     def <U foreign_invalid_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
       ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+    end
+
+    def <U ifunset><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    end
+
+    def <U ifunset=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U ifunset_nilable><<C <U <todo sym>>>>(&<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    ::Sorbet.<U sig>() do ||
+      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    end
+
+    def <U ifunset_nilable=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
   end
 
@@ -641,6 +689,7 @@ class <emptyTree><<C <U <root>>>> < ()
       <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_false>(), <emptyTree>::<C <U String>>)
       <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U nodefault>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
       <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U nodefault>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U t_nilable>())
       <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U type>(), <emptyTree>::<C <U String>>)
       <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U object>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Object>>))
       <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array>(), <emptyTree>::<C <U Array>>)
@@ -686,6 +735,10 @@ class <emptyTree><<C <U <root>>>> < ()
       <emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo=>("hello")
       <emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo=>(nil)
       <emptyTree>::<C <U EncryptedProp>>.<U new>().<U bar=>("hello")
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U ifunset>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U ifunset_nilable>())
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U ifunset=>(nil)
+      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U ifunset_nilable=>(nil)
     end
   end
 end

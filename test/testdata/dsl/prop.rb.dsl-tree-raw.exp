@@ -277,20 +277,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -327,20 +316,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -623,20 +601,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -673,20 +640,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -953,20 +909,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -1003,20 +948,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -1099,6 +1033,210 @@ ClassDef{
               UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <C <U String>>
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U String>>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U t_nilable><<C <U <todo sym>>>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = <U cast>
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                fun = <U nilable>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U String>>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = UnresolvedConstantLit{
+                            scope = EmptyTree
+                            cnst = <C <U T>>
+                          }
+                          fun = <U nilable>
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <C <U String>>
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U String>>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U t_nilable=><<C <U <todo sym>>>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = <U cast>
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                fun = <U nilable>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U String>>
+                  }
+                ]
               }
             ]
           }
@@ -1283,21 +1421,10 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Object
-                      typeAlias = nullptr
-                    }
-                  ]
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Object
+                  typeAlias = nullptr
                 }
               ]
             }
@@ -1334,21 +1461,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  ConstantLit{
-                    orig = nullptr
-                    symbol = ::Object
-                    typeAlias = nullptr
-                  }
-                ]
+              ConstantLit{
+                orig = nullptr
+                symbol = ::Object
+                typeAlias = nullptr
               }
             ]
           }
@@ -3385,20 +3501,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -3435,20 +3540,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -3474,20 +3568,9 @@ ClassDef{
                     pairs = [
                       [
                         key = Literal{ value = :"arg0" }
-                        value = Send{
-                          recv = ConstantLit{
-                            orig = nullptr
-                            symbol = ::T
-                            typeAlias = nullptr
-                          }
-                          fun = <U nilable>
-                          block = nullptr
-                          args = [
-                            UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <C <U String>>
-                            }
-                          ]
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U String>>
                         }
                       ]
                     ]
@@ -3497,20 +3580,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -3550,20 +3622,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -3594,20 +3655,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -3644,20 +3694,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -4338,20 +4377,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U Array>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U Array>>
                 }
               ]
             }
@@ -4388,20 +4416,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Array>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Array>>
               }
             ]
           }
@@ -4434,20 +4451,9 @@ ClassDef{
                         pairs = [
                           [
                             key = Literal{ value = :"arg0" }
-                            value = Send{
-                              recv = ConstantLit{
-                                orig = nullptr
-                                symbol = ::T
-                                typeAlias = nullptr
-                              }
-                              fun = <U nilable>
-                              block = nullptr
-                              args = [
-                                UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U Array>>
-                                }
-                              ]
+                            value = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <C <U Array>>
                             }
                           ]
                         ]
@@ -4457,20 +4463,9 @@ ClassDef{
                   fun = <U returns>
                   block = nullptr
                   args = [
-                    Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = <U nilable>
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U Array>>
-                        }
-                      ]
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U Array>>
                     }
                   ]
                 }
@@ -4510,20 +4505,9 @@ ClassDef{
                       Literal{ value = nil }
                     ]
                   }
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                      typeAlias = nullptr
-                    }
-                    fun = <U nilable>
-                    block = nullptr
-                    args = [
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U Array>>
-                      }
-                    ]
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Array>>
                   }
                 ]
               }
@@ -4748,20 +4732,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -4798,20 +4771,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -5009,20 +4971,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -5059,20 +5010,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -5270,20 +5210,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -5320,20 +5249,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -5531,20 +5449,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                    typeAlias = nullptr
-                  }
-                  fun = <U nilable>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U String>>
-                    }
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -5581,20 +5488,9 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                  typeAlias = nullptr
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
               }
             ]
           }
@@ -5759,6 +5655,364 @@ ClassDef{
             block = nullptr
             args = [
               Literal{ value = nil }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U ifunset><<C <U <todo sym>>>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = <U cast>
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U String>>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U ifunset=><<C <U <todo sym>>>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = <U cast>
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U String>>
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U String>>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U ifunset_nilable><<C <U <todo sym>>>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = <U cast>
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                fun = <U nilable>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U String>>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = UnresolvedConstantLit{
+                            scope = EmptyTree
+                            cnst = <C <U T>>
+                          }
+                          fun = <U nilable>
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <C <U String>>
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U String>>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U ifunset_nilable=><<C <U <todo sym>>>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = <U cast>
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                fun = <U nilable>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U String>>
+                  }
+                ]
+              }
             ]
           }
         }
@@ -7516,6 +7770,32 @@ ClassDef{
               scope = EmptyTree
               cnst = <C <U T>>
             }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U AdvancedODM>>
+                  }
+                  fun = <U new>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U t_nilable>
+                block = nullptr
+                args = [
+                ]
+              }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
             fun = <U assert_type!>
             block = nullptr
             args = [
@@ -8781,22 +9061,108 @@ ClassDef{
               Literal{ value = nil }
             ]
           }
+          Send{
+            recv = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U EncryptedProp>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+              ]
+            }
+            fun = <U bar=>
+            block = nullptr
+            args = [
+              Literal{ value = "hello" }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U AdvancedODM>>
+                  }
+                  fun = <U new>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U ifunset>
+                block = nullptr
+                args = [
+                ]
+              }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U AdvancedODM>>
+                  }
+                  fun = <U new>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U ifunset_nilable>
+                block = nullptr
+                args = [
+                ]
+              }
+            ]
+          }
+          Send{
+            recv = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U AdvancedODM>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+              ]
+            }
+            fun = <U ifunset=>
+            block = nullptr
+            args = [
+              Literal{ value = nil }
+            ]
+          }
         ],
         expr = Send{
           recv = Send{
             recv = UnresolvedConstantLit{
               scope = EmptyTree
-              cnst = <C <U EncryptedProp>>
+              cnst = <C <U AdvancedODM>>
             }
             fun = <U new>
             block = nullptr
             args = [
             ]
           }
-          fun = <U bar=>
+          fun = <U ifunset_nilable=>
           block = nullptr
           args = [
-            Literal{ value = "hello" }
+            Literal{ value = nil }
           ]
         }
       }

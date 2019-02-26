@@ -63,11 +63,6 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T.nilable`. Expected: `0`, got: `1` http://go/e/7004
-     4 |  const :foo, T::Array[Foo::Baz]
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ???: `nilable` defined here
-
 ???: Method `keep_for_typechecking` does not exist on `T.class_of(RubyTyper)` http://go/e/7003
 
 test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
@@ -86,11 +81,6 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
-
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T.nilable`. Expected: `0`, got: `1` http://go/e/7004
-     4 |  const :foo, T::Array[Foo::Baz]
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ???: `nilable` defined here
 
 ???: Method `keep_for_ide` does not exist on `T.class_of(RubyTyper)` http://go/e/7003
 
@@ -136,4 +126,4 @@ test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorb
 test/cli/same-loc/same-loc.rb:4: Method `returns` does not exist on `Sorbet::Private::Builder` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 33
+Errors: 31

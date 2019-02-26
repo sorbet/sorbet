@@ -9,9 +9,7 @@ end
 
 def test
   di = SomeDataInterface.new
-  T.assert_type!(di.foo, T.nilable(String))
-  T.assert_type!(di.foo, String) # error: does not have asserted type
+  T.reveal_type(di.foo) # error: Revealed type: `String`
 
-  T.assert_type!(di.foo_, T.nilable(Other))
-  T.assert_type!(di.foo_, Other) # error: does not have asserted type
+  T.reveal_type(di.foo_) # error: Revealed type: `T.nilable(Other)`
 end
