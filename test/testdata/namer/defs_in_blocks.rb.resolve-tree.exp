@@ -1,7 +1,7 @@
 class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>
 
-  def self.<U <static-init>><<N <U <static-init>> $86>>(<blk>)
+  def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
     self(<S <C <U <root>>> $1>).<U foobar>() do ||
       begin
         <emptyTree>

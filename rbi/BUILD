@@ -1,8 +1,19 @@
 filegroup(
     name = "rbi",
-    srcs = glob([
-        "**/*.rbi",
-    ]) + [":generate_procs_rbi"],
+    srcs = glob(
+        ["**/*.rbi"],
+        exclude = ["test_bootstrap.rbi"],
+    ) + [":generate_procs_rbi"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "test_bootstrap",
+    srcs =
+        [
+            "test_bootstrap.rbi",
+            ":generate_procs_rbi",
+        ],
     visibility = ["//visibility:public"],
 )
 

@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $86>>(<blk>)
+    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
           ::RubyTyper.<U keep_for_ide>(::Parent)

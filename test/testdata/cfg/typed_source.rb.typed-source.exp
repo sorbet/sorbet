@@ -59,23 +59,23 @@ class Examples
       else
             # <U a>: Integer(1)
         b = 2
-            # <U b>: Integer(2)
-            #
             # <U a>: Integer(1)
+            #
+            # <U b>: Integer(2)
       end
 
-      # <U b>: Integer(2)
-      #
       # <U a>: Integer(1)
+      #
+      # <U b>: Integer(2)
       a + b
       # dead=1
       # <U <returnMethodTemp>>$2: Integer
       #
       # <U <finalReturn>>: T.noreturn
       #
-      # <U b>: Integer(2)
-      #
       # <U a>: Integer(1)
+      #
+      # <U b>: Integer(2)
     end
 
 

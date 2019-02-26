@@ -3,6 +3,7 @@
 
 #include "absl/debugging/symbolize.h"
 #include "absl/strings/str_cat.h"
+#include "common/Timer.h"
 #include "common/statsd/statsd.h"
 #include "core/Error.h"
 #include "core/Files.h"
@@ -14,8 +15,7 @@
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
-#include "payload/binary/binary.h"
-#include "payload/text/text.h"
+#include "payload/payload.h"
 #include "resolver/resolver.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -41,54 +41,6 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
 }
 
 shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr_color_sink();
-
-constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
-
-void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd::logger> &logger,
-                              const options::Options &options, unique_ptr<KeyValueStore> &kvstore) {
-    if (kvstore) {
-        auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
-        if (maybeGsBytes) {
-            Timer timeit(logger, "read_global_state.kvstore");
-            core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
-            for (unsigned int i = 1; i < gs->filesUsed(); i++) {
-                core::FileRef fref(i);
-                if (fref.dataAllowingTombstone(*gs).sourceType == core::File::Type::Normal) {
-                    gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
-                }
-            }
-            return;
-        }
-    }
-    if (options.noStdlib) {
-        gs->initEmpty();
-        return;
-    }
-
-    const u1 *const nameTablePayload = getNameTablePayload;
-    if (nameTablePayload == nullptr) {
-        gs->initEmpty();
-        Timer timeit(logger, "read_global_state.source");
-
-        vector<core::FileRef> payloadFiles;
-        {
-            core::UnfreezeFileTable fileTableAccess(*gs);
-            for (auto &p : rbi::all()) {
-                auto file = gs->enterFile(p.first, p.second);
-                file.data(*gs).sourceType = core::File::PayloadGeneration;
-                payloadFiles.emplace_back(move(file));
-            }
-        }
-        options::Options emptyOpts;
-        WorkerPool workers(emptyOpts.threads, logger);
-        vector<string> empty;
-        auto indexed = pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, logger);
-        pipeline::resolve(*gs, move(indexed), emptyOpts, logger); // result is thrown away
-    } else {
-        Timer timeit(logger, "read_global_state.binary");
-        core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
-    }
-}
 
 /*
  * Workaround https://bugzilla.mindrot.org/show_bug.cgi?id=2863 ; We are
@@ -221,7 +173,7 @@ int realmain(int argc, char *argv[]) {
     if (!opts.cacheDir.empty()) {
         kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir);
     }
-    createInitialGlobalState(gs, logger, opts, kvstore);
+    payload::createInitialGlobalState(gs, logger, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
@@ -283,11 +235,7 @@ int realmain(int argc, char *argv[]) {
             indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, logger);
         }
 
-        if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
-            Timer timeit(logger, "write_global_state.kvstore");
-            kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
-            KeyValueStore::commit(move(kvstore));
-        }
+        payload::retainGlobalState(gs, logger, opts, kvstore);
 
         if (opts.print.Autogen || opts.print.AutogenMsgPack) {
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);

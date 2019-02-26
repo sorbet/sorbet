@@ -3,7 +3,7 @@
 #include <signal.h>
 
 #include "main/lsp/json_types.h"
-#include "main/realmain.h"
+#include "payload/payload.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
 namespace sorbet::test {
@@ -21,7 +21,7 @@ void LSPTest::SetUp() {
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     unique_ptr<KeyValueStore> kvstore;
     realmain::options::Options opts;
-    realmain::createInitialGlobalState(gs, logger, opts, kvstore);
+    payload::createInitialGlobalState(gs, logger, opts, kvstore);
     // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
     gs->errorQueue->ignoreFlushes = true;
 

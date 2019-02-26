@@ -34,8 +34,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
-        "//payload/binary:some",
-        "//payload/text:empty",
+        "//payload",
     ],
 )
 
@@ -51,8 +50,39 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
-        "//payload/binary:empty",
-        "//payload/text:some",
+        "//payload:text",
+    ],
+)
+
+cc_binary(
+    name = "sorbet-orig-test-bootstrap",
+    srcs = [
+        "main.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "realmain",
+        "//payload:test_bootstrap_text",
+    ],
+)
+
+cc_binary(
+    name = "sorbet-test-bootstrap",
+    srcs = [
+        "main.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "realmain",
+        "//payload:test_bootstrap",
     ],
 )
 
@@ -69,16 +99,13 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
-        "//common/kvstore",
         "//common/statsd",
         "//core",
         "//core/proto",
-        "//core/serialize",
         "//main/autogen",
         "//main/lsp",
         "//main/options",
         "//main/pipeline",
-        "//payload/binary",
-        "//payload/text",
+        "//payload:interface",
     ],
 )

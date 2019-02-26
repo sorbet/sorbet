@@ -5,7 +5,7 @@ COMMAND_FILE=$(mktemp)
 
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-raw typed-source autogen)
 
-bazel build //main:sorbet -c opt "$@"
+bazel build //main:sorbet-test-bootstrap -c opt "$@"
 
 # shellcheck disable=SC2207
 rb_src=(
@@ -30,7 +30,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 args=("--stop-after=namer --skip-dsl-passes")
             fi
             if [ -e "$candidate" ]; then
-                echo bazel-bin/main/sorbet --silence-dev-message  --suppress-non-critical --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+                echo bazel-bin/main/sorbet-test-bootstrap --silence-dev-message  --suppress-non-critical --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
             fi
         done
     fi

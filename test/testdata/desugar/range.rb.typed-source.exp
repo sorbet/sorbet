@@ -65,7 +65,7 @@ def foo
     #
     # <U <finalReturn>>: T.noreturn
     #
-    # <U c>: AppliedType {
+    # <U a>: AppliedType {
     #   klass = <C <U Range>>
     #   targs = [
     #     <C <U Elem>> = Integer
@@ -79,7 +79,7 @@ def foo
     #   ]
     # }
     #
-    # <U a>: AppliedType {
+    # <U c>: AppliedType {
     #   klass = <C <U Range>>
     #   targs = [
     #     <C <U Elem>> = Integer

@@ -6,9 +6,8 @@ cc_binary(
     tags = ["manual"],
     visibility = ["//tools:__pkg__"],
     deps = [
-        "//main:realmain",
-        "//payload/binary:some",
-        "//payload/text:empty",
+        "//main/pipeline",
+        "//payload:test_bootstrap",
     ],
 )
 

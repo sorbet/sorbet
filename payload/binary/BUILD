@@ -33,6 +33,21 @@ cc_library(
     srcs = [
         "binary.cc",
     ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "binary",
+    ],
+)
+
+cc_library(
+    name = "test_bootstrap",
+    srcs = [
+        "test_bootstrap.cc",
+    ],
     hdrs = [
         "binary.h",
     ],
@@ -42,7 +57,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//common",
+        "binary",
     ],
 )
 
@@ -74,6 +89,20 @@ genrule(
 )
 
 genrule(
+    name = "generate-state-payload-test-bootstrap-cc",
+    srcs = ["state-payload-raw-test-bootstrap"],
+    outs = [
+        "test_bootstrap.cc",
+    ],
+    cmd = "$(location :gen_state_payload) $(location state-payload-raw-test-bootstrap) $(location test_bootstrap.cc) && \
+             $(location //tools:clang-format) -i $(location test_bootstrap.cc)",
+    tools = [
+        ":gen_state_payload",
+        "//tools:clang-format",
+    ],
+)
+
+genrule(
     name = "generate-state-payload-raw",
     srcs = [],
     outs = [
@@ -81,4 +110,14 @@ genrule(
     ],
     cmd = "$(location //main:sorbet-orig) --silence-dev-message  --store-state $(location state-payload-raw) --no-error-count",
     tools = ["//main:sorbet-orig"],
+)
+
+genrule(
+    name = "generate-state-payload-raw-test-bootstrap",
+    srcs = [],
+    outs = [
+        "state-payload-raw-test-bootstrap",
+    ],
+    cmd = "$(location //main:sorbet-orig-test-bootstrap) --silence-dev-message  --store-state $(location state-payload-raw-test-bootstrap) --no-error-count",
+    tools = ["//main:sorbet-orig-test-bootstrap"],
 )

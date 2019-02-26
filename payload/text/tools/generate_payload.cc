@@ -18,17 +18,6 @@ string sourceName2funcName(string sourceName) {
     return sourceName;
 }
 
-void emit_header(vector<string> sourceFiles, ostream &out) {
-    out << "#include<string_view>" << '\n' << "#include<vector>" << '\n';
-    out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
-    for (auto &file : sourceFiles) {
-        out << "  std::string_view " + sourceName2funcName(file) << "();" << '\n';
-    }
-    out << "  std::vector<std::pair<std::string_view, std::string_view> > all();" << '\n';
-
-    out << "}};" << '\n';
-}
-
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "#include<string_view>" << '\n' << "#include<vector>\nusing namespace std;\n";
     out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
@@ -58,24 +47,17 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
 int main(int argc, char **argv) {
     // emit header file
     {
-        ofstream header(argv[1], ios::trunc);
-        if (!header.good()) {
-            cerr << "unable to open " << argv[1] << '\n';
-            return 1;
-        }
-
-        ofstream classfile(argv[2], ios::trunc);
+        ofstream classfile(argv[1], ios::trunc);
         if (!classfile.good()) {
             cerr << "unable to open " << argv[2] << '\n';
             return 1;
         }
 
         vector<string> sources;
-        for (int i = 3; i < argc; i++) {
+        for (int i = 2; i < argc; i++) {
             sources.emplace_back(argv[i]);
         }
 
-        emit_header(sources, header);
         emit_classfile(sources, classfile);
     }
 

@@ -25,7 +25,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_9" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_6" [
-        label = "block[id=6](<U <gotoDeadTemp>>$8: NilClass, <U err>: NilClass, <U final_attempt>: T.untyped, <U foo>: T.untyped)\l<U <gotoDeadTemp>>$8: NilClass\l"
+        label = "block[id=6](<U <gotoDeadTemp>>$8: NilClass, <U final_attempt>: T.untyped, <U foo>: T.untyped, <U err>: NilClass)\l<U <gotoDeadTemp>>$8: NilClass\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_6" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
@@ -53,21 +53,21 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_9" -> "bb::ModuleMethods#instrumented_request_10" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_10" [
-        label = "block[id=10](<U err>: T.nilable(StandardError), <U final_attempt>: T.untyped, <U foo>: T.untyped)\l<U is_successful>: T.any(TrueClass, FalseClass) = <U err>: T.nilable(StandardError).<U nil?>()\l<U is_successful>: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=10](<U final_attempt>: T.untyped, <U foo>: T.untyped, <U err>: T.nilable(StandardError))\l<U is_successful>: T.any(TrueClass, FalseClass) = <U err>: T.nilable(StandardError).<U nil?>()\l<U is_successful>: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_10" -> "bb::ModuleMethods#instrumented_request_11" [style="bold"];
     "bb::ModuleMethods#instrumented_request_10" -> "bb::ModuleMethods#instrumented_request_12" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_11" [
-        label = "block[id=11](<U err>: NilClass, <U foo>: T.untyped, <U is_successful>: TrueClass)\l<D <U ||> $2>: TrueClass = <U is_successful>\l<D <U ||> $2>: TrueClass\l"
+        label = "block[id=11](<U foo>: T.untyped, <U err>: NilClass, <U is_successful>: TrueClass)\l<D <U ||> $2>: TrueClass = <U is_successful>\l<D <U ||> $2>: TrueClass\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_11" -> "bb::ModuleMethods#instrumented_request_14" [style="bold"];
     "bb::ModuleMethods#instrumented_request_11" -> "bb::ModuleMethods#instrumented_request_15" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_12" [
-        label = "block[id=12](<U err>: StandardError, <U final_attempt>: T.untyped, <U foo>: T.untyped, <U is_successful>: FalseClass)\l<D <U ||> $2>: T.untyped = <U final_attempt>\l<D <U ||> $2>: T.untyped\l"
+        label = "block[id=12](<U final_attempt>: T.untyped, <U foo>: T.untyped, <U err>: StandardError, <U is_successful>: FalseClass)\l<D <U ||> $2>: T.untyped = <U final_attempt>\l<D <U ||> $2>: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_12" -> "bb::ModuleMethods#instrumented_request_14" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_14" -> "bb::ModuleMethods#instrumented_request_25" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_15" [
-        label = "block[id=15](<U err>: StandardError, <U foo>: T.untyped, <U is_successful>: FalseClass)\l<U err>: StandardError\l"
+        label = "block[id=15](<U foo>: T.untyped, <U err>: StandardError, <U is_successful>: FalseClass)\l<U err>: StandardError\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_15" -> "bb::ModuleMethods#instrumented_request_16" [style="bold"];

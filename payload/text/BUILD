@@ -41,6 +41,19 @@ cc_library(
 )
 
 cc_library(
+    name = "test_bootstrap",
+    srcs = [
+        "test_bootstrap.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = ["text"],
+)
+
+cc_library(
     name = "empty",
     srcs = [
         "empty.cc",
@@ -58,10 +71,9 @@ genrule(
     srcs = ["//rbi"],
     outs = [
         "text.cc",
-        "text.h",
     ],
-    cmd = "$(location :generate_payload) $(location text.h) $(location text.cc) $(locations //rbi) && \
-    $(location //tools:clang-format) -i $(location text.h) $(location text.cc)",
+    cmd = "$(location :generate_payload) $(location text.cc) $(locations //rbi) && \
+    $(location //tools:clang-format) -i $(location text.cc)",
     tools = [
         ":generate_payload",
         "//tools:clang-format",
@@ -69,13 +81,26 @@ genrule(
 )
 
 genrule(
-    name = "generate__text_empty_payload_cc",
+    name = "generate_test_bootstrap_payload_cc",
+    srcs = ["//rbi:test_bootstrap"],
+    outs = [
+        "test_bootstrap.cc",
+    ],
+    cmd = "$(location :generate_payload) $(location test_bootstrap.cc) $(locations //rbi:test_bootstrap) && \
+    $(location //tools:clang-format) -i $(location test_bootstrap.cc)",
+    tools = [
+        ":generate_payload",
+        "//tools:clang-format",
+    ],
+)
+
+genrule(
+    name = "generate_text_empty_payload_cc",
     outs = [
         "empty.cc",
-        "empty.h",
     ],
-    cmd = "$(location :generate_payload) $(location empty.h) $(location empty.cc)&& \
-       $(location //tools:clang-format) -i $(location empty.h) $(location empty.cc)",
+    cmd = "$(location :generate_payload) $(location empty.cc)&& \
+       $(location //tools:clang-format) -i $(location empty.cc)",
     tools = [
         ":generate_payload",
         "//tools:clang-format",
