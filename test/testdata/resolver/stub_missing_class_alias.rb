@@ -11,7 +11,12 @@ class O::B
   extend T::Sig
 
 
-  sig {params(arg: Document::J, # error: Unable to resolve constant `J`
-   arg1: Doc1::J).void}  # error: Unable to resolve constant `J`
-  def self.foo(arg, arg1); end
+  sig do
+    params(
+      arg0: Document::J, # error: Unable to resolve constant `J`
+      arg1: Doc1::J      # error: Unable to resolve constant `J`
+    )
+    .void
+  end
+  def self.foo(arg0, arg1); end
 end
