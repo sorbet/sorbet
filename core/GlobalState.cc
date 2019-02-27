@@ -516,7 +516,8 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 nu
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
         ENFORCE(res.data(*this)->arguments().size() == 0);
         res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
-        for (auto &arg : original.data(*this)->arguments()) {
+        auto originalArguments = original.data(*this)->arguments();
+        for (auto &arg : originalArguments) {
             Loc loc = arg.data(*this)->loc();
             NameRef nm = arg.data(*this)->name;
             SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
