@@ -402,7 +402,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             core::ErrorColors::enableColors();
         }
 
-        if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Stripe) {
+        if (opts.suggestTyped && opts.forceMinStrict < core::StrictLevel::Typed) {
             logger->error("--suggest-typed requires --typed=true or higher.");
             throw EarlyReturnWithCode(1);
         }

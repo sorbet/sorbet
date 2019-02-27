@@ -301,7 +301,7 @@ int realmain(int argc, char *argv[]) {
         if (opts.suggestTyped) {
             for (auto &tree : indexed) {
                 auto f = tree.file;
-                if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
+                if (!f.data(*gs).hadErrors() && f.data(*gs).sigil < core::StrictLevel::Typed) {
                     counterInc("types.input.files.suggest_typed");
                     logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
                 }
@@ -371,7 +371,7 @@ int realmain(int argc, char *argv[]) {
         if (opts.suggestTyped) {
             for (auto &tree : indexed) {
                 auto f = tree.file;
-                if (f.data(*gs).sigil == core::StrictLevel::Stripe) {
+                if (f.data(*gs).sigil < core::StrictLevel::Typed) {
                     auto *metric = metrics.add_metrics();
                     metric->set_name(absl::StrCat(opts.metricsPrefix, ".suggest.", f.data(*gs).path()));
                     metric->set_value(!f.data(*gs).hadErrors());

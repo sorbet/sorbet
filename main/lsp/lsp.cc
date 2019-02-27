@@ -43,7 +43,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> 
         return TypecheckRun{{}, {}, {}, move(gs)};
     }
 
-    if (errorIfFileIsUntyped && fref.data(*gs).sigil == core::StrictLevel::Stripe) {
+    if (errorIfFileIsUntyped && fref.data(*gs).sigil < core::StrictLevel::Typed) {
         sendError(id, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
         sendShowMessageNotification(
             MessageType::Error,
