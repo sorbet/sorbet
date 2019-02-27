@@ -2,7 +2,7 @@ suggest-sig-literal.rb:2: This function does not have a `sig` http://go/e/7017
      2 |def index_for_live(fields)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-literal.rb:2: Replaced with `sig {generated.params(fields: T::Enumerable[T::Array[T.any(Symbol, Integer)]]).returns(T::Array[T::Array[T.any(Symbol, Integer)]])}
+    suggest-sig-literal.rb:2: Inserted `sig {generated.params(fields: T::Enumerable[T::Array[T.any(Symbol, Integer)]]).returns(T::Array[T::Array[T.any(Symbol, Integer)]])}
 `
      2 |def index_for_live(fields)
         ^
