@@ -4,6 +4,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include <atomic>
+#include <optional>
 #include <string>
 
 namespace sorbet::core {
