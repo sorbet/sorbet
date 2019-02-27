@@ -236,15 +236,14 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
     auto fileName = file.dataAllowingUnsafe(*gs).path();
     logger->trace("Reading: {}", fileName);
     string src;
+    bool fileFound = true;
     try {
         src = FileOps::read(fileName);
     } catch (FileNotFoundException e) {
-        if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
-            e.setHeader("File Not Found: `{}`", fileName);
-        }
         // continue with an empty source, because the
         // assertion below requires every input file to map
         // to one output tree
+        fileFound = false;
     }
     prodCounterAdd("types.input.bytes", src.size());
     prodCounterInc("types.input.files");
@@ -260,6 +259,11 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
     }
 
     auto &fileData = file.data(*gs);
+    if (!fileFound) {
+        if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            e.setHeader("File Not Found");
+        }
+    }
 
     switch (fileData.strict) {
         case core::StrictLevel::Ignore:
@@ -295,7 +299,7 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
         if (fnd->second == fileData.sigil) {
             core::ErrorRegion errs(*gs, file);
             if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
-                e.setHeader("Useless override of strictness level for {}", fileData.path());
+                e.setHeader("Useless override of strictness level");
             }
         }
         fileData.strict = fnd->second;

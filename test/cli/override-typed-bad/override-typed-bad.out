@@ -1,4 +1,4 @@
-???: Useless override of strictness level for test/cli/override-typed-bad/override-typed-bad.rb http://go/e/2001
+test/cli/override-typed-bad/override-typed-bad.rb: Useless override of strictness level http://go/e/2001
 
 test/cli/override-typed-bad/override-typed-bad.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      2 |1 + "s"

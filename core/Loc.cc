@@ -159,19 +159,22 @@ string Loc::showRaw(const GlobalState &gs) const {
 
 string Loc::filePosToString(const GlobalState &gs) const {
     stringstream buf;
-    if (!exists()) {
+    if (!file().exists()) {
         buf << "???";
     } else {
-        auto pos = position(gs);
         auto path = file().data(gs).path();
-        if (path.find("https://") == 0) {
-            // For github permalinks
-            buf << path << "#L";
-        } else {
-            buf << path << ":";
+        buf << path;
+        if (exists()) {
+            auto pos = position(gs);
+            if (path.find("https://") == 0) {
+                // For github permalinks
+                buf << "#L";
+            } else {
+                buf << ":";
+            }
+            buf << pos.first.line;
+            // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
         }
-        buf << pos.first.line;
-        // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
     }
     return buf.str();
 }
