@@ -12,7 +12,7 @@ cp "$cwd"/test/cli/suggest-typed-true/*.rb "$tmp/"
 "$cwd/main/sorbet" --silence-dev-message --suggest-typed does-not-exist.rb 2>&1
 separator
 
-"$cwd/main/sorbet" --silence-dev-message --suggest-typed --typed=ruby does-not-exist.rb 2>&1
+"$cwd/main/sorbet" --silence-dev-message --suggest-typed --typed=false does-not-exist.rb 2>&1
 separator
 
 "$cwd/main/sorbet" --silence-dev-message --suggest-typed --typed=true does-not-exist.rb 2>&1

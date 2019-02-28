@@ -27,7 +27,8 @@ vector<int> findLineBreaks(string_view s) {
 
 StrictLevel fileSigil(string_view source) {
     /*
-     * StrictLevel::Stripe: <none> | # typed: false
+     * StrictLevel::None: <none>
+     * StrictLevel::Stripe: # typed: false
      * StrictLevel::Typed: # typed: true
      * StrictLevel::Strict: # typed: strict
      * StrictLevel::String: # typed: strong
@@ -37,7 +38,7 @@ StrictLevel fileSigil(string_view source) {
     while (true) {
         start = source.find("typed:", start);
         if (start == string_view::npos) {
-            return StrictLevel::Stripe;
+            return StrictLevel::None;
         }
         start += 6;
         while (start < source.size() && source[start] == ' ') {
@@ -45,7 +46,7 @@ StrictLevel fileSigil(string_view source) {
         }
 
         if (start >= source.size()) {
-            return StrictLevel::Stripe;
+            return StrictLevel::None;
         }
         auto end = start + 1;
         while (end < source.size() && source[end] != ' ' && source[end] != '\n') {
