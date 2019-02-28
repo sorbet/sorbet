@@ -1,8 +1,10 @@
 ClassDef{
+  kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U NotAODM>>
@@ -227,6 +229,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U SomeODM>>
@@ -551,6 +554,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U ForeignClass>>
@@ -566,6 +570,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U AdvancedODM>>
@@ -1710,6 +1715,7 @@ ClassDef{
         }
 
         ClassDef{
+          kind = class
           name = UnresolvedConstantLit{
             scope = EmptyTree
             cnst = <C <U Mutator>>
@@ -2292,6 +2298,7 @@ ClassDef{
         }
 
         ClassDef{
+          kind = class
           name = UnresolvedConstantLit{
             scope = EmptyTree
             cnst = <C <U Mutator>>
@@ -2730,6 +2737,7 @@ ClassDef{
         }
 
         ClassDef{
+          kind = class
           name = UnresolvedConstantLit{
             scope = EmptyTree
             cnst = <C <U Mutator>>
@@ -3213,6 +3221,7 @@ ClassDef{
         }
 
         ClassDef{
+          kind = class
           name = UnresolvedConstantLit{
             scope = EmptyTree
             cnst = <C <U Mutator>>
@@ -4425,6 +4434,7 @@ ClassDef{
         }
 
         ClassDef{
+          kind = class
           name = UnresolvedConstantLit{
             scope = EmptyTree
             cnst = <C <U Mutator>>
@@ -6020,6 +6030,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U PropHelpers>>
@@ -6351,6 +6362,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U PropHelpers2>>
@@ -6597,6 +6609,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U ShardingProp>>
@@ -6684,6 +6697,7 @@ ClassDef{
     }
 
     ClassDef{
+      kind = class
       name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U EncryptedProp>>

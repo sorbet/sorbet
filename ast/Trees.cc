@@ -324,6 +324,8 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
+    buf << "kind = " << (kind == ClassDefKind::Module ? "module" : "class") << '\n';
+    printTabs(buf, tabs + 1);
     buf << "name = " << name->showRaw(gs, tabs + 1) << "<"
         << this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs) << ">" << '\n';
     printTabs(buf, tabs + 1);

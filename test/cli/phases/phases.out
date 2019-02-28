@@ -16,6 +16,7 @@ end
 --- ast end ---
 --- ast-raw start ---
 ClassDef{
+  kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
@@ -30,6 +31,7 @@ end
 --- dsl-tree end ---
 --- dsl-tree-raw start ---
 ClassDef{
+  kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
@@ -56,6 +58,7 @@ end
 --- name-tree end ---
 --- name-tree-raw start ---
 ClassDef{
+  kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
@@ -72,6 +75,7 @@ end
 --- resolve-tree end ---
 --- resolve-tree-raw start ---
 ClassDef{
+  kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [

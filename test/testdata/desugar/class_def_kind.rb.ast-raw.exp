@@ -1,0 +1,34 @@
+ClassDef{
+  kind = class
+  name = EmptyTree<<C <U <root>>>>
+  ancestors = []
+  rhs = [
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        scope = EmptyTree
+        cnst = <C <U MyClass>>
+      }<<C <U <todo sym>>>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
+        }]
+      rhs = [
+        EmptyTree
+      ]
+    }
+
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        scope = EmptyTree
+        cnst = <C <U MyModule>>
+      }<<C <U <todo sym>>>>
+      ancestors = []
+      rhs = [
+        EmptyTree
+      ]
+    }
+  ]
+}

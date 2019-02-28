@@ -20,6 +20,7 @@ InsSeq{
       ]
     }
     ClassDef{
+      kind = class
       name = ConstantLit{
         orig = UnresolvedConstantLit{
           scope = EmptyTree

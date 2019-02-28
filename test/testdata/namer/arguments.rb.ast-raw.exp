@@ -1,4 +1,5 @@
 ClassDef{
+  kind = class
   name = UnresolvedConstantLit{
     scope = EmptyTree
     cnst = <C <U A>>

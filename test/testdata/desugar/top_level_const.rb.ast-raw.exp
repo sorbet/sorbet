@@ -1,4 +1,5 @@
 ClassDef{
+  kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
