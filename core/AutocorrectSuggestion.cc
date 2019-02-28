@@ -7,6 +7,9 @@ namespace sorbet::core {
 
 bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     for (auto &seenLoc : seen) {
+        if (seenLoc.file() != loc.file()) {
+            continue;
+        }
         // Check exactly equal for zero-width locs
         if (seenLoc == loc) {
             return true;

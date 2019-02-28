@@ -1,0 +1,8 @@
+# typed: true
+
+foo = T.let(nil, T.nilable(String))
+T.must(foo)[0]
+# typed: true
+
+foo = T.let(nil, T.nilable(String))
+T.must(foo)[0]
