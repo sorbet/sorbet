@@ -64,7 +64,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto file = gs->enterFile(string("fuzz.rb"), inputData);
         inputFiles.emplace_back(file);
-        file.data(*gs).strict = core::StrictLevel::Typed;
+        file.data(*gs).strictLevel = core::StrictLevel::Typed;
     }
 
     indexed = realmain::pipeline::index(gs, {}, inputFiles, opts, workers, kvstore, logger);

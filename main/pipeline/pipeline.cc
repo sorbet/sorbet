@@ -43,7 +43,7 @@ public:
     CFG_Collector_and_Typer(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file().data(ctx).strict < core::StrictLevel::Typed || m->symbol.data(ctx)->isOverloaded()) {
+        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::Typed || m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto &print = opts.print;
@@ -103,7 +103,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         if (!dslsInlined.tree) {
             // tree isn't cached. Need to start from parser
 
-            if (file.data(lgs).strict == core::StrictLevel::Ignore) {
+            if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return {make_unique<ast::EmptyTree>(), file};
             }
 
@@ -265,7 +265,7 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
         }
     }
 
-    switch (fileData.strict) {
+    switch (fileData.strictLevel) {
         case core::StrictLevel::Ignore:
             prodCounterInc("types.input.files.sigil.ignore");
             break;
@@ -279,7 +279,7 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
             prodCounterInc("types.input.files.sigil.typed");
             break;
         case core::StrictLevel::Strict:
-            prodCounterInc("types.input.files.sigil.strict");
+            prodCounterInc("types.input.files.sigil.strictLevel");
             break;
         case core::StrictLevel::Strong:
             prodCounterInc("types.input.files.sigil.strong");
@@ -296,23 +296,23 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
     }
     auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
     if (fnd != opts.strictnessOverrides.end()) {
-        if (fnd->second == fileData.sigil) {
+        if (fnd->second == fileData.originalSigil) {
             core::ErrorRegion errs(*gs, file);
             if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
                 e.setHeader("Useless override of strictness level");
             }
         }
-        fileData.strict = fnd->second;
+        fileData.strictLevel = fnd->second;
     } else {
-        fileData.strict = fileData.sigil;
+        fileData.strictLevel = fileData.originalSigil;
     }
 
-    fileData.strict = max(min(fileData.strict, maxStrict), minStrict);
+    fileData.strictLevel = max(min(fileData.strictLevel, maxStrict), minStrict);
 
     if (opts.print.Autogen || opts.print.AutogenMsgPack) {
         // Autogen stops before infer but needs to see
         // all definitions
-        fileData.strict = core::StrictLevel::Stripe;
+        fileData.strictLevel = core::StrictLevel::Stripe;
     }
 
     if (!opts.storeState.empty()) {

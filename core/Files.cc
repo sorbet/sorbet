@@ -78,7 +78,7 @@ StrictLevel fileSigil(string_view source) {
 
 File::File(string &&path_, string &&source_, Type sourceType)
     : sourceType(sourceType), path_(path_), source_(source_), globalStateHash(GlobalState::HASH_STATE_NOT_COMPUTED),
-      sigil(fileSigil(this->source_)), strict(sigil) {}
+      originalSigil(fileSigil(this->source_)), strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -87,7 +87,7 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     ret->line_breaks_ = line_breaks_;
     ret->hadErrors_ = hadErrors_;
     ret->globalStateHash = globalStateHash.load();
-    ret->strict = strict;
+    ret->strictLevel = strictLevel;
     return ret;
 }
 

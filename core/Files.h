@@ -98,8 +98,8 @@ private:
     mutable std::atomic<unsigned int> globalStateHash = 0;
 
 public:
-    const StrictLevel sigil;
-    StrictLevel strict;
+    const StrictLevel originalSigil;
+    StrictLevel strictLevel;
 };
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {

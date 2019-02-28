@@ -512,10 +512,10 @@ public:
         core::StrictLevel right = core::StrictLevel::Strong;
 
         if (lhs.file().exists()) {
-            left = lhs.file().data(ctx).strict;
+            left = lhs.file().data(ctx).strictLevel;
         }
         if (rhs.file().exists()) {
-            right = rhs.file().data(ctx).strict;
+            right = rhs.file().data(ctx).strictLevel;
         }
 
         if (left != right) {

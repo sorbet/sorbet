@@ -41,7 +41,7 @@ ast::ParsedFile getTree(core::GlobalState &gs, string str) {
     sorbet::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto tree = parser::Parser::run(gs, "<test>", str);
     auto file = tree->loc.file();
-    file.data(gs).strict = core::StrictLevel::Strict;
+    file.data(gs).strictLevel = core::StrictLevel::Strict;
     sorbet::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ast::desugar::node2Tree(ctx, move(tree));
     ast = dsl::DSL::run(ctx, move(ast));

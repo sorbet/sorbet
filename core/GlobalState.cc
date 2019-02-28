@@ -1130,7 +1130,7 @@ void GlobalState::onlyShowErrorClass(int code) {
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
-        level = loc.file().data(*this).strict;
+        level = loc.file().data(*this).strictLevel;
     }
     if (what.code == errors::Internal::InternalError.code) {
         return true;
