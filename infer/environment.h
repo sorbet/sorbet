@@ -1,8 +1,8 @@
 #ifndef SORBET_ENVIRONMENT_H
 #define SORBET_ENVIRONMENT_H
 
-#include "../common/common.h"
 #include "cfg/CFG.h"
+#include "common/common.h"
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/Names.h"

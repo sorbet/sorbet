@@ -7,7 +7,6 @@
 #include "core/errors/infer.h"
 #include <algorithm> // find_if, sort
 
-#include "../Types.h"
 #include "absl/strings/str_cat.h"
 
 template class std::vector<sorbet::core::SymbolRef>;

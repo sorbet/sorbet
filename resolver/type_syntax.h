@@ -1,8 +1,8 @@
 #include <memory>
 #include <vector>
 
-#include "../core/Symbols.h"
 #include "ast/ast.h"
+#include "core/Symbols.h"
 
 namespace sorbet::resolver {
 
