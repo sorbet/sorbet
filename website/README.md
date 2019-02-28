@@ -102,3 +102,16 @@ future for release notes, communicating roadmaps, etc.
 
 For more information about blog posts, click
 [here](https://docusaurus.io/docs/en/adding-blog).
+
+## A note about logos
+
+The canonical Sorbet logos are located in the `../logo/` folder (i.e., at the
+top-level of the repo). Logos in the website's `static/img/` folder are derived
+(usually: copied) from there.
+
+If you make changes to the logo and want to re-generate the `.ico` file, install
+ImageMagick and then run:
+
+```
+convert ../logo/sorbet-logo.svg -define icon:auto-resize static/img/favicon.ico
+```

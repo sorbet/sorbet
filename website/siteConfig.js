@@ -32,9 +32,9 @@ const siteConfig = {
   users,
 
   // path to images for header/footer
-  headerIcon: 'img/favicon-32x32.png',
-  footerIcon: 'img/logo-192x192.png',
-  favicon: 'img/favicon-16x16.png',
+  headerIcon: 'img/sorbet-logo-white-sparkles.svg',
+  footerIcon: 'img/sorbet-logo-purple-sparkles.svg',
+  favicon: 'img/favicon.ico',
 
   /* Colors for website */
   colors: {
@@ -74,8 +74,8 @@ const siteConfig = {
   cleanUrl: true,
 
   // Open Graph and Twitter card images.
-  ogImage: 'img/logo-512x512.png',
-  twitterImage: 'img/logo-512x512.png',
+  ogImage: 'img/sorbet-logo-purple-sparkles.svg',
+  twitterImage: 'img/sorbet-logo-purple-sparkles.svg',
 
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
