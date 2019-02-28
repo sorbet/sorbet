@@ -1,3 +1,5 @@
+#ifndef SORBET_RESOLVER_TYPE_SYNTAX_H
+#define SORBET_RESOLVER_TYPE_SYNTAX_H
 #include <memory>
 #include <vector>
 
@@ -53,3 +55,5 @@ public:
 };
 
 } // namespace sorbet::resolver
+
+#endif // SORBET_RESOLVER_TYPE_SYNTAX_H
