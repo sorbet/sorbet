@@ -81,20 +81,20 @@ constexpr unsigned int WINDOW_SIZE = 10; // how many lines of source to print
 constexpr unsigned int WINDOW_HALF_SIZE = WINDOW_SIZE / 2;
 static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
 
-void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int posWidth) {
+void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth) {
     printTabs(buf, tabs);
     buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
-    auto endPos = filed.line_breaks()[line + 1];
-    if (filed.source()[endPos] == '\n') {
+    auto endPos = file.line_breaks()[line + 1];
+    if (file.source()[endPos] == '\n') {
         endPos -= 1;
     }
-    buf.write(filed.source().data() + filed.line_breaks()[line] + 1, endPos - filed.line_breaks()[line]);
+    buf.write(file.source().data() + file.line_breaks()[line] + 1, endPos - file.line_breaks()[line]);
 }
 } // namespace
 
 string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     stringstream buf;
-    const File &filed = this->file().data(gs);
+    const File &file = this->file().data(gs);
     auto pos = this->position(gs);
     int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
 
@@ -106,7 +106,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
             buf << '\n';
         }
         first = false;
-        addLocLine(buf, lineIt, filed, tabs, posWidth);
+        addLocLine(buf, lineIt, file, tabs, posWidth);
         lineIt++;
     }
     if (lineIt != pos.second.line && lineIt < pos.second.line - WINDOW_HALF_SIZE) {
@@ -118,7 +118,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     }
     while (lineIt != pos.second.line) {
         buf << '\n';
-        addLocLine(buf, lineIt, filed, tabs, posWidth);
+        addLocLine(buf, lineIt, file, tabs, posWidth);
         lineIt++;
     }
 
