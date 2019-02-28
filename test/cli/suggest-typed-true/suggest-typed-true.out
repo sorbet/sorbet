@@ -1,0 +1,56 @@
+--suggest-typed requires --typed=true or higher.
+-------------------------
+--suggest-typed requires --typed=true or higher.
+-------------------------
+does-not-exist.rb: File Not Found http://go/e/1001
+Errors: 1
+-------------------------
+does-not-exist.rb: File Not Found http://go/e/1001
+Errors: 1
+-------------------------
+suggest-typed-true.rb:1: You could add `# typed: true` http://go/e/7022
+     1 |1
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-typed-true.rb:1: Insert `# typed: true
+`
+     1 |1
+        ^
+Errors: 1
+-------------------------
+suggest-typed-true.rb:1: You could add `# typed: true` http://go/e/7022
+     1 |1
+        ^
+  Autocorrect: Done
+    suggest-typed-true.rb:1: Inserted `# typed: true
+`
+     1 |1
+        ^
+Errors: 1
+# typed: true
+1
+-------------------------
+suggest-typed-with-error.rb:1: Method `foo` does not exist on `T.class_of(<root>)` http://go/e/7003
+     1 |foo
+        ^^^
+
+suggest-typed-true.rb:1: You could add `# typed: true` http://go/e/7022
+     1 |1
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-typed-true.rb:1: Insert `# typed: true
+`
+     1 |1
+        ^
+Errors: 2
+-------------------------
+empty.rb:1: You could add `# typed: true` http://go/e/7022
+     1 |
+       ^
+  Autocorrect: Use `-a` to autocorrect
+    empty.rb:1: Insert `# typed: true
+`
+     1 |
+       ^
+Errors: 1
+-------------------------

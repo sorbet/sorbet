@@ -288,6 +288,20 @@ int realmain(int argc, char *argv[]) {
             indexed = pipeline::typecheck(gs, move(indexed), opts, workers, logger);
         }
 
+        if (opts.suggestTyped) {
+            for (auto &tree : indexed) {
+                auto f = tree.file;
+                if (!f.data(*gs).hadErrors() && f.data(*gs).originalSigil < core::StrictLevel::Typed) {
+                    counterInc("types.input.files.suggest_typed");
+                    auto loc = core::Loc(f, 0, 0);
+                    if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
+                        e.setHeader("You could add `# typed: true`");
+                        e.addAutocorrect(core::AutocorrectSuggestion(loc, "# typed: true\n"));
+                    }
+                }
+            }
+        }
+
         gs->errorQueue->flushErrors(true);
 
         if (!opts.noErrorCount) {
@@ -297,16 +311,6 @@ int realmain(int argc, char *argv[]) {
             gs->errorQueue->flushAutocorrects(*gs);
         }
         logger->trace("sorbet done");
-
-        if (opts.suggestTyped) {
-            for (auto &tree : indexed) {
-                auto f = tree.file;
-                if (!f.data(*gs).hadErrors() && f.data(*gs).strictLevel < core::StrictLevel::Typed) {
-                    counterInc("types.input.files.suggest_typed");
-                    logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
-                }
-            }
-        }
 
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
