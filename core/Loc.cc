@@ -30,21 +30,21 @@ Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
         // parser generate positions out of file \facepalm.
         off = file.source().size() - 1;
     }
-    auto it = absl::c_lower_bound(file.line_breaks(), off);
-    if (it == file.line_breaks().begin()) {
+    auto it = absl::c_lower_bound(file.lineBreaks(), off);
+    if (it == file.lineBreaks().begin()) {
         pos.line = 1;
         pos.column = off + 1;
         return pos;
     }
     --it;
-    pos.line = (it - file.line_breaks().begin()) + 1;
+    pos.line = (it - file.lineBreaks().begin()) + 1;
     pos.column = off - *it;
     return pos;
 }
 
 u4 Loc::pos2Offset(const File &file, Loc::Detail pos) {
     auto l = pos.line - 1;
-    auto lineOffset = file.line_breaks()[l];
+    auto lineOffset = file.lineBreaks()[l];
     return lineOffset + pos.column;
 }
 
@@ -84,15 +84,15 @@ static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
 void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth) {
     printTabs(buf, tabs);
     buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
-    auto endPos = file.line_breaks()[line + 1];
+    auto endPos = file.lineBreaks()[line + 1];
     if (endPos >= 0 && file.source()[endPos] == '\n') {
         endPos -= 1;
     }
-    auto numToWrite = endPos - file.line_breaks()[line];
+    auto numToWrite = endPos - file.lineBreaks()[line];
     if (numToWrite <= 0) {
         return;
     }
-    buf.write(file.source().data() + file.line_breaks()[line] + 1, numToWrite);
+    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite);
 }
 } // namespace
 

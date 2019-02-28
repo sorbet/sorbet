@@ -121,7 +121,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
     core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
     auto thisLinePadding = findStartOfLine(ctx, thisLineLoc).padding;
 
-    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).line_breaks().size());
+    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
     core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
     auto [replacementLoc, nextLinePadding] = findStartOfLine(ctx, nextLineLoc);

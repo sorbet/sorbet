@@ -85,7 +85,7 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
     string pathCopy = path_;
     auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType);
-    ret->line_breaks_ = line_breaks_;
+    ret->lineBreaks_ = lineBreaks_;
     ret->hadErrors_ = hadErrors_;
     ret->globalStateHash = globalStateHash.load();
     ret->strictLevel = strictLevel;
@@ -161,29 +161,28 @@ bool File::isRBI() const {
     return absl::EndsWith(path(), ".rbi");
 }
 
-vector<int> &File::line_breaks() const {
+vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != Type::TombStone);
     ENFORCE(this->sourceType != File::NotYetRead);
-    auto ptr = atomic_load(&line_breaks_);
+    auto ptr = atomic_load(&lineBreaks_);
     if (ptr) {
         return *ptr;
     } else {
         auto my = make_shared<vector<int>>(findLineBreaks(this->source_));
-        atomic_compare_exchange_weak(&line_breaks_, &ptr, my);
-        return line_breaks();
+        atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
+        return lineBreaks();
     }
 }
 
 int File::lineCount() const {
-    return line_breaks().size() - 1;
+    return lineBreaks().size() - 1;
 }
 
 string_view File::getLine(int i) {
-    auto lineBreaks = line_breaks();
-    ENFORCE(i < lineBreaks.size());
+    ENFORCE(i < lineBreaks().size());
     ENFORCE(i > 0);
-    auto start = lineBreaks.at(i - 1) + 1;
-    auto end = lineBreaks.at(i);
+    auto start = lineBreaks().at(i - 1) + 1;
+    auto end = lineBreaks().at(i);
     return source().substr(start, end - start);
 }
 
