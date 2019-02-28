@@ -244,7 +244,7 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs) {
         entry->set_path(path);
         entry->set_sigil(strictToProto(file.data(gs).originalSigil));
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
-        entry->set_had_errors(file.data(gs).hadErrors());
+        entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
     }
     return files;
 }

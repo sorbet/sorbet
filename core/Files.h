@@ -83,7 +83,7 @@ public:
     std::unique_ptr<File> deepCopy(GlobalState &) const;
     std::vector<int> &lineBreaks() const;
     int lineCount() const;
-    bool hadErrors() const;
+    StrictLevel minErrorLevel() const;
 
     std::optional<unsigned int> getDefinitionHash() const;
     void setDefinitionHash(unsigned int) const;
@@ -94,7 +94,7 @@ private:
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
-    mutable bool hadErrors_ = false;
+    mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
     mutable std::atomic<unsigned int> globalStateHash = 0;
 
 public:

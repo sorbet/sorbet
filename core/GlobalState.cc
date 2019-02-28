@@ -1094,8 +1094,8 @@ void GlobalState::_error(unique_ptr<Error> error) const {
         errorQueue->hadCritical = true;
     }
     auto loc = error->loc;
-    if (loc.file().exists()) {
-        loc.file().data(*this).hadErrors_ = true;
+    if (loc.file().exists() && error->what != errors::Infer::SuggestTyped) {
+        loc.file().data(*this).minErrorLevel_ = min(loc.file().data(*this).minErrorLevel_, error->what.minLevel);
     }
 
     errorQueue->pushError(*this, move(error));

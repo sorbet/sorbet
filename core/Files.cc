@@ -86,7 +86,7 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string pathCopy = path_;
     auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType);
     ret->lineBreaks_ = lineBreaks_;
-    ret->hadErrors_ = hadErrors_;
+    ret->minErrorLevel_ = minErrorLevel_;
     ret->globalStateHash = globalStateHash.load();
     ret->strictLevel = strictLevel;
     return ret;
@@ -149,8 +149,8 @@ string_view File::source() const {
     return this->source_;
 }
 
-bool File::hadErrors() const {
-    return hadErrors_;
+StrictLevel File::minErrorLevel() const {
+    return minErrorLevel_;
 }
 
 bool File::isPayload() const {

@@ -1,1 +1,2 @@
-1
+def true_func
+end

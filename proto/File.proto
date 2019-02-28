@@ -18,7 +18,7 @@ message File {
     string path = 1;
     StrictLevel sigil = 2;
     StrictLevel strict = 3;
-    bool had_errors = 4;
+    StrictLevel min_error_level = 4;
 }
 
 message FileTable {

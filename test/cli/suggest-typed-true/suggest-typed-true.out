@@ -1,56 +1,110 @@
---suggest-typed requires --typed=true or higher.
+--suggest-typed can't use --typed
 -------------------------
---suggest-typed requires --typed=true or higher.
--------------------------
-does-not-exist.rb: File Not Found http://go/e/1001
-Errors: 1
+--suggest-typed can't use --typed
 -------------------------
 does-not-exist.rb: File Not Found http://go/e/1001
 Errors: 1
 -------------------------
 suggest-typed-true.rb:1: You could add `# typed: true` http://go/e/7022
-     1 |1
+     1 |def true_func
         ^
   Autocorrect: Use `-a` to autocorrect
     suggest-typed-true.rb:1: Insert `# typed: true
 `
-     1 |1
+     1 |def true_func
         ^
 Errors: 1
 -------------------------
+suggest-typed-ignore.rb:1: You could add `# typed: ignore` http://go/e/7022
+     1 |Foo
+        ^
+  Autocorrect: Done
+    suggest-typed-ignore.rb:1: Inserted `# typed: ignore
+`
+     1 |Foo
+        ^
+Errors: 1
+# typed: ignore
+Foo
+No errors! Great job.
+-------------------------
+suggest-typed-false.rb:1: You could add `# typed: false` http://go/e/7022
+     1 |false_func
+        ^
+  Autocorrect: Done
+    suggest-typed-false.rb:1: Inserted `# typed: false
+`
+     1 |false_func
+        ^
+Errors: 1
+# typed: false
+false_func
+No errors! Great job.
+-------------------------
 suggest-typed-true.rb:1: You could add `# typed: true` http://go/e/7022
-     1 |1
+     1 |def true_func
         ^
   Autocorrect: Done
     suggest-typed-true.rb:1: Inserted `# typed: true
 `
-     1 |1
+     1 |def true_func
         ^
 Errors: 1
 # typed: true
-1
+def true_func
+end
+No errors! Great job.
 -------------------------
-suggest-typed-with-error.rb:1: Method `foo` does not exist on `T.class_of(<root>)` http://go/e/7003
-     1 |foo
-        ^^^
-
-suggest-typed-true.rb:1: You could add `# typed: true` http://go/e/7022
+suggest-typed-strict.rb:1: You could add `# typed: strict` http://go/e/7022
+     1 |extend T::Sig
+        ^
+  Autocorrect: Done
+    suggest-typed-strict.rb:1: Inserted `# typed: strict
+`
+     1 |extend T::Sig
+        ^
+Errors: 1
+# typed: strict
+extend T::Sig
+sig {void}
+def strict_func
+  T.untyped
+end
+No errors! Great job.
+-------------------------
+suggest-typed-strong.rb:1: You could add `# typed: strong` http://go/e/7022
      1 |1
         ^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-typed-true.rb:1: Insert `# typed: true
+  Autocorrect: Done
+    suggest-typed-strong.rb:1: Inserted `# typed: strong
 `
      1 |1
         ^
-Errors: 2
+Errors: 1
+# typed: strong
+1
+No errors! Great job.
 -------------------------
-empty.rb:1: You could add `# typed: true` http://go/e/7022
+empty.rb:1: You could add `# typed: strong` http://go/e/7022
      1 |
        ^
   Autocorrect: Use `-a` to autocorrect
-    empty.rb:1: Insert `# typed: true
+    empty.rb:1: Insert `# typed: strong
 `
      1 |
        ^
 Errors: 1
+-------------------------
+suggest-typed-with-too-low.rb:2: You could add `# typed: strong` http://go/e/7022
+     2 |# typed: false
+        ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-typed-with-too-low.rb:2: Replaced with `# typed: strong`
+     2 |# typed: false
+        ^^^^^^^^^^^^^^
+Errors: 1
+1
+# typed: strong
+-------------------------
+No errors! Great job.
 -------------------------
