@@ -5,6 +5,7 @@
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
 #include "dsl/InterfaceWrapper.h"
+#include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
 #include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
@@ -43,6 +44,12 @@ public:
                          nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = std::move(nodes);
+                             return;
+                         }
+
+                         nodes = Minitest::replaceDSL(ctx, send);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = move(nodes);
                              return;
                          }
 

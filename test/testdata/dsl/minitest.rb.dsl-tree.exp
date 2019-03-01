@@ -1,0 +1,66 @@
+class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree>::<C <U MyTest>><<C <U <todo sym>>>> < (::<todo sym>)
+    def <U outside_method><<C <U <todo sym>>>>(&<U <blk>>)
+      <emptyTree>
+    end
+
+    def <U <test_<U works outside>>><<C <U <todo sym>>>>(&<U <blk>>)
+      self(<C <U <todo sym>>>).<U outside_method>()
+    end
+
+    class <emptyTree>::<C <U <class_<U some inner tests>>>><<C <U <todo sym>>>> < (self(<C <U <todo sym>>>))
+      begin
+        def <U inside_method><<C <U <todo sym>>>>(&<U <blk>>)
+          <emptyTree>
+        end
+        def <U <test_<U works inside>>><<C <U <todo sym>>>>(&<U <blk>>)
+          begin
+            self(<C <U <todo sym>>>).<U outside_method>()
+            self(<C <U <todo sym>>>).<U inside_method>()
+          end
+        end
+      end
+    end
+
+    def <U initialize><<C <U <todo sym>>>>(&<U <blk>>)
+      <U @foo> = <emptyTree>::<C <U T>>.<U let>(3, <emptyTree>::<C <U Integer>>)
+    end
+
+    def <U <test_<U can read foo>>><<C <U <todo sym>>>>(&<U <blk>>)
+      <emptyTree>::<C <U T>>.<U assert_type!>(<U @foo>, <emptyTree>::<C <U Integer>>)
+    end
+
+    def self.<U random_method><<C <U <todo sym>>>>(&<U <blk>>)
+      <emptyTree>
+    end
+
+    self(<C <U <todo sym>>>).<U random_method>() do ||
+      <U @random_method_ivar> = <emptyTree>::<C <U T>>.<U let>(3, <emptyTree>::<C <U Integer>>)
+    end
+
+    class <emptyTree>::<C <U <class_<C <U Object>>>>><<C <U <todo sym>>>> < (self(<C <U <todo sym>>>))
+      begin
+        def <U <test_<C <U Object>>>><<C <U <todo sym>>>>(&<U <blk>>)
+          <emptyTree>
+        end
+        def <U <test_<C <U Object>>>><<C <U <todo sym>>>>(&<U <blk>>)
+          <emptyTree>
+        end
+      end
+    end
+
+    def self.<U it><<C <U <todo sym>>>>(*<U args>, &<U <blk>>)
+      <emptyTree>
+    end
+
+    self(<C <U <todo sym>>>).<U it>("ignores methods without a block")
+
+    self(<C <U <todo sym>>>).<U junk>().<U it>("ignores non-self calls") do ||
+      self(<C <U <todo sym>>>).<U junk>()
+    end
+  end
+
+  def <U junk><<C <U <todo sym>>>>(&<U <blk>>)
+    <emptyTree>
+  end
+end
