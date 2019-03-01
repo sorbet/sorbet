@@ -149,18 +149,20 @@ class RubyTyper::ENVClass
     .returns(String)
   end
   sig do
-    params(
+    type_parameters(:U)
+    .params(
         key: String,
-        value: T.nilable(String),
+        value: T.type_parameter(:U),
     )
-    .returns(String)
+    .returns(T.any(String, T.type_parameter(:U)))
   end
   sig do
-    params(
+    type_parameters(:U)
+    .params(
         key: String,
-        blk: T.proc.params(key: String).returns(String),
+        blk: T.proc.params(key: String).returns(T.type_parameter(:U)),
     )
-    .returns(String)
+    .returns(T.any(String, T.type_parameter(:U)))
   end
   def fetch(key, value=T.unsafe(nil), &blk); end
 
