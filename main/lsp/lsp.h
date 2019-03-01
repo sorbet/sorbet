@@ -143,6 +143,13 @@ enum class LSPErrorCodes {
 };
 
 class LSPLoop {
+    /** Used to store the state of LSPLoop's internal request queue.  */
+    struct QueueState {
+        std::deque<std::unique_ptr<LSPMessage>> pendingRequests;
+        bool terminate;
+        bool paused;
+    };
+
     int requestCounter = 1;
     struct ResponseHandler {
         std::function<void(rapidjson::Value &)> onResult;
@@ -276,6 +283,14 @@ class LSPLoop {
                                                                const TextDocumentPositionParams &params);
     static void mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
                                 std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
+    /**
+     * Performs pre-processing on the incoming LSP request.
+     * Merges changes to the same document, and processes
+     * pause/ignore requests.
+     */
+    static void preprocessRequest(rapidjson::MemoryPoolAllocator<> &alloc, const std::shared_ptr<spd::logger> &logger,
+                                  LSPLoop::QueueState &queue, std::unique_ptr<LSPMessage> msg, int requestCounter);
+
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
                              const CancelParams &cancellationRequest);
@@ -291,6 +306,11 @@ public:
     std::unique_ptr<core::GlobalState> runLSP();
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
+    /**
+     * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.
+     */
+    std::unique_ptr<core::GlobalState> processRequests(std::unique_ptr<core::GlobalState> gs,
+                                                       std::vector<std::unique_ptr<LSPMessage>> messages);
 };
 
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);

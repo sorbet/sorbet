@@ -23,6 +23,21 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
     }
 }
 
+unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalState> gs,
+                                                       vector<unique_ptr<LSPMessage>> messages) {
+    int requestCounter = 0;
+    LSPLoop::QueueState state{{}, false, false};
+    for (auto &message : messages) {
+        preprocessRequest(alloc, logger, state, move(message), requestCounter++);
+    }
+    ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
+
+    for (auto &message : state.pendingRequests) {
+        gs = processRequest(move(gs), *message);
+    }
+    return gs;
+}
+
 unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     if (handleReplies(msg)) {
         return gs;

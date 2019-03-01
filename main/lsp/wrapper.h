@@ -35,6 +35,8 @@ private:
     void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,
                      bool disableFastPath);
 
+    std::vector<std::unique_ptr<LSPMessage>> drainLSPResponses();
+
 public:
     /** Memory allocator for rapidjson objects. */
     rapidjson::MemoryPoolAllocator<> alloc;
@@ -55,6 +57,11 @@ public:
      * Send a message to LSP, and returns any responses.
      */
     std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(const std::string &json);
+
+    /**
+     * Sends multiple messages to LSP, and returns any responses.
+     */
+    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(std::vector<std::unique_ptr<LSPMessage>> &messages);
 };
 
 } // namespace sorbet::realmain::lsp

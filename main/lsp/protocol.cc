@@ -81,11 +81,7 @@ public:
 
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
-    struct GuardedState {
-        std::deque<std::unique_ptr<LSPMessage>> pendingRequests;
-        bool terminate = false;
-        bool paused = false;
-    } guardedState;
+    LSPLoop::QueueState guardedState{{}, false, false};
     absl::Mutex mtx;
 
     rapidjson::MemoryPoolAllocator<>
@@ -107,40 +103,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
                 try {
-                    auto msg = make_unique<LSPMessage>(inner_alloc, d);
-                    msg->setCounter(requestCounter++);
-                    msg->setTimestamp((double)Timer::currentTimeNanos());
-
-                    const LSPMethod method = LSPMethod::getByName(msg->method());
-                    if (method == LSPMethod::CancelRequest()) {
-                        // see if they are canceling request that we didn't yet even start processing.
-                        auto it = findRequestToBeCancelled(
-                            guardedState.pendingRequests,
-                            *CancelParams::fromJSONValue(inner_alloc, msg->params(), "root.params"));
-                        if (it != guardedState.pendingRequests.end() && (*it)->isRequest()) {
-                            auto &requestToBeCancelled = (*it)->asRequest();
-                            requestToBeCancelled.canceled = true;
-                            auto canceledRequest = move(*it);
-                            guardedState.pendingRequests.erase(it);
-                            // move the canceled request to the front
-                            auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
-                            guardedState.pendingRequests.insert(itFront, move(canceledRequest));
-                            LSPLoop::mergeDidChanges(inner_alloc, guardedState.pendingRequests);
-                        }
-                        // if we started processing it already, well... swallow the cancellation request and
-                        // continue computing.
-                    } else if (method == LSPMethod::Pause()) {
-                        ENFORCE(!guardedState.paused);
-                        logger->error("Pausing");
-                        guardedState.paused = true;
-                    } else if (method == LSPMethod::Resume()) {
-                        logger->error("Resuming");
-                        ENFORCE(guardedState.paused);
-                        guardedState.paused = false;
-                    } else {
-                        guardedState.pendingRequests.emplace_back(move(msg));
-                        LSPLoop::mergeDidChanges(inner_alloc, guardedState.pendingRequests);
-                    }
+                    preprocessRequest(inner_alloc, logger, guardedState, make_unique<LSPMessage>(inner_alloc, d),
+                                      requestCounter++);
                 } catch (DeserializationError e) {
                     logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));
                 }
@@ -153,7 +117,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         {
             absl::MutexLock lck(&mtx);
             mtx.Await(absl::Condition(
-                +[](GuardedState *guardedState) -> bool {
+                +[](LSPLoop::QueueState *guardedState) -> bool {
                     return guardedState->terminate || (!guardedState->paused && !guardedState->pendingRequests.empty());
                 },
                 &guardedState));
@@ -213,6 +177,46 @@ void LSPLoop::mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
         ++it;
     }
     ENFORCE(pendingRequests.size() + requestsMerged == originalSize);
+}
+
+void LSPLoop::preprocessRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
+                                LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg, int requestCounter) {
+    try {
+        msg->setCounter(requestCounter);
+        msg->setTimestamp((double)Timer::currentTimeNanos());
+
+        const LSPMethod method = LSPMethod::getByName(msg->method());
+        if (method == LSPMethod::CancelRequest()) {
+            // see if they are canceling request that we didn't yet even start processing.
+            auto it = findRequestToBeCancelled(state.pendingRequests,
+                                               *CancelParams::fromJSONValue(alloc, msg->params(), "root.params"));
+            if (it != state.pendingRequests.end() && (*it)->isRequest()) {
+                auto &requestToBeCancelled = (*it)->asRequest();
+                requestToBeCancelled.canceled = true;
+                auto canceledRequest = move(*it);
+                state.pendingRequests.erase(it);
+                // move the canceled request to the front
+                auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
+                state.pendingRequests.insert(itFront, move(canceledRequest));
+                LSPLoop::mergeDidChanges(alloc, state.pendingRequests);
+            }
+            // if we started processing it already, well... swallow the cancellation request and
+            // continue computing.
+        } else if (method == LSPMethod::Pause()) {
+            ENFORCE(!state.paused);
+            logger->error("Pausing");
+            state.paused = true;
+        } else if (method == LSPMethod::Resume()) {
+            logger->error("Resuming");
+            ENFORCE(state.paused);
+            state.paused = false;
+        } else {
+            state.pendingRequests.emplace_back(move(msg));
+            LSPLoop::mergeDidChanges(alloc, state.pendingRequests);
+        }
+    } catch (DeserializationError e) {
+        logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));
+    }
 }
 
 std::deque<std::unique_ptr<LSPMessage>>::iterator

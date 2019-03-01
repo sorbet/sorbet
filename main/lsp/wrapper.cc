@@ -9,16 +9,7 @@ namespace sorbet::realmain::lsp {
 
 regex contentLengthRegex("^Content-Length: ([0-9]+)$");
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &message) {
-    gs = lspLoop->processRequest(move(gs), message);
-
-    // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
-
-    if (message.isNotification() && message.method() == "initialized") {
-        initialized = true;
-    }
-
+vector<unique_ptr<LSPMessage>> LSPWrapper::drainLSPResponses() {
     vector<unique_ptr<LSPMessage>> rv;
     string responses = lspOstream.str();
     // Reset error flags and change contents of stream to the empty string.
@@ -71,6 +62,42 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &
     }
 
     return rv;
+}
+
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &message) {
+    gs = lspLoop->processRequest(move(gs), message);
+
+    // Should always run typechecking at least once for each request post-initialization.
+    ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
+    if (message.isNotification() && message.method() == "initialized") {
+        initialized = true;
+    }
+
+    return drainLSPResponses();
+}
+
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
+    // Determine boolean before moving messages.
+    bool foundPostInitializationRequest = messages.size() > 0;
+    if (!initialized) {
+        foundPostInitializationRequest = false;
+        for (auto &message : messages) {
+            if (initialized) {
+                foundPostInitializationRequest = true;
+                break;
+            } else if (message->isNotification() && message->method() == "initialized") {
+                initialized = true;
+            }
+        }
+    }
+
+    gs = lspLoop->processRequests(move(gs), move(messages));
+
+    // Should always run typechecking at least once for each request post-initialization.
+    ENFORCE(!initialized || !foundPostInitializationRequest || gs->lspTypecheckCount > 0,
+            "Fatal error: LSPLoop did not typecheck GlobalState.");
+
+    return drainLSPResponses();
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &message) {
