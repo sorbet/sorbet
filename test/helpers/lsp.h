@@ -1,30 +1,12 @@
-#ifndef TEST_LSP_TEST_HELPERS_H
-#define TEST_LSP_TEST_HELPERS_H
+#ifndef TEST_HELPERS_LSP_H
+#define TEST_HELPERS_LSP_H
 
-#include "common/common.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
-#include "test/LSPTest.h"
+#include "main/lsp/wrapper.h"
 
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
-
-/** Constructs a vector with all enum values from MIN to MAX. Assumes a contiguous enum and properly chosen min/max
- * values. Our serialization/deserialization code will throw if we pick an improper value. */
-template <typename T, T MAX, T MIN> std::vector<T> getAllEnumKinds() {
-    std::vector<T> symbols;
-    for (int i = (int)MIN; i <= (int)MAX; i++) {
-        symbols.push_back((T)i);
-    }
-    return symbols;
-};
-
-template <typename T = DynamicRegistrationOption>
-std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
-    auto option = std::make_unique<T>();
-    option->dynamicRegistration = dynamicRegistration;
-    return option;
-};
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
 std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::string rootUri);
@@ -32,6 +14,10 @@ std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::st
 /** Creates an LSPMessage containing a request message constructed from the given items. */
 std::unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, std::string method, int id,
                                                const JSONBaseType &params);
+
+/** Create an LSPMessage containing a textDocument/definition request. */
+std::unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
+                                                  int line, int character);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
@@ -49,5 +35,8 @@ bool assertNotificationMessage(const std::string &expectedMethod, const LSPMessa
 std::optional<std::unique_ptr<PublishDiagnosticsParams>>
 getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc, const NotificationMessage &notifMsg);
 
+/** Sends boilerplate initialization / initialized messages to start a new LSP session. */
+void initializeLSP(std::string_view rootPath, std::string_view rootUri, LSPWrapper &lspWrapper, int &nextId);
+
 } // namespace sorbet::test
-#endif // TEST_LSP_TEST_HELPERS_H
+#endif // TEST_HELPERS_LSP_H

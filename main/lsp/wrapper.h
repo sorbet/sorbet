@@ -1,3 +1,6 @@
+#ifndef MAIN_LSP_WRAPPER_H
+#define MAIN_LSP_WRAPPER_H
+
 #include "spdlog/spdlog.h"
 // has to come before the next spdlog include. This comment stops formatter from reordering them
 #include "lsp.h"
@@ -55,3 +58,5 @@ public:
 };
 
 } // namespace sorbet::realmain::lsp
+
+#endif // MAIN_LSP_WRAPPER_H

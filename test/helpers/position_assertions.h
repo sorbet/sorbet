@@ -1,9 +1,9 @@
-#ifndef TEST_POSITION_ASSERTIONS_H
-#define TEST_POSITION_ASSERTIONS_H
+#ifndef TEST_HELPERS_POSITION_ASSERTIONS_H
+#define TEST_HELPERS_POSITION_ASSERTIONS_H
 
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include "test/expectations.h"
+#include "test/helpers/expectations.h"
 
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
@@ -31,7 +31,18 @@ std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath)
 std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
 
 class ErrorAssertion;
-class LSPTest;
+
+/** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
+void reportMissingError(const std::string &filename, const ErrorAssertion &assertion, std::string_view sourceLine);
+
+/** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
+void reportUnexpectedError(const std::string &filename, const Diagnostic &diagnostic, std::string_view sourceLine);
+
+/**
+ * Given a filename, a 0-indexed line number, and the contents of all test files, returns the source line.
+ */
+std::string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                          const std::string &filename, int line);
 
 /**
  * An assertion that is relevant to a specific set of characters on a line.
@@ -85,6 +96,13 @@ public:
     static std::shared_ptr<ErrorAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                 int assertionLine, std::string_view assertionContents);
 
+    /**
+     * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
+     */
+    static void checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         std::vector<std::shared_ptr<ErrorAssertion>> errorAssertions,
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics);
+
     const std::string message;
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
@@ -107,7 +125,8 @@ public:
     DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
                  int version);
 
-    void check(LSPTest &test, std::string_view uriPrefix, const Location &queryLoc);
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string_view uriPrefix, const Location &queryLoc);
 
     std::string toString() const override;
 };
@@ -118,8 +137,9 @@ public:
     static std::shared_ptr<UsageAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                 int assertionLine, std::string_view assertionContents);
 
-    static void check(LSPTest &test, std::string_view uriPrefix, std::string_view symbol, const Location &queryLoc,
-                      const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
+    static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                      LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string_view symbol,
+                      const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
 
     const std::string symbol;
     const int version;
@@ -132,4 +152,4 @@ public:
 };
 
 } // namespace sorbet::test
-#endif // TEST_POSITION_ASSERTIONS_H
+#endif // TEST_HELPERS_POSITION_ASSERTIONS_H

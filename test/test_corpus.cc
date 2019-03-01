@@ -23,9 +23,9 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
-#include "test/expectations.h"
-#include "test/lsp_test_helpers.h"
-#include "test/position_assertions.h"
+#include "test/helpers/expectations.h"
+#include "test/helpers/lsp.h"
+#include "test/helpers/position_assertions.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
@@ -120,138 +120,6 @@ unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Erro
     auto position = error.loc.position(gs);
     auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
     return make_unique<Diagnostic>(move(range), error.header);
-}
-
-/** Returns true if a and b are different Diagnostic objects but have the same range and message. */
-bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
-    return a != b && rangeComparison(*a->range, *b->range) == 0 && a->message == b->message;
-}
-
-/**
- * Given a filename, a 0-indexed line number, and the contents of all test files, returns the source line.
- */
-string getSourceLine(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents,
-                     const string &filename, int line) {
-    auto it = sourceFileContents.find(filename);
-    if (it == sourceFileContents.end()) {
-        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
-        return "";
-    }
-
-    auto &file = it->second;
-    if (line >= file->lineCount()) {
-        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
-        return "";
-    } else {
-        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
-        auto lineView = file->getLine(line + 1);
-        return string(lineView.begin(), lineView.end());
-    }
-}
-
-/** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
-void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine) {
-    ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
-        << fmt::format("Did not find expected error:\n{}",
-                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()));
-}
-
-/** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
-void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine) {
-    ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
-        "Found unexpected error:\n{}",
-        prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
-}
-
-/**
- * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
- * NOTE: filenamesAndDiagnostics should use default sort order, which sorts the map in filename order.
- */
-void checkErrors(const Expectations &expectations, const vector<shared_ptr<RangeAssertion>> &assertions,
-                 map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics) {
-    auto errorAssertions = RangeAssertion::getErrorAssertions(assertions);
-    auto assertionsIt = errorAssertions.begin();
-    auto &files = expectations.sourceFileContents;
-
-    // Due to map's default sort order, this loop iterates over diagnostics in filename order.
-    for (auto &filenameAndDiagnostics : filenamesAndDiagnostics) {
-        auto &filename = filenameAndDiagnostics.first;
-        auto &diagnostics = filenameAndDiagnostics.second;
-
-        // Sort diagnostics within file in range, message order.
-        // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
-        // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
-        fast_sort(diagnostics, [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
-            return errorComparison(filename, *a->range, a->message, filename, *b->range, b->message) == -1;
-        });
-
-        auto diagnosticsIt = diagnostics.begin();
-        auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
-
-        while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
-            // See if the ranges match.
-            auto &diagnostic = *diagnosticsIt;
-            auto &assertion = *assertionsIt;
-
-            // TODO: Remove duplicate diagnostics for parity with old runner.
-            // Remove this check when ruby types team fixes duplicate diagnostics.
-            if (isDuplicateDiagnostic(lastDiagnostic, diagnostic.get())) {
-                diagnosticsIt++;
-                continue;
-            }
-            lastDiagnostic = diagnostic.get();
-
-            switch (assertion->compare(filename, *diagnostic->range)) {
-                case 1: {
-                    // Diagnostic comes *before* this assertion, so we don't
-                    // have an assertion that matches the diagnostic.
-                    reportUnexpectedError(filename, *diagnostic,
-                                          getSourceLine(files, filename, diagnostic->range->start->line));
-                    // We've 'consumed' the diagnostic -- nothing matches it.
-                    diagnosticsIt++;
-                    break;
-                }
-                case -1: {
-                    // Diagnostic comes *after* this assertion
-                    // We don't have a diagnostic that matches the assertion.
-                    reportMissingError(assertion->filename, *assertion,
-                                       getSourceLine(files, assertion->filename, assertion->range->start->line));
-                    // We've 'consumed' this error assertion -- nothing matches it.
-                    assertionsIt++;
-                    break;
-                }
-                default: {
-                    // Ranges match, so check the assertion.
-                    assertion->check(*diagnostic,
-                                     getSourceLine(files, assertion->filename, assertion->range->start->line));
-                    // We've 'consumed' the diagnostic and assertion.
-                    diagnosticsIt++;
-                    assertionsIt++;
-                    break;
-                }
-            }
-        }
-
-        while (diagnosticsIt != diagnostics.end()) {
-            // We had more diagnostics than error assertions.
-            // Drain dupes.
-            // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
-            if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
-                auto &diagnostic = *diagnosticsIt;
-                reportUnexpectedError(filename, *diagnostic,
-                                      getSourceLine(files, filename, diagnostic->range->start->line));
-            }
-            lastDiagnostic = (*diagnosticsIt).get();
-            diagnosticsIt++;
-        }
-    }
-
-    while (assertionsIt != errorAssertions.end()) {
-        // Had more error assertions than diagnostics
-        reportMissingError((*assertionsIt)->filename, **assertionsIt,
-                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line));
-        assertionsIt++;
-    }
 }
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
@@ -535,7 +403,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto path = error->loc.file().data(gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, *error));
         }
-        checkErrors(test, assertions, diagnostics);
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 
     // Allow later phases to have errors that we didn't test for
@@ -554,39 +422,8 @@ TEST_P(LSPTest, All) {
         testFileUris[filename] = filePathToUri(rootUri, filename);
     }
 
-    // Reset next id.
-    nextId = 0;
-
-    // Send 'initialize' message.
-    {
-        unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(rootPath, rootUri);
-        auto responses = lspWrapper->getLSPResponsesFor(
-            *makeRequestMessage(lspWrapper->alloc, "initialize", nextId++, *initializeParams));
-
-        // Should just have an 'initialize' response.
-        ASSERT_EQ(1, responses.size());
-
-        if (assertResponseMessage(0, *responses.at(0))) {
-            auto &respMsg = responses.at(0)->asResponse();
-            ASSERT_FALSE(respMsg.error.has_value());
-            ASSERT_TRUE(respMsg.result.has_value());
-
-            auto &result = *respMsg.result;
-            // TODO(jvilk): Need a better way to unwrap these.
-            auto initializeResult =
-                InitializeResult::fromJSONValue(lspWrapper->alloc, *result.get(), "ResponseMessage.result");
-            checkServerCapabilities(*initializeResult->capabilities);
-        }
-    }
-
-    // Complete initialization handshake with an 'initialized' message.
-    {
-        rapidjson::Value emptyObject(rapidjson::kObjectType);
-        auto initialized = make_unique<NotificationMessage>("2.0", "initialized");
-        initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
-        auto initializedResponses = lspWrapper->getLSPResponsesFor(LSPMessage(move(initialized)));
-        EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
-    }
+    // Perform initialize / initialized handshake.
+    initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
 
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {
@@ -641,7 +478,7 @@ TEST_P(LSPTest, All) {
                 }
             }
         }
-        checkErrors(test, assertions, diagnostics);
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 
     // Usage and def assertions
@@ -685,7 +522,6 @@ TEST_P(LSPTest, All) {
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
                 int version = -1;
-                // TODO(jvilk): Worth unifying as a parent class (DefOrUsageAssertion)?
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                     version = defAssertion->version;
                     symbol = defAssertion->symbol;
@@ -698,9 +534,10 @@ TEST_P(LSPTest, All) {
                     auto &def = entry->second;
                     auto queryLoc = assertion->getLocation(rootUri);
                     // Check that a definition request at this location returns def.
-                    def->check(*this, rootUri, *queryLoc);
+                    def->check(test.sourceFileContents, *lspWrapper, nextId, rootUri, *queryLoc);
                     // Check that a reference request at this location returns entryAssertions.
-                    UsageAssertion::check(*this, rootUri, symbol, *queryLoc, entryAssertions);
+                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
+                                          entryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "

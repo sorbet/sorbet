@@ -14,6 +14,7 @@ compilation_database(
         "//test/fuzz:proto",
         "//test/fuzz:fuzz_dash_e",
         "//test:test_corpus_sharded",
+        "//test/helpers:helpers",
         "//test:hello-test",
         "//test:error-check-test",
         "//test:backtrace-test-raise",

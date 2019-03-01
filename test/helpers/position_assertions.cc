@@ -2,8 +2,8 @@
 // ^ Include first because it violates linting rules.
 
 #include "absl/strings/str_split.h"
-#include "test/lsp_test_helpers.h"
-#include "test/position_assertions.h"
+#include "test/helpers/lsp.h"
+#include "test/helpers/position_assertions.h"
 #include <regex>
 
 using namespace std;
@@ -101,7 +101,7 @@ string prettyPrintRangeComment(string_view sourceLine, const Range &range, strin
                        string(numLeadingSpaces + sourceLineNumber.length() + 1, ' '), string(numCarets, '^'), comment);
 }
 
-string_view getLine(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
+string_view getLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
                     const Location &loc) {
     auto filename = uriToFilePath(uriPrefix, loc.uri);
     auto foundFile = sourceFileContents.find(filename);
@@ -332,21 +332,19 @@ vector<unique_ptr<Location>> extractLocations(rapidjson::MemoryPoolAllocator<> &
     return locations;
 }
 
-void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &queryLoc) {
+void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
+                         int &nextId, string_view uriPrefix, const Location &queryLoc) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
-    auto &sourceFileContents = test.test.sourceFileContents;
     auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
     auto defSourceLine = getLine(sourceFileContents, uriPrefix, *getLocation(uriPrefix));
     string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
     string defUri = filePathToUri(uriPrefix, filename);
 
-    unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
-        make_unique<TextDocumentIdentifier>(queryLoc.uri), make_unique<Position>(line, character));
-    int id = test.nextId++;
-    auto responses = test.lspWrapper->getLSPResponsesFor(
-        *makeRequestMessage(test.lspWrapper->alloc, "textDocument/definition", id, *textDocumentPositionParams));
+    int id = nextId++;
+    auto responses =
+        lspWrapper.getLSPResponsesFor(*makeDefinitionRequest(lspWrapper.alloc, id, queryLoc.uri, line, character));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
         return;
@@ -358,7 +356,7 @@ void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &q
         ASSERT_FALSE(respMsg.error.has_value());
 
         auto &result = *(respMsg.result);
-        vector<unique_ptr<Location>> locations = extractLocations(test.lspWrapper->alloc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(lspWrapper.alloc, result);
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -398,12 +396,12 @@ void DefAssertion::check(LSPTest &test, string_view uriPrefix, const Location &q
     }
 }
 
-void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view symbol, const Location &queryLoc,
-                           const vector<shared_ptr<RangeAssertion>> &allLocs) {
+void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                           LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
+                           const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
-    auto &sourceFileContents = test.test.sourceFileContents;
     auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
     string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
 
@@ -411,9 +409,9 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
         make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(queryLoc.uri),
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
-    int id = test.nextId++;
-    auto responses = test.lspWrapper->getLSPResponsesFor(
-        *makeRequestMessage(test.lspWrapper->alloc, "textDocument/references", id, *referenceParams));
+    int id = nextId++;
+    auto responses = lspWrapper.getLSPResponsesFor(
+        *makeRequestMessage(lspWrapper.alloc, "textDocument/references", id, *referenceParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
@@ -425,7 +423,7 @@ void UsageAssertion::check(LSPTest &test, string_view uriPrefix, string_view sym
         ASSERT_FALSE(respMsg.error.has_value());
         auto &result = *(respMsg.result);
 
-        vector<unique_ptr<Location>> locations = extractLocations(test.lspWrapper->alloc, result);
+        vector<unique_ptr<Location>> locations = extractLocations(lspWrapper.alloc, result);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });
@@ -524,6 +522,133 @@ shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr
 
 string UsageAssertion::toString() const {
     return fmt::format("usage: {}", symbol);
+}
+
+void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine) {
+    ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
+        << fmt::format("Did not find expected error:\n{}",
+                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()));
+}
+
+void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine) {
+    ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
+        "Found unexpected error:\n{}",
+        prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
+}
+
+/** Returns true if a and b are different Diagnostic objects but have the same range and message. */
+bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
+    return a != b && rangeComparison(*a->range, *b->range) == 0 && a->message == b->message;
+}
+
+void ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+                              vector<shared_ptr<ErrorAssertion>> errorAssertions,
+                              map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics) {
+    // Sort input error assertions so they are in (filename, line, column) order.
+    fast_sort(errorAssertions, [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool {
+        return errorComparison(a->filename, *a->range, a->message, b->filename, *b->range, b->message) == -1;
+    });
+
+    auto assertionsIt = errorAssertions.begin();
+
+    // Due to map's default sort order, this loop iterates over diagnostics in filename order.
+    for (auto &filenameAndDiagnostics : filenamesAndDiagnostics) {
+        auto &filename = filenameAndDiagnostics.first;
+        auto &diagnostics = filenameAndDiagnostics.second;
+
+        // Sort diagnostics within file in range, message order.
+        // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
+        // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
+        fast_sort(diagnostics, [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
+            return errorComparison(filename, *a->range, a->message, filename, *b->range, b->message) == -1;
+        });
+
+        auto diagnosticsIt = diagnostics.begin();
+        auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
+
+        while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
+            // See if the ranges match.
+            auto &diagnostic = *diagnosticsIt;
+            auto &assertion = *assertionsIt;
+
+            // TODO: Remove duplicate diagnostics for parity with old runner.
+            // Remove this check when ruby types team fixes duplicate diagnostics.
+            if (isDuplicateDiagnostic(lastDiagnostic, diagnostic.get())) {
+                diagnosticsIt++;
+                continue;
+            }
+            lastDiagnostic = diagnostic.get();
+
+            switch (assertion->compare(filename, *diagnostic->range)) {
+                case 1: {
+                    // Diagnostic comes *before* this assertion, so we don't
+                    // have an assertion that matches the diagnostic.
+                    reportUnexpectedError(filename, *diagnostic,
+                                          getSourceLine(files, filename, diagnostic->range->start->line));
+                    // We've 'consumed' the diagnostic -- nothing matches it.
+                    diagnosticsIt++;
+                    break;
+                }
+                case -1: {
+                    // Diagnostic comes *after* this assertion
+                    // We don't have a diagnostic that matches the assertion.
+                    reportMissingError(assertion->filename, *assertion,
+                                       getSourceLine(files, assertion->filename, assertion->range->start->line));
+                    // We've 'consumed' this error assertion -- nothing matches it.
+                    assertionsIt++;
+                    break;
+                }
+                default: {
+                    // Ranges match, so check the assertion.
+                    assertion->check(*diagnostic,
+                                     getSourceLine(files, assertion->filename, assertion->range->start->line));
+                    // We've 'consumed' the diagnostic and assertion.
+                    diagnosticsIt++;
+                    assertionsIt++;
+                    break;
+                }
+            }
+        }
+
+        while (diagnosticsIt != diagnostics.end()) {
+            // We had more diagnostics than error assertions.
+            // Drain dupes.
+            // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
+            if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
+                auto &diagnostic = *diagnosticsIt;
+                reportUnexpectedError(filename, *diagnostic,
+                                      getSourceLine(files, filename, diagnostic->range->start->line));
+            }
+            lastDiagnostic = (*diagnosticsIt).get();
+            diagnosticsIt++;
+        }
+    }
+
+    while (assertionsIt != errorAssertions.end()) {
+        // Had more error assertions than diagnostics
+        reportMissingError((*assertionsIt)->filename, **assertionsIt,
+                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line));
+        assertionsIt++;
+    }
+}
+
+string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
+                     int line) {
+    auto it = sourceFileContents.find(filename);
+    if (it == sourceFileContents.end()) {
+        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+        return "";
+    }
+
+    auto &file = it->second;
+    if (line >= file->lineCount()) {
+        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
+        return "";
+    } else {
+        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
+        auto lineView = file->getLine(line + 1);
+        return string(lineView.begin(), lineView.end());
+    }
 }
 
 } // namespace sorbet::test

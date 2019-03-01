@@ -5,8 +5,8 @@
 // ^ Violates linting rules, so include first.
 
 #include "main/lsp/wrapper.h"
-#include "test/expectations.h"
-#include "test/position_assertions.h"
+#include "test/helpers/expectations.h"
+#include "test/helpers/position_assertions.h"
 
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;

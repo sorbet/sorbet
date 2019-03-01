@@ -2,13 +2,28 @@
 #include <cxxopts.hpp>
 // has to go first as it violates requirements
 
-#include "spdlog/spdlog.h"
-// has to come before the next one. This comment stops formatter from reordering them
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "test/lsp_test_helpers.h"
+#include "common/common.h"
+#include "test/helpers/lsp.h"
 
 namespace sorbet::test {
 using namespace std;
+
+template <typename T = DynamicRegistrationOption>
+std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
+    auto option = std::make_unique<T>();
+    option->dynamicRegistration = dynamicRegistration;
+    return option;
+};
+
+/** Constructs a vector with all enum values from MIN to MAX. Assumes a contiguous enum and properly chosen min/max
+ * values. Our serialization/deserialization code will throw if we pick an improper value. */
+template <typename T, T MAX, T MIN> std::vector<T> getAllEnumKinds() {
+    std::vector<T> symbols;
+    for (int i = (int)MIN; i <= (int)MAX; i++) {
+        symbols.push_back((T)i);
+    }
+    return symbols;
+};
 
 unique_ptr<SymbolConfiguration> makeSymbolConfiguration() {
     auto config = make_unique<SymbolConfiguration>();
@@ -114,6 +129,13 @@ unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &allo
     auto initialize = make_unique<RequestMessage>("2.0", id, method);
     initialize->params = params.toJSONValue(alloc);
     return make_unique<LSPMessage>(move(initialize));
+}
+
+unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
+                                             int line, int character) {
+    unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
+        make_unique<TextDocumentIdentifier>(string(uri)), make_unique<Position>(line, character));
+    return makeRequestMessage(alloc, "textDocument/definition", id, *textDocumentPositionParams);
 }
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
@@ -225,4 +247,40 @@ optional<unique_ptr<PublishDiagnosticsParams>> getPublishDiagnosticParams(rapidj
     auto &paramsValue = *paramsValuePtr;
     return PublishDiagnosticsParams::fromJSONValue(alloc, *paramsValue.get(), "NotificationMessage.params");
 }
+
+void initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper, int &nextId) {
+    // Reset next id.
+    nextId = 0;
+
+    // Send 'initialize' message.
+    {
+        unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(string(rootPath), string(rootUri));
+        auto responses = lspWrapper.getLSPResponsesFor(
+            *makeRequestMessage(lspWrapper.alloc, "initialize", nextId++, *initializeParams));
+
+        // Should just have an 'initialize' response.
+        ASSERT_EQ(1, responses.size());
+
+        if (assertResponseMessage(0, *responses.at(0))) {
+            auto &respMsg = responses.at(0)->asResponse();
+            ASSERT_FALSE(respMsg.error.has_value());
+            ASSERT_TRUE(respMsg.result.has_value());
+
+            auto &result = *respMsg.result;
+            auto initializeResult =
+                InitializeResult::fromJSONValue(lspWrapper.alloc, *result.get(), "ResponseMessage.result");
+            checkServerCapabilities(*initializeResult->capabilities);
+        }
+    }
+
+    // Complete initialization handshake with an 'initialized' message.
+    {
+        rapidjson::Value emptyObject(rapidjson::kObjectType);
+        auto initialized = make_unique<NotificationMessage>("2.0", "initialized");
+        initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
+        auto initializedResponses = lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
+        EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
+    }
+}
+
 } // namespace sorbet::test

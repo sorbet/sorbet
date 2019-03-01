@@ -1,5 +1,5 @@
-#ifndef TEST_EXPECTATIONS_H
-#define TEST_EXPECTATIONS_H
+#ifndef TEST_HELPERS_EXPECTATIONS_H
+#define TEST_HELPERS_EXPECTATIONS_H
 
 #include "common/common.h"
 #include "core/Files.h"
@@ -16,4 +16,4 @@ struct Expectations {
 };
 } // namespace sorbet::test
 
-#endif // TEST_EXPECTATIONS_H
+#endif // TEST_HELPERS_EXPECTATIONS_H
