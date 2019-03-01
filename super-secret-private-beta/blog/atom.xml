@@ -6,7 +6,7 @@
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
-    <logo>https://stripe.github.io/sorbet/super-secret-private-beta/img/favicon-32x32.png</logo>
+    <logo>https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-white-sparkles.svg</logo>
     <rights>© 2019 Stripe</rights>
     <entry>
         <title type="html"><![CDATA[Sample Blog Post]]></title>
