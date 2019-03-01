@@ -390,6 +390,7 @@ class RbiGenerator
         return
       end
       require './config/application'
+      require 'rails/test_help'
       Rails.application.require_environment!
       Rails.application.load_runner
       ActionCable::Connection::Base
