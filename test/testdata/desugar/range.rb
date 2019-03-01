@@ -6,4 +6,11 @@ def foo
     d = Range.new(1, 2, true)
     e = (1..42).first
     f = ('a'..'z').last
+
+    T.reveal_type(a) # error: Revealed type: `T::Range[Integer]`
+    T.reveal_type(b) # error: Revealed type: `T::Range[Integer]`
+    T.reveal_type(c) # error: Revealed type: `T::Range[Integer]`
+    T.reveal_type(d) # error: Revealed type: `T::Range[Integer]`
+    T.reveal_type(e) # error: Revealed type: `Integer`
+    T.reveal_type(f) # error: Revealed type: `String`
 end

@@ -142,21 +142,4 @@ CFGContext CFGContext::withSendAndBlockLink(const shared_ptr<core::SendAndBlockL
     return ret;
 }
 
-unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> cfg) {
-    for (auto &bb : cfg->basicBlocks) {
-        if (bb->exprs.empty()) {
-            continue;
-        }
-        core::LocalVariable bind(core::Names::debugEnvironmentTemp(), 0);
-        auto &firstExpr = bb->exprs[0];
-        bb->exprs.emplace(bb->exprs.begin(), bind, firstExpr.loc,
-                          make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::BEFORE));
-
-        auto &lastExpr = bb->exprs[bb->exprs.size() - 1];
-        bb->exprs.emplace_back(bind, lastExpr.loc,
-                               make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::AFTER));
-    }
-    return cfg;
-}
-
 } // namespace sorbet::cfg

@@ -168,10 +168,6 @@ string BasicBlock::toString(core::Context ctx) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
     for (Binding &exp : this->exprs) {
-        if (isa_instruction<DebugEnvironment>(exp.value.get())) {
-            fmt::format_to(buf, "{}", exp.value->toString(ctx));
-            continue;
-        }
         fmt::format_to(buf, "{} = {}\n", exp.bind.toString(ctx), exp.value->toString(ctx));
     }
     if (this->bexit.cond.variable.exists()) {
@@ -180,25 +176,6 @@ string BasicBlock::toString(core::Context ctx) {
         fmt::format_to(buf, "<unconditional>");
     }
     return to_string(buf);
-}
-
-void CFG::recordAnnotations(core::Context ctx) {
-    for (auto &basicBlock : this->basicBlocks) {
-        basicBlock->recordAnnotations(ctx);
-    }
-}
-
-void BasicBlock::recordAnnotations(core::Context ctx) {
-    // Exit out if there was no user written code
-    if (this->exprs.size() <= 1) {
-        return;
-    }
-
-    for (Binding &exp : this->exprs) {
-        if (auto debugEnv = cast_instruction<DebugEnvironment>(exp.value.get())) {
-            ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx), this->id, debugEnv->pos);
-        }
-    }
 }
 
 core::Loc BasicBlock::loc() const {

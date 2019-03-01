@@ -156,7 +156,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         int i = 0;
         for (cfg::Binding &bind : bb->exprs) {
             i++;
-            if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
+            if (!current.isDead) {
                 current.ensureGoodAssignTarget(ctx, bind.bind.variable);
                 bind.bind.type = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind.variable],
                                                         knowledgeFilter, *constr, methodReturnType);

@@ -39,8 +39,6 @@ const vector<PrintOptions> print_options({
     {"resolve-tree", &Printers::ResolveTree, true},
     {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"cfg", &Printers::CFG, true},
-    {"cfg-raw", &Printers::CFGRaw, true},
-    {"typed-source", &Printers::TypedSource, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
 });
@@ -174,8 +172,6 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value(""), "filepath.yaml");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>()->default_value(""),
                                "file");
-    options.add_options("dev")("typed-source", "Print the specified file with type annotations",
-                               cxxopts::value<string>()->default_value(""), "file");
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
@@ -351,7 +347,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
-        opts.typedSource = raw["typed-source"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack) {
@@ -377,20 +372,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
             logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help({""}));
             throw EarlyReturnWithCode(1);
-        }
-
-        if (!opts.typedSource.empty()) {
-            if (opts.print.TypedSource) {
-                logger->error("`--typed-source " + opts.typedSource +
-                              "` and `-p typed-source` are incompatible. Either print out one file or all files.");
-                throw EarlyReturnWithCode(1);
-            }
-            auto found = absl::c_any_of(opts.inputFileNames,
-                                        [&](string_view path) { return path.find(opts.typedSource) != string::npos; });
-            if (!found) {
-                logger->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
-                throw EarlyReturnWithCode(1);
-            }
         }
 
         if ((raw["color"].as<string>() == "never") || opts.runLSP) {

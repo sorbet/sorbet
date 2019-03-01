@@ -26,16 +26,6 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-bool wantTypedSource(const options::Options &opts, core::Context ctx, core::FileRef file) {
-    if (opts.print.TypedSource) {
-        return true;
-    }
-    if (opts.typedSource.empty()) {
-        return false;
-    }
-    return file.data(ctx).path().find(opts.typedSource) != string::npos;
-}
-
 class CFG_Collector_and_Typer {
     const options::Options &opts;
 
@@ -49,20 +39,12 @@ public:
         auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
 
-        bool printSrc = wantTypedSource(opts, ctx, m->loc.file());
-
-        if (print.CFGRaw || printSrc) {
-            cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
-        }
         if (opts.stopAfterPhase == options::Phase::CFG) {
             return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
-        if (print.CFG || print.CFGRaw) {
+        if (print.CFG) {
             fmt::print("{}\n\n", cfg->toString(ctx));
-        }
-        if (printSrc) {
-            cfg->recordAnnotations(ctx);
         }
         return m;
     }
@@ -267,9 +249,6 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
 
     core::StrictLevel minStrict = opts.forceMinStrict;
     core::StrictLevel maxStrict = opts.forceMaxStrict;
-    if (!opts.typedSource.empty() && fileData.path().find(opts.typedSource) != string::npos) {
-        minStrict = core::StrictLevel::Typed;
-    }
     auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil) {
@@ -448,7 +427,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     }
 
     try {
-        if (opts.print.CFG || opts.print.CFGRaw) {
+        if (opts.print.CFG) {
             fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
         CFG_Collector_and_Typer collector(opts);
@@ -457,10 +436,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
         }
-        if (wantTypedSource(opts, ctx, f)) {
-            fmt::print("{}", ctx.state.showAnnotatedSource(f));
-        }
-        if (opts.print.CFG || opts.print.CFGRaw) {
+        if (opts.print.CFG) {
             fmt::print("}}\n\n");
         }
     } catch (SorbetException &) {

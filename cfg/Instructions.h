@@ -187,16 +187,6 @@ public:
 };
 CheckSize(Cast, 64, 8);
 
-class DebugEnvironment final : public Instruction {
-public:
-    std::string str;
-    core::GlobalState::AnnotationPos pos;
-
-    DebugEnvironment(core::GlobalState::AnnotationPos pos);
-    virtual std::string toString(core::Context ctx);
-};
-CheckSize(DebugEnvironment, 48, 8);
-
 } // namespace sorbet::cfg
 
 #endif // SORBET_CFG_H

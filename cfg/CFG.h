@@ -65,7 +65,6 @@ public:
     };
 
     std::string toString(core::Context ctx);
-    void recordAnnotations(core::Context ctx);
     core::Loc loc() const;
 };
 
@@ -97,7 +96,6 @@ public:
     };
 
     std::string toString(core::Context ctx);
-    void recordAnnotations(core::Context ctx);
 
     // Flags
     static constexpr int LOOP_HEADER = 1 << 0;

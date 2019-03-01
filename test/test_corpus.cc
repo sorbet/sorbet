@@ -85,25 +85,14 @@ public:
 #define TEST_COUT TestCout()
 
 class CFG_Collector_and_Typer {
-    bool raw = false;
-    bool typedSource = false;
-
 public:
-    CFG_Collector_and_Typer(bool raw = false, bool typedSource = false) : raw(raw), typedSource(typedSource){};
     vector<string> cfgs;
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        if (raw || typedSource) {
-            cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
-        }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
-        if (typedSource) {
-            cfg->recordAnnotations(ctx);
-        }
-
         cfgs.emplace_back(cfg->toString(ctx));
         return m;
     }
@@ -112,7 +101,7 @@ public:
 UnorderedSet<string> knownPasses = {"parse-tree", "parse-tree-json", "ast",          "ast-raw",
                                     "dsl-tree",   "dsl-tree-raw",    "symbol-table", "symbol-table-raw",
                                     "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw",
-                                    "cfg",        "cfg-raw",         "typed-source", "autogen"};
+                                    "cfg",        "autogen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -495,40 +484,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
             dot << "}" << '\n' << '\n';
             got["cfg"].append(dot.str());
-
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("cfg-raw");
-        if (expectation != test.expectations.end()) {
-            checkTree();
-            checkPragma("cfg-raw");
-            CFG_Collector_and_Typer collector(true);
-            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
-            resolvedTree.tree.reset();
-
-            stringstream dot;
-            dot << "digraph \"" << rbName << "\" {" << '\n';
-            for (auto &cfg : collector.cfgs) {
-                dot << cfg << '\n' << '\n';
-            }
-            dot << "}" << '\n' << '\n';
-            got["cfg-raw"].append(dot.str());
-
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("typed-source");
-        if (expectation != test.expectations.end()) {
-            checkTree();
-            checkPragma("typed-source");
-            CFG_Collector_and_Typer collector(false, true);
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
-            resolvedTree.tree.reset();
-
-            got["typed-source"].append(gs.showAnnotatedSource(file));
 
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));

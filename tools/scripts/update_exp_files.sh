@@ -3,7 +3,7 @@ set -e
 
 COMMAND_FILE=$(mktemp)
 
-passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-raw typed-source autogen)
+passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg autogen)
 
 bazel build //main:sorbet-test-bootstrap -c opt "$@"
 

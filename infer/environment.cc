@@ -1039,11 +1039,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 if (c->cast == core::Names::let()) {
                     pinnedTypes[bind.bind.variable] = tp;
                 }
-            },
-            [&](cfg::DebugEnvironment *d) {
-                d->str = toString(ctx);
-                tp.type = core::Types::nilClass();
-                tp.origins.emplace_back(bind.loc);
             });
 
         ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));

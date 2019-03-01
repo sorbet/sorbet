@@ -99,15 +99,6 @@ public:
     std::string toString() {
         return toStringWithOptions();
     }
-    std::string showAnnotatedSource(FileRef file) const;
-    enum AnnotationPos { BEFORE, AFTER };
-    struct Annotation {
-        Loc loc;
-        std::string str;
-        AnnotationPos pos;
-        u4 blockId; // used to define order in case `loc`s are the same
-    };
-    void addAnnotation(Loc loc, std::string str, u4 blockId, AnnotationPos pos) const;
 
     bool hadCriticalError() const;
 
@@ -162,9 +153,6 @@ private:
     UnorderedSet<int> suppressed_error_classes;
     UnorderedSet<int> only_error_classes;
     bool wasModified_ = false;
-
-    mutable absl::Mutex annotations_mtx;
-    mutable std::vector<Annotation> annotations;
 
     bool freezeSymbolTable();
     bool freezeNameTable();
