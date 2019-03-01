@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=34:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3365:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=34:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
   method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=34:4}
     argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=5:1 end=5:8}

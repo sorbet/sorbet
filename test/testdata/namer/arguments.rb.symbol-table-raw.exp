@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3365:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/arguments.rb start=2:1 end=2:8}
     method <C <U A>><U take_arguments> (a, b, c, d, e, f, &g) @ Loc {file=test/testdata/namer/arguments.rb start=3:3 end=3:51}
       argument <C <U A>><U take_arguments>a<> @ Loc {file=test/testdata/namer/arguments.rb start=3:22 end=3:23}

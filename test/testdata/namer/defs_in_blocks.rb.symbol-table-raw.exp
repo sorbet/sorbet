@@ -1,8 +1,8 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3365:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
   method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}
     argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
     method <N <U <static-init>> $3><N <U <block>> $2> () @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=771:1 end=771:27}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=722:1 end=722:27}
     method <C <U Object>><U a_method> (<blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=5:3 end=5:15}
       argument <C <U Object>><U a_method><blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
     method <C <U Object>><U a_method_with_param> (a, <blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=8:3 end=8:29}

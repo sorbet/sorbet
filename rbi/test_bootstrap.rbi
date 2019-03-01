@@ -133,55 +133,6 @@ class RubyTyper::Shape < Hash
   V = type_member(:out)
   Elem = type_member(:out)
 end
-class RubyTyper::ENVClass
-  extend T::Generic
-  include Enumerable
-  Elem = type_member(:out, fixed: [String, T.nilable(String)])
-  sig do
-    params(
-        key: String,
-    )
-    .returns(T.nilable(String))
-  end
-  def [](key); end
-  sig do
-    params(
-        key: String,
-        value: T.nilable(String),
-    )
-    .returns(T.nilable(String))
-  end
-  def []=(key, value); end
-  sig do
-    params(
-        key: String,
-    )
-    .returns(String)
-  end
-  sig do
-    params(
-        key: String,
-        value: T.nilable(String),
-    )
-    .returns(String)
-  end
-  sig do
-    params(
-        key: String,
-        blk: T.proc.params(key: String).returns(String),
-    )
-    .returns(String)
-  end
-  def fetch(key, value=T.unsafe(nil), &blk); end
-  sig do
-    params(
-        key: String
-    )
-    .returns(T.any(TrueClass, FalseClass))
-  end
-  def key?(key); end
-end
-::ENV = T.let(T.unsafe(nil), RubyTyper::ENVClass)
 module RubyTyper::Void
 end
 class RubyTyper::ReturnTypeInference
