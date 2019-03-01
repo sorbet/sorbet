@@ -26,12 +26,10 @@ namespace sorbet::dsl {
  *
  * Any `prop` method call in a class body whose shape matches is considered.
  * `const ...` is the same as `prop ..., immutable: true`.
- * `optional ...` is the same as `prop ..., optional: true`.
  * The getter will return `T.nilable(TheType)` and the setter will take `TheType`.
  * In the last param if there is a:
  *   type: TheType - overrides the second param.
  *   array: TheType - overrides the second param and makes it an `Array[TheValue]`.
- *   optional: true - the setter can be passed `nil`.
  *   default: - the getter isn't nilable anymore.
  *   factory: - same as default:.
  *

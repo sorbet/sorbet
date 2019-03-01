@@ -33,28 +33,21 @@ class ForeignClass
 end
 
 class AdvancedODM
-    prop :default_without_optional_false, String, default: ""
-    prop :optional_false, String, optional: false
-    prop :nodefault, String
+    prop :default, String, default: ""
     prop :t_nilable, T.nilable(String)
 
-    prop :type, type: String, optional: false
+    prop :type, type: String
     prop :object
-    prop :array, Array, optional: false
-    prop :array_of, array: String, optional: false
-    prop :array_of_explicit, Array, array: String, optional: false
-    prop :t_array, T::Array[String], optional: false
-    prop :hash_of, T::Hash[Symbol, String], optional: false
+    prop :array, Array
+    prop :array_of, array: String
+    prop :array_of_explicit, Array, array: String
+    prop :t_array, T::Array[String]
+    prop :hash_of, T::Hash[Symbol, String]
 
-    prop :optional_explicit, String, optional: true, optional: false
-    prop :optional_existing, String, optional: :existing, optional: false
-    optional :optional, String, optional: false
-    optional :optional_nilable, T.nilable(String), optional: false
+    prop :const_explicit, String, immutable: true
+    const :const, String
 
-    prop :const_explicit, String, immutable: true, optional: false
-    const :const, String, optional: false
-
-    prop :no_class_arg, type: Array, immutable: true, optional: true, array: String, optional: false
+    prop :no_class_arg, type: Array, immutable: true, array: String
 
     prop :enum_prop, enum: ["hello", "goodbye"]
 
@@ -87,77 +80,59 @@ class EncryptedProp
 end
 
 def main
-    T.assert_type!(SomeODM.new.foo, T.nilable(String)) # TODO(jez) This some of these are redundant
-    T.assert_type!(SomeODM.new.foo, String)
-    T.assert_type!(SomeODM.new.foo = 'b', String)
-    T.assert_type!(SomeODM.new.foo2, T.nilable(String))
-    T.assert_type!(SomeODM.new.foo2, String) # error: Argument does not have asserted type
-    T.assert_type!(SomeODM.new.foo2 = 'b', String)
+    T.reveal_type(SomeODM.new.foo) # error: Revealed type: `String`
+    T.reveal_type(SomeODM.new.foo = 'b') # error: Revealed type: `String`
+    T.reveal_type(SomeODM.new.foo2) # error: Revealed type: `T.nilable(String)`
+    T.reveal_type(SomeODM.new.foo2 = 'b') # error: Revealed type: `String`
 
-    T.assert_type!(AdvancedODM.new.default_without_optional_false, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.optional_false, String)
-    T.assert_type!(AdvancedODM.new.nodefault, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.nodefault, String)
+    T.reveal_type(AdvancedODM.new.default) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.t_nilable) # error: Revealed type: `T.nilable(String)`
 
-    T.assert_type!(AdvancedODM.new.type, String)
-    T.assert_type!(AdvancedODM.new.object, T.nilable(Object))
-    # Sadly I can't check this for allowed nillnes since NilClass is an Object
-    # T.assert_type!(AdvancedODM.new.object, Object) # not-a-error: argument does not have asserted type
-    T.assert_type!(AdvancedODM.new.array, Array)
-    T.assert_type!(AdvancedODM.new.array_of, T::Array[String])
-    T.assert_type!(AdvancedODM.new.array_of_explicit, T::Array[String])
-    T.assert_type!(AdvancedODM.new.t_array, T::Array[String])
-    T.assert_type!(AdvancedODM.new.hash_of, T::Hash[Symbol, String])
+    T.reveal_type(AdvancedODM.new.type) # error: Revealed type: `String`
+    T.reveal_type(AdvancedODM.new.object) # error: Revealed type: `Object`
+    T.reveal_type(AdvancedODM.new.array) # error: Revealed type: `T::Array[T.untyped]`
+    T.reveal_type(AdvancedODM.new.array_of) # error: Revealed type: `T::Array[String]`
+    T.reveal_type(AdvancedODM.new.array_of_explicit) # error: Revealed type: `T::Array[T.untyped]`
+    T.reveal_type(AdvancedODM.new.t_array) # error: Revealed type: `T::Array[String]`
+    T.reveal_type(AdvancedODM.new.hash_of) # error: Revealed type: `T::Hash[Symbol, String]`
 
-    T.assert_type!(AdvancedODM.new.optional_explicit, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.optional_existing, T.nilable(String))
-    AdvancedODM.new.optional_existing = 'b'
-    AdvancedODM.new.optional_existing = nil # error: does not match expected type
-    T.assert_type!(AdvancedODM.new.optional_false, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.optional, T.nilable(String))
-    AdvancedODM.new.optional = 'b'
-    AdvancedODM.new.optional = nil
-    T.assert_type!(AdvancedODM.new.optional_nilable, T.nilable(String))
-
-    T.assert_type!(AdvancedODM.new.const_explicit, String)
+    T.reveal_type(AdvancedODM.new.const_explicit) # error: Revealed type: `String`
     AdvancedODM.new.const_explicit = 'b' # error: Method `const_explicit=` does not exist on `AdvancedODM`
-    T.assert_type!(AdvancedODM.new.const, String)
+    T.reveal_type(AdvancedODM.new.const) # error: Revealed type: `String`
     AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
 
-    T.assert_type!(AdvancedODM.new.no_class_arg, T.nilable(T::Array[String]))
+    T.reveal_type(AdvancedODM.new.no_class_arg) # error: Revealed type: `T::Array[T.untyped]`
     AdvancedODM.new.no_class_arg = ['b'] # error: Method `no_class_arg=` does not exist on `AdvancedODM`
 
-    # T.assert_type!(AdvancedODM.new.enum_prop, T.noreturn) # no longer true
+    T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `T.untyped`
     AdvancedODM.new.enum_prop = "hello" # error: Method `enum_prop=` does not exist
 
-    T.assert_type!(AdvancedODM.new.foreign_, T.nilable(ForeignClass))
-    T.assert_type!(AdvancedODM.new.foreign_, ForeignClass) # error: Argument does not have asserted type
-    T.assert_type!(AdvancedODM.new.foreign_lazy_, T.nilable(ForeignClass))
+    T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
+    T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(ForeignClass)`
 
     # Check that the method still exists even if we can't parse the type
     AdvancedODM.new.foreign_invalid_
 
-    T.assert_type!(PropHelpers.new.token, String)
+    T.reveal_type(PropHelpers.new.token) # error: Revealed type: `String`
     PropHelpers.new.token = "tok_token"
     PropHelpers.new.token = nil # error: does not match expected type
 
-    T.assert_type!(PropHelpers.new.created, Float)
+    T.reveal_type(PropHelpers.new.created) # error: Revealed type: `Float`
     PropHelpers.new.created = 0.0
     PropHelpers.new.created = nil # error: does not match expected type
 
-    T.assert_type!(PropHelpers2.new.token, String)
+    T.reveal_type(PropHelpers2.new.token) # error: Revealed type: `String`
     PropHelpers2.new.token = "tok_token"
     PropHelpers2.new.token = nil # error: does not match expected type
 
-    T.assert_type!(PropHelpers2.new.created, Float)
+    T.reveal_type(PropHelpers2.new.created) # error: Revealed type: `Float`
     PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist
 
-    T.assert_type!(ShardingProp.new.merchant, String)
+    T.reveal_type(ShardingProp.new.merchant) # error: Revealed type: `String`
     ShardingProp.new.merchant = "hi" # error: Method `merchant=` does not exist
 
-    T.assert_type!(EncryptedProp.new.foo, T.nilable(String))
-    T.assert_type!(EncryptedProp.new.encrypted_foo, T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue))
+    T.reveal_type(EncryptedProp.new.foo) # error: Revealed type: `T.nilable(String)`
+    T.reveal_type(EncryptedProp.new.encrypted_foo) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
     EncryptedProp.new.bar = "hello" # error: Method `bar=` does not exist

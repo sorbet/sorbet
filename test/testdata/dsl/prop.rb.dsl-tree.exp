@@ -70,7 +70,7 @@ class <emptyTree><<C <U <root>>>> < ()
       self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def <U default_without_optional_false><<C <U <todo sym>>>>(&<U <blk>>)
+    def <U default><<C <U <todo sym>>>>(&<U <blk>>)
       ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
@@ -78,39 +78,7 @@ class <emptyTree><<C <U <root>>>> < ()
       self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
-    def <U default_without_optional_false=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional_false><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional_false=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U nodefault><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U nodefault=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+    def <U default=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
       ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
@@ -312,70 +280,6 @@ class <emptyTree><<C <U <root>>>> < ()
       def <U hash_of><<C <U <todo sym>>>>(&<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), ::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U HashMutator>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
       end
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional_explicit><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional_existing><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional_existing=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
-    end
-
-    def <U optional><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
-    end
-
-    def <U optional=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U String>>))
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-    end
-
-    def <U optional_nilable><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-    end
-
-    ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)))
-    end
-
-    def <U optional_nilable=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), ::T.<U nilable>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)))
     end
 
     ::Sorbet.<U sig>() do ||
@@ -679,59 +583,45 @@ class <emptyTree><<C <U <root>>>> < ()
 
   def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo>(), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo=>("b"), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2>(), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2=>("b"), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U default_without_optional_false>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_false>(), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U nodefault>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U nodefault>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo=>("b"))
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U SomeODM>>.<U new>().<U foo2=>("b"))
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U default>())
       <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U t_nilable>())
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U type>(), <emptyTree>::<C <U String>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U object>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Object>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array>(), <emptyTree>::<C <U Array>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array_of>(), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array_of_explicit>(), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U t_array>(), <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U hash_of>(), <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_explicit>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_existing>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_existing=>("b")
-      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_existing=>(nil)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_false>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional=>("b")
-      <emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional=>(nil)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U optional_nilable>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U const_explicit>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U type>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U object>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array_of>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U array_of_explicit>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U t_array>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U hash_of>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U const_explicit>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U const_explicit=>("b")
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U const>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U const>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U const=>("b")
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U no_class_arg>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)))
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U no_class_arg>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U no_class_arg=>(["b"])
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U enum_prop>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U enum_prop=>("hello")
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_>(), <emptyTree>::<C <U ForeignClass>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_lazy_>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_lazy_>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_invalid_>()
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U token>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U token>())
       <emptyTree>::<C <U PropHelpers>>.<U new>().<U token=>("tok_token")
       <emptyTree>::<C <U PropHelpers>>.<U new>().<U token=>(nil)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U created>(), <emptyTree>::<C <U Float>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U created>())
       <emptyTree>::<C <U PropHelpers>>.<U new>().<U created=>(0.000000)
       <emptyTree>::<C <U PropHelpers>>.<U new>().<U created=>(nil)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers2>>.<U new>().<U token>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U PropHelpers2>>.<U new>().<U token>())
       <emptyTree>::<C <U PropHelpers2>>.<U new>().<U token=>("tok_token")
       <emptyTree>::<C <U PropHelpers2>>.<U new>().<U token=>(nil)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U PropHelpers2>>.<U new>().<U created>(), <emptyTree>::<C <U Float>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U PropHelpers2>>.<U new>().<U created>())
       <emptyTree>::<C <U PropHelpers2>>.<U new>().<U created=>(0.000000)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U ShardingProp>>.<U new>().<U merchant>(), <emptyTree>::<C <U String>>)
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U ShardingProp>>.<U new>().<U merchant>())
       <emptyTree>::<C <U ShardingProp>>.<U new>().<U merchant=>("hi")
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-      <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U EncryptedProp>>.<U new>().<U encrypted_foo>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U EncryptedProp>>.<U new>().<U encrypted_foo>())
       <emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo=>("hello")
       <emptyTree>::<C <U EncryptedProp>>.<U new>().<U foo=>(nil)
       <emptyTree>::<C <U EncryptedProp>>.<U new>().<U bar=>("hello")

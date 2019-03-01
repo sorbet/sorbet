@@ -12,7 +12,6 @@ using namespace std;
 namespace sorbet::dsl {
 
 vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
-    bool isOptional = false;  // Can the setter be passed nil?
     bool isImmutable = false; // Are there no setters?
     vector<unique_ptr<ast::Expression>> empty;
     unique_ptr<ast::Expression> type;
@@ -23,10 +22,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     switch (send->fun._id) {
         case core::Names::prop()._id:
             // Nothing special
-            break;
-        case core::Names::optional()._id:
-            // TODO(jez) Remove this
-            isOptional = true;
             break;
         case core::Names::const_()._id:
             isImmutable = true;
@@ -143,16 +138,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     auto getType = ASTUtil::dupType(type.get());
     ENFORCE(getType != nullptr);
 
-    if (auto send = ast::cast_tree<ast::Send>(type.get())) {
-        // A heuristic for detecting the API Param Spec
-        if (isOptional && send->fun != core::Names::squareBrackets()) {
-            auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv.get());
-            if (cnst == nullptr || cnst->cnst != core::Symbols::T().data(ctx)->name) {
-                return empty;
-            }
-        }
-    }
-
     // From this point, we can't `return empty` anymore since we're going to be
     // consuming the tree.
 
@@ -182,10 +167,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     // Compute the setter
     if (!isImmutable) {
         auto setType = ASTUtil::dupType(type.get());
-        if (isOptional) {
-            setType = mkNilable(loc, std::move(setType));
-        }
-
         stats.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
@@ -219,9 +200,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     {
         // Compute a setter
         auto setType = ASTUtil::dupType(type.get());
-        if (isOptional) {
-            setType = mkNilable(loc, std::move(setType));
-        }
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
