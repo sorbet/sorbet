@@ -39,6 +39,11 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
 }
 
 void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+    if (ctx.state.forAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return;
+    }
+
     if (!isCommand(ctx, klass)) {
         return;
     }

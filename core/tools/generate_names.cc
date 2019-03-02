@@ -190,6 +190,14 @@ NameDef names[] = {
     {"Encryptable", "Encryptable", true},
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
+
+    {"Google", "Google", true},
+    {"Protobuf", "Protobuf", true},
+    {"DescriptorPool", "DescriptorPool", true},
+    {"generatedPool", "generated_pool"},
+    {"lookup"},
+    {"msgclass"},
+    {"enummodule"},
     // end DSL methods
 
     // Our own special methods which have special meaning

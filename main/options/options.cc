@@ -289,10 +289,8 @@ void readOptions(Options &opts, int argc, char *argv[],
             logger->info("lsp mode does not yet support caching.");
             throw EarlyReturnWithCode(1);
         }
-        if ((opts.print.Autogen || opts.print.AutogenMsgPack) &&
-            (opts.stopAfterPhase != Phase::NAMER || !opts.skipDSLPasses)) {
-            logger->info("-p autogen{} requires --stop-after=namer --skip-dsl-passes",
-                         opts.print.AutogenMsgPack ? "-msgpack" : "");
+        if ((opts.print.Autogen || opts.print.AutogenMsgPack) && (opts.stopAfterPhase != Phase::NAMER)) {
+            logger->info("-p autogen{} requires --stop-after=namer", opts.print.AutogenMsgPack ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
         }
 

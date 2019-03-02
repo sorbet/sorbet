@@ -27,6 +27,11 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
 vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
 
+    if (ctx.state.forAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return empty;
+    }
+
     auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
     if (lhs == nullptr) {
         return empty;

@@ -115,6 +115,11 @@ public:
     bool autocorrect = false;
     bool suggestRuntimeProfiledType = false;
     bool isInitialized = false;
+    // So we can know whether we're running in autogen mode.
+    // Right now this is only used to turn certain DSL passes on or off.
+    // Think very hard before looking at this value in namer / resolver!
+    // (hint: probably you want to find an alternate solution)
+    bool forAutogen = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;

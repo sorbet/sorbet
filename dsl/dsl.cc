@@ -7,6 +7,7 @@
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
+#include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
@@ -28,6 +29,12 @@ public:
             typecase(stat.get(),
                      [&](ast::Assign *assign) {
                          auto nodes = Struct::replaceDSL(ctx, assign);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = std::move(nodes);
+                             return;
+                         }
+
+                         nodes = ProtobufDescriptorPool::replaceDSL(ctx, assign);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = std::move(nodes);
                              return;

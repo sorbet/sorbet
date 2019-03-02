@@ -12,6 +12,11 @@ using namespace std;
 
 namespace sorbet::dsl {
 unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+    if (ctx.state.forAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return send;
+    }
+
     if (send->fun != core::Names::wrapInstance()) {
         return send;
     }

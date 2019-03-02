@@ -12,8 +12,14 @@ using namespace std;
 namespace sorbet::dsl {
 
 vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
-    bool isImmutable = false; // Are there no setters?
     vector<unique_ptr<ast::Expression>> empty;
+
+    if (ctx.state.forAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return empty;
+    }
+
+    bool isImmutable = false; // Are there no setters?
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
     core::NameRef name = core::NameRef::noName();

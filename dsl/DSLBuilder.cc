@@ -21,6 +21,11 @@ namespace sorbet::dsl {
 vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
+    if (ctx.state.forAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return empty;
+    }
+
     bool nilable = false;
     bool implied = false;
     bool skipGetter = false;

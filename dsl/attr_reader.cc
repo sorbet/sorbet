@@ -136,6 +136,11 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
                                                            const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> empty;
 
+    if (ctx.state.forAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return empty;
+    }
+
     bool makeReader = false;
     bool makeWriter = false;
     if (send->fun == core::Names::attr() || send->fun == core::Names::attrReader() ||

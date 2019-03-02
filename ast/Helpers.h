@@ -92,6 +92,11 @@ public:
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
     }
 
+    static std::unique_ptr<Reference> OptionalArg(core::Loc loc, std::unique_ptr<Reference> inner,
+                                                  std::unique_ptr<Expression> default_) {
+        return std::make_unique<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
+    }
+
     static std::unique_ptr<Reference> KeywordArg(core::Loc loc, std::unique_ptr<Reference> inner) {
         return std::make_unique<ast::KeywordArg>(loc, std::move(inner));
     }
@@ -318,7 +323,8 @@ public:
             // Recurse into structure to find the Local
             typecase(arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
                      [&](class KeywordArg *kw) { arg = kw->expr.get(); },
-                     [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
+                     [&](class OptionalArg *opt) { arg = opt->expr.get(); },
+                     [&](BlockArg *blk) { arg = blk->expr.get(); },
                      [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
                      // ENFORCES are last so that we don't pay the price of casting in the happy path.
                      [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },

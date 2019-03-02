@@ -268,9 +268,8 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
 
     fileData.strictLevel = max(min(fileData.strictLevel, maxStrict), minStrict);
 
-    if (opts.print.Autogen || opts.print.AutogenMsgPack) {
-        // Autogen stops before infer but needs to see
-        // all definitions
+    if (gs->forAutogen) {
+        // Autogen stops before infer but needs to see all definitions
         fileData.strictLevel = core::StrictLevel::Stripe;
     }
 
