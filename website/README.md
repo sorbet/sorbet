@@ -113,5 +113,5 @@ If you make changes to the logo and want to re-generate the `.ico` file, install
 ImageMagick and then run:
 
 ```
-convert ../logo/sorbet-logo.svg -define icon:auto-resize static/img/favicon.ico
+convert ../logo/sorbet-logo.svg -transparent white -define icon:auto-resize static/img/favicon.ico
 ```
