@@ -223,6 +223,29 @@ bool assertResponseMessage(int expectedId, const LSPMessage &response) {
     return false;
 }
 
+bool assertResponseError(int code, string_view msg, const LSPMessage &response) {
+    EXPECT_TRUE(response.isResponse()) << fmt::format(
+        "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
+    if (response.isResponse()) {
+        auto &r = response.asResponse();
+        auto &maybeError = r.error;
+        if (maybeError.has_value()) {
+            auto &error = *maybeError;
+            EXPECT_EQ(error->code, code) << fmt::format("Response message contains error with unexpected code:\n{}",
+                                                        error->toJSON());
+
+            bool msgMatches = error->message.find(msg) != string::npos;
+            EXPECT_TRUE(msgMatches) << fmt::format("Expected a response message with error `{}: {}`, but received:\n{}",
+                                                   code, msg, response.toJSON());
+            return error->code == code && msgMatches;
+        } else {
+            ADD_FAILURE() << fmt::format("Expected a response message with an error, but received:\n{}",
+                                         response.toJSON());
+        }
+    }
+    return false;
+}
+
 bool assertNotificationMessage(const string &expectedMethod, const LSPMessage &response) {
     if (!response.isNotification()) {
         failWithUnexpectedLSPResponse(response);

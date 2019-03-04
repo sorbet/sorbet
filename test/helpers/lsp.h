@@ -22,11 +22,15 @@ std::unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
 
-/** Asserts that the JSONBaseType is a ResponseMessage with the given id. Returns true on success, fails
+/** Asserts that the LSPMessage is a ResponseMessage with the given id. Returns true on success, fails
  * the test otherwise. */
 bool assertResponseMessage(int expectedId, const LSPMessage &response);
 
-/** Asserts that the JSONBaseType is a NotificationMessage with the given method. Returns true on
+/** Asserts that the LSPMessage is a ResponseMessage with an error of the given code and that
+ * contains the given message. Returns true on success, fails otherwise. */
+bool assertResponseError(int code, std::string_view msg, const LSPMessage &response);
+
+/** Asserts that the LSPMessage is a NotificationMessage with the given method. Returns true on
  * success, fails the test otherwise. */
 bool assertNotificationMessage(const std::string &expectedMethod, const LSPMessage &response);
 

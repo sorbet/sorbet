@@ -6,6 +6,29 @@ sh_binary(
     data = ["//main:sorbet"],
 )
 
+cc_test(
+    name = "protocol_test_corpus",
+    size = "medium",
+    srcs = glob([
+        "*.cc",
+        "*.h",
+    ]),
+    copts = ["-Iexternal/gtest/include"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//core",
+        "//main/lsp",
+        "//payload:test_bootstrap",
+        "//test/helpers",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 test_suite(
     name = "lsp",
     tests = [lsp_test(script) for script in glob(["*/*.rec"])],
