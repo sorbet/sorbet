@@ -3,11 +3,12 @@
 
 namespace sorbet::core {
 enum class StrictLevel {
-    // No errors are at this level.
-    None = 0,
-
     // Internal Sorbet errors. There is no syntax to make those errors ignored.
-    Internal = 1,
+    // This error should _always_ be lower than any other level so that there's no way to silence internal errors.
+    Internal = 0,
+
+    // No user errors are at this level.
+    None = 1,
 
     // Don't even parse this file.
     Ignore = 2,

@@ -214,7 +214,8 @@ com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict
         case core::StrictLevel::None:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_None;
         case core::StrictLevel::Internal:
-            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Internal;
+            Exception::raise(
+                "Should never happen"); // we should never attempt to serialize any state that had internal errors
         case core::StrictLevel::Ignore:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Ignore;
         case core::StrictLevel::Stripe:
