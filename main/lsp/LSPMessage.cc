@@ -23,6 +23,28 @@ MessageId::operator variant<int, string, JSONNullObject>() const {
     return id;
 }
 
+bool MessageId::isInt() const {
+    return !!get_if<int>(&id);
+}
+
+int MessageId::asInt() const {
+    if (auto intId = get_if<int>(&id)) {
+        return *intId;
+    }
+    Exception::raise("MessageId is not an int.");
+}
+
+bool MessageId::isString() const {
+    return !!get_if<string>(&id);
+}
+
+string MessageId::asString() const {
+    if (auto stringId = get_if<string>(&id)) {
+        return *stringId;
+    }
+    Exception::raise("MessageId is not a string.");
+}
+
 LSPMessage::RawLSPMessage fromJSONValue(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d) {
     if (d.HasMember("result")) {
         return ResponseMessage::fromJSONValue(alloc, d.GetObject(), "root");
@@ -206,6 +228,18 @@ double LSPMessage::timestamp() const {
         return asNotification().sorbet_receive_timestamp.value_or(0.0);
     } else if (isResponse()) {
         return asResponse().sorbet_receive_timestamp.value_or(0.0);
+    } else {
+        Exception::raise("LSPMessage is not a request, notification, or a response.");
+    }
+}
+
+string LSPMessage::toJSON() const {
+    if (isRequest()) {
+        return asRequest().toJSON();
+    } else if (isNotification()) {
+        return asNotification().toJSON();
+    } else if (isResponse()) {
+        return asResponse().toJSON();
     } else {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }

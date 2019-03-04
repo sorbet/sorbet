@@ -20,6 +20,11 @@ public:
     MessageId(const std::variant<int, std::string, JSONNullObject> id);
 
     operator std::variant<int, std::string, JSONNullObject>() const;
+
+    bool isInt() const;
+    int asInt() const;
+    bool isString() const;
+    std::string asString() const;
 };
 
 /**
@@ -132,6 +137,11 @@ public:
      * Retrieve the internal `sorbet_receive_timestamp` property on this message. Returns 0.0 if not specified.
      */
     double timestamp() const;
+
+    /**
+     * Returns the message in JSON form.
+     */
+    std::string toJSON() const;
 };
 } // namespace sorbet::realmain::lsp
 
