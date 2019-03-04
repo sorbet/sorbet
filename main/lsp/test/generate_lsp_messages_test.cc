@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "common/common.h"
+#include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
@@ -267,6 +268,24 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
     symbols.push_back((SymbolKind)-1);
     symbolKind->valueSet = make_optional<std::vector<SymbolKind>>(std::move(symbols));
     ASSERT_THROW(symbolKind->toJSON(), InvalidEnumValueError);
+}
+
+// Ensures that LSPMessage parses ResultMessage/ResultMessageWithError/RequestMessage/NotificationMessage properly.
+TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
+    auto request = make_unique<RequestMessage>("2.0", 1, "foobar");
+    auto response = make_unique<ResponseMessage>("2.0", 1);
+    // Null result.
+    response->result = make_unique<rapidjson::Value>();
+    auto responseWithError = make_unique<ResponseMessage>("2.0", 1);
+    responseWithError->error = make_unique<ResponseError>(20, "Bad request");
+    auto notification = make_unique<NotificationMessage>("2.0", "foobar");
+
+    // For each, serialize as a JSON document to force LSPMessage to re-deserialize it.
+    // Checks that LSPMessage recognizes each as the correct type of message.
+    ASSERT_TRUE(LSPMessage(alloc, request->toJSON()).isRequest());
+    ASSERT_TRUE(LSPMessage(alloc, response->toJSON()).isResponse());
+    ASSERT_TRUE(LSPMessage(alloc, responseWithError->toJSON()).isResponse());
+    ASSERT_TRUE(LSPMessage(alloc, notification->toJSON()).isNotification());
 }
 
 } // namespace sorbet::realmain::lsp::test
