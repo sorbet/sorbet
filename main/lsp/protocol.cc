@@ -274,10 +274,14 @@ void LSPLoop::sendResponse(const MessageId &id, const vector<unique_ptr<JSONBase
     sendRaw(resp.toJSON());
 }
 
-void LSPLoop::sendError(const MessageId &id, int errorCode, string_view errorMsg) {
+void LSPLoop::sendError(const MessageId &id, unique_ptr<ResponseError> error) {
     auto resp = ResponseMessage("2.0", id);
-    resp.error = make_unique<ResponseError>(errorCode, string(errorMsg));
+    resp.error = move(error);
     sendRaw(resp.toJSON());
+}
+
+void LSPLoop::sendError(const MessageId &id, int errorCode, string_view errorMsg) {
+    sendError(id, make_unique<ResponseError>(errorCode, string(errorMsg)));
 }
 
 unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) {

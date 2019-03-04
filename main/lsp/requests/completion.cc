@@ -188,47 +188,57 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
                                                                     const CompletionParams &params) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
 
-    auto finalGs = move(gs);
-    auto run = setupLSPQueryByLoc(move(finalGs), id, params.textDocument->uri, *params.position,
-                                  LSPMethod::TextDocumentCompletion(), false);
-    finalGs = move(run.gs);
-    auto &queryResponses = run.responses;
-    vector<unique_ptr<CompletionItem>> items;
-    if (!queryResponses.empty()) {
-        auto resp = move(queryResponses[0]);
+    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
+                                     LSPMethod::TextDocumentCompletion(), false);
 
-        if (auto sendResp = resp->isSend()) {
-            auto pattern = sendResp->name.data(*finalGs)->shortName(*finalGs);
-            auto receiverType = sendResp->receiver.type;
-            logger->debug("Looking for method similar to {}", pattern);
-            UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                findSimilarMethodsIn(*finalGs, receiverType, pattern);
-            vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
-            methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
-                                 make_move_iterator(methods.end()));
-            fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                auto leftShortName = leftPair.first.data(*finalGs)->shortName(*finalGs);
-                auto rightShortName = rightPair.first.data(*finalGs)->shortName(*finalGs);
-                if (leftShortName != rightShortName) {
-                    return leftShortName < rightShortName;
+    if (auto run = get_if<TypecheckRun>(&result)) {
+        auto finalGs = move(run->gs);
+        auto &queryResponses = run->responses;
+        vector<unique_ptr<CompletionItem>> items;
+        if (!queryResponses.empty()) {
+            auto resp = move(queryResponses[0]);
+
+            if (auto sendResp = resp->isSend()) {
+                auto pattern = sendResp->name.data(*finalGs)->shortName(*finalGs);
+                auto receiverType = sendResp->receiver.type;
+                logger->debug("Looking for method similar to {}", pattern);
+                UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
+                    findSimilarMethodsIn(*finalGs, receiverType, pattern);
+                vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
+                methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
+                                     make_move_iterator(methods.end()));
+                fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
+                    auto leftShortName = leftPair.first.data(*finalGs)->shortName(*finalGs);
+                    auto rightShortName = rightPair.first.data(*finalGs)->shortName(*finalGs);
+                    if (leftShortName != rightShortName) {
+                        return leftShortName < rightShortName;
+                    }
+                    return leftPair.first._id < rightPair.first._id;
+                });
+                for (auto &entry : methodsSorted) {
+                    if (entry.second[0].exists()) {
+                        fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                        items.push_back(getCompletionItem(*finalGs, entry.second[0], sendResp->receiver.type,
+                                                          sendResp->constraint));
+                    }
                 }
-                return leftPair.first._id < rightPair.first._id;
-            });
-            for (auto &entry : methodsSorted) {
-                if (entry.second[0].exists()) {
-                    fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                    items.push_back(
-                        getCompletionItem(*finalGs, entry.second[0], sendResp->receiver.type, sendResp->constraint));
-                }
+            } else if (auto identResp = resp->isIdent()) {
+                findSimilarConstantOrIdent(*finalGs, identResp->retType.type, items);
+            } else if (auto constantResp = resp->isConstant()) {
+                findSimilarConstantOrIdent(*finalGs, constantResp->retType.type, items);
             }
-        } else if (auto identResp = resp->isIdent()) {
-            findSimilarConstantOrIdent(*finalGs, identResp->retType.type, items);
-        } else if (auto constantResp = resp->isConstant()) {
-            findSimilarConstantOrIdent(*finalGs, constantResp->retType.type, items);
         }
+        sendResponse(id, CompletionList(false, move(items)));
+        return finalGs;
+    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
+        // An error happened while setting up the query.
+        sendError(id, move(error->first));
+        return move(error->second);
+    } else {
+        // Should never happen, but satisfy the compiler.
+        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
+        return nullptr;
     }
-    sendResponse(id, CompletionList(false, move(items)));
-    return finalGs;
 }
 
 } // namespace sorbet::realmain::lsp

@@ -33,28 +33,31 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
     return rv;
 }
 
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                  string_view uri, const Position &pos, const LSPMethod &forMethod,
-                                                  bool errorIfFileIsUntyped) {
+variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
+LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
+                            const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
-        sendError(id, (int)LSPErrorCodes::InvalidParams,
-                  fmt::format("Did not find file at uri {} in {}", uri, forMethod.name));
-        return TypecheckRun{{}, {}, {}, move(gs)};
+        return make_pair(
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
+                                       fmt::format("Did not find file at uri {} in {}", uri, forMethod.name)),
+            move(gs));
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::Typed) {
-        sendError(id, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
         sendShowMessageNotification(
             MessageType::Error,
             "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
-        return TypecheckRun{{}, {}, {}, move(gs)};
+        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
+                                                    "This feature only works correctly on typed ruby files."),
+                         move(gs));
     }
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
-        sendError(id, (int)LSPErrorCodes::InvalidParams,
-                  fmt::format("Did not find location at uri {} in {}", uri, forMethod.name));
-        return TypecheckRun{{}, {}, {}, move(gs)};
+        return make_pair(
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
+                                       fmt::format("Did not find location at uri {} in {}", uri, forMethod.name)),
+            move(gs));
     }
 
     vector<shared_ptr<core::File>> files;

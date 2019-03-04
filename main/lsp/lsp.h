@@ -207,6 +207,7 @@ class LSPLoop {
     void sendNullResponse(const MessageId &id);
     void sendResponse(const MessageId &id, const JSONBaseType &result);
     void sendResponse(const MessageId &id, const std::vector<std::unique_ptr<JSONBaseType>> &result);
+    void sendError(const MessageId &id, std::unique_ptr<ResponseError> error);
     void sendError(const MessageId &id, int errorCode, std::string_view errorMsg);
 
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
@@ -251,8 +252,9 @@ class LSPLoop {
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
     TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
-    TypecheckRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, const MessageId &id, std::string_view uri,
-                                    const Position &pos, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
+    std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
+    setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
+                       const LSPMethod &forMethod, bool errorIfFileIsUntyped);
     TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
                                        const LSPMethod &forMethod);
     std::unique_ptr<core::GlobalState> handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs,
