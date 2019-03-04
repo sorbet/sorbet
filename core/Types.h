@@ -25,6 +25,7 @@ class TypeAndOrigins;
 // using TypePtr = std::shared_ptr<Type>;
 class TypePtr {
     std::shared_ptr<Type> store;
+    TypePtr(std::shared_ptr<Type> &&store);
 
 public:
     TypePtr() = default;
@@ -57,10 +58,12 @@ public:
     bool operator==(std::nullptr_t n) const {
         return store == nullptr;
     }
+
+    template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
-    return TypePtr(new T(std::forward<Args>(args)...));
+    return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
 }
 
 class Types final {

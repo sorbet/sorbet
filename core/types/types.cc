@@ -19,6 +19,8 @@ namespace sorbet::core {
 
 using namespace std;
 
+TypePtr::TypePtr(shared_ptr<Type> &&store) : store(move(store)){};
+
 TypePtr Types::top() {
     static auto res = make_type<ClassType>(Symbols::top());
     return res;
