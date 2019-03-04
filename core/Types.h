@@ -33,7 +33,8 @@ public:
     TypePtr(const TypePtr &other) = default;
     TypePtr &operator=(TypePtr &&other) = default;
     TypePtr &operator=(const TypePtr &other) = default;
-    TypePtr(Type *ptr) : store(ptr) {}
+    explicit TypePtr(Type *ptr) : store(ptr) {}
+    TypePtr(std::nullptr_t n) : store(nullptr) {}
     operator bool() const {
         return (bool)store;
     }
