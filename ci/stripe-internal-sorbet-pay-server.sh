@@ -31,6 +31,11 @@ fi
 mkdir -p /build/bin
 cp bazel-bin/main/sorbet /build/bin
 
+ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/llvm_toolchain/bin/llvm-symbolizer"
+ASAN_SYMBOLIZER_PATH="$(realpath "$ASAN_SYMBOLIZER_PATH")"
+export ASAN_SYMBOLIZER_PATH
+$ASAN_SYMBOLIZER_PATH -version
+
 SORBET_CACHE_DIR=$(mktemp -d)
 mkdir -p "${SORBET_CACHE_DIR}/bin"
 export SORBET_CACHE_DIR
@@ -149,8 +154,6 @@ fi
 
 
 # Run 2: Make sure we don't crash on all of pay-server with ASAN on
-ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/llvm_toolchain/bin/llvm-symbolizer"
-export ASAN_SYMBOLIZER_PATH
 ASAN_OPTIONS=detect_leaks=0
 export ASAN_OPTIONS
 UBSAN_OPTIONS=print_stacktrace=1
