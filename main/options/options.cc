@@ -383,20 +383,18 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (opts.suggestTyped) {
-            if (!opts.errorCodeWhiteList.empty()) {
-                logger->error("--suggest-typed can't use --error-white-list");
+            if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code}) {
+                logger->error("--suggest-typed needs --error-white-list={}", core::errors::Infer::SuggestTyped.code);
                 throw EarlyReturnWithCode(1);
             }
             if (!opts.errorCodeBlackList.empty()) {
                 logger->error("--suggest-typed can't use --error-black-list");
                 throw EarlyReturnWithCode(1);
             }
-            if (opts.forceMinStrict != core::StrictLevel::Ignore) {
-                logger->error("--suggest-typed can't use --typed");
+            if (raw["typed"].as<string>() != "strict") {
+                logger->error("--suggest-typed needs --typed=strict");
                 throw EarlyReturnWithCode(1);
             }
-            opts.errorCodeWhiteList.emplace_back(core::errors::Infer::SuggestTyped.code);
-            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strong;
         }
 
         opts.inlineInput = raw["e"].as<string>();
