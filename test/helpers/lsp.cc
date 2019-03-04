@@ -218,8 +218,9 @@ bool assertResponseMessage(int expectedId, const LSPMessage &response) {
     EXPECT_NE(nullptr, idIntPtr) << "Response message lacks an integer ID field.";
     if (idIntPtr != nullptr) {
         EXPECT_EQ(expectedId, *idIntPtr) << "Response message's ID does not match expected value.";
+        return expectedId == *idIntPtr;
     }
-    return true;
+    return false;
 }
 
 bool assertNotificationMessage(const string &expectedMethod, const LSPMessage &response) {
@@ -228,7 +229,7 @@ bool assertNotificationMessage(const string &expectedMethod, const LSPMessage &r
         return false;
     }
     EXPECT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
-    return true;
+    return expectedMethod == response.method();
 }
 
 optional<unique_ptr<PublishDiagnosticsParams>> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
