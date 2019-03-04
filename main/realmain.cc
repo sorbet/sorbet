@@ -246,7 +246,7 @@ int realmain(int argc, char *argv[]) {
         gs->suggestRuntimeProfiledType = true;
     }
     if (opts.print.Autogen || opts.print.AutogenMsgPack) {
-        gs->forAutogen = true;
+        gs->runningUnderAutogen = true;
     }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
@@ -302,7 +302,7 @@ int realmain(int argc, char *argv[]) {
 
         payload::retainGlobalState(gs, logger, opts, kvstore);
 
-        if (gs->forAutogen) {
+        if (gs->runningUnderAutogen) {
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);

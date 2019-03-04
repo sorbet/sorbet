@@ -14,7 +14,7 @@ namespace sorbet::dsl {
 vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx, ast::MethodDef *mdef) {
     vector<unique_ptr<ast::Expression>> empty;
 
-    if (ctx.state.forAutogen) {
+    if (ctx.state.runningUnderAutogen) {
         // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
         return empty;
     }

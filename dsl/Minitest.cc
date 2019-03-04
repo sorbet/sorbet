@@ -96,6 +96,11 @@ unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Ex
 
 vector<unique_ptr<ast::Expression>> Minitest::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> stats;
+    if (ctx.state.runningUnderAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return stats;
+    }
+
     auto exp = replaceDSLSingle(ctx, send);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));

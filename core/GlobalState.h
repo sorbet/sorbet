@@ -119,7 +119,7 @@ public:
     // Right now this is only used to turn certain DSL passes on or off.
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
-    bool forAutogen = false;
+    bool runningUnderAutogen = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
