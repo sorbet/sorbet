@@ -179,10 +179,11 @@ int File::lineCount() const {
 }
 
 string_view File::getLine(int i) {
-    ENFORCE(i < lineBreaks().size());
+    auto &lineBreaks = this->lineBreaks();
+    ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);
-    auto start = lineBreaks().at(i - 1) + 1;
-    auto end = lineBreaks().at(i);
+    auto start = lineBreaks[i - 1] + 1;
+    auto end = lineBreaks[i];
     return source().substr(start, end - start);
 }
 
