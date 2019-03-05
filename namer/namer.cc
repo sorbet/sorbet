@@ -49,7 +49,11 @@ class NameInserter {
         if (!existing.exists()) {
             if (!newOwner.data(ctx)->isClass()) {
                 if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::InvalidClassOwner)) {
-                    e.setHeader("Nesting is only permitted inside classes and modules");
+                    auto constLitName = constLit->cnst.data(ctx)->show(ctx);
+                    auto newOwnerName = newOwner.data(ctx)->show(ctx);
+                    e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
+                                newOwnerName, newOwnerName);
+                    e.addErrorLine(newOwner.data(ctx)->loc(), "`{}` defined here", newOwnerName);
                 }
                 node = ast::MK::EmptyTree();
                 return owner;
@@ -718,6 +722,21 @@ public:
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
+        if (!scope.data(ctx)->isClass()) {
+            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidClassOwner)) {
+                auto constLitName = lhs->cnst.data(ctx)->show(ctx);
+                auto scopeName = scope.data(ctx)->show(ctx);
+                e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
+                            scopeName);
+                e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", scopeName);
+            }
+            // Mangle this one out of the way, and re-enter a symbol with this name as a class.
+            auto scopeName = scope.data(ctx)->name;
+            ctx.state.mangleRenameSymbol(scope, scopeName);
+            scope = ctx.state.enterClassSymbol(lhs->scope->loc, scope.data(ctx)->owner, scopeName);
+            scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        }
+
         auto sym = scope.data(ctx)->findMemberNoDealias(ctx, lhs->cnst);
         if (sym.exists() && !sym.data(ctx)->isStaticField()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {

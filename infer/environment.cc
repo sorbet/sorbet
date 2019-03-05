@@ -842,7 +842,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 const auto &data = symbol.data(ctx);
                 if (data->isClass()) {
                     if (!data->resultType) { // common case
-                        tp.type = data->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
+                        auto singletonClass = data->lookupSingletonClass(ctx);
+                        ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
+                        tp.type = singletonClass.data(ctx)->externalType(ctx);
                     } else {
                         tp.type = data->resultType;
                     }

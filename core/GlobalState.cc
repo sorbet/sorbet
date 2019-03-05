@@ -534,7 +534,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    // ENFORCE(owner.data(*this)->isClass()); // TODO: enable. This is violated by proto
+    ENFORCE(owner.data(*this)->isClass());
     return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD);
 }
 
