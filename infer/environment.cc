@@ -948,8 +948,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                             "Expected " + methodReturnType->show(ctx),
                             {
                                 core::ErrorLine::from(ctx.owner.data(ctx)->loc(), "Method `{}` has return type `{}`",
-                                                      ctx.owner.data(ctx)->name.toString(ctx),
-                                                      methodReturnType->show(ctx)),
+                                                      ctx.owner.data(ctx)->name.show(ctx), methodReturnType->show(ctx)),
                             }));
                         e.addErrorSection(
                             core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",

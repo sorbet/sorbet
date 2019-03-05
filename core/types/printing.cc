@@ -130,7 +130,7 @@ string ShapeType::show(const GlobalState &gs) const {
         }
         SymbolRef undSymbol = cast_type<ClassType>(cast_type<LiteralType>(key.get())->underlying().get())->symbol;
         if (undSymbol == Symbols::Symbol()) {
-            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type<LiteralType>(key.get())->value).toString(gs),
+            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type<LiteralType>(key.get())->value).show(gs),
                            (*valueIterator)->show(gs));
         } else {
             fmt::format_to(buf, "{} => {}", key->show(gs), (*valueIterator)->show(gs));
