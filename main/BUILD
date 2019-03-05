@@ -11,10 +11,6 @@ cc_binary(
     srcs = [
         "main.cc",
     ],
-    features = select({
-        "//tools/config:linkshared": ["fully_static_link"],
-        "//conditions:default": [],
-    }),
     # When changing this, you should also update the REQUIRED_STACK_SIZE variable in common/os/os.cc.
     linkopts = select({
         "//tools/config:darwindbg": [
