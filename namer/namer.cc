@@ -520,7 +520,7 @@ public:
     }
 
     bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
-        auto sym = ctx.owner;
+        auto sym = ctx.owner.data(ctx)->dealias(ctx);
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
@@ -598,7 +598,7 @@ public:
             parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
         }
 
-        auto sym = owner.data(ctx)->findMember(ctx, method->name);
+        auto sym = owner.data(ctx)->findMemberNoDealias(ctx, method->name);
         if (sym.exists()) {
             if (method->declLoc == sym.data(ctx)->loc()) {
                 // TODO remove if the paramsMatch is perfect
