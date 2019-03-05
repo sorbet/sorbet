@@ -2,9 +2,9 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/class_
   method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/class_and_alias.rb start=2:1 end=8:7}
     argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/class_and_alias.rb start=??? end=???}
   class <C <U A>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=3:8}
-  static-field <N <C <U A>> $1> -> Integer(91) @ Loc {file=test/testdata/namer/class_and_alias.rb start=2:1 end=2:2}
+  static-field <M <C <U A>> $1> -> Integer(91) @ Loc {file=test/testdata/namer/class_and_alias.rb start=2:1 end=2:2}
   class <S <C <U A>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=3:8}
   static-field <C <U B>> -> Integer(91) @ Loc {file=test/testdata/namer/class_and_alias.rb start=8:1 end=8:2}
-  class <N <C <U B>> $1> < <C <U Object>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=6:1 end=6:8}
-  class <N <S <C <U B>> $1> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=6:7 end=6:8}
+  class <M <C <U B>> $1> < <C <U Object>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=6:1 end=6:8}
+  class <M <S <C <U B>> $1> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=6:7 end=6:8}
 

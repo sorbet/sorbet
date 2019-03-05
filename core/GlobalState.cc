@@ -842,7 +842,7 @@ FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }
 
-void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {
+void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     auto whatData = what.data(*this);
     auto owner = whatData->owner;
     auto ownerData = owner.data(*this);
@@ -854,7 +854,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNam
     u2 collisionCount = 1;
     NameRef name;
     do {
-        name = freshNameUnique(kind, origName, collisionCount++);
+        name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
     } while (ownerData->findMember(*this, name).exists());
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
@@ -862,7 +862,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNam
     if (whatData->isClass()) {
         auto singleton = whatData->lookupSingletonClass(*this);
         if (singleton.exists()) {
-            mangleRenameSymbol(singleton, singleton.data(*this)->name, kind);
+            mangleRenameSymbol(singleton, singleton.data(*this)->name);
         }
     }
 }

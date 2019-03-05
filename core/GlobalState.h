@@ -85,7 +85,7 @@ public:
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path);
 
-    void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
+    void mangleRenameSymbol(SymbolRef what, NameRef origName);
 
     unsigned int namesUsed() const;
 

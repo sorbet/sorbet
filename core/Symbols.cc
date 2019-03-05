@@ -647,7 +647,7 @@ bool isSingletonName(const GlobalState &gs, core::NameRef name) {
 }
 
 bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Namer &&
+    return name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::MangleRename &&
            isSingletonName(gs, name.data(gs)->unique.original);
 }
 } // namespace

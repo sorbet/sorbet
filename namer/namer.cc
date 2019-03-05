@@ -262,7 +262,7 @@ public:
                     e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
                 }
                 auto origName = klass->symbol.data(ctx)->name;
-                ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name, core::UniqueNameKind::Namer);
+                ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
                 klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
 
                 auto oldSymCount = ctx.state.symbolsUsed();
@@ -610,7 +610,7 @@ public:
             if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), method->declLoc, parsedArgs)) {
                 sym.data(ctx)->addLoc(ctx, method->declLoc);
             } else {
-                ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
+                ctx.state.mangleRenameSymbol(sym, method->name);
             }
         }
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
@@ -724,7 +724,7 @@ public:
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
                 e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
             }
-            ctx.state.mangleRenameSymbol(sym, sym.data(ctx)->name, core::UniqueNameKind::Namer);
+            ctx.state.mangleRenameSymbol(sym, sym.data(ctx)->name);
         }
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
         auto loc = lhs->loc;
@@ -797,7 +797,7 @@ public:
                 e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                 e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
             }
-            ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name, core::UniqueNameKind::Namer);
+            ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
         if (isTypeTemplate) {
@@ -808,7 +808,7 @@ public:
                     e.setHeader("Redefining constant `{}`", context.data(ctx)->show(ctx));
                     e.addErrorLine(context.data(ctx)->loc(), "Previous definition");
                 }
-                ctx.state.mangleRenameSymbol(oldSym, typeName->cnst, core::UniqueNameKind::Namer);
+                ctx.state.mangleRenameSymbol(oldSym, typeName->cnst);
             }
             auto alias = ctx.state.enterStaticFieldSymbol(asgn->loc, context, typeName->cnst);
             alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);

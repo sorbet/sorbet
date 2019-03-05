@@ -9,11 +9,11 @@ begin
 
     <emptyTree>
 
-    def <U foo><<N <U foo> $1>>(a, <blk>)
+    def <U foo><<M <U foo> $1>>(a, <blk>)
       <U a>
     end
 
-    def <U foo><<N <U foo> $2>>(a, b, <blk>)
+    def <U foo><<M <U foo> $2>>(a, b, <blk>)
       <emptyTree>
     end
 

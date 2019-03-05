@@ -2,13 +2,13 @@ begin
   class <emptyTree><<C <U <root>>>> < ()
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
-        ::A = 91
+        ::A$1 = 91
         begin
-          ::RubyTyper.<U keep_for_ide>(::A)
+          ::RubyTyper.<U keep_for_ide>(::A$1)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::B)
+          ::RubyTyper.<U keep_for_ide>(::B$1)
           <emptyTree>
         end
         ::B = 91
@@ -16,7 +16,7 @@ begin
       end
     end
   end
-  class ::A<<C <U A>>> < (::<todo sym>)  end
-  class ::B<<N <C <U B>> $1>> < (::<todo sym>)  end
+  class ::A$1<<C <U A>>> < (::<todo sym>)  end
+  class ::B$1<<M <C <U B>> $1>> < (::<todo sym>)  end
   <emptyTree>
 end

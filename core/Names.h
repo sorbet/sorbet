@@ -43,6 +43,7 @@ enum UniqueNameKind : u2 {
     Parser,
     Desugar,
     Namer,
+    MangleRename,
     Singleton,
     Overload,
     TypeVarName,

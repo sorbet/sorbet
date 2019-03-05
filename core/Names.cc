@@ -51,6 +51,9 @@ string Name::toString(const GlobalState &gs) const {
                 case UniqueNameKind::Namer:
                     kind = "N";
                     break;
+                case UniqueNameKind::MangleRename:
+                    kind = "M";
+                    break;
                 case UniqueNameKind::Singleton:
                     kind = "S";
                     break;
@@ -85,6 +88,8 @@ string Name::show(const GlobalState &gs) const {
                 return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::MangleRename) {
+                return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
             }
             return this->unique.original.data(gs)->show(gs);
         case CONSTANT:
@@ -144,7 +149,7 @@ bool Name::isClassName(const GlobalState &gs) const {
         case UTF8:
             return false;
         case UNIQUE: {
-            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == Namer) &&
+            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename) &&
                    this->unique.original.data(gs)->isClassName(gs);
         }
         case CONSTANT:
