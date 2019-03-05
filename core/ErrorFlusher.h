@@ -5,7 +5,9 @@
 #include "core/ErrorQueueMessage.h"
 #include <vector>
 
-namespace sorbet::core {
+namespace sorbet {
+class FileSystem;
+namespace core {
 
 class ErrorFlusher {
 private:
@@ -16,9 +18,10 @@ public:
     ErrorFlusher() = default;
     void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> error);
     void flushErrorCount(spdlog::logger &logger, int count);
-    void flushAutocorrects(const GlobalState &gs);
+    void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
 };
 
-} // namespace sorbet::core
+} // namespace core
+} // namespace sorbet
 
 #endif

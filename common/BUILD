@@ -12,6 +12,7 @@ cc_library(
         exclude = ["flycheck_*"],
     ),
     hdrs = [
+        "FileSystem.h",
         "common.h",
         "typecase.h",
     ],

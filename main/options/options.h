@@ -1,5 +1,6 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
+#include "common/FileSystem.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
 #include "spdlog/spdlog.h"
@@ -100,6 +101,8 @@ struct Options {
     std::vector<std::string> inputFileNames;
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
+
+    std::shared_ptr<FileSystem> fs = std::make_shared<OSFileSystem>();
 
     Options() = default;
 

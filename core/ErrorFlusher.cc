@@ -1,4 +1,5 @@
 #include "core/ErrorFlusher.h"
+#include "common/FileSystem.h"
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;
@@ -50,18 +51,18 @@ void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
     }
 }
 
-void ErrorFlusher::flushAutocorrects(const GlobalState &gs) {
+void ErrorFlusher::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
         auto file = autocorrect.loc.file();
         if (!sources.count(file)) {
-            sources[file] = FileOps::read(file.data(gs).path());
+            sources[file] = fs.readFile(file.data(gs).path());
         }
     }
 
     auto toWrite = AutocorrectSuggestion::apply(autocorrects, sources);
     for (auto &entry : toWrite) {
-        FileOps::write(entry.first.data(gs).path(), entry.second);
+        fs.writeFile(entry.first.data(gs).path(), entry.second);
     }
     autocorrects.clear();
 }

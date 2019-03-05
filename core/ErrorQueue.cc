@@ -1,4 +1,5 @@
 #include "core/ErrorQueue.h"
+#include "common/FileSystem.h"
 #include "core/Error.h"
 
 namespace sorbet::core {
@@ -67,8 +68,8 @@ void ErrorQueue::flushErrorCount() {
     errorFlusher.flushErrorCount(logger, nonSilencedErrorCount);
 }
 
-void ErrorQueue::flushAutocorrects(const GlobalState &gs) {
-    errorFlusher.flushAutocorrects(gs);
+void ErrorQueue::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
+    errorFlusher.flushAutocorrects(gs, fs);
 }
 
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {

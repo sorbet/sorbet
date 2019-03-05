@@ -7,8 +7,10 @@
 #include "core/lsp/QueryResponse.h"
 #include <atomic>
 
-namespace sorbet::core {
+namespace sorbet {
+class FileSystem;
 
+namespace core {
 class ErrorQueue {
 private:
     void checkOwned();
@@ -43,9 +45,10 @@ public:
 
     void flushErrors(bool all = false);
     void flushErrorCount();
-    void flushAutocorrects(const GlobalState &gs);
+    void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
 };
 
-} // namespace sorbet::core
+} // namespace core
+} // namespace sorbet
 
 #endif

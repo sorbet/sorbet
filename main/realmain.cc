@@ -380,7 +380,7 @@ int realmain(int argc, char *argv[]) {
             gs->errorQueue->flushErrorCount();
         }
         if (opts.autocorrect) {
-            gs->errorQueue->flushAutocorrects(*gs);
+            gs->errorQueue->flushAutocorrects(*gs, *opts.fs);
         }
         logger->trace("sorbet done");
 
@@ -450,7 +450,7 @@ int realmain(int argc, char *argv[]) {
         metrics.set_status(status);
 
         auto json = core::Proto::toJSON(metrics);
-        FileOps::write(opts.metricsFile, json);
+        opts.fs->writeFile(opts.metricsFile, json);
     }
     if (gs->hadCriticalError()) {
         returnCode = 10;

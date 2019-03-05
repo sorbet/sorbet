@@ -220,7 +220,7 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
     string src;
     bool fileFound = true;
     try {
-        src = FileOps::read(fileName);
+        src = opts.fs->readFile(fileName);
     } catch (FileNotFoundException e) {
         // continue with an empty source, because the
         // assertion below requires every input file to map
