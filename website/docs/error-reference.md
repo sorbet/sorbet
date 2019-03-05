@@ -77,6 +77,22 @@ The only way to silence this error currently is to make the offending file as `#
 typed: false`.
 
 
+## 4015
+
+This error usually comes when a class or module is dynamically defined and
+stored into a constant, like this:
+
+```ruby
+A = ...
+A::B = 1
+```
+
+where `...` is some expression which computes a class or module. Sorbet can't
+know statically what this `...` code does (and for example even if could assume
+that it's defining a class, Sorbet can't know what methods or constants it has).
+Therefore, Sorbet does not support this pattern.
+
+
 ## 5002
 
 This means that the typechecker has been unable to resolve a reference to a
