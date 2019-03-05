@@ -78,7 +78,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 
     for (auto &bb : this->basicBlocks) {
-        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block " + bb->toString(ctx));
+        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block {}", bb->toString(ctx));
 
         if (bb.get() == deadBlock()) {
             continue;
@@ -86,8 +86,8 @@ void CFG::sanityCheck(core::Context ctx) {
 
         auto thenCount = absl::c_count(bb->bexit.thenb->backEdges, bb.get());
         auto elseCount = absl::c_count(bb->bexit.elseb->backEdges, bb.get());
-        ENFORCE(thenCount == 1, "bb id=", bb->id, "; then has ", thenCount, " back edges");
-        ENFORCE(elseCount == 1, "bb id=", bb->id, "; else has ", elseCount, " back edges");
+        ENFORCE(thenCount == 1, "bb id={}; then has {} back edges", bb->id, thenCount);
+        ENFORCE(elseCount == 1, "bb id={}; else has {} back edges", bb->id, elseCount);
         if (bb->bexit.thenb == bb->bexit.elseb) {
             ENFORCE(!bb->bexit.cond.variable.exists());
         } else {

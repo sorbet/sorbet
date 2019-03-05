@@ -13,10 +13,10 @@ TypePtr lubGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
 TypePtr Types::any(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto ret = lub(ctx, t1, t2);
-    ENFORCE(Types::isSubType(ctx, t1, ret), "\n" + ret->toString(ctx) + "\n is not a super type of \n" +
-                                                t1->toString(ctx) + "\n was lubbing with " + t2->toString(ctx));
-    ENFORCE(Types::isSubType(ctx, t2, ret), "\n" + ret->toString(ctx) + "\n is not a super type of \n" +
-                                                t2->toString(ctx) + "\n was lubbing with \n" + t1->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, t1, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}", ret->toString(ctx),
+            t1->toString(ctx), t2->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, t2, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}", ret->toString(ctx),
+            t2->toString(ctx), t1->toString(ctx));
 
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
@@ -524,11 +524,11 @@ TypePtr Types::all(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto ret = glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
-    ENFORCE(Types::isSubType(ctx, ret, t1), "\n" + ret->toString(ctx) + "\n is not a subtype of \n" +
-                                                t1->toString(ctx) + "\n was glbbing with \n" + t2->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, ret, t1), "\n{}\nis not a subtype of\n{}\nwas glbbing with\n{}", ret->toString(ctx),
+            t1->toString(ctx), t2->toString(ctx));
 
-    ENFORCE(Types::isSubType(ctx, ret, t2), "\n" + glb(ctx, t1, t2)->toString(ctx) + "\n is not a subtype of \n" +
-                                                t2->toString(ctx) + "\n was glbbing with \n" + t1->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, ret, t2), "\n{}\n is not a subtype of\n{}\nwas glbbing with\n{}", ret->toString(ctx),
+            t2->toString(ctx), t1->toString(ctx));
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
     //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t1 || ret->isUntyped(),
@@ -1140,7 +1140,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
                 return classSymbolIsAsGoodAs(ctx, c1->symbol, c2->symbol);
             }
         }
-        Exception::raise("isSubTypeUnderConstraint(", t1->typeName(), ", ", t2->typeName(), "): unreachable");
+        Exception::raise("isSubTypeUnderConstraint({}, {}): unreachable", t1->typeName(), t2->typeName());
     }
 }
 

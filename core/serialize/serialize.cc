@@ -874,7 +874,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  pickleTree(p, file, a->typeAlias);
              },
 
-             [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: ", n->nodeName()); });
+             [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: {}", n->nodeName()); });
 }
 
 unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p, GlobalState &gs, FileRef file) {

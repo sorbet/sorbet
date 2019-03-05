@@ -58,7 +58,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
         // do nothing
     } else {
         auto node = argnode.get();
-        Exception::raise("not implemented: ", demangle(typeid(*node).name()));
+        Exception::raise("not implemented: {}", demangle(typeid(*node).name()));
     }
 
     return make_pair(std::move(args), std::move(destructures));
@@ -278,7 +278,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             return MK::EmptyTree();
         }
         auto loc = what->loc;
-        ENFORCE(loc.exists(), "parse-tree node has no location: " + what->toString(dctx.ctx));
+        ENFORCE(loc.exists(), "parse-tree node has no location: {}", what->toString(dctx.ctx));
         unique_ptr<Expression> result;
         typecase(
             what.get(),
@@ -1498,7 +1498,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
-            [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: ", node->nodeName()); });
+            [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: {}", node->nodeName()); });
         ENFORCE(result.get() != nullptr, "desugar result unset");
         return result;
     } catch (SorbetException &) {

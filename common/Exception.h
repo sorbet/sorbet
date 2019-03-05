@@ -32,16 +32,21 @@ public:
     static void print_backtrace() noexcept;
     static void failInFuzzer() noexcept;
 
+    [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line)
+        __attribute__((noreturn)) {
+        enforce_handler(check, file, line, "(no message provided)");
+    }
     template <typename... TArgs>
-    [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line,
+    [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line, std::string message,
                                                     const TArgs &... args) __attribute__((noreturn)) {
-        raise(file + ":" + std::to_string(line), " enforced condition ", check, " has failed: ", args...);
+        raise(file + ":" + std::to_string(line), " enforced condition ", check,
+              " has failed: ", fmt::format(message, args...));
     }
 };
 
 template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... args) {
     Exception::failInFuzzer();
-    std::string message = absl::StrCat("", args...);
+    std::string message = fmt::format(args...);
 
     if (message.size() > 0) {
         fatalLogger->error("Exception::raise(): {}\n", message);

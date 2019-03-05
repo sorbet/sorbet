@@ -203,7 +203,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             }
         }
 
-        Exception::raise("findMemberTransitive hit a loop while resolving ");
+        Exception::raise("findMemberTransitive hit a loop while resolving");
     }
 
     SymbolRef result = findMember(gs, name);

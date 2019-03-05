@@ -281,8 +281,8 @@ private:
             depth++;
         }
 
-        Exception::raise("Too many recursive calls trying to resolve constant:\n", job.out->original->cnst.show(ctx),
-                         "\n", job.out->original->loc.file().data(ctx).path(), "\n",
+        Exception::raise("Too many recursive calls trying to resolve constant:\n{}\n{}\n{}",
+                         job.out->original->cnst.show(ctx), job.out->original->loc.file().data(ctx).path(),
                          job.out->original->loc.toString(ctx));
     }
 
@@ -1220,10 +1220,10 @@ public:
                 sym.data(ctx)->arguments().emplace_back(blkSym);
             }
         }
-        ENFORCE(!sym.data(ctx)->arguments().empty(),
-                "<static-init> method should already have a block arg symbol: " + sym.data(ctx)->show(ctx));
+        ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
+                sym.data(ctx)->show(ctx));
         ENFORCE(sym.data(ctx)->arguments().back().data(ctx)->isBlockArgument(),
-                "Last argument symbol is not a block arg: " + sym.data(ctx)->show(ctx));
+                "Last argument symbol is not a block arg: {}" + sym.data(ctx)->show(ctx));
 
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
@@ -1446,28 +1446,28 @@ public:
 class ResolveSanityCheckWalk {
 public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
-        ENFORCE(original->symbol != core::Symbols::todo(),
-                "These should have all been resolved: ", original->toString(ctx));
+        ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
+                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
-        ENFORCE(original->symbol != core::Symbols::todo(),
-                "These should have all been resolved: ", original->toString(ctx));
+        ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
+                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
-        ENFORCE(false, "These should have all been removed: ", original->toString(ctx));
+        ENFORCE(false, "These should have all been removed: {}", original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> original) {
-        ENFORCE(original->claz != core::Symbols::todo(),
-                "These should have all been resolved: ", original->toString(ctx));
+        ENFORCE(original->claz != core::Symbols::todo(), "These should have all been resolved: {}",
+                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
-        ENFORCE(original->symbol != core::Symbols::todo(),
-                "These should have all been resolved: ", original->toString(ctx));
+        ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
+                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,

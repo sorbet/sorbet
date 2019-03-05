@@ -83,7 +83,7 @@ public:
         : loc(loc), what(what), header(move(header)), isSilenced(isSilenced), autocorrects(move(autocorrects)),
           sections(sections) {
         ENFORCE(this->header.empty() || this->header.back() != '.');
-        ENFORCE(this->header.find('\n') == std::string::npos, this->header, " has a newline in it");
+        ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
 };
 

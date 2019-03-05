@@ -505,9 +505,8 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
         data->setClassLinearizationComputed();
         if (debug_mode) {
             for (auto oldMixin : currentMixins) {
-                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), ofClass.data(gs)->showFullName(gs) +
-                                                                         " no longer derrives from " +
-                                                                         oldMixin.data(gs)->showFullName(gs));
+                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
+                        ofClass.data(gs)->showFullName(gs), oldMixin.data(gs)->showFullName(gs));
             }
         }
     }

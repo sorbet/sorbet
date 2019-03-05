@@ -628,8 +628,8 @@ public:
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol);
         }
-        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), method->name.toString(ctx), ": ",
-                method->args.size(), " != ", method->symbol.data(ctx)->arguments().size());
+        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
+                method->name.toString(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
         // method->args.clear();
         return method;

@@ -525,8 +525,7 @@ private:
 
     static int assert_valid_version(int version) {
         if (version < MIN_VERSION || version > MAX_VERSION) {
-            Exception::raise("msgpack version ", version, " not in available range [", MIN_VERSION, ",", MAX_VERSION,
-                             "]");
+            Exception::raise("msgpack version {} not in available range [{}, {}]", version, MIN_VERSION, MAX_VERSION);
         }
         return version;
     }

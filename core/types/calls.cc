@@ -648,9 +648,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: " + data->show(ctx));
+        ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: {}", data->show(ctx));
         SymbolRef bspec = data->arguments().back();
-        ENFORCE(bspec.data(ctx)->isBlockArgument(), "The last symbol must be the block arg: " + data->show(ctx));
+        ENFORCE(bspec.data(ctx)->isBlockArgument(), "The last symbol must be the block arg: {}", data->show(ctx));
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
         if (!blockType) {
@@ -731,11 +731,11 @@ TypePtr getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vec
     args.reserve(data->arguments().size());
     for (auto arg : data->arguments()) {
         if (arg.data(ctx)->isRepeated()) {
-            ENFORCE(args.empty(),
-                    "getCallArguments with positional and repeated args is not supported: ", data->toString(ctx));
+            ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
+                    data->toString(ctx));
             return Types::arrayOf(ctx, Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
         }
-        ENFORCE(!arg.data(ctx)->isKeyword(), "getCallArguments does not support kwargs: ", data->toString(ctx));
+        ENFORCE(!arg.data(ctx)->isKeyword(), "getCallArguments does not support kwargs: {}", data->toString(ctx));
         if (arg.data(ctx)->isBlockArgument()) {
             continue;
         }
@@ -790,7 +790,7 @@ SymbolRef unwrapSymbol(const Type *type) {
 
                  [&](const ProxyType *proxy) { type = proxy->underlying().get(); },
 
-                 [&](const Type *ty) { ENFORCE(false, "Unexpected type: ", ty->typeName()); });
+                 [&](const Type *ty) { ENFORCE(false, "Unexpected type: {}", ty->typeName()); });
     }
     return result;
 }
@@ -1326,14 +1326,14 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(thisType)) {
             element = tuple->elementType();
         } else {
-            ENFORCE(false, "Array#flatten on unexpected type: ", args.selfType->show(ctx));
+            ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType->show(ctx));
         }
 
         int64_t depth = INT64_MAX;
         if (args.args.size() == 1) {
             auto argTyp = args.args[0]->type;
-            ENFORCE(args.locs.args.size() == 1,
-                    "Mismatch between args.size() andargs.locs.args.size(): ", args.locs.args.size());
+            ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
+                    args.locs.args.size());
             auto argLoc = args.locs.args[0];
 
             auto lt = cast_type<LiteralType>(argTyp.get());
@@ -1352,7 +1352,7 @@ public:
                 depth = INT64_MAX;
             }
         } else {
-            ENFORCE(args.args.empty(), "Array#flatten passed too many args: ", args.args.size());
+            ENFORCE(args.args.empty(), "Array#flatten passed too many args: {}", args.args.size());
         }
 
         return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));
@@ -1370,7 +1370,7 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(thisType)) {
             element = tuple->elementType();
         } else {
-            ENFORCE(false, "Array#compact on unexpected type: ", args.selfType->show(ctx));
+            ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType->show(ctx));
         }
         auto ret = Types::approximateSubtract(ctx, element, Types::nilClass());
         return Types::arrayOf(ctx, ret);

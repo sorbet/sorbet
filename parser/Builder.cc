@@ -41,7 +41,7 @@ string Dedenter::dedent(string_view str) {
                     break;
                 }
                 default:
-                    Exception::raise("unexpected whitespace: '", std::to_string(ch), "'");
+                    Exception::raise("unexpected whitespace: '{}'", std::to_string(ch));
             }
         } else {
             out.push_back(ch);
@@ -334,7 +334,7 @@ public:
 
                  [&](Next *n) { exprs = &n->exprs; },
 
-                 [&](Node *n) { Exception::raise("Unexpected send node: ", n->nodeName()); });
+                 [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
         core::Loc block_loc = send->loc.join(tok_loc(end));
@@ -506,7 +506,7 @@ public:
                      result = std::move(node);
                  },
 
-                 [&](Node *n) { Exception::raise("Unexpected dedent node: ", n->nodeName()); });
+                 [&](Node *n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
 
         return result;
     }

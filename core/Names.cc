@@ -31,7 +31,7 @@ unsigned int Name::hash(const GlobalState &gs) const {
         case CONSTANT:
             return _hash_mix_constant(CONSTANT, cnst.original.id());
         default:
-            Exception::raise("Unknown name kind?", kind);
+            Exception::raise("Unknown name kind? {}", kind);
     }
 }
 

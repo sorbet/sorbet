@@ -118,7 +118,7 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
             continue;
         }
         if (bb.get() != cfg.entry()) {
-            ENFORCE((bb->flags & CFG::WAS_JUMP_DESTINATION) != 0, "block ", bb->id, " was never linked into cfg");
+            ENFORCE((bb->flags & CFG::WAS_JUMP_DESTINATION) != 0, "block {} was never linked into cfg", bb->id);
         }
         auto thenFnd = absl::c_find(bb->bexit.thenb->backEdges, bb.get());
         auto elseFnd = absl::c_find(bb->bexit.elseb->backEdges, bb.get());

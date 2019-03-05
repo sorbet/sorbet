@@ -338,13 +338,13 @@ void GlobalState::initEmpty() {
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         string name = absl::StrCat("Proc", arity);
         auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc()._id);
-        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity, " got: ", id._id,
-                " expected: ", Symbols::Proc(arity)._id);
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id._id,
+                Symbols::Proc(arity)._id);
         id.data(*this)->singletonClass(*this);
     }
 
     ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
-            "Too many synthetic symbols? have: ", symbols.size(), " expected: ", Symbols::last_synthetic_sym()._id + 1);
+            "Too many synthetic symbols? have: {} expected: {}", symbols.size(), Symbols::last_synthetic_sym()._id + 1);
 
     installIntrinsics();
 
@@ -895,8 +895,9 @@ void GlobalState::sanityCheck() const {
     ENFORCE(!strings.empty(), "empty string table size");
     ENFORCE(!names_by_hash.empty(), "empty name hash table size");
     ENFORCE((names_by_hash.size() & (names_by_hash.size() - 1)) == 0, "name hash table size is not a power of two");
-    ENFORCE(names.capacity() * 2 == names_by_hash.capacity(), "name table and hash name table sizes out of sync",
-            " names.capacity=", names.capacity(), " names_by_hash.capacity=", names_by_hash.capacity());
+    ENFORCE(names.capacity() * 2 == names_by_hash.capacity(),
+            "name table and hash name table sizes out of sync names.capacity={} names_by_hash.capacity={}",
+            names.capacity(), names_by_hash.capacity());
     ENFORCE(names_by_hash.size() == names_by_hash.capacity(), "hash name table not at full capacity");
     int i = -1;
     for (auto &nm : names) {

@@ -37,23 +37,22 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::drainLSPResponses() {
         string contentLengthLine = responses.substr(pos, newlinePos - pos);
         smatch matches;
         if (!regex_match(contentLengthLine, matches, contentLengthRegex)) {
-            Exception::raise(fmt::format("Invalid Content-Length line:\n{}", contentLengthLine));
+            Exception::raise("Invalid Content-Length line:\n{}", contentLengthLine);
         }
 
         int contentLength = stoi(matches[1]);
         pos = newlinePos + 2;
         string emptyLine = responses.substr(pos, 2);
         if (emptyLine != "\r\n") {
-            Exception::raise(fmt::format("A carraige return and a newline must separate headers and the body of the "
-                                         "LSP message. Instead, got:\n{}",
-                                         emptyLine));
+            Exception::raise("A carraige return and a newline must separate headers and the body of the LSP message."
+                             " Instead, got:\n{}",
+                             emptyLine);
         }
         pos += 2;
 
         if (pos + contentLength > len) {
-            Exception::raise(
-                fmt::format("Invalid Content-Length: Server specified `{}`, but only `{}` characters provided.",
-                            contentLength, len - pos));
+            Exception::raise("Invalid Content-Length: Server specified `{}`, but only `{}` characters provided.",
+                             contentLength, len - pos);
         }
 
         string messageLine = responses.substr(pos, contentLength);

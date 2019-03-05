@@ -538,7 +538,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::ClassDef *c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](ast::MethodDef *c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
-            [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: ", n->nodeName()); });
+            [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: {}", n->nodeName()); });
 
         // For, Rescue,
         // Symbol, Array,
