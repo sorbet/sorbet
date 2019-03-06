@@ -579,22 +579,31 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
     }
 
     fmt::format_to(buf, "\n");
-    bool hadPrintableChild = false;
     for (auto pair : membersStableOrderSlow(gs)) {
+        if (!pair.second.exists()) {
+            continue;
+        }
+        if (!showHidden && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+            bool hadPrintableChild = false;
+            for (auto childPair : pair.second.data(gs)->members) {
+                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                    hadPrintableChild = true;
+                    break;
+                }
+            }
+            if (!hadPrintableChild) {
+                continue;
+            }
+        }
+
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
             continue;
         }
 
         auto str = pair.second.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
-        if (!str.empty()) {
-            hadPrintableChild = true;
-            fmt::format_to(buf, "{}", move(str));
-        }
-    }
-
-    if (!showHidden && this->isHiddenFromPrinting(gs) && !hadPrintableChild) {
-        return "";
+        ENFORCE(!str.empty());
+        fmt::format_to(buf, "{}", move(str));
     }
 
     return to_string(buf);
