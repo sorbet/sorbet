@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 # typed: true
 
+require 'bigdecimal'
+
 class SorbetRBIGeneration::Serialize
   BLACKLIST_CONSTANTS = [
     ['DidYouMean', :NameErrorCheckers], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d

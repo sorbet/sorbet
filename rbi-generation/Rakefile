@@ -1,0 +1,5 @@
+# frozen_string_literal: true
+
+task :test do
+  Dir.glob('./test/**/*.rb').each(&method(:require))
+end

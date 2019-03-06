@@ -1,0 +1,19 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    metaclass (0.0.4)
+    minitest (5.11.3)
+    mocha (1.8.0)
+      metaclass (~> 0.0.1)
+    rake (12.3.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  minitest (~> 5.11)
+  mocha (~> 1.7)
+  rake
+
+BUNDLED WITH
+   1.17.3

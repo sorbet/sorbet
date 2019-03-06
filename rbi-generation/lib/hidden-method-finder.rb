@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 # typed: true
 
@@ -54,8 +55,8 @@ class SorbetRBIGeneration::HiddenMethodFinder
   end
 
   def mkdir
-    Dir.mkdir(PATH) unless Dir.exist?(PATH)
-    Dir.mkdir(TMP_PATH) unless Dir.exist?(TMP_PATH)
+    FileUtils.mkdir_p(PATH) unless Dir.exist?(PATH)
+    FileUtils.mkdir_p(TMP_PATH) unless Dir.exist?(TMP_PATH)
   end
 
   def remove_temp_files
@@ -67,7 +68,6 @@ class SorbetRBIGeneration::HiddenMethodFinder
   def require_everything
     puts "Requiring all of your code"
     SorbetRBIGeneration::RequireEverything.require_everything
-    SorbetRBIGeneration::RbiGenerator.require_eveything
   end
 
   def hidden_rbi
@@ -131,6 +131,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
         '--print=symbol-table-json',
         '--stdout-hup-hack',
         '--silence-dev-message',
+        '--no-error-count',
       ] + files,
     )
     File.write(SOURCE_CONSTANTS, io.read)
@@ -144,6 +145,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
         '--error-black-list=4010',
         '--stdout-hup-hack',
         '--silence-dev-message',
+        '--no-error-count',
         TMP_RBI,
       ],
     )
@@ -369,4 +371,8 @@ class SorbetRBIGeneration::HiddenMethodFinder
     end
     return :hidden
   end
+end
+
+if $PROGRAM_NAME == __FILE__
+  SorbetRBIGeneration::HiddenMethodFinder.main
 end
