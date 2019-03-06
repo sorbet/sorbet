@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <arrayTemp>>$4: Integer(1) = 1\l<U <arrayTemp>>$5: Integer(2) = 2\l<U <magic>>$6: <Magic> = alias <C <U <Magic>>>\l<U <statTemp>>$3: [Integer(1), Integer(2)] = <U <magic>>$6: <Magic>.<U <build-array>>(<U <arrayTemp>>$4: Integer(1), <U <arrayTemp>>$5: Integer(2))\l<U <block-pre-call-temp>>$7: T::Array[U] = <U <statTemp>>$3: [Integer(1), Integer(2)].<U map>()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <arrayTemp>>$4: Integer(1) = 1\l<U <arrayTemp>>$5: Integer(2) = 2\l<U <magic>>$6: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$3: [Integer(1), Integer(2)] = <U <magic>>$6: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$4: Integer(1), <U <arrayTemp>>$5: Integer(2))\l<U <block-pre-call-temp>>$7: T::Array[U] = <U <statTemp>>$3: [Integer(1), Integer(2)].<U map>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];

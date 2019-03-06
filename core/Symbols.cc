@@ -40,7 +40,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
-        return make_type<ClassType>(ref(gs));
+        return externalType(gs);
     } else {
         return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
     }
@@ -48,21 +48,34 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
 
 TypePtr Symbol::externalType(const GlobalState &gs) const {
     ENFORCE(isClass());
-    auto ref = this->ref(gs);
-    // todo: also cache these?
-    if (typeMembers().empty()) {
-        return make_type<ClassType>(ref);
-    } else {
-        vector<TypePtr> targs;
-        for (auto tm : typeMembers()) {
-            if (tm.data(gs)->isFixed()) {
-                targs.emplace_back(tm.data(gs)->resultType);
-            } else {
-                targs.emplace_back(Types::untyped(gs, ref));
+    if (!resultType) {
+        // note that sometimes resultType is set externally to not be a result of this computation
+        // this happens e.g. in case this is a stub class
+        TypePtr newResultType;
+        auto ref = this->ref(gs);
+        if (typeMembers().empty()) {
+            newResultType = make_type<ClassType>(ref);
+        } else {
+            vector<TypePtr> targs;
+            for (auto tm : typeMembers()) {
+                if (tm.data(gs)->isFixed()) {
+                    targs.emplace_back(tm.data(gs)->resultType);
+                } else {
+                    targs.emplace_back(Types::untyped(gs, ref));
+                }
             }
+            newResultType = make_type<AppliedType>(ref, targs);
         }
-        return make_type<AppliedType>(ref, targs);
+        {
+            // this method is supposed to be idempotent. The lines below implement "safe publication" of a value that is
+            // safe to be used in presence of multiple threads running this tion concurrently
+            auto mutableThis = const_cast<Symbol *>(this);
+            shared_ptr<core::Type> current(nullptr);
+            atomic_compare_exchange_weak(&mutableThis->resultType.store, &current, newResultType.store);
+        }
+        return externalType(gs);
     }
+    return resultType;
 }
 
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
@@ -563,7 +576,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
         fmt::format_to(buf, ">");
     }
-    if (this->resultType) {
+    if (this->resultType && !isClass()) {
         fmt::format_to(buf, " -> {}",
                        useToString ? this->resultType->toStringWithTabs(gs, tabs) : this->resultType->show(gs));
     }

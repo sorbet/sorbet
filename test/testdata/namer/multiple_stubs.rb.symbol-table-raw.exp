@@ -1,8 +1,8 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=3:16}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
   method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=3:16}
     argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/multiple_stubs.rb start=??? end=???}
-  class <C <U Foo>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=2:4}
-    class <C <U Foo>><C <U Bar>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=2:9}
+  class <C <U Foo>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=2:4}
+    class <C <U Foo>><C <U Bar>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=2:9}
     class <C <U Foo>><S <C <U Bar>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=2:9}
   class <S <C <U Foo>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/namer/multiple_stubs.rb start=2:1 end=2:4}
 

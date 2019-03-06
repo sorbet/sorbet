@@ -1,0 +1,79 @@
+class A
+  extend T::Sig
+
+  sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
+  # <U <statTemp>>$3: T.class_of(A)
+  #
+  # <U <block-pre-call-temp>>$4: RubyTyper::Void
+  # dead=1
+  # <U <returnMethodTemp>>$2: RubyTyper::Void
+  #
+  # <U <finalReturn>>: T.noreturn
+  # dead=1
+  # <U <statTemp>>$8: Sorbet::Private::Builder
+  #
+  # <U <statTemp>>$9: Sorbet::Private::Builder
+  #
+  # <U <statTemp>>$10: ShapeType {
+  #   Symbol(:"x") => MetaType
+  #   Symbol(:"y") => T.class_of(Integer)
+  # }
+  #
+  # <U <statTemp>>$13: T.class_of(T)
+  #
+  # <U <statTemp>>$14: T.class_of(String)
+  #
+  # <U <statTemp>>$15: T.class_of(Integer)
+  #
+  # <U <statTemp>>$19: T.class_of(Integer)
+  #
+  # <U <blockReturnTemp>>$7: Sorbet::Private::Builder
+  #
+  # <U <blockReturnTemp>>$20: T.noreturn
+  #
+  # <U <hashTemp>>$11: Symbol(:"x")
+  #
+  # <U <hashTemp>>$12: MetaType
+  #
+  # <U <hashTemp>>$16: Symbol(:"y")
+  #
+  # <U <hashTemp>>$17: T.class_of(Integer)
+  #
+  # <U <magic>>$18: T.class_of(<Magic>)
+  def a_method(x, y)
+    if x.is_a?(String)
+       # <U <ifTemp>>$4: TrueClass | FalseClass
+       #   Being truthy entails:
+       #     <U x> to be String
+       #   Being falsy entails:
+       #     <U x> NOT to be String
+       #
+       # <U <statTemp>>$6: T.class_of(String)
+       #
+       # <U x>: String | Integer
+       #
+       # <U y>: Integer
+          # <U x>: String
+          #
+          # <U y>: Integer
+      x = x.to_i
+          # <U <statTemp>>$7: String
+          #
+          # <U x>: Integer
+          #
+          # <U y>: Integer
+    end
+    # <U x>: Integer
+    #
+    # <U y>: Integer
+    x + y
+    # dead=1
+    # <U <returnMethodTemp>>$2: Integer
+    #
+    # <U <finalReturn>>: T.noreturn
+    #
+    # <U x>: Integer
+    #
+    # <U y>: Integer
+  end
+end

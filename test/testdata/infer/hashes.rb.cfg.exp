@@ -18,12 +18,12 @@ subgraph "cluster_::Foo#bar" {
 
     "bb::Foo#bar_1" -> "bb::Foo#bar_1" [style="bold"];
     "bb::Foo#bar_2" [
-        label = "block[id=2]()\l<U <magic>>$5: <Magic> = alias <C <U <Magic>>>\l<U s>: {} = <U <magic>>$5: <Magic>.<U <build-hash>>()\l<unconditional>\l"
+        label = "block[id=2]()\l<U <magic>>$5: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U s>: {} = <U <magic>>$5: T.class_of(<Magic>).<U <build-hash>>()\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_2" -> "bb::Foo#bar_4" [style="bold"];
     "bb::Foo#bar_3" [
-        label = "block[id=3]()\l<U <magic>>$6: <Magic> = alias <C <U <Magic>>>\l<U s>: {} = <U <magic>>$6: <Magic>.<U <build-hash>>()\l<unconditional>\l"
+        label = "block[id=3]()\l<U <magic>>$6: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U s>: {} = <U <magic>>$6: T.class_of(<Magic>).<U <build-hash>>()\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_3" -> "bb::Foo#bar_4" [style="bold"];

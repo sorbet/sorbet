@@ -1720,12 +1720,12 @@ const vector<Intrinsic> intrinsicMethods{
 
     {Symbols::Class(), false, Names::new_(), &Class_new},
 
-    {Symbols::Magic(), false, Names::buildHash(), &Magic_buildHash},
-    {Symbols::Magic(), false, Names::buildArray(), &Magic_buildArray},
-    {Symbols::Magic(), false, Names::expandSplat(), &Magic_expandSplat},
-    {Symbols::Magic(), false, Names::callWithSplat(), &Magic_callWithSplat},
-    {Symbols::Magic(), false, Names::callWithBlock(), &Magic_callWithBlock},
-    {Symbols::Magic(), false, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::MagicSingleton(), false, Names::buildHash(), &Magic_buildHash},
+    {Symbols::MagicSingleton(), false, Names::buildArray(), &Magic_buildArray},
+    {Symbols::MagicSingleton(), false, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::MagicSingleton(), false, Names::callWithSplat(), &Magic_callWithSplat},
+    {Symbols::MagicSingleton(), false, Names::callWithBlock(), &Magic_callWithBlock},
+    {Symbols::MagicSingleton(), false, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
 
     {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), false, Names::first(), &Tuple_first},

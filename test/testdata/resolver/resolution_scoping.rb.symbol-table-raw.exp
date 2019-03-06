@@ -9,7 +9,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/res
   class <S <C <U A>> $1> < <S <C <U B>> $1> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:7 end=2:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:1 end=2:12}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
-  class <C <U B>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:11 end=2:12}
+  class <C <U B>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:11 end=2:12}
   class <S <C <U B>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:11 end=2:12}
   class <C <U D>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> (<C <U E>>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=11:1 end=11:9}
     class <C <U D>><C <U E>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=13:3 end=13:11}

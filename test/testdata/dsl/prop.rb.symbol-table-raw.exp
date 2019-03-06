@@ -385,11 +385,11 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
   class <C <U ForeignClass>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=32:1 end=32:19}
   class <S <C <U ForeignClass>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=32:7 end=32:19}
   class <C <U NotAODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=2:14}
-    class <C <U NotAODM>><C <U Default>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=14:106 end=14:113}
+    class <C <U NotAODM>><C <U Default>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:106 end=14:113}
     class <C <U NotAODM>><S <C <U Default>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:106 end=14:113}
-    class <C <U NotAODM>><C <U IntegerParam>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=10:20 end=10:32}
+    class <C <U NotAODM>><C <U IntegerParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=10:20 end=10:32}
     class <C <U NotAODM>><S <C <U IntegerParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=10:20 end=10:32}
-    class <C <U NotAODM>><C <U StringParam>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=12:21 end=12:32}
+    class <C <U NotAODM>><C <U StringParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=12:21 end=12:32}
     class <C <U NotAODM>><S <C <U StringParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=12:21 end=12:32}
   class <S <C <U NotAODM>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=2:7 end=2:14}
     method <S <C <U NotAODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=2:14}
@@ -401,10 +401,10 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
     method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=82:1 end=82:9}
       argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
   class <C <U Opus>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> ()
-    class <C <U Opus>><C <U Param>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:36}
-      class <C <U Opus>><C <U Param>><C <U CaseParam>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:47}
+    class <C <U Opus>><C <U Param>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:36}
+      class <C <U Opus>><C <U Param>><C <U CaseParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:47}
       class <C <U Opus>><C <U Param>><S <C <U CaseParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:47}
-      class <C <U Opus>><C <U Param>><C <U ParamSpecsParam>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=14:73 end=14:101}
+      class <C <U Opus>><C <U Param>><C <U ParamSpecsParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:73 end=14:101}
       class <C <U Opus>><C <U Param>><S <C <U ParamSpecsParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:73 end=14:101}
     class <C <U Opus>><S <C <U Param>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:36}
   class <C <U PropHelpers>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=63:1 end=63:18}

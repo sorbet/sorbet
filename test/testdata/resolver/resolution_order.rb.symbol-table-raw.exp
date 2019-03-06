@@ -4,7 +4,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/res
   class <C <U A>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:1 end=34:9}
     static-field <C <U A>><C <U AB>> -> AliasType { symbol = <C <U B>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=35:3 end=35:5}
     static-field <C <U A>><C <U AV>> -> Integer @ Loc {file=test/testdata/resolver/resolution_order.rb start=37:3 end=37:5}
-    class <C <U A>><C <U DOES_NOT_EXIST>> < <C <U RubyTyper>><C <U StubClass>> () -> T.untyped @ Loc {file=test/testdata/resolver/resolution_order.rb start=11:11 end=11:32}
+    class <C <U A>><C <U DOES_NOT_EXIST>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=11:11 end=11:32}
     class <C <U A>><S <C <U DOES_NOT_EXIST>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=11:11 end=11:32}
   class <S <C <U A>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:8 end=34:9}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:1 end=34:9}

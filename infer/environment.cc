@@ -841,13 +841,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(symbol);
                 const auto &data = symbol.data(ctx);
                 if (data->isClass()) {
-                    if (!data->resultType) { // common case
-                        auto singletonClass = data->lookupSingletonClass(ctx);
-                        ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
-                        tp.type = singletonClass.data(ctx)->externalType(ctx);
-                    } else {
-                        tp.type = data->resultType;
-                    }
+                    auto singletonClass = data->lookupSingletonClass(ctx);
+                    ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
+                    tp.type = singletonClass.data(ctx)->externalType(ctx);
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
                 } else if (data->isField() || data->isStaticField() || data->isMethodArgument() ||
                            data->isTypeMember()) {

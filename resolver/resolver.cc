@@ -237,7 +237,9 @@ private:
         stub.data(ctx)->superClass = core::Symbols::StubClass();
         stub.data(ctx)->resultType = core::Types::untypedUntracked();
         stub.data(ctx)->setIsModule(false);
-        stub.data(ctx)->singletonClass(ctx); // force singleton class into existence.
+        stub.data(ctx)->singletonClass(ctx).data(ctx)->resultType =
+            core::Types::untypedUntracked(); // override result type of externalResultType. See also comment in
+                                             // type_syntax.cc that intentionally side-steps this
     }
 
     static bool resolveJob(core::Context ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {

@@ -114,6 +114,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Regexp());
     id = synthesizeClass(core::Names::Constants::Magic());
     ENFORCE(id == Symbols::Magic());
+    id = Symbols::Magic().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::MagicSingleton());
     id = synthesizeClass(core::Names::Constants::Module());
     ENFORCE(id == Symbols::Module());
     id = synthesizeClass(core::Names::Constants::StandardError());
@@ -220,14 +222,8 @@ void GlobalState::initEmpty() {
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Bottom()] = Symbols::bottom();
     Context ctx(*this, Symbols::root());
 
-    // Synthesize untyped = T.untyped
-    Symbols::untyped().data(*this)->resultType = Types::untyped(*this, Symbols::untyped());
-
-    // <Magic> has its own type
-    Symbols::Magic().data(*this)->resultType = make_type<ClassType>(Symbols::Magic());
-
     // Synthesize <Magic>#build_hash(*vs : T.untyped) => Hash
-    SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildHash());
+    SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->setRepeated();
     arg.data(*this)->resultType = Types::untyped(*this, arg);
@@ -238,7 +234,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildArray());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->setRepeated();
     arg.data(*this)->resultType = Types::untyped(*this, arg);
@@ -249,7 +245,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::splat());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::arrayOfUntyped();
     method.data(*this)->arguments().emplace_back(arg);
@@ -259,7 +255,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::Object();
     method.data(*this)->arguments().emplace_back(arg);
@@ -269,7 +265,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::expandSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     method.data(*this)->arguments().emplace_back(arg);
@@ -285,7 +281,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-splat>(args: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithSplat());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
@@ -296,7 +292,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-block>(args: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithBlock());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithBlock());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
@@ -307,7 +303,7 @@ void GlobalState::initEmpty() {
     method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-splat-and-block>(args: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithSplatAndBlock());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithSplatAndBlock());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
@@ -369,6 +365,19 @@ void GlobalState::initEmpty() {
             "Too many synthetic symbols? have: {} expected: {}", symbols.size(), Symbols::last_synthetic_sym()._id + 1);
 
     installIntrinsics();
+
+    Symbols::top().data(*this)->resultType = Types::top();
+    Symbols::bottom().data(*this)->resultType = Types::bottom();
+    Symbols::NilClass().data(*this)->resultType = Types::nilClass();
+    Symbols::untyped().data(*this)->resultType = Types::untypedUntracked();
+    Symbols::FalseClass().data(*this)->resultType = Types::falseClass();
+    Symbols::TrueClass().data(*this)->resultType = Types::trueClass();
+    Symbols::Integer().data(*this)->resultType = Types::Integer();
+    Symbols::String().data(*this)->resultType = Types::String();
+    Symbols::Symbol().data(*this)->resultType = Types::Symbol();
+    Symbols::Float().data(*this)->resultType = Types::Float();
+    Symbols::Object().data(*this)->resultType = Types::Object();
+    Symbols::Class().data(*this)->resultType = Types::classClass();
 
     // First file is used to indicate absence of a file
     files.emplace_back();
