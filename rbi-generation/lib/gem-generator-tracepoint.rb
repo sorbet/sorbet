@@ -1,10 +1,12 @@
-#!/usr/bin/env ruby
-require 'set'
+# frozen_string_literal: true
+# typed: true
+
+module SorbetRBIGeneration; end
 
 alias DelegateClass_without_rbi_generator DelegateClass
 def DelegateClass(superclass)
   result = DelegateClass_without_rbi_generator(superclass)
-  RbiGenerator.register_delegate_class(superclass, result)
+  SorbetRBIGeneration::RbiGenerator.register_delegate_class(superclass, result)
   result
 end
 
@@ -21,13 +23,13 @@ end
 #
 # instead of manually defining every getter/setter
 
-class RbiGenerator
+class SorbetRBIGeneration::RbiGenerator
   SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
   module ModuleOverride
     def include(mod, *smth)
       result = super
-      RbiGenerator.module_included(mod, self)
+      SorbetRBIGeneration::RbiGenerator.module_included(mod, self)
       result
     end
   end
@@ -36,7 +38,7 @@ class RbiGenerator
   module ObjectOverride
     def extend(mod, *args)
       result = super
-      RbiGenerator.module_extended(mod, self)
+      SorbetRBIGeneration::RbiGenerator.module_extended(mod, self)
       result
     end
   end
@@ -45,7 +47,7 @@ class RbiGenerator
   module ClassOverride
     def new(*)
       result = super
-      RbiGenerator.module_created(result)
+      SorbetRBIGeneration::RbiGenerator.module_created(result)
       result
     end
   end
@@ -57,7 +59,8 @@ class RbiGenerator
       install_tracepoints
     end
 
-    def finish(output_dir = './rbi')
+    def finish(output_dir = './rbi/gems/')
+      FileUtils.rm_r(output_dir)
       disable_tracepoints
       generate_rbis(output_dir)
     end
@@ -85,7 +88,6 @@ class RbiGenerator
     def require_eveything
       require_bundler
       require_rails
-      hack_things_which_dont_tracepoint
     end
 
     private
@@ -400,15 +402,6 @@ class RbiGenerator
       ActionMailer::MessageDelivery
       ActiveJob::Base
       ActiveRecord::Schema
-    end
-
-    def hack_things_which_dont_tracepoint
-      files.each do |path, defined|
-        gem = gem_from_location(path)
-        if gem && gem[:gem] == 'ruby'
-          files[path] += [{type: :module, module: Zlib::Error}]
-        end
-      end
     end
   end
 end
