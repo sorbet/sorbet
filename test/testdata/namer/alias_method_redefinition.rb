@@ -13,5 +13,18 @@ class A
 end
 
 class A
-  def self.__foo__(*_); end # error: Method alias `A.__foo__` redefined without matching argument count. Expected: `2`, got: `1`
+  def self.__foo__(*_); end # error: Redefining method alias `A.__foo__`
+end
+
+
+class B
+  def self.__foo__(*_); end
+end
+
+class B
+  class << self
+    def foo(opts={}, *rest)
+    end
+    alias_method :__foo__, :foo # error: Redefining the existing method `B.__foo__` as a method alias
+  end
 end

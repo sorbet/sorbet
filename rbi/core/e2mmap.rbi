@@ -3,8 +3,12 @@
 module Exception2MessageMapper
   sig {params(err: Exception, rest: T.untyped).void}
   def Raise(err, *rest); end
-  alias_method(:Fail, :Raise)
-  alias_method(:fail, :Raise)
+
+  sig {params(err: Exception, rest: T.untyped).void}
+  def fail(err, *rest); end
+
+  sig {params(err: Exception, rest: T.untyped).void}
+  def Fail(err, *rest); end
 
   sig {params(c: Class, m: String).void}
   def def_e2message(c, m); end
