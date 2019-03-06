@@ -333,7 +333,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
-        opts.silenceErrors = raw["q"].as<bool>();
+        opts.silenceErrors = raw["quiet"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
