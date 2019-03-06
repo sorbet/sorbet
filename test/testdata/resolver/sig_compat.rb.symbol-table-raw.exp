@@ -5,7 +5,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
       argument <C <U A>><U f>b<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=8:7 end=8:8}
       argument <C <U A>><U f><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_compat.rb start=4:7 end=4:8}
-    method <S <C <U A>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_compat.rb start=5:3 end=10:6}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_compat.rb start=5:3 end=10:6}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_compat.rb start=??? end=???}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_compat.rb start=5:3 end=10:6}
 

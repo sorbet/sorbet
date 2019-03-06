@@ -401,9 +401,9 @@ private:
             job.ancestor = cnst;
         } else if (auto *self = ast::cast_tree<ast::Self>(ancestor.get())) {
             auto loc = ancestor->loc;
-            auto nw =
-                make_unique<ast::UnresolvedConstantLit>(loc, std::move(ancestor), ctx.contextClass().data(ctx)->name);
-            auto out = make_unique<ast::ConstantLit>(loc, ctx.contextClass(), std::move(nw), nullptr);
+            auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            auto nw = make_unique<ast::UnresolvedConstantLit>(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
+            auto out = make_unique<ast::ConstantLit>(loc, enclosingClass, std::move(nw), nullptr);
             job.ancestor = out.get();
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor.get())) {
@@ -1018,7 +1018,7 @@ private:
                 }
             }
 
-            scope = ctx.contextClass();
+            scope = ctx.owner.data(ctx)->enclosingClass(ctx);
         } else {
             if (ctx.owner.data(ctx)->isClass()) {
                 // Declaring a class instance variable
@@ -1212,15 +1212,7 @@ public:
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.staticInitForFile(inits->loc);
         } else {
-            auto prevCount = ctx.state.symbolsUsed();
-            sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol.data(ctx)->lookupSingletonClass(ctx),
-                                              core::Names::staticInit());
-            if (prevCount != ctx.state.symbolsUsed()) {
-                auto blkLoc = core::Loc::none(inits->loc.file());
-                auto blkSym = ctx.state.enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
-                blkSym.data(ctx)->setBlockArgument();
-                sym.data(ctx)->arguments().emplace_back(blkSym);
-            }
+            sym = ctx.state.staticInitForClass(classDef->symbol, inits->loc);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));

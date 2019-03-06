@@ -8,10 +8,10 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sel
     method <C <U TestSelf>><U pass> (<blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=18:3 end=18:13}
       argument <C <U TestSelf>><U pass><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <S <C <U TestSelf>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/self.rb start=3:7 end=3:15}
-    method <S <C <U TestSelf>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/self.rb start=6:3 end=9:6}
-    method <S <C <U TestSelf>> $1><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/self.rb start=14:3 end=17:6}
-    method <S <C <U TestSelf>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=3:15}
+    method <S <C <U TestSelf>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=6:3 end=9:6}
       argument <S <C <U TestSelf>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
+      method <S <C <U TestSelf>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/self.rb start=6:3 end=9:6}
+      method <S <C <U TestSelf>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/self.rb start=14:3 end=17:6}
   class <C <U TestSelfGeneric>>[<C <U Elem>>] < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=24:1 end=24:22}
     type-member(=) <C <U TestSelfGeneric>><C <U Elem>> @ Loc {file=test/testdata/resolver/self.rb start=28:3 end=28:21}
     method <C <U TestSelfGeneric>><U good1> (s, <blk>) -> AppliedType {
@@ -35,8 +35,8 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sel
     } @ Loc {file=test/testdata/resolver/self.rb start=41:3 end=41:13}
       argument <C <U TestSelfGeneric>><U pass><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <S <C <U TestSelfGeneric>> $1> < <S <C <U Object>> $1> (<C <U Sig>>, <C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/self.rb start=24:7 end=24:22}
-    method <S <C <U TestSelfGeneric>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/self.rb start=29:3 end=32:6}
-    method <S <C <U TestSelfGeneric>> $1><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/self.rb start=37:3 end=40:6}
-    method <S <C <U TestSelfGeneric>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=24:1 end=24:22}
+    method <S <C <U TestSelfGeneric>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=29:3 end=32:6}
       argument <S <C <U TestSelfGeneric>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
+      method <S <C <U TestSelfGeneric>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/self.rb start=29:3 end=32:6}
+      method <S <C <U TestSelfGeneric>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/self.rb start=37:3 end=40:6}
 

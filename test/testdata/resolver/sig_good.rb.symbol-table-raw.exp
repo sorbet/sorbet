@@ -45,9 +45,9 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig
       argument <C <U A>><U good>i<> -> T1 @ Loc {file=test/testdata/resolver/sig_good.rb start=18:7 end=18:8}
       argument <C <U A>><U good><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=7:7 end=7:8}
-    method <S <C <U A>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_good.rb start=8:3 end=30:6}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_good.rb start=8:3 end=30:6}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_good.rb start=8:3 end=30:6}
   static-field <C <U A1>> -> AliasType { symbol = <C <U T1>> } @ Loc {file=test/testdata/resolver/sig_good.rb start=5:1 end=5:3}
   class <C <U M1>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:1 end=4:10}
   class <S <C <U M1>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:8 end=4:10}

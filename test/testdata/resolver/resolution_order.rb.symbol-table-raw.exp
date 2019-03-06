@@ -43,10 +43,10 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/res
       argument <C <U IsGood>><U foo2>a<> -> A @ Loc {file=test/testdata/resolver/resolution_order.rb start=22:15 end=22:16}
       argument <C <U IsGood>><U foo2><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <S <C <U IsGood>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:7 end=14:13}
-    method <S <C <U IsGood>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=17:3 end=17:42}
-    method <S <C <U IsGood>> $1><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=22:3 end=22:42}
-    method <S <C <U IsGood>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=14:13}
+    method <S <C <U IsGood>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=17:3 end=17:42}
       argument <S <C <U IsGood>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
+      method <S <C <U IsGood>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=17:3 end=17:42}
+      method <S <C <U IsGood>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=22:3 end=22:42}
   class <C <U TestInheritace1>> < <C <U B>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:1 end=28:30}
   class <S <C <U TestInheritace1>> $1> < <S <C <U B>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:7 end=28:22}
   class <C <U TestInheritace2>> < <C <U A>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=31:1 end=31:30}

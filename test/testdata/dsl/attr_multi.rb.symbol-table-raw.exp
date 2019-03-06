@@ -31,18 +31,18 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
       argument <C <U Test>><U i=>i<> -> String @ Loc {file=test/testdata/dsl/attr_multi.rb start=22:20 end=22:21}
       argument <C <U Test>><U i=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
   class <S <C <U Test>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:7 end=3:11}
-    method <S <C <U Test>> $1><N <U <block>> $10> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=15:3 end=15:24}
-    method <S <C <U Test>> $1><N <U <block>> $11> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=18:3 end=18:42}
-    method <S <C <U Test>> $1><N <U <block>> $12> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=21:3 end=21:42}
-    method <S <C <U Test>> $1><N <U <block>> $13> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=21:3 end=21:42}
-    method <S <C <U Test>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=6:3 end=6:35}
-    method <S <C <U Test>> $1><N <U <block>> $3> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=6:3 end=6:35}
-    method <S <C <U Test>> $1><N <U <block>> $4> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
-    method <S <C <U Test>> $1><N <U <block>> $5> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
-    method <S <C <U Test>> $1><N <U <block>> $6> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
-    method <S <C <U Test>> $1><N <U <block>> $7> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
-    method <S <C <U Test>> $1><N <U <block>> $8> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=12:3 end=12:24}
-    method <S <C <U Test>> $1><N <U <block>> $9> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=15:3 end=15:24}
-    method <S <C <U Test>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=3:11}
+    method <S <C <U Test>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=6:3 end=6:35}
       argument <S <C <U Test>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $10> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=15:3 end=15:24}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $11> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=18:3 end=18:42}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $12> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=21:3 end=21:42}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $13> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=21:3 end=21:42}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=6:3 end=6:35}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=6:3 end=6:35}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $4> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $5> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $6> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $7> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=9:3 end=9:36}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $8> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=12:3 end=12:24}
+      method <S <C <U Test>> $1><U <static-init>><N <U <block>> $9> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=15:3 end=15:24}
 

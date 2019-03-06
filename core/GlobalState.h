@@ -66,7 +66,9 @@ public:
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+
     SymbolRef staticInitForFile(Loc loc);
+    SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
 
     NameRef enterNameUTF8(std::string_view nm);
 

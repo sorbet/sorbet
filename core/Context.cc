@@ -20,7 +20,7 @@ SymbolRef MutableContext::selfClass() {
     if (data->isClass()) {
         return data->singletonClass(this->state);
     }
-    return this->contextClass();
+    return data->enclosingClass(this->state);
 }
 
 bool Context::permitOverloadDefinitions() const {
@@ -42,15 +42,6 @@ bool MutableContext::permitOverloadDefinitions() const {
     return self.permitOverloadDefinitions();
 }
 
-SymbolRef Context::contextClass() const {
-    SymbolRef owner = this->owner;
-    while (!owner.data(this->state)->isClass()) {
-        ENFORCE(owner.exists(), "non-existing owner in contextClass");
-        owner = owner.data(this->state)->owner;
-    }
-    return owner;
-}
-
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
 
 void Context::trace(string_view msg) const {
@@ -65,11 +56,6 @@ Context Context::withOwner(SymbolRef sym) const {
     Context r = Context(*this);
     r.owner = sym;
     return r;
-}
-
-SymbolRef MutableContext::contextClass() const {
-    Context self(*this);
-    return self.contextClass();
 }
 
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,

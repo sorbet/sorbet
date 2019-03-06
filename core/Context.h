@@ -31,11 +31,6 @@ public:
 
     bool permitOverloadDefinitions() const;
 
-    // Returns the SymbolRef corresponding to the class `self.class`, unless the
-    // context is a class, in which case return it. This class is most notably
-    // the class in which to look up class variables.
-    SymbolRef contextClass() const;
-
     Context withOwner(SymbolRef sym) const;
 
     void trace(std::string_view msg) const;
@@ -65,11 +60,6 @@ public:
     SymbolRef selfClass();
 
     bool permitOverloadDefinitions() const;
-
-    // Returns the SymbolRef corresponding to the class `self.class`, unless the
-    // context is a class, in which case return it. This class is most notably
-    // the class in which to look up class variables.
-    SymbolRef contextClass() const;
 
     MutableContext withOwner(SymbolRef sym) const {
         MutableContext r = MutableContext(*this);

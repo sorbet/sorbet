@@ -113,12 +113,12 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
     "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Parent>#<static-init>_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Parent>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Parent>#<static-init>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_3" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
     "bb::<Class:Parent>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Parent>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Parent>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_4" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
@@ -166,12 +166,12 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
     "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Generic>#<static-init>_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Generic>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Generic>#<static-init>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_3" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
     "bb::<Class:Generic>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$12: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$11: T.untyped = <U <statTemp>>$12: T.class_of(T).<U self_type>()\l<U <statTemp>>$9: <Type: Generic[T.untyped]> = <U <statTemp>>$10: T.class_of(Generic).<U []>(<U <statTemp>>$11: T.untyped)\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::<Class:Generic>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$12: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$11: T.untyped = <U <statTemp>>$12: T.class_of(T).<U self_type>()\l<U <statTemp>>$9: <Type: Generic[T.untyped]> = <U <statTemp>>$10: T.class_of(Generic).<U []>(<U <statTemp>>$11: T.untyped)\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::<Class:Generic>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_4" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
@@ -219,12 +219,12 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
     "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Array>#<static-init>_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Array>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Array>#<static-init>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_3" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
     "bb::<Class:Array>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Array>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Array>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_4" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
@@ -272,12 +272,12 @@ subgraph "cluster_::<Class:B>#<static-init>" {
     "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:B>#<static-init>_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:B>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:B>#<static-init>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_3" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
     "bb::<Class:B>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:B>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:B>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_4" -> "bb::<Class:B>#<static-init>_2" [style="bold"];

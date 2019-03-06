@@ -68,7 +68,7 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
 
     switch (id->kind) {
         case ast::UnresolvedIdent::Class:
-            klass = cctx.ctx.contextClass();
+            klass = cctx.ctx.owner.data(cctx.ctx)->enclosingClass(cctx.ctx);
             while (klass.data(cctx.ctx)->attachedClass(cctx.ctx).exists()) {
                 klass = klass.data(cctx.ctx)->attachedClass(cctx.ctx);
             }

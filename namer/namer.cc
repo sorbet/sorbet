@@ -277,7 +277,7 @@ public:
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
-            klass->symbol = ctx.contextClass().data(ctx)->singletonClass(ctx);
+            klass->symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         } else {
             if (klass->symbol == core::Symbols::todo()) {
                 klass->symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass->name);
@@ -697,7 +697,7 @@ public:
         } else if (owner.data(ctx)->isClass()) {
             // If we're at class scope, we're actually in the context of the
             // singleton class.
-            owner = owner.data(ctx)->singletonClass(ctx);
+            owner = ctx.state.staticInitForClass(owner, blk->loc);
         }
         blk->symbol =
             ctx.state.enterMethodSymbol(blk->loc, owner,
@@ -766,11 +766,31 @@ public:
         return self;
     }
 
+    // Returns the SymbolRef corresponding to the class `self.class`, unless the
+    // context is a class, in which case return it.
+    core::SymbolRef contextClass(core::GlobalState &gs, core::SymbolRef ofWhat) const {
+        core::SymbolRef owner = ofWhat;
+        while (true) {
+            ENFORCE(owner.exists(), "non-existing owner in contextClass");
+            const auto &data = owner.data(gs);
+
+            if (data->isClass()) {
+                break;
+            }
+            if (data->name == core::Names::staticInit()) {
+                owner = data->owner.data(gs)->attachedClass(gs);
+            } else {
+                owner = data->owner;
+            }
+        }
+        return owner;
+    }
+
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // TODO(nelhage): forbid dynamic constant definition
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
-        core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
+        core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs->scope);
         if (!scope.data(ctx)->isClass()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidClassOwner)) {
                 auto constLitName = lhs->cnst.data(ctx)->show(ctx);

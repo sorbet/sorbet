@@ -23,9 +23,9 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig
       argument <C <U A>><U bad>i<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=21:7 end=21:8}
       argument <C <U A>><U bad><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=5:7 end=5:8}
-    method <S <C <U A>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:3 end=30:6}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:3 end=30:6}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:3 end=30:6}
     method <S <C <U A>> $1><U unsupported> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=8:3 end=8:23}
       argument <S <C <U A>> $1><U unsupported><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=2:9}

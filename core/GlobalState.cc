@@ -1173,6 +1173,18 @@ vector<shared_ptr<File>> GlobalState::getFiles() const {
     return files;
 }
 
+SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
+    auto prevCount = symbolsUsed();
+    auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
+    if (prevCount != symbolsUsed()) {
+        auto blkLoc = core::Loc::none(loc.file());
+        auto blkSym = enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
+        blkSym.data(*this)->setBlockArgument();
+        sym.data(*this)->arguments().emplace_back(blkSym);
+    }
+    return sym;
+}
+
 SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();

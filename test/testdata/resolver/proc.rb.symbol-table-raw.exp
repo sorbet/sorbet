@@ -66,11 +66,11 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
         ]
       } @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
   class <S <C <U TestProc>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
-    method <S <C <U TestProc>> $1><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/proc.rb start=6:3 end=9:6}
-    method <S <C <U TestProc>> $1><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/proc.rb start=14:3 end=17:6}
-    method <S <C <U TestProc>> $1><N <U <block>> $4> () @ Loc {file=test/testdata/resolver/proc.rb start=22:3 end=29:6}
-    method <S <C <U TestProc>> $1><N <U <block>> $5> () @ Loc {file=test/testdata/resolver/proc.rb start=33:3 end=33:39}
-    method <S <C <U TestProc>> $1><N <U <block>> $6> () @ Loc {file=test/testdata/resolver/proc.rb start=36:3 end=40:6}
-    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=3:15}
+    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=6:3 end=9:6}
       argument <S <C <U TestProc>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
+      method <S <C <U TestProc>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/proc.rb start=6:3 end=9:6}
+      method <S <C <U TestProc>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/proc.rb start=14:3 end=17:6}
+      method <S <C <U TestProc>> $1><U <static-init>><N <U <block>> $4> () @ Loc {file=test/testdata/resolver/proc.rb start=22:3 end=29:6}
+      method <S <C <U TestProc>> $1><U <static-init>><N <U <block>> $5> () @ Loc {file=test/testdata/resolver/proc.rb start=33:3 end=33:39}
+      method <S <C <U TestProc>> $1><U <static-init>><N <U <block>> $6> () @ Loc {file=test/testdata/resolver/proc.rb start=36:3 end=40:6}
 
