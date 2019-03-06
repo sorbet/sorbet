@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :mode, :checked, :finalized, :soft_notify, :override_allow_incompatible, :type_parameters, :generated)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :soft_notify, :override_allow_incompatible, :type_parameters, :generated)
 
   class DeclBuilder
     attr_reader :decl
@@ -21,6 +21,7 @@ module T::Private::Methods
         mod,
         ARG_NOT_PROVIDED, # params
         ARG_NOT_PROVIDED, # returns
+        ARG_NOT_PROVIDED, # bind
         Modes.standard, # mode
         ARG_NOT_PROVIDED, # checked
         false, # finalized
@@ -63,6 +64,17 @@ module T::Private::Methods
       end
 
       decl.returns = T::Private::Types::Void.new
+
+      self
+    end
+
+    def bind(type)
+      check_live!
+      if !decl.bind.equal?(ARG_NOT_PROVIDED)
+        raise BuilderError.new("You can't call .bind multiple times in a signature.")
+      end
+
+      decl.bind = type
 
       self
     end
@@ -228,6 +240,9 @@ module T::Private::Methods
     def finalize!
       check_live!
 
+      if decl.bind.equal?(ARG_NOT_PROVIDED)
+        decl.bind = nil
+      end
       if decl.checked.equal?(ARG_NOT_PROVIDED)
         decl.checked = :always
       end

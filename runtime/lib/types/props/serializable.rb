@@ -32,29 +32,24 @@ module T::Props::Serializable
         if self.required_prop_missing_from_deserialize?(prop)
           Opus::Log.info("chalk-odm: missing required property in serialize",
             prop: prop, class: self.class.name, id: decorator.get_id(self))
+        elsif rules[:notify_on_nil_write]
+          to_notify =
+            if rules[:notify_on_nil_write].is_a?(String)
+              Opus::Project::Instance.fetch(rules[:notify_on_nil_write].to_sym)
+            else
+              rules[:notify_on_nil_write]
+            end
+          Opus::Error.soft(
+            'nil value written to prop with :notify_on_nil_write set',
+            notify: to_notify,
+            storytime: {
+              klass: self.class.name,
+              prop: prop,
+              type: rules[:type],
+            },
+          )
         else
-          # TODO: move this back to hard assert.
-          # We have some client code that rescues InvalidValueError exception so that we have to behave the same here.
-          e = T::Props::InvalidValueError.new("#{self.class.name}.#{prop} not set for non-optional prop")
-          if rules[:notify_on_nil_write] &&
-              ((!Opus::Sys.testing? && !Opus::CI.in_ci?) ||
-               self.class.name == 'Opus::Types::Test::Props::SerializableTest::MigratingNilFieldModelWithError')
-            params = {
-              storytime: {
-                klass: self.class.name,
-                prop: prop,
-                type: rules[:type],
-              },
-            }
-            to_notify =
-              if rules[:notify_on_nil_write].is_a?(String)
-                Opus::Project.fetch(rules[:notify_on_nil_write].to_sym)
-              else
-                rules[:notify_on_nil_write]
-              end
-            Opus::Breakage.report_error(e, project: to_notify, params: params)
-          end
-          raise e
+          raise T::Props::InvalidValueError.new("#{self.class.name}.#{prop} not set for non-optional prop")
         end
       end
 
@@ -112,13 +107,23 @@ module T::Props::Serializable
         if rules[:optional] == false || rules[:optional] == :migrate
           val = decorator.get_default(rules, self.class)
           if val.nil?
-            Opus::Error.hard(
-              "tried to deserialize a required prop from a nil value, either provide a default: or factory: on it, or do a migration to populate it",
-              storytime: {
-                prop: hkey,
-                klass: self.class.name,
-              },
-            )
+            # TODO(jerry): hard assert unconditionally after verifying this
+            # doesn't fire in production
+            msg = "Tried to deserialize a required prop from a nil value. It's "\
+              "possible that a nil value exists in the database, so you should "\
+              "provide a `default: or factory:` for this prop (see go/optional "\
+              "for more details). If this is already the case, you probably "\
+              "omitted a required prop from the `fields:` option when doing a "\
+              "partial load."
+            storytime = {
+              prop: hkey,
+              klass: self.class.name,
+            }
+            if hkey == '_id' || hkey == 'merchant'
+              Opus::Error.soft(msg, notify: 'jerry', storytime: storytime)
+            else
+              Opus::Error.hard(msg, storytime: storytime)
+            end
           end
         elsif T::Props::Utils.need_nil_read_check?(rules)
           self.required_prop_missing_from_deserialize(p)
@@ -190,7 +195,12 @@ module T::Props::Serializable::DecoratorMethods
       :dont_store,
       :name,
       :notify_on_nil_write,
+      :raise_on_nil_write,
     ]
+  end
+
+  def required_props
+    @class.props.select {|_, v| v[:optional] == false}.keys
   end
 
   def prop_dont_store?(prop); prop_rules(prop)[:dont_store]; end
@@ -228,6 +238,7 @@ module T::Props::Serializable::DecoratorMethods
       if nilable_type_info.non_nilable_type
         # We change this inline so that the caller would get this update.
         rules[:optional] = true
+        rules[:optional_setter] = :t_nilable # this should be removed from the super call.
         super(name, nilable_type_info.non_nilable_type, rules)
       else
         # TODO(wei): we should check this as error as we only allow T.nilable union, but can not do it for now.
@@ -250,16 +261,18 @@ module T::Props::Serializable::DecoratorMethods
       validate_prop_name(rules_name)
     end
 
+    if !rules[:raise_on_nil_write].nil? && rules[:raise_on_nil_write] != true
+        raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
+    end
+
     if (to_notify = rules[:notify_on_nil_write])
-      if !(to_notify.is_a?(String) || to_notify.is_a?(Opus::Project))
+      if !(to_notify.is_a?(String) || to_notify.is_a?(Opus::Project::Instance))
         raise ArgumentError.new("The value of `notify_on_nil_write` must be a string or project (given: #{to_notify.class}).")
       end
+    end
 
-      # TODO(jerry): This relies on the fact that we currently set optional for
-      # T.nilable types.
-      if !rules[:optional]
-        raise ArgumentError.new("'notify_on_nil_write' is only supported for T.nilable(...) props (given: #{type}).")
-      end
+    if rules[:raise_on_nil_write] && rules[:notify_on_nil_write]
+      raise ArgumentError.new("You can only specify one of `raise_on_nil_write` and `notify_on_nil_write`")
     end
 
     result

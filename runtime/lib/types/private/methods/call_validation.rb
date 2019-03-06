@@ -59,6 +59,20 @@ module T::Private::Methods::CallValidation
       t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
 
+    if method_sig.bind
+      message = method_sig.bind.error_message_for_obj(instance)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Bind',
+          nil,
+          method_sig.bind,
+          instance
+        )
+      end
+    end
+
     # NOTE: We don't bother validating for missing or extra kwargs;
     # the method call itself will take care of that.
     method_sig.each_args_value_type(args) do |name, arg, type|
@@ -212,6 +226,20 @@ module T::Private::Methods::CallValidation
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
 
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
+      end
+
       if should_sample
         T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
@@ -277,6 +305,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -352,6 +394,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -439,6 +495,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -539,6 +609,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -672,6 +756,32 @@ module T::Private::Methods::CallValidation
         return original_method.bind(self).call(&blk)
       end
 
+      T::Profile.typecheck_sample_attempts -= 1
+      should_sample = T::Profile.typecheck_sample_attempts == 0
+      if should_sample
+        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+        T::Profile.typecheck_samples += 1
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
+      end
+
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+
       # The following line breaks are intentional to show nice pry message
 
 
@@ -709,6 +819,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -762,6 +886,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -828,6 +966,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)
@@ -907,6 +1059,20 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
         T::Profile.typecheck_samples += 1
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if method_sig.bind
+        message = method_sig.bind.error_message_for_obj(self)
+        if message
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Bind',
+            nil,
+            method_sig.bind,
+            self
+          )
+        end
       end
 
       unless arg0.is_a?(arg0_type)

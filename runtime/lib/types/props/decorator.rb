@@ -74,6 +74,7 @@ class T::Props::Decorator
       without_accessors
       clobber_existing_method!
       extra
+      optional
     }
   end
 
@@ -203,9 +204,6 @@ class T::Props::Decorator
   end
   def foreign_prop_get(instance, prop, foreign_class, rules=props[prop.to_sym], opts={})
     return if !(value = prop_get(instance, prop, rules))
-    if foreign_class.respond_to?(:get_foreign_load_opts)
-      opts = foreign_class.get_foreign_load_opts(opts)
-    end
     foreign_class.load(value, {}, opts)
   end
 
@@ -281,7 +279,7 @@ class T::Props::Decorator
       Set
     when T::Types::Union
       # The below unwraps our T.nilable types for T::Props if we can.
-      # This lets us do things like specify: const T.nilable(String), foreign: M::Merchant
+      # This lets us do things like specify: const T.nilable(String), foreign: Opus::DB::Model::Merchant
       non_nil_type = T::Utils.unwrap_nilable(type)
       if non_nil_type
         convert_type_to_class(non_nil_type)
@@ -306,8 +304,58 @@ class T::Props::Decorator
     .void
   end
   def prop_defined(name, cls, rules={})
-    name = name.to_sym
+    # TODO(jerry): Create similar soft assertions against false
+    if rules[:optional] == true
+      optional_setter = rules.delete(:optional_setter)
+      if optional_setter != :t_nilable
+        Opus::Error.soft(
+          'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
+          notify: 'wei',
+          storytime: {
+            name: name,
+            cls_or_args: cls.to_s,
+            args: rules,
+            klass: decorated_class.name,
+          },
+        )
+      end
+    elsif rules[:optional] == :on_load
+      Opus::Error.soft(
+        'Use of `optional: :on_load` is deprecated. You probably want `T.nilable(...)` with :raise_on_nil_write instead.',
+        notify: 'jerry',
+        storytime: {
+          name: name,
+          cls_or_args: cls.to_s,
+          args: rules,
+          klass: decorated_class.name,
+        },
+      )
+    elsif rules[:optional] == :existing
+      Opus::Error.soft(
+        'Use of `optional: :existing` is not allowed: you should use use T.nilable (http://go/optional)',
+        notify: 'wei',
+        storytime: {
+          name: name,
+          cls_or_args: cls.to_s,
+          args: rules,
+          klass: decorated_class.name,
+        },
+      )
+    end
 
+    # Finally, if `optional` was not specified, then we set it to its default
+    # value of `false`.
+    if rules[:optional].nil?
+      if is_nilable?(cls)
+        rules[:optional] = true
+      elsif rules[:ifunset].nil?
+        # TODO(jerry): Once we get rid of :ifunset, we can unconditionally make
+        # the default to be `optional: false`
+        rules[:optional] = false
+      end
+    end
+
+    name = name.to_sym
     type = cls
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
@@ -372,11 +420,6 @@ class T::Props::Decorator
       rules[:array] = type.type.raw_type
     elsif array_subdoc_type
       rules[:array] = array_subdoc_type
-    end
-
-    # Make nilable types optional, so serialization/deserialization is handled properly.
-    if !rules.include?(:optional) && is_nilable?(type)
-      rules[:optional] = true
     end
 
     if rules[:type_is_serializable]

@@ -78,17 +78,17 @@ class Opus::Enum; end
 module Opus::Breakage; end
 class Opus::Breakage::BreakageInfo; end
 module Opus::CI; end
-module Opus::Projects
-  def self.storage
-  end
-end
-
+module Opus::Extn; end
+module Opus::Extn::Assertions; end
+class Opus::Extn::Assertions::HardAssertionRuntimeError < RuntimeError; end
 module Opus::Error
   def self.hard(message, *)
-    raise message
+    raise Opus::Extn::Assertions::HardAssertionRuntimeError.new(message)
   end
 
-  def self.soft(*); end
+  def self.soft(message, *);
+    raise message
+  end
 end
 
 module Opus::Log
@@ -96,6 +96,10 @@ module Opus::Log
 end
 
 module Opus::Project
+  def self.fetch(*); end
+  def self.storage; end
+end
+module Opus::Project::Instance
   def self.fetch(*); end
 end
 

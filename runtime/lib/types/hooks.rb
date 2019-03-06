@@ -4,7 +4,7 @@
 module T::Hooks
   Private = T::Private
 
-  # This is rarely required since `decalre_sig` will do it for you, but in
+  # This is rarely required since `declare_sig` will do it for you, but in
   # certain cases, we need to get the hooks installed without `sig`ing
   # anything. E.g. `class << self`.
   #

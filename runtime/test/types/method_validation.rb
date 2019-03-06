@@ -109,38 +109,6 @@ module Opus::Types::Test
         )
       end
 
-      it "provides a method_declared hook to modules that implement it, given an instance method definition" do
-        klass = Class.new do
-          public_class_method :sig
-
-          def self.method_declared(signature); end
-        end
-
-        klass.expects(:method_declared).with do |signature|
-          signature.is_a?(T::Private::Methods::Signature) && signature.method_name == :bar
-        end
-
-        klass.sig {returns(Symbol)}
-        klass.send(:define_method, :bar) {:ok}
-        klass.new.bar
-      end
-
-      it "provides a method_declared hook to modules that implement it, given an class method definition" do
-        klass = Class.new do
-          public_class_method :sig
-
-          def self.method_declared(signature); end
-        end
-
-        klass.expects(:method_declared).with do |signature|
-          signature.is_a?(T::Private::Methods::Signature) && signature.method_name == :bar
-        end
-
-        klass.sig {returns(Symbol)}
-        def klass.bar; :bar; end
-        klass.bar
-      end
-
       it "gives a helpful error if you order optional kwargs after required" do
         ex = assert_raises(RuntimeError) do
           mod = Module.new do
@@ -269,6 +237,24 @@ module Opus::Types::Test
         assert_empty(lines[3..-1])
       end
 
+      it "raises an error when the bind is the wrong type" do
+        @mod.sig {bind(Integer).returns(Integer)}
+        def @mod.foo
+          self + 2
+        end
+
+        err = assert_raises(TypeError) do
+          @mod.foo
+        end
+
+        lines = err.message.split("\n")
+        assert_match(/Bind: Expected type Integer, got type Module with value #<Module:0x/, lines[0])
+        # Note that the paths here could be relative or absolute depending on how this test was invoked.
+        assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
+        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+        assert_empty(lines[3..-1])
+      end
+
       it "accepts T.proc" do
         @mod.sig {params(blk: T.proc.params(i: Integer).returns(Integer)).returns(Integer)}
         def @mod.foo(&blk)
@@ -276,6 +262,15 @@ module Opus::Types::Test
         end
 
         @mod.foo {|i| i * i}
+      end
+
+      it "allows procs to bind" do
+        @mod.sig {params(blk: T.proc.bind(Integer).returns(Integer)).returns(Integer)}
+        def @mod.foo(&blk)
+          3.instance_eval(&blk)
+        end
+
+        assert_equal(7, @mod.foo {self + 4})
       end
 
       it "rejects T::Utils::RuntimeProfiled" do

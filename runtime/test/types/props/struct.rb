@@ -62,4 +62,53 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     assert_equal('object_id', doc.object_id)
     assert_equal('object_id', doc.class.decorator.prop_get(doc, :object_id))
   end
+
+  class TestStruct < T::Struct
+    prop :foo0, Integer
+    prop :foo1, Integer
+    prop :foo2, String
+    prop :foo3, T.nilable(String)
+  end
+
+  class StructWithReqiredField < T::Struct
+    prop :foo1, Integer
+    prop :foo2, Integer
+  end
+
+  describe 'required/optional prop test' do
+    it 'Test optional: false' do
+      assert_equal(false, TestStruct.props[:foo0][:optional])
+      assert_equal(false, TestStruct.props[:foo1][:optional])
+      assert_equal(false, TestStruct.props[:foo2][:optional])
+      assert_equal(true, TestStruct.props[:foo3][:optional])
+    end
+
+    it 'tstruct need to initialize required fields' do
+      doc = StructWithReqiredField.new(foo1: 10, foo2: 20)
+      assert_equal(10, doc.foo1)
+      assert_equal(20, doc.foo2)
+
+      assert_raises(ArgumentError) do
+        StructWithReqiredField.new(foo2: 20)
+      end
+      assert_raises(ArgumentError) do
+        StructWithReqiredField.new(foo1: 10)
+      end
+    end
+
+    it 'tstruct deserialize different fields' do
+      doc = StructWithReqiredField.from_hash({'foo1' => 10, 'foo2' => 20})
+      assert_equal(10, doc.foo1)
+      assert_equal(20, doc.foo2)
+
+      assert_raises(Opus::Extn::Assertions::HardAssertionRuntimeError) do
+        StructWithReqiredField.from_hash({'foo2' => 20})
+      end
+
+      # The code should behave for deserialization.
+      assert_raises(Opus::Extn::Assertions::HardAssertionRuntimeError) do
+        StructWithReqiredField.from_hash({'foo1' => 10})
+      end
+    end
+  end
 end

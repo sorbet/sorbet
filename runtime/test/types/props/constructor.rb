@@ -4,7 +4,7 @@ require_relative '../../test_helper'
 class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   class MyStruct < T::Struct
     prop :name, String
-    prop :greeting, String, optional: false, default: "Hi"
+    prop :greeting, String, default: "Hi"
     prop :foo, T.nilable(T::Hash[T.any(String, Symbol), Object])
   end
 
@@ -20,7 +20,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     err = assert_raises(ArgumentError) do
       MyStruct.new(foo: 'foo')
     end
-    assert_equal("Missing required prop `name`", err.message)
+    assert_equal("Missing required prop `name` for class `Opus::Types::Test::Props::ConstructorTest::MyStruct`", err.message)
   end
 
   it 'allows required props to be omitted if they have a default value' do

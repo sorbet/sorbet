@@ -221,6 +221,7 @@ module T::Private::Methods
         method_name: method_name,
         raw_arg_types: current_declaration.params,
         raw_return_type: current_declaration.returns,
+        bind: current_declaration.bind,
         mode: current_declaration.mode,
         check_level: current_declaration.checked,
         soft_notify: current_declaration.soft_notify,
@@ -249,9 +250,6 @@ module T::Private::Methods
   def self.unwrap_method(hook_mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(signature.method.owner, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
-
-    # Callbacks
-    hook_mod.method_declared(signature) if hook_mod.respond_to?(:method_declared)
   end
 
   def self.has_sig_block_for_method(method)

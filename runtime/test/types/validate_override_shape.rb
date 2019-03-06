@@ -4,7 +4,6 @@ require_relative '../test_helper'
 module Opus::Types::Test
   class ValidateOverrideShapeTest < Critic::Unit::UnitTest
     class Base
-
       sig do
         overridable
         .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)

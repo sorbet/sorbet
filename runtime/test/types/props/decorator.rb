@@ -13,21 +13,21 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   end
 
   class StringArrayAndHashStruct < T::Struct
-    optional :arr, T::Array[String]
-    optional :the_hash, T::Hash[String, String]
+    prop :arr, T.nilable(T::Array[String])
+    prop :the_hash, T.nilable(T::Hash[String, String])
   end
 
   class SubstructArrayAndHashStruct < T::Struct
     class Substruct < T::Struct
-      optional :id, Integer, default: 0
+      prop :id, T.nilable(Integer), default: 0
 
       def ==(other)
         other.class <= self.class && other.id == self.id
       end
     end
 
-    optional :arr, T::Array[Substruct]
-    optional :the_hash, T::Hash[String, Substruct]
+    prop :arr, T.nilable(T::Array[Substruct])
+    prop :the_hash, T.nilable(T::Hash[String, Substruct])
   end
 
   class CustomTypeArrayAndHashStruct < T::Struct
@@ -47,8 +47,8 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       end
     end
 
-    optional :arr, T::Array[CustomType]
-    optional :the_hash, T::Hash[String, CustomType]
+    prop :arr, T.nilable(T::Array[CustomType])
+    prop :the_hash, T.nilable(T::Hash[String, CustomType])
   end
 
   describe 'typed arrays and hashes' do
@@ -60,7 +60,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       assert_equal({"arr" => ["foo"], "the_hash" => {"foo" => "bar"}}, doc.serialize)
       assert_equal(doc.serialize, StringArrayAndHashStruct.from_hash(doc.serialize).serialize)
     end
-
 
     it 'can have substruct values' do
       doc = SubstructArrayAndHashStruct.new(
@@ -188,7 +187,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
 
   class OptionalArrayClass
     include T::Props::Serializable
-    optional :foo, T::Array[Integer]
+    prop :foo, T.nilable(T::Array[Integer])
   end
 
   describe 'optional props' do
@@ -200,7 +199,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
 
     it "validates setting 'optional' argument when defining with 'optional' keyword" do
-      assert_prop_error(/Cannot pass 'optional' argument/, mixin: T::Props::Serializable) do
+      assert_prop_error(/Use of `optional` is deprecated/, error: RuntimeError, mixin: T::Props::Serializable) do
         optional :foo, String, optional: :migration
       end
 
@@ -214,8 +213,8 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     include T::Props::Serializable
     include T::Props::WeakConstructor
 
-    prop :foo, String, optional: false
-    prop :bar, String, optional: false, default: 'bar'
+    prop :foo, String
+    prop :bar, String, default: 'bar'
   end
 
   describe 'optional: false props' do
@@ -229,7 +228,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       e = assert_raises do
         OptionalMigrate.from_hash({})
       end
-      assert_match(/tried to deserialize a required prop from a nil value/, e.message)
+      assert_match(/Tried to deserialize a required prop from a nil value./, e.message)
     end
 
     it "won't serialize with a missing prop" do
@@ -240,6 +239,35 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
   end
 
+  class OptionalMigrate2
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :foo, String
+    prop :bar, String, default: 'bar'
+  end
+
+  describe 'optional: false props are the default' do
+    it 'works if the field is there' do
+      m = OptionalMigrate.from_hash('foo' => 'foo')
+      assert_equal('foo', m.foo)
+      assert_equal('bar', m.bar)
+    end
+
+    it "won't populate in from_hash" do
+      e = assert_raises do
+        OptionalMigrate.from_hash({})
+      end
+      assert_match(/Tried to deserialize a required prop from a nil value./, e.message)
+    end
+
+    it "won't serialize with a missing prop" do
+      e = assert_raises do
+        OptionalMigrate.new({}).serialize
+      end
+      assert_match(/Opus::Types::Test::Props::DecoratorTest::OptionalMigrate.foo not set/, e.message)
+    end
+  end
 
   class ImmutablePropStruct
     include T::Props::WeakConstructor
@@ -289,11 +317,11 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     include T::Props::Serializable
     include T::Props::WeakConstructor
 
-    prop :a, Integer
-    optional :b, Integer
-    const :c, Integer
-    prop :d, Integer, optional: false, default: 91
-    prop :e, Integer, optional: false
+    prop :a, T.nilable(Integer), raise_on_nil_write: true
+    prop :b, T.nilable(Integer)
+    const :c, T.nilable(Integer), raise_on_nil_write: true
+    prop :d, Integer, default: 91
+    prop :e, Integer
   end
 
   it 'writes as expected' do
@@ -326,7 +354,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     e = assert_raises do
       MatrixStruct.from_hash("e" => nil)
     end
-    assert_match(/tried to deserialize a required prop from a nil value/, e.message)
+    assert_match(/Tried to deserialize a required prop from a nil value./, e.message)
   end
 
   it 'constructs as expected' do
@@ -335,5 +363,28 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     assert_nil(MatrixStruct.new.c)
     assert_equal(91, MatrixStruct.new.d)
     assert_nil(MatrixStruct.new.e)
+  end
+
+  it 'soft asserts if `optional` is ever specified' do
+    e = assert_raises do
+      Class.new(T::Struct) do
+        prop :optional_true, Boolean, optional: true
+      end
+    end
+    assert_match(/Use of `optional: true` is deprecated/, e.message)
+
+    e = assert_raises do
+      Class.new(T::Struct) do
+        prop :optional_on_load, Boolean, optional: :on_load
+      end
+    end
+    assert_match(/Use of `optional: :on_load` is deprecated/, e.message)
+
+    e = assert_raises do
+      Class.new(T::Struct) do
+        prop :optional_existing, Boolean, optional: :existing
+      end
+    end
+    assert_match(/Use of `optional: :existing` is not allowed/, e.message)
   end
 end
