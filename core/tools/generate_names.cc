@@ -279,6 +279,8 @@ NameDef names[] = {
 
     {"require"},
     {"callWithSplat", "<call-with-splat>"},
+    {"callWithBlock", "<call-with-block>"},
+    {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerable_to_h"},
 
     // GlobalState initEmpty()

@@ -22,9 +22,7 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   def <U calls_with_object><<C <U <todo sym>>>>(&<U blk>)
-    self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |*<D <U <block-pass>> $2>|
-      ::<Magic>.<U <call-with-splat>>(<U blk>.<U to_proc>(), :"call", <D <U <block-pass>> $2>)
-    end
+    ::<Magic>.<U <call-with-block>>(self(<C <U <todo sym>>>), :"calls_arg_with_object", <U blk>, <emptyTree>::<C <U HasMeth>>.<U new>())
   end
 
   class <emptyTree>::<C <U CallsWithObject>><<C <U <todo sym>>>> < (::<todo sym>)
@@ -35,9 +33,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U CallsWithObjectChild>><<C <U <todo sym>>>> < (<emptyTree>::<C <U CallsWithObject>>)
     def self.<U calls_with_object><<C <U <todo sym>>>>(&<U blk>)
-      self(<C <U <todo sym>>>).<U super>() do |*<D <U <block-pass>> $2>|
-        ::<Magic>.<U <call-with-splat>>(<U blk>.<U to_proc>(), :"call", <D <U <block-pass>> $2>)
-      end
+      ::<Magic>.<U <call-with-block>>(self(<C <U <todo sym>>>), :"super", <U blk>)
     end
   end
 
@@ -55,36 +51,30 @@ class <emptyTree><<C <U <root>>>> < ()
       self(<C <U <todo sym>>>).<U calls_with_object>() do |<U x>|
         <U x>.<U meth>()
       end
-      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<D <U <block-pass>> $3>|
-        ::<Magic>.<U <call-with-splat>>(<U blk>.<U to_proc>(), :"call", <D <U <block-pass>> $3>)
-      end
-      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<D <U <block-pass>> $4>|
-        ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>).<U returns_lambda>().<U to_proc>(), :"call", <D <U <block-pass>> $4>)
-      end
-      self(<C <U <todo sym>>>).<U calls_with_object>() do |*<D <U <block-pass>> $5>|
-        ::<Magic>.<U <call-with-splat>>(<emptyTree>::<C <U HasToProc>>.<U new>().<U to_proc>(), :"call", <D <U <block-pass>> $5>)
-      end
+      ::<Magic>.<U <call-with-block>>(self(<C <U <todo sym>>>), :"calls_with_object", <U blk>)
+      ::<Magic>.<U <call-with-block>>(self(<C <U <todo sym>>>), :"calls_with_object", self(<C <U <todo sym>>>).<U returns_lambda>())
+      ::<Magic>.<U <call-with-block>>(self(<C <U <todo sym>>>), :"calls_with_object", <emptyTree>::<C <U HasToProc>>.<U new>())
       self(<C <U <todo sym>>>).<U calls_with_object>() do |*<U args>|
         ::<Magic>.<U <call-with-splat>>(<emptyTree>::<C <U HasToProc>>.<U new>().<U to_proc>(), :"call", <U args>.<U to_a>())
       end
-      <emptyTree>::<C <U CallsWithObject>>.<U calls_with_object>() do |<D <U <block-pass>> $6>|
-        <D <U <block-pass>> $6>.<U meth>()
+      <emptyTree>::<C <U CallsWithObject>>.<U calls_with_object>() do |<D <U <block-pass>> $3>|
+        <D <U <block-pass>> $3>.<U meth>()
       end
       begin
-        <D <U <assignTemp>> $7> = <emptyTree>::<C <U CallsWithObject>>
-        if <D <U <assignTemp>> $7>.<U nil?>()
+        <D <U <assignTemp>> $4> = <emptyTree>::<C <U CallsWithObject>>
+        if <D <U <assignTemp>> $4>.<U nil?>()
           nil
         else
-          <D <U <assignTemp>> $7>.<U calls_with_object>() do |<D <U <block-pass>> $8>|
-            <D <U <block-pass>> $8>.<U meth>()
+          <D <U <assignTemp>> $4>.<U calls_with_object>() do |<D <U <block-pass>> $5>|
+            <D <U <block-pass>> $5>.<U meth>()
           end
         end
       end
-      <emptyTree>::<C <U CallsWithObjectChild>>.<U calls_with_object>() do |<D <U <block-pass>> $9>|
-        <D <U <block-pass>> $9>.<U meth>()
+      <emptyTree>::<C <U CallsWithObjectChild>>.<U calls_with_object>() do |<D <U <block-pass>> $6>|
+        <D <U <block-pass>> $6>.<U meth>()
       end
-      self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |<D <U <block-pass>> $10>|
-        <D <U <block-pass>> $10>.<U meth>()
+      self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |<D <U <block-pass>> $7>|
+        <D <U <block-pass>> $7>.<U meth>()
       end
       self(<C <U <todo sym>>>).<U calls_arg_with_object>(<emptyTree>::<C <U HasMeth>>.<U new>()) do |<U x>|
         <U x>.<U meth>()

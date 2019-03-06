@@ -136,38 +136,19 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
     return mdef;
 }
 
-unique_ptr<Block> node2Proc(DesugarContext dctx, unique_ptr<parser::Node> node) {
-    if (node == nullptr) {
-        return nullptr;
-    }
-
-    auto expr = node2TreeImpl(dctx, std::move(node));
+unique_ptr<Block> symbol2Proc(DesugarContext dctx, unique_ptr<Expression> expr) {
     core::Loc loc = expr->loc;
     core::NameRef temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp(),
                                                         ++dctx.uniqueCounter);
-    Literal *lit;
-    if ((lit = cast_tree<Literal>(expr.get())) && lit->isSymbol(dctx.ctx)) {
-        // &:foo => {|temp| temp.foo() }
-        core::NameRef name(dctx.ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
-        MethodDef::ARGS_store args;
-        args.emplace_back(MK::Local(loc, temp));
-        unique_ptr<Expression> recv = MK::Local(loc, temp);
-        unique_ptr<Expression> body = MK::Send0(loc, std::move(recv), name);
-        return make_unique<Block>(loc, std::move(args), std::move(body));
-    }
+    Literal *lit = cast_tree<Literal>(expr.get());
+    ENFORCE(lit && lit->isSymbol(dctx.ctx));
 
-    // &foo => {|*args| foo.to_proc.call(*args) }
-    // aka Magic.callWithSplat(foo.to_proc, :call, args)
-
-    auto proc = MK::Send0(loc, std::move(expr), core::Names::to_proc());
+    // &:foo => {|temp| temp.foo() }
+    core::NameRef name(dctx.ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
     MethodDef::ARGS_store args;
-    unique_ptr<Expression> rest = make_unique<RestArg>(loc, MK::Local(loc, temp));
-    args.emplace_back(std::move(rest));
-    auto magic = MK::Constant(loc, core::Symbols::Magic());
-    auto callLiteral =
-        MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::call()));
-    unique_ptr<Expression> body = MK::Send3(loc, std::move(magic), core::Names::callWithSplat(), std::move(proc),
-                                            std::move(callLiteral), MK::Local(loc, temp));
+    args.emplace_back(MK::Local(loc, temp));
+    unique_ptr<Expression> recv = MK::Local(loc, temp);
+    unique_ptr<Expression> body = MK::Send0(loc, std::move(recv), name);
     return make_unique<Block>(loc, std::move(args), std::move(body));
 }
 
@@ -319,9 +300,22 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     sendargs.emplace_back(std::move(rec));
                     sendargs.emplace_back(std::move(method));
                     sendargs.emplace_back(std::move(args));
-
-                    auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                        std::move(sendargs), 0, node2Proc(dctx, std::move(block)));
+                    unique_ptr<Expression> res;
+                    if (block == nullptr) {
+                        res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
+                                       std::move(sendargs), 0);
+                    } else {
+                        auto convertedBlock = node2TreeImpl(dctx, std::move(block));
+                        Literal *lit;
+                        if ((lit = cast_tree<Literal>(convertedBlock.get())) && lit->isSymbol(dctx.ctx)) {
+                            res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
+                                           std::move(sendargs), 0, symbol2Proc(dctx, std::move(convertedBlock)));
+                        } else {
+                            sendargs.emplace_back(std::move(convertedBlock));
+                            res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                           core::Names::callWithSplatAndBlock(), std::move(sendargs), 0);
+                        }
+                    }
                     result.swap(res);
                 } else {
                     Send::ARGS_store args;
@@ -336,8 +330,31 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         }
                     };
 
-                    auto res = MK::Send(loc, std::move(rec), send->method, std::move(args), flags,
-                                        node2Proc(dctx, std::move(block)));
+                    unique_ptr<Expression> res;
+                    if (block == nullptr) {
+                        res = MK::Send(loc, std::move(rec), send->method, std::move(args), flags);
+                    } else {
+                        auto method =
+                            MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
+                        auto convertedBlock = node2TreeImpl(dctx, std::move(block));
+                        Literal *lit;
+                        if ((lit = cast_tree<Literal>(convertedBlock.get())) && lit->isSymbol(dctx.ctx)) {
+                            res = MK::Send(loc, std::move(rec), send->method, std::move(args), flags,
+                                           symbol2Proc(dctx, std::move(convertedBlock)));
+                        } else {
+                            Send::ARGS_store sendargs;
+                            sendargs.emplace_back(std::move(rec));
+                            sendargs.emplace_back(std::move(method));
+                            sendargs.emplace_back(std::move(convertedBlock));
+                            for (auto &arg : args) {
+                                sendargs.emplace_back(std::move(arg));
+                            }
+
+                            res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithBlock(),
+                                           std::move(sendargs), 0);
+                        }
+                    }
+
                     if (auto send = cast_tree<Send>(res.get())) {
                         if (isa_tree<Self>(send->recv.get()) &&
                             (send->fun == core::Names::include() || send->fun == core::Names::extend())) {

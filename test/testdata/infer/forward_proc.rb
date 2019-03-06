@@ -14,4 +14,4 @@ p = T.let(proc {|x, y| x}, T.proc.params(x: Integer, y: String).returns(Integer)
 f(&p)
 
 p = T.let(proc {|x, y| x}, T.proc.params(x: Integer, y: Integer).returns(Integer))
-f(&p) # error: `String` doesn't match `Integer` for argument `arg1`
+f(&p) # error: `T.proc.params(arg0: Integer, arg1: Integer).returns(Integer)` doesn't match `T.proc.params(arg0: Integer, arg1: String).returns(Integer)` for block argument

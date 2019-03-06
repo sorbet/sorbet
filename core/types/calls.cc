@@ -1095,6 +1095,27 @@ public:
 } Magic_expandSplat;
 
 class Magic_callWithSplat : public IntrinsicMethod {
+    friend class Magic_callWithSplatAndBlock;
+
+private:
+    static InlinedVector<const TypeAndOrigins *, 2>
+    generateSendArgs(TupleType *tuple, InlinedVector<TypeAndOrigins, 2> &sendArgStore, Loc argsLoc) {
+        sendArgStore.reserve(tuple->elems.size());
+        for (auto &arg : tuple->elems) {
+            TypeAndOrigins tao;
+            tao.type = arg;
+            tao.origins.emplace_back(argsLoc);
+            sendArgStore.emplace_back(std::move(tao));
+        }
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        sendArgs.reserve(sendArgStore.size());
+        for (auto &arg : sendArgStore) {
+            sendArgs.emplace_back(&arg);
+        }
+
+        return sendArgs;
+    }
+
 public:
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.size() != 3) {
@@ -1126,18 +1147,8 @@ public:
         }
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
-        sendArgStore.reserve(tuple->elems.size());
-        for (auto &arg : tuple->elems) {
-            TypeAndOrigins tao;
-            tao.type = arg;
-            tao.origins.emplace_back(args.locs.args[2]);
-            sendArgStore.emplace_back(std::move(tao));
-        }
-        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        sendArgs.reserve(sendArgStore.size());
-        for (auto &arg : sendArgStore) {
-            sendArgs.emplace_back(&arg);
-        }
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs =
+            Magic_callWithSplat::generateSendArgs(tuple, sendArgStore, args.locs.args[2]);
         InlinedVector<Loc, 2> sendArgLocs(tuple->elems.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, args.block};
@@ -1150,6 +1161,271 @@ public:
         return dispatched.returnType;
     }
 } Magic_callWithSplat;
+
+class Magic_callWithBlock : public IntrinsicMethod {
+    friend class Magic_callWithSplatAndBlock;
+
+private:
+    static TypePtr typeToProc(Context ctx, TypePtr blockType, Loc callLoc, Loc receiverLoc) {
+        auto nonNilBlockType = blockType;
+        auto typeIsNilable = false;
+        if (Types::isSubType(ctx, Types::nilClass(), blockType)) {
+            nonNilBlockType = Types::dropSubtypesOf(ctx, blockType, Symbols::NilClass());
+            typeIsNilable = true;
+
+            if (nonNilBlockType->isBottom()) {
+                return Types::nilClass();
+            }
+        }
+
+        NameRef to_proc = core::Names::to_proc();
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        InlinedVector<Loc, 2> sendArgLocs;
+        CallLocs sendLocs{callLoc, receiverLoc, sendArgLocs};
+        DispatchArgs innerArgs{to_proc, sendLocs, sendArgs, nonNilBlockType, nonNilBlockType, nullptr};
+        auto dispatched = nonNilBlockType->dispatchCall(ctx, innerArgs);
+        for (auto &comp : dispatched.components) {
+            for (auto &err : comp.errors) {
+                ctx.state._error(std::move(err));
+            }
+        }
+
+        if (typeIsNilable) {
+            return Types::any(ctx, dispatched.returnType, Types::nilClass());
+        } else {
+            return dispatched.returnType;
+        }
+    }
+
+    static std::optional<int> getArityForBlock(TypePtr blockType) {
+        if (AppliedType *appliedType = cast_type<AppliedType>(blockType.get())) {
+            return Types::getProcArity(*appliedType);
+        }
+
+        return std::nullopt;
+    }
+
+    static void showLocationOfArgDefn(Context ctx, ErrorBuilder &e, TypePtr blockType,
+                                      DispatchComponent &dispatchComp) {
+        if (!dispatchComp.method.exists()) {
+            return;
+        }
+
+        if (dispatchComp.method.data(ctx)->isClass()) {
+            return;
+        }
+
+        auto methodArgs = dispatchComp.method.data(ctx)->arguments();
+        ENFORCE(!methodArgs.empty());
+        SymbolRef bspec = methodArgs.back();
+        ENFORCE(bspec.exists() && bspec.data(ctx)->isBlockArgument());
+        e.addErrorSection(ErrorSection({
+            ErrorLine::from(bspec.data(ctx)->loc(), "Method `{}` has specified `{}` as `{}`",
+                            dispatchComp.method.data(ctx)->show(ctx), bspec.data(ctx)->argumentName(ctx),
+                            blockType->show(ctx)),
+        }));
+    }
+
+    static TypePtr simulateCall(Context ctx, const TypeAndOrigins *receiver, DispatchArgs innerArgs,
+                                shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc,
+                                Loc blockLoc) {
+        auto dispatched = receiver->type->dispatchCall(ctx, innerArgs);
+        for (auto &comp : dispatched.components) {
+            for (auto &err : comp.errors) {
+                ctx.state._error(std::move(err));
+            }
+        }
+        // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
+        // as we do the subtyping check.
+        TypeConstraint *constr = link->constr.get();
+        if (link->blockPreType &&
+            !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, link->blockPreType)) {
+            ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
+            auto nonNilableBlockType = Types::dropSubtypesOf(ctx, link->blockPreType, Symbols::NilClass());
+            if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
+                Types::isSubType(ctx, nonNilableBlockType, passedInBlockType)) {
+                // If a block of unknown arity is passed in, but the function was declared with a known arity,
+                // raise an error in strict mode.
+                // This could occur, for example, when using Method#to_proc, since we type it as returning a `Proc`.
+                if (auto e = ctx.state.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
+                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc",
+                                link->blockPreType->show(ctx));
+                    if (dispatched.components.size() == 1) {
+                        Magic_callWithBlock::showLocationOfArgDefn(ctx, e, link->blockPreType,
+                                                                   dispatched.components[0]);
+                    }
+                }
+
+                // Create a new proc of correct arity, with everything as untyped,
+                // and then use this type instead of passedInBlockType in later subtype checks.
+                // This allows the generic parameters to be instantiated with untyped rather than bottom.
+                if (std::optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
+                    vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
+                    auto procWithCorrectArity = core::Symbols::Proc(*procArity);
+                    passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, targs);
+                }
+            } else if (auto e = ctx.state.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
+                e.setHeader("`{}` doesn't match `{}` for block argument", passedInBlockType->show(ctx),
+                            link->blockPreType->show(ctx));
+                if (dispatched.components.size() == 1) {
+                    Magic_callWithBlock::showLocationOfArgDefn(ctx, e, link->blockPreType, dispatched.components[0]);
+                }
+            }
+        }
+
+        for (auto &dispatchComp : dispatched.components) {
+            if (!dispatchComp.method.exists()) {
+                continue;
+            }
+
+            if (dispatchComp.method.data(ctx)->isClass()) {
+                continue;
+            }
+
+            auto methodArgs = dispatchComp.method.data(ctx)->arguments();
+            ENFORCE(!methodArgs.empty());
+            SymbolRef bspec = methodArgs.back();
+            ENFORCE(bspec.exists() && bspec.data(ctx)->isBlockArgument());
+
+            auto bspecType = bspec.data(ctx)->resultType;
+            if (bspecType) {
+                // This subtype check is here to discover the correct generic bounds.
+                Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);
+            }
+        }
+
+        if (!constr->solve(ctx)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::GenericMethodConstaintUnsolved)) {
+                e.setHeader("Could not find valid instantiation of type parameters");
+            }
+            return core::Types::untypedUntracked();
+        }
+
+        if (!constr->isEmpty() && constr->isSolved()) {
+            dispatched.returnType = Types::instantiate(ctx, dispatched.returnType, *(constr));
+        }
+        return dispatched.returnType;
+    }
+
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] is the block
+        // args[3...] are the remaining arguements
+        // equivalent to (args[0]).args[1](*args[3..], &args[2])
+
+        if (args.args.size() < 3) {
+            return core::Types::untypedUntracked();
+        }
+        auto &receiver = args.args[0];
+        if (receiver->type->isUntyped()) {
+            return receiver->type;
+        }
+
+        if (!receiver->type->isFullyDefined()) {
+            return core::Types::untypedUntracked();
+        }
+
+        if (core::cast_type<core::TypeVar>(args.args[2]->type.get())) {
+            if (auto e = ctx.state.beginError(args.locs.args[2], core::errors::Infer::GenericPassedAsBlock)) {
+                e.setHeader("Passing generics as block arguments is not supported");
+            }
+            return Types::untypedUntracked();
+        }
+
+        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
+        if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
+            return core::Types::untypedUntracked();
+        }
+        NameRef fn(ctx.state, (u4)lit->value);
+
+        InlinedVector<TypeAndOrigins, 2> sendArgStore;
+        InlinedVector<Loc, 2> sendArgLocs;
+        for (int i = 3; i < args.args.size(); i++) {
+            sendArgStore.emplace_back(*args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        sendArgs.reserve(sendArgStore.size());
+        for (auto &arg : sendArgStore) {
+            sendArgs.emplace_back(&arg);
+        }
+        CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
+
+        TypePtr finalBlockType =
+            Magic_callWithBlock::typeToProc(ctx, args.args[2]->type, args.locs.call, args.locs.args[2]);
+        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        auto link = make_shared<core::SendAndBlockLink>(Symbols::noSymbol(), fn, blockArity);
+
+        DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
+
+        return Magic_callWithBlock::simulateCall(ctx, receiver, innerArgs, link, finalBlockType, args.locs.args[2],
+                                                 args.locs.call);
+    }
+} Magic_callWithBlock;
+
+class Magic_callWithSplatAndBlock : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] are the splat arguments
+        // args[3] is the block
+
+        if (args.args.size() != 4) {
+            return core::Types::untypedUntracked();
+        }
+        auto &receiver = args.args[0];
+        if (receiver->type->isUntyped()) {
+            return receiver->type;
+        }
+
+        if (!receiver->type->isFullyDefined()) {
+            return core::Types::untypedUntracked();
+        }
+
+        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
+        if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
+            return core::Types::untypedUntracked();
+        }
+        NameRef fn(ctx.state, (u4)lit->value);
+
+        if (args.args[2]->type->isUntyped()) {
+            return args.args[2]->type;
+        }
+        auto *tuple = cast_type<TupleType>(args.args[2]->type.get());
+        if (tuple == nullptr) {
+            if (auto e = ctx.state.beginError(args.locs.args[2], core::errors::Infer::UntypedSplat)) {
+                e.setHeader("Splats are only supported where the size of the array is known statically");
+            }
+            return Types::untypedUntracked();
+        }
+
+        if (core::cast_type<core::TypeVar>(args.args[3]->type.get())) {
+            if (auto e = ctx.state.beginError(args.locs.args[3], core::errors::Infer::GenericPassedAsBlock)) {
+                e.setHeader("Passing generics as block arguments is not supported");
+            }
+            return Types::untypedUntracked();
+        }
+
+        InlinedVector<TypeAndOrigins, 2> sendArgStore;
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs =
+            Magic_callWithSplat::generateSendArgs(tuple, sendArgStore, args.locs.args[2]);
+        InlinedVector<Loc, 2> sendArgLocs(tuple->elems.size(), args.locs.args[2]);
+        CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
+
+        TypePtr finalBlockType =
+            Magic_callWithBlock::typeToProc(ctx, args.args[3]->type, args.locs.call, args.locs.args[3]);
+        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        auto link = make_shared<core::SendAndBlockLink>(Symbols::noSymbol(), fn, blockArity);
+
+        DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
+
+        return Magic_callWithBlock::simulateCall(ctx, receiver, innerArgs, link, finalBlockType, args.locs.args[3],
+                                                 args.locs.call);
+    }
+} Magic_callWithSplatAndBlock;
 
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
@@ -1448,6 +1724,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), false, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), false, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), false, Names::callWithSplat(), &Magic_callWithSplat},
+    {Symbols::Magic(), false, Names::callWithBlock(), &Magic_callWithBlock},
+    {Symbols::Magic(), false, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
 
     {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), false, Names::first(), &Tuple_first},

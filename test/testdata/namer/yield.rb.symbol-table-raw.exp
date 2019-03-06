@@ -12,14 +12,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/yield.
       argument <C <U Main>><U main><blk><block> @ Loc {file=test/testdata/namer/yield.rb start=??? end=???}
       method <C <U Main>><U main><N <U <block>> $2> (x) @ Loc {file=test/testdata/namer/yield.rb start=20:13 end=20:35}
         argument <C <U Main>><U main><N <U <block>> $2>x<> @ Loc {file=test/testdata/namer/yield.rb start=20:22 end=20:23}
-      method <C <U Main>><U main><N <U <block>> $3> (l) @ Loc {file=test/testdata/namer/yield.rb start=21:18 end=21:19}
-        argument <C <U Main>><U main><N <U <block>> $3>l<repeated> @ Loc {file=test/testdata/namer/yield.rb start=21:18 end=21:19}
-      method <C <U Main>><U main><N <U <block>> $4> (l) @ Loc {file=test/testdata/namer/yield.rb start=22:20 end=22:21}
-        argument <C <U Main>><U main><N <U <block>> $4>l<repeated> @ Loc {file=test/testdata/namer/yield.rb start=22:20 end=22:21}
-      method <C <U Main>><U main><N <U <block>> $5> (l) @ Loc {file=test/testdata/namer/yield.rb start=23:16 end=23:17}
-        argument <C <U Main>><U main><N <U <block>> $5>l<repeated> @ Loc {file=test/testdata/namer/yield.rb start=23:16 end=23:17}
-      method <C <U Main>><U main><N <U <block>> $6> (l) @ Loc {file=test/testdata/namer/yield.rb start=24:21 end=24:22}
-        argument <C <U Main>><U main><N <U <block>> $6>l<repeated> @ Loc {file=test/testdata/namer/yield.rb start=24:21 end=24:22}
     method <C <U Main>><U mixed> (&blk) @ Loc {file=test/testdata/namer/yield.rb start=11:5 end=11:20}
       argument <C <U Main>><U mixed>&blk<block> @ Loc {file=test/testdata/namer/yield.rb start=11:15 end=11:19}
     method <C <U Main>><U yielder> (<blk>) @ Loc {file=test/testdata/namer/yield.rb start=3:5 end=3:16}

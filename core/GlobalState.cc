@@ -295,6 +295,28 @@ void GlobalState::initEmpty() {
     arg.data(*this)->setBlockArgument();
     method.data(*this)->arguments().emplace_back(arg);
 
+    // Synthesize <Magic>#<call-with-block>(args: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithBlock());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this)->resultType = Types::untyped(*this, method);
+    arg.data(*this)->setRepeated();
+    method.data(*this)->arguments().emplace_back(arg);
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
+
+    // Synthesize <Magic>#<call-with-splat-and-block>(args: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithSplatAndBlock());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this)->resultType = Types::untyped(*this, method);
+    arg.data(*this)->setRepeated();
+    method.data(*this)->arguments().emplace_back(arg);
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+    method.data(*this)->arguments().emplace_back(arg);
+
     // Some of these are Modules
     Symbols::T().data(*this)->setIsModule(true);
     Symbols::StubAncestor().data(*this)->setIsModule(true);

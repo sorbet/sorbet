@@ -57,18 +57,10 @@ begin
             3
           end
         end
-        self(<C <U Main>>).<U yielder>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $2>$2)
-        end
-        self(<C <U Main>>).<U blockpass>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $3>$3)
-        end
-        self(<C <U Main>>).<U mixed>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $4>$4)
-        end
-        self(<C <U Main>>).<U blockyield>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $5>$5)
-        end
+        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"yielder", <U l>)
+        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"blockpass", <U l>)
+        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"mixed", <U l>)
+        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"blockyield", <U l>)
       end
     end
   end
