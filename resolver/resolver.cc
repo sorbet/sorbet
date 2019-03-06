@@ -24,7 +24,7 @@ namespace {
 /*
  * Ruby supports resolving constants via your ancestors -- superclasses and
  * mixins. Since superclass and mixins are themselves constant references, we
- * thus may not be able to resolve certain constants until after we've typeAlias
+ * thus may not be able to resolve certain constants until after we've resolved
  * others.
  *
  * To solve this, we collect any failed resolutions into a pair of TODO lists,
@@ -32,12 +32,12 @@ namespace {
  * practice this loop terminates after 3 or fewer passes on most real codebases.
  * We also track defined type aliases in a separate map.
  *
- * This walk replaces ast::UnresolvedConstantLit nodes with either ast::ConstantLit nodes.
+ * This walk replaces ast::UnresolvedConstantLit nodes with ast::ConstantLit nodes.
  * Successful resolutions are removed from the `todo_` lists.
  *
- * There are 4 items maintained by this fixed point computations:
- *  - list of constants to be typeAlias
- *  - list of ancestors to be filled that require constants to be typeAlias
+ * There are 4 items maintained by these fixed point computations:
+ *  - list of constants to be resolved
+ *  - list of ancestors to be filled that require constants to be resolved
  *  - map of class aliases
  *  - map of type aliases to their respective trees
  *
@@ -66,7 +66,7 @@ private:
 
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
-        // setting out->typeAlias to non-nullptr indicates that the tree was already typeAlias.
+        // setting out->typeAlias to non-nullptr indicates that the tree was already resolved.
         ast::ConstantLit *out;
 
         ResolutionItem() = default;
