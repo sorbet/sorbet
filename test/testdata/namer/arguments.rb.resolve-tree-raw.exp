@@ -109,28 +109,28 @@ InsSeq{
                 body = Array{
                   elems = [
                     Local{
-                      localVariable = <U a>$2
+                      localVariable = <U a>$1
                     }
                     Local{
-                      localVariable = <U b>$2
+                      localVariable = <U b>$1
                     }
                     Local{
-                      localVariable = <U c>$2
+                      localVariable = <U c>$1
                     }
                     Local{
-                      localVariable = <U d>$2
+                      localVariable = <U d>$1
                     }
                     Local{
-                      localVariable = <U e>$2
+                      localVariable = <U e>$1
                     }
                     Local{
-                      localVariable = <U f>$2
+                      localVariable = <U f>$1
                     }
                     Local{
-                      localVariable = <U g>$2
+                      localVariable = <U g>$1
                     }
                     Local{
-                      localVariable = <U h>$2
+                      localVariable = <U h>$1
                     }
                   ]
                 }

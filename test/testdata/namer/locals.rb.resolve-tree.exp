@@ -7,16 +7,16 @@ begin
         <U c> = 4
         self(<C <U TestLocals>>).<U proc>() do ||
           begin
-            <U b>$2 = 2
-            <U a>.<U +>(<U b>$2)
+            <U b>$1 = 2
+            <U a>.<U +>(<U b>$1)
             self(<C <U TestLocals>>).<U proc>() do ||
-              <U b>$2.<U +>(<U c>)
+              <U b>$1.<U +>(<U c>)
             end
           end
         end
         <U b> = 3
         self(<C <U TestLocals>>).<U proc>() do |a|
-          <U a>$4.<U +>(<U b>$4)
+          <U a>$3.<U +>(<U b>$3)
         end
       end
     end

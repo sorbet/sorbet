@@ -100,7 +100,7 @@ subgraph "cluster_::Main#blockyield" {
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_4" [
-        label = "block[id=4](<U <blk>>: T.untyped)\louterLoops: 1\l<U <blk>>$5: T.untyped = load_yield_params(::Main#blockyield#<block>, Main#blockyield#<block>)\l<U <blk>>$6: Integer(0) = 0\l<U i>$5: T.untyped = <U <blk>>$5: T.untyped.<U []>(<U <blk>>$6: Integer(0))\l<U <blockReturnTemp>>$7: T.untyped = <U <blk>>: T.untyped.<U call>(<U i>$5: T.untyped)\l<U <blockReturnTemp>>$10: T.noreturn = blockreturn<::Main#blockyield#<block>> <U <blockReturnTemp>>$7: T.untyped\l<unconditional>\l"
+        label = "block[id=4](<U <blk>>: T.untyped)\louterLoops: 1\l<U <blk>>$5: T.untyped = load_yield_params(::Main#blockyield#<block>, Main#blockyield#<block>)\l<U <blk>>$6: Integer(0) = 0\l<U i>$1: T.untyped = <U <blk>>$5: T.untyped.<U []>(<U <blk>>$6: Integer(0))\l<U <blockReturnTemp>>$7: T.untyped = <U <blk>>: T.untyped.<U call>(<U i>$1: T.untyped)\l<U <blockReturnTemp>>$10: T.noreturn = blockreturn<::Main#blockyield#<block>> <U <blockReturnTemp>>$7: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_4" -> "bb::Main#blockyield_2" [style="bold"];
@@ -135,7 +135,7 @@ subgraph "cluster_::Main#main" {
 
     "bb::Main#main_3" -> "bb::Main#main_5" [style="bold"];
     "bb::Main#main_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$6: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<U <blk>>$7: Integer(0) = 0\l<U x>$7: T.untyped = <U <blk>>$6: T.untyped.<U []>(<U <blk>>$7: Integer(0))\l<U <statTemp>>$10: Main = self\l<U <statTemp>>$9: NilClass = <U <statTemp>>$10: Main.<U puts>(<U x>$7: T.untyped)\l<U <blockReturnTemp>>$8: Integer(3) = 3\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::Main#main#<block>> <U <blockReturnTemp>>$8: Integer(3)\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$6: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<U <blk>>$7: Integer(0) = 0\l<U x>$1: T.untyped = <U <blk>>$6: T.untyped.<U []>(<U <blk>>$7: Integer(0))\l<U <statTemp>>$10: Main = self\l<U <statTemp>>$9: NilClass = <U <statTemp>>$10: Main.<U puts>(<U x>$1: T.untyped)\l<U <blockReturnTemp>>$8: Integer(3) = 3\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::Main#main#<block>> <U <blockReturnTemp>>$8: Integer(3)\l<unconditional>\l"
     ];
 
     "bb::Main#main_4" -> "bb::Main#main_2" [style="bold"];

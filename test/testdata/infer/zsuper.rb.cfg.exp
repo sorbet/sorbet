@@ -64,7 +64,7 @@ subgraph "cluster_::Bar#baz" {
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$7: T.untyped = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>)\l<U <blk>>$8: Integer(0) = 0\l<U a>$2: T.untyped = <U <blk>>$7: T.untyped.<U []>(<U <blk>>$8: Integer(0))\l<U <statTemp>>$10: Bar = self\l<U <blockReturnTemp>>$9: NilClass = <U <statTemp>>$10: Bar.<U puts>(<U a>$2: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::Bar#baz#<block>> <U <blockReturnTemp>>$9: NilClass\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$7: T.untyped = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>)\l<U <blk>>$8: Integer(0) = 0\l<U a>$1: T.untyped = <U <blk>>$7: T.untyped.<U []>(<U <blk>>$8: Integer(0))\l<U <statTemp>>$10: Bar = self\l<U <blockReturnTemp>>$9: NilClass = <U <statTemp>>$10: Bar.<U puts>(<U a>$1: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::Bar#baz#<block>> <U <blockReturnTemp>>$9: NilClass\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_4" -> "bb::Bar#baz_2" [style="bold"];

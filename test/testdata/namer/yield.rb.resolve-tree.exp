@@ -45,7 +45,7 @@ begin
 
     def <U blockyield><<U blockyield>>(<blk>)
       self(<C <U Main>>).<U yielder>() do |i|
-        <U <blk>>.<U call>(<U i>$5)
+        <U <blk>>.<U call>(<U i>$1)
       end
     end
 
@@ -53,21 +53,21 @@ begin
       begin
         <U l> = self(<C <U Main>>).<U lambda>() do |x|
           begin
-            self(<C <U Main>>).<U puts>(<U x>$7)
+            self(<C <U Main>>).<U puts>(<U x>$1)
             3
           end
         end
         self(<C <U Main>>).<U yielder>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $2>$8)
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $2>$2)
         end
         self(<C <U Main>>).<U blockpass>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $3>$9)
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $3>$3)
         end
         self(<C <U Main>>).<U mixed>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $4>$10)
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $4>$4)
         end
         self(<C <U Main>>).<U blockyield>() do |*l|
-          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $5>$11)
+          ::<Magic>.<U <call-with-splat>>(<U l>.<U to_proc>(), :"call", <D <U <block-pass>> $5>$5)
         end
       end
     end

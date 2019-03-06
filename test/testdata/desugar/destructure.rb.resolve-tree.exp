@@ -14,10 +14,10 @@ begin
           self(<C <U Destructure>>).<U lambda>() do |(a,b)|
             begin
               begin
-                <D <U <assignTemp>> $5>$2 = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $4>$2, 2, 0)
-                <U a>$2 = <D <U <assignTemp>> $5>$2.<U []>(0)
-                <U b>$2 = <D <U <assignTemp>> $5>$2.<U []>(1)
-                <D <U <assignTemp>> $5>$2
+                <D <U <assignTemp>> $5>$1 = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $4>$1, 2, 0)
+                <U a>$1 = <D <U <assignTemp>> $5>$1.<U []>(0)
+                <U b>$1 = <D <U <assignTemp>> $5>$1.<U []>(1)
+                <D <U <assignTemp>> $5>$1
               end
               <emptyTree>
             end

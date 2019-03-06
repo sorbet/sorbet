@@ -157,21 +157,47 @@ class NameInserter {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<core::LocalVariable> args;
         bool moduleFunctionActive;
-        u4 scopeId;
+        u4 localId;
+        std::optional<u4> oldBlockCounter;
     };
 
-    LocalFrame &enterScope() {
-        scopeStack.emplace_back().scopeId = scopeCounter;
-        ++scopeCounter;
+    LocalFrame &enterBlock() {
+        scopeStack.emplace_back().localId = blockCounter;
+        ++blockCounter;
+        return scopeStack.back();
+    }
+
+    LocalFrame &enterClassOrMethod() {
+        scopeStack.emplace_back().localId = 0;
+        scopeStack.back().oldBlockCounter = blockCounter;
+        blockCounter = 1;
         return scopeStack.back();
     }
 
     void exitScope() {
+        auto &oldScopeCounter = scopeStack.back().oldBlockCounter;
+        if (oldScopeCounter) {
+            blockCounter = *oldScopeCounter;
+        }
         scopeStack.pop_back();
     }
 
     vector<LocalFrame> scopeStack;
-    u4 scopeCounter;
+    // The purpose of this counter is to ensure that every block within a method/class has a unique scope id.
+    // For example, a possible assignment of ids is the following:
+    //
+    // [].map { # $0 }
+    // class A
+    //   [].each { # $0 }
+    //   [].map { # $1 }
+    // end
+    // [].each { # $1 }
+    // def foo
+    //   [].each { # $0 }
+    //   [].map { # $1 }
+    // end
+    // [].each { # $2 }
+    u4 blockCounter;
 
     bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
@@ -284,8 +310,7 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        scopeCounter = 0;
-        enterScope();
+        enterClassOrMethod();
         return klass;
     }
 
@@ -367,7 +392,7 @@ public:
         if (!ctx.owner.data(ctx)->isBlockSymbol(ctx)) {
             return core::LocalVariable(name, 0);
         }
-        return core::LocalVariable(name, scopeStack.back().scopeId);
+        return core::LocalVariable(name, scopeStack.back().localId);
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ParsedArg> parsedArgs) {
@@ -580,7 +605,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterScope();
+        enterClassOrMethod();
 
         core::SymbolRef owner = methodOwner(ctx);
 
@@ -656,7 +681,7 @@ public:
                                                                   ++(owner.data(ctx)->uniqueCounter)));
 
         auto outerArgs = scopeStack.back().args;
-        auto &frame = enterScope();
+        auto &frame = enterBlock();
         frame.args = std::move(outerArgs);
         auto &parent = *(scopeStack.end() - 2);
 
@@ -903,8 +928,8 @@ public:
 
 private:
     NameInserter() {
-        scopeCounter = 0;
-        enterScope();
+        blockCounter = 0;
+        enterBlock();
     }
 };
 

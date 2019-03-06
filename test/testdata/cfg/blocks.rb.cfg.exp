@@ -28,7 +28,7 @@ subgraph "cluster_::BlockTest#block_pass" {
 
     "bb::BlockTest#block_pass_3" -> "bb::BlockTest#block_pass_1" [style="bold"];
     "bb::BlockTest#block_pass_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$8: T.untyped = load_yield_params(::BlockTest#block_pass#<block>, BlockTest#block_pass#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$2: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(0))\l<U <blk>>$9: Integer(1) = 1\l<U y>$2: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(1))\l<U <blockReturnTemp>>$10: T.untyped = <U x>$2\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::BlockTest#block_pass#<block>> <U <blockReturnTemp>>$10: T.untyped\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$8: T.untyped = load_yield_params(::BlockTest#block_pass#<block>, BlockTest#block_pass#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(0))\l<U <blk>>$9: Integer(1) = 1\l<U y>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(1))\l<U <blockReturnTemp>>$10: T.untyped = <U x>$1\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::BlockTest#block_pass#<block>> <U <blockReturnTemp>>$10: T.untyped\l<unconditional>\l"
     ];
 
     "bb::BlockTest#block_pass_4" -> "bb::BlockTest#block_pass_2" [style="bold"];
