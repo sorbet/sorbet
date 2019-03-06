@@ -251,14 +251,15 @@ class NameInserter {
         return true;
     }
 
-    void aliasMethod(core::MutableContext ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
-        core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx)->loc(), owner, newName);
+    void aliasMethod(core::MutableContext ctx, core::Loc loc, core::SymbolRef owner, core::NameRef newName,
+                     core::SymbolRef method) {
+        core::SymbolRef alias = ctx.state.enterMethodSymbol(loc, owner, newName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(method);
     }
 
-    void aliasModuleFunction(core::MutableContext ctx, core::SymbolRef method) {
+    void aliasModuleFunction(core::MutableContext ctx, core::Loc loc, core::SymbolRef method) {
         core::SymbolRef owner = method.data(ctx)->owner;
-        aliasMethod(ctx, owner.data(ctx)->singletonClass(ctx), method.data(ctx)->name, method);
+        aliasMethod(ctx, loc, owner.data(ctx)->singletonClass(ctx), method.data(ctx)->name, method);
     }
 
     core::SymbolRef methodOwner(core::MutableContext ctx) {
@@ -463,7 +464,7 @@ public:
                     mdef->symbol.data(ctx)->setPublic();
                     break;
                 case core::Names::moduleFunction()._id:
-                    aliasModuleFunction(ctx, mdef->symbol);
+                    aliasModuleFunction(ctx, original->loc, mdef->symbol);
                     break;
                 default:
                     return original;
@@ -495,7 +496,7 @@ public:
                             }
                             continue;
                         }
-                        aliasModuleFunction(ctx, meth);
+                        aliasModuleFunction(ctx, original->loc, meth);
                     }
                     break;
                 }
@@ -532,7 +533,7 @@ public:
                         }
                         break;
                     }
-                    aliasMethod(ctx, methodOwner(ctx), args[0], meth);
+                    aliasMethod(ctx, original->loc, methodOwner(ctx), args[0], meth);
                     break;
                 }
             }
@@ -549,14 +550,25 @@ public:
     }
 
     bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
+        // We're intentially dealiasing here because the args don't exist on on the alias symbol.
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
-                // Eventually we should be more principled about how we report this.
-                e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                            sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                if (sym != ctx.owner) {
+                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Eventually we should be more principled about how we report this.
+                    e.setHeader(
+                        "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
+                        ctx.owner.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                    e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
+                    e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
+                } else {
+                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Eventually we should be more principled about how we report this.
+                    e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
+                                sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                }
             }
             return false;
         }
@@ -655,7 +667,7 @@ public:
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         exitScope();
         if (scopeStack.back().moduleFunctionActive) {
-            aliasModuleFunction(ctx, method->symbol);
+            aliasModuleFunction(ctx, method->symbol.data(ctx)->loc(), method->symbol);
         }
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method->name.toString(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());

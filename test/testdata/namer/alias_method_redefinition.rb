@@ -13,5 +13,5 @@ class A
 end
 
 class A
-  def self.__foo__(*_); end # error: Method `A.foo` redefined without matching argument count. Expected: `2`, got: `1`
+  def self.__foo__(*_); end # error: Method alias `A.__foo__` redefined without matching argument count. Expected: `2`, got: `1`
 end
