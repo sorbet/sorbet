@@ -286,16 +286,17 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
-            logger->info("lsp mode does not yet support caching.");
+            logger->error("lsp mode does not yet support caching.");
             throw EarlyReturnWithCode(1);
         }
         if ((opts.print.Autogen || opts.print.AutogenMsgPack) && (opts.stopAfterPhase != Phase::NAMER)) {
-            logger->info("-p autogen{} requires --stop-after=namer", opts.print.AutogenMsgPack ? "-msgpack" : "");
+            logger->error("-p autogen{} must also include --stop-after=namer",
+                          opts.print.AutogenMsgPack ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
         }
 
         if (opts.skipDSLPasses && !opts.cacheDir.empty()) {
-            logger->info("--skip-dsl-passes does not support caching");
+            logger->error("`{}` does not support caching", "--skip-dsl-passes");
             throw EarlyReturnWithCode(1);
         }
 
@@ -348,7 +349,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack) {
-                logger->info("--autogen-version requires -p autogen-msgpack");
+                logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
                 throw EarlyReturnWithCode(1);
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
@@ -358,7 +359,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         if (raw.count("error-black-list") > 0) {
             if (raw.count("error-white-list") > 0) {
-                logger->info("You can't pass both --error-black-list and --error-white-list");
+                logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--error-white-list");
                 throw EarlyReturnWithCode(1);
             }
             opts.errorCodeBlackList = raw["error-black-list"].as<vector<int>>();
@@ -368,7 +369,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
-            logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help({""}));
+            logger->error("You must pass either `{}` or at least one ruby file.\n\n{}", "-e", options.help({""}));
             throw EarlyReturnWithCode(1);
         }
 
@@ -384,15 +385,16 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         if (opts.suggestTyped) {
             if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code}) {
-                logger->error("--suggest-typed needs --error-white-list={}", core::errors::Infer::SuggestTyped.code);
+                logger->error("--suggest-typed must also include `{}`",
+                              fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
             if (!opts.errorCodeBlackList.empty()) {
-                logger->error("--suggest-typed can't use --error-black-list");
+                logger->error("--suggest-typed can't include `{}`", "--error-black-list");
                 throw EarlyReturnWithCode(1);
             }
             if (raw["typed"].as<string>() != "strict") {
-                logger->error("--suggest-typed needs --typed=strict");
+                logger->error("--suggest-typed must also include `{}`", "--typed=strict");
                 throw EarlyReturnWithCode(1);
             }
         }

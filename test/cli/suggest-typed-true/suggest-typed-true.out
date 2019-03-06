@@ -1,6 +1,6 @@
---suggest-typed needs --typed=strict
+--suggest-typed must also include `--typed=strict`
 -------------------------
---suggest-typed needs --typed=strict
+--suggest-typed must also include `--typed=strict`
 -------------------------
 does-not-exist.rb: File Not Found http://go/e/1001
 Errors: 1
