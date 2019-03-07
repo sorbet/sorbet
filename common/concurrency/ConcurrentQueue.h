@@ -19,11 +19,7 @@ struct DequeueResult {
 /* A thread safe lock free queue that has safe publication guarantees, that is only used to process N elements */
 template <class Elem, class Queue> class AbstractConcurrentBoundedQueue {
     Queue _queue;
-
-public:
     const int bound;
-
-private:
     std::atomic<int> elementsLeftToPush; // double serves as a counter and as safe publication marker
     std::atomic<int> elementsPopped;
 
