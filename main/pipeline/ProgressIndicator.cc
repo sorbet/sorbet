@@ -15,6 +15,7 @@ void ProgressIndicator::reportProgress(int current) {
 
 ProgressIndicator::~ProgressIndicator() {
     if (enabled) {
+        progressbar_update(progress.get(), progressExpected);
         progressbar_finish(progress.release());
     }
 }
