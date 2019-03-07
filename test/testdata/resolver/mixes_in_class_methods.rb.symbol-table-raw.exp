@@ -1,5 +1,5 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=59:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=59:4}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=51:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
+  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=51:4}
     argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
   class <C <U Bad1>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=24:1 end=24:12}
   class <S <C <U Bad1>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=24:8 end=24:12}
@@ -16,15 +16,9 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/mix
     method <S <C <U Bad3>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=38:3 end=38:21}
       argument <S <C <U Bad3>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
   class <C <U Bad4>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=42:1 end=42:12}
-    class <C <U Bad4>><C <U ClassMethods>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=45:3 end=45:22}
-    class <C <U Bad4>><S <C <U ClassMethods>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=45:10 end=45:22}
   class <S <C <U Bad4>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=42:8 end=42:12}
-    method <S <C <U Bad4>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=45:3 end=45:22}
-      argument <S <C <U Bad4>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
-  class <C <U Bad5>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=50:1 end=50:12}
-  class <S <C <U Bad5>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=50:8 end=50:12}
-  class <C <U Bad6>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=56:1 end=56:12}
-  class <S <C <U Bad6>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=56:8 end=56:12}
+  class <C <U Bad5>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=48:1 end=48:12}
+  class <S <C <U Bad5>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=48:8 end=48:12}
   class <C <U Mixin>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=2:13}
     class <C <U Mixin>><C <U ClassMethods>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=5:3 end=5:22}
       method <C <U Mixin>><C <U ClassMethods>><U mixin_class_method> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=6:5 end=6:27}

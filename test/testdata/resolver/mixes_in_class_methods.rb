@@ -42,18 +42,10 @@ end
 module Bad4
   extend T::Sig
 
-  module ClassMethods; end
-  mixes_in_class_methods(ClassMethods)
-  mixes_in_class_methods(ClassMethods) # error: can only be declared once
+  mixes_in_class_methods(0) # error: must be statically resolvable to a module
 end
 
 module Bad5
   extend T::Sig
-
-  mixes_in_class_methods(0) # error: must be statically resolvable to a module
-end
-
-module Bad6
-  extend T::Sig
-  mixes_in_class_methods(Bad6) # error: Must not pass your self
+  mixes_in_class_methods(Bad5) # error: Must not pass your self
 end

@@ -1422,10 +1422,10 @@ class ResolveMixesInClassMethodsWalk {
             return;
         }
         auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
-        if (existing.exists()) {
+        if (existing.exists() && existing != id->constantSymbol()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared once per module", send->fun.data(ctx)->show(ctx));
-                e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous definition in this class");
+                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.data(ctx)->show(ctx),
+                            existing.data(ctx)->show(ctx), id->constantSymbol().data(ctx)->show(ctx));
             }
             return;
         }
