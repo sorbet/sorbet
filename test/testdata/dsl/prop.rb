@@ -81,9 +81,9 @@ end
 
 def main
     T.reveal_type(SomeODM.new.foo) # error: Revealed type: `String`
-    T.reveal_type(SomeODM.new.foo = 'b') # error: Revealed type: `String`
+    T.reveal_type(SomeODM.new.foo = 'b') # error: Revealed type: `String("b")`
     T.reveal_type(SomeODM.new.foo2) # error: Revealed type: `T.nilable(String)`
-    T.reveal_type(SomeODM.new.foo2 = 'b') # error: Revealed type: `String`
+    T.reveal_type(SomeODM.new.foo2 = 'b') # error: Revealed type: `String("b")`
 
     T.reveal_type(AdvancedODM.new.default) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.t_nilable) # error: Revealed type: `T.nilable(String)`

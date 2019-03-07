@@ -118,7 +118,15 @@ bool isSetter(Context ctx, NameRef fun) {
     if (fun.data(ctx)->kind != NameKind::UTF8) {
         return false;
     }
-    return fun.data(ctx)->raw.utf8.back() == '=';
+    const string_view rawName = fun.data(ctx)->raw.utf8;
+    if (rawName.size() < 2) {
+        return false;
+    }
+    if (rawName.back() == '=') {
+        return !(fun == Names::leq() || fun == Names::geq() || fun == Names::tripleEq() || fun == Names::eqeq() ||
+                 fun == Names::neq());
+    }
+    return false;
 }
 
 unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc, SymbolRef inClass,
@@ -671,7 +679,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     }
 
     if (resultType == nullptr) {
-        resultType = Types::resultTypeAsSeenFrom(ctx, method, symbol, targs);
+        if (args.args.size() == 1 && isSetter(ctx, method.data(ctx)->name)) {
+            // assignments always return their right hand side
+            resultType = args.args.front()->type;
+        } else if (args.args.size() == 2 && method.data(ctx)->name == Names::squareBracketsEq()) {
+            resultType = args.args[1]->type;
+        } else {
+            resultType = Types::resultTypeAsSeenFrom(ctx, method, symbol, targs);
+        }
     }
     if (args.block == nullptr) {
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
