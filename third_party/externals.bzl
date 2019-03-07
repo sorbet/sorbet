@@ -55,7 +55,7 @@ def externals():
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="bfdcf4911047688fec49014d575433e2e5eb05be",
+        commit="3cf4f7c5a030e9a65b842d2e160ffee90df7613d",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
@@ -89,7 +89,7 @@ def externals():
     new_git_repository(
         name="concurrentqueue",
         remote="https://github.com/cameron314/concurrentqueue.git",
-        commit="8f65a8734d77c3cc00d74c0532efca872931d3ce",
+        commit="dea078cf5b6e742cd67a0d725e36f872feca4de4",
         build_file = "//third_party:concurrentqueue.BUILD",
     )
 
@@ -103,7 +103,7 @@ def externals():
     new_git_repository(
         name="cxxopts",
         remote="https://github.com/jarro2783/cxxopts.git",
-        commit="9990f73845d76106063536d7cd630ac15cb4a065",
+        commit="3876c0907237e5fa89c5850ed1ee688a3bcb62b3",
         build_file = "//third_party:cxxopts.BUILD",
     )
 
@@ -118,7 +118,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="0b1e6d417b414aad9282e32e8c49c719edeb63c1"
+        commit="febc5ee6a92d0eb7dac1fceaa6c648cf6521b4dc"
     )
 
     new_git_repository(
@@ -176,14 +176,14 @@ package(default_visibility = ["//visibility:public"])
     new_git_repository(
         name = "com_github_msgpack_msgpack",
         remote = "https://github.com/msgpack/msgpack-c",
-        commit = "daa78b46062d49bc192a921f7192637f58b334cc",
+        commit = "b759f5bdf7e4ba59338499e889648e6227042f23",
         build_file = "//third_party:msgpack.BUILD",
     )
 
     new_git_repository(
         name = "com_github_d_bahr_crcpp",
         remote = "https://github.com/d-bahr/CRCpp.git",
-        commit = "76dc872e163ea91ca51468db686ba16912979765",
+        commit = "12df3a15e89aaa3a4b44bb357b15e1f7e20a2608",
         build_file = "//third_party:crcpp.BUILD",
     )
 
