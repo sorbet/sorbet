@@ -2,6 +2,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
   class <C <U LetErrors>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/let_errors.rb start=2:1 end=2:16}
     static-field <C <U LetErrors>><U @@cv> -> Symbol @ Loc {file=test/testdata/resolver/let_errors.rb start=15:3 end=15:7}
     static-field <C <U LetErrors>><U @@cvar> -> Integer @ Loc {file=test/testdata/resolver/let_errors.rb start=4:5 end=4:11}
+    static-field <C <U LetErrors>><U @@dv> -> Symbol @ Loc {file=test/testdata/resolver/let_errors.rb start=21:3 end=21:7}
     field <C <U LetErrors>><U @a> -> Integer @ Loc {file=test/testdata/resolver/let_errors.rb start=9:5 end=9:7}
     field <C <U LetErrors>><U @ivar> -> Integer @ Loc {file=test/testdata/resolver/let_errors.rb start=5:5 end=5:10}
     method <C <U LetErrors>><U initialize> (<blk>) @ Loc {file=test/testdata/resolver/let_errors.rb start=3:3 end=3:17}
@@ -12,4 +13,5 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
     method <S <C <U LetErrors>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/let_errors.rb start=2:1 end=2:16}
       argument <S <C <U LetErrors>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/let_errors.rb start=??? end=???}
     field <S <C <U LetErrors>> $1><U @b> -> String @ Loc {file=test/testdata/resolver/let_errors.rb start=12:3 end=12:5}
+    field <S <C <U LetErrors>> $1><U @d> -> String @ Loc {file=test/testdata/resolver/let_errors.rb start=18:3 end=18:5}
 

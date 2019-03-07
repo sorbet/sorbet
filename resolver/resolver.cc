@@ -1035,11 +1035,16 @@ private:
 
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
         if (prior.exists()) {
-            if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                e.setHeader("Illegal variable redeclaration");
-                e.addErrorLine(prior.data(ctx)->loc(), "Previous declaration is here:");
+            if (core::Types::equiv(ctx, prior.data(ctx)->resultType, cast->type)) {
+                // We already have a symbol for this field, and it matches what we already saw, so we can short circuit.
+                return true;
+            } else {
+                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.data(ctx)->show(ctx));
+                    e.addErrorLine(prior.data(ctx)->loc(), "Previous declaration is here:");
+                }
+                return false;
             }
-            return false;
         }
         core::SymbolRef var;
 
