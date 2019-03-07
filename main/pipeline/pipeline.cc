@@ -221,20 +221,15 @@ vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vect
     return ret;
 }
 
-core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file, const const options::Options &opts) {
-    auto &fileData = file.data(*gs);
-    if (!fileFound) {
-        if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-            e.setHeader("File Not Found");
-        }
-    }
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file, const options::Options &opts) {
+    auto &fileData = file.data(gs);
 
     core::StrictLevel level;
     auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil) {
-            core::ErrorRegion errs(*gs, file);
-            if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
+            core::ErrorRegion errs(gs, file);
+            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
                 e.setHeader("Useless override of strictness level");
             }
         }
@@ -253,7 +248,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = max(min(level, maxStrict), minStrict);
     }
 
-    if (gs->runningUnderAutogen) {
+    if (gs.runningUnderAutogen) {
         // Autogen stops before infer but needs to see all definitions
         level = core::StrictLevel::Stripe;
     }
@@ -332,7 +327,7 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
         fileData.sourceType = core::File::PayloadGeneration;
     }
 
-    fileData.strictLevel = decideStrictLevel(gs, file, opts);
+    fileData.strictLevel = decideStrictLevel(*gs, file, opts);
 }
 
 shared_ptr<BlockingBoundedQueue<thread_result>> indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs,
@@ -425,7 +420,7 @@ PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs,
             for (auto result = pluginFileq->try_pop(job); !result.done(); result = pluginFileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
-                    decideStrictLevel(file, opts, *localGs);
+                    decideStrictLevel(*localGs, file, opts);
                     threadResult.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger, nullptr));
                 }
             }
@@ -471,7 +466,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                 {
                     core::UnfreezeFileTable fileTableAccess(*gs);
                     pluginFileRef = gs->enterFile(pluginFile);
-                    decideStrictLevel(pluginFileRef, opts, *gs);
+                    decideStrictLevel(*gs, pluginFileRef, opts);
                 }
                 ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore, logger, nullptr));
             }
