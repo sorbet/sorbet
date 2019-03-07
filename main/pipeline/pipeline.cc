@@ -347,6 +347,8 @@ pair<unique_ptr<core::GlobalState>, vector<thread_result>>
 indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
                    const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
                    shared_ptr<spdlog::logger> &logger) {
+    ProgressIndicator indexingProgress(opts.showProgress, "Indexing (supplied)", files.size());
+
     auto resultq = make_shared<BlockingBoundedQueue<thread_result>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
@@ -391,6 +393,7 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
             if (result.gotItem()) {
                 threadResults.emplace_back(move(threadResult));
             }
+            indexingProgress.reportProgress(fileq->doneEstimate());
         }
     }
     logger->trace("Done tallying plugin generated files from threads");
@@ -493,7 +496,6 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
-        ProgressIndicator indexingProgress(opts.showProgress, "Indexing (supplied)", files.size());
         const shared_ptr<core::GlobalState> cgs = move(gs);
 
         auto [pluginGs, firstPass] = indexSuppliedFiles(cgs, files, opts, workers, kvstore, logger);
@@ -501,6 +503,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         gs = move(pluginPass.gsWithPluginFiles);
 
         {
+            ProgressIndicator progress(opts.showProgress, "Indexing (plugins + merge)",
+                                       files.size() + pluginPass.pluginFileCount);
             logger->trace("Collecting results from indexing threads");
             thread_result threadResult;
             for (auto result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS);
@@ -530,6 +534,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                 }
                 gs->errorQueue->flushErrors();
             }
+            progress.reportProgress(pluginPass.resultq->doneEstimate());
             logger->trace("Done collecting results from indexing threads");
         }
         ENFORCE(files.size() + pluginPass.pluginFileCount == ret.size());
