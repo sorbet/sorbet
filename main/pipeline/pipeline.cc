@@ -68,9 +68,10 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     return key;
 }
 
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger,
-                         vector<shared_ptr<core::File>> *pluginFileSink) {
+ast::ParsedFile indexOneImpl(
+    const options::Options &opts, core::GlobalState &lgs, core::FileRef file, unique_ptr<KeyValueStore> &kvstore,
+    shared_ptr<spdlog::logger> logger,
+    function<unique_ptr<ast::Expression>(core::MutableContext, unique_ptr<ast::Expression>)> betweenDesugarAndDsl) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
 
@@ -129,12 +130,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return {make_unique<ast::EmptyTree>(), file};
             }
 
-            if (pluginFileSink) {
-                auto result = plugin::SubprocessTextPlugin::run(ctx, move(ast));
-                ast = move(result.first);
-                pluginFileSink->insert(pluginFileSink->end(), make_move_iterator(result.second.begin()),
-                                       make_move_iterator(result.second.end()));
-            }
+            ast = betweenDesugarAndDsl(ctx, move(ast));
 
             if (!opts.skipDSLPasses) {
                 logger->trace("Inlining DSLs: {}", file.data(lgs).path());
@@ -163,6 +159,22 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         }
         return {make_unique<ast::EmptyTree>(), file};
     }
+}
+
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                         unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
+    return indexOneImpl(opts, lgs, file, kvstore, logger, [](auto, auto ast) { return ast; });
+}
+
+ast::ParsedFile indexOneAllowingPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
+                                        unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger,
+                                        vector<shared_ptr<core::File>> &pluginFileSink) {
+    return indexOneImpl(opts, gs, file, kvstore, logger, [&pluginFileSink](auto ctx, auto inputAst) {
+        auto [ast, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(inputAst));
+        pluginFileSink.insert(pluginFileSink.end(), make_move_iterator(pluginFiles.begin()),
+                              make_move_iterator(pluginFiles.end()));
+        return move(ast);
+    });
 }
 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
@@ -221,7 +233,8 @@ vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vect
     return ret;
 }
 
-core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file, const options::Options &opts) {
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
+                                    const options::Options &opts) {
     auto &fileData = file.data(gs);
 
     core::StrictLevel level;
@@ -353,8 +366,8 @@ shared_ptr<BlockingBoundedQueue<thread_result>> indexSuppliedFiles(const shared_
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     readFile(localGs, file, opts, logger);
-                    threadResult.trees.emplace_back(
-                        indexOne(opts, *localGs, file, kvstore, logger, &threadResult.pluginGeneratedFiles));
+                    threadResult.trees.emplace_back(indexOneAllowingPlugins(opts, *localGs, file, kvstore, logger,
+                                                                            threadResult.pluginGeneratedFiles));
                 }
             }
         }
@@ -421,7 +434,7 @@ PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs,
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     decideStrictLevel(*localGs, file, opts);
-                    threadResult.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger, nullptr));
+                    threadResult.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger));
                 }
             }
 
@@ -459,7 +472,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         for (auto file : files) {
             readFile(gs, file, opts, logger);
             vector<shared_ptr<core::File>> pluginGeneratedFiles;
-            ret.emplace_back(indexOne(opts, *gs, file, kvstore, logger, &pluginGeneratedFiles));
+            ret.emplace_back(indexOneAllowingPlugins(opts, *gs, file, kvstore, logger, pluginGeneratedFiles));
             pluginFileCount += pluginGeneratedFiles.size();
             for (auto &pluginFile : pluginGeneratedFiles) {
                 core::FileRef pluginFileRef;
@@ -468,7 +481,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                     pluginFileRef = gs->enterFile(pluginFile);
                     decideStrictLevel(*gs, pluginFileRef, opts);
                 }
-                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore, logger, nullptr));
+                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore, logger));
             }
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());

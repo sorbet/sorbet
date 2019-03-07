@@ -10,8 +10,11 @@
 namespace sorbet::realmain::pipeline {
 constexpr std::chrono::milliseconds PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger,
-                         std::vector<std::shared_ptr<core::File>> *pluginFileSink = nullptr);
+                         std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger);
+
+ast::ParsedFile indexOneAllowingPlugins(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                                        std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger,
+                                        std::vector<std::shared_ptr<core::File>> &pluginFileSink);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files,
                                         std::shared_ptr<spdlog::logger> logger);
