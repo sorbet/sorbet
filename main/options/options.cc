@@ -112,30 +112,38 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
     return result;
 }
 
-UnorderedMap<string, string> extractDslPlugins(string fileName, shared_ptr<spdlog::logger> logger) {
+UnorderedMap<string, string> extractDslPlugins(string filePath, shared_ptr<spdlog::logger> logger) {
     UnorderedMap<string, string> result;
+    bool good = true;
     try {
-        YAML::Node config = YAML::LoadFile(fileName);
+        YAML::Node config = YAML::LoadFile(filePath);
         switch (config.Type()) {
             case YAML::NodeType::Map:
                 for (const auto &child : config) {
                     auto key = child.first.as<string>();
                     if (child.second.Type() == YAML::NodeType::Scalar) {
                         auto value = child.second.as<string>();
-                        result[key] = value;
+                        auto [_, inserted] = result.emplace(move(key), move(value));
+                        if (!inserted) {
+                            logger->error("{}: Duplicate plugin trigger \"{}\"", filePath, key);
+                            good = false;
+                        }
                     } else {
-                        logger->error(R"(DSL trigger "{}" in "{}": must map to a command that is a string)", key,
-                                      fileName);
-                        throw EarlyReturnWithCode(1);
+                        logger->error(R"({}: Plugin trigger "{}" must map to a command that is a string)", filePath,
+                                      key);
+                        good = false;
                     }
                 }
                 break;
             default:
-                logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", fileName);
-                throw EarlyReturnWithCode(1);
+                logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", filePath);
+                good = false;
         }
     } catch (YAML::BadFile) {
-        logger->error("Failed to open DSL specification file \"{}\"", fileName);
+        logger->error("Failed to open DSL specification file \"{}\"", filePath);
+        good = false;
+    }
+    if (!good) {
         throw EarlyReturnWithCode(1);
     }
     return result;
