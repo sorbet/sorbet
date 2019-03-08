@@ -198,6 +198,10 @@ NameDef names[] = {
     {"lookup"},
     {"msgclass"},
     {"enummodule"},
+
+    {"ActiveRecord", "ActiveRecord", true},
+    {"Migration", "Migration", true},
+    {"Compatibility", "Compatibility", true},
     // end DSL methods
 
     // Our own special methods which have special meaning

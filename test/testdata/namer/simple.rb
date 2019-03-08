@@ -25,7 +25,7 @@ module OtherMixin
 end
 class Child < Parent
   include Mixin
-  include 3 # error: `include` must only contain simple expressions
+  include 3 # error: `include` must only contain constant literals
   include Mixin do # error: `include` can not be passed a block
   end
   whatever.include OtherMixin # error: Method `whatever` does not exist on `T.class_of(Child)`

@@ -247,7 +247,7 @@ class NameInserter {
                 dest->emplace_back(std::move(arg));
             } else {
                 if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
-                    e.setHeader("`{}` must only contain simple expressions", send->fun.data(ctx)->show(ctx));
+                    e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
             }
@@ -391,7 +391,7 @@ public:
             for (auto &anc : klass->ancestors) {
                 if (!isValidAncestor(anc.get())) {
                     if (auto e = ctx.state.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
-                        e.setHeader("Superclasses must only contain simple expressions");
+                        e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
                 } else if (shouldLeaveAncestorForIDE(anc) &&
