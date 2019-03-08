@@ -41,9 +41,9 @@ cc_library(
 )
 
 cc_library(
-    name = "test_bootstrap",
+    name = "light",
     srcs = [
-        "test_bootstrap.cc",
+        "light.cc",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -81,13 +81,13 @@ genrule(
 )
 
 genrule(
-    name = "generate_test_bootstrap_payload_cc",
-    srcs = ["//rbi:test_bootstrap"],
+    name = "generate_light_payload_cc",
+    srcs = ["//rbi:light"],
     outs = [
-        "test_bootstrap.cc",
+        "light.cc",
     ],
-    cmd = "$(location :generate_payload) $(location test_bootstrap.cc) $(locations //rbi:test_bootstrap) && \
-    $(location //tools:clang-format) -i $(location test_bootstrap.cc)",
+    cmd = "$(location :generate_payload) $(location light.cc) $(locations //rbi:light) && \
+    $(location //tools:clang-format) -i $(location light.cc)",
     tools = [
         ":generate_payload",
         "//tools:clang-format",

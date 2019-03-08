@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/deviations/superclass_implicit.rb start=8:1 end=15:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/deviations/superclass_implicit.rb start=8:1 end=15:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
   method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/deviations/superclass_implicit.rb start=8:1 end=15:4}
     argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/deviations/superclass_implicit.rb start=??? end=???}
   class <C <U A>> < <C <U B>> () @ Loc {file=test/testdata/deviations/superclass_implicit.rb start=14:1 end=14:12}

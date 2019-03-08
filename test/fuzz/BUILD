@@ -7,7 +7,7 @@ cc_binary(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//main/pipeline",
-        "//payload:test_bootstrap",
+        "//payload:light",
     ],
 )
 

@@ -44,9 +44,9 @@ cc_library(
 )
 
 cc_library(
-    name = "test_bootstrap",
+    name = "light",
     srcs = [
-        "test_bootstrap.cc",
+        "light.cc",
     ],
     hdrs = [
         "binary.h",
@@ -89,13 +89,13 @@ genrule(
 )
 
 genrule(
-    name = "generate-state-payload-test-bootstrap-cc",
-    srcs = ["state-payload-raw-test-bootstrap"],
+    name = "generate-state-payload-light-cc",
+    srcs = ["state-payload-raw-light"],
     outs = [
-        "test_bootstrap.cc",
+        "light.cc",
     ],
-    cmd = "$(location :gen_state_payload) $(location state-payload-raw-test-bootstrap) $(location test_bootstrap.cc) && \
-             $(location //tools:clang-format) -i $(location test_bootstrap.cc)",
+    cmd = "$(location :gen_state_payload) $(location state-payload-raw-light) $(location light.cc) && \
+             $(location //tools:clang-format) -i $(location light.cc)",
     tools = [
         ":gen_state_payload",
         "//tools:clang-format",
@@ -113,11 +113,11 @@ genrule(
 )
 
 genrule(
-    name = "generate-state-payload-raw-test-bootstrap",
+    name = "generate-state-payload-raw-light",
     srcs = [],
     outs = [
-        "state-payload-raw-test-bootstrap",
+        "state-payload-raw-light",
     ],
-    cmd = "$(location //main:sorbet-orig-test-bootstrap) --silence-dev-message  --store-state $(location state-payload-raw-test-bootstrap) --no-error-count",
-    tools = ["//main:sorbet-orig-test-bootstrap"],
+    cmd = "$(location //main:sorbet-orig-light) --silence-dev-message  --store-state $(location state-payload-raw-light) --no-error-count",
+    tools = ["//main:sorbet-orig-light"],
 )

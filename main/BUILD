@@ -55,7 +55,7 @@ cc_binary(
 )
 
 cc_binary(
-    name = "sorbet-orig-test-bootstrap",
+    name = "sorbet-orig-light",
     srcs = [
         "main.cc",
     ],
@@ -66,12 +66,12 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
-        "//payload:test_bootstrap_text",
+        "//payload:light_text",
     ],
 )
 
 cc_binary(
-    name = "sorbet-test-bootstrap",
+    name = "sorbet-light",
     srcs = [
         "main.cc",
     ],
@@ -82,7 +82,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
-        "//payload:test_bootstrap",
+        "//payload:light",
     ],
 )
 

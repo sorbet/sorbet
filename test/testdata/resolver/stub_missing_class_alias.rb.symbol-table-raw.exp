@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
   class <C <U O>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:7 end=4:8}
     class <C <U O>><C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:1 end=4:11}
       class <C <U O>><C <U B>><C <R <C <U Doc1>> $1>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=17:13 end=17:20}

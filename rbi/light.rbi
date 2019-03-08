@@ -1,3 +1,9 @@
+# A much lighter stripped down version of core/ and stdlib/
+#
+# This is used in our test suit as well as for fast quick checks.
+# Don't rely on this working anywhere of importance as we will remove and add
+# things at our leisure.
+
 class Chalk::ODM::Document
 end
 class SystemCallError < StandardError

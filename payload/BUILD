@@ -51,7 +51,7 @@ cc_library(
 )
 
 cc_library(
-    name = "test_bootstrap",  # payload used in tests and fuzzers
+    name = "light",  # payload used in tests and fuzzers
     srcs = ["otherwise_compdb_bugs_out.cc"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -61,13 +61,13 @@ cc_library(
     deps = [
         "//core",
         "//payload:interface",
-        "//payload/binary:test_bootstrap",
+        "//payload/binary:light",
         "//payload/text:empty",
     ],
 )
 
 cc_library(
-    name = "test_bootstrap_text",  # payload used in tests and fuzzers
+    name = "light_text",  # payload used in tests and fuzzers
     srcs = ["otherwise_compdb_bugs_out.cc"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -78,6 +78,6 @@ cc_library(
         "//core",
         "//payload:interface",
         "//payload/binary:empty",
-        "//payload/text:test_bootstrap",
+        "//payload/text:light",
     ],
 )

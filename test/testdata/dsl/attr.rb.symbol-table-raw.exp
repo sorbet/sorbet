@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/test_bootstrap.rbi start=1:1 end=3316:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
   class <C <U TestAttr>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/attr.rb start=2:1 end=2:15}
     field <C <U TestAttr>><U @v1> -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=7:5 end=7:8}
     field <C <U TestAttr>><U @v2> -> String @ Loc {file=test/testdata/dsl/attr.rb start=8:5 end=8:8}
