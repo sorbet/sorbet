@@ -21,6 +21,8 @@ protected:
     std::string rootUri;
     UnorderedMap<std::string, std::shared_ptr<core::File>> sourceFileContents;
     std::vector<std::unique_ptr<LSPMessage>> pendingRequests;
+    // Currently active diagnostics, specifically using map to enforce sort order on filename.
+    std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> diagnostics;
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
@@ -52,6 +54,13 @@ protected:
 
     void assertDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
                            std::vector<ExpectedDiagnostic> diagnostics);
+
+    /**
+     * ProtocolTest maintains the latest diagnostics for files received over a session, as LSP is not required to
+     * re-send diagnostics that have not changed. send() automatically updates diagnostics, but if a test manually
+     * invokes getLSPResponsesFor on lspWrapper, it should update diagnostics with this function.
+     */
+    void updateDiagnostics(const std::vector<std::unique_ptr<LSPMessage>> &messages);
 };
 
 } // namespace sorbet::test::lsp

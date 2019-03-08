@@ -7,8 +7,9 @@ using namespace std;
 
 void ProtocolTest::SetUp() {
     // Always use fast path
-    // TODO: Toggleable?
-    lspWrapper = make_unique<LSPWrapper>(true);
+    // TODO: Make toggleable so we can run slow path tests?
+    bool disableFastPath = false;
+    lspWrapper = make_unique<LSPWrapper>(disableFastPath);
     rootPath = "/Users/jvilk/stripe/pay-server";
     rootUri = fmt::format("file://{}", rootPath);
 }
@@ -52,7 +53,7 @@ unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
     return make_unique<LSPMessage>(move(req));
 }
 
-unique_ptr<LSPMessage> ProtocolTest::getDefinition(std::string_view path, int line, int character) {
+unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
     return makeDefinitionRequest(lspWrapper->alloc, nextId++, getUri(path), line, character);
 }
 
@@ -61,29 +62,38 @@ unique_ptr<LSPMessage> ProtocolTest::cancelRequest(int id) {
 }
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
-    return lspWrapper->getLSPResponsesFor(message);
+    auto responses = lspWrapper->getLSPResponsesFor(message);
+    updateDiagnostics(responses);
+    return responses;
 }
 
-vector<unique_ptr<LSPMessage>> ProtocolTest::send(std::vector<std::unique_ptr<LSPMessage>> messages) {
-    return lspWrapper->getLSPResponsesFor(messages);
+vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>> messages) {
+    auto responses = lspWrapper->getLSPResponsesFor(messages);
+    updateDiagnostics(responses);
+    return responses;
+}
+
+void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messages) {
+    for (auto &msg : messages) {
+        if (msg->isNotification() && msg->method() == "textDocument/publishDiagnostics") {
+            if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
+                // Will explicitly overwrite older diagnostics that are irrelevant.
+                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move((*diagnosticParams)->diagnostics);
+            }
+        }
+    }
 }
 
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
-    // uri => diagnostics for that URI.
-    map<std::string, vector<std::unique_ptr<Diagnostic>>> diagnostics;
     for (auto &msg : messages) {
         if (!assertNotificationMessage("textDocument/publishDiagnostics", *msg)) {
             // Assertion failed: Received a non-diagnostic. No need to continue.
             return;
         }
-        if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
-            // Will explicitly overwrite older diagnostics that are irrelevant.
-            diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move((*diagnosticParams)->diagnostics);
-        }
     }
 
     // Convert ExpectedDiagnostic into ErrorAssertion objects.
-    std::vector<std::shared_ptr<ErrorAssertion>> errorAssertions;
+    vector<shared_ptr<ErrorAssertion>> errorAssertions;
     for (auto e : expected) {
         auto range = RangeAssertion::makeRange(e.line);
         errorAssertions.push_back(ErrorAssertion::make(e.path, range, e.line, e.message));
