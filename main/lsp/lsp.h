@@ -191,8 +191,6 @@ class LSPLoop {
     std::istream &inputStream;
     /** Output stream; used by LSP to output messages */
     std::ostream &outputStream;
-    /** If true, LSPLoop will typecheck test files */
-    const bool typecheckTestFiles;
     /** If true, LSPLoop will skip configatron during type checking */
     const bool skipConfigatron;
     /** If true, all queries will hit the slow path. */
@@ -279,7 +277,6 @@ class LSPLoop {
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
                                     std::vector<std::unique_ptr<CompletionItem>> &items);
     void sendShowMessageNotification(MessageType messageType, std::string_view message);
-    bool isTestFile(const std::shared_ptr<core::File> &file);
     std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
                                                                const MessageId &id,
                                                                const TextDocumentPositionParams &params);
@@ -304,7 +301,7 @@ class LSPLoop {
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
             const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, std::istream &input, std::ostream &output,
-            bool typecheckTestFiles = false, bool skipConfigatron = false, bool disableFastPath = false);
+            bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);

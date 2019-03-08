@@ -21,18 +21,6 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-bool LSPLoop::isTestFile(const shared_ptr<core::File> &file) {
-    if (typecheckTestFiles) {
-        return false;
-    } else if (file->path().find("/test/") != file->path().npos) {
-        return true;
-    } else if (file->path().find_first_of("test/") == 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     core::FileRef fref;
     if (!file)
@@ -155,9 +143,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     vector<core::FileRef> changedFileRefs;
     indexed.reserve(indexed.size() + changedFiles.size());
     for (auto &t : changedFiles) {
-        if (!isTestFile(t)) {
-            addNewFile(t);
-        }
+        addNewFile(t);
     }
 
     vector<ast::ParsedFile> indexedCopies;
@@ -203,7 +189,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         core::UnfreezeFileTable fileTableAccess(*initialGS);
         for (auto &f : changedFiles) {
             ++i;
-            if (!f || isTestFile(f)) {
+            if (!f) {
                 continue;
             }
             auto wasFiles = initialGS->filesUsed();

@@ -8,11 +8,10 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, const shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool typecheckTestFiles,
-                 bool skipConfigatron, bool disableFastPath)
+                 WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool skipConfigatron,
+                 bool disableFastPath)
     : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputStream(inputStream),
-      outputStream(outputStream), typecheckTestFiles(typecheckTestFiles), skipConfigatron(skipConfigatron),
-      disableFastPath(disableFastPath) {
+      outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes,
