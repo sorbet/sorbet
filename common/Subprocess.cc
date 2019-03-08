@@ -9,7 +9,8 @@
 
 using namespace std;
 
-struct FileCloser {
+class FileCloser {
+public:
     explicit FileCloser(int filedes) : filedes(filedes) {}
 
     ~FileCloser() {
@@ -20,22 +21,37 @@ private:
     int filedes;
 };
 
-struct FileActionsDestroyer {
-    explicit FileActionsDestroyer(posix_spawn_file_actions_t *fileActions) : fileActions(fileActions) {}
+class FileActions {
+public:
+    FileActions() {
+        if (posix_spawn_file_actions_init(&fileActions) == 0) {
+            _initialized = true;
+        } else {
+            _initialized = false;
+        }
+    }
 
-    ~FileActionsDestroyer() {
-        posix_spawn_file_actions_destroy(fileActions);
+    operator posix_spawn_file_actions_t *() {
+        return &fileActions;
+    }
+
+    bool initialized() {
+        return _initialized;
+    }
+
+    ~FileActions() {
+        posix_spawn_file_actions_destroy(&fileActions);
     }
 
 private:
-    posix_spawn_file_actions_t *fileActions;
+    posix_spawn_file_actions_t fileActions;
+    bool _initialized;
 };
 
 // can't take string_views because we need char * not const char *
 optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arguments) {
     int readWrite[2];
     int ret;
-    posix_spawn_file_actions_t fileActions;
     pid_t childPid;
 
     ret = pipe(readWrite);
@@ -46,19 +62,18 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
     {
         FileCloser closeRead(readWrite[1]);
 
-        ret = posix_spawn_file_actions_init(&fileActions);
-        if (ret) {
+        FileActions fileActions;
+        if (!fileActions.initialized()) {
             return nullopt;
         }
-        FileActionsDestroyer destroyFileActions(&fileActions);
 
         // put the write end as stdout
-        ret = posix_spawn_file_actions_adddup2(&fileActions, readWrite[1], 1);
+        ret = posix_spawn_file_actions_adddup2(fileActions, readWrite[1], 1);
         if (ret) {
             return nullopt;
         }
         // close the read end of the pipe
-        ret = posix_spawn_file_actions_addclose(&fileActions, readWrite[0]);
+        ret = posix_spawn_file_actions_addclose(fileActions, readWrite[0]);
         if (ret) {
             close(readWrite[1]);
             return nullopt;
@@ -72,7 +87,7 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
         }
         argv.push_back(nullptr);
 
-        ret = posix_spawnp(&childPid, executable.data(), &fileActions, nullptr, argv.data(), nullptr);
+        ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
         if (ret) {
             return nullopt;
         }
