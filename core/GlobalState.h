@@ -163,7 +163,7 @@ private:
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
-    UnorderedMap<NameRef, std::string_view> dslPlugins;
+    UnorderedMap<NameRef, std::string> dslPlugins;
     bool wasModified_ = false;
 
     bool freezeSymbolTable();
