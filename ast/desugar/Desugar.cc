@@ -159,16 +159,6 @@ unique_ptr<Expression> unsupportedNode(DesugarContext dctx, parser::Node *node) 
     return MK::EmptyTree();
 }
 
-bool isValidAncestor(ast::Expression *exp) {
-    if (isa_tree<EmptyTree>(exp) || isa_tree<Self>(exp) || isa_tree<ConstantLit>(exp)) {
-        return true;
-    }
-    if (auto lit = cast_tree<UnresolvedConstantLit>(exp)) {
-        return isValidAncestor(lit->scope.get());
-    }
-    return false;
-}
-
 unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::Mlhs *lhs, unique_ptr<Expression> rhs) {
     InsSeq::STATS_store stats;
 
@@ -352,22 +342,6 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithBlock(),
                                            std::move(sendargs), 0);
-                        }
-                    }
-
-                    if (auto send = cast_tree<Send>(res.get())) {
-                        if (isa_tree<Self>(send->recv.get()) &&
-                            (send->fun == core::Names::include() || send->fun == core::Names::extend())) {
-                            for (auto &arg : send->args) {
-                                if (!isValidAncestor(arg.get())) {
-                                    if (auto e = dctx.ctx.state.beginError(arg->loc,
-                                                                           core::errors::Desugar::SimpleSuperclass)) {
-                                        e.setHeader("`{}` must only contain simple expressions",
-                                                    send->fun.show(dctx.ctx));
-                                    }
-                                    arg = MK::EmptyTree();
-                                }
-                            }
                         }
                     }
 
@@ -707,16 +681,6 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 } else {
                     ancestors.emplace_back(node2TreeImpl(dctx, std::move(claz->superclass)));
                 }
-                for (auto &ancestor : ancestors) {
-                    if (!isValidAncestor(ancestor.get())) {
-                        if (auto e =
-                                dctx.ctx.state.beginError(ancestor->loc, core::errors::Desugar::SimpleSuperclass)) {
-                            e.setHeader("Superclasses must only contain simple expressions");
-                        }
-                        ancestor = MK::EmptyTree();
-                    }
-                }
-
                 unique_ptr<Expression> res = make_unique<ClassDef>(
                     claz->loc, claz->declLoc, core::Symbols::todo(), node2TreeImpl(dctx, std::move(claz->name)),
                     std::move(ancestors), std::move(body), ClassDefKind::Class);

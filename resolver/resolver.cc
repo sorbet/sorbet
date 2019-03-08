@@ -409,7 +409,7 @@ private:
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor.get())) {
             return;
         } else {
-            ENFORCE(false, "Desugarer should have not allowed this");
+            ENFORCE(false, "Namer should have not allowed this");
         }
 
         if (resolveAncestorJob(ctx, job, typeAliases, false)) {

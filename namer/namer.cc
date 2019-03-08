@@ -243,9 +243,14 @@ class NameInserter {
                 dest->emplace_back(std::move(arg));
                 continue;
             }
-            auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
-            ENFORCE(constLit, "Desugarer should have not allowed this");
-            dest->emplace_back(std::move(arg));
+            if (isValidAncestor(arg.get())) {
+                dest->emplace_back(std::move(arg));
+            } else {
+                if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
+                    e.setHeader("`{}` must only contain simple expressions", send->fun.data(ctx)->show(ctx));
+                }
+                arg = ast::MK::EmptyTree();
+            }
         }
 
         return true;
@@ -269,6 +274,17 @@ class NameInserter {
             owner = core::Symbols::Object();
         }
         return owner;
+    }
+
+    bool isValidAncestor(ast::Expression *exp) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || ast::isa_tree<ast::Self>(exp) ||
+            ast::isa_tree<ast::ConstantLit>(exp)) {
+            return true;
+        }
+        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
+            return isValidAncestor(lit->scope.get());
+        }
+        return false;
     }
 
 public:
@@ -373,7 +389,13 @@ public:
         if (!klass->ancestors.empty()) {
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass->ancestors) {
-                if (shouldLeaveAncestorForIDE(anc) && (klass->kind == ast::Module || anc != klass->ancestors.front())) {
+                if (!isValidAncestor(anc.get())) {
+                    if (auto e = ctx.state.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
+                        e.setHeader("Superclasses must only contain simple expressions");
+                    }
+                    anc = ast::MK::EmptyTree();
+                } else if (shouldLeaveAncestorForIDE(anc) &&
+                           (klass->kind == ast::Module || anc != klass->ancestors.front())) {
                     klass->rhs.emplace_back(ast::MK::KeepForIDE(anc->deepCopy()));
                 }
             }

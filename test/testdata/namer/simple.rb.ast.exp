@@ -42,7 +42,7 @@ class <emptyTree><<C <U <root>>>> < ()
   class <emptyTree>::<C <U Child>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Parent>>)
     self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Mixin>>)
 
-    self(<C <U <todo sym>>>).<U include>(<emptyTree>)
+    self(<C <U <todo sym>>>).<U include>(3)
 
     self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Mixin>>) do ||
       <emptyTree>

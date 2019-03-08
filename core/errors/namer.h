@@ -4,7 +4,7 @@
 
 namespace sorbet::core::errors::Namer {
 constexpr ErrorClass IncludeMutipleParam{4001, StrictLevel::Stripe};
-// constexpr ErrorClass IncludeNotConstant{4002, StrictLevel::Stripe};
+constexpr ErrorClass AncestorNotConstant{4002, StrictLevel::Stripe};
 constexpr ErrorClass IncludePassedBlock{4003, StrictLevel::Stripe};
 // constexpr ErrorClass DynamicConstantDefinition{4004, StrictLevel::Typed};
 // constexpr ErrorClass DynamicMethodDefinition{4005, StrictLevel::Typed};
