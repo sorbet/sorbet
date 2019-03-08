@@ -1091,8 +1091,12 @@ void GlobalState::onlyShowErrorClass(int code) {
 
 void GlobalState::addDslPlugin(string_view method, string_view command) {
     auto ref = enterNameUTF8(method);
-    auto result = dslPlugins.emplace(ref, command);
-    ENFORCE(result.second, "method trigger should be unique");
+    auto [it, inserted] = dslPlugins.try_emplace(ref, command);
+    if (!inserted) {
+        if (auto e = beginError(Loc::none(), errors::Internal::InternalError)) {
+            e.setHeader("Duplicate plugin trigger \"{}\". Previous definition: \"{}\"", method, it->second);
+        }
+    }
 }
 
 optional<string_view> GlobalState::findDslPlugin(NameRef method) const {
