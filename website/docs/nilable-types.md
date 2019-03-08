@@ -3,7 +3,7 @@ id: nilable-types
 title: Nilable Types
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 Example:
 

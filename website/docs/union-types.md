@@ -3,7 +3,7 @@ id: union-types
 title: Union Types
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```
 class A; end

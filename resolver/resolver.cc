@@ -913,7 +913,6 @@ private:
 
                     fillInInfoFromSig(ctx, mdef->symbol, lastSigs[0], isOverloaded, *mdef);
 
-                    // TODO(jez) Should we handle isOverloaded?
                     if (!isOverloaded) {
                         injectOptionalArgs(ctx, mdef);
                     }

@@ -289,7 +289,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
     }
 
     ENFORCE(left.blk.exists() && right.blk.exists(), "Broken assumption: every method has a block argument.");
-    // TODO(jez) This is a raw string comparison on argument names
+    // TODO This is a raw string comparison on argument names
     if (left.blk.data(gs)->argumentName(gs) != core::Names::blkArg().data(gs)->shortName(gs) &&
         right.blk.data(gs)->argumentName(gs) == core::Names::blkArg().data(gs)->shortName(gs)) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {

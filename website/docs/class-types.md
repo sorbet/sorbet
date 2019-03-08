@@ -3,7 +3,7 @@ id: class-types
 title: Class Types
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 Every Ruby class is a valid type. For example:
 

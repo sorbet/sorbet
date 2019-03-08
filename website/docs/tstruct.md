@@ -3,4 +3,4 @@ id: tstruct
 title: Typed Structs
 ---
 
-TODO(jez) tstruct
+> TODO: This page is currently unwritten. Contributions welcome!

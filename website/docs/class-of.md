@@ -3,7 +3,7 @@ id: class-of
 title: T.class_of
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```
 T.class_of(Integer)

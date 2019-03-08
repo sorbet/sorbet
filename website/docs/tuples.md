@@ -3,7 +3,7 @@ id: tuples
 title: Tuples
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```ruby
 [Type1, Type2, ...]

@@ -3,7 +3,7 @@ id: abstract
 title: Abstract Classes and Interfaces
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 Sorbet has some support for abstract classes, abstract methods, and interfaces.
 

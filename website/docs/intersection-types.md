@@ -3,7 +3,7 @@ id: intersection-types
 title: Intersection Types
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 Intersection types can be useful to say, after the fact, that the input must
 implement two specific interfaces.

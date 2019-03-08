@@ -3,7 +3,7 @@ id: shapes
 title: Shapes
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```ruby
 {symbol1: Type1, symbol2: Type2}

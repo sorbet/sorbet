@@ -3,7 +3,7 @@ id: noreturn
 title: T.noreturn
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```
 T.noreturn

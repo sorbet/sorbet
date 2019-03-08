@@ -3,7 +3,7 @@ id: self-type
 title: T.self_type
 ---
 
-TODO(jez) self-type
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```
 T.self_type

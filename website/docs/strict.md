@@ -3,7 +3,7 @@ id: strict
 title: Strict Mode
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 As introduced in [Enabling Static Checks](static.md), Sorbet has multiple
 strictness modes. The default is `# typed: false`, which silences all type

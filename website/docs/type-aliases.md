@@ -3,7 +3,7 @@ id: type-aliases
 title: Type Aliases
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```
 MyTypeAlias = T.type_alias(...)

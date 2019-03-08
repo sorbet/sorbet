@@ -3,7 +3,7 @@ id: procs
 title: Proc Types
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 ```
 T.proc.params(arg0: Arg0Type, arg1: Arg2Type, ...).returns(ReturnType)

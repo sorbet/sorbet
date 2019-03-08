@@ -4,7 +4,7 @@ title: Generics in the Standard Library
 sidebar_label: Builtin Generics
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 Sorbet supports generics types. The syntax looks likes `MyClass[Elem]`. For user
 defined generic classes, it's possible to make this valid Ruby syntax.

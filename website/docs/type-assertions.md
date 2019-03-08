@@ -3,7 +3,7 @@ id: type-assertions
 title: Type Assertions
 ---
 
-> TODO(jez) This page is still a fragment. Contributions welcome!
+> TODO: This page is still a fragment. Contributions welcome!
 
 There are four ways to do type assertions in Sorbet:
 
