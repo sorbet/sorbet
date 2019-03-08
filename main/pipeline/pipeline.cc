@@ -299,7 +299,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     return level;
 }
 
-void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const options::Options &opts,
+void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file, const options::Options &opts,
               shared_ptr<spdlog::logger> logger) {
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::NotYetRead) {
         return;
@@ -366,7 +366,7 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
-                    readFile(localGs, file, opts, logger);
+                    readFileWithStrictnessOverrides(localGs, file, opts, logger);
                     threadResult.trees.emplace_back(indexOneAllowingPlugins(opts, *localGs, file, kvstore, logger,
                                                                             threadResult.pluginGeneratedFiles));
                 }
@@ -480,7 +480,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         // Run singlethreaded if only using 2 files
         size_t pluginFileCount = 0;
         for (auto file : files) {
-            readFile(gs, file, opts, logger);
+            readFileWithStrictnessOverrides(gs, file, opts, logger);
             vector<shared_ptr<core::File>> pluginGeneratedFiles;
             ret.emplace_back(indexOneAllowingPlugins(opts, *gs, file, kvstore, logger, pluginGeneratedFiles));
             pluginFileCount += pluginGeneratedFiles.size();
