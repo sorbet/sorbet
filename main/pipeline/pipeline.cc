@@ -52,13 +52,6 @@ public:
     }
 };
 
-struct thread_result {
-    unique_ptr<core::GlobalState> gs;
-    CounterState counters;
-    vector<ast::ParsedFile> trees;
-    vector<shared_ptr<core::File>> pluginGeneratedFiles;
-};
-
 string fileKey(core::GlobalState &gs, core::FileRef file) {
     auto path = file.data(gs).path();
     string key(path.begin(), path.end());
@@ -407,13 +400,20 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     fileData.strictLevel = decideStrictLevel(*gs, file, opts);
 }
 
-pair<unique_ptr<core::GlobalState>, vector<thread_result>>
+struct IndexResultPack {
+    unique_ptr<core::GlobalState> gs;
+    CounterState counters;
+    vector<ast::ParsedFile> trees;
+    vector<shared_ptr<core::File>> pluginGeneratedFiles;
+};
+
+pair<unique_ptr<core::GlobalState>, vector<IndexResultPack>>
 indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
                    const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
                    shared_ptr<spdlog::logger> &logger) {
     ProgressIndicator indexingProgress(opts.showProgress, "Indexing (supplied)", files.size());
 
-    auto resultq = make_shared<BlockingBoundedQueue<thread_result>>(files.size());
+    auto resultq = make_shared<BlockingBoundedQueue<IndexResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
         fileq->push(move(file), 1);
@@ -423,7 +423,7 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
         logger->trace("worker deep copying global state");
         auto localGs = baseGs->deepCopy();
         logger->trace("worker done deep copying global state");
-        thread_result threadResult;
+        IndexResultPack threadResult;
 
         {
             core::FileRef job;
@@ -452,9 +452,9 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
     logger->trace("Done deep copying global state");
 
     logger->trace("Tallying plugin generated files from threads");
-    vector<thread_result> threadResults;
+    vector<IndexResultPack> threadResults;
     {
-        thread_result threadResult;
+        IndexResultPack threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
              result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
             if (result.gotItem()) {
@@ -470,11 +470,11 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
 
 struct PluginFileIndexResult {
     size_t pluginFileCount;
-    shared_ptr<BlockingBoundedQueue<thread_result>> resultq;
+    shared_ptr<BlockingBoundedQueue<IndexResultPack>> resultq;
     unique_ptr<core::GlobalState> gsWithPluginFiles;
 };
 
-PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs, vector<thread_result> firstPass,
+PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs, vector<IndexResultPack> firstPass,
                                        const options::Options &opts, WorkerPool &workers,
                                        unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
     size_t pluginFileCount = 0;
@@ -484,7 +484,7 @@ PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs, vector<
         suppliedFileCount += threadResult.trees.size();
     }
 
-    auto resultq = make_shared<BlockingBoundedQueue<thread_result>>(suppliedFileCount + pluginFileCount);
+    auto resultq = make_shared<BlockingBoundedQueue<IndexResultPack>>(suppliedFileCount + pluginFileCount);
     auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(pluginFileCount);
     for (auto &threadResult : firstPass) {
         core::UnfreezeFileTable unfreezeFiles(*gs);
@@ -504,7 +504,7 @@ PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs, vector<
             logger->trace("worker deep copying global state");
             auto localGs = protoGs->deepCopy();
             logger->trace("worker done deep copying global state");
-            thread_result threadResult;
+            IndexResultPack threadResult;
             core::FileRef job;
 
             for (auto result = pluginFileq->try_pop(job); !result.done(); result = pluginFileq->try_pop(job)) {
@@ -573,7 +573,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
             ProgressIndicator progress(opts.showProgress, "Indexing (plugins + merge)",
                                        files.size() + pluginPass.pluginFileCount);
             logger->trace("Collecting results from indexing threads");
-            thread_result threadResult;
+            IndexResultPack threadResult;
             for (auto result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS);
                  !result.done();
                  result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
