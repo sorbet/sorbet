@@ -407,4 +407,68 @@ foo(*T.unsafe(xs))
 # ---------------------------------------------
 ```
 
+## 7021
+
+The method called declares a block parameter that is not `T.nilable`,
+but a block was not passed when it was called.
+
+This can be fixed by either passing a block to the method, or changing the method's
+signature for the block parameter from `T.proc...` to `T.nilable(T.proc...)` (and then
+changing the method to deal with a nilable block parameter).
+
+## 7023
+
+This error occurs when a method is passed in a `Proc` object that Sorbet does not
+know the arity for statically.
+
+One instance where this can happen is when using `method`, since the arity of method
+corresponding to the symbol is unknown. This can be fixed by passing in a block with the correct arity:
+
+```ruby
+# typed: strict
+
+extend T::Sig
+
+sig {params(blk: T.proc.params(arg0: String).void).void}
+def foo(&blk)
+end
+
+# ----- AVOID THIS ----------------------------
+foo(&method(:puts))
+# ---------------------------------------------
+
+# ----- Do this instead -----------------------
+foo do |arg0|
+    method(:puts).call(arg0)
+end
+# ---------------------------------------------
+```
+
+## 7024
+
+This error occurs when a generic argument is passed in as a block parameter.
+
+In `# typed: strict` files, using a parameter from a method that does not have a signature will
+cause this issue to be reported. Adding a signature to the method will fix the issue.
+
+```ruby
+# typed: strict
+
+extend T::Sig
+
+# ----- This will error -----------------------
+def foo(&blk)
+    proc(&blk)
+end
+# ---------------------------------------------
+
+# ----- This will not error -------------------
+sig {params(blk: T.untyped).returns(T.untyped)}
+def bar(&blk)
+    proc(&blk)
+end
+# ---------------------------------------------
+```
+
+
 [report an issue]: https://github.com/stripe/sorbet/issues
