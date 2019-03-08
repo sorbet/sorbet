@@ -39,8 +39,7 @@ public:
     template <typename... TArgs>
     [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line, std::string message,
                                                     const TArgs &... args) __attribute__((noreturn)) {
-        raise(file + ":" + std::to_string(line), " enforced condition ", check,
-              " has failed: ", fmt::format(message, args...));
+        raise("{}:{} enforced condition {} has failed: {}", file, line, check, fmt::format(message, args...));
     }
 };
 
