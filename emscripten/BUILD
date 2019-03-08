@@ -10,6 +10,8 @@ cc_binary(
             "EXPORTED_FUNCTIONS=[\"_typecheck\"]",
             "-s",
             "EXTRA_EXPORTED_RUNTIME_METHODS=[\"ccall\",\"cwrap\"]",
+            "-s",
+            "TOTAL_MEMORY=33554432",
         ],
         "//conditions:default": [],
     }),
