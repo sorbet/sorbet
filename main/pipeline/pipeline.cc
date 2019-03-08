@@ -68,113 +68,177 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     return key;
 }
 
-ast::ParsedFile indexOneImpl(
-    const options::Options &opts, core::GlobalState &lgs, core::FileRef file, unique_ptr<KeyValueStore> &kvstore,
-    shared_ptr<spdlog::logger> logger,
-    function<unique_ptr<ast::Expression>(core::MutableContext, unique_ptr<ast::Expression>)> betweenDesugarAndDsl) {
+unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
+                                               const unique_ptr<KeyValueStore> &kvstore,
+                                               shared_ptr<spdlog::logger> &logger) {
+    if (kvstore && file.id() < gs.filesUsed()) {
+        string fileHashKey = fileKey(gs, file);
+        auto maybeCached = kvstore->read(fileHashKey);
+        if (maybeCached) {
+            logger->trace("Reading from cache: {}", file.data(gs).path());
+            auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
+            file.data(gs).cachedParseTree = true;
+            ENFORCE(cachedTree->loc.file() == file);
+            return cachedTree;
+        }
+    }
+    return nullptr;
+}
+
+unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                   shared_ptr<spdlog::logger> &logger) {
+    unique_ptr<parser::Node> nodes;
+    {
+        logger->trace("Parsing: {}", file.data(gs).path());
+        core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
+        nodes = parser::Parser::run(gs, file);
+    }
+    if (print.ParseTree) {
+        fmt::print("{}\n", nodes->toStringWithTabs(gs, 0));
+    }
+    if (print.ParseTreeJSON) {
+        fmt::print("{}\n", nodes->toJSON(gs, 0));
+    }
+    return nodes;
+}
+
+unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
+                                       const options::Printers &print, shared_ptr<spdlog::logger> &logger) {
+    unique_ptr<ast::Expression> ast;
+    core::MutableContext ctx(gs, core::Symbols::root());
+    {
+        logger->trace("Desugaring: {}", file.data(gs).path());
+        core::ErrorRegion errs(gs, file);
+        core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
+        ast = ast::desugar::node2Tree(ctx, move(parseTree));
+    }
+    if (print.Desugared) {
+        fmt::print("{}\n", ast->toStringWithTabs(gs, 0));
+    }
+    if (print.DesugaredRaw) {
+        fmt::print("{}\n", ast->showRaw(gs));
+    }
+    return ast;
+}
+
+unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast,
+                                   shared_ptr<spdlog::logger> &logger) {
+    core::MutableContext ctx(gs, core::Symbols::root());
+    logger->trace("Inlining DSLs: {}", file.data(gs).path());
+    core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
+    core::ErrorRegion errs(gs, file);
+    return dsl::DSL::run(ctx, move(ast));
+}
+
+ast::ParsedFile emptyParsedFile(core::FileRef file) {
+    return {make_unique<ast::EmptyTree>(), file};
+}
+
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                         unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
 
     try {
-        if (kvstore && file.id() < lgs.filesUsed()) {
-            string fileHashKey = fileKey(lgs, file);
-            auto maybeCached = kvstore->read(fileHashKey);
-            if (maybeCached) {
-                logger->trace("Reading from cache: {}", file.data(lgs).path());
-                auto t = core::serialize::Serializer::loadExpression(lgs, maybeCached, file.id());
-                file.data(lgs).cachedParseTree = true;
-                ENFORCE(t->loc.file() == file);
-                dslsInlined.tree = move(t);
-            }
-        }
-        if (!dslsInlined.tree) {
+        unique_ptr<ast::Expression> tree = fetchTreeFromCache(lgs, file, kvstore, logger);
+
+        if (!tree) {
             // tree isn't cached. Need to start from parser
-
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
-                return {make_unique<ast::EmptyTree>(), file};
+                return emptyParsedFile(file);
             }
-
-            unique_ptr<parser::Node> nodes;
-            {
-                logger->trace("Parsing: {}", file.data(lgs).path());
-                core::ErrorRegion errs(lgs, file);
-                core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
-                nodes = parser::Parser::run(lgs, file);
-            }
-            if (print.ParseTree) {
-                fmt::print("{}\n", nodes->toStringWithTabs(lgs, 0));
-            }
-            if (print.ParseTreeJSON) {
-                fmt::print("{}\n", nodes->toJSON(lgs, 0));
-            }
-
+            auto parseTree = runParser(lgs, file, print, logger);
             if (opts.stopAfterPhase == options::Phase::PARSER) {
-                return {make_unique<ast::EmptyTree>(), file};
+                return emptyParsedFile(file);
             }
-
-            unique_ptr<ast::Expression> ast;
-            core::MutableContext ctx(lgs, core::Symbols::root());
-            {
-                logger->trace("Desugaring: {}", file.data(lgs).path());
-                core::ErrorRegion errs(lgs, file);
-                core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-                ast = ast::desugar::node2Tree(ctx, move(nodes));
-            }
-            if (print.Desugared) {
-                fmt::print("{}\n", ast->toStringWithTabs(lgs, 0));
-            }
-            if (print.DesugaredRaw) {
-                fmt::print("{}\n", ast->showRaw(lgs));
-            }
+            tree = runDesugar(lgs, file, move(parseTree), print, logger);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
-                return {make_unique<ast::EmptyTree>(), file};
+                return emptyParsedFile(file);
             }
-
-            ast = betweenDesugarAndDsl(ctx, move(ast));
-
             if (!opts.skipDSLPasses) {
-                logger->trace("Inlining DSLs: {}", file.data(lgs).path());
-                core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-                core::ErrorRegion errs(lgs, file);
-                dslsInlined.tree = dsl::DSL::run(ctx, move(ast));
-            } else {
-                dslsInlined.tree = move(ast);
+                tree = runDSL(lgs, file, move(tree), logger);
             }
         }
         if (print.DSLTree) {
-            fmt::print("{}\n", dslsInlined.tree->toStringWithTabs(lgs, 0));
+            fmt::print("{}\n", tree->toStringWithTabs(lgs, 0));
         }
         if (print.DSLTreeRaw) {
-            fmt::print("{}\n", dslsInlined.tree->showRaw(lgs));
+            fmt::print("{}\n", tree->showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
-            return {make_unique<ast::EmptyTree>(), file};
+            return emptyParsedFile(file);
         }
 
+        dslsInlined.tree = move(tree);
         return dslsInlined;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
         }
-        return {make_unique<ast::EmptyTree>(), file};
+        return emptyParsedFile(file);
     }
 }
 
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
-    return indexOneImpl(opts, lgs, file, kvstore, logger, [](auto, auto ast) { return ast; });
+pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::FileRef file) {
+    return {emptyParsedFile(file), vector<shared_ptr<core::File>>()};
 }
 
-ast::ParsedFile indexOneAllowingPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
-                                        unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger,
-                                        vector<shared_ptr<core::File>> &pluginFileSink) {
-    return indexOneImpl(opts, gs, file, kvstore, logger, [&pluginFileSink](auto ctx, auto inputAst) {
-        auto [ast, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(inputAst));
-        pluginFileSink.insert(pluginFileSink.end(), make_move_iterator(pluginFiles.begin()),
-                              make_move_iterator(pluginFiles.end()));
-        return move(ast);
-    });
+pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneAllowingPlugins(const options::Options &opts,
+                                                                              core::GlobalState &gs, core::FileRef file,
+                                                                              unique_ptr<KeyValueStore> &kvstore,
+                                                                              shared_ptr<spdlog::logger> logger) {
+    auto &print = opts.print;
+    ast::ParsedFile dslsInlined{nullptr, file};
+    vector<shared_ptr<core::File>> resultPluginFiles;
+
+    try {
+        unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore, logger);
+
+        if (!tree) {
+            // tree isn't cached. Need to start from parser
+            if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                return emptyPluginFile(file);
+            }
+            auto parseTree = runParser(gs, file, print, logger);
+            if (opts.stopAfterPhase == options::Phase::PARSER) {
+                return emptyPluginFile(file);
+            }
+            tree = runDesugar(gs, file, move(parseTree), print, logger);
+            if (opts.stopAfterPhase == options::Phase::DESUGARER) {
+                return emptyPluginFile(file);
+            }
+            {
+                logger->trace("Running plugins: {}", file.data(gs).path());
+                core::MutableContext ctx(gs, core::Symbols::root());
+                core::ErrorRegion errs(gs, file);
+                auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
+                tree = move(pluginTree);
+                resultPluginFiles = move(pluginFiles);
+            }
+            if (!opts.skipDSLPasses) {
+                tree = runDSL(gs, file, move(tree), logger);
+            }
+        }
+        if (print.DSLTree) {
+            fmt::print("{}\n", tree->toStringWithTabs(gs, 0));
+        }
+        if (print.DSLTreeRaw) {
+            fmt::print("{}\n", tree->showRaw(gs));
+        }
+        if (opts.stopAfterPhase == options::Phase::DSL) {
+            return emptyPluginFile(file);
+        }
+
+        dslsInlined.tree = move(tree);
+        return {move(dslsInlined), resultPluginFiles};
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(gs).path());
+        }
+        return emptyPluginFile(file);
+    }
 }
 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
@@ -299,8 +363,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     return level;
 }
 
-void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file, const options::Options &opts,
-              shared_ptr<spdlog::logger> logger) {
+void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
+                                     const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::NotYetRead) {
         return;
     }
@@ -367,8 +431,11 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     readFileWithStrictnessOverrides(localGs, file, opts, logger);
-                    threadResult.trees.emplace_back(indexOneAllowingPlugins(opts, *localGs, file, kvstore, logger,
-                                                                            threadResult.pluginGeneratedFiles));
+                    auto [parsedFile, pluginFiles] = indexOneAllowingPlugins(opts, *localGs, file, kvstore, logger);
+                    threadResult.pluginGeneratedFiles.insert(threadResult.pluginGeneratedFiles.end(),
+                                                             make_move_iterator(pluginFiles.begin()),
+                                                             make_move_iterator(pluginFiles.end()));
+                    threadResult.trees.emplace_back(move(parsedFile));
                 }
             }
         }
@@ -481,10 +548,10 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         size_t pluginFileCount = 0;
         for (auto file : files) {
             readFileWithStrictnessOverrides(gs, file, opts, logger);
-            vector<shared_ptr<core::File>> pluginGeneratedFiles;
-            ret.emplace_back(indexOneAllowingPlugins(opts, *gs, file, kvstore, logger, pluginGeneratedFiles));
-            pluginFileCount += pluginGeneratedFiles.size();
-            for (auto &pluginFile : pluginGeneratedFiles) {
+            auto [parsedFile, pluginFiles] = indexOneAllowingPlugins(opts, *gs, file, kvstore, logger);
+            ret.emplace_back(move(parsedFile));
+            pluginFileCount += pluginFiles.size();
+            for (auto &pluginFile : pluginFiles) {
                 core::FileRef pluginFileRef;
                 {
                     core::UnfreezeFileTable fileTableAccess(*gs);
