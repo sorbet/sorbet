@@ -1058,9 +1058,16 @@ private:
         return true;
     }
 
-public:
-    int sendCount = 0;
+    core::SymbolRef methodOwner(core::MutableContext ctx) {
+        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        if (owner == core::Symbols::root()) {
+            // Root methods end up going on object
+            owner = core::Symbols::Object();
+        }
+        return owner;
+    }
 
+public:
     unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         if (handleDeclaration(ctx, asgn)) {
             return asgn;
@@ -1121,32 +1128,88 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        auto *recv = send->recv.get();
-        auto *id = ast::cast_tree<ast::ConstantLit>(recv);
-        if (id == nullptr) {
-            sendCount++;
-            return send;
-        }
-        if (id->typeAliasOrConstantSymbol() != core::Symbols::T()) {
-            sendCount++;
-            return send;
-        }
-        switch (send->fun._id) {
-            case core::Names::let()._id:
-            case core::Names::assertType()._id:
-            case core::Names::cast()._id: {
-                if (send->args.size() < 2) {
-                    return send;
-                }
-
-                auto expr = std::move(send->args[0]);
-                ParsedSig emptySig;
-                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false, core::Symbols::noSymbol());
-                return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
-                                        make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
-            }
-            default:
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(send->recv.get())) {
+            if (id->typeAliasOrConstantSymbol() != core::Symbols::T()) {
                 return send;
+            }
+            switch (send->fun._id) {
+                case core::Names::let()._id:
+                case core::Names::assertType()._id:
+                case core::Names::cast()._id: {
+                    if (send->args.size() < 2) {
+                        return send;
+                    }
+
+                    auto expr = std::move(send->args[0]);
+                    ParsedSig emptySig;
+                    auto type =
+                        TypeSyntax::getResultType(ctx, send->args[1], emptySig, false, core::Symbols::noSymbol());
+                    return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
+                                            make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
+                }
+                default:
+                    return send;
+            }
+        } else if (auto *self = ast::cast_tree<ast::Self>(send->recv.get())) {
+            if (send->fun != core::Names::aliasMethod()) {
+                return send;
+            }
+
+            vector<core::NameRef> args;
+            for (auto &arg : send->args) {
+                auto lit = ast::cast_tree<ast::Literal>(arg.get());
+                if (lit == nullptr || !lit->isSymbol(ctx)) {
+                    continue;
+                }
+                core::NameRef name = lit->asSymbol(ctx);
+
+                args.emplace_back(name);
+            }
+            if (send->args.size() != 2) {
+                return send;
+            }
+            if (args.size() != 2) {
+                return send;
+            }
+
+            auto fromName = args[0];
+            auto toName = args[1];
+
+            auto owner = methodOwner(ctx);
+            core::SymbolRef toMethod = owner.data(ctx)->findMember(ctx, toName);
+            if (!toMethod.exists()) {
+                if (auto e = ctx.state.beginError(send->args[1]->loc, core::errors::Resolver::BadAliasMethod)) {
+                    e.setHeader("Can't make method alias from `{}` to non existing method `{}`", fromName.show(ctx),
+                                toName.show(ctx));
+                }
+                return send;
+            }
+
+            core::SymbolRef fromMethod = owner.data(ctx)->findMemberNoDealias(ctx, fromName);
+            if (fromMethod.exists() && fromMethod.data(ctx)->dealias(ctx) != toMethod) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::BadAliasMethod)) {
+                    auto dealiased = fromMethod.data(ctx)->dealias(ctx);
+                    if (fromMethod == dealiased) {
+                        e.setHeader("Redefining the existing method `{}` as a method alias",
+                                    fromMethod.data(ctx)->show(ctx));
+                        e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
+                    } else {
+                        e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
+                                    dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
+                        e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
+                        e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
+                        e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
+                    }
+                }
+                return send;
+            }
+
+            core::SymbolRef alias = ctx.state.enterMethodSymbol(send->loc, owner, fromName);
+            alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
+
+            return send;
+        } else {
+            return send;
         }
     }
 };

@@ -522,56 +522,6 @@ public:
                     }
                     break;
                 }
-                case core::Names::aliasMethod()._id: {
-                    vector<core::NameRef> args;
-                    for (auto &arg : original->args) {
-                        auto lit = ast::cast_tree<ast::Literal>(arg.get());
-                        if (lit == nullptr || !lit->isSymbol(ctx)) {
-                            if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
-                                e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
-                                            original->fun.show(ctx));
-                            }
-                            continue;
-                        }
-                        core::NameRef name = lit->asSymbol(ctx);
-
-                        args.emplace_back(name);
-                    }
-                    if (original->args.size() != 2) {
-                        if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
-                            e.setHeader("Wrong number of arguments to `{}`; Expected: `{}`, got: `{}`",
-                                        original->fun.show(ctx), 2, original->args.size());
-                        }
-                        break;
-                    }
-                    if (args.size() != 2) {
-                        break;
-                    }
-
-                    auto toName = args[1];
-                    core::SymbolRef meth = methodOwner(ctx).data(ctx)->findMember(ctx, toName);
-                    if (!meth.exists()) {
-                        if (auto e =
-                                ctx.state.beginError(original->args[1]->loc, core::errors::Namer::MethodNotFound)) {
-                            e.setHeader("`{}`: no such method: `{}`", original->fun.show(ctx), toName.show(ctx));
-                        }
-                        break;
-                    }
-
-                    auto fromName = args[0];
-                    core::SymbolRef fromSymbol = methodOwner(ctx).data(ctx)->findMember(ctx, fromName);
-                    if (fromSymbol.exists()) {
-                        if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::RedefinitionOfAlias)) {
-                            e.setHeader("Redefining the existing method `{}` as a method alias",
-                                        fromSymbol.data(ctx)->show(ctx));
-                            e.addErrorLine(fromSymbol.data(ctx)->loc(), "Previous definition");
-                        }
-                        ctx.state.mangleRenameSymbol(fromSymbol, fromName);
-                    }
-
-                    aliasMethod(ctx, original->loc, methodOwner(ctx), fromName, meth);
-                    break;
-                }
             }
         }
 
@@ -587,22 +537,23 @@ public:
 
     bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
-        if (sym != ctx.owner) {
-            if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfAlias)) {
-                e.setHeader("Redefining method alias `{}`", ctx.owner.data(ctx)->show(ctx));
-                e.addErrorLine(ctx.owner.data(ctx)->loc(), "Alias definition");
-                e.addErrorLine(sym.data(ctx)->loc(), "Aliased to");
-            }
-            return false;
-        }
-
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
-                // Eventually we should be more principled about how we report this.
-                e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                            sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                if (sym != ctx.owner) {
+                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Eventually we should be more principled about how we report this.
+                    e.setHeader(
+                        "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
+                        ctx.owner.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                    e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
+                    e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
+                } else {
+                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Eventually we should be more principled about how we report this.
+                    e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
+                                sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                }
             }
             return false;
         }
