@@ -40,7 +40,9 @@ public:
     }
 
     ~FileActions() {
-        posix_spawn_file_actions_destroy(&fileActions);
+        if (_inittialized) {
+            posix_spawn_file_actions_destroy(&fileActions);
+        }
     }
 
 private:
