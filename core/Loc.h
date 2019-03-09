@@ -47,6 +47,15 @@ public:
         return FileRef(storage.fileRef);
     }
 
+    bool isTombStoned(const GlobalState &gs) const {
+        auto f = file();
+        if (!f.exists()) {
+            return false;
+        } else {
+            return file().data(gs).sourceType == File::TombStone;
+        }
+    }
+
     inline Loc(FileRef file, u4 begin, u4 end) : storage{begin, end, file.id()} {
         ENFORCE(begin <= INVALID_POS_LOC);
         ENFORCE(end <= INVALID_POS_LOC);
