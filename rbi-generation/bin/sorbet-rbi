@@ -4,8 +4,12 @@ module SorbetRBIGeneration; end
 
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-method-finder'
+require_relative '../lib/fetch-rbis'
 
 if $PROGRAM_NAME == __FILE__
+  # Pull in the hand-written RBIs
+  SorbetRBIGeneration::FetchRBIs.main
+
   # Generate the RBIs from bundler
   SorbetRBIGeneration::RbiGenerator.start
   SorbetRBIGeneration::RbiGenerator.require_eveything
