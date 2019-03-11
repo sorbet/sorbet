@@ -42,15 +42,18 @@ initialize_pay_server
 
 # The goal here is no ENFORCE failures, exceptions, or sanitizer crashes.
 # There will be lots of type errors, because we're passing the --typed= flag.
+#
+# Specifically, the --stress-incremntal-resolver flag *might* introduce new
+# type errors that wouldn't show up in the normal pipeline, even after the
+# typed overrides.
 
 /usr/local/bin/junit-script-output \
     typecheck-sanitized \
     /usr/bin/time -o "$TIMEFILE" \
     ./scripts/bin/typecheck \
-    --suppress-non-critical --typed=strict --quiet
+    --suppress-non-critical --typed=strict --quiet \
+    --stress-incremental-resolver
 cat "$TIMEFILE"
-
-# TODO(jez) --stress-incremental-resolver
 
 if [ "$RECORD_STATS" ]; then
     t_user="$(grep user "$TIMEFILE" | cut -d ' ' -f 2)"
