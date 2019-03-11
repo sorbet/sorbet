@@ -4,7 +4,7 @@ constexpr int MAX_PROC_ARITY = 10;
 
 using namespace std;
 
-void emit_proc(ofstream &out, int arity) {
+void emitProc(ofstream &out, int arity) {
     out << "class Proc" << arity << " < Proc" << '\n';
     out << "  Return = type_member(:out)" << '\n';
     for (int i = 0; i < arity; ++i) {
@@ -38,6 +38,6 @@ void emit_proc(ofstream &out, int arity) {
 int main(int argc, char **argv) {
     ofstream rb(argv[1], ios::trunc);
     for (int arity = 0; arity <= MAX_PROC_ARITY; ++arity) {
-        emit_proc(rb, arity);
+        emitProc(rb, arity);
     }
 }

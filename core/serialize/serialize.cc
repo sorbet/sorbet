@@ -63,27 +63,27 @@ vector<u1> Pickler::result(int compressionDegree) {
         data.emplace_back(zeroCounter);
         zeroCounter = 0;
     }
-    const size_t max_dst_size = Lizard_compressBound(data.size());
-    vector<u1> compressed_data;
-    compressed_data.resize(2048 + max_dst_size); // give extra room for compression
-                                                 // Lizard_compressBound returns size of data if compression
-                                                 // succeeds. It seems to be written for big inputs
-                                                 // and returns too small sizes for small inputs,
-                                                 // where compressed size is bigger than original size
-    int resultCode = Lizard_compress((const char *)data.data(), (char *)(compressed_data.data() + SIZE_BYTES * 2),
-                                     data.size(), (compressed_data.size() - SIZE_BYTES * 2), compressionDegree);
+    const size_t maxDstSize = Lizard_compressBound(data.size());
+    vector<u1> compressedData;
+    compressedData.resize(2048 + maxDstSize); // give extra room for compression
+                                              // Lizard_compressBound returns size of data if compression
+                                              // succeeds. It seems to be written for big inputs
+                                              // and returns too small sizes for small inputs,
+                                              // where compressed size is bigger than original size
+    int resultCode = Lizard_compress((const char *)data.data(), (char *)(compressedData.data() + SIZE_BYTES * 2),
+                                     data.size(), (compressedData.size() - SIZE_BYTES * 2), compressionDegree);
     if (resultCode == 0) {
         // did not compress!
         Exception::raise("incompressible pickler?");
     } else {
-        memcpy(compressed_data.data(), &resultCode, SIZE_BYTES); // ~200K of our stdlib
+        memcpy(compressedData.data(), &resultCode, SIZE_BYTES); // ~200K of our stdlib
         int uncompressedSize = data.size();
-        memcpy(compressed_data.data() + SIZE_BYTES, &uncompressedSize,
+        memcpy(compressedData.data() + SIZE_BYTES, &uncompressedSize,
                SIZE_BYTES);                                     // 172817 ints(x4), ~675K of our stdlib
         int actualCompressedSize = resultCode + SIZE_BYTES * 2; // SIZE_BYTES * 2 are for sizes
-        compressed_data.resize(actualCompressedSize);
+        compressedData.resize(actualCompressedSize);
     }
-    return compressed_data;
+    return compressedData;
 }
 
 UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
@@ -527,8 +527,8 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
         pickle(result, s);
     }
 
-    result.putU4(gs.names_by_hash.size());
-    for (const auto &s : gs.names_by_hash) {
+    result.putU4(gs.namesByHash.size());
+    for (const auto &s : gs.namesByHash) {
         result.putU4(s.first);
         result.putU4(s.second);
     }
@@ -554,8 +554,8 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     names.clear();
     vector<Symbol> symbols(std::move(result.symbols));
     symbols.clear();
-    vector<pair<unsigned int, unsigned int>> names_by_hash(std::move(result.names_by_hash));
-    names_by_hash.clear();
+    vector<pair<unsigned int, unsigned int>> namesByHash(std::move(result.namesByHash));
+    namesByHash.clear();
 
     result.trace("Reading files");
 
@@ -597,11 +597,11 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
     int namesByHashSize = p.getU4();
     names.reserve(namesByHashSize / 2);
-    names_by_hash.reserve(names.capacity() * 2);
+    namesByHash.reserve(names.capacity() * 2);
     for (int i = 0; i < namesByHashSize; i++) {
         auto hash = p.getU4();
         auto value = p.getU4();
-        names_by_hash.emplace_back(make_pair(hash, value));
+        namesByHash.emplace_back(make_pair(hash, value));
     }
 
     UnorderedMap<string, FileRef> fileRefByPath;
@@ -617,7 +617,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     result.files = std::move(files);
     result.names = std::move(names);
     result.symbols = std::move(symbols);
-    result.names_by_hash = std::move(names_by_hash);
+    result.namesByHash = std::move(namesByHash);
     result.sanityCheck();
 }
 
@@ -796,13 +796,13 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  p.putU1(c->kind);
                  p.putU4(c->symbol._id);
                  p.putU4(c->ancestors.size());
-                 p.putU4(c->singleton_ancestors.size());
+                 p.putU4(c->singletonAncestors.size());
                  p.putU4(c->rhs.size());
                  pickle(p, file, c->name);
                  for (auto &anc : c->ancestors) {
                      pickle(p, file, anc);
                  }
-                 for (auto &anc : c->singleton_ancestors) {
+                 for (auto &anc : c->singletonAncestors) {
                      pickle(p, file, anc);
                  }
                  for (auto &anc : c->rhs) {
@@ -1025,7 +1025,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             }
             auto ret = ast::MK::Class(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                       (ast::ClassDefKind)kind);
-            ret->singleton_ancestors = std::move(singletonAncestors);
+            ret->singletonAncestors = std::move(singletonAncestors);
             ret->symbol = symbol;
             return ret;
         }

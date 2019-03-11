@@ -11,31 +11,31 @@ namespace ruby_parser {
 
 struct builder;
 
-using foreign_ptr = const void*;
-using self_ptr = const void *;
+using ForeignPtr = const void*;
+using SelfPtr = const void *;
 
 struct node_list {
 	node_list() = default;
-	node_list(foreign_ptr node) {
+	node_list(ForeignPtr node) {
 		nodes.emplace_back(node);
 	}
 
-	node_list& operator=(const foreign_ptr &other) = delete;
-	node_list& operator=(foreign_ptr &&other) = delete;
+	node_list& operator=(const ForeignPtr &other) = delete;
+	node_list& operator=(ForeignPtr &&other) = delete;
 
 	inline size_t size() const {
 		return nodes.size();
 	}
 
-	inline void emplace_back(const foreign_ptr &ptr) {
+	inline void emplace_back(const ForeignPtr &ptr) {
 		nodes.emplace_back(ptr);
 	}
 
-	inline void push_front(const foreign_ptr &ptr) {
+	inline void push_front(const ForeignPtr &ptr) {
 		nodes.insert(nodes.begin(), ptr);
 	}
 
-	inline foreign_ptr &at(size_t n) { return nodes.at(n); }
+	inline ForeignPtr &at(size_t n) { return nodes.at(n); }
 
 	inline void concat(node_list *other) {
 		nodes.insert(nodes.end(),
@@ -45,7 +45,7 @@ struct node_list {
 	}
 
 protected:
-	std::vector<foreign_ptr> nodes;
+	std::vector<ForeignPtr> nodes;
 };
 
 struct delimited_node_list {
@@ -60,22 +60,22 @@ struct delimited_node_list {
 
 struct delimited_block {
 	delimited_block() = default;
-	delimited_block(const token_t &begin, foreign_ptr args, foreign_ptr body, const token_t &end)
+	delimited_block(const token_t &begin, ForeignPtr args, ForeignPtr body, const token_t &end)
 		: begin(begin), args(args), body(body), end(end) {}
 
 	token_t begin = nullptr;
-	foreign_ptr args = nullptr;
-	foreign_ptr body = nullptr;
+	ForeignPtr args = nullptr;
+	ForeignPtr body = nullptr;
 	token_t end = nullptr;
 };
 
 struct node_with_token {
 	node_with_token() = default;
-	node_with_token(const token_t &token_, foreign_ptr node_)
+	node_with_token(const token_t &token_, ForeignPtr node_)
 		: tok(token_), nod(node_) {}
 
 	token_t tok = nullptr;
-	foreign_ptr nod = nullptr;
+	ForeignPtr nod = nullptr;
 };
 
 struct case_body {
@@ -132,11 +132,11 @@ public:
 
 	bool pending_error;
 	size_t def_level;
-	foreign_ptr ast;
+	ForeignPtr ast;
 
 	base_driver(ruby_version version, const std::string& source, const struct builder& builder);
 	virtual ~base_driver() {}
-	virtual foreign_ptr parse(self_ptr self) = 0;
+	virtual ForeignPtr parse(SelfPtr self) = 0;
 
 	bool valid_kwarg_name(const token *name) {
 		char c = name->string().at(0);
@@ -162,7 +162,7 @@ public:
 class typedruby25 : public base_driver {
 public:
 	typedruby25(const std::string& source, const struct builder& builder);
-	virtual foreign_ptr parse(self_ptr self);
+	virtual ForeignPtr parse(SelfPtr self);
 	~typedruby25() {}
 };
 

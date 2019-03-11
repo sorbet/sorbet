@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <typeinfo>
 
-using ruby_parser::foreign_ptr;
+using ruby_parser::ForeignPtr;
 using ruby_parser::node_list;
-using ruby_parser::self_ptr;
+using ruby_parser::SelfPtr;
 using ruby_parser::token;
 
 using sorbet::core::GlobalState;
@@ -56,23 +56,23 @@ string Dedenter::dedent(string_view str) {
 class Builder::Impl {
 public:
     Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
-        this->max_off_ = file.data(gs).source().size();
-        foreign_nodes_.emplace_back();
+        this->maxOff_ = file.data(gs).source().size();
+        foreignNodes_.emplace_back();
     }
 
     GlobalState &gs_;
     u2 uniqueCounter_ = 1;
     core::FileRef file_;
-    u4 max_off_;
+    u4 maxOff_;
     ruby_parser::base_driver *driver_;
 
-    vector<unique_ptr<Node>> foreign_nodes_;
+    vector<unique_ptr<Node>> foreignNodes_;
 
     u4 clamp(u4 off) {
-        return std::min(off, max_off_);
+        return std::min(off, maxOff_);
     }
 
-    core::Loc tok_loc(const token *tok) {
+    core::Loc tokLoc(const token *tok) {
         return core::Loc{file_, clamp((u4)tok->start()), clamp((u4)tok->end())};
     }
 
@@ -83,14 +83,14 @@ public:
         return node->loc;
     }
 
-    core::Loc tok_loc(const token *begin, const token *end) {
+    core::Loc tokLoc(const token *begin, const token *end) {
         return core::Loc{file_, clamp((u4)begin->start()), clamp((u4)end->end())};
     }
 
-    core::Loc collection_loc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
+    core::Loc collectionLoc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
         if (begin != nullptr) {
             ENFORCE(end != nullptr);
-            return tok_loc(begin, end);
+            return tokLoc(begin, end);
         }
         ENFORCE(end == nullptr);
         if (elts.empty()) {
@@ -99,27 +99,27 @@ public:
         return elts.front()->loc.join(elts.back()->loc);
     }
 
-    core::Loc collection_loc(sorbet::parser::NodeVec &elts) {
-        return collection_loc(nullptr, elts, nullptr);
+    core::Loc collectionLoc(sorbet::parser::NodeVec &elts) {
+        return collectionLoc(nullptr, elts, nullptr);
     }
 
-    unique_ptr<Node> transform_condition(unique_ptr<Node> cond) {
+    unique_ptr<Node> transformCondition(unique_ptr<Node> cond) {
         if (auto *b = parser::cast_node<Begin>(cond.get())) {
             if (b->stmts.size() == 1) {
-                b->stmts[0] = transform_condition(std::move(b->stmts[0]));
+                b->stmts[0] = transformCondition(std::move(b->stmts[0]));
             }
         } else if (auto *a = parser::cast_node<And>(cond.get())) {
-            a->left = transform_condition(std::move(a->left));
-            a->right = transform_condition(std::move(a->right));
+            a->left = transformCondition(std::move(a->left));
+            a->right = transformCondition(std::move(a->right));
         } else if (auto *o = parser::cast_node<Or>(cond.get())) {
-            o->left = transform_condition(std::move(o->left));
-            o->right = transform_condition(std::move(o->right));
+            o->left = transformCondition(std::move(o->left));
+            o->right = transformCondition(std::move(o->right));
         } else if (auto *ir = parser::cast_node<IRange>(cond.get())) {
-            return make_unique<IFlipflop>(ir->loc, transform_condition(std::move(ir->from)),
-                                          transform_condition(std::move(ir->to)));
+            return make_unique<IFlipflop>(ir->loc, transformCondition(std::move(ir->from)),
+                                          transformCondition(std::move(ir->to)));
         } else if (auto *er = parser::cast_node<ERange>(cond.get())) {
-            return make_unique<EFlipflop>(er->loc, transform_condition(std::move(er->from)),
-                                          transform_condition(std::move(er->to)));
+            return make_unique<EFlipflop>(er->loc, transformCondition(std::move(er->from)),
+                                          transformCondition(std::move(er->to)));
         } else if (auto *re = parser::cast_node<Regexp>(cond.get())) {
             return make_unique<MatchCurLine>(re->loc, std::move(cond));
         }
@@ -146,22 +146,22 @@ public:
     }
 
     unique_ptr<Node> alias(const token *alias, unique_ptr<Node> to, unique_ptr<Node> from) {
-        return make_unique<Alias>(tok_loc(alias).join(from->loc), std::move(to), std::move(from));
+        return make_unique<Alias>(tokLoc(alias).join(from->loc), std::move(to), std::move(from));
     }
 
     unique_ptr<Node> arg(const token *name) {
-        return make_unique<Arg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
+        return make_unique<Arg>(tokLoc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
-        return make_unique<Args>(collection_loc(begin, args, end), std::move(args));
+        return make_unique<Args>(collectionLoc(begin, args, end), std::move(args));
     }
 
     unique_ptr<Node> array(const token *begin, sorbet::parser::NodeVec elements, const token *end) {
-        return make_unique<Array>(collection_loc(begin, elements, end), std::move(elements));
+        return make_unique<Array>(collectionLoc(begin, elements, end), std::move(elements));
     }
 
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
@@ -201,26 +201,26 @@ public:
     }
 
     unique_ptr<Node> associate(const token *begin, sorbet::parser::NodeVec pairs, const token *end) {
-        return make_unique<Hash>(collection_loc(begin, pairs, end), std::move(pairs));
+        return make_unique<Hash>(collectionLoc(begin, pairs, end), std::move(pairs));
     }
 
-    unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
+    unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
         core::NameRef method = gs_.enterNameUTF8(selector->string() + "=");
-        core::Loc loc = receiver->loc.join(tok_loc(selector));
+        core::Loc loc = receiver->loc.join(tokLoc(selector));
         if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
         }
         return make_unique<Send>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
     }
 
-    unique_ptr<Node> back_ref(const token *tok) {
-        return make_unique<Backref>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
+    unique_ptr<Node> backRef(const token *tok) {
+        return make_unique<Backref>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
         core::Loc loc;
         if (begin != nullptr) {
-            loc = tok_loc(begin).join(tok_loc(end));
+            loc = tokLoc(begin).join(tokLoc(end));
         } else {
             loc = body->loc;
         }
@@ -239,14 +239,14 @@ public:
         return make_unique<Begin>(loc, std::move(stmts));
     }
 
-    unique_ptr<Node> begin_body(unique_ptr<Node> body, sorbet::parser::NodeVec rescue_bodies, const token *else_tok,
-                                unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
-        if (!rescue_bodies.empty()) {
+    unique_ptr<Node> beginBody(unique_ptr<Node> body, sorbet::parser::NodeVec rescueBodies, const token *elseTok,
+                               unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
+        if (!rescueBodies.empty()) {
             if (else_ == nullptr) {
-                body = make_unique<Rescue>(maybe_loc(body).join(rescue_bodies.back()->loc), std::move(body),
-                                           std::move(rescue_bodies), nullptr);
+                body = make_unique<Rescue>(maybe_loc(body).join(rescueBodies.back()->loc), std::move(body),
+                                           std::move(rescueBodies), nullptr);
             } else {
-                body = make_unique<Rescue>(maybe_loc(body).join(else_->loc), std::move(body), std::move(rescue_bodies),
+                body = make_unique<Rescue>(maybe_loc(body).join(else_->loc), std::move(body), std::move(rescueBodies),
                                            std::move(else_));
             }
         } else if (else_ != nullptr) {
@@ -257,7 +257,7 @@ public:
                 stmts.emplace_back(std::move(body));
             }
             stmts.emplace_back(std::move(else_));
-            body = make_unique<Begin>(collection_loc(stmts), std::move(stmts));
+            body = make_unique<Begin>(collectionLoc(stmts), std::move(stmts));
         }
 
         if (ensure_tok != nullptr) {
@@ -265,7 +265,7 @@ public:
             if (body != nullptr) {
                 loc = body->loc;
             } else {
-                loc = tok_loc(ensure_tok);
+                loc = tokLoc(ensure_tok);
             }
             loc = loc.join(maybe_loc(ensure));
             body = make_unique<Ensure>(loc, std::move(body), std::move(ensure));
@@ -274,8 +274,8 @@ public:
         return body;
     }
 
-    unique_ptr<Node> begin_keyword(const token *begin, unique_ptr<Node> body, const token *end) {
-        core::Loc loc = tok_loc(begin).join(tok_loc(end));
+    unique_ptr<Node> beginKeyword(const token *begin, unique_ptr<Node> body, const token *end) {
+        core::Loc loc = tokLoc(begin).join(tokLoc(end));
         if (body != nullptr) {
             if (auto *b = parser::cast_node<Begin>(body.get())) {
                 return make_unique<Kwbegin>(loc, std::move(b->stmts));
@@ -288,7 +288,7 @@ public:
         return make_unique<Kwbegin>(loc, sorbet::parser::NodeVec());
     }
 
-    unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
+    unique_ptr<Node> binaryOp(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
         core::Loc loc = receiver->loc.join(arg->loc);
 
         sorbet::parser::NodeVec args;
@@ -297,21 +297,21 @@ public:
         return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->string()), std::move(args));
     }
 
-    unique_ptr<Node> block(unique_ptr<Node> method_call, const token *begin, unique_ptr<Node> args,
+    unique_ptr<Node> block(unique_ptr<Node> methodCall, const token *begin, unique_ptr<Node> args,
                            unique_ptr<Node> body, const token *end) {
-        if (auto *y = parser::cast_node<Yield>(method_call.get())) {
+        if (auto *y = parser::cast_node<Yield>(methodCall.get())) {
             error(ruby_parser::dclass::BlockGivenToYield, y->loc);
             return make_unique<Yield>(y->loc, sorbet::parser::NodeVec());
         }
 
         sorbet::parser::NodeVec *callargs = nullptr;
-        if (auto *s = parser::cast_node<Send>(method_call.get())) {
+        if (auto *s = parser::cast_node<Send>(methodCall.get())) {
             callargs = &s->args;
         }
-        if (auto *s = parser::cast_node<CSend>(method_call.get())) {
+        if (auto *s = parser::cast_node<CSend>(methodCall.get())) {
             callargs = &s->args;
         }
-        if (auto *s = parser::cast_node<Super>(method_call.get())) {
+        if (auto *s = parser::cast_node<Super>(methodCall.get())) {
             callargs = &s->args;
         }
         if (callargs != nullptr && !callargs->empty()) {
@@ -320,15 +320,15 @@ public:
             }
         }
 
-        Node &n = *method_call;
+        Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
-            return make_unique<Block>(method_call->loc.join(tok_loc(end)), std::move(method_call), std::move(args),
+            return make_unique<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
                                       std::move(body));
         }
 
         sorbet::parser::NodeVec *exprs;
-        typecase(method_call.get(), [&](Break *b) { exprs = &b->exprs; },
+        typecase(methodCall.get(), [&](Break *b) { exprs = &b->exprs; },
 
                  [&](Return *r) { exprs = &r->exprs; },
 
@@ -337,22 +337,22 @@ public:
                  [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        core::Loc block_loc = send->loc.join(tok_loc(end));
-        unique_ptr<Node> block = make_unique<Block>(block_loc, std::move(send), std::move(args), std::move(body));
+        core::Loc blockLoc = send->loc.join(tokLoc(end));
+        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
         exprs->front().swap(block);
-        return method_call;
+        return methodCall;
     }
 
-    unique_ptr<Node> block_pass(const token *amper, unique_ptr<Node> arg) {
-        return make_unique<BlockPass>(tok_loc(amper).join(arg->loc), std::move(arg));
+    unique_ptr<Node> blockPass(const token *amper, unique_ptr<Node> arg) {
+        return make_unique<BlockPass>(tokLoc(amper).join(arg->loc), std::move(arg));
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        core::Loc loc = tok_loc(amper);
+        core::Loc loc = tokLoc(amper);
         core::NameRef nm;
 
         if (name != nullptr) {
-            loc = loc.join(tok_loc(name));
+            loc = loc.join(tokLoc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
@@ -360,31 +360,31 @@ public:
         return make_unique<Blockarg>(loc, nm);
     }
 
-    unique_ptr<Node> call_lambda(const token *lambda) {
-        return make_unique<Send>(tok_loc(lambda), nullptr, core::Names::lambda(), NodeVec());
+    unique_ptr<Node> callLambda(const token *lambda) {
+        return make_unique<Send>(tokLoc(lambda), nullptr, core::Names::lambda(), NodeVec());
     }
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
                                  const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
-        core::Loc selector_loc, start_loc;
+        core::Loc selectorLoc, startLoc;
         if (selector != nullptr) {
-            selector_loc = tok_loc(selector);
+            selectorLoc = tokLoc(selector);
         } else {
-            selector_loc = tok_loc(dot);
+            selectorLoc = tokLoc(dot);
         }
         if (receiver == nullptr) {
-            start_loc = selector_loc;
+            startLoc = selectorLoc;
         } else {
-            start_loc = receiver->loc;
+            startLoc = receiver->loc;
         }
 
         core::Loc loc;
         if (rparen != nullptr) {
-            loc = start_loc.join(tok_loc(rparen));
+            loc = startLoc.join(tokLoc(rparen));
         } else if (!args.empty()) {
-            loc = start_loc.join(args.back()->loc);
+            loc = startLoc.join(args.back()->loc);
         } else {
-            loc = start_loc.join(selector_loc);
+            loc = startLoc.join(selectorLoc);
         }
 
         core::NameRef method;
@@ -401,18 +401,18 @@ public:
         }
     }
 
-    unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec when_bodies,
-                           const token *else_tok, unique_ptr<Node> else_body, const token *end) {
-        return make_unique<Case>(tok_loc(case_).join(tok_loc(end)), std::move(expr), std::move(when_bodies),
-                                 std::move(else_body));
+    unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec whenBodies,
+                           const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
+        return make_unique<Case>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(whenBodies),
+                                 std::move(elseBody));
     }
 
     unique_ptr<Node> character(const token *char_) {
-        return make_unique<String>(tok_loc(char_), gs_.enterNameUTF8(char_->string()));
+        return make_unique<String>(tokLoc(char_), gs_.enterNameUTF8(char_->string()));
     }
 
     unique_ptr<Node> complex(const token *tok) {
-        return make_unique<Complex>(tok_loc(tok), tok->string());
+        return make_unique<Complex>(tokLoc(tok), tok->string());
     }
 
     unique_ptr<Node> compstmt(sorbet::parser::NodeVec nodes) {
@@ -422,65 +422,64 @@ public:
             case 1:
                 return std::move(nodes.back());
             default:
-                return make_unique<Begin>(collection_loc(nodes), std::move(nodes));
+                return make_unique<Begin>(collectionLoc(nodes), std::move(nodes));
         }
     }
 
-    unique_ptr<Node> condition(const token *cond_tok, unique_ptr<Node> cond, const token *then,
-                               unique_ptr<Node> if_true, const token *else_, unique_ptr<Node> if_false,
-                               const token *end) {
-        core::Loc loc = tok_loc(cond_tok).join(cond->loc);
+    unique_ptr<Node> condition(const token *cond_tok, unique_ptr<Node> cond, const token *then, unique_ptr<Node> ifTrue,
+                               const token *else_, unique_ptr<Node> ifFalse, const token *end) {
+        core::Loc loc = tokLoc(cond_tok).join(cond->loc);
         if (then != nullptr) {
-            loc = loc.join(tok_loc(then));
+            loc = loc.join(tokLoc(then));
         }
-        if (if_true != nullptr) {
-            loc = loc.join(if_true->loc);
+        if (ifTrue != nullptr) {
+            loc = loc.join(ifTrue->loc);
         }
         if (else_ != nullptr) {
-            loc = loc.join(tok_loc(else_));
+            loc = loc.join(tokLoc(else_));
         }
-        if (if_false != nullptr) {
-            loc = loc.join(if_false->loc);
+        if (ifFalse != nullptr) {
+            loc = loc.join(ifFalse->loc);
         }
         if (end != nullptr) {
-            loc = loc.join(tok_loc(end));
+            loc = loc.join(tokLoc(end));
         }
-        return make_unique<If>(loc, transform_condition(std::move(cond)), std::move(if_true), std::move(if_false));
+        return make_unique<If>(loc, transformCondition(std::move(cond)), std::move(ifTrue), std::move(ifFalse));
     }
 
-    unique_ptr<Node> condition_mod(unique_ptr<Node> if_true, unique_ptr<Node> if_false, unique_ptr<Node> cond) {
+    unique_ptr<Node> conditionMod(unique_ptr<Node> ifTrue, unique_ptr<Node> ifFalse, unique_ptr<Node> cond) {
         core::Loc loc = cond->loc;
-        if (if_true != nullptr) {
-            loc = loc.join(if_true->loc);
+        if (ifTrue != nullptr) {
+            loc = loc.join(ifTrue->loc);
         } else {
-            loc = loc.join(if_false->loc);
+            loc = loc.join(ifFalse->loc);
         }
-        return make_unique<If>(loc, transform_condition(std::move(cond)), std::move(if_true), std::move(if_false));
+        return make_unique<If>(loc, transformCondition(std::move(cond)), std::move(ifTrue), std::move(ifFalse));
     }
 
     unique_ptr<Node> const_(const token *name) {
-        return make_unique<Const>(tok_loc(name), nullptr, gs_.enterNameConstant(name->string()));
+        return make_unique<Const>(tokLoc(name), nullptr, gs_.enterNameConstant(name->string()));
     }
 
-    unique_ptr<Node> const_fetch(unique_ptr<Node> scope, const token *colon, const token *name) {
-        return make_unique<Const>(scope->loc.join(tok_loc(name)), std::move(scope),
+    unique_ptr<Node> constFetch(unique_ptr<Node> scope, const token *colon, const token *name) {
+        return make_unique<Const>(scope->loc.join(tokLoc(name)), std::move(scope),
                                   gs_.enterNameConstant(name->string()));
     }
 
-    unique_ptr<Node> const_global(const token *colon, const token *name) {
-        return make_unique<Const>(tok_loc(colon).join(tok_loc(name)), make_unique<Cbase>(tok_loc(colon)),
+    unique_ptr<Node> constGlobal(const token *colon, const token *name) {
+        return make_unique<Const>(tokLoc(colon).join(tokLoc(name)), make_unique<Cbase>(tokLoc(colon)),
                                   gs_.enterNameConstant(name->string()));
     }
 
-    unique_ptr<Node> const_op_assignable(unique_ptr<Node> node) {
+    unique_ptr<Node> constOpAssignable(unique_ptr<Node> node) {
         return node;
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        return make_unique<CVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<CVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedentLevel) {
+    unique_ptr<Node> dedentString(unique_ptr<Node> node, size_t dedentLevel) {
         if (dedentLevel == 0) {
             return node;
         }
@@ -513,38 +512,38 @@ public:
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
                                unique_ptr<Node> superclass, unique_ptr<Node> body, const token *end_) {
-        core::Loc declLoc = tok_loc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
-        core::Loc loc = tok_loc(class_, end_);
+        core::Loc declLoc = tokLoc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
+        core::Loc loc = tokLoc(class_, end_);
 
         return make_unique<Class>(loc, declLoc, std::move(name), std::move(superclass), std::move(body));
     }
 
-    unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
-                                const token *end) {
-        core::Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
-        core::Loc loc = tok_loc(def, end);
+    unique_ptr<Node> defMethod(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
+                               const token *end) {
+        core::Loc declLoc = tokLoc(def, name).join(maybe_loc(args));
+        core::Loc loc = tokLoc(def, end);
 
         return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->string()), std::move(args),
                                       std::move(body));
     }
 
-    unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
-        core::Loc declLoc = tok_loc(module).join(maybe_loc(name));
-        core::Loc loc = tok_loc(module, end_);
+    unique_ptr<Node> defModule(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
+        core::Loc declLoc = tokLoc(module).join(maybe_loc(name));
+        core::Loc loc = tokLoc(module, end_);
         return make_unique<Module>(loc, declLoc, std::move(name), std::move(body));
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
                                 const token *end_) {
-        core::Loc declLoc = tok_loc(class_);
-        core::Loc loc = tok_loc(class_, end_);
+        core::Loc declLoc = tokLoc(class_);
+        core::Loc loc = tokLoc(class_, end_);
         return make_unique<SClass>(loc, declLoc, std::move(expr), std::move(body));
     }
 
-    unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
-                                   unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        core::Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
-        core::Loc loc = tok_loc(def, end);
+    unique_ptr<Node> defSingleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
+                                  unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
+        core::Loc declLoc = tokLoc(def, name).join(maybe_loc(args));
+        core::Loc loc = tokLoc(def, end);
 
         // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
         // need to reject it here, or can we defer that until later analysis?
@@ -552,127 +551,127 @@ public:
                                  std::move(body));
     }
 
-    unique_ptr<Node> encoding_literal(const token *tok) {
-        return make_unique<EncodingLiteral>(tok_loc(tok));
+    unique_ptr<Node> encodingLiteral(const token *tok) {
+        return make_unique<EncodingLiteral>(tokLoc(tok));
     }
 
     unique_ptr<Node> false_(const token *tok) {
-        return make_unique<False>(tok_loc(tok));
+        return make_unique<False>(tokLoc(tok));
     }
 
-    unique_ptr<Node> file_literal(const token *tok) {
-        return make_unique<FileLiteral>(tok_loc(tok));
+    unique_ptr<Node> fileLiteral(const token *tok) {
+        return make_unique<FileLiteral>(tokLoc(tok));
     }
 
     unique_ptr<Node> float_(const token *tok) {
-        return make_unique<Float>(tok_loc(tok), tok->string());
+        return make_unique<Float>(tokLoc(tok), tok->string());
     }
 
-    unique_ptr<Node> float_complex(const token *tok) {
-        return make_unique<Complex>(tok_loc(tok), tok->string());
+    unique_ptr<Node> floatComplex(const token *tok) {
+        return make_unique<Complex>(tokLoc(tok), tok->string());
     }
 
     unique_ptr<Node> for_(const token *for_, unique_ptr<Node> iterator, const token *in_, unique_ptr<Node> iteratee,
                           const token *do_, unique_ptr<Node> body, const token *end) {
-        return make_unique<For>(tok_loc(for_).join(tok_loc(end)), std::move(iterator), std::move(iteratee),
+        return make_unique<For>(tokLoc(for_).join(tokLoc(end)), std::move(iterator), std::move(iteratee),
                                 std::move(body));
     }
 
     unique_ptr<Node> gvar(const token *tok) {
-        return make_unique<GVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<GVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> ident(const token *tok) {
-        return make_unique<Ident>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<Ident>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                            const token *rbrack) {
-        return make_unique<Send>(receiver->loc.join(tok_loc(rbrack)), std::move(receiver),
-                                 core::Names::squareBrackets(), std::move(indexes));
+        return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver), core::Names::squareBrackets(),
+                                 std::move(indexes));
     }
 
-    unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
-                                const token *rbrack) {
-        return make_unique<Send>(receiver->loc.join(tok_loc(rbrack)), std::move(receiver),
+    unique_ptr<Node> indexAsgn(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
+                               const token *rbrack) {
+        return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver),
                                  core::Names::squareBracketsEq(), std::move(indexes));
     }
 
     unique_ptr<Node> integer(const token *tok) {
-        return make_unique<Integer>(tok_loc(tok), tok->string());
+        return make_unique<Integer>(tokLoc(tok), tok->string());
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        return make_unique<IVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<IVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                   const token *rparen) {
-        core::Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
+    unique_ptr<Node> keywordBreak(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
+                                  const token *rparen) {
+        core::Loc loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         return make_unique<Break>(loc, std::move(args));
     }
 
-    unique_ptr<Node> keyword_defined(const token *keyword, unique_ptr<Node> arg) {
-        return make_unique<Defined>(tok_loc(keyword).join(arg->loc), std::move(arg));
+    unique_ptr<Node> keywordDefined(const token *keyword, unique_ptr<Node> arg) {
+        return make_unique<Defined>(tokLoc(keyword).join(arg->loc), std::move(arg));
     }
 
-    unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                  const token *rparen) {
-        return make_unique<Next>(tok_loc(keyword).join(collection_loc(lparen, args, rparen)), std::move(args));
+    unique_ptr<Node> keywordNext(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
+                                 const token *rparen) {
+        return make_unique<Next>(tokLoc(keyword).join(collectionLoc(lparen, args, rparen)), std::move(args));
     }
 
-    unique_ptr<Node> keyword_redo(const token *keyword) {
-        return make_unique<Redo>(tok_loc(keyword));
+    unique_ptr<Node> keywordRedo(const token *keyword) {
+        return make_unique<Redo>(tokLoc(keyword));
     }
 
-    unique_ptr<Node> keyword_retry(const token *keyword) {
-        return make_unique<Retry>(tok_loc(keyword));
+    unique_ptr<Node> keywordRetry(const token *keyword) {
+        return make_unique<Retry>(tokLoc(keyword));
     }
 
-    unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                    const token *rparen) {
-        core::Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
+    unique_ptr<Node> keywordReturn(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
+                                   const token *rparen) {
+        core::Loc loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         return make_unique<Return>(loc, std::move(args));
     }
 
-    unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                   const token *rparen) {
-        core::Loc loc = tok_loc(keyword);
-        core::Loc argloc = collection_loc(lparen, args, rparen);
+    unique_ptr<Node> keywordSuper(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
+                                  const token *rparen) {
+        core::Loc loc = tokLoc(keyword);
+        core::Loc argloc = collectionLoc(lparen, args, rparen);
         if (argloc.exists()) {
             loc = loc.join(argloc);
         }
         return make_unique<Super>(loc, std::move(args));
     }
 
-    unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                   const token *rparen) {
-        core::Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
+    unique_ptr<Node> keywordYield(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
+                                  const token *rparen) {
+        core::Loc loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         if (!args.empty() && parser::isa_node<BlockPass>(args.back().get())) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
         }
         return make_unique<Yield>(loc, std::move(args));
     }
 
-    unique_ptr<Node> keyword_zsuper(const token *keyword) {
-        return make_unique<ZSuper>(tok_loc(keyword));
+    unique_ptr<Node> keywordZsuper(const token *keyword) {
+        return make_unique<ZSuper>(tokLoc(keyword));
     }
 
     unique_ptr<Node> kwarg(const token *name) {
-        return make_unique<Kwarg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
+        return make_unique<Kwarg>(tokLoc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
-        return make_unique<Kwoptarg>(tok_loc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tok_loc(name),
+        return make_unique<Kwoptarg>(tokLoc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
                                      std::move(value));
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        core::Loc loc = tok_loc(dstar);
+        core::Loc loc = tokLoc(dstar);
         core::NameRef nm;
 
         if (name != nullptr) {
-            loc = loc.join(tok_loc(name));
+            loc = loc.join(tokLoc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
@@ -681,33 +680,33 @@ public:
     }
 
     unique_ptr<Node> kwsplat(const token *dstar, unique_ptr<Node> arg) {
-        return make_unique<Kwsplat>(tok_loc(dstar).join(arg->loc), std::move(arg));
+        return make_unique<Kwsplat>(tokLoc(dstar).join(arg->loc), std::move(arg));
     }
 
     unique_ptr<Node> line_literal(const token *tok) {
-        return make_unique<LineLiteral>(tok_loc(tok));
+        return make_unique<LineLiteral>(tokLoc(tok));
     }
 
-    unique_ptr<Node> logical_and(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
+    unique_ptr<Node> logicalAnd(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
         return make_unique<And>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
     }
 
-    unique_ptr<Node> logical_or(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
+    unique_ptr<Node> logicalOr(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
         return make_unique<Or>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
     }
 
-    unique_ptr<Node> loop_until(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
-                                const token *end) {
-        return make_unique<Until>(tok_loc(keyword).join(tok_loc(end)), std::move(cond), std::move(body));
+    unique_ptr<Node> loopUntil(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
+                               const token *end) {
+        return make_unique<Until>(tokLoc(keyword).join(tokLoc(end)), std::move(cond), std::move(body));
     }
 
-    unique_ptr<Node> loop_until_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
+    unique_ptr<Node> loopUntil_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
         return make_unique<UntilPost>(body->loc.join(cond->loc), std::move(cond), std::move(body));
     }
 
     unique_ptr<Node> loop_while(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
                                 const token *end) {
-        return make_unique<While>(tok_loc(keyword).join(tok_loc(end)), std::move(cond), std::move(body));
+        return make_unique<While>(tokLoc(keyword).join(tokLoc(end)), std::move(cond), std::move(body));
     }
 
     unique_ptr<Node> loop_while_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
@@ -730,7 +729,7 @@ public:
     }
 
     unique_ptr<Node> multi_lhs(const token *begin, sorbet::parser::NodeVec items, const token *end) {
-        return make_unique<Mlhs>(collection_loc(begin, items, end), std::move(items));
+        return make_unique<Mlhs>(collectionLoc(begin, items, end), std::move(items));
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
@@ -739,32 +738,32 @@ public:
         }
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(item));
-        return make_unique<Mlhs>(collection_loc(begin, args, end), std::move(args));
+        return make_unique<Mlhs>(collectionLoc(begin, args, end), std::move(args));
     }
 
     unique_ptr<Node> nil(const token *tok) {
-        return make_unique<Nil>(tok_loc(tok));
+        return make_unique<Nil>(tokLoc(tok));
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
         if (receiver != nullptr) {
             core::Loc loc;
             if (end != nullptr) {
-                loc = tok_loc(not_).join(tok_loc(end));
+                loc = tokLoc(not_).join(tokLoc(end));
             } else {
-                loc = tok_loc(not_).join(receiver->loc);
+                loc = tokLoc(not_).join(receiver->loc);
             }
             return make_unique<Send>(loc, std::move(receiver), core::Names::bang(), sorbet::parser::NodeVec());
         }
 
         ENFORCE(begin != nullptr && end != nullptr);
-        auto body = make_unique<Begin>(tok_loc(begin).join(tok_loc(end)), sorbet::parser::NodeVec());
-        return make_unique<Send>(tok_loc(not_).join(body->loc), std::move(body), core::Names::bang(),
+        auto body = make_unique<Begin>(tokLoc(begin).join(tokLoc(end)), sorbet::parser::NodeVec());
+        return make_unique<Send>(tokLoc(not_).join(body->loc), std::move(body), core::Names::bang(),
                                  sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        return make_unique<NthRef>(tok_loc(tok), atoi(tok->string().c_str()));
+        return make_unique<NthRef>(tokLoc(tok), atoi(tok->string().c_str()));
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -783,7 +782,7 @@ public:
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        return make_unique<Optarg>(tok_loc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tok_loc(name),
+        return make_unique<Optarg>(tokLoc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
                                    std::move(value));
     }
 
@@ -794,22 +793,22 @@ public:
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
         auto keyLoc = core::Loc{file_, clamp((u4)key->start()), clamp((u4)key->end() - 1)}; // drop the trailing :
 
-        return make_unique<Pair>(tok_loc(key).join(value->loc),
+        return make_unique<Pair>(tokLoc(key).join(value->loc),
                                  make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->string())), std::move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                  unique_ptr<Node> value) {
-        auto sym = make_unique<DSymbol>(tok_loc(begin).join(tok_loc(end)), std::move(parts));
-        return make_unique<Pair>(tok_loc(begin).join(value->loc), std::move(sym), std::move(value));
+        auto sym = make_unique<DSymbol>(tokLoc(begin).join(tokLoc(end)), std::move(parts));
+        return make_unique<Pair>(tokLoc(begin).join(value->loc), std::move(sym), std::move(value));
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        return make_unique<Postexe>(tok_loc(begin).join(tok_loc(rbrace)), std::move(node));
+        return make_unique<Postexe>(tokLoc(begin).join(tokLoc(rbrace)), std::move(node));
     }
 
     unique_ptr<Node> preexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        return make_unique<Preexe>(tok_loc(begin).join(tok_loc(rbrace)), std::move(node));
+        return make_unique<Preexe>(tokLoc(begin).join(tokLoc(rbrace)), std::move(node));
     }
 
     unique_ptr<Node> procarg0(unique_ptr<Node> arg) {
@@ -825,47 +824,47 @@ public:
     }
 
     unique_ptr<Node> rational(const token *tok) {
-        return make_unique<Rational>(tok_loc(tok), tok->string());
+        return make_unique<Rational>(tokLoc(tok), tok->string());
     }
 
     unique_ptr<Node> rational_complex(const token *tok) {
         // TODO(nelhage): We're losing this information that this was marked as
         // a Rational in the source.
-        return make_unique<Complex>(tok_loc(tok), tok->string());
+        return make_unique<Complex>(tokLoc(tok), tok->string());
     }
 
     unique_ptr<Node> regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                     unique_ptr<Node> options) {
-        core::Loc loc = tok_loc(begin).join(tok_loc(end)).join(maybe_loc(options));
+        core::Loc loc = tokLoc(begin).join(tokLoc(end)).join(maybe_loc(options));
         return make_unique<Regexp>(loc, std::move(parts), std::move(options));
     }
 
     unique_ptr<Node> regexp_options(const token *regopt) {
-        return make_unique<Regopt>(tok_loc(regopt), regopt->string());
+        return make_unique<Regopt>(tokLoc(regopt), regopt->string());
     }
 
-    unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
-                                 unique_ptr<Node> exc_var, const token *then, unique_ptr<Node> body) {
-        core::Loc loc = tok_loc(rescue);
-        if (exc_list != nullptr) {
-            loc = loc.join(exc_list->loc);
+    unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> excList, const token *assoc,
+                                 unique_ptr<Node> excVar, const token *then, unique_ptr<Node> body) {
+        core::Loc loc = tokLoc(rescue);
+        if (excList != nullptr) {
+            loc = loc.join(excList->loc);
         }
-        if (exc_var != nullptr) {
-            loc = loc.join(exc_var->loc);
+        if (excVar != nullptr) {
+            loc = loc.join(excVar->loc);
         }
         if (body != nullptr) {
             loc = loc.join(body->loc);
         }
-        return make_unique<Resbody>(loc, std::move(exc_list), std::move(exc_var), std::move(body));
+        return make_unique<Resbody>(loc, std::move(excList), std::move(excVar), std::move(body));
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        core::Loc loc = tok_loc(star);
+        core::Loc loc = tokLoc(star);
         core::NameRef nm;
         core::Loc nameLoc = loc;
 
         if (name != nullptr) {
-            nameLoc = tok_loc(name);
+            nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->string());
         } else {
@@ -876,75 +875,75 @@ public:
     }
 
     unique_ptr<Node> self_(const token *tok) {
-        return make_unique<Self>(tok_loc(tok));
+        return make_unique<Self>(tokLoc(tok));
     }
 
     unique_ptr<Node> shadowarg(const token *name) {
-        return make_unique<Shadowarg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
+        return make_unique<Shadowarg>(tokLoc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
-        return make_unique<Splat>(tok_loc(star).join(arg->loc), std::move(arg));
+        return make_unique<Splat>(tokLoc(star).join(arg->loc), std::move(arg));
     }
 
     unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
-        core::Loc loc = tok_loc(star).join(maybe_loc(arg));
+        core::Loc loc = tokLoc(star).join(maybe_loc(arg));
         return make_unique<SplatLhs>(loc, std::move(arg));
     }
 
     unique_ptr<Node> string(const token *string_) {
-        return make_unique<String>(tok_loc(string_), gs_.enterNameUTF8(string_->string()));
+        return make_unique<String>(tokLoc(string_), gs_.enterNameUTF8(string_->string()));
     }
 
     unique_ptr<Node> string_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        core::Loc loc = collection_loc(begin, parts, end);
+        core::Loc loc = collectionLoc(begin, parts, end);
         return make_unique<DString>(loc, std::move(parts));
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
-        return make_unique<String>(tok_loc(string_), gs_.enterNameUTF8(string_->string()));
+        return make_unique<String>(tokLoc(string_), gs_.enterNameUTF8(string_->string()));
     }
 
     unique_ptr<Node> symbol(const token *symbol) {
-        return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
+        return make_unique<Symbol>(tokLoc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        return make_unique<DSymbol>(collection_loc(begin, parts, end), std::move(parts));
+        return make_unique<DSymbol>(collectionLoc(begin, parts, end), std::move(parts));
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
+        return make_unique<Symbol>(tokLoc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        core::Loc loc = collection_loc(begin, parts, end);
-        sorbet::parser::NodeVec out_parts;
-        out_parts.reserve(parts.size());
+        core::Loc loc = collectionLoc(begin, parts, end);
+        sorbet::parser::NodeVec outParts;
+        outParts.reserve(parts.size());
         for (auto &p : parts) {
             if (auto *s = parser::cast_node<String>(p.get())) {
-                out_parts.emplace_back(make_unique<Symbol>(s->loc, s->val));
+                outParts.emplace_back(make_unique<Symbol>(s->loc, s->val));
             } else if (auto *d = parser::cast_node<DString>(p.get())) {
-                out_parts.emplace_back(make_unique<DSymbol>(d->loc, std::move(d->nodes)));
+                outParts.emplace_back(make_unique<DSymbol>(d->loc, std::move(d->nodes)));
             } else {
-                out_parts.emplace_back(std::move(p));
+                outParts.emplace_back(std::move(p));
             }
         }
-        return make_unique<Array>(loc, std::move(out_parts));
+        return make_unique<Array>(loc, std::move(outParts));
     }
 
-    unique_ptr<Node> ternary(unique_ptr<Node> cond, const token *question, unique_ptr<Node> if_true, const token *colon,
-                             unique_ptr<Node> if_false) {
-        core::Loc loc = cond->loc.join(if_false->loc);
-        return make_unique<If>(loc, transform_condition(std::move(cond)), std::move(if_true), std::move(if_false));
+    unique_ptr<Node> ternary(unique_ptr<Node> cond, const token *question, unique_ptr<Node> ifTrue, const token *colon,
+                             unique_ptr<Node> ifFalse) {
+        core::Loc loc = cond->loc.join(ifFalse->loc);
+        return make_unique<If>(loc, transformCondition(std::move(cond)), std::move(ifTrue), std::move(ifFalse));
     }
 
     unique_ptr<Node> true_(const token *tok) {
-        return make_unique<True>(tok_loc(tok));
+        return make_unique<True>(tokLoc(tok));
     }
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
-        core::Loc loc = tok_loc(oper).join(receiver->loc);
+        core::Loc loc = tokLoc(oper).join(receiver->loc);
 
         if (auto *num = parser::cast_node<Integer>(receiver.get())) {
             return make_unique<Integer>(loc, oper->string() + num->val);
@@ -968,8 +967,8 @@ public:
         return make_unique<Send>(loc, std::move(receiver), op, sorbet::parser::NodeVec());
     }
 
-    unique_ptr<Node> undef_method(const token *undef, sorbet::parser::NodeVec name_list) {
-        core::Loc loc = tok_loc(undef);
+    unique_ptr<Node> undefMethod(const token *undef, sorbet::parser::NodeVec name_list) {
+        core::Loc loc = tokLoc(undef);
         if (!name_list.empty()) {
             loc = loc.join(name_list.back()->loc);
         }
@@ -978,11 +977,11 @@ public:
 
     unique_ptr<Node> when(const token *when, sorbet::parser::NodeVec patterns, const token *then,
                           unique_ptr<Node> body) {
-        core::Loc loc = tok_loc(when);
+        core::Loc loc = tokLoc(when);
         if (body != nullptr) {
             loc = loc.join(body->loc);
         } else if (then != nullptr) {
-            loc = loc.join(tok_loc(then));
+            loc = loc.join(tokLoc(then));
         } else {
             loc = loc.join(patterns.back()->loc);
         }
@@ -990,41 +989,41 @@ public:
     }
 
     unique_ptr<Node> word(sorbet::parser::NodeVec parts) {
-        core::Loc loc = collection_loc(parts);
+        core::Loc loc = collectionLoc(parts);
         return make_unique<DString>(loc, std::move(parts));
     }
 
     unique_ptr<Node> words_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        return make_unique<Array>(collection_loc(begin, parts, end), std::move(parts));
+        return make_unique<Array>(collectionLoc(begin, parts, end), std::move(parts));
     }
 
     unique_ptr<Node> xstring_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        return make_unique<XString>(collection_loc(begin, parts, end), std::move(parts));
+        return make_unique<XString>(collectionLoc(begin, parts, end), std::move(parts));
     }
 
     /* End callback methods */
 
     /* methods for marshalling to and from the parser's foreign pointers */
 
-    unique_ptr<Node> cast_node(foreign_ptr node) {
+    unique_ptr<Node> cast_node(ForeignPtr node) {
         auto off = reinterpret_cast<size_t>(node);
         if (off == 0) {
             return nullptr;
         }
 
-        ENFORCE(foreign_nodes_[off] != nullptr);
-        return std::move(foreign_nodes_[off]);
+        ENFORCE(foreignNodes_[off] != nullptr);
+        return std::move(foreignNodes_[off]);
     }
 
-    foreign_ptr to_foreign(unique_ptr<Node> node) {
+    ForeignPtr toForeign(unique_ptr<Node> node) {
         if (node == nullptr) {
-            return reinterpret_cast<foreign_ptr>(0);
+            return reinterpret_cast<ForeignPtr>(0);
         }
-        foreign_nodes_.emplace_back(std::move(node));
-        return reinterpret_cast<foreign_ptr>(foreign_nodes_.size() - 1);
+        foreignNodes_.emplace_back(std::move(node));
+        return reinterpret_cast<ForeignPtr>(foreignNodes_.size() - 1);
     }
 
-    sorbet::parser::NodeVec convert_node_list(const node_list *cargs) {
+    sorbet::parser::NodeVec convertNodeList(const node_list *cargs) {
         sorbet::parser::NodeVec out;
         if (cargs == nullptr) {
             return out;
@@ -1049,596 +1048,594 @@ namespace {
 using sorbet::parser::Builder;
 using sorbet::parser::Node;
 
-Builder::Impl *cast_builder(self_ptr builder) {
+Builder::Impl *cast_builder(SelfPtr builder) {
     return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
 }
 
-foreign_ptr accessible(self_ptr builder, foreign_ptr node) {
+ForeignPtr accessible(SelfPtr builder, ForeignPtr node) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->accessible(build->cast_node(node)));
+    return build->toForeign(build->accessible(build->cast_node(node)));
 }
 
-foreign_ptr alias(self_ptr builder, const token *alias, foreign_ptr to, foreign_ptr from) {
+ForeignPtr alias(SelfPtr builder, const token *alias, ForeignPtr to, ForeignPtr from) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->alias(alias, build->cast_node(to), build->cast_node(from)));
+    return build->toForeign(build->alias(alias, build->cast_node(to), build->cast_node(from)));
 }
 
-foreign_ptr arg(self_ptr builder, const token *name) {
+ForeignPtr arg(SelfPtr builder, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->arg(name));
+    return build->toForeign(build->arg(name));
 }
 
-foreign_ptr args(self_ptr builder, const token *begin, const node_list *args, const token *end, bool check_args) {
+ForeignPtr args(SelfPtr builder, const token *begin, const node_list *args, const token *end, bool check_args) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->args(begin, build->convert_node_list(args), end, check_args));
+    return build->toForeign(build->args(begin, build->convertNodeList(args), end, check_args));
 }
 
-foreign_ptr array(self_ptr builder, const token *begin, const node_list *elements, const token *end) {
+ForeignPtr array(SelfPtr builder, const token *begin, const node_list *elements, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->array(begin, build->convert_node_list(elements), end));
+    return build->toForeign(build->array(begin, build->convertNodeList(elements), end));
 }
 
-foreign_ptr assign(self_ptr builder, foreign_ptr lhs, const token *eql, foreign_ptr rhs) {
+ForeignPtr assign(SelfPtr builder, ForeignPtr lhs, const token *eql, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->assign(build->cast_node(lhs), eql, build->cast_node(rhs)));
+    return build->toForeign(build->assign(build->cast_node(lhs), eql, build->cast_node(rhs)));
 }
 
-foreign_ptr assignable(self_ptr builder, foreign_ptr node) {
+ForeignPtr assignable(SelfPtr builder, ForeignPtr node) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->assignable(build->cast_node(node)));
+    return build->toForeign(build->assignable(build->cast_node(node)));
 }
 
-foreign_ptr associate(self_ptr builder, const token *begin, const node_list *pairs, const token *end) {
+ForeignPtr associate(SelfPtr builder, const token *begin, const node_list *pairs, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->associate(begin, build->convert_node_list(pairs), end));
+    return build->toForeign(build->associate(begin, build->convertNodeList(pairs), end));
 }
 
-foreign_ptr attr_asgn(self_ptr builder, foreign_ptr receiver, const token *dot, const token *selector) {
+ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->attr_asgn(build->cast_node(receiver), dot, selector));
+    return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector));
 }
 
-foreign_ptr back_ref(self_ptr builder, const token *tok) {
+ForeignPtr backRef(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->back_ref(tok));
+    return build->toForeign(build->backRef(tok));
 }
 
-foreign_ptr begin(self_ptr builder, const token *begin, foreign_ptr body, const token *end) {
+ForeignPtr begin(SelfPtr builder, const token *begin, ForeignPtr body, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->begin(begin, build->cast_node(body), end));
+    return build->toForeign(build->begin(begin, build->cast_node(body), end));
 }
 
-foreign_ptr begin_body(self_ptr builder, foreign_ptr body, const node_list *rescue_bodies, const token *else_tok,
-                       foreign_ptr else_, const token *ensure_tok, foreign_ptr ensure) {
+ForeignPtr beginBody(SelfPtr builder, ForeignPtr body, const node_list *rescueBodies, const token *elseTok,
+                     ForeignPtr else_, const token *ensure_tok, ForeignPtr ensure) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->begin_body(build->cast_node(body), build->convert_node_list(rescue_bodies),
-                                               else_tok, build->cast_node(else_), ensure_tok,
-                                               build->cast_node(ensure)));
+    return build->toForeign(build->beginBody(build->cast_node(body), build->convertNodeList(rescueBodies), elseTok,
+                                             build->cast_node(else_), ensure_tok, build->cast_node(ensure)));
 }
 
-foreign_ptr begin_keyword(self_ptr builder, const token *begin, foreign_ptr body, const token *end) {
+ForeignPtr beginKeyword(SelfPtr builder, const token *begin, ForeignPtr body, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->begin_keyword(begin, build->cast_node(body), end));
+    return build->toForeign(build->beginKeyword(begin, build->cast_node(body), end));
 }
 
-foreign_ptr binary_op(self_ptr builder, foreign_ptr receiver, const token *oper, foreign_ptr arg) {
+ForeignPtr binaryOp(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->binary_op(build->cast_node(receiver), oper, build->cast_node(arg)));
+    return build->toForeign(build->binaryOp(build->cast_node(receiver), oper, build->cast_node(arg)));
 }
 
-foreign_ptr block(self_ptr builder, foreign_ptr method_call, const token *begin, foreign_ptr args, foreign_ptr body,
-                  const token *end) {
+ForeignPtr block(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
+                 const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->block(build->cast_node(method_call), begin, build->cast_node(args), build->cast_node(body), end));
+    return build->toForeign(
+        build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
 }
 
-foreign_ptr block_pass(self_ptr builder, const token *amper, foreign_ptr arg) {
+ForeignPtr blockPass(SelfPtr builder, const token *amper, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->block_pass(amper, build->cast_node(arg)));
+    return build->toForeign(build->blockPass(amper, build->cast_node(arg)));
 }
 
-foreign_ptr blockarg(self_ptr builder, const token *amper, const token *name) {
+ForeignPtr blockarg(SelfPtr builder, const token *amper, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->blockarg(amper, name));
+    return build->toForeign(build->blockarg(amper, name));
 }
 
-foreign_ptr call_lambda(self_ptr builder, const token *lambda) {
+ForeignPtr callLambda(SelfPtr builder, const token *lambda) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->call_lambda(lambda));
+    return build->toForeign(build->callLambda(lambda));
 }
 
-foreign_ptr call_method(self_ptr builder, foreign_ptr receiver, const token *dot, const token *selector,
-                        const token *lparen, const node_list *args, const token *rparen) {
+ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector,
+                       const token *lparen, const node_list *args, const token *rparen) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convert_node_list(args), rparen));
+    return build->toForeign(
+        build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
-foreign_ptr case_(self_ptr builder, const token *case_, foreign_ptr expr, const node_list *when_bodies,
-                  const token *else_tok, foreign_ptr else_body, const token *end) {
+ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
+                 const token *elseTok, ForeignPtr elseBody, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->case_(case_, build->cast_node(expr), build->convert_node_list(when_bodies),
-                                          else_tok, build->cast_node(else_body), end));
+    return build->toForeign(build->case_(case_, build->cast_node(expr), build->convertNodeList(whenBodies), elseTok,
+                                         build->cast_node(elseBody), end));
 }
 
-foreign_ptr character(self_ptr builder, const token *char_) {
+ForeignPtr character(SelfPtr builder, const token *char_) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->character(char_));
+    return build->toForeign(build->character(char_));
 }
 
-foreign_ptr complex(self_ptr builder, const token *tok) {
+ForeignPtr complex(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->complex(tok));
+    return build->toForeign(build->complex(tok));
 }
 
-foreign_ptr compstmt(self_ptr builder, const node_list *node) {
+ForeignPtr compstmt(SelfPtr builder, const node_list *node) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->compstmt(build->convert_node_list(node)));
+    return build->toForeign(build->compstmt(build->convertNodeList(node)));
 }
 
-foreign_ptr condition(self_ptr builder, const token *cond_tok, foreign_ptr cond, const token *then, foreign_ptr if_true,
-                      const token *else_, foreign_ptr if_false, const token *end) {
+ForeignPtr condition(SelfPtr builder, const token *cond_tok, ForeignPtr cond, const token *then, ForeignPtr ifTrue,
+                     const token *else_, ForeignPtr ifFalse, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->condition(cond_tok, build->cast_node(cond), then, build->cast_node(if_true), else_,
-                                              build->cast_node(if_false), end));
+    return build->toForeign(build->condition(cond_tok, build->cast_node(cond), then, build->cast_node(ifTrue), else_,
+                                             build->cast_node(ifFalse), end));
 }
 
-foreign_ptr condition_mod(self_ptr builder, foreign_ptr if_true, foreign_ptr if_false, foreign_ptr cond) {
+ForeignPtr conditionMod(SelfPtr builder, ForeignPtr ifTrue, ForeignPtr ifFalse, ForeignPtr cond) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->condition_mod(build->cast_node(if_true), build->cast_node(if_false), build->cast_node(cond)));
+    return build->toForeign(
+        build->conditionMod(build->cast_node(ifTrue), build->cast_node(ifFalse), build->cast_node(cond)));
 }
 
-foreign_ptr const_(self_ptr builder, const token *name) {
+ForeignPtr const_(SelfPtr builder, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->const_(name));
+    return build->toForeign(build->const_(name));
 }
 
-foreign_ptr const_fetch(self_ptr builder, foreign_ptr scope, const token *colon, const token *name) {
+ForeignPtr constFetch(SelfPtr builder, ForeignPtr scope, const token *colon, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->const_fetch(build->cast_node(scope), colon, name));
+    return build->toForeign(build->constFetch(build->cast_node(scope), colon, name));
 }
 
-foreign_ptr const_global(self_ptr builder, const token *colon, const token *name) {
+ForeignPtr constGlobal(SelfPtr builder, const token *colon, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->const_global(colon, name));
+    return build->toForeign(build->constGlobal(colon, name));
 }
 
-foreign_ptr const_op_assignable(self_ptr builder, foreign_ptr node) {
+ForeignPtr constOpAssignable(SelfPtr builder, ForeignPtr node) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->const_op_assignable(build->cast_node(node)));
+    return build->toForeign(build->constOpAssignable(build->cast_node(node)));
 }
 
-foreign_ptr cvar(self_ptr builder, const token *tok) {
+ForeignPtr cvar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->cvar(tok));
+    return build->toForeign(build->cvar(tok));
 }
 
-foreign_ptr dedent_string(self_ptr builder, foreign_ptr node, size_t dedentLevel) {
+ForeignPtr dedentString(SelfPtr builder, ForeignPtr node, size_t dedentLevel) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->dedent_string(build->cast_node(node), dedentLevel));
+    return build->toForeign(build->dedentString(build->cast_node(node), dedentLevel));
 }
 
-foreign_ptr def_class(self_ptr builder, const token *class_, foreign_ptr name, const token *lt_, foreign_ptr superclass,
-                      foreign_ptr body, const token *end_) {
+ForeignPtr def_class(SelfPtr builder, const token *class_, ForeignPtr name, const token *lt_, ForeignPtr superclass,
+                     ForeignPtr body, const token *end_) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->def_class(class_, build->cast_node(name), lt_, build->cast_node(superclass),
-                                              build->cast_node(body), end_));
+    return build->toForeign(build->def_class(class_, build->cast_node(name), lt_, build->cast_node(superclass),
+                                             build->cast_node(body), end_));
 }
 
-foreign_ptr def_method(self_ptr builder, const token *def, const token *name, foreign_ptr args, foreign_ptr body,
-                       const token *end) {
+ForeignPtr defMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, ForeignPtr body,
+                     const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->def_method(def, name, build->cast_node(args), build->cast_node(body), end));
+    return build->toForeign(build->defMethod(def, name, build->cast_node(args), build->cast_node(body), end));
 }
 
-foreign_ptr def_module(self_ptr builder, const token *module, foreign_ptr name, foreign_ptr body, const token *end_) {
+ForeignPtr defModule(SelfPtr builder, const token *module, ForeignPtr name, ForeignPtr body, const token *end_) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->def_module(module, build->cast_node(name), build->cast_node(body), end_));
+    return build->toForeign(build->defModule(module, build->cast_node(name), build->cast_node(body), end_));
 }
 
-foreign_ptr def_sclass(self_ptr builder, const token *class_, const token *lshft_, foreign_ptr expr, foreign_ptr body,
-                       const token *end_) {
+ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr, ForeignPtr body,
+                      const token *end_) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->def_sclass(class_, lshft_, build->cast_node(expr), build->cast_node(body), end_));
+    return build->toForeign(build->def_sclass(class_, lshft_, build->cast_node(expr), build->cast_node(body), end_));
 }
 
-foreign_ptr def_singleton(self_ptr builder, const token *def, foreign_ptr definee, const token *dot, const token *name,
-                          foreign_ptr args, foreign_ptr body, const token *end) {
+ForeignPtr defSingleton(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name,
+                        ForeignPtr args, ForeignPtr body, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->def_singleton(def, build->cast_node(definee), dot, name, build->cast_node(args),
-                                                  build->cast_node(body), end));
+    return build->toForeign(build->defSingleton(def, build->cast_node(definee), dot, name, build->cast_node(args),
+                                                build->cast_node(body), end));
 }
 
-foreign_ptr encoding_literal(self_ptr builder, const token *tok) {
+ForeignPtr encodingLiteral(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->encoding_literal(tok));
+    return build->toForeign(build->encodingLiteral(tok));
 }
 
-foreign_ptr false_(self_ptr builder, const token *tok) {
+ForeignPtr false_(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->false_(tok));
+    return build->toForeign(build->false_(tok));
 }
 
-foreign_ptr file_literal(self_ptr builder, const token *tok) {
+ForeignPtr fileLiteral(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->file_literal(tok));
+    return build->toForeign(build->fileLiteral(tok));
 }
 
-foreign_ptr float_(self_ptr builder, const token *tok) {
+ForeignPtr float_(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->float_(tok));
+    return build->toForeign(build->float_(tok));
 }
 
-foreign_ptr float_complex(self_ptr builder, const token *tok) {
+ForeignPtr floatComplex(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->float_complex(tok));
+    return build->toForeign(build->floatComplex(tok));
 }
 
-foreign_ptr for_(self_ptr builder, const token *for_, foreign_ptr iterator, const token *in_, foreign_ptr iteratee,
-                 const token *do_, foreign_ptr body, const token *end) {
+ForeignPtr for_(SelfPtr builder, const token *for_, ForeignPtr iterator, const token *in_, ForeignPtr iteratee,
+                const token *do_, ForeignPtr body, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->for_(for_, build->cast_node(iterator), in_, build->cast_node(iteratee), do_,
-                                         build->cast_node(body), end));
+    return build->toForeign(build->for_(for_, build->cast_node(iterator), in_, build->cast_node(iteratee), do_,
+                                        build->cast_node(body), end));
 }
 
-foreign_ptr gvar(self_ptr builder, const token *tok) {
+ForeignPtr gvar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->gvar(tok));
+    return build->toForeign(build->gvar(tok));
 }
 
-foreign_ptr ident(self_ptr builder, const token *tok) {
+ForeignPtr ident(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->ident(tok));
+    return build->toForeign(build->ident(tok));
 }
 
-foreign_ptr index(self_ptr builder, foreign_ptr receiver, const token *lbrack, const node_list *indexes,
-                  const token *rbrack) {
+ForeignPtr index(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
+                 const token *rbrack) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->index(build->cast_node(receiver), lbrack, build->convert_node_list(indexes), rbrack));
+    return build->toForeign(build->index(build->cast_node(receiver), lbrack, build->convertNodeList(indexes), rbrack));
 }
 
-foreign_ptr index_asgn(self_ptr builder, foreign_ptr receiver, const token *lbrack, const node_list *indexes,
-                       const token *rbrack) {
+ForeignPtr indexAsgn(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
+                     const token *rbrack) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->index_asgn(build->cast_node(receiver), lbrack, build->convert_node_list(indexes), rbrack));
+    return build->toForeign(
+        build->indexAsgn(build->cast_node(receiver), lbrack, build->convertNodeList(indexes), rbrack));
 }
 
-foreign_ptr integer(self_ptr builder, const token *tok) {
+ForeignPtr integer(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->integer(tok));
+    return build->toForeign(build->integer(tok));
 }
 
-foreign_ptr ivar(self_ptr builder, const token *tok) {
+ForeignPtr ivar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->ivar(tok));
+    return build->toForeign(build->ivar(tok));
 }
 
-foreign_ptr keyword_break(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
-                          const token *rparen) {
+ForeignPtr keywordBreak(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                        const token *rparen) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_break(keyword, lparen, build->convert_node_list(args), rparen));
+    return build->toForeign(build->keywordBreak(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-foreign_ptr keyword_defined(self_ptr builder, const token *keyword, foreign_ptr arg) {
+ForeignPtr keywordDefined(SelfPtr builder, const token *keyword, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_defined(keyword, build->cast_node(arg)));
+    return build->toForeign(build->keywordDefined(keyword, build->cast_node(arg)));
 }
 
-foreign_ptr keyword_next(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
+ForeignPtr keywordNext(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                       const token *rparen) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->keywordNext(keyword, lparen, build->convertNodeList(args), rparen));
+}
+
+ForeignPtr keywordRedo(SelfPtr builder, const token *keyword) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->keywordRedo(keyword));
+}
+
+ForeignPtr keywordRetry(SelfPtr builder, const token *keyword) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->keywordRetry(keyword));
+}
+
+ForeignPtr keywordReturn(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
                          const token *rparen) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_next(keyword, lparen, build->convert_node_list(args), rparen));
+    return build->toForeign(build->keywordReturn(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-foreign_ptr keyword_redo(self_ptr builder, const token *keyword) {
+ForeignPtr keywordSuper(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                        const token *rparen) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_redo(keyword));
+    return build->toForeign(build->keywordSuper(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-foreign_ptr keyword_retry(self_ptr builder, const token *keyword) {
+ForeignPtr keywordYield(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                        const token *rparen) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_retry(keyword));
+    return build->toForeign(build->keywordYield(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-foreign_ptr keyword_return(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
-                           const token *rparen) {
+ForeignPtr keywordZsuper(SelfPtr builder, const token *keyword) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_return(keyword, lparen, build->convert_node_list(args), rparen));
+    return build->toForeign(build->keywordZsuper(keyword));
 }
 
-foreign_ptr keyword_super(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
-                          const token *rparen) {
+ForeignPtr kwarg(SelfPtr builder, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_super(keyword, lparen, build->convert_node_list(args), rparen));
+    return build->toForeign(build->kwarg(name));
 }
 
-foreign_ptr keyword_yield(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
-                          const token *rparen) {
+ForeignPtr kwoptarg(SelfPtr builder, const token *name, ForeignPtr value) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_yield(keyword, lparen, build->convert_node_list(args), rparen));
+    return build->toForeign(build->kwoptarg(name, build->cast_node(value)));
 }
 
-foreign_ptr keyword_zsuper(self_ptr builder, const token *keyword) {
+ForeignPtr kwrestarg(SelfPtr builder, const token *dstar, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->keyword_zsuper(keyword));
+    return build->toForeign(build->kwrestarg(dstar, name));
 }
 
-foreign_ptr kwarg(self_ptr builder, const token *name) {
+ForeignPtr kwsplat(SelfPtr builder, const token *dstar, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->kwarg(name));
+    return build->toForeign(build->kwsplat(dstar, build->cast_node(arg)));
 }
 
-foreign_ptr kwoptarg(self_ptr builder, const token *name, foreign_ptr value) {
+ForeignPtr line_literal(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->kwoptarg(name, build->cast_node(value)));
+    return build->toForeign(build->line_literal(tok));
 }
 
-foreign_ptr kwrestarg(self_ptr builder, const token *dstar, const token *name) {
+ForeignPtr logicalAnd(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->kwrestarg(dstar, name));
+    return build->toForeign(build->logicalAnd(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
-foreign_ptr kwsplat(self_ptr builder, const token *dstar, foreign_ptr arg) {
+ForeignPtr logicalOr(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->kwsplat(dstar, build->cast_node(arg)));
+    return build->toForeign(build->logicalOr(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
-foreign_ptr line_literal(self_ptr builder, const token *tok) {
+ForeignPtr loopUntil(SelfPtr builder, const token *keyword, ForeignPtr cond, const token *do_, ForeignPtr body,
+                     const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->line_literal(tok));
+    return build->toForeign(build->loopUntil(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
 }
 
-foreign_ptr logical_and(self_ptr builder, foreign_ptr lhs, const token *op, foreign_ptr rhs) {
+ForeignPtr loopUntil_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->logical_and(build->cast_node(lhs), op, build->cast_node(rhs)));
+    return build->toForeign(build->loopUntil_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
-foreign_ptr logical_or(self_ptr builder, foreign_ptr lhs, const token *op, foreign_ptr rhs) {
+ForeignPtr loop_while(SelfPtr builder, const token *keyword, ForeignPtr cond, const token *do_, ForeignPtr body,
+                      const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->logical_or(build->cast_node(lhs), op, build->cast_node(rhs)));
+    return build->toForeign(build->loop_while(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
 }
 
-foreign_ptr loop_until(self_ptr builder, const token *keyword, foreign_ptr cond, const token *do_, foreign_ptr body,
-                       const token *end) {
+ForeignPtr loop_while_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->loop_until(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
+    return build->toForeign(build->loop_while_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
-foreign_ptr loop_until_mod(self_ptr builder, foreign_ptr body, foreign_ptr cond) {
+ForeignPtr match_op(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->loop_until_mod(build->cast_node(body), build->cast_node(cond)));
+    return build->toForeign(build->match_op(build->cast_node(receiver), oper, build->cast_node(arg)));
 }
 
-foreign_ptr loop_while(self_ptr builder, const token *keyword, foreign_ptr cond, const token *do_, foreign_ptr body,
-                       const token *end) {
+ForeignPtr multi_assign(SelfPtr builder, ForeignPtr mlhs, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->loop_while(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
+    return build->toForeign(build->multi_assign(build->cast_node(mlhs), build->cast_node(rhs)));
 }
 
-foreign_ptr loop_while_mod(self_ptr builder, foreign_ptr body, foreign_ptr cond) {
+ForeignPtr multi_lhs(SelfPtr builder, const token *begin, const node_list *items, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->loop_while_mod(build->cast_node(body), build->cast_node(cond)));
+    return build->toForeign(build->multi_lhs(begin, build->convertNodeList(items), end));
 }
 
-foreign_ptr match_op(self_ptr builder, foreign_ptr receiver, const token *oper, foreign_ptr arg) {
+ForeignPtr multi_lhs1(SelfPtr builder, const token *begin, ForeignPtr item, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->match_op(build->cast_node(receiver), oper, build->cast_node(arg)));
+    return build->toForeign(build->multi_lhs1(begin, build->cast_node(item), end));
 }
 
-foreign_ptr multi_assign(self_ptr builder, foreign_ptr mlhs, foreign_ptr rhs) {
+ForeignPtr nil(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->multi_assign(build->cast_node(mlhs), build->cast_node(rhs)));
+    return build->toForeign(build->nil(tok));
 }
 
-foreign_ptr multi_lhs(self_ptr builder, const token *begin, const node_list *items, const token *end) {
+ForeignPtr not_op(SelfPtr builder, const token *not_, const token *begin, ForeignPtr receiver, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->multi_lhs(begin, build->convert_node_list(items), end));
+    return build->toForeign(build->not_op(not_, begin, build->cast_node(receiver), end));
 }
 
-foreign_ptr multi_lhs1(self_ptr builder, const token *begin, foreign_ptr item, const token *end) {
+ForeignPtr nth_ref(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->multi_lhs1(begin, build->cast_node(item), end));
+    return build->toForeign(build->nth_ref(tok));
 }
 
-foreign_ptr nil(self_ptr builder, const token *tok) {
+ForeignPtr op_assign(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->nil(tok));
+    return build->toForeign(build->op_assign(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
-foreign_ptr not_op(self_ptr builder, const token *not_, const token *begin, foreign_ptr receiver, const token *end) {
+ForeignPtr optarg_(SelfPtr builder, const token *name, const token *eql, ForeignPtr value) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->not_op(not_, begin, build->cast_node(receiver), end));
+    return build->toForeign(build->optarg_(name, eql, build->cast_node(value)));
 }
 
-foreign_ptr nth_ref(self_ptr builder, const token *tok) {
+ForeignPtr pair(SelfPtr builder, ForeignPtr key, const token *assoc, ForeignPtr value) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->nth_ref(tok));
+    return build->toForeign(build->pair(build->cast_node(key), assoc, build->cast_node(value)));
 }
 
-foreign_ptr op_assign(self_ptr builder, foreign_ptr lhs, const token *op, foreign_ptr rhs) {
+ForeignPtr pair_keyword(SelfPtr builder, const token *key, ForeignPtr value) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->op_assign(build->cast_node(lhs), op, build->cast_node(rhs)));
+    return build->toForeign(build->pair_keyword(key, build->cast_node(value)));
 }
 
-foreign_ptr optarg_(self_ptr builder, const token *name, const token *eql, foreign_ptr value) {
+ForeignPtr pair_quoted(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
+                       ForeignPtr value) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->optarg_(name, eql, build->cast_node(value)));
+    return build->toForeign(build->pair_quoted(begin, build->convertNodeList(parts), end, build->cast_node(value)));
 }
 
-foreign_ptr pair(self_ptr builder, foreign_ptr key, const token *assoc, foreign_ptr value) {
+ForeignPtr postexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->pair(build->cast_node(key), assoc, build->cast_node(value)));
+    return build->toForeign(build->postexe(begin, build->cast_node(node), rbrace));
 }
 
-foreign_ptr pair_keyword(self_ptr builder, const token *key, foreign_ptr value) {
+ForeignPtr preexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->pair_keyword(key, build->cast_node(value)));
+    return build->toForeign(build->preexe(begin, build->cast_node(node), rbrace));
 }
 
-foreign_ptr pair_quoted(self_ptr builder, const token *begin, const node_list *parts, const token *end,
-                        foreign_ptr value) {
+ForeignPtr procarg0(SelfPtr builder, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->pair_quoted(begin, build->convert_node_list(parts), end, build->cast_node(value)));
+    return build->toForeign(build->procarg0(build->cast_node(arg)));
 }
 
-foreign_ptr postexe(self_ptr builder, const token *begin, foreign_ptr node, const token *rbrace) {
+ForeignPtr range_exclusive(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->postexe(begin, build->cast_node(node), rbrace));
+    return build->toForeign(build->range_exclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
 }
 
-foreign_ptr preexe(self_ptr builder, const token *begin, foreign_ptr node, const token *rbrace) {
+ForeignPtr range_inclusive(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->preexe(begin, build->cast_node(node), rbrace));
+    return build->toForeign(build->range_inclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
 }
 
-foreign_ptr procarg0(self_ptr builder, foreign_ptr arg) {
+ForeignPtr rational(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->procarg0(build->cast_node(arg)));
+    return build->toForeign(build->rational(tok));
 }
 
-foreign_ptr range_exclusive(self_ptr builder, foreign_ptr lhs, const token *oper, foreign_ptr rhs) {
+ForeignPtr rational_complex(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->range_exclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
+    return build->toForeign(build->rational_complex(tok));
 }
 
-foreign_ptr range_inclusive(self_ptr builder, foreign_ptr lhs, const token *oper, foreign_ptr rhs) {
+ForeignPtr regexp_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
+                          ForeignPtr options) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->range_inclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
+    return build->toForeign(
+        build->regexp_compose(begin, build->convertNodeList(parts), end, build->cast_node(options)));
 }
 
-foreign_ptr rational(self_ptr builder, const token *tok) {
+ForeignPtr regexp_options(SelfPtr builder, const token *regopt) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->rational(tok));
+    return build->toForeign(build->regexp_options(regopt));
 }
 
-foreign_ptr rational_complex(self_ptr builder, const token *tok) {
+ForeignPtr rescue_body(SelfPtr builder, const token *rescue, ForeignPtr excList, const token *assoc, ForeignPtr excVar,
+                       const token *then, ForeignPtr body) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->rational_complex(tok));
+    return build->toForeign(build->rescue_body(rescue, build->cast_node(excList), assoc, build->cast_node(excVar), then,
+                                               build->cast_node(body)));
 }
 
-foreign_ptr regexp_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end,
-                           foreign_ptr options) {
+ForeignPtr restarg(SelfPtr builder, const token *star, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->regexp_compose(begin, build->convert_node_list(parts), end, build->cast_node(options)));
+    return build->toForeign(build->restarg(star, name));
 }
 
-foreign_ptr regexp_options(self_ptr builder, const token *regopt) {
+ForeignPtr self_(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->regexp_options(regopt));
+    return build->toForeign(build->self_(tok));
 }
 
-foreign_ptr rescue_body(self_ptr builder, const token *rescue, foreign_ptr exc_list, const token *assoc,
-                        foreign_ptr exc_var, const token *then, foreign_ptr body) {
+ForeignPtr shadowarg(SelfPtr builder, const token *name) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->rescue_body(rescue, build->cast_node(exc_list), assoc, build->cast_node(exc_var),
-                                                then, build->cast_node(body)));
+    return build->toForeign(build->shadowarg(name));
 }
 
-foreign_ptr restarg(self_ptr builder, const token *star, const token *name) {
+ForeignPtr splat(SelfPtr builder, const token *star, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->restarg(star, name));
+    return build->toForeign(build->splat(star, build->cast_node(arg)));
 }
 
-foreign_ptr self_(self_ptr builder, const token *tok) {
+ForeignPtr splat_mlhs(SelfPtr builder, const token *star, ForeignPtr arg) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->self_(tok));
+    return build->toForeign(build->splat_mlhs(star, build->cast_node(arg)));
 }
 
-foreign_ptr shadowarg(self_ptr builder, const token *name) {
+ForeignPtr string_(SelfPtr builder, const token *string_) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->shadowarg(name));
+    return build->toForeign(build->string(string_));
 }
 
-foreign_ptr splat(self_ptr builder, const token *star, foreign_ptr arg) {
+ForeignPtr string_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->splat(star, build->cast_node(arg)));
+    return build->toForeign(build->string_compose(begin, build->convertNodeList(parts), end));
 }
 
-foreign_ptr splat_mlhs(self_ptr builder, const token *star, foreign_ptr arg) {
+ForeignPtr string_internal(SelfPtr builder, const token *string_) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->splat_mlhs(star, build->cast_node(arg)));
+    return build->toForeign(build->string_internal(string_));
 }
 
-foreign_ptr string_(self_ptr builder, const token *string_) {
+ForeignPtr symbol(SelfPtr builder, const token *symbol) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->string(string_));
+    return build->toForeign(build->symbol(symbol));
 }
 
-foreign_ptr string_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr symbol_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->string_compose(begin, build->convert_node_list(parts), end));
+    return build->toForeign(build->symbol_compose(begin, build->convertNodeList(parts), end));
 }
 
-foreign_ptr string_internal(self_ptr builder, const token *string_) {
+ForeignPtr symbol_internal(SelfPtr builder, const token *symbol) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->string_internal(string_));
+    return build->toForeign(build->symbol_internal(symbol));
 }
 
-foreign_ptr symbol(self_ptr builder, const token *symbol) {
+ForeignPtr symbols_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->symbol(symbol));
+    return build->toForeign(build->symbols_compose(begin, build->convertNodeList(parts), end));
 }
 
-foreign_ptr symbol_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr ternary(SelfPtr builder, ForeignPtr cond, const token *question, ForeignPtr ifTrue, const token *colon,
+                   ForeignPtr ifFalse) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->symbol_compose(begin, build->convert_node_list(parts), end));
+    return build->toForeign(
+        build->ternary(build->cast_node(cond), question, build->cast_node(ifTrue), colon, build->cast_node(ifFalse)));
 }
 
-foreign_ptr symbol_internal(self_ptr builder, const token *symbol) {
+ForeignPtr true_(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->symbol_internal(symbol));
+    return build->toForeign(build->true_(tok));
 }
 
-foreign_ptr symbols_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr unary_op(SelfPtr builder, const token *oper, ForeignPtr receiver) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->symbols_compose(begin, build->convert_node_list(parts), end));
+    return build->toForeign(build->unary_op(oper, build->cast_node(receiver)));
 }
 
-foreign_ptr ternary(self_ptr builder, foreign_ptr cond, const token *question, foreign_ptr if_true, const token *colon,
-                    foreign_ptr if_false) {
+ForeignPtr undefMethod(SelfPtr builder, const token *undef, const node_list *name_list) {
     auto build = cast_builder(builder);
-    return build->to_foreign(
-        build->ternary(build->cast_node(cond), question, build->cast_node(if_true), colon, build->cast_node(if_false)));
+    return build->toForeign(build->undefMethod(undef, build->convertNodeList(name_list)));
 }
 
-foreign_ptr true_(self_ptr builder, const token *tok) {
+ForeignPtr when(SelfPtr builder, const token *when, const node_list *patterns, const token *then, ForeignPtr body) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->true_(tok));
+    return build->toForeign(build->when(when, build->convertNodeList(patterns), then, build->cast_node(body)));
 }
 
-foreign_ptr unary_op(self_ptr builder, const token *oper, foreign_ptr receiver) {
+ForeignPtr word(SelfPtr builder, const node_list *parts) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->unary_op(oper, build->cast_node(receiver)));
+    return build->toForeign(build->word(build->convertNodeList(parts)));
 }
 
-foreign_ptr undef_method(self_ptr builder, const token *undef, const node_list *name_list) {
+ForeignPtr words_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->undef_method(undef, build->convert_node_list(name_list)));
+    return build->toForeign(build->words_compose(begin, build->convertNodeList(parts), end));
 }
 
-foreign_ptr when(self_ptr builder, const token *when, const node_list *patterns, const token *then, foreign_ptr body) {
+ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->when(when, build->convert_node_list(patterns), then, build->cast_node(body)));
-}
-
-foreign_ptr word(self_ptr builder, const node_list *parts) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->word(build->convert_node_list(parts)));
-}
-
-foreign_ptr words_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->words_compose(begin, build->convert_node_list(parts), end));
-}
-
-foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    auto build = cast_builder(builder);
-    return build->to_foreign(build->xstring_compose(begin, build->convert_node_list(parts), end));
+    return build->toForeign(build->xstring_compose(begin, build->convertNodeList(parts), end));
 }
 }; // namespace
 
@@ -1658,64 +1655,64 @@ struct ruby_parser::builder Builder::interface = {
     assign,
     assignable,
     associate,
-    attr_asgn,
-    back_ref,
+    attrAsgn,
+    backRef,
     begin,
-    begin_body,
-    begin_keyword,
-    binary_op,
+    beginBody,
+    beginKeyword,
+    binaryOp,
     block,
-    block_pass,
+    blockPass,
     blockarg,
-    call_lambda,
+    callLambda,
     call_method,
     case_,
     character,
     complex,
     compstmt,
     condition,
-    condition_mod,
+    conditionMod,
     const_,
-    const_fetch,
-    const_global,
-    const_op_assignable,
+    constFetch,
+    constGlobal,
+    constOpAssignable,
     cvar,
-    dedent_string,
+    dedentString,
     def_class,
-    def_method,
-    def_module,
+    defMethod,
+    defModule,
     def_sclass,
-    def_singleton,
-    encoding_literal,
+    defSingleton,
+    encodingLiteral,
     false_,
-    file_literal,
+    fileLiteral,
     float_,
-    float_complex,
+    floatComplex,
     for_,
     gvar,
     ident,
     index,
-    index_asgn,
+    indexAsgn,
     integer,
     ivar,
-    keyword_break,
-    keyword_defined,
-    keyword_next,
-    keyword_redo,
-    keyword_retry,
-    keyword_return,
-    keyword_super,
-    keyword_yield,
-    keyword_zsuper,
+    keywordBreak,
+    keywordDefined,
+    keywordNext,
+    keywordRedo,
+    keywordRetry,
+    keywordReturn,
+    keywordSuper,
+    keywordYield,
+    keywordZsuper,
     kwarg,
     kwoptarg,
     kwrestarg,
     kwsplat,
     line_literal,
-    logical_and,
-    logical_or,
-    loop_until,
-    loop_until_mod,
+    logicalAnd,
+    logicalOr,
+    loopUntil,
+    loopUntil_mod,
     loop_while,
     loop_while_mod,
     match_op,
@@ -1755,7 +1752,7 @@ struct ruby_parser::builder Builder::interface = {
     ternary,
     true_,
     unary_op,
-    undef_method,
+    undefMethod,
     when,
     word,
     words_compose,

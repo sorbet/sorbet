@@ -15,7 +15,7 @@ rbdriver_typedruby25_free(ruby_parser::typedruby25* driver)
 }
 
 const void*
-rbdriver_parse(ruby_parser::base_driver* driver, ruby_parser::self_ptr self)
+rbdriver_parse(ruby_parser::base_driver* driver, ruby_parser::SelfPtr self)
 {
 	return driver->parse(self);
 }

@@ -26,11 +26,11 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-class CFG_Collector_and_Typer {
+class CFGCollectorAndTyper {
     const options::Options &opts;
 
 public:
-    CFG_Collector_and_Typer(const options::Options &opts) : opts(opts){};
+    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::Typed || m->symbol.data(ctx)->isOverloaded()) {
@@ -431,7 +431,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         if (opts.print.CFG) {
             fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
-        CFG_Collector_and_Typer collector(opts);
+        CFGCollectorAndTyper collector(opts);
         {
             logger->trace("CFG+Infer: {}", f.data(ctx).path());
             core::ErrorRegion errs(ctx, f);

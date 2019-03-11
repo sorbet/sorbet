@@ -85,16 +85,16 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     absl::Mutex mtx;
 
     rapidjson::MemoryPoolAllocator<>
-        inner_alloc; // we need objects created by inner thread to outlive the thread itself.
+        innerAlloc; // we need objects created by inner thread to outlive the thread itself.
 
     auto readerThread = runInAThread(
-        "lspReader", [&guardedState, &mtx, logger = this->logger, &inner_alloc, &inputStream = this->inputStream] {
+        "lspReader", [&guardedState, &mtx, logger = this->logger, &innerAlloc, &inputStream = this->inputStream] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
             int requestCounter = 0;
             while (true) {
-                rapidjson::Document d(&inner_alloc);
+                rapidjson::Document d(&innerAlloc);
 
                 if (!getNewRequest(d, logger, inputStream)) {
                     break;
@@ -103,7 +103,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
                 try {
-                    preprocessRequest(inner_alloc, logger, guardedState, make_unique<LSPMessage>(inner_alloc, d),
+                    preprocessRequest(innerAlloc, logger, guardedState, make_unique<LSPMessage>(innerAlloc, d),
                                       requestCounter++);
                 } catch (DeserializationError e) {
                     logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));

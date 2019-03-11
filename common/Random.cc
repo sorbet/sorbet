@@ -16,12 +16,12 @@ u8 Random::uniformU8() {
 }
 
 u4 Random::uniformU4(u4 from, u4 to) {
-    uniform_int_distribution<u4> uniform_dist(from, to);
-    return uniform_dist(re);
+    uniform_int_distribution<u4> uniformDist(from, to);
+    return uniformDist(re);
 }
 
 u8 Random::uniformU8(u8 from, u8 to) {
-    uniform_int_distribution<u8> uniform_dist(from, to);
-    return uniform_dist(re);
+    uniform_int_distribution<u8> uniformDist(from, to);
+    return uniformDist(re);
 }
 } // namespace sorbet

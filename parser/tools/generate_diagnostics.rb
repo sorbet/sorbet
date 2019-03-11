@@ -6,7 +6,7 @@ load(diagnostics_rb)
 File.open(out_cpp, 'w') do |fh|
   fh.puts "namespace sorbet {"
   fh.puts "namespace parser {"
-  fh.puts "const char * dclass_strings[] = {"
+  fh.puts "const char * dclassStrings[] = {"
   fh.puts MESSAGES.map { |_, msg| "\t#{msg.inspect}" }.join(",\n")
   fh.puts "};"
   fh.puts "}"

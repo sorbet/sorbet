@@ -13,15 +13,15 @@ using namespace std;
 
 string exec(string cmd);
 
-string addr2line(string_view program_name, void const *const *addr, int count) {
-    auto addr2line_cmd = fmt::format("atos -o {} -p {}", program_name, (int)getpid());
+string addr2line(string_view programName, void const *const *addr, int count) {
+    auto addr2lineCmd = fmt::format("atos -o {} -p {}", programName, (int)getpid());
     for (int i = 3; i < count; ++i) {
-        addr2line_cmd = fmt::format("{} {}", addr2line_cmd, addr[i]);
+        addr2lineCmd = fmt::format("{} {}", addr2lineCmd, addr[i]);
     }
 
-    //    printf("%s\n", addr2line_cmd.c_str());
+    //    printf("%s\n", addr2lineCmd.c_str());
 
-    return exec(addr2line_cmd);
+    return exec(addr2lineCmd);
 }
 string getProgramName() {
     char buf[512];

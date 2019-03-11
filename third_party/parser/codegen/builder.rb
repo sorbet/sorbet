@@ -3,16 +3,16 @@
 require 'optparse'
 
 RE_BODY = /struct builder \{(.*?)\}/m
-RE_FUNC = /foreign_ptr\(\*(\w+)\)\((.*?)\);/
+RE_FUNC = /ForeignPtr\(\*(\w+)\)\((.*?)\);/
 
 CHECK_COOKIES = false
 TYPE_CONVERSION = {
-  "foreign_ptr" => "NodeId",
+  "ForeignPtr" => "NodeId",
   "const token*" => "*const TokenPtr",
   "const node_list*" => "*mut NodeListPtr",
   "bool" => "bool",
   "size_t" => "size_t",
-  "self_ptr" => "*mut Builder",
+  "SelfPtr" => "*mut Builder",
 }
 
 class Argument

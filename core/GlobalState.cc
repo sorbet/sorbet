@@ -46,14 +46,14 @@ GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
     : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue), lspQuery(lsp::Query::noQuery()) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
-    unsigned int max_name_count = 8192;
-    unsigned int max_symbol_count = 16384;
+    unsigned int maxNameCount = 8192;
+    unsigned int maxSymbolCount = 16384;
 
-    names.reserve(max_name_count);
-    symbols.reserve(max_symbol_count);
-    int names_by_hash_size = 2 * max_name_count;
-    names_by_hash.resize(names_by_hash_size);
-    ENFORCE((names_by_hash_size & (names_by_hash_size - 1)) == 0, "names_by_hash_size is not a power of 2");
+    names.reserve(maxNameCount);
+    symbols.reserve(maxSymbolCount);
+    int namesByHashSize = 2 * maxNameCount;
+    namesByHash.resize(namesByHashSize);
+    ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
 }
 
 void GlobalState::initEmpty() {
@@ -419,7 +419,7 @@ u4 nextPowerOfTwo(u4 v) {
 }
 
 void GlobalState::reserveMemory(u4 kb) {
-    u8 allocated = (sizeof(Name) + sizeof(decltype(names_by_hash)::value_type)) * names.capacity() +
+    u8 allocated = (sizeof(Name) + sizeof(decltype(namesByHash)::value_type)) * names.capacity() +
                    sizeof(Symbol) * symbols.capacity();
     u8 want = 1024 * kb;
     if (allocated > want) {
@@ -430,7 +430,7 @@ void GlobalState::reserveMemory(u4 kb) {
     expandNames(scale);
     sanityCheck();
 
-    allocated = (sizeof(Name) + sizeof(decltype(names_by_hash)::value_type)) * names.capacity() +
+    allocated = (sizeof(Name) + sizeof(decltype(namesByHash)::value_type)) * names.capacity() +
                 sizeof(Symbol) * symbols.capacity();
 
     trace(absl::StrCat("Reserved ", allocated / 1024, "KiB of memory. symbols=", symbols.capacity(),
@@ -590,32 +590,32 @@ string_view GlobalState::enterString(string_view nm) {
             swap(*(strings.end() - 1), *(strings.end() - 2));
         }
     } else {
-        if (strings_last_page_used + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
+        if (stringsLastPageUsed + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
             strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
-            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
-            strings_last_page_used = 0;
+            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - stringsLastPageUsed);
+            stringsLastPageUsed = 0;
         }
-        from = strings.back()->data() + strings_last_page_used;
+        from = strings.back()->data() + stringsLastPageUsed;
     }
 
     counterInc("strings");
     memcpy(from, nm.data(), nm.size());
-    strings_last_page_used += nm.size();
+    stringsLastPageUsed += nm.size();
     return string_view(from, nm.size());
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
     const auto hs = _hash(nm);
-    unsigned int hashTableSize = names_by_hash.size();
+    unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
-    unsigned int probe_count = 1;
+    unsigned int probeCount = 1;
 
-    while (names_by_hash[bucketId].second != 0u) {
-        auto &bucket = names_by_hash[bucketId];
+    while (namesByHash[bucketId].second != 0u) {
+        auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto name_id = bucket.second;
-            auto &nm2 = names[name_id];
+            auto nameId = bucket.second;
+            auto &nm2 = names[nameId];
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
                 counterInc("names.utf8.hit");
                 return nm2.ref(*this);
@@ -623,27 +623,27 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
                 counterInc("names.hash_collision.utf8");
             }
         }
-        bucketId = (bucketId + probe_count) & mask;
-        probe_count++;
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
     }
     ENFORCE(!nameTableFrozen);
 
-    ENFORCE(probe_count != hashTableSize, "Full table?");
+    ENFORCE(probeCount != hashTableSize, "Full table?");
 
     if (names.size() == names.capacity()) {
         expandNames();
-        hashTableSize = names_by_hash.size();
+        hashTableSize = namesByHash.size();
         mask = hashTableSize - 1;
         bucketId = hs & mask; // look for place in the new size
-        probe_count = 1;
-        while (names_by_hash[bucketId].second != 0) {
-            bucketId = (bucketId + probe_count) & mask;
-            probe_count++;
+        probeCount = 1;
+        while (namesByHash[bucketId].second != 0) {
+            bucketId = (bucketId + probeCount) & mask;
+            probeCount++;
         }
     }
 
     auto idx = names.size();
-    auto &bucket = names_by_hash[bucketId];
+    auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
     bucket.second = idx;
     names.emplace_back();
@@ -665,13 +665,13 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());
-    unsigned int hashTableSize = names_by_hash.size();
+    unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
-    unsigned int probe_count = 1;
+    unsigned int probeCount = 1;
 
-    while (names_by_hash[bucketId].second != 0 && probe_count < hashTableSize) {
-        auto &bucket = names_by_hash[bucketId];
+    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+        auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
@@ -681,28 +681,28 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
                 counterInc("names.hash_collision.constant");
             }
         }
-        bucketId = (bucketId + probe_count) & mask;
-        probe_count++;
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
     }
-    if (probe_count == hashTableSize) {
+    if (probeCount == hashTableSize) {
         Exception::raise("Full table?");
     }
     ENFORCE(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
         expandNames();
-        hashTableSize = names_by_hash.size();
+        hashTableSize = namesByHash.size();
         mask = hashTableSize - 1;
 
         bucketId = hs & mask; // look for place in the new size
-        probe_count = 1;
-        while (names_by_hash[bucketId].second != 0) {
-            bucketId = (bucketId + probe_count) & mask;
-            probe_count++;
+        probeCount = 1;
+        while (namesByHash[bucketId].second != 0) {
+            bucketId = (bucketId + probeCount) & mask;
+            probeCount++;
         }
     }
 
-    auto &bucket = names_by_hash[bucketId];
+    auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
     bucket.second = names.size();
 
@@ -745,21 +745,21 @@ void GlobalState::expandNames(int growBy) {
     sanityCheck();
 
     names.reserve(names.capacity() * growBy);
-    vector<pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * growBy);
-    moveNames(names_by_hash.data(), new_names_by_hash.data(), names_by_hash.size(), new_names_by_hash.capacity());
-    names_by_hash.swap(new_names_by_hash);
+    vector<pair<unsigned int, unsigned int>> new_namesByHash(namesByHash.capacity() * growBy);
+    moveNames(namesByHash.data(), new_namesByHash.data(), namesByHash.size(), new_namesByHash.capacity());
+    namesByHash.swap(new_namesByHash);
 }
 
 NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
-    unsigned int hashTableSize = names_by_hash.size();
+    unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
-    unsigned int probe_count = 1;
+    unsigned int probeCount = 1;
 
-    while (names_by_hash[bucketId].second != 0 && probe_count < hashTableSize) {
-        auto &bucket = names_by_hash[bucketId];
+    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+        auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
@@ -770,8 +770,8 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
                 counterInc("names.hash_collision.unique");
             }
         }
-        bucketId = (bucketId + probe_count) & mask;
-        probe_count++;
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
     }
     Exception::raise("should never happen");
 }
@@ -779,13 +779,13 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
-    unsigned int hashTableSize = names_by_hash.size();
+    unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
-    unsigned int probe_count = 1;
+    unsigned int probeCount = 1;
 
-    while (names_by_hash[bucketId].second != 0 && probe_count < hashTableSize) {
-        auto &bucket = names_by_hash[bucketId];
+    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+        auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
@@ -796,28 +796,28 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
                 counterInc("names.hash_collision.unique");
             }
         }
-        bucketId = (bucketId + probe_count) & mask;
-        probe_count++;
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
     }
-    if (probe_count == hashTableSize) {
+    if (probeCount == hashTableSize) {
         Exception::raise("Full table?");
     }
     ENFORCE(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
         expandNames();
-        hashTableSize = names_by_hash.size();
+        hashTableSize = namesByHash.size();
         mask = hashTableSize - 1;
 
         bucketId = hs & mask; // look for place in the new size
-        probe_count = 1;
-        while (names_by_hash[bucketId].second != 0) {
-            bucketId = (bucketId + probe_count) & mask;
-            probe_count++;
+        probeCount = 1;
+        while (namesByHash[bucketId].second != 0) {
+            bucketId = (bucketId + probeCount) & mask;
+            probeCount++;
         }
     }
 
-    auto &bucket = names_by_hash[bucketId];
+    auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
     bucket.second = names.size();
 
@@ -924,12 +924,12 @@ void GlobalState::sanityCheck() const {
     }
     ENFORCE(!names.empty(), "empty name table size");
     ENFORCE(!strings.empty(), "empty string table size");
-    ENFORCE(!names_by_hash.empty(), "empty name hash table size");
-    ENFORCE((names_by_hash.size() & (names_by_hash.size() - 1)) == 0, "name hash table size is not a power of two");
-    ENFORCE(names.capacity() * 2 == names_by_hash.capacity(),
-            "name table and hash name table sizes out of sync names.capacity={} names_by_hash.capacity={}",
-            names.capacity(), names_by_hash.capacity());
-    ENFORCE(names_by_hash.size() == names_by_hash.capacity(), "hash name table not at full capacity");
+    ENFORCE(!namesByHash.empty(), "empty name hash table size");
+    ENFORCE((namesByHash.size() & (namesByHash.size() - 1)) == 0, "name hash table size is not a power of two");
+    ENFORCE(names.capacity() * 2 == namesByHash.capacity(),
+            "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
+            names.capacity(), namesByHash.capacity());
+    ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
     int i = -1;
     for (auto &nm : names) {
         i++;
@@ -945,7 +945,7 @@ void GlobalState::sanityCheck() const {
             sym.sanityCheck(*this);
         }
     }
-    for (auto &ent : names_by_hash) {
+    for (auto &ent : namesByHash) {
         if (ent.second == 0) {
             continue;
         }
@@ -1006,13 +1006,13 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->lastNameKnownByParentGlobalState = namesUsed();
 
     result->strings = this->strings;
-    result->strings_last_page_used = STRINGS_PAGE_SIZE;
+    result->stringsLastPageUsed = STRINGS_PAGE_SIZE;
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
     result->lspTypecheckCount = this->lspTypecheckCount;
-    result->suppressed_error_classes = this->suppressed_error_classes;
-    result->only_error_classes = this->only_error_classes;
+    result->suppressedErrorClasses = this->suppressedErrorClasses;
+    result->onlyErrorClasses = this->onlyErrorClasses;
     result->names.reserve(this->names.capacity());
     if (keepId) {
         result->names.resize(this->names.size());
@@ -1023,8 +1023,8 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         }
     }
 
-    result->names_by_hash.reserve(this->names_by_hash.size());
-    result->names_by_hash = this->names_by_hash;
+    result->namesByHash.reserve(this->namesByHash.size());
+    result->namesByHash = this->namesByHash;
 
     result->symbols.reserve(this->symbols.size());
     for (auto &sym : this->symbols) {
@@ -1067,13 +1067,13 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
 }
 
 void GlobalState::suppressErrorClass(int code) {
-    ENFORCE(only_error_classes.empty());
-    suppressed_error_classes.insert(code);
+    ENFORCE(onlyErrorClasses.empty());
+    suppressedErrorClasses.insert(code);
 }
 
 void GlobalState::onlyShowErrorClass(int code) {
-    ENFORCE(suppressed_error_classes.empty());
-    only_error_classes.insert(code);
+    ENFORCE(suppressedErrorClasses.empty());
+    onlyErrorClasses.insert(code);
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
@@ -1084,10 +1084,10 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     if (what.code == errors::Internal::InternalError.code) {
         return true;
     }
-    if (suppressed_error_classes.count(what.code) != 0) {
+    if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
     }
-    if (!only_error_classes.empty() && only_error_classes.count(what.code) == 0) {
+    if (!onlyErrorClasses.empty() && onlyErrorClasses.count(what.code) == 0) {
         return false;
     }
 

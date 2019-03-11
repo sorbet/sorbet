@@ -119,22 +119,22 @@ public:
     const rapidjson::Value &params() const;
 
     /**
-     * Set the internal `sorbet_counter` property on this message.
+     * Set the internal `sorbetCounter` property on this message.
      */
     void setCounter(int count);
 
     /**
-     * Retrieve the internal `sorbet_counter` property on this message. Returns -1 if not specified.
+     * Retrieve the internal `sorbetCounter` property on this message. Returns -1 if not specified.
      */
     int counter() const;
 
     /**
-     * Set the internal `sorbet_receive_timestamp` property on this message.
+     * Set the internal `sorbetReceiveTimestamp` property on this message.
      */
     void setTimestamp(double timestamp);
 
     /**
-     * Retrieve the internal `sorbet_receive_timestamp` property on this message. Returns 0.0 if not specified.
+     * Retrieve the internal `sorbetReceiveTimestamp` property on this message. Returns 0.0 if not specified.
      */
     double timestamp() const;
 

@@ -199,7 +199,7 @@ NodeDef nodes[] = {
     {"ZSuper", vector<FieldDef>()},
 };
 
-string field_type(FieldType arg) {
+string fieldType(FieldType arg) {
     switch (arg) {
         case Name:
             return "core::NameRef";
@@ -216,14 +216,14 @@ string field_type(FieldType arg) {
     }
 }
 
-void emit_node_header(ostream &out, NodeDef &node) {
+void emitNodeHeader(ostream &out, NodeDef &node) {
     out << "class " << node.name << " final : public Node {" << '\n';
     out << "public:" << '\n';
 
     // generate constructor
     out << "    " << node.name << "(core::Loc loc";
     for (auto &arg : node.fields) {
-        out << ", " << field_type(arg.type) << " " << arg.name;
+        out << ", " << fieldType(arg.type) << " " << arg.name;
     }
     out << ")" << '\n';
     out << "        : Node(loc)";
@@ -246,7 +246,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
 
     // Generate fields
     for (auto &arg : node.fields) {
-        out << "    " << field_type(arg.type) << " " << arg.name << ";" << '\n';
+        out << "    " << fieldType(arg.type) << " " << arg.name << ";" << '\n';
     }
     out << '\n';
     out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
@@ -257,7 +257,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
     out << '\n';
 }
 
-void emit_node_classfile(ostream &out, NodeDef &node) {
+void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  std::string " << node.name << "::nodeName() {" << '\n';
     out << "    return \"" << node.name << "\";" << '\n';
     out << "  };" << '\n' << '\n';
@@ -386,7 +386,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         for (auto &node : nodes) {
-            emit_node_header(header, node);
+            emitNodeHeader(header, node);
         }
     }
 
@@ -400,7 +400,7 @@ int main(int argc, char **argv) {
         classfile << "namespace sorbet {" << '\n';
         classfile << "namespace parser {" << '\n';
         for (auto &node : nodes) {
-            emit_node_classfile(classfile, node);
+            emitNodeClassfile(classfile, node);
         }
         classfile << "}" << '\n';
         classfile << "}" << '\n';

@@ -63,14 +63,14 @@ bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::Sym
             return true;
         }
 
-        auto scope_cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
-        if (scope_cnst && ast::isa_tree<ast::EmptyTree>(scope_cnst->scope.get()) &&
-            scope_cnst->cnst == core::Symbols::T().data(ctx)->name) {
+        auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
+        if (scopeCnst && ast::isa_tree<ast::EmptyTree>(scopeCnst->scope.get()) &&
+            scopeCnst->cnst == core::Symbols::T().data(ctx)->name) {
             return true;
         }
 
-        auto scope_cnst_lit = ast::cast_tree<ast::ConstantLit>(cnst->scope.get());
-        if (scope_cnst_lit && scope_cnst_lit->constantSymbol() == core::Symbols::root()) {
+        auto scopeCnstLit = ast::cast_tree<ast::ConstantLit>(cnst->scope.get());
+        if (scopeCnstLit && scopeCnstLit->constantSymbol() == core::Symbols::root()) {
             return true;
         }
         return false;

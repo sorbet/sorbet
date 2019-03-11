@@ -91,12 +91,12 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     // everything in the file before the method definition.
     auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
-    int last_newline_loc = preDefinition.rfind('\n');
+    int lastNewlineLoc = preDefinition.rfind('\n');
     // if there is no '\n' in preDefinition, we're at the top of the file.
-    if (last_newline_loc == preDefinition.npos) {
+    if (lastNewlineLoc == preDefinition.npos) {
         return nullopt;
     }
-    auto prevLine = preDefinition.substr(last_newline_loc, preDefinition.size() - last_newline_loc);
+    auto prevLine = preDefinition.substr(lastNewlineLoc, preDefinition.size() - lastNewlineLoc);
     if (prevLine.find('#') == prevLine.npos) {
         return nullopt;
     }
@@ -105,13 +105,13 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     // keep looking for previous newline locations, searching for lines with # in them.
     while (prevLine.find('#') != prevLine.npos) {
         documentation = absl::StrCat(prevLine.substr(prevLine.find('#') + 1, prevLine.size()), "\n", documentation);
-        int prev_newline_loc = preDefinition.rfind('\n', last_newline_loc - 1);
+        int prevNewlineLoc = preDefinition.rfind('\n', lastNewlineLoc - 1);
         // if there is no '\n', we're at the top of the file, so just return documentation.
-        if (prev_newline_loc == preDefinition.npos) {
+        if (prevNewlineLoc == preDefinition.npos) {
             break;
         }
-        prevLine = preDefinition.substr(prev_newline_loc, last_newline_loc - prev_newline_loc);
-        last_newline_loc = prev_newline_loc;
+        prevLine = preDefinition.substr(prevNewlineLoc, lastNewlineLoc - prevNewlineLoc);
+        lastNewlineLoc = prevNewlineLoc;
     }
     if (documentation.empty()) {
         return nullopt;

@@ -308,9 +308,9 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    vector<UnorderedSet<core::LocalVariable>> reads_by_block(cfg.maxBasicBlockId);
-    vector<UnorderedSet<core::LocalVariable>> writes_by_block(cfg.maxBasicBlockId);
-    vector<UnorderedSet<core::LocalVariable>> dead_by_block(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> readsByBlock(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> writesByBlock(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> deadByBlock(cfg.maxBasicBlockId);
 
     for (auto &rds : RnW.reads) {
         auto &wts = RnW.writes[rds.first];
@@ -330,78 +330,78 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
             wts.second.clear();
         }
         for (BasicBlock *bb : rds) {
-            reads_by_block[bb->id].insert(wts.first);
+            readsByBlock[bb->id].insert(wts.first);
         }
         for (BasicBlock *bb : wts.second) {
-            writes_by_block[bb->id].insert(wts.first);
+            writesByBlock[bb->id].insert(wts.first);
         }
     }
 
     for (auto &dead : RnW.dead) {
         for (BasicBlock *bb : dead.second) {
-            dead_by_block[bb->id].insert(dead.first);
+            deadByBlock[bb->id].insert(dead.first);
         }
     }
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    vector<UnorderedSet<core::LocalVariable>> upper_bounds1(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> upperBounds1(cfg.maxBasicBlockId);
     bool changed = true;
 
     while (changed) {
         changed = false;
         for (BasicBlock *bb : cfg.forwardsTopoSort) {
-            int sz = upper_bounds1[bb->id].size();
-            upper_bounds1[bb->id].insert(reads_by_block[bb->id].begin(), reads_by_block[bb->id].end());
+            int sz = upperBounds1[bb->id].size();
+            upperBounds1[bb->id].insert(readsByBlock[bb->id].begin(), readsByBlock[bb->id].end());
             if (bb->bexit.thenb != cfg.deadBlock()) {
-                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.thenb->id].begin(),
-                                             upper_bounds1[bb->bexit.thenb->id].end());
+                upperBounds1[bb->id].insert(upperBounds1[bb->bexit.thenb->id].begin(),
+                                            upperBounds1[bb->bexit.thenb->id].end());
             }
             if (bb->bexit.elseb != cfg.deadBlock()) {
-                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.elseb->id].begin(),
-                                             upper_bounds1[bb->bexit.elseb->id].end());
+                upperBounds1[bb->id].insert(upperBounds1[bb->bexit.elseb->id].begin(),
+                                            upperBounds1[bb->bexit.elseb->id].end());
             }
             // Any variable that we write and do not read is dead on entry to
             // this block, and we do not require it.
-            for (auto dead : dead_by_block[bb->id]) {
+            for (auto dead : deadByBlock[bb->id]) {
                 // TODO(nelhage) We can't erase for variables inside loops, due
                 // to how our "pinning" type inference works. We can remove this
                 // inner condition when we get a better type inference
                 // algorithm.
                 if (bb->outerLoops <= cfg.minLoops[dead]) {
-                    upper_bounds1[bb->id].erase(dead);
+                    upperBounds1[bb->id].erase(dead);
                 }
             }
 
-            changed = changed || (upper_bounds1[bb->id].size() != sz);
+            changed = changed || (upperBounds1[bb->id].size() != sz);
         }
     }
 
-    vector<UnorderedSet<core::LocalVariable>> upper_bounds2(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> upperBounds2(cfg.maxBasicBlockId);
 
     changed = true;
     while (changed) {
         changed = false;
         for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
             BasicBlock *bb = *it;
-            int sz = upper_bounds2[bb->id].size();
+            int sz = upperBounds2[bb->id].size();
             for (BasicBlock *edge : bb->backEdges) {
                 if (edge != cfg.deadBlock()) {
-                    upper_bounds2[bb->id].insert(writes_by_block[edge->id].begin(), writes_by_block[edge->id].end());
-                    upper_bounds2[bb->id].insert(upper_bounds2[edge->id].begin(), upper_bounds2[edge->id].end());
+                    upperBounds2[bb->id].insert(writesByBlock[edge->id].begin(), writesByBlock[edge->id].end());
+                    upperBounds2[bb->id].insert(upperBounds2[edge->id].begin(), upperBounds2[edge->id].end());
                 }
             }
-            changed = changed || (upper_bounds2[bb->id].size() != sz);
+            changed = changed || (upperBounds2[bb->id].size() != sz);
         }
     }
 
     /** Combine two upper bounds */
     for (auto &it : cfg.basicBlocks) {
-        auto set2 = upper_bounds2[it->id];
+        auto set2 = upperBounds2[it->id];
 
         int set1Sz = set2.size();
-        int set2Sz = upper_bounds1[it->id].size();
+        int set2Sz = upperBounds1[it->id].size();
         it->args.reserve(set1Sz > set2Sz ? set2Sz : set1Sz);
-        for (auto el : upper_bounds1[it->id]) {
+        for (auto el : upperBounds1[it->id]) {
             if (set2.find(el) != set2.end()) {
                 it->args.emplace_back(el);
             }

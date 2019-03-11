@@ -95,9 +95,9 @@ void CFG::sanityCheck(core::Context ctx) {
         }
 
         for (auto &binding : bb->exprs) {
-            if (auto send_binding = cast_instruction<Send>(binding.value.get())) {
-                if (send_binding->link && send_binding->link->block != core::Symbols::noSymbol()) {
-                    const core::SymbolData data = send_binding->link->block.data(ctx);
+            if (auto sendBinding = cast_instruction<Send>(binding.value.get())) {
+                if (sendBinding->link && sendBinding->link->block != core::Symbols::noSymbol()) {
+                    const core::SymbolData data = sendBinding->link->block.data(ctx);
 
                     std::optional<int> arity = 0;
                     auto &gs = ctx.state;
@@ -109,7 +109,7 @@ void CFG::sanityCheck(core::Context ctx) {
                         }
                         arity = *arity + 1;
                     }
-                    ENFORCE(arity == send_binding->link->numberOfPositionalBlockParams);
+                    ENFORCE(arity == sendBinding->link->numberOfPositionalBlockParams);
                 }
             }
         }

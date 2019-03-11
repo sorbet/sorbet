@@ -210,7 +210,7 @@ class NameInserter {
         if (send->fun == core::Names::include()) {
             dest = &klass->ancestors;
         } else if (send->fun == core::Names::extend()) {
-            dest = &klass->singleton_ancestors;
+            dest = &klass->singletonAncestors;
         } else {
             return false;
         }

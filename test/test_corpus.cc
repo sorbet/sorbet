@@ -84,7 +84,7 @@ public:
 
 #define TEST_COUT TestCout()
 
-class CFG_Collector_and_Typer {
+class CFGCollectorAndTyper {
 public:
     vector<string> cfgs;
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
@@ -341,7 +341,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (expectation != test.expectations.end()) {
             checkTree();
             checkPragma("cfg");
-            CFG_Collector_and_Typer collector;
+            CFGCollectorAndTyper collector;
             auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             resolvedTree.tree.reset();
 
@@ -360,7 +360,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         // If there is a tree left with a typed: pragma, run the inferencer
         if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::Typed) {
             checkTree();
-            CFG_Collector_and_Typer collector;
+            CFGCollectorAndTyper collector;
             ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             resolvedTree.tree.reset();
             auto newErrors = errorQueue->drainAllErrors();

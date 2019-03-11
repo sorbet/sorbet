@@ -124,7 +124,7 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
     metrics.set_uuid(uuid);
 
     counters.counters->canonicalize();
-    for (auto &cat : counters.counters->counters_by_category) {
+    for (auto &cat : counters.counters->countersByCategory) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : cat.second) {
             sum += e.second;
@@ -251,13 +251,13 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs) {
 }
 
 string Proto::toJSON(const google::protobuf::Message &message) {
-    string json_string;
+    string jsonString;
     google::protobuf::util::JsonPrintOptions options;
     options.add_whitespace = true;
     options.always_print_primitive_fields = false;
     options.preserve_proto_field_names = true;
-    google::protobuf::util::MessageToJsonString(message, &json_string, options);
-    return json_string;
+    google::protobuf::util::MessageToJsonString(message, &jsonString, options);
+    return jsonString;
 }
 
 const char *kTypeUrlPrefix = "type.googleapis.com";

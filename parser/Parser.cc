@@ -11,16 +11,16 @@ using namespace std;
 
 namespace sorbet::parser {
 
-extern const char *dclass_strings[];
+extern const char *dclassStrings[];
 
 using namespace std;
 
 class ErrorToError {
-    static u4 translatePos(size_t pos, u4 max_off) {
+    static u4 translatePos(size_t pos, u4 maxOff) {
         if (pos == 0) {
             return pos;
         }
-        return min((u4)(pos), max_off);
+        return min((u4)(pos), maxOff);
     }
 
 public:
@@ -28,7 +28,7 @@ public:
         if (diagnostics.empty()) {
             return;
         }
-        u4 max_off = file.data(gs).source().size();
+        u4 maxOff = file.data(gs).source().size();
 
         for (auto &diag : diagnostics) {
             string_view level = "unknown"sv;
@@ -46,9 +46,9 @@ public:
                     Exception::notImplemented();
             }
             string msg("Parse {}: ");
-            msg.append(dclass_strings[(int)diag.error_class()]);
-            core::Loc loc(file, translatePos(diag.location().beginPos, max_off),
-                          translatePos(diag.location().endPos, max_off));
+            msg.append(dclassStrings[(int)diag.error_class()]);
+            core::Loc loc(file, translatePos(diag.location().beginPos, maxOff),
+                          translatePos(diag.location().endPos, maxOff));
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader(msg, level, diag.data());
             }

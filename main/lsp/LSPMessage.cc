@@ -185,13 +185,13 @@ const rapidjson::Value &LSPMessage::params() const {
 void LSPMessage::setCounter(int count) {
     if (isRequest()) {
         auto &r = asRequest();
-        r.sorbet_counter = count;
+        r.sorbetCounter = count;
     } else if (isNotification()) {
         auto &n = asNotification();
-        n.sorbet_counter = count;
+        n.sorbetCounter = count;
     } else if (isResponse()) {
         auto &rs = asResponse();
-        rs.sorbet_counter = count;
+        rs.sorbetCounter = count;
     } else {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }
@@ -199,11 +199,11 @@ void LSPMessage::setCounter(int count) {
 
 int LSPMessage::counter() const {
     if (isRequest()) {
-        return asRequest().sorbet_counter.value_or(-1);
+        return asRequest().sorbetCounter.value_or(-1);
     } else if (isNotification()) {
-        return asNotification().sorbet_counter.value_or(-1);
+        return asNotification().sorbetCounter.value_or(-1);
     } else if (isResponse()) {
-        return asResponse().sorbet_counter.value_or(-1);
+        return asResponse().sorbetCounter.value_or(-1);
     } else {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }
@@ -212,13 +212,13 @@ int LSPMessage::counter() const {
 void LSPMessage::setTimestamp(double timestamp) {
     if (isRequest()) {
         auto &r = asRequest();
-        r.sorbet_receive_timestamp = timestamp;
+        r.sorbetReceiveTimestamp = timestamp;
     } else if (isNotification()) {
         auto &n = asNotification();
-        n.sorbet_receive_timestamp = timestamp;
+        n.sorbetReceiveTimestamp = timestamp;
     } else if (isResponse()) {
         auto &rs = asResponse();
-        rs.sorbet_receive_timestamp = timestamp;
+        rs.sorbetReceiveTimestamp = timestamp;
     } else {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }
@@ -226,11 +226,11 @@ void LSPMessage::setTimestamp(double timestamp) {
 
 double LSPMessage::timestamp() const {
     if (isRequest()) {
-        return asRequest().sorbet_receive_timestamp.value_or(0.0);
+        return asRequest().sorbetReceiveTimestamp.value_or(0.0);
     } else if (isNotification()) {
-        return asNotification().sorbet_receive_timestamp.value_or(0.0);
+        return asNotification().sorbetReceiveTimestamp.value_or(0.0);
     } else if (isResponse()) {
-        return asResponse().sorbet_receive_timestamp.value_or(0.0);
+        return asResponse().sorbetReceiveTimestamp.value_or(0.0);
     } else {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }

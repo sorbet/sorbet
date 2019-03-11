@@ -30,12 +30,12 @@ struct CounterImpl {
     // std::string_view isn't hashable, so we use an unordered map. We could
     // implement hash ourselves, but this is the slowpath anyways.
     UnorderedMap<std::string_view, const char *> strings_by_value;
-    UnorderedMap<const char *, const char *> strings_by_ptr;
+    UnorderedMap<const char *, const char *> stringsByPtr;
 
     UnorderedMap<const char *, UnorderedMap<int, CounterType>> histograms;
     UnorderedMap<const char *, CounterType> counters;
     UnorderedMap<const char *, std::vector<CounterType>> timings;
-    UnorderedMap<const char *, UnorderedMap<const char *, CounterType>> counters_by_category;
+    UnorderedMap<const char *, UnorderedMap<const char *, CounterType>> countersByCategory;
 };
 } // namespace sorbet
 

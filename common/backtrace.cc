@@ -7,7 +7,7 @@
 using namespace std;
 
 #define MAX_STACK_FRAMES 128
-void *stack_traces[MAX_STACK_FRAMES];
+void *stackTraces[MAX_STACK_FRAMES];
 
 void filter_unnecessary(string &out) {
     string::size_type i = 0;
@@ -37,14 +37,14 @@ void filter_unnecessary(string &out) {
 }
 
 void sorbet::Exception::print_backtrace() noexcept {
-    int trace_size = 0;
+    int traceSize = 0;
     auto **messages = (char **)nullptr;
-    string program_name = getProgramName();
+    string programName = getProgramName();
 
-    trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
-    messages = backtrace_symbols(stack_traces, trace_size);
+    traceSize = backtrace(stackTraces, MAX_STACK_FRAMES);
+    messages = backtrace_symbols(stackTraces, traceSize);
 
-    string res = addr2line(program_name, stack_traces, trace_size);
+    string res = addr2line(programName, stackTraces, traceSize);
     filter_unnecessary(res);
     fatalLogger->error("Backtrace:\n{}", res.c_str());
 

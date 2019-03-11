@@ -576,7 +576,7 @@ class Module < Object
     )
     .returns(T.self_type)
   end
-  def undef_method(arg0); end
+  def undefMethod(arg0); end
 
   sig do
     params(

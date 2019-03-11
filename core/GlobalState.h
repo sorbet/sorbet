@@ -151,14 +151,14 @@ private:
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     std::string_view enterString(std::string_view nm);
-    u2 strings_last_page_used = STRINGS_PAGE_SIZE + 1;
+    u2 stringsLastPageUsed = STRINGS_PAGE_SIZE + 1;
     std::vector<Name> names;
     UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<Symbol> symbols;
-    std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
+    std::vector<std::pair<unsigned int, unsigned int>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
-    UnorderedSet<int> suppressed_error_classes;
-    UnorderedSet<int> only_error_classes;
+    UnorderedSet<int> suppressedErrorClasses;
+    UnorderedSet<int> onlyErrorClasses;
     bool wasModified_ = false;
 
     bool freezeSymbolTable();

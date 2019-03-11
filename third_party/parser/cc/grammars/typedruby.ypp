@@ -21,7 +21,7 @@ using namespace std::string_literals;
 }
 
 %param { ruby_parser::typedruby25& driver }
-%parse-param { ruby_parser::self_ptr self }
+%parse-param { ruby_parser::SelfPtr self }
 %define api.namespace {ruby_parser::bison::typedruby25}
 %define api.prefix {typedruby25}
 %define api.value.type { union parser_value }
@@ -212,7 +212,7 @@ using namespace std::string_literals;
   keyword_variable
   lhs
   literal
-  method_call
+  methodCall
   mlhs
   mlhs_inner
   mlhs_item
@@ -255,7 +255,7 @@ using namespace std::string_literals;
   bv_decls
   call_args
   command_args
-  exc_list
+  excList
   f_arg
   f_args
   f_block_arg
@@ -330,7 +330,7 @@ using namespace std::string_literals;
   lambda_body
 
 %type <with_token>
-  exc_var
+  excVar
   if_tail
   opt_else
   opt_ensure
@@ -371,7 +371,7 @@ union parser_value {
   ruby_parser::delimited_block *delimited_block;
   ruby_parser::node_with_token *with_token;
   ruby_parser::case_body *case_body;
-  ruby_parser::foreign_ptr node;
+  ruby_parser::ForeignPtr node;
   ruby_parser::node_list *list;
   ruby_parser::state_stack *stack;
   size_t size;
@@ -447,16 +447,16 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
 
         bodystmt: compstmt opt_rescue opt_else opt_ensure
                     {
-                      auto &rescue_bodies = $2;
+                      auto &rescueBodies = $2;
                       auto &else_ = $3;
                       auto &ensure = $4;
 
-                      if (rescue_bodies->size() == 0 && else_ != nullptr) {
+                      if (rescueBodies->size() == 0 && else_ != nullptr) {
                         driver.diagnostics.emplace_back(
 			  dlevel::WARNING, dclass::UselessElse, else_->tok);
                       }
 
-                      $$ = driver.build.begin_body(self, $1, rescue_bodies,
+                      $$ = driver.build.beginBody(self, $1, rescueBodies,
 						else_ ? else_->tok : nullptr,
 						else_ ? else_->nod : nullptr,
 						ensure ? ensure->tok : nullptr,
@@ -508,7 +508,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | kALIAS tGVAR tBACK_REF
                     {
-                      $$ = driver.build.alias(self, $1, driver.build.gvar(self, $2), driver.build.back_ref(self, $3));
+                      $$ = driver.build.alias(self, $1, driver.build.gvar(self, $2), driver.build.backRef(self, $3));
                     }
                 | kALIAS tGVAR tNTH_REF
                     {
@@ -517,15 +517,15 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | kUNDEF undef_list
                     {
-                      $$ = driver.build.undef_method(self, $1, $2);
+                      $$ = driver.build.undefMethod(self, $1, $2);
                     }
                 | stmt kIF_MOD expr_value
                     {
-                      $$ = driver.build.condition_mod(self, $1, nullptr, $3);
+                      $$ = driver.build.conditionMod(self, $1, nullptr, $3);
                     }
                 | stmt kUNLESS_MOD expr_value
                     {
-                      $$ = driver.build.condition_mod(self, nullptr, $1, $3);
+                      $$ = driver.build.conditionMod(self, nullptr, $1, $3);
                     }
                 | stmt kWHILE_MOD expr_value
                     {
@@ -533,13 +533,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | stmt kUNTIL_MOD expr_value
                     {
-                      $$ = driver.build.loop_until_mod(self, $1, $3);
+                      $$ = driver.build.loopUntil_mod(self, $1, $3);
                     }
                 | stmt kRESCUE_MOD stmt
                     {
                       ruby_parser::node_list rescue_body(
 						driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3));
-                      $$ = driver.build.begin_body(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                      $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
                     }
                 | klEND tLCURLY compstmt tRCURLY
                     {
@@ -586,7 +586,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tCOLON2 tCONSTANT tOP_ASGN command_rhs
                     {
-                      auto const_node = driver.build.const_op_assignable(self, driver.build.const_fetch(self, $1, $2, $3));
+                      auto const_node = driver.build.constOpAssignable(self, driver.build.constFetch(self, $1, $2, $3));
                       $$ = driver.build.op_assign(self, const_node, $4, $5);
                       DIAGCHECK();
                     }
@@ -606,18 +606,18 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     {
                       node_list rescue_body(
 			driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3));
-                      $$ = driver.build.begin_body(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                      $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
                     }
                 | command_asgn
 
             expr: command_call
                 | expr kAND expr
                     {
-                      $$ = driver.build.logical_and(self, $1, $2, $3);
+                      $$ = driver.build.logicalAnd(self, $1, $2, $3);
                     }
                 | expr kOR expr
                     {
-                      $$ = driver.build.logical_or(self, $1, $2, $3);
+                      $$ = driver.build.logicalOr(self, $1, $2, $3);
                     }
                 | kNOT opt_nl expr
                     {
@@ -656,9 +656,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | fcall command_args cmd_brace_block
                     {
-                      auto method_call = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, $2, nullptr);
+                      auto methodCall = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, $2, nullptr);
                       auto &delimited_block = $3;
-                      $$ = driver.build.block(self, method_call,
+                      $$ = driver.build.block(self, methodCall,
                                       delimited_block->begin,
                                       delimited_block->args,
                                       delimited_block->body,
@@ -671,9 +671,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value call_op operation2 command_args cmd_brace_block
                     {
-                      auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                      auto methodCall = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                       auto &delimited_block = $5;
-                      $$ = driver.build.block(self, method_call,
+                      $$ = driver.build.block(self, methodCall,
                                       delimited_block->begin,
                                       delimited_block->args,
                                       delimited_block->body,
@@ -686,9 +686,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tCOLON2 operation2 command_args cmd_brace_block
                     {
-                      auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                      auto methodCall = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                       auto &delimited_block = $5;
-                      $$ = driver.build.block(self, method_call,
+                      $$ = driver.build.block(self, methodCall,
                                       delimited_block->begin,
                                       delimited_block->args,
                                       delimited_block->body,
@@ -697,24 +697,24 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | kSUPER command_args
                     {
-                      $$ = driver.build.keyword_super(self, $1, nullptr, $2, nullptr);
+                      $$ = driver.build.keywordSuper(self, $1, nullptr, $2, nullptr);
                     }
                 | kYIELD command_args
                     {
-                      $$ = driver.build.keyword_yield(self, $1, nullptr, $2, nullptr);
+                      $$ = driver.build.keywordYield(self, $1, nullptr, $2, nullptr);
                       DIAGCHECK();
                     }
                 | kRETURN call_args
                     {
-                      $$ = driver.build.keyword_return(self, $1, nullptr, $2, nullptr);
+                      $$ = driver.build.keywordReturn(self, $1, nullptr, $2, nullptr);
                     }
                 | kBREAK call_args
                     {
-                      $$ = driver.build.keyword_break(self, $1, nullptr, $2, nullptr);
+                      $$ = driver.build.keywordBreak(self, $1, nullptr, $2, nullptr);
                     }
                 | kNEXT call_args
                     {
-                      $$ = driver.build.keyword_next(self, $1, nullptr, $2, nullptr);
+                      $$ = driver.build.keywordNext(self, $1, nullptr, $2, nullptr);
                     }
 
             mlhs: mlhs_basic
@@ -829,28 +829,28 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tLBRACK2 opt_call_args rbracket
                     {
-                      $$ = driver.build.index_asgn(self, $1, $2, $3, $4);
+                      $$ = driver.build.indexAsgn(self, $1, $2, $3, $4);
                     }
                 | primary_value call_op tIDENTIFIER
                     {
-                      $$ = driver.build.attr_asgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
                     }
                 | primary_value tCOLON2 tIDENTIFIER
                     {
-                      $$ = driver.build.attr_asgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
                     }
                 | primary_value call_op tCONSTANT
                     {
-                      $$ = driver.build.attr_asgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
-                      $$ = driver.build.assignable(self, driver.build.const_fetch(self, $1, $2, $3));
+                      $$ = driver.build.assignable(self, driver.build.constFetch(self, $1, $2, $3));
                       DIAGCHECK();
                     }
                 | tCOLON3 tCONSTANT
                     {
-                      $$ = driver.build.assignable(self, driver.build.const_global(self, $1, $2));
+                      $$ = driver.build.assignable(self, driver.build.constGlobal(self, $1, $2));
                       DIAGCHECK();
                     }
                 | backref
@@ -871,28 +871,28 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tLBRACK2 opt_call_args rbracket
                     {
-                      $$ = driver.build.index_asgn(self, $1, $2, $3, $4);
+                      $$ = driver.build.indexAsgn(self, $1, $2, $3, $4);
                     }
                 | primary_value call_op tIDENTIFIER
                     {
-                      $$ = driver.build.attr_asgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
                     }
                 | primary_value tCOLON2 tIDENTIFIER
                     {
-                      $$ = driver.build.attr_asgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
                     }
                 | primary_value call_op tCONSTANT
                     {
-                      $$ = driver.build.attr_asgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
-                      $$ = driver.build.assignable(self, driver.build.const_fetch(self, $1, $2, $3));
+                      $$ = driver.build.assignable(self, driver.build.constFetch(self, $1, $2, $3));
                       DIAGCHECK();
                     }
                 | tCOLON3 tCONSTANT
                     {
-                      $$ = driver.build.assignable(self, driver.build.const_global(self, $1, $2));
+                      $$ = driver.build.assignable(self, driver.build.constGlobal(self, $1, $2));
                       DIAGCHECK();
                     }
                 | backref
@@ -910,7 +910,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
 
            cpath: tCOLON3 cname
                     {
-                      $$ = driver.build.const_global(self, $1, $2);
+                      $$ = driver.build.constGlobal(self, $1, $2);
                     }
                 | cname
                     {
@@ -918,7 +918,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tCOLON2 cname
                     {
-                      $$ = driver.build.const_fetch(self, $1, $2, $3);
+                      $$ = driver.build.constFetch(self, $1, $2, $3);
                     }
 
            fname: tIDENTIFIER | tCONSTANT | tFID
@@ -996,13 +996,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tCOLON2 tCONSTANT tOP_ASGN arg_rhs
                     {
-                      auto const_ = driver.build.const_op_assignable(self, driver.build.const_fetch(self, $1, $2, $3));
+                      auto const_ = driver.build.constOpAssignable(self, driver.build.constFetch(self, $1, $2, $3));
                       $$ = driver.build.op_assign(self, const_, $4, $5);
                       DIAGCHECK();
                     }
                 | tCOLON3 tCONSTANT tOP_ASGN arg_rhs
                     {
-                      auto const_ = driver.build.const_op_assignable(self, driver.build.const_global(self, $1, $2));
+                      auto const_ = driver.build.constOpAssignable(self, driver.build.constGlobal(self, $1, $2));
                       $$ = driver.build.op_assign(self, const_, $3, $4);
                       DIAGCHECK();
                     }
@@ -1021,31 +1021,31 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | arg tPLUS arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tMINUS arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tSTAR2 arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tDIVIDE arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tPERCENT arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tPOW arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | tUNARY_OP simple_numeric tPOW arg
                     {
-                      $$ = driver.build.unary_op(self, $1, driver.build.binary_op(self, $2, $3, $4));
+                      $$ = driver.build.unary_op(self, $1, driver.build.binaryOp(self, $2, $3, $4));
                     }
                 | tUPLUS arg
                     {
@@ -1057,47 +1057,47 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | arg tPIPE arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tCARET arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tAMPER2 arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tCMP arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tGT arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tGEQ arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tLT arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tLEQ arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tEQ arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tEQQ arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tNEQ arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tMATCH arg
                     {
@@ -1106,7 +1106,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | arg tNMATCH arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | tBANG arg
                     {
@@ -1118,23 +1118,23 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | arg tLSHFT arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tRSHFT arg
                     {
-                      $$ = driver.build.binary_op(self, $1, $2, $3);
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
                 | arg tANDOP arg
                     {
-                      $$ = driver.build.logical_and(self, $1, $2, $3);
+                      $$ = driver.build.logicalAnd(self, $1, $2, $3);
                     }
                 | arg tOROP arg
                     {
-                      $$ = driver.build.logical_or(self, $1, $2, $3);
+                      $$ = driver.build.logicalOr(self, $1, $2, $3);
                     }
                 | kDEFINED opt_nl arg
                     {
-                      $$ = driver.build.keyword_defined(self, $1, $3);
+                      $$ = driver.build.keywordDefined(self, $1, $3);
                     }
                 | arg tEH arg opt_nl tCOLON arg
                     {
@@ -1161,7 +1161,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | arg kRESCUE_MOD arg
                     {
                       node_list rescue_body(driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3));
-                      $$ = driver.build.begin_body(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                      $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
                     }
 
       paren_args: tLPAREN2 opt_call_args rparen
@@ -1232,7 +1232,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
 
        block_arg: tAMPER arg_value
                     {
-                      $$ = driver.build.block_pass(self, $1, $2);
+                      $$ = driver.build.blockPass(self, $1, $2);
                     }
 
    opt_block_arg: tCOMMA block_arg
@@ -1310,7 +1310,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     bodystmt kEND
                     {
                       driver.replace_stack($<stack>2);
-                      $$ = driver.build.begin_keyword(self, $1, $3, $4);
+                      $$ = driver.build.beginKeyword(self, $1, $3, $4);
                     }
                 | tLPAREN_ARG
                     {
@@ -1340,11 +1340,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
-                      $$ = driver.build.const_fetch(self, $1, $2, $3);
+                      $$ = driver.build.constFetch(self, $1, $2, $3);
                     }
                 | tCOLON3 tCONSTANT
                     {
-                      $$ = driver.build.const_global(self, $1, $2);
+                      $$ = driver.build.constGlobal(self, $1, $2);
                     }
                 | tLBRACK aref_args tRBRACK
                     {
@@ -1356,27 +1356,27 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | kRETURN
                     {
-                      $$ = driver.build.keyword_return(self, $1, nullptr, nullptr, nullptr);
+                      $$ = driver.build.keywordReturn(self, $1, nullptr, nullptr, nullptr);
                     }
                 | kYIELD tLPAREN2 call_args rparen
                     {
-                      $$ = driver.build.keyword_yield(self, $1, $2, $3, $4);
+                      $$ = driver.build.keywordYield(self, $1, $2, $3, $4);
                       DIAGCHECK();
                     }
                 | kYIELD tLPAREN2 rparen
                     {
                       node_list tmp;
-                      $$ = driver.build.keyword_yield(self, $1, $2, &tmp, $3);
+                      $$ = driver.build.keywordYield(self, $1, $2, &tmp, $3);
                       DIAGCHECK();
                     }
                 | kYIELD
                     {
-                      $$ = driver.build.keyword_yield(self, $1, nullptr, nullptr, nullptr);
+                      $$ = driver.build.keywordYield(self, $1, nullptr, nullptr, nullptr);
                       DIAGCHECK();
                     }
                 | kDEFINED opt_nl tLPAREN2 expr rparen
                     {
-                      $$ = driver.build.keyword_defined(self, $1, $4);
+                      $$ = driver.build.keywordDefined(self, $1, $4);
                     }
                 | kNOT tLPAREN2 expr rparen
                     {
@@ -1388,18 +1388,18 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | fcall brace_block
                     {
-                      auto method_call = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
+                      auto methodCall = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
                       auto &delimited_block = $2;
 
-                      $$ = driver.build.block(self, method_call,
+                      $$ = driver.build.block(self, methodCall,
                         delimited_block->begin,
                         delimited_block->args,
                         delimited_block->body,
                         delimited_block->end);
                       DIAGCHECK();
                     }
-                | method_call
-                | method_call brace_block
+                | methodCall
+                | methodCall brace_block
                     {
                       auto &delimited_block = $2;
                       $$ = driver.build.block(self, $1,
@@ -1411,7 +1411,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | tLAMBDA lambda
                     {
-                      auto lambda_call = driver.build.call_lambda(self, $1);
+                      auto lambda_call = driver.build.callLambda(self, $1);
                       auto &lambda = $2;
                       $$ = driver.build.block(self, lambda_call,
                         lambda->begin,
@@ -1456,7 +1456,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                     compstmt kEND
                     {
-                      $$ = driver.build.loop_until(self, $1, $3, $4, $6, $7);
+                      $$ = driver.build.loopUntil(self, $1, $3, $4, $6, $7);
                     }
                 | kCASE expr_value opt_terms case_body kEND
                     {
@@ -1549,7 +1549,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                         YYERROR;
                       }
 
-                      $$ = driver.build.def_module(self, module_tok, $2, $4, end_tok);
+                      $$ = driver.build.defModule(self, module_tok, $2, $4, end_tok);
                       driver.replace_stack($<stack>3);
                       driver.lex.unextend();
                     }
@@ -1563,7 +1563,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                     f_arglist bodystmt kEND
                     {
-                      $$ = driver.build.def_method(self, $1, $2, $4, $5, $6);
+                      $$ = driver.build.defMethod(self, $1, $2, $4, $5, $6);
                       driver.replace_stack($<stack>3);
                       driver.lex.cond.pop();
                       driver.lex.unextend();
@@ -1583,7 +1583,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                     f_arglist bodystmt kEND
                     {
-                      $$ = driver.build.def_singleton(self, $1, $2, $3, $5, $7, $8, $9);
+                      $$ = driver.build.defSingleton(self, $1, $2, $3, $5, $7, $8, $9);
                       DIAGCHECK();
 
                       driver.replace_stack($<stack>6);
@@ -1593,19 +1593,19 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | kBREAK
                     {
-                      $$ = driver.build.keyword_break(self, $1, nullptr, nullptr, nullptr);
+                      $$ = driver.build.keywordBreak(self, $1, nullptr, nullptr, nullptr);
                     }
                 | kNEXT
                     {
-                      $$ = driver.build.keyword_next(self, $1, nullptr, nullptr, nullptr);
+                      $$ = driver.build.keywordNext(self, $1, nullptr, nullptr, nullptr);
                     }
                 | kREDO
                     {
-                      $$ = driver.build.keyword_redo(self, $1);
+                      $$ = driver.build.keywordRedo(self, $1);
                     }
                 | kRETRY
                     {
-                      $$ = driver.build.keyword_retry(self, $1);
+                      $$ = driver.build.keywordRetry(self, $1);
                     }
 
    primary_value: primary
@@ -1981,12 +1981,12 @@ opt_block_args_tail:
                 | block_call dot_or_colon operation2 opt_paren_args brace_block
                     {
                       auto &delimited = $4;
-                      auto method_call = driver.build.call_method(self, $1, $2, $3,
+                      auto methodCall = driver.build.call_method(self, $1, $2, $3,
                           delimited->begin,
                           delimited->inner,
                           delimited->end);
                       auto &block = $5;
-                      $$ = driver.build.block(self, method_call,
+                      $$ = driver.build.block(self, methodCall,
                           block->begin,
                           block->args,
                           block->body,
@@ -1995,13 +1995,13 @@ opt_block_args_tail:
                     }
                 | block_call dot_or_colon operation2 command_args do_block
                     {
-                      auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                      auto methodCall = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                       auto &block = $5;
-                      $$ = driver.build.block(self, method_call, block->begin, block->args, block->body, block->end);
+                      $$ = driver.build.block(self, methodCall, block->begin, block->args, block->body, block->end);
                       DIAGCHECK();
                     }
 
-     method_call: fcall paren_args
+     methodCall: fcall paren_args
                     {
                       auto &delimited = $2;
                       $$ = driver.build.call_method(self, nullptr, nullptr, $1,
@@ -2048,14 +2048,14 @@ opt_block_args_tail:
                 | kSUPER paren_args
                     {
                       auto &delimited = $2;
-                      $$ = driver.build.keyword_super(self, $1,
+                      $$ = driver.build.keywordSuper(self, $1,
                           delimited->begin,
                           delimited->inner,
                           delimited->end);
                     }
                 | kSUPER
                     {
-                      $$ = driver.build.keyword_zsuper(self, $1);
+                      $$ = driver.build.keywordZsuper(self, $1);
                     }
                 | primary_value tLBRACK2 opt_call_args rbracket
                     {
@@ -2121,19 +2121,19 @@ opt_block_args_tail:
                     }
                 | case_body
 
-      opt_rescue: kRESCUE exc_list exc_var then compstmt opt_rescue
+      opt_rescue: kRESCUE excList excVar then compstmt opt_rescue
                     {
-                      auto &exc_var = $3;
-                      auto &exc_list_ = $2;
-                      auto exc_list = exc_list_
-                        ? driver.build.array(self, nullptr, exc_list_, nullptr)
+                      auto &excVar = $3;
+                      auto &excList_ = $2;
+                      auto excList = excList_
+                        ? driver.build.array(self, nullptr, excList_, nullptr)
                         : nullptr;
                       auto &rescues = $6;
 
                       rescues->push_front(driver.build.rescue_body(self, $1,
-                          exc_list,
-			  exc_var ? exc_var->tok : nullptr,
-			  exc_var ? exc_var->nod : nullptr,
+                          excList,
+			  excVar ? excVar->tok : nullptr,
+			  excVar ? excVar->nod : nullptr,
 			  $4, $5));
 
                       $$ = rescues;
@@ -2143,14 +2143,14 @@ opt_block_args_tail:
                       $$ = driver.alloc.node_list();
                     }
 
-        exc_list: arg_value
+        excList: arg_value
                     {
                       $$ = driver.alloc.node_list($1);
                     }
                 | mrhs
                 | list_none
 
-         exc_var: tASSOC lhs
+         excVar: tASSOC lhs
                     {
                       $$ = driver.alloc.node_with_token($1, $2);
                     }
@@ -2191,12 +2191,12 @@ opt_block_args_tail:
          string1: tSTRING_BEG string_contents tSTRING_END
                     {
                       auto str = driver.build.string_compose(self, $1, $2, $3);
-                      $$ = driver.build.dedent_string(self, str, driver.lex.dedentLevel().value_or(0));
+                      $$ = driver.build.dedentString(self, str, driver.lex.dedentLevel().value_or(0));
                     }
                 | tSTRING
                     {
                       auto str = driver.build.string(self, $1);
-                      $$ = driver.build.dedent_string(self, str, driver.lex.dedentLevel().value_or(0));
+                      $$ = driver.build.dedentString(self, str, driver.lex.dedentLevel().value_or(0));
                     }
                 | tCHARACTER
                     {
@@ -2206,7 +2206,7 @@ opt_block_args_tail:
          xstring: tXSTRING_BEG xstring_contents tSTRING_END
                     {
                       auto xstr = driver.build.xstring_compose(self, $1, $2, $3);
-                      $$ = driver.build.dedent_string(self, xstr, driver.lex.dedentLevel().value_or(0));
+                      $$ = driver.build.dedentString(self, xstr, driver.lex.dedentLevel().value_or(0));
                     }
 
           regexp: tREGEXP_BEG regexp_contents tSTRING_END tREGEXP_OPT
@@ -2408,7 +2408,7 @@ regexp_contents: // nothing
                 | tFLOAT_IMAGINARY
                     {
                       driver.lex.set_state_expr_endarg();
-                      $$ = driver.build.float_complex(self, $1);
+                      $$ = driver.build.floatComplex(self, $1);
                     }
 
    user_variable: tIDENTIFIER
@@ -2450,7 +2450,7 @@ keyword_variable: kNIL
                     }
                 | k__FILE__
                     {
-                      $$ = driver.build.file_literal(self, $1);
+                      $$ = driver.build.fileLiteral(self, $1);
                     }
                 | k__LINE__
                     {
@@ -2458,7 +2458,7 @@ keyword_variable: kNIL
                     }
                 | k__ENCODING__
                     {
-                      $$ = driver.build.encoding_literal(self, $1);
+                      $$ = driver.build.encodingLiteral(self, $1);
                     }
 
          var_ref: user_variable
@@ -2487,7 +2487,7 @@ keyword_variable: kNIL
                     }
                 | tBACK_REF
                     {
-                      $$ = driver.build.back_ref(self, $1);
+                      $$ = driver.build.backRef(self, $1);
                     }
 
       superclass: tLT

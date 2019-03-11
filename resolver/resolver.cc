@@ -103,8 +103,8 @@ private:
     };
 
     vector<ResolutionItem> todo_;
-    vector<AncestorResolutionItem> todo_ancestors_;
-    vector<ClassAliasResolutionItem> todo_aliases_;
+    vector<AncestorResolutionItem> todoAncestors_;
+    vector<ClassAliasResolutionItem> todoAliases_;
     using TypeAliasMap = UnorderedMap<core::SymbolRef, const ast::Expression *>;
     TypeAliasMap typeAliases;
 
@@ -415,7 +415,7 @@ private:
         if (resolveAncestorJob(ctx, job, typeAliases, false)) {
             categoryCounterInc("resolve.constants.ancestor", "firstpass");
         } else {
-            todo_ancestors_.emplace_back(std::move(job));
+            todoAncestors_.emplace_back(std::move(job));
         }
     }
 
@@ -455,7 +455,7 @@ public:
         }
 
         auto singleton = klass.data(ctx)->singletonClass(ctx);
-        for (auto &ancst : original->singleton_ancestors) {
+        for (auto &ancst : original->singletonAncestors) {
             transformAncestor(ctx.withOwner(klass), singleton, ancst);
         }
 
@@ -504,7 +504,7 @@ public:
         } else {
             // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
             // We may be able to get some perf by using this
-            this->todo_aliases_.emplace_back(std::move(item));
+            this->todoAliases_.emplace_back(std::move(item));
         }
         return asgn;
     }
@@ -550,53 +550,53 @@ public:
         }
 
         auto todo = std::move(constants.todo_);
-        auto todo_ancestors = std::move(constants.todo_ancestors_);
-        auto todo_aliases = std::move(constants.todo_aliases_);
+        auto todoAncestors = std::move(constants.todoAncestors_);
+        auto todoAliases = std::move(constants.todoAliases_);
         const auto typeAliases = std::move(constants.typeAliases);
         bool progress = true;
 
-        while (!(todo.empty() && todo_ancestors.empty()) && progress) {
+        while (!(todo.empty() && todoAncestors.empty()) && progress) {
             counterInc("resolve.constants.retries");
             {
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
                 // else.
-                int orig_size = todo_ancestors.size();
-                auto it = remove_if(todo_ancestors.begin(), todo_ancestors.end(),
+                int origSize = todoAncestors.size();
+                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(),
                                     [ctx, &typeAliases](AncestorResolutionItem &job) -> bool {
                                         return resolveAncestorJob(ctx, job, typeAliases, false);
                                     });
-                todo_ancestors.erase(it, todo_ancestors.end());
-                progress = (orig_size != todo_ancestors.size());
-                categoryCounterAdd("resolve.constants.ancestor", "retry", orig_size - todo_ancestors.size());
+                todoAncestors.erase(it, todoAncestors.end());
+                progress = (origSize != todoAncestors.size());
+                categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
             }
             {
-                int orig_size = todo.size();
+                int origSize = todo.size();
                 auto it = remove_if(todo.begin(), todo.end(), [ctx, &typeAliases](ResolutionItem &job) -> bool {
                     return resolveJob(ctx, job, typeAliases);
                 });
                 todo.erase(it, todo.end());
-                progress = progress || (orig_size != todo.size());
-                categoryCounterAdd("resolve.constants.nonancestor", "retry", orig_size - todo.size());
+                progress = progress || (origSize != todo.size());
+                categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
             }
             {
                 // This is an optimization. The order should not matter semantically
                 // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
-                // every item in todo_aliases implicitly depends on an item in item in todo
-                // there would be no point in running the todo_aliases step before todo
+                // every item in todoAliases implicitly depends on an item in item in todo
+                // there would be no point in running the todoAliases step before todo
 
-                int orig_size = todo_aliases.size();
-                auto it = remove_if(todo_aliases.begin(), todo_aliases.end(),
+                int origSize = todoAliases.size();
+                auto it = remove_if(todoAliases.begin(), todoAliases.end(),
                                     [ctx](ClassAliasResolutionItem &it) -> bool { return resolveAliasJob(ctx, it); });
-                todo_aliases.erase(it, todo_aliases.end());
-                progress = progress || (orig_size != todo_aliases.size());
-                categoryCounterAdd("resolve.constants.aliases", "retry", orig_size - todo_aliases.size());
+                todoAliases.erase(it, todoAliases.end());
+                progress = progress || (origSize != todoAliases.size());
+                categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoAliases.size());
             }
         }
         // We can no longer resolve new constants. All the code below reports errors
 
         categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
-        categoryCounterAdd("resolve.constants.ancestor", "failure", todo_ancestors.size());
+        categoryCounterAdd("resolve.constants.ancestor", "failure", todoAncestors.size());
 
         /*
          * Sort errors so we choose a deterministic error to report for each
@@ -619,7 +619,7 @@ public:
             return compareLocs(ctx, lhs.out->loc, rhs.out->loc);
         });
 
-        fast_sort(todo_ancestors, [ctx](const auto &lhs, const auto &rhs) -> bool {
+        fast_sort(todoAncestors, [ctx](const auto &lhs, const auto &rhs) -> bool {
             if (lhs.ancestor->loc == rhs.ancestor->loc) {
                 return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
             }
@@ -633,7 +633,7 @@ public:
             ENFORCE(resolved);
         }
 
-        for (auto &job : todo_ancestors) {
+        for (auto &job : todoAncestors) {
             auto resolved = resolveAncestorJob(ctx, job, typeAliases, true);
             if (!resolved) {
                 resolved = resolveAncestorJob(ctx, job, typeAliases, true);

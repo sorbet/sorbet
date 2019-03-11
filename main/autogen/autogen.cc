@@ -26,7 +26,7 @@ class AutogenWalk {
     vector<DefinitionRef> nesting;
     vector<ast::Send *> ignoring;
 
-    UnorderedMap<ast::Expression *, ReferenceRef> ref_map;
+    UnorderedMap<ast::Expression *, ReferenceRef> refMap;
 
     static bool ignoreChild(ast::Expression *expr) {
         bool result = false;
@@ -134,7 +134,7 @@ public:
                 def.defines_behavior = true;
             }
         }
-        for (auto &ancst : original->singleton_ancestors) {
+        for (auto &ancst : original->singletonAncestors) {
             auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
             if (cnst && cnst->original != nullptr) {
                 def.defines_behavior = true;
@@ -148,8 +148,8 @@ public:
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
         original->name = ast::TreeMap::apply(ctx, *this, move(original->name));
-        auto it = ref_map.find(original->name.get());
-        ENFORCE(it != ref_map.end());
+        auto it = refMap.find(original->name.get());
+        ENFORCE(it != refMap.end());
         def.defining_ref = it->second;
         refs[it->second.id()].is_defining_ref = true;
         refs[it->second.id()].definitionLoc = original->loc;
@@ -166,7 +166,7 @@ public:
         for (; ait != original->ancestors.end(); ++ait) {
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
         }
-        for (auto &ancst : original->singleton_ancestors) {
+        for (auto &ancst : original->singletonAncestors) {
             ancst = ast::TreeMap::apply(ctx, *this, move(ancst));
         }
 
@@ -177,8 +177,8 @@ public:
                 continue;
             }
 
-            auto it = ref_map.find(ancst.get());
-            if (it == ref_map.end()) {
+            auto it = refMap.find(ancst.get());
+            if (it == refMap.end()) {
                 continue;
             }
             if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
@@ -241,7 +241,7 @@ public:
         }
         ref.is_resolved_statically = true;
         ref.is_defining_ref = false;
-        ref_map[original.get()] = ref.id;
+        refMap[original.get()] = ref.id;
         return original;
     }
 
@@ -256,13 +256,13 @@ public:
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
         if (rhs && !rhs->typeAlias && rhs->constantSymbol().exists()) {
             def.type = Definition::Alias;
-            ENFORCE(ref_map.count(rhs));
-            def.aliased_ref = ref_map[rhs];
+            ENFORCE(refMap.count(rhs));
+            def.aliased_ref = refMap[rhs];
         } else {
             def.type = Definition::Casgn;
         }
-        ENFORCE(ref_map.count(lhs));
-        auto &ref = refs[ref_map[lhs].id()];
+        ENFORCE(refMap.count(lhs));
+        auto &ref = refs[refMap[lhs].id()];
         def.defining_ref = ref.id;
         ref.is_defining_ref = true;
         ref.definitionLoc = original->loc;

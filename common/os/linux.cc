@@ -15,23 +15,23 @@ using namespace std;
 extern "C" {
 // If we are linked against the LLVM sanitizers, this symbol will be
 // replaced with the definition from the sanitizer runtime
-void __attribute__((weak)) __sanitizer_symbolize_pc(void *pc, const char *fmt, char *out_buf, size_t out_buf_size) {
-    snprintf(out_buf, out_buf_size, "<null>");
+void __attribute__((weak)) __sanitizer_symbolize_pc(void *pc, const char *fmt, char *outBuf, size_t outBufSize) {
+    snprintf(outBuf, outBufSize, "<null>");
 }
 }
 
 string exec(string cmd);
 
-static void symbolize_pc(void *pc, const char *fmt, char *out_buf, size_t out_buf_size) {
-    __sanitizer_symbolize_pc(pc, fmt, out_buf, out_buf_size);
-    out_buf[out_buf_size - 1] = '\0';
-    if (strstr(out_buf, "<null>") != nullptr) { // sanitizers were'nt able to symbolize it.
-        auto offset = snprintf(out_buf, out_buf_size, "%p ", pc);
-        absl::Symbolize(pc, out_buf + offset, out_buf_size - offset);
+static void symbolize_pc(void *pc, const char *fmt, char *outBuf, size_t outBufSize) {
+    __sanitizer_symbolize_pc(pc, fmt, outBuf, outBufSize);
+    outBuf[outBufSize - 1] = '\0';
+    if (strstr(outBuf, "<null>") != nullptr) { // sanitizers were'nt able to symbolize it.
+        auto offset = snprintf(outBuf, outBufSize, "%p ", pc);
+        absl::Symbolize(pc, outBuf + offset, outBufSize - offset);
     }
 }
 
-string addr2line(string_view program_name, void const *const *addr, int count) {
+string addr2line(string_view programName, void const *const *addr, int count) {
     fmt::memory_buffer os;
     for (int i = 3; i < count; ++i) {
         char buf[4096];
@@ -57,25 +57,25 @@ bool amIBeingDebugged() {
     // cargo culted from
     // https://stackoverflow.com/questions/3596781/how-to-detect-if-the-current-process-is-being-run-by-gdb
 
-    const int status_fd = ::open("/proc/self/status", O_RDONLY);
-    if (status_fd == -1) {
+    const int statusFd = ::open("/proc/self/status", O_RDONLY);
+    if (statusFd == -1) {
         return false;
     }
 
-    const ssize_t num_read = ::read(status_fd, buf, sizeof(buf) - 1);
-    ::close(status_fd);
-    if (num_read <= 0) {
+    const ssize_t numRead = ::read(statusFd, buf, sizeof(buf) - 1);
+    ::close(statusFd);
+    if (numRead <= 0) {
         return false;
     }
 
-    buf[num_read] = '\0';
+    buf[numRead] = '\0';
     constexpr char tracerPidString[] = "TracerPid:";
-    const auto tracer_pid_ptr = ::strstr(buf, tracerPidString);
-    if (!tracer_pid_ptr) {
+    const auto tracerPidPtr = ::strstr(buf, tracerPidString);
+    if (!tracerPidPtr) {
         return false; // Can't tell
     }
 
-    for (const char *characterPtr = tracer_pid_ptr + sizeof(tracerPidString) - 1; characterPtr <= buf + num_read;
+    for (const char *characterPtr = tracerPidPtr + sizeof(tracerPidString) - 1; characterPtr <= buf + numRead;
          ++characterPtr) {
         if (::isspace(*characterPtr)) {
             continue;

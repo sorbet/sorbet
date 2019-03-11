@@ -19,7 +19,7 @@ typedruby25::typedruby25(const std::string& source, const struct builder& builde
 	: base_driver(ruby_version::RUBY_25, source, builder)
 {}
 
-foreign_ptr typedruby25::parse(self_ptr self) {
+ForeignPtr typedruby25::parse(SelfPtr self) {
 	bison::typedruby25::parser p(*this, self);
 	p.parse();
 	return ast;

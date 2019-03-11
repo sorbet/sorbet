@@ -62,7 +62,7 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     StatsdClientWrapper statsd(string(host), port, string(prefix));
 
     counters.counters->canonicalize();
-    for (auto &cat : counters.counters->counters_by_category) {
+    for (auto &cat : counters.counters->countersByCategory) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : cat.second) {
             sum += e.second;

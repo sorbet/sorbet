@@ -20,7 +20,7 @@ class ERB
     )
     .returns(::T.untyped)
   end
-  def def_method(mod, methodname, fname=T.unsafe(nil)); end
+  def defMethod(mod, methodname, fname=T.unsafe(nil)); end
 
   Sorbet.sig do
     params(
@@ -28,7 +28,7 @@ class ERB
     )
     .returns(::T.untyped)
   end
-  def def_module(methodname=T.unsafe(nil)); end
+  def defModule(methodname=T.unsafe(nil)); end
 
   Sorbet.sig {returns(::T.untyped)}
   def encoding(); end

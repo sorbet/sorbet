@@ -20,20 +20,20 @@ CounterState::CounterState(CounterState &&rhs) = default;
 CounterState &CounterState::operator=(CounterState &&rhs) = default;
 
 const char *CounterImpl::internKey(const char *str) {
-    auto it1 = this->strings_by_ptr.find(str);
-    if (it1 != this->strings_by_ptr.end()) {
+    auto it1 = this->stringsByPtr.find(str);
+    if (it1 != this->stringsByPtr.end()) {
         return it1->second;
     }
 
     string_view view(str);
     auto it2 = this->strings_by_value.find(view);
     if (it2 != this->strings_by_value.end()) {
-        this->strings_by_ptr[str] = it2->second;
+        this->stringsByPtr[str] = it2->second;
         return it2->second;
     }
 
     this->strings_by_value[view] = str;
-    this->strings_by_ptr[str] = str;
+    this->stringsByPtr[str] = str;
     return str;
 }
 
@@ -56,7 +56,7 @@ void CounterImpl::categoryCounterAdd(const char *category, const char *counter, 
 }
 
 void CounterImpl::prodCategoryCounterAdd(const char *category, const char *counter, unsigned long value) {
-    this->counters_by_category[category][counter] += value;
+    this->countersByCategory[category][counter] += value;
 }
 
 void CounterImpl::counterAdd(const char *counter, unsigned long value) {
@@ -84,10 +84,10 @@ CounterState getAndClearThreadCounters() {
 
 void CounterImpl::clear() {
     this->strings_by_value.clear();
-    this->strings_by_ptr.clear();
+    this->stringsByPtr.clear();
     this->histograms.clear();
     this->counters.clear();
-    this->counters_by_category.clear();
+    this->countersByCategory.clear();
 }
 
 UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram) {
@@ -106,7 +106,7 @@ UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram) {
 }
 
 void counterConsume(CounterState cs) {
-    for (auto &cat : cs.counters->counters_by_category) {
+    for (auto &cat : cs.counters->countersByCategory) {
         for (auto &e : cat.second) {
             counterState.prodCategoryCounterAdd(cat.first, e.first, e.second);
         }
@@ -183,7 +183,7 @@ const float HIST_CUTOFF = 0.1;
 void CounterImpl::canonicalize() {
     CounterImpl out;
 
-    for (auto &cat : this->counters_by_category) {
+    for (auto &cat : this->countersByCategory) {
         for (auto &e : cat.second) {
             out.prodCategoryCounterAdd(internKey(cat.first), internKey(e.first), e.second);
         }
@@ -205,7 +205,7 @@ void CounterImpl::canonicalize() {
         }
     }
 
-    this->counters_by_category = std::move(out.counters_by_category);
+    this->countersByCategory = std::move(out.countersByCategory);
     this->histograms = std::move(out.histograms);
     this->counters = std::move(out.counters);
     this->timings = std::move(out.timings);
@@ -228,7 +228,7 @@ string getCounterStatistics(vector<string> names) {
 
     fmt::format_to(buf, "Counters and Histograms: \n");
 
-    for (auto &cat : counterState.counters_by_category) {
+    for (auto &cat : counterState.countersByCategory) {
         if (!shouldShow(names, cat.first)) {
             continue;
         }

@@ -1,37 +1,37 @@
 digraph "blocks.rb" {
-subgraph "cluster_::BlockTest#block_pass" {
-    label = "::BlockTest#block_pass";
+subgraph "cluster_::BlockTest#blockPass" {
+    label = "::BlockTest#blockPass";
     color = blue;
-    "bb::BlockTest#block_pass_0" [shape = invhouse];
-    "bb::BlockTest#block_pass_1" [shape = parallelogram];
+    "bb::BlockTest#blockPass_0" [shape = invhouse];
+    "bb::BlockTest#blockPass_1" [shape = parallelogram];
 
-    "bb::BlockTest#block_pass_0" [
+    "bb::BlockTest#blockPass_0" [
         label = "block[id=0]()\l<U <statTemp>>$3: BlockTest = self\l<U <statTemp>>$4: Integer(1) = 1\l<U <statTemp>>$5: Integer(2) = 2\l<U <statTemp>>$6: Integer(3) = 3\l<U <block-pre-call-temp>>$7: T.untyped = <U <statTemp>>$3: BlockTest.<U foo>(<U <statTemp>>$4: Integer(1), <U <statTemp>>$5: Integer(2), <U <statTemp>>$6: Integer(3))\l<unconditional>\l"
     ];
 
-    "bb::BlockTest#block_pass_0" -> "bb::BlockTest#block_pass_2" [style="bold"];
-    "bb::BlockTest#block_pass_1" [
+    "bb::BlockTest#blockPass_0" -> "bb::BlockTest#blockPass_2" [style="bold"];
+    "bb::BlockTest#blockPass_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb::BlockTest#block_pass_1" -> "bb::BlockTest#block_pass_1" [style="bold"];
-    "bb::BlockTest#block_pass_2" [
+    "bb::BlockTest#blockPass_1" -> "bb::BlockTest#blockPass_1" [style="bold"];
+    "bb::BlockTest#blockPass_2" [
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::BlockTest#block_pass_2" -> "bb::BlockTest#block_pass_4" [style="bold"];
-    "bb::BlockTest#block_pass_2" -> "bb::BlockTest#block_pass_3" [style="tapered"];
+    "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_4" [style="bold"];
+    "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_3" [style="tapered"];
 
-    "bb::BlockTest#block_pass_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: T.untyped = Solve<::BlockTest#block_pass#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+    "bb::BlockTest#blockPass_3" [
+        label = "block[id=3]()\l<U <returnMethodTemp>>$2: T.untyped = Solve<::BlockTest#blockPass#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
     ];
 
-    "bb::BlockTest#block_pass_3" -> "bb::BlockTest#block_pass_1" [style="bold"];
-    "bb::BlockTest#block_pass_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$8: T.untyped = load_yield_params(::BlockTest#block_pass#<block>, BlockTest#block_pass#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(0))\l<U <blk>>$9: Integer(1) = 1\l<U y>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(1))\l<U <blockReturnTemp>>$10: T.untyped = <U x>$1\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::BlockTest#block_pass#<block>> <U <blockReturnTemp>>$10: T.untyped\l<unconditional>\l"
+    "bb::BlockTest#blockPass_3" -> "bb::BlockTest#blockPass_1" [style="bold"];
+    "bb::BlockTest#blockPass_4" [
+        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$8: T.untyped = load_yield_params(::BlockTest#blockPass#<block>, BlockTest#blockPass#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(0))\l<U <blk>>$9: Integer(1) = 1\l<U y>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(1))\l<U <blockReturnTemp>>$10: T.untyped = <U x>$1\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::BlockTest#blockPass#<block>> <U <blockReturnTemp>>$10: T.untyped\l<unconditional>\l"
     ];
 
-    "bb::BlockTest#block_pass_4" -> "bb::BlockTest#block_pass_2" [style="bold"];
+    "bb::BlockTest#blockPass_4" -> "bb::BlockTest#blockPass_2" [style="bold"];
 }
 
 }

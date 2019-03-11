@@ -26,12 +26,12 @@ int sorbet::Levenstein::distance(string_view s1, string_view s2, int bound) noex
 
     for (int x = 1; x <= s2len; x++) {
         column[0] = x;
-        int last_diagonal = x - 1;
+        int lastDiagonal = x - 1;
         for (auto y = 1; y <= s1len; y++) {
-            int old_diagonal = column[y];
-            auto possibilities = {column[y] + 1, column[y - 1] + 1, last_diagonal + (s1[y - 1] == s2[x - 1] ? 0 : 1)};
+            int oldDiagonal = column[y];
+            auto possibilities = {column[y] + 1, column[y - 1] + 1, lastDiagonal + (s1[y - 1] == s2[x - 1] ? 0 : 1)};
             column[y] = min(possibilities);
-            last_diagonal = old_diagonal;
+            lastDiagonal = oldDiagonal;
         }
     }
     int result = column[s1len];

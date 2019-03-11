@@ -5,7 +5,7 @@ Class {
   }
   superclass = NULL
   body = DefMethod {
-    name = <U block_pass>
+    name = <U blockPass>
     args = NULL
     body = Block {
       send = Send {

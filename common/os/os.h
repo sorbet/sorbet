@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <string>
 
-std::string addr2line(std::string_view program_name, void const *const *addr, int count);
+std::string addr2line(std::string_view programName, void const *const *addr, int count);
 
 std::string getProgramName();
 
