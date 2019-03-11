@@ -339,6 +339,22 @@ public:
         return SymbolRef(nullptr, 66);
     }
 
+    static SymbolRef Magic_undeclaredFieldStub_blk() {
+        return SymbolRef(nullptr, 67);
+    }
+
+    static SymbolRef RubyTyper_badAliasMethodStub() {
+        return SymbolRef(nullptr, 68);
+    }
+
+    static SymbolRef RubyTyper_badAliasMethodStub_arg0() {
+        return SymbolRef(nullptr, 69);
+    }
+
+    static SymbolRef RubyTyper_badAliasMethodStub_blk() {
+        return SymbolRef(nullptr, 70);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

@@ -11,3 +11,11 @@ class A
   # the rbi defining transaction_currency by the time we get to this
   alias_method :currency, :transaction_currency
 end
+
+class B
+  alias_method :foo, :does_not_exist
+end
+
+# foo should get stubbed, so we should be able to call it and use it anywhere
+x = B.new.foo(1)
+B.new.foo('', :sym, x)

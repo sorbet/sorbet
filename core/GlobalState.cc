@@ -216,6 +216,18 @@ void GlobalState::initEmpty() {
         id);
     id.data(*this)->setBlockArgument();
 
+    // RubyTyper#badAliasMethodStub(*arg0 : T.untyped) => T.untyped
+    id = enterMethodSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::badAliasMethodStub());
+    ENFORCE(id == Symbols::RubyTyper_badAliasMethodStub());
+    id.data(*this)->resultType = Types::untyped(*this, id);
+    id = enterMethodArgumentSymbol(Loc::none(), Symbols::RubyTyper_badAliasMethodStub(), core::Names::arg0());
+    id.data(*this)->setRepeated();
+    id.data(*this)->resultType = Types::untyped(*this, id);
+    id = enterMethodArgumentSymbol(Loc::none(), Symbols::RubyTyper_badAliasMethodStub(), core::Names::blkArg());
+    id.data(*this)->setBlockArgument();
+    id.data(*this)->resultType = Types::untyped(*this, id);
+    Symbols::RubyTyper_badAliasMethodStub().data(*this)->arguments().emplace_back(id);
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Top()] = Symbols::top();
