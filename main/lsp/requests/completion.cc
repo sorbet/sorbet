@@ -34,9 +34,10 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const 
                 result = mergeMaps(std::move(result),
                                    findSimilarMethodsIn(gs, core::make_type<core::ClassType>(mixin), name));
             }
-            if (owner->superClass.exists()) {
-                result = mergeMaps(std::move(result),
-                                   findSimilarMethodsIn(gs, core::make_type<core::ClassType>(owner->superClass), name));
+            if (owner->superClass().exists()) {
+                result =
+                    mergeMaps(std::move(result),
+                              findSimilarMethodsIn(gs, core::make_type<core::ClassType>(owner->superClass()), name));
             }
         },
         [&](core::AndType *c) {

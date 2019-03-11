@@ -139,9 +139,9 @@ struct Path {
                 gs.enterClassSymbol(core::Loc::none(), owner, gs.enterNameConstant("configatron" + this->toString()));
             classSym.data(gs)->setIsModule(false);
             if (this->parent == nullptr) {
-                classSym.data(gs)->superClass = core::Symbols::Configatron_RootStore();
+                classSym.data(gs)->setSuperClass(core::Symbols::Configatron_RootStore());
             } else {
-                classSym.data(gs)->superClass = core::Symbols::Configatron_Store();
+                classSym.data(gs)->setSuperClass(core::Symbols::Configatron_Store());
             }
             parent.data(gs)->resultType = core::make_type<core::ClassType>(classSym);
             // DO NOT ADD METHODS HERE. add them to Configatron::Store shim

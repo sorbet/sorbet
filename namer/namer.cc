@@ -374,9 +374,9 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         exitScope();
-        if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass.exists() &&
+        if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass().exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
-            klass->symbol.data(ctx)->superClass = core::Symbols::todo();
+            klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
 
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);

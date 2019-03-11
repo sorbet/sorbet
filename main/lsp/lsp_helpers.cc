@@ -85,7 +85,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (data->isClass() && data->attachedClass(gs).exists()) {
         return true;
     }
-    if (data->isClass() && data->superClass == core::Symbols::StubClass()) {
+    if (data->isClass() && data->superClass() == core::Symbols::StubClass()) {
         return true;
     }
     if (data->isMethodArgument() && data->isBlockArgument()) {

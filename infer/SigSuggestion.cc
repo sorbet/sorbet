@@ -391,7 +391,7 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
         }
     }
 
-    auto superClass = enclosingClass->superClass;
+    auto superClass = enclosingClass->superClass();
     if (!superClass.exists()) {
         core::SymbolRef none;
         return none;

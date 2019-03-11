@@ -35,7 +35,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
                     return dealiasAt(gs, aliasPair.second, klass, typeAliases);
                 }
             }
-            cursor = cursor.data(gs)->superClass;
+            cursor = cursor.data(gs)->superClass();
         }
     }
 }
@@ -86,8 +86,8 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
     }
     resolved[sym._id] = true;
 
-    if (sym.data(gs)->superClass.exists()) {
-        auto parent = sym.data(gs)->superClass;
+    if (sym.data(gs)->superClass().exists()) {
+        auto parent = sym.data(gs)->superClass();
         resolveTypeMembers(gs, parent, typeAliases, resolved);
 
         auto tps = parent.data(gs)->typeMembers();
@@ -155,7 +155,7 @@ const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
         return ent->second;
     }
 
-    auto superclass = klass.data(gs)->superClass;
+    auto superclass = klass.data(gs)->superClass();
     if (superclass.exists()) {
         auto &superclassMethods = getAbstractMethods(gs, abstractCache, superclass);
         // TODO(nelhage): This code coud go quadratic or even exponential given
@@ -306,8 +306,8 @@ void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(klass.data(gs)->isClass());
     auto klassData = klass.data(gs);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
-    if (klassData->superClass.exists()) {
-        auto superMethod = klassData->superClass.data(gs)->findMemberTransitive(gs, name);
+    if (klassData->superClass().exists()) {
+        auto superMethod = klassData->superClass().data(gs)->findMemberTransitive(gs, name);
         if (superMethod.exists()) {
             overridenMethods.emplace_back(superMethod);
         }
@@ -387,13 +387,13 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
         }
-        if (ref.data(gs)->superClass.exists() && ref.data(gs)->superClass != core::Symbols::todo()) {
+        if (ref.data(gs)->superClass().exists() && ref.data(gs)->superClass() != core::Symbols::todo()) {
             continue;
         }
         if (ref == core::Symbols::RubyTyper_ImplicitModuleSuperClass()) {
             // only happens if we run without stdlib
             ENFORCE(!core::Symbols::RubyTyper_ImplicitModuleSuperClass().data(gs)->loc().exists());
-            ref.data(gs)->superClass = core::Symbols::BasicObject();
+            ref.data(gs)->setSuperClass(core::Symbols::BasicObject());
             continue;
         }
 
@@ -401,23 +401,23 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         bool isSingleton = attached.exists() && attached != core::Symbols::untyped();
         if (isSingleton) {
             if (attached == core::Symbols::BasicObject()) {
-                ref.data(gs)->superClass = core::Symbols::Class();
-            } else if (attached.data(gs)->superClass == core::Symbols::RubyTyper_ImplicitModuleSuperClass()) {
+                ref.data(gs)->setSuperClass(core::Symbols::Class());
+            } else if (attached.data(gs)->superClass() == core::Symbols::RubyTyper_ImplicitModuleSuperClass()) {
                 // Note: this depends on attached classes having lower indexes in name table than their singletons
-                ref.data(gs)->superClass = core::Symbols::Module();
+                ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
-                ENFORCE(attached.data(gs)->superClass != core::Symbols::todo());
-                ref.data(gs)->superClass = attached.data(gs)->superClass.data(gs)->singletonClass(gs);
+                ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
+                ref.data(gs)->setSuperClass(attached.data(gs)->superClass().data(gs)->singletonClass(gs));
             }
         } else {
             if (ref.data(gs)->isClassClass()) {
                 if (!core::Symbols::Object().data(gs)->derivesFrom(gs, ref) && core::Symbols::Object() != ref) {
-                    ref.data(gs)->superClass = core::Symbols::Object();
+                    ref.data(gs)->setSuperClass(core::Symbols::Object());
                 }
             } else {
                 if (!core::Symbols::BasicObject().data(gs)->derivesFrom(gs, ref) &&
                     core::Symbols::BasicObject() != ref) {
-                    ref.data(gs)->superClass = core::Symbols::RubyTyper_ImplicitModuleSuperClass();
+                    ref.data(gs)->setSuperClass(core::Symbols::RubyTyper_ImplicitModuleSuperClass());
                 }
             }
         }
@@ -464,17 +464,17 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
     auto data = ofClass.data(gs);
     ENFORCE(data->isClass());
     if (!data->isClassLinearizationComputed()) {
-        if (data->superClass.exists()) {
-            computeLinearization(gs, data->superClass);
+        if (data->superClass().exists()) {
+            computeLinearization(gs, data->superClass());
         }
         InlinedVector<core::SymbolRef, 4> currentMixins = data->mixins();
         InlinedVector<core::SymbolRef, 4> newMixins;
         for (auto mixin : currentMixins) {
-            if (mixin == data->superClass) {
+            if (mixin == data->superClass()) {
                 continue;
             }
-            if (mixin.data(gs)->superClass == core::Symbols::StubAncestor() ||
-                mixin.data(gs)->superClass == core::Symbols::StubClass()) {
+            if (mixin.data(gs)->superClass() == core::Symbols::StubAncestor() ||
+                mixin.data(gs)->superClass() == core::Symbols::StubClass()) {
                 newMixins.emplace_back(mixin);
                 continue;
             }
@@ -495,9 +495,9 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
             } else {
                 int pos = 0;
-                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass, pos);
+                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass(), pos);
                 for (auto &mixinLinearizationComponent : mixinLinearization.mixins) {
-                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data->superClass, pos);
+                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data->superClass(), pos);
                 }
             }
         }
@@ -511,7 +511,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
         }
     }
     ENFORCE(data->isClassLinearizationComputed());
-    return ParentLinearizationInformation{data->mixins(), data->superClass, ofClass};
+    return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
 }
 
 void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationInformation &info,

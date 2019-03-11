@@ -234,7 +234,7 @@ private:
         }
 
         core::SymbolRef stub = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
-        stub.data(ctx)->superClass = core::Symbols::StubClass();
+        stub.data(ctx)->setSuperClass(core::Symbols::StubClass());
         stub.data(ctx)->resultType = core::Types::untypedUntracked();
         stub.data(ctx)->setIsModule(false);
         stub.data(ctx)->singletonClass(ctx).data(ctx)->resultType =
@@ -353,10 +353,10 @@ private:
         if (job.isSuperclass) {
             if (resolved == core::Symbols::todo()) {
                 // No superclass specified
-            } else if (!job.klass.data(ctx)->superClass.exists() ||
-                       job.klass.data(ctx)->superClass == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass == resolved) {
-                job.klass.data(ctx)->superClass = resolved;
+            } else if (!job.klass.data(ctx)->superClass().exists() ||
+                       job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
+                       job.klass.data(ctx)->superClass() == resolved) {
+                job.klass.data(ctx)->setSuperClass(resolved);
             } else {
                 if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx)->show(ctx));

@@ -428,7 +428,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
 void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.owner._id);
     p.putU4(what.name._id);
-    p.putU4(what.superClass._id);
+    p.putU4(what.superClassOrRebind._id);
     p.putU4(what.flags);
     p.putU4(what.uniqueCounter);
     p.putU4(what.argumentsOrMixins.size());
@@ -456,7 +456,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     Symbol result;
     result.owner = SymbolRef(gs, p.getU4());
     result.name = NameRef(*gs, p.getU4());
-    result.superClass = SymbolRef(gs, p.getU4());
+    result.superClassOrRebind = SymbolRef(gs, p.getU4());
     result.flags = p.getU4();
     result.uniqueCounter = p.getU4();
     int argumentsOrMixinsSize = p.getU4();

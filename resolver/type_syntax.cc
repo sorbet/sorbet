@@ -447,7 +447,7 @@ core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast
                                     i->constantSymbol().show(ctx));
                     }
                 }
-                if (sym.data(ctx)->superClass == core::Symbols::StubClass()) {
+                if (sym.data(ctx)->superClass() == core::Symbols::StubClass()) {
                     // Though for normal types _and_ stub types `infer` should use `externalType`,
                     // using `externalType` for stub types here will lead to incorrect handling of global state hashing,
                     // where we won't see difference between two different unresolved stubs(or a mistyped stub). thus,

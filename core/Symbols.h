@@ -165,11 +165,6 @@ public:
 
     bool derivesFrom(const GlobalState &gs, SymbolRef sym) const;
 
-    inline SymbolRef parent(const GlobalState &gs) const {
-        ENFORCE(isClass());
-        return superClass;
-    }
-
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     SymbolRef ref(const GlobalState &gs) const;
 
@@ -566,7 +561,28 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClass;
+    SymbolRef superClassOrRebind; // methods and method arugments store rebind here
+
+    inline SymbolRef superClass() const {
+        ENFORCE(isClass());
+        return superClassOrRebind;
+    }
+
+    inline void setSuperClass(SymbolRef claz) {
+        ENFORCE(isClass());
+        superClassOrRebind = claz;
+    }
+
+    inline SymbolRef rebind() const {
+        ENFORCE(isMethodArgument() || isMethod());
+        return superClassOrRebind;
+    }
+
+    inline void setReBind(SymbolRef rebind) {
+        ENFORCE(isMethodArgument() || isMethod());
+        superClassOrRebind = rebind;
+    }
+
     u4 flags = Flags::NONE;
     u4 uniqueCounter = 1; // used as a counter inside the namer
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution

@@ -28,10 +28,10 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = nameId;
     data->owner = Symbols::root();
-    data->superClass = SymbolRef(this, superclass);
     data->flags = 0;
     data->setClass();
     data->setIsModule(isModule);
+    data->setSuperClass(SymbolRef(this, superclass));
 
     if (symRef._id > Symbols::root()._id) {
         Symbols::root().dataAllowingNone(*this)->members[nameId] = symRef;
@@ -331,7 +331,7 @@ void GlobalState::initEmpty() {
 
     // Some of these are Classes
     Symbols::SinatraBase().data(*this)->setIsModule(false);
-    Symbols::SinatraBase().data(*this)->superClass = Symbols::Object();
+    Symbols::SinatraBase().data(*this)->setSuperClass(Symbols::Object());
 
     // Synthesize T::Utils
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());

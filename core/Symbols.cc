@@ -92,8 +92,8 @@ bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
             }
         }
     }
-    if (this->superClass.exists()) {
-        return sym == this->superClass || this->superClass.data(gs)->derivesFrom(gs, sym);
+    if (this->superClass().exists()) {
+        return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
 }
@@ -247,8 +247,8 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             }
         }
     }
-    if (this->superClass.exists()) {
-        return this->superClass.data(gs)->findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
+    if (this->superClass().exists()) {
+        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
     }
     return Symbols::noSymbol();
 }
@@ -311,9 +311,9 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
             while (i < candidateScopes.size()) {
                 const auto &sym = candidateScopes[i].data(gs);
-                if (sym->superClass.exists()) {
-                    if (!absl::c_linear_search(candidateScopes, sym->superClass)) {
-                        candidateScopes.emplace_back(sym->superClass);
+                if (sym->superClass().exists()) {
+                    if (!absl::c_linear_search(candidateScopes, sym->superClass())) {
+                        candidateScopes.emplace_back(sym->superClass());
                     }
                 }
                 for (auto ancestor : sym->argumentsOrMixins) {
@@ -426,8 +426,8 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
             result = subResult;
         }
     }
-    if (this->superClass.exists()) {
-        auto subResult = this->superClass.data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+    if (this->superClass().exists()) {
+        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
@@ -538,8 +538,8 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
                            }));
         }
 
-        if (this->superClass.exists()) {
-            auto superClass = this->superClass.data(gs);
+        if (this->isClass() && this->superClass().exists()) {
+            auto superClass = this->superClass().data(gs);
             fmt::format_to(buf, " < {}", useToString ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
         }
 
@@ -699,7 +699,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
     counterInc("singleton_classes");
     singletonInfo->members[Names::attached()] = selfRef;
-    singletonInfo->superClass = Symbols::todo();
+    singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
     selfRef.data(gs)->members[Names::singleton()] = singleton;
@@ -770,7 +770,7 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
             result.members[NameRef(to, mem.first.id())] = mem.second;
         }
     }
-    result.superClass = this->superClass;
+    result.superClassOrRebind = this->superClassOrRebind;
     result.uniqueCounter = this->uniqueCounter;
     result.intrinsic = this->intrinsic;
     return result;
@@ -834,7 +834,7 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
     result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClass._id);
+    result = mix(result, this->superClassOrRebind._id);
     // argumentsOrMixins, typeParams, typeAliases
     for (auto e : membersStableOrderSlow(gs)) {
         if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
@@ -857,7 +857,7 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
 
 bool Symbol::ignoreInHashing(const GlobalState &gs) const {
     if (isClass()) {
-        return superClass == core::Symbols::StubClass();
+        return superClass() == core::Symbols::StubClass();
     } else if (isMethod()) {
         return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit();
     }
