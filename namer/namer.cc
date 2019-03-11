@@ -864,10 +864,11 @@ public:
         if (isTypeTemplate) {
             auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
             oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
-            if (oldSym.exists()) {
+            if (oldSym.exists() &&
+                !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
                 if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Redefining constant `{}`", context.data(ctx)->show(ctx));
-                    e.addErrorLine(context.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Redefining constant `{}`", typeName->cnst.data(ctx)->show(ctx));
+                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
                 ctx.state.mangleRenameSymbol(oldSym, typeName->cnst);
             }
