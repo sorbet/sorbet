@@ -583,12 +583,12 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
                 core::Loc recvLoc = csend->receiver->loc;
 
-                // NOTE(nelhage): We actually desugar into a call to `nil?`. If an
-                // object has overridden `nil?`, this technically will not match
+                // NOTE(dug): We actually desugar into a call to `== nil`. If an
+                // object has overridden `==`, this technically will not match
                 // Ruby's behavior.
 
                 auto assgn = MK::Assign(recvLoc, tempRecv, node2TreeImpl(dctx, std::move(csend->receiver)));
-                auto cond = MK::Send0(loc, MK::Local(recvLoc, tempRecv), core::Names::nil_p());
+                auto cond = MK::Send1(loc, MK::Local(recvLoc, tempRecv), core::Names::eqeq(), MK::Nil(loc));
 
                 unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));

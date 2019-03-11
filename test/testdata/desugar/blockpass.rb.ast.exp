@@ -62,7 +62,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
       begin
         <D <U <assignTemp>> $4> = <emptyTree>::<C <U CallsWithObject>>
-        if <D <U <assignTemp>> $4>.<U nil?>()
+        if <D <U <assignTemp>> $4>.<U ==>(nil)
           nil
         else
           <D <U <assignTemp>> $4>.<U calls_with_object>() do |<D <U <block-pass>> $5>|
