@@ -60,7 +60,7 @@ class SorbetRBIGeneration::RbiGenerator
     end
 
     def finish(output_dir = './rbi/gems/')
-      FileUtils.rm_r(output_dir)
+      FileUtils.rm_r(output_dir) if Dir.exist?(output_dir)
       disable_tracepoints
       generate_rbis(output_dir)
     end
