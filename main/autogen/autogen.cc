@@ -459,7 +459,11 @@ private:
     }
 
     void packRange(u4 begin, u4 end) {
-        packer.pack_uint32((begin << 16) | end);
+        if (version == 1) {
+            packer.pack_uint32((begin << 16) | end);
+        } else {
+            packer.pack_uint64(((u8)begin << 32) | end);
+        }
     }
 
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def) {
@@ -532,7 +536,7 @@ private:
 
 public:
     constexpr static int MIN_VERSION = 1;
-    constexpr static int MAX_VERSION = 1;
+    constexpr static int MAX_VERSION = 2;
 
     // symbols[0..3] are reserved for the Type aliases
     MsgpackWriter(int version)
@@ -638,11 +642,36 @@ const map<int, vector<string>> MsgpackWriter::ref_attr_map{
             "parent_of",
         },
     },
+    {
+        2,
+        {
+            "scope",
+            "name",
+            "nesting",
+            "expression_range",
+            "expression_pos_range",
+            "resolved",
+            "is_defining_ref",
+            "parent_of",
+        },
+    },
 };
 
 const map<int, vector<string>> MsgpackWriter::def_attr_map{
     {
         1,
+        {
+            "raw_full_name",
+            "type",
+            "defines_behavior",
+            "is_empty",
+            "parent_ref",
+            "aliased_ref",
+            "defining_ref",
+        },
+    },
+    {
+        2,
         {
             "raw_full_name",
             "type",
