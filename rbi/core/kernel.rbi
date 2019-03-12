@@ -787,4 +787,10 @@ module Kernel
     .returns(T.noreturn)
   end
   def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
+
+  sig { params(args: String).returns(T.noreturn) }
+  def exec(*args); end
+
+  sig { params(args: String).returns(T.any(NilClass, FalseClass, TrueClass)) }
+  def system(*args); end
 end

@@ -1,18 +1,29 @@
 # typed: strict
 
 module Timeout
-  Sorbet.sig do
-    params(
-      sec: ::T.untyped,
-      klass: ::T.untyped,
-      message: ::T.untyped,
-    )
-    .returns(::T.untyped)
+  sig do
+    type_parameters(:U).params(
+      sec: T.nilable(Numeric),
+      klass: T.any(NilClass, T.class_of(Exception)),
+      message: T.untyped,
+      blk: T.proc.params(sec: T.nilable(Numeric)).returns(T.type_parameter(:U))
+    ).returns(T.type_parameter(:U))
   end
-  def self.timeout(sec, klass=T.unsafe(nil), message=T.unsafe(nil)); end
+  def self.timeout(sec, klass = nil, message = nil, &blk); end
 end
 
 class Timeout::Error < RuntimeError
+  sig { params(msg: T.untyped, blk: T.proc.params(exc: Timeout::Error).void).void }
+  def self.catch(msg = nil, &blk); end
+
+  sig { returns(T.nilable(Thread)) }
+  def thread; end
+
+  sig { params(msg: T.untyped).void }
+  def initialize(msg = nil)
+    @thread = T.let(T.unsafe(nil), T.nilable(Thread))
+  end
+
   Sorbet.sig do
     params(
       _: ::T.untyped,
@@ -23,12 +34,4 @@ class Timeout::Error < RuntimeError
 
   Sorbet.sig {returns(::T.untyped)}
   def thread(); end
-
-  Sorbet.sig do
-    params(
-      args: ::T.untyped,
-    )
-    .returns(::T.untyped)
-  end
-  def self.catch(*args); end
 end
