@@ -12,6 +12,10 @@ constexpr std::chrono::milliseconds PROGRESS_REFRESH_TIME_MILLIS = ProgressIndic
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger);
 
+std::pair<ast::ParsedFile, std::vector<std::shared_ptr<core::File>>>
+indexOneWithPlugins(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                    std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger);
+
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files,
                                         std::shared_ptr<spdlog::logger> logger);
 

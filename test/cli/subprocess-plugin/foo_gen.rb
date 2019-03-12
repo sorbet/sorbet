@@ -1,0 +1,1 @@
+puts "def foo; end"

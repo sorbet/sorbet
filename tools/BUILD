@@ -50,6 +50,7 @@ compilation_database(
         "//payload:interface",
         "//main/pipeline:pipeline",
         "//resolver:resolver",
+        "//plugin:plugin",
         "//payload/text:text",
         "//payload/binary:binary",
         "//namer/configatron:configatron",

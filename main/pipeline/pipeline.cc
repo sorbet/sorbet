@@ -20,6 +20,8 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
+#include "plugin/Plugins.h"
+#include "plugin/SubprocessTextPlugin.h"
 #include "resolver/resolver.h"
 
 using namespace std;
@@ -50,12 +52,6 @@ public:
     }
 };
 
-struct thread_result {
-    unique_ptr<core::GlobalState> gs;
-    CounterState counters;
-    vector<ast::ParsedFile> trees;
-};
-
 string fileKey(core::GlobalState &gs, core::FileRef file) {
     auto path = file.data(gs).path();
     string key(path.begin(), path.end());
@@ -65,92 +61,176 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     return key;
 }
 
+unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
+                                               const unique_ptr<KeyValueStore> &kvstore,
+                                               shared_ptr<spdlog::logger> &logger) {
+    if (kvstore && file.id() < gs.filesUsed()) {
+        string fileHashKey = fileKey(gs, file);
+        auto maybeCached = kvstore->read(fileHashKey);
+        if (maybeCached) {
+            logger->trace("Reading from cache: {}", file.data(gs).path());
+            auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
+            file.data(gs).cachedParseTree = true;
+            ENFORCE(cachedTree->loc.file() == file);
+            return cachedTree;
+        }
+    }
+    return nullptr;
+}
+
+unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                   shared_ptr<spdlog::logger> &logger) {
+    unique_ptr<parser::Node> nodes;
+    {
+        logger->trace("Parsing: {}", file.data(gs).path());
+        core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
+        nodes = parser::Parser::run(gs, file);
+    }
+    if (print.ParseTree) {
+        fmt::print("{}\n", nodes->toStringWithTabs(gs, 0));
+    }
+    if (print.ParseTreeJSON) {
+        fmt::print("{}\n", nodes->toJSON(gs, 0));
+    }
+    return nodes;
+}
+
+unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
+                                       const options::Printers &print, shared_ptr<spdlog::logger> &logger) {
+    unique_ptr<ast::Expression> ast;
+    core::MutableContext ctx(gs, core::Symbols::root());
+    {
+        logger->trace("Desugaring: {}", file.data(gs).path());
+        core::ErrorRegion errs(gs, file);
+        core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
+        ast = ast::desugar::node2Tree(ctx, move(parseTree));
+    }
+    if (print.Desugared) {
+        fmt::print("{}\n", ast->toStringWithTabs(gs, 0));
+    }
+    if (print.DesugaredRaw) {
+        fmt::print("{}\n", ast->showRaw(gs));
+    }
+    return ast;
+}
+
+unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast,
+                                   shared_ptr<spdlog::logger> &logger) {
+    core::MutableContext ctx(gs, core::Symbols::root());
+    logger->trace("Inlining DSLs: {}", file.data(gs).path());
+    core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
+    core::ErrorRegion errs(gs, file);
+    return dsl::DSL::run(ctx, move(ast));
+}
+
+ast::ParsedFile emptyParsedFile(core::FileRef file) {
+    return {make_unique<ast::EmptyTree>(), file};
+}
+
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
 
     try {
-        if (kvstore && file.id() < lgs.filesUsed()) {
-            string fileHashKey = fileKey(lgs, file);
-            auto maybeCached = kvstore->read(fileHashKey);
-            if (maybeCached) {
-                logger->trace("Reading from cache: {}", file.data(lgs).path());
-                auto t = core::serialize::Serializer::loadExpression(lgs, maybeCached, file.id());
-                file.data(lgs).cachedParseTree = true;
-                ENFORCE(t->loc.file() == file);
-                dslsInlined.tree = move(t);
-            }
-        }
-        if (!dslsInlined.tree) {
+        unique_ptr<ast::Expression> tree = fetchTreeFromCache(lgs, file, kvstore, logger);
+
+        if (!tree) {
             // tree isn't cached. Need to start from parser
-
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
-                return {make_unique<ast::EmptyTree>(), file};
+                return emptyParsedFile(file);
             }
-
-            unique_ptr<parser::Node> nodes;
-            {
-                logger->trace("Parsing: {}", file.data(lgs).path());
-                core::ErrorRegion errs(lgs, file);
-                core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
-                nodes = parser::Parser::run(lgs, file);
-            }
-            if (print.ParseTree) {
-                fmt::print("{}\n", nodes->toStringWithTabs(lgs, 0));
-            }
-            if (print.ParseTreeJSON) {
-                fmt::print("{}\n", nodes->toJSON(lgs, 0));
-            }
-
+            auto parseTree = runParser(lgs, file, print, logger);
             if (opts.stopAfterPhase == options::Phase::PARSER) {
-                return {make_unique<ast::EmptyTree>(), file};
+                return emptyParsedFile(file);
             }
-
-            unique_ptr<ast::Expression> ast;
-            core::MutableContext ctx(lgs, core::Symbols::root());
-            {
-                logger->trace("Desugaring: {}", file.data(lgs).path());
-                core::ErrorRegion errs(lgs, file);
-                core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-                ast = ast::desugar::node2Tree(ctx, move(nodes));
-            }
-            if (print.Desugared) {
-                fmt::print("{}\n", ast->toStringWithTabs(lgs, 0));
-            }
-            if (print.DesugaredRaw) {
-                fmt::print("{}\n", ast->showRaw(lgs));
-            }
+            tree = runDesugar(lgs, file, move(parseTree), print, logger);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
-                return {make_unique<ast::EmptyTree>(), file};
+                return emptyParsedFile(file);
             }
-
             if (!opts.skipDSLPasses) {
-                logger->trace("Inlining DSLs: {}", file.data(lgs).path());
-                core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-                core::ErrorRegion errs(lgs, file);
-                dslsInlined.tree = dsl::DSL::run(ctx, move(ast));
-            } else {
-                dslsInlined.tree = move(ast);
+                tree = runDSL(lgs, file, move(tree), logger);
             }
         }
         if (print.DSLTree) {
-            fmt::print("{}\n", dslsInlined.tree->toStringWithTabs(lgs, 0));
+            fmt::print("{}\n", tree->toStringWithTabs(lgs, 0));
         }
         if (print.DSLTreeRaw) {
-            fmt::print("{}\n", dslsInlined.tree->showRaw(lgs));
+            fmt::print("{}\n", tree->showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
-            return {make_unique<ast::EmptyTree>(), file};
+            return emptyParsedFile(file);
         }
 
+        dslsInlined.tree = move(tree);
         return dslsInlined;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
         }
-        return {make_unique<ast::EmptyTree>(), file};
+        return emptyParsedFile(file);
+    }
+}
+
+pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::FileRef file) {
+    return {emptyParsedFile(file), vector<shared_ptr<core::File>>()};
+}
+
+pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const options::Options &opts,
+                                                                          core::GlobalState &gs, core::FileRef file,
+                                                                          unique_ptr<KeyValueStore> &kvstore,
+                                                                          shared_ptr<spdlog::logger> logger) {
+    auto &print = opts.print;
+    ast::ParsedFile dslsInlined{nullptr, file};
+    vector<shared_ptr<core::File>> resultPluginFiles;
+
+    try {
+        unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore, logger);
+
+        if (!tree) {
+            // tree isn't cached. Need to start from parser
+            if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                return emptyPluginFile(file);
+            }
+            auto parseTree = runParser(gs, file, print, logger);
+            if (opts.stopAfterPhase == options::Phase::PARSER) {
+                return emptyPluginFile(file);
+            }
+            tree = runDesugar(gs, file, move(parseTree), print, logger);
+            if (opts.stopAfterPhase == options::Phase::DESUGARER) {
+                return emptyPluginFile(file);
+            }
+            {
+                logger->trace("Running plugins: {}", file.data(gs).path());
+                core::MutableContext ctx(gs, core::Symbols::root());
+                core::ErrorRegion errs(gs, file);
+                auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
+                tree = move(pluginTree);
+                resultPluginFiles = move(pluginFiles);
+            }
+            if (!opts.skipDSLPasses) {
+                tree = runDSL(gs, file, move(tree), logger);
+            }
+        }
+        if (print.DSLTree) {
+            fmt::print("{}\n", tree->toStringWithTabs(gs, 0));
+        }
+        if (print.DSLTreeRaw) {
+            fmt::print("{}\n", tree->showRaw(gs));
+        }
+        if (opts.stopAfterPhase == options::Phase::DSL) {
+            return emptyPluginFile(file);
+        }
+
+        dslsInlined.tree = move(tree);
+        return {move(dslsInlined), resultPluginFiles};
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(gs).path());
+        }
+        return emptyPluginFile(file);
     }
 }
 
@@ -210,8 +290,74 @@ vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vect
     return ret;
 }
 
-void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const options::Options &opts,
-              shared_ptr<spdlog::logger> logger) {
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
+                                    const options::Options &opts) {
+    auto &fileData = file.data(gs);
+
+    core::StrictLevel level;
+    auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
+    if (fnd != opts.strictnessOverrides.end()) {
+        if (fnd->second == fileData.originalSigil) {
+            core::ErrorRegion errs(gs, file);
+            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
+                e.setHeader("Useless override of strictness level");
+            }
+        }
+        level = fnd->second;
+    } else {
+        if (fileData.originalSigil == core::StrictLevel::None) {
+            level = core::StrictLevel::Stripe;
+        } else {
+            level = fileData.originalSigil;
+        }
+    }
+
+    core::StrictLevel minStrict = opts.forceMinStrict;
+    core::StrictLevel maxStrict = opts.forceMaxStrict;
+    if (level <= core::StrictLevel::Max && level >= core::StrictLevel::None) {
+        level = max(min(level, maxStrict), minStrict);
+    }
+
+    if (gs.runningUnderAutogen) {
+        // Autogen stops before infer but needs to see all definitions
+        level = core::StrictLevel::Stripe;
+    }
+
+    switch (level) {
+        case core::StrictLevel::None:
+            Exception::raise("Should never happen");
+            break;
+        case core::StrictLevel::Ignore:
+            prodCounterInc("types.input.files.sigil.ignore");
+            break;
+        case core::StrictLevel::Internal:
+            Exception::raise("Should never happen");
+            break;
+        case core::StrictLevel::Stripe:
+            prodCounterInc("types.input.files.sigil.none");
+            break;
+        case core::StrictLevel::Typed:
+            prodCounterInc("types.input.files.sigil.typed");
+            break;
+        case core::StrictLevel::Strict:
+            prodCounterInc("types.input.files.sigil.strictLevel");
+            break;
+        case core::StrictLevel::Strong:
+            prodCounterInc("types.input.files.sigil.strong");
+            break;
+        case core::StrictLevel::Max:
+            Exception::raise("Should never happen");
+            break;
+        case core::StrictLevel::Autogenerated:
+            prodCounterInc("types.input.files.sigil.autogenerated");
+            break;
+    }
+
+    return level;
+}
+
+void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
+                                     const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::NotYetRead) {
         return;
     }
@@ -247,67 +393,142 @@ void readFile(unique_ptr<core::GlobalState> &gs, core::FileRef file, const optio
         }
     }
 
-    core::StrictLevel minStrict = opts.forceMinStrict;
-    core::StrictLevel maxStrict = opts.forceMaxStrict;
-    auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
-    if (fnd != opts.strictnessOverrides.end()) {
-        if (fnd->second == fileData.originalSigil) {
-            core::ErrorRegion errs(*gs, file);
-            if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
-                e.setHeader("Useless override of strictness level");
-            }
-        }
-        fileData.strictLevel = fnd->second;
-    } else {
-        if (fileData.originalSigil == core::StrictLevel::None) {
-            fileData.strictLevel = core::StrictLevel::Stripe;
-        } else {
-            fileData.strictLevel = fileData.originalSigil;
-        }
-    }
-
-    if (fileData.strictLevel <= core::StrictLevel::Max && fileData.strictLevel >= core::StrictLevel::None) {
-        fileData.strictLevel = max(min(fileData.strictLevel, maxStrict), minStrict);
-    }
-
-    if (gs->runningUnderAutogen) {
-        // Autogen stops before infer but needs to see all definitions
-        fileData.strictLevel = core::StrictLevel::Stripe;
-    }
-
-    switch (fileData.strictLevel) {
-        case core::StrictLevel::None:
-            Exception::raise("Should never happen");
-            break;
-        case core::StrictLevel::Ignore:
-            prodCounterInc("types.input.files.sigil.ignore");
-            break;
-        case core::StrictLevel::Internal:
-            Exception::raise("Should never happen");
-            break;
-        case core::StrictLevel::Stripe:
-            prodCounterInc("types.input.files.sigil.none");
-            break;
-        case core::StrictLevel::Typed:
-            prodCounterInc("types.input.files.sigil.typed");
-            break;
-        case core::StrictLevel::Strict:
-            prodCounterInc("types.input.files.sigil.strictLevel");
-            break;
-        case core::StrictLevel::Strong:
-            prodCounterInc("types.input.files.sigil.strong");
-            break;
-        case core::StrictLevel::Max:
-            Exception::raise("Should never happen");
-            break;
-        case core::StrictLevel::Autogenerated:
-            prodCounterInc("types.input.files.sigil.autogenerated");
-            break;
-    }
-
     if (!opts.storeState.empty()) {
         fileData.sourceType = core::File::PayloadGeneration;
     }
+
+    fileData.strictLevel = decideStrictLevel(*gs, file, opts);
+}
+
+struct IndexResultPack {
+    unique_ptr<core::GlobalState> gs;
+    CounterState counters;
+    vector<ast::ParsedFile> trees;
+    vector<shared_ptr<core::File>> pluginGeneratedFiles;
+};
+
+pair<unique_ptr<core::GlobalState>, vector<IndexResultPack>>
+indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
+                   const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
+                   shared_ptr<spdlog::logger> &logger) {
+    ProgressIndicator indexingProgress(opts.showProgress, "Indexing (supplied)", files.size());
+
+    auto resultq = make_shared<BlockingBoundedQueue<IndexResultPack>>(files.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
+    for (auto &file : files) {
+        fileq->push(move(file), 1);
+    }
+
+    workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore, logger]() {
+        logger->trace("worker deep copying global state");
+        auto localGs = baseGs->deepCopy();
+        logger->trace("worker done deep copying global state");
+        IndexResultPack threadResult;
+
+        {
+            core::FileRef job;
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    core::FileRef file = job;
+                    readFileWithStrictnessOverrides(localGs, file, opts, logger);
+                    auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, kvstore, logger);
+                    threadResult.pluginGeneratedFiles.insert(threadResult.pluginGeneratedFiles.end(),
+                                                             make_move_iterator(pluginFiles.begin()),
+                                                             make_move_iterator(pluginFiles.end()));
+                    threadResult.trees.emplace_back(move(parsedFile));
+                }
+            }
+        }
+
+        if (!threadResult.trees.empty()) {
+            threadResult.counters = getAndClearThreadCounters();
+            threadResult.gs = move(localGs);
+            resultq->push(move(threadResult), threadResult.trees.size());
+        }
+    });
+
+    logger->trace("Deep copying global state");
+    unique_ptr<core::GlobalState> gsCopy = baseGs->deepCopy();
+    logger->trace("Done deep copying global state");
+
+    logger->trace("Tallying plugin generated files from threads");
+    vector<IndexResultPack> threadResults;
+    {
+        IndexResultPack threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
+             result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+            if (result.gotItem()) {
+                threadResults.emplace_back(move(threadResult));
+            }
+            indexingProgress.reportProgress(fileq->doneEstimate());
+        }
+    }
+    logger->trace("Done tallying plugin generated files from threads");
+
+    return {move(gsCopy), move(threadResults)};
+}
+
+struct PluginFileIndexResult {
+    size_t pluginFileCount;
+    shared_ptr<BlockingBoundedQueue<IndexResultPack>> resultq;
+    unique_ptr<core::GlobalState> gsWithPluginFiles;
+};
+
+PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs, vector<IndexResultPack> firstPass,
+                                       const options::Options &opts, WorkerPool &workers,
+                                       unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
+    size_t pluginFileCount = 0;
+    size_t suppliedFileCount = 0;
+    for (const auto &threadResult : firstPass) {
+        pluginFileCount += threadResult.pluginGeneratedFiles.size();
+        suppliedFileCount += threadResult.trees.size();
+    }
+
+    auto resultq = make_shared<BlockingBoundedQueue<IndexResultPack>>(suppliedFileCount + pluginFileCount);
+    auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(pluginFileCount);
+    for (auto &threadResult : firstPass) {
+        core::UnfreezeFileTable unfreezeFiles(*gs);
+        const auto processedByThread = threadResult.trees.size();
+        for (const auto &file : threadResult.pluginGeneratedFiles) {
+            logger->trace("enqueue (plugin): {}", file->path());
+            auto generatedFile = gs->enterFile(file);
+            pluginFileq->push(move(generatedFile), 1);
+        }
+        resultq->push(move(threadResult), processedByThread);
+    }
+
+    PluginFileIndexResult result{pluginFileCount, resultq, nullptr};
+    if (pluginFileCount > 0) {
+        shared_ptr<core::GlobalState> protoGs = move(gs);
+        workers.multiplexJob("indexPluginFiles", [protoGs, &opts, pluginFileq, resultq, &kvstore, logger]() {
+            logger->trace("worker deep copying global state");
+            auto localGs = protoGs->deepCopy();
+            logger->trace("worker done deep copying global state");
+            IndexResultPack threadResult;
+            core::FileRef job;
+
+            for (auto result = pluginFileq->try_pop(job); !result.done(); result = pluginFileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    core::FileRef file = job;
+                    decideStrictLevel(*localGs, file, opts);
+                    threadResult.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger));
+                }
+            }
+
+            if (!threadResult.trees.empty()) {
+                threadResult.counters = getAndClearThreadCounters();
+                threadResult.gs = move(localGs);
+                resultq->push(move(threadResult), threadResult.trees.size());
+            }
+        });
+        logger->trace("Deep copying global state (plugins)");
+        result.gsWithPluginFiles = protoGs->deepCopy();
+        logger->trace("Done deep copying global state (plugins)");
+    } else {
+        result.gsWithPluginFiles = move(gs);
+    }
+
+    return result;
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
@@ -320,66 +541,42 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         return empty;
     }
 
-    shared_ptr<ConcurrentBoundedQueue<core::FileRef>> fileq;
-
-    shared_ptr<BlockingBoundedQueue<thread_result>> resultq;
-
-    {
-        fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
-        resultq = make_shared<BlockingBoundedQueue<thread_result>>(files.size());
-    }
-
     gs->sanityCheck();
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
+        size_t pluginFileCount = 0;
         for (auto file : files) {
-            readFile(gs, file, opts, logger);
-            ret.emplace_back(indexOne(opts, *gs, file, kvstore, logger));
-        }
-    } else {
-        ProgressIndicator indexingProgress(opts.showProgress, "Indexing", files.size());
-        const shared_ptr<core::GlobalState> cgs = move(gs);
-        for (auto &file : files) {
-            fileq->push(move(file), 1);
-        }
-        {
-            workers.multiplexJob("index", [cgs, &opts, fileq, resultq, &kvstore, logger]() {
-                logger->trace("worker deep copying global state");
-                auto lgs = cgs->deepCopy();
-                logger->trace("worker done deep copying global state");
-                thread_result threadResult;
-                int processedByThread = 0;
-                core::FileRef job;
-
+            readFileWithStrictnessOverrides(gs, file, opts, logger);
+            auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *gs, file, kvstore, logger);
+            ret.emplace_back(move(parsedFile));
+            pluginFileCount += pluginFiles.size();
+            for (auto &pluginFile : pluginFiles) {
+                core::FileRef pluginFileRef;
                 {
-                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                        if (result.gotItem()) {
-                            core::FileRef file = job;
-                            processedByThread++;
-                            readFile(lgs, file, opts, logger);
-                            threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore, logger));
-                        }
-                    }
+                    core::UnfreezeFileTable fileTableAccess(*gs);
+                    pluginFileRef = gs->enterFile(pluginFile);
+                    decideStrictLevel(*gs, pluginFileRef, opts);
                 }
-
-                if (processedByThread > 0) {
-                    threadResult.counters = getAndClearThreadCounters();
-                    threadResult.gs = move(lgs);
-                    resultq->push(move(threadResult), processedByThread);
-                }
-            });
-            logger->trace("Deep copying global state");
-            unique_ptr<core::GlobalState> mainTheadGs = cgs->deepCopy();
-            logger->trace("Done deep copying global state");
-            gs = move(mainTheadGs);
+                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore, logger));
+            }
         }
+        ENFORCE(files.size() + pluginFileCount == ret.size());
+    } else {
+        const shared_ptr<core::GlobalState> cgs = move(gs);
 
-        thread_result threadResult;
+        auto [pluginGs, firstPass] = indexSuppliedFiles(cgs, files, opts, workers, kvstore, logger);
+        auto pluginPass = indexPluginFiles(move(pluginGs), move(firstPass), opts, workers, kvstore, logger);
+        gs = move(pluginPass.gsWithPluginFiles);
+
         {
+            ProgressIndicator progress(opts.showProgress, "Indexing (plugins + merge)",
+                                       files.size() + pluginPass.pluginFileCount);
             logger->trace("Collecting results from indexing threads");
-            for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-                 result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+            IndexResultPack threadResult;
+            for (auto result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS);
+                 !result.done();
+                 result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
                 if (result.gotItem()) {
                     logger->trace("Building global substitution");
                     core::GlobalSubstitution substitution(*threadResult.gs, *gs, cgs.get());
@@ -403,12 +600,12 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                     logger->trace("Tree substitution done");
                 }
                 gs->errorQueue->flushErrors();
-                indexingProgress.reportProgress(fileq->doneEstimate());
             }
+            progress.reportProgress(pluginPass.resultq->doneEstimate());
             logger->trace("Done collecting results from indexing threads");
         }
+        ENFORCE(files.size() + pluginPass.pluginFileCount == ret.size());
     }
-    ENFORCE(files.size() == ret.size());
 
     auto by_file = [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; };
     fast_sort(ret, by_file);
@@ -628,6 +825,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.FileTableJson) {
             auto files = core::Proto::filesToProto(*gs);
             core::Proto::toJSON(files, cout);
+        }
+        if (opts.print.PluginGeneratedCode) {
+            plugin::Plugins::dumpPluginGeneratedFiles(*gs);
         }
 
         return typecheck_result;

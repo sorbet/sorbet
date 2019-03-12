@@ -65,6 +65,7 @@ public:
     };
 
     bool cachedParseTree = false;
+    bool pluginGenerated = false;
 
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;

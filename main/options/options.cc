@@ -41,6 +41,7 @@ const vector<PrintOptions> print_options({
     {"cfg", &Printers::CFG, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
+    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
 struct StopAfterOptions {
@@ -111,6 +112,43 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
     return result;
 }
 
+UnorderedMap<string, string> extractDslPlugins(string filePath, shared_ptr<spdlog::logger> logger) {
+    UnorderedMap<string, string> result;
+    bool good = true;
+    try {
+        YAML::Node config = YAML::LoadFile(filePath);
+        switch (config.Type()) {
+            case YAML::NodeType::Map:
+                for (const auto &child : config) {
+                    auto key = child.first.as<string>();
+                    if (child.second.Type() == YAML::NodeType::Scalar) {
+                        auto value = child.second.as<string>();
+                        auto [_, inserted] = result.emplace(move(key), move(value));
+                        if (!inserted) {
+                            logger->error("{}: Duplicate plugin trigger \"{}\"", filePath, key);
+                            good = false;
+                        }
+                    } else {
+                        logger->error("{}: Plugin trigger \"{}\" must map to a command that is a string", filePath,
+                                      key);
+                        good = false;
+                    }
+                }
+                break;
+            default:
+                logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", filePath);
+                good = false;
+        }
+    } catch (YAML::BadFile) {
+        logger->error("Failed to open DSL specification file \"{}\"", filePath);
+        good = false;
+    }
+    if (!good) {
+        throw EarlyReturnWithCode(1);
+    }
+    return result;
+}
+
 cxxopts::Options buildOptions() {
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
@@ -175,6 +213,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
+    options.add_options("dev")("dsl-plugins", "YAML config that configures external DSL plugins",
+                               cxxopts::value<string>()->default_value(""), "filepath.yaml");
 
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
@@ -403,6 +443,9 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
+        }
+        if (!raw["dsl-plugins"].as<string>().empty()) {
+            opts.dslPlugins = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));

@@ -1,0 +1,9 @@
+Failed to open DSL specification file "a_yaml_file_that_doesnt_exist"
+---
+test/cli/bad-plugin-spec/not-map.yaml: Cannot parse DSL plugin format. Map is expected at top level
+---
+test/cli/bad-plugin-spec/values-not-scalar.yaml: Plugin trigger "bad-trigger" must map to a command that is a string
+---
+test/cli/bad-plugin-spec/duplicate-triggers.yaml: Duplicate plugin trigger "attribute"
+test/cli/bad-plugin-spec/duplicate-triggers.yaml: Duplicate plugin trigger "attribute"
+test/cli/bad-plugin-spec/duplicate-triggers.yaml: Duplicate plugin trigger "food"
