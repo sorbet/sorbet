@@ -175,7 +175,8 @@ private:
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases);
         if (resolved.exists() && resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
             if (auto e = ctx.state.beginError(resolved.data(ctx)->loc(), core::errors::Resolver::RecursiveTypeAlias)) {
-                e.setHeader("Type alias expands to to an infinite type");
+                e.setHeader("Type alias `{}` expands to to an infinite type", resolved.data(ctx)->show(ctx));
+                e.addErrorLine(job.out->original->loc, "Constant used here");
             }
             job.out->typeAlias = ast::MK::Constant(job.out->loc, core::Symbols::untyped());
             job.out->setAliasSymbol(resolved);
@@ -1591,7 +1592,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
-    // This check is FAR to slow to run on large codebases, especially with sanitizers on.
+    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();
 
