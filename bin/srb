@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#!/usr/bin/env ruby
+
+# A total hack, but this file is both a valid ruby script and a bash script.
+puts() { return; }
+puts 'If you are seeing this, you need to run `gem install --no-wrappers sorbet`'
+=begin 2>/dev/null
+
+# From here on in, it is all bash until the last line
+
+display_help() {
+  echo "Usage $0 [command] [command_options]
+
+  Where [command] is one of:
+    initialize, init
+    typecheck, tc
+  "
+  exit 0
+}
+
+if [ "$#" -eq 0 ]; then
+  display_help
+fi
+
+command=$1
+shift
+
+case $command in
+  "initialize" | "init")
+    sorbet-rbi-generation
+    ;;
+
+  "typecheck" | "tc")
+    files=$(bundle exec rbis)
+    files+=" "
+    files+=$(find . -name '*.rb' -or -name '*.rbi')
+    $(dirname "${BASH_SOURCE[0]}")/sorbet $files "$@"
+    ;;
+
+  *)
+    echo "Unknown command \`$command\`"
+    display_help
+esac
+
+exit $?
+# The closing comment for ruby to be ok with this file
+=end

@@ -23,3 +23,5 @@
 # used for fuzzing
 /fuzz_corpus
 /fuzz_crashers
+
+*.gem

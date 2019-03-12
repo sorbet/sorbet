@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+module SorbetRBIGeneration; end
+
+require_relative '../lib/gem-generator-tracepoint'
+require_relative '../lib/hidden-method-finder'
+require_relative '../lib/fetch-rbis'
+
+# Pull in the hand-written RBIs
+SorbetRBIGeneration::FetchRBIs.main
+
+# Generate the RBIs from bundler
+SorbetRBIGeneration::RbiGenerator.start
+SorbetRBIGeneration::RbiGenerator.require_eveything
+SorbetRBIGeneration::RbiGenerator.finish
+
+# Find the hidden methods
+SorbetRBIGeneration::HiddenMethodFinder.main
