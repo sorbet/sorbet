@@ -4,41 +4,12 @@
 #include "absl/strings/match.h"
 #include "configatron.h"
 #include <cctype>
-#include <dirent.h>
 #include <sys/types.h>
 #include <utility>
 
 using namespace std;
 namespace sorbet::namer {
 namespace {
-vector<string> listDir(const char *name) {
-    vector<string> result;
-    DIR *dir;
-    struct dirent *entry;
-    vector<string> names;
-
-    if ((dir = opendir(name)) == nullptr) {
-        return result;
-    }
-
-    while ((entry = readdir(dir)) != nullptr) {
-        if (entry->d_type == DT_DIR) {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-                continue;
-            }
-            char path[1024];
-            snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
-            auto nested = listDir(path);
-            result.insert(result.end(), nested.begin(), nested.end());
-        } else if (absl::EndsWith(entry->d_name, ".yaml")) {
-            names.emplace_back(entry->d_name);
-        }
-    }
-    fast_sort(names);
-
-    closedir(dir);
-    return names;
-}
 
 enum class StringKind { String, Integer, Float, Symbol };
 
@@ -220,12 +191,15 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
                                        const vector<string> &files) {
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
-        auto files = listDir(folder.c_str());
+        auto files = FileOps::listFilesInDir(folder, {".yaml"}, true);
+        const int prefixLen = folder.length() + 1;
         for (const auto &file : files) {
             constexpr int extLen = 5; // strlen(".yaml");
             string_view fileName(file.c_str(), file.size() - extLen);
+            // Trim off folder + '/'
+            fileName = fileName.substr(prefixLen);
             auto innerNode = rootNode->getChild(fileName);
-            handleFile(gs, absl::StrCat(folder, "/", file), innerNode);
+            handleFile(gs, file, innerNode);
         }
     }
     for (auto &file : files) {

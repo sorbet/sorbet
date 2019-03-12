@@ -7,6 +7,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cxxabi.h>
+#include <dirent.h>
 #include <exception>
 #include <memory>
 #include <vector>
@@ -73,6 +74,45 @@ string_view sorbet::FileOps::getExtension(string_view path) {
         return string_view();
     }
     return path.substr(found + 1);
+}
+
+void appendFilesInDir(string_view path, sorbet::UnorderedSet<string> extensions, bool recursive,
+                      vector<string> &result) {
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(string(path).c_str())) == nullptr) {
+        switch (errno) {
+            case ENOTDIR:
+                throw sorbet::FileNotDirException();
+            default:
+                // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                throw sorbet::FileNotFoundException();
+        }
+    }
+
+    while ((entry = readdir(dir)) != nullptr) {
+        auto fullPath = fmt::format("{}/{}", path, entry->d_name);
+        if (entry->d_type == DT_DIR) {
+            if (!recursive || strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                continue;
+            }
+            appendFilesInDir(fullPath, extensions, recursive, result);
+        } else {
+            auto ext = fullPath.substr(fullPath.rfind('.'));
+            if (extensions.find(ext) != extensions.end()) {
+                result.emplace_back(fullPath);
+            }
+        }
+    }
+    closedir(dir);
+}
+
+vector<string> sorbet::FileOps::listFilesInDir(string_view path, UnorderedSet<string> extensions, bool recursive) {
+    vector<string> result;
+    appendFilesInDir(path, extensions, recursive, result);
+    fast_sort(result);
+    return result;
 }
 
 class SetTerminateHandler {

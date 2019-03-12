@@ -1,5 +1,4 @@
 #include "common/FileSystem.h"
-#include "common/common.h"
 
 namespace sorbet {
 using namespace std;
@@ -12,9 +11,9 @@ void OSFileSystem::writeFile(string_view filename, string_view text) {
     return FileOps::write(filename, text);
 }
 
-vector<string> OSFileSystem::listFilesInDir(string_view path, bool recursive) const {
-    // TODO: Implement once Sorbet supports folder inputs.
-    Exception::raise("listFilesInDir not yet supported");
+vector<string> OSFileSystem::listFilesInDir(string_view path, UnorderedSet<std::string> extensions,
+                                            bool recursive) const {
+    return FileOps::listFilesInDir(path, extensions, recursive);
 }
 
 } // namespace sorbet

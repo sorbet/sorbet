@@ -1,6 +1,7 @@
 #ifndef COMMON_FILESYSTEM_H
 #define COMMON_FILESYSTEM_H
 
+#include "common/common.h"
 #include <string>
 #include <vector>
 
@@ -20,8 +21,12 @@ public:
     /** Writes the specified data to the given file. */
     virtual void writeFile(std::string_view filename, std::string_view text) = 0;
 
-    /** Returns a list of all files in the given directory. */
-    virtual std::vector<std::string> listFilesInDir(std::string_view path, bool recursive) const = 0;
+    /**
+     * Returns a list of all files in the given directory. Returns paths that include the path to directory.
+     * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
+     */
+    virtual std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions,
+                                                    bool recursive) const = 0;
 };
 
 /**
@@ -33,7 +38,8 @@ public:
 
     std::string readFile(std::string_view path) const override;
     void writeFile(std::string_view filename, std::string_view text) override;
-    std::vector<std::string> listFilesInDir(std::string_view path, bool recursive) const override;
+    std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions,
+                                            bool recursive) const override;
 };
 
 } // namespace sorbet

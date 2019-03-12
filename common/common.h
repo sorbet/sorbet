@@ -136,6 +136,12 @@ public:
     static std::string read(std::string_view filename);
     static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
     static void write(std::string_view filename, std::string_view text);
+    /**
+     * Returns a list of all files in the given directory. Returns paths that include the path to directory.
+     * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
+     */
+    static std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions,
+                                                   bool recursive);
     static std::string_view getFileName(std::string_view path);
     static std::string_view getExtension(std::string_view path);
 };

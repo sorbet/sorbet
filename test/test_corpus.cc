@@ -28,7 +28,6 @@
 #include "test/helpers/position_assertions.h"
 #include <algorithm>
 #include <cstdio>
-#include <dirent.h>
 #include <fstream>
 #include <memory>
 #include <regex>
@@ -599,24 +598,15 @@ string rbFile2BaseTestName(string rbFileName) {
     }
     return testName;
 }
-// substrantially modified from https://stackoverflow.com/a/8438663
+
 vector<Expectations> listDir(const char *name) {
     vector<Expectations> result;
-    DIR *dir;
-    struct dirent *entry;
-    vector<string> names;
 
-    if ((dir = opendir(name)) == nullptr) {
-        return result;
-    }
-
-    while ((entry = readdir(dir)) != nullptr) {
-        if (entry->d_type == DT_DIR) {
-            continue;
-        } else {
-            names.emplace_back(entry->d_name);
-        }
-    }
+    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".exp"}, false);
+    const int prefixLen = strnlen(name, 1024) + 1;
+    // Trim off the input directory from the name.
+    transform(names.begin(), names.end(), names.begin(),
+              [&prefixLen](auto &name) -> string { return name.substr(prefixLen); });
     fast_sort(names, compareNames);
 
     Expectations current;
@@ -645,7 +635,6 @@ vector<Expectations> listDir(const char *name) {
                 string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
                 current.expectations[kind] = s;
             }
-        } else {
         }
     }
     if (!current.basename.empty()) {
@@ -653,7 +642,6 @@ vector<Expectations> listDir(const char *name) {
         current = Expectations();
     }
 
-    closedir(dir);
     return result;
 }
 

@@ -21,6 +21,11 @@ public:
     FileNotFoundException() : SorbetException("File not found") {}
 };
 
+class FileNotDirException : SorbetException {
+public:
+    FileNotDirException() : SorbetException("File is not a directory") {}
+};
+
 class Exception final {
 public:
     template <typename... TArgs>[[noreturn]] static bool raise(const TArgs &... args) __attribute__((noreturn));
