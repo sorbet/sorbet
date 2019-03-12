@@ -3,13 +3,16 @@
 
 # A total hack, but this file is both a valid ruby script and a bash script.
 puts() { return; }
+# shellcheck disable=SC2016
 puts 'If you are seeing this, you need to run `gem install --no-wrappers sorbet`'
 =begin 2>/dev/null
 
 # From here on in, it is all bash until the last line
 
 display_help() {
-  echo "Usage $0 [command] [command_options]
+  echo "Sorbet - A Typechecker for Ruby
+
+Usage $0 [command] [command_options]
 
   Where [command] is one of:
     initialize, init
@@ -25,16 +28,35 @@ fi
 command=$1
 shift
 
+# shellcheck disable=SC2120
+typecheck() {
+  files=""
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet"
+
+  [ -d "$cache_dir" ] || mkdir "$cache_dir"
+  if [ -f Gemfile.lock ]; then
+    cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
+    cache_file="${cache_dir}/${cache_hash}"
+    if [ ! -f "$cache_file" ]; then
+      bundle exec rbis > "$cache_file"
+    fi
+    files+=$(cat "$cache_file")
+    files+=" "
+  fi
+
+  files+=$(find . -name '*.rb' -or -name '*.rbi')
+  # shellcheck disable=SC2086
+  "$(dirname "${BASH_SOURCE[0]}")"/sorbet $files "$@"
+}
+
 case $command in
   "initialize" | "init")
     sorbet-rbi-generation
     ;;
 
   "typecheck" | "tc")
-    files=$(bundle exec rbis)
-    files+=" "
-    files+=$(find . -name '*.rb' -or -name '*.rbi')
-    $(dirname "${BASH_SOURCE[0]}")/sorbet $files "$@"
+    # shellcheck disable=SC2119
+    typecheck
     ;;
 
   *)
