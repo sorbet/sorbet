@@ -4,8 +4,6 @@
 #include "common/Subprocess.h"
 #include "core/errors/plugin.h"
 
-#include <sstream>
-
 using namespace std;
 
 namespace sorbet::plugin {
@@ -76,34 +74,33 @@ struct SpawningWalker {
             }
 
             if (output) {
-                stringstream generatedSource;
+                fmt::memory_buffer generatedSource;
                 for (auto &n : nesting) {
                     if (!n.components.empty() && n.components.back() == core::Names::singleton()) {
-                        generatedSource << "class << self;";
+                        format_to(generatedSource, "{}", "class << self;");
                     } else {
                         bool first = true;
-                        generatedSource << (n.type == Namespace::Class ? "class " : "module ");
+                        format_to(generatedSource, "{}", (n.type == Namespace::Class ? "class " : "module "));
                         for (auto it = n.components.rbegin(); it != n.components.rend(); it++) {
-                            auto &c = *it;
                             if (!first) {
-                                generatedSource << "::";
+                                format_to(generatedSource, "{}", "::");
                             }
                             first = false;
-                            if (c != core::Names::Constants::Root()) {
-                                generatedSource << c.data(ctx)->shortName(ctx);
+                            if (auto &name = *it; name != core::Names::Constants::Root()) {
+                                format_to(generatedSource, "{}", name.data(ctx)->shortName(ctx));
                             }
                         }
-                        generatedSource << ';';
+                        format_to(generatedSource, "{}", ';');
                     }
                 }
-                generatedSource << '\n' << *output;
+                format_to(generatedSource, "\n{}", *output);
                 for (int i = 0; i < nesting.size(); i++) {
-                    generatedSource << "end;";
+                    format_to(generatedSource, "{}", "end;");
                 }
 
                 auto path = fmt::format("{}//plugin-generated|{}", klass->loc.file().data(ctx).path(),
                                         subprocessResults.size());
-                auto file = make_shared<core::File>(move(path), generatedSource.str(), core::File::Normal);
+                auto file = make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Normal);
                 file->pluginGenerated = true;
                 subprocessResults.emplace_back(move(file));
             } else {
