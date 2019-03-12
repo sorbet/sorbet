@@ -104,7 +104,7 @@ private:
 
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
-    vector<ClassAliasResolutionItem> todoAliases_;
+    vector<ClassAliasResolutionItem> todoClassAliases_;
     using TypeAliasMap = UnorderedMap<core::SymbolRef, const ast::Expression *>;
     TypeAliasMap typeAliases;
 
@@ -289,7 +289,7 @@ private:
                          job.out->original->loc.toString(ctx));
     }
 
-    static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
+    static bool resolveClassAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
         if (it.rhs->typeAlias) {
             if (auto e = ctx.state.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
@@ -500,12 +500,12 @@ public:
 
         auto item = ClassAliasResolutionItem{id->constantSymbol(), rhs};
 
-        if (resolveAliasJob(ctx, item)) {
+        if (resolveClassAliasJob(ctx, item)) {
             categoryCounterInc("resolve.constants.aliases", "firstpass");
         } else {
             // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
             // We may be able to get some perf by using this
-            this->todoAliases_.emplace_back(std::move(item));
+            this->todoClassAliases_.emplace_back(std::move(item));
         }
         return asgn;
     }
@@ -552,7 +552,7 @@ public:
 
         auto todo = std::move(constants.todo_);
         auto todoAncestors = std::move(constants.todoAncestors_);
-        auto todoAliases = std::move(constants.todoAliases_);
+        auto todoClassAliases = std::move(constants.todoClassAliases_);
         const auto typeAliases = std::move(constants.typeAliases);
         bool progress = true;
 
@@ -583,15 +583,16 @@ public:
             {
                 // This is an optimization. The order should not matter semantically
                 // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
-                // every item in todoAliases implicitly depends on an item in item in todo
-                // there would be no point in running the todoAliases step before todo
+                // every item in todoClassAliases implicitly depends on an item in item in todo
+                // there would be no point in running the todoClassAliases step before todo
 
-                int origSize = todoAliases.size();
-                auto it = remove_if(todoAliases.begin(), todoAliases.end(),
-                                    [ctx](ClassAliasResolutionItem &it) -> bool { return resolveAliasJob(ctx, it); });
-                todoAliases.erase(it, todoAliases.end());
-                progress = progress || (origSize != todoAliases.size());
-                categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoAliases.size());
+                int origSize = todoClassAliases.size();
+                auto it =
+                    remove_if(todoClassAliases.begin(), todoClassAliases.end(),
+                              [ctx](ClassAliasResolutionItem &it) -> bool { return resolveClassAliasJob(ctx, it); });
+                todoClassAliases.erase(it, todoClassAliases.end());
+                progress = progress || (origSize != todoClassAliases.size());
+                categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
             }
         }
         // We can no longer resolve new constants. All the code below reports errors
