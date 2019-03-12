@@ -50,9 +50,9 @@ matrix:
     script:
     - travis_wait 90 bazel build main:sorbet --config=release-linux
     - cp bazel-bin/main/sorbet bin/sorbet
-    - chmod u+w sorbet
+    - chmod u+w bin/sorbet
     - strip bin/sorbet
-    - chmod u-w sorbet
+    - chmod u-w bin/sorbet
     - gem build sorbet.gemspec
     # eventually we'll have gem versions but for now erase them
     - mv sorbet-0.0.1-x86_64-linux.gem sorbet-x86_64-linux.gem
