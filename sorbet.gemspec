@@ -9,7 +9,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://sorbet.run'
 
   s.add_dependency('sorbet-rbi-generation')
-  s.add_dependency('rbis')
 
   # The binary `sorbet` is included, so it is platform dependent
   s.platform = Gem::Platform::CURRENT
