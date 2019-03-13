@@ -1,5 +1,9 @@
+#!/usr/bin/env ruby
+
 # frozen_string_literal: true
 # typed: true
+
+require 'set'
 
 module SorbetRBIGeneration; end
 
@@ -86,8 +90,8 @@ class SorbetRBIGeneration::RbiGenerator
     end
 
     def require_eveything
-      require_bundler
       require_rails
+      require_bundler # this comes second since rails projects fail `Bundler.require'
     end
 
     private
@@ -395,13 +399,12 @@ class SorbetRBIGeneration::RbiGenerator
       require 'rails/test_help'
       Rails.application.require_environment!
       Rails.application.load_runner
-      ActionCable::Connection::Base
-      ActionController::Base
-      ActionDispatch::SystemTestCase
-      ActionMailer::Base
-      ActionMailer::MessageDelivery
-      ActiveJob::Base
-      ActiveRecord::Schema
     end
   end
+end
+
+if $PROGRAM_NAME == __FILE__
+  SorbetRBIGeneration::RbiGenerator.start
+  SorbetRBIGeneration::RbiGenerator.require_eveything
+  SorbetRBIGeneration::RbiGenerator.finish
 end

@@ -51,7 +51,7 @@ typecheck() {
 
 case $command in
   "initialize" | "init")
-    sorbet-rbi-generation
+    bundle exec sorbet-rbi-generation
     ;;
 
   "typecheck" | "tc")
