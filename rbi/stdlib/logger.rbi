@@ -119,22 +119,22 @@ class Logger
   sig { params(msg: String).void }
   def <<(msg); end
 
-  sig { params(progname: T.untyped, block: T.proc.returns(T.untyped)).void }
+  sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def debug(progname = nil, &block); end
 
-  sig { params(progname: T.untyped, block: T.proc.returns(T.untyped)).void }
+  sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def info(progname = nil, &block); end
 
-  sig { params(progname: T.untyped, block: T.proc.returns(T.untyped)).void }
+  sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def warn(progname = nil, &block); end
 
-  sig { params(progname: T.untyped, block: T.proc.returns(T.untyped)).void }
+  sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def error(progname = nil, &block); end
 
-  sig { params(progname: T.untyped, block: T.proc.returns(T.untyped)).void }
+  sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def fatal(progname = nil, &block); end
 
-  sig { params(progname: T.untyped, block: T.proc.returns(T.untyped)).void }
+  sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def unknown(progname = nil, &block); end
 
   sig { void }
