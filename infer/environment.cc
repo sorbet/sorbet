@@ -1094,6 +1094,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                         break;
                     default: {
                         if (!asGoodAs || (tp.type->isUntyped() && !cur.type->isUntyped())) {
+                            if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
+                                // See cfg/builder/builder_walk.cc for an explanation of why this is here.
+                                if (ident->what._name == core::Names::blockBreakAssign()) {
+                                    break;
+                                }
+                            }
                             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Changing the type of a variable in a loop is not permitted");
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(

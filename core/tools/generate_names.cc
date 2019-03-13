@@ -232,6 +232,7 @@ NameDef names[] = {
     {"forTemp"},
     {"new_", "new"},
     {"blockCall", "<block-call>"},
+    {"blockBreakAssign", "<block-break-assign>"},
     {"arg", "<arg>"},
     {"blkArg", "<blk>"},
     {"blockGiven_p", "block_given?"},

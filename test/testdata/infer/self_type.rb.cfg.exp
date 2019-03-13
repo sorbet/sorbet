@@ -49,26 +49,26 @@ subgraph "cluster_#<static-init>" {
         label = "block[id=5](<U s>: A)\louterLoops: 1\l<U <statTemp>>$89: T.class_of(<root>) = self\l<U <whileTemp>>$88: T.untyped = <U <statTemp>>$89: T.class_of(<root>).<U rnd>()\l<U <whileTemp>>$88: T.untyped\l"
     ];
 
-    "bb#<static-init>_5" -> "bb#<static-init>_7" [style="bold"];
-    "bb#<static-init>_5" -> "bb#<static-init>_6" [style="tapered"];
+    "bb#<static-init>_5" -> "bb#<static-init>_8" [style="bold"];
+    "bb#<static-init>_5" -> "bb#<static-init>_7" [style="tapered"];
 
-    "bb#<static-init>_6" [
-        label = "block[id=6](<U s>: A)\l<U <statTemp>>$96: T.class_of(<root>) = self\l<U <statTemp>>$95: NilClass = <U <statTemp>>$96: T.class_of(<root>).<U puts>(<U s>: A)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_6" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_7" [
-        label = "block[id=7](<U s>: A)\louterLoops: 1\l<U <statTemp>>$93: T.class_of(B) = alias <C <U B>>\l<U <ifTemp>>$91: T.any(TrueClass, FalseClass) = <U s>: A.<U is_a?>(<U <statTemp>>$93: T.class_of(B))\l<U <ifTemp>>$91: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=7](<U s>: A)\l<U <statTemp>>$96: T.class_of(<root>) = self\l<U <statTemp>>$95: NilClass = <U <statTemp>>$96: T.class_of(<root>).<U puts>(<U s>: A)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_7" -> "bb#<static-init>_8" [style="bold"];
-    "bb#<static-init>_7" -> "bb#<static-init>_5" [style="tapered"];
-
+    "bb#<static-init>_7" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_8" [
-        label = "block[id=8](<U s>: T.all(A, B))\louterLoops: 1\l<U <statTemp>>$94: T.all(A, B) = <U s>\l<U s>: T.all(A, B) = <U <statTemp>>$94: T.all(A, B).<U returns_self>()\l<unconditional>\l"
+        label = "block[id=8](<U s>: A)\louterLoops: 1\l<U <statTemp>>$93: T.class_of(B) = alias <C <U B>>\l<U <ifTemp>>$91: T.any(TrueClass, FalseClass) = <U s>: A.<U is_a?>(<U <statTemp>>$93: T.class_of(B))\l<U <ifTemp>>$91: T.any(TrueClass, FalseClass)\l"
     ];
 
-    "bb#<static-init>_8" -> "bb#<static-init>_5" [style="bold"];
+    "bb#<static-init>_8" -> "bb#<static-init>_9" [style="bold"];
+    "bb#<static-init>_8" -> "bb#<static-init>_5" [style="tapered"];
+
+    "bb#<static-init>_9" [
+        label = "block[id=9](<U s>: T.all(A, B))\louterLoops: 1\l<U <statTemp>>$94: T.all(A, B) = <U s>\l<U s>: T.all(A, B) = <U <statTemp>>$94: T.all(A, B).<U returns_self>()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_9" -> "bb#<static-init>_5" [style="bold"];
 }
 
 subgraph "cluster_::Parent#returns_self" {
@@ -109,7 +109,7 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_4" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_5" [style="bold"];
     "bb::<Class:Parent>#<static-init>_2" -> "bb::<Class:Parent>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Parent>#<static-init>_3" [
@@ -117,11 +117,11 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
     ];
 
     "bb::<Class:Parent>#<static-init>_3" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
-    "bb::<Class:Parent>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Parent>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+    "bb::<Class:Parent>#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Parent>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::<Class:Parent>#<static-init>_4" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
+    "bb::<Class:Parent>#<static-init>_5" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::Generic#bad" {
@@ -162,7 +162,7 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_4" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_5" [style="bold"];
     "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Generic>#<static-init>_3" [
@@ -170,11 +170,11 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
     ];
 
     "bb::<Class:Generic>#<static-init>_3" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
-    "bb::<Class:Generic>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$12: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$11: T.untyped = <U <statTemp>>$12: T.class_of(T).<U self_type>()\l<U <statTemp>>$9: <Type: Generic[T.untyped]> = <U <statTemp>>$10: T.class_of(Generic).<U []>(<U <statTemp>>$11: T.untyped)\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::<Class:Generic>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+    "bb::<Class:Generic>#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$12: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$11: T.untyped = <U <statTemp>>$12: T.class_of(T).<U self_type>()\l<U <statTemp>>$9: <Type: Generic[T.untyped]> = <U <statTemp>>$10: T.class_of(Generic).<U []>(<U <statTemp>>$11: T.untyped)\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::<Class:Generic>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::<Class:Generic>#<static-init>_4" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
+    "bb::<Class:Generic>#<static-init>_5" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::Array#returns_self" {
@@ -215,7 +215,7 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_4" [style="bold"];
+    "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_5" [style="bold"];
     "bb::<Class:Array>#<static-init>_2" -> "bb::<Class:Array>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Array>#<static-init>_3" [
@@ -223,11 +223,11 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
     ];
 
     "bb::<Class:Array>#<static-init>_3" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
-    "bb::<Class:Array>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Array>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+    "bb::<Class:Array>#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:Array>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::<Class:Array>#<static-init>_4" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
+    "bb::<Class:Array>#<static-init>_5" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::B#returns_self" {
@@ -268,7 +268,7 @@ subgraph "cluster_::<Class:B>#<static-init>" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_4" [style="bold"];
+    "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_5" [style="bold"];
     "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:B>#<static-init>_3" [
@@ -276,11 +276,11 @@ subgraph "cluster_::<Class:B>#<static-init>" {
     ];
 
     "bb::<Class:B>#<static-init>_3" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
-    "bb::<Class:B>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:B>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
+    "bb::<Class:B>#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$8: Sorbet::Private::Builder = self\l<U <statTemp>>$10: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$7: Sorbet::Private::Builder = <U <statTemp>>$8: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$9: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::<Class:B>#<static-init>#<block>> <U <blockReturnTemp>>$7: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::<Class:B>#<static-init>_4" -> "bb::<Class:B>#<static-init>_2" [style="bold"];
+    "bb::<Class:B>#<static-init>_5" -> "bb::<Class:B>#<static-init>_2" [style="bold"];
 }
 
 }

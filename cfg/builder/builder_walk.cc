@@ -122,6 +122,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             what,
             [&](ast::While *a) {
                 auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                // breakNotCalledBlock is only entered if break is not called in
+                // the loop body
+                auto breakNotCalledBlock = cctx.inWhat.freshBlock(cctx.loops);
                 auto continueBlock = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(current, headerBlock, cctx.inWhat, a->loc);
 
@@ -129,16 +132,42 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto headerEnd = walk(cctx.withTarget(condSym).withLoopScope(headerBlock, continueBlock), a->cond.get(),
                                       headerBlock);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
-                conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat, a->cond->loc);
+                conditionalJump(headerEnd, condSym, bodyBlock, breakNotCalledBlock, cctx.inWhat, a->cond->loc);
                 // finishHeader
                 core::LocalVariable bodySym = cctx.newTemporary(core::Names::statTemp());
 
-                auto body =
-                    walk(cctx.withTarget(bodySym).withLoopScope(headerBlock, continueBlock), a->body.get(), bodyBlock);
+                auto body = walk(cctx.withTarget(bodySym)
+                                     .withLoopScope(headerBlock, continueBlock)
+                                     .withBlockBreakTarget(cctx.target),
+                                 a->body.get(), bodyBlock);
                 unconditionalJump(body, headerBlock, cctx.inWhat, a->loc);
 
-                synthesizeExpr(continueBlock, cctx.target, a->loc, make_unique<Literal>(core::Types::nilClass()));
+                synthesizeExpr(breakNotCalledBlock, cctx.target, a->loc, make_unique<Literal>(core::Types::nilClass()));
+                unconditionalJump(breakNotCalledBlock, continueBlock, cctx.inWhat, a->loc);
                 ret = continueBlock;
+
+                /*
+                 * This code:
+                 *
+                 * a = while cond
+                 *       break b
+                 *     end
+                 *
+                 *
+                 * generates this CFG:
+                 *
+                 *   --->Loop Header -------
+                 *   |     |               |
+                 *   |     |               V
+                 *   |     V        breakNotCalledBlock
+                 *   --Loop Body         a = nil
+                 *         |               |
+                 *       a = b             |
+                 *         |               |
+                 *         V               |
+                 *    continueBlock <-------
+                 *
+                 */
             },
             [&](ast::Return *a) {
                 core::LocalVariable retSym = cctx.newTemporary(core::Names::returnTemp());
@@ -277,6 +306,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                    // solveConstraintBlock is only entered if break is not called
+                    // in the block body.
+                    auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops);
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
 
@@ -311,13 +343,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                             make_unique<Send>(argTemp, core::Names::squareBrackets(), s->block->loc, idxVec, locs));
                     }
 
-                    conditionalJump(headerBlock, core::LocalVariable::blockCall(), bodyBlock, postBlock, cctx.inWhat,
-                                    s->loc);
+                    conditionalJump(headerBlock, core::LocalVariable::blockCall(), bodyBlock, solveConstraintBlock,
+                                    cctx.inWhat, s->loc);
 
                     unconditionalJump(current, headerBlock, cctx.inWhat, s->loc);
 
                     core::LocalVariable blockrv = cctx.newTemporary(core::Names::blockReturnTemp());
                     auto blockLast = walk(cctx.withTarget(blockrv)
+                                              .withBlockBreakTarget(cctx.target)
                                               .withLoopScope(headerBlock, postBlock, s->block->symbol)
                                               .withSendAndBlockLink(link),
                                           s->block->body.get(), bodyBlock);
@@ -327,9 +360,33 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s->loc);
+                    unconditionalJump(solveConstraintBlock, postBlock, cctx.inWhat, s->loc);
 
+                    solveConstraintBlock->exprs.emplace_back(cctx.target, s->loc, move(solveConstraint));
                     current = postBlock;
-                    current->exprs.emplace_back(cctx.target, s->loc, move(solveConstraint));
+
+                    /*
+                     * This code:
+                     *
+                     * a = foo do
+                     *   break b
+                     * end
+                     *
+                     * generates this CFG:
+                     *
+                     *   --->headerBlock -------
+                     *   |     |               |
+                     *   |     |               |
+                     *   |     V               |
+                     *   --Block Body          V
+                     *         |    a = solveConstraintBlock
+                     *         |               |
+                     *       a = b             |
+                     *         |               |
+                     *         V               |
+                     *     Post Block <---------
+                     *
+                     */
                 } else {
                     current->exprs.emplace_back(cctx.target, s->loc,
                                                 make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs));
@@ -365,6 +422,22 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Break *a) {
                 core::LocalVariable exprSym = cctx.newTemporary(core::Names::returnTemp());
                 auto afterBreak = walk(cctx.withTarget(exprSym), a->expr.get(), current);
+
+                // Here, since cctx.blockBreakTarget refers to something outside of the block,
+                // it will show up on the pinned variables list (with type of NilClass).
+                // Then, since we are assigning to it at a higher loop level, we throw a
+                // "changing type in loop" error.
+
+                // To get around this, we first assign to a
+                // temporary blockBreakAssign variable, and then assign blockBreakAssign to
+                // cctx.blockBreakTarget. This allows us to silence this error, if the RHS is
+                // a variable of type "blockBreakAssign". You can find the silencing code in
+                // infer/environment.cc, if you search for "== core::Names::blockBreakAssign()".
+
+                // This is a temporary hack until we change how pining works to handle this case.
+                auto blockBreakAssign = cctx.newTemporary(core::Names::blockBreakAssign());
+                afterBreak->exprs.emplace_back(blockBreakAssign, a->loc, make_unique<Ident>(exprSym));
+                afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a->loc, make_unique<Ident>(blockBreakAssign));
 
                 if (cctx.breakScope == nullptr) {
                     if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {

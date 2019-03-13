@@ -108,53 +108,53 @@ subgraph "cluster_::<Class:Main>#<static-init>" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_2" -> "bb::<Class:Main>#<static-init>_4" [style="bold"];
+    "bb::<Class:Main>#<static-init>_2" -> "bb::<Class:Main>#<static-init>_5" [style="bold"];
     "bb::<Class:Main>#<static-init>_2" -> "bb::<Class:Main>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Main>#<static-init>_3" [
         label = "block[id=3]()\l<U <statTemp>>$3: RubyTyper::Void = Solve<::<Class:Main>#<static-init>#<block>>\l<U <statTemp>>$21: T.class_of(Main) = self\l<U <block-pre-call-temp>>$22: RubyTyper::Void = <U <statTemp>>$21: T.class_of(Main).<U sig>()\l<unconditional>\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_3" -> "bb::<Class:Main>#<static-init>_5" [style="bold"];
-    "bb::<Class:Main>#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$10: Sorbet::Private::Builder = self\l<U <hashTemp>>$12: Symbol(:\"a\") = :\"a\"\l<U <statTemp>>$14: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$15: T.class_of(Integer) = alias <C <U Integer>>\l<U <statTemp>>$16: T.class_of(String) = alias <C <U String>>\l<U <hashTemp>>$13: <Type: T.any(Integer, String)> = <U <statTemp>>$14: T.class_of(T).<U any>(<U <statTemp>>$15: T.class_of(Integer), <U <statTemp>>$16: T.class_of(String))\l<U <magic>>$17: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$11: {a: <Type: T.any(Integer, String)>} = <U <magic>>$17: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$12: Symbol(:\"a\"), <U <hashTemp>>$13: <Type: T.any(Integer, String)>)\l<U <statTemp>>$9: Sorbet::Private::Builder = <U <statTemp>>$10: Sorbet::Private::Builder.<U params>(<U <statTemp>>$11: {a: <Type: T.any(Integer, String)>})\l<U <statTemp>>$18: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <blockReturnTemp>>$8: Sorbet::Private::Builder = <U <statTemp>>$9: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$18: T.class_of(NilClass))\l<U <blockReturnTemp>>$19: T.noreturn = blockreturn<::<Class:Main>#<static-init>#<block>> <U <blockReturnTemp>>$8: Sorbet::Private::Builder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Main>#<static-init>_4" -> "bb::<Class:Main>#<static-init>_2" [style="bold"];
+    "bb::<Class:Main>#<static-init>_3" -> "bb::<Class:Main>#<static-init>_6" [style="bold"];
     "bb::<Class:Main>#<static-init>_5" [
-        label = "block[id=5]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$10: Sorbet::Private::Builder = self\l<U <hashTemp>>$12: Symbol(:\"a\") = :\"a\"\l<U <statTemp>>$14: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$15: T.class_of(Integer) = alias <C <U Integer>>\l<U <statTemp>>$16: T.class_of(String) = alias <C <U String>>\l<U <hashTemp>>$13: <Type: T.any(Integer, String)> = <U <statTemp>>$14: T.class_of(T).<U any>(<U <statTemp>>$15: T.class_of(Integer), <U <statTemp>>$16: T.class_of(String))\l<U <magic>>$17: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$11: {a: <Type: T.any(Integer, String)>} = <U <magic>>$17: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$12: Symbol(:\"a\"), <U <hashTemp>>$13: <Type: T.any(Integer, String)>)\l<U <statTemp>>$9: Sorbet::Private::Builder = <U <statTemp>>$10: Sorbet::Private::Builder.<U params>(<U <statTemp>>$11: {a: <Type: T.any(Integer, String)>})\l<U <statTemp>>$18: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <blockReturnTemp>>$8: Sorbet::Private::Builder = <U <statTemp>>$9: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$18: T.class_of(NilClass))\l<U <blockReturnTemp>>$19: T.noreturn = blockreturn<::<Class:Main>#<static-init>#<block>> <U <blockReturnTemp>>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_5" -> "bb::<Class:Main>#<static-init>_7" [style="bold"];
-    "bb::<Class:Main>#<static-init>_5" -> "bb::<Class:Main>#<static-init>_6" [style="tapered"];
-
+    "bb::<Class:Main>#<static-init>_5" -> "bb::<Class:Main>#<static-init>_2" [style="bold"];
     "bb::<Class:Main>#<static-init>_6" [
-        label = "block[id=6]()\l<U <statTemp>>$20: RubyTyper::Void = Solve<::<Class:Main>#<static-init>#<block>>\l<U <statTemp>>$38: T.class_of(Main) = self\l<U <block-pre-call-temp>>$39: RubyTyper::Void = <U <statTemp>>$38: T.class_of(Main).<U sig>()\l<unconditional>\l"
+        label = "block[id=6]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_6" -> "bb::<Class:Main>#<static-init>_8" [style="bold"];
+    "bb::<Class:Main>#<static-init>_6" -> "bb::<Class:Main>#<static-init>_9" [style="bold"];
+    "bb::<Class:Main>#<static-init>_6" -> "bb::<Class:Main>#<static-init>_7" [style="tapered"];
+
     "bb::<Class:Main>#<static-init>_7" [
-        label = "block[id=7]()\louterLoops: 1\l<U <statTemp>>$27: Sorbet::Private::Builder = self\l<U <hashTemp>>$29: Symbol(:\"a\") = :\"a\"\l<U <statTemp>>$31: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$32: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$33: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <hashTemp>>$30: <Type: T.nilable(String)> = <U <statTemp>>$31: T.class_of(T).<U any>(<U <statTemp>>$32: T.class_of(String), <U <statTemp>>$33: T.class_of(NilClass))\l<U <magic>>$34: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$28: {a: <Type: T.nilable(String)>} = <U <magic>>$34: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$29: Symbol(:\"a\"), <U <hashTemp>>$30: <Type: T.nilable(String)>)\l<U <statTemp>>$26: Sorbet::Private::Builder = <U <statTemp>>$27: Sorbet::Private::Builder.<U params>(<U <statTemp>>$28: {a: <Type: T.nilable(String)>})\l<U <statTemp>>$35: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <blockReturnTemp>>$25: Sorbet::Private::Builder = <U <statTemp>>$26: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$35: T.class_of(NilClass))\l<U <blockReturnTemp>>$36: T.noreturn = blockreturn<::<Class:Main>#<static-init>#<block>> <U <blockReturnTemp>>$25: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=7]()\l<U <statTemp>>$20: RubyTyper::Void = Solve<::<Class:Main>#<static-init>#<block>>\l<U <statTemp>>$38: T.class_of(Main) = self\l<U <block-pre-call-temp>>$39: RubyTyper::Void = <U <statTemp>>$38: T.class_of(Main).<U sig>()\l<unconditional>\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_7" -> "bb::<Class:Main>#<static-init>_5" [style="bold"];
-    "bb::<Class:Main>#<static-init>_8" [
-        label = "block[id=8]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
-    ];
-
-    "bb::<Class:Main>#<static-init>_8" -> "bb::<Class:Main>#<static-init>_10" [style="bold"];
-    "bb::<Class:Main>#<static-init>_8" -> "bb::<Class:Main>#<static-init>_9" [style="tapered"];
-
+    "bb::<Class:Main>#<static-init>_7" -> "bb::<Class:Main>#<static-init>_10" [style="bold"];
     "bb::<Class:Main>#<static-init>_9" [
-        label = "block[id=9]()\l<U <statTemp>>$37: RubyTyper::Void = Solve<::<Class:Main>#<static-init>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=9]()\louterLoops: 1\l<U <statTemp>>$27: Sorbet::Private::Builder = self\l<U <hashTemp>>$29: Symbol(:\"a\") = :\"a\"\l<U <statTemp>>$31: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$32: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$33: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <hashTemp>>$30: <Type: T.nilable(String)> = <U <statTemp>>$31: T.class_of(T).<U any>(<U <statTemp>>$32: T.class_of(String), <U <statTemp>>$33: T.class_of(NilClass))\l<U <magic>>$34: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$28: {a: <Type: T.nilable(String)>} = <U <magic>>$34: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$29: Symbol(:\"a\"), <U <hashTemp>>$30: <Type: T.nilable(String)>)\l<U <statTemp>>$26: Sorbet::Private::Builder = <U <statTemp>>$27: Sorbet::Private::Builder.<U params>(<U <statTemp>>$28: {a: <Type: T.nilable(String)>})\l<U <statTemp>>$35: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <blockReturnTemp>>$25: Sorbet::Private::Builder = <U <statTemp>>$26: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$35: T.class_of(NilClass))\l<U <blockReturnTemp>>$36: T.noreturn = blockreturn<::<Class:Main>#<static-init>#<block>> <U <blockReturnTemp>>$25: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_9" -> "bb::<Class:Main>#<static-init>_1" [style="bold"];
+    "bb::<Class:Main>#<static-init>_9" -> "bb::<Class:Main>#<static-init>_6" [style="bold"];
     "bb::<Class:Main>#<static-init>_10" [
-        label = "block[id=10]()\louterLoops: 1\l<U <statTemp>>$44: Sorbet::Private::Builder = self\l<U <hashTemp>>$46: Symbol(:\"a\") = :\"a\"\l<U <statTemp>>$48: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$49: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$50: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <hashTemp>>$47: <Type: T.nilable(String)> = <U <statTemp>>$48: T.class_of(T).<U any>(<U <statTemp>>$49: T.class_of(String), <U <statTemp>>$50: T.class_of(NilClass))\l<U <magic>>$51: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$45: {a: <Type: T.nilable(String)>} = <U <magic>>$51: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$46: Symbol(:\"a\"), <U <hashTemp>>$47: <Type: T.nilable(String)>)\l<U <statTemp>>$43: Sorbet::Private::Builder = <U <statTemp>>$44: Sorbet::Private::Builder.<U params>(<U <statTemp>>$45: {a: <Type: T.nilable(String)>})\l<U <statTemp>>$52: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <blockReturnTemp>>$42: Sorbet::Private::Builder = <U <statTemp>>$43: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$52: T.class_of(NilClass))\l<U <blockReturnTemp>>$53: T.noreturn = blockreturn<::<Class:Main>#<static-init>#<block>> <U <blockReturnTemp>>$42: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=10]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::<Class:Main>#<static-init>_10" -> "bb::<Class:Main>#<static-init>_8" [style="bold"];
+    "bb::<Class:Main>#<static-init>_10" -> "bb::<Class:Main>#<static-init>_13" [style="bold"];
+    "bb::<Class:Main>#<static-init>_10" -> "bb::<Class:Main>#<static-init>_11" [style="tapered"];
+
+    "bb::<Class:Main>#<static-init>_11" [
+        label = "block[id=11]()\l<U <statTemp>>$37: RubyTyper::Void = Solve<::<Class:Main>#<static-init>#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Main>#<static-init>_11" -> "bb::<Class:Main>#<static-init>_1" [style="bold"];
+    "bb::<Class:Main>#<static-init>_13" [
+        label = "block[id=13]()\louterLoops: 1\l<U <statTemp>>$44: Sorbet::Private::Builder = self\l<U <hashTemp>>$46: Symbol(:\"a\") = :\"a\"\l<U <statTemp>>$48: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$49: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$50: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <hashTemp>>$47: <Type: T.nilable(String)> = <U <statTemp>>$48: T.class_of(T).<U any>(<U <statTemp>>$49: T.class_of(String), <U <statTemp>>$50: T.class_of(NilClass))\l<U <magic>>$51: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$45: {a: <Type: T.nilable(String)>} = <U <magic>>$51: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$46: Symbol(:\"a\"), <U <hashTemp>>$47: <Type: T.nilable(String)>)\l<U <statTemp>>$43: Sorbet::Private::Builder = <U <statTemp>>$44: Sorbet::Private::Builder.<U params>(<U <statTemp>>$45: {a: <Type: T.nilable(String)>})\l<U <statTemp>>$52: T.class_of(NilClass) = alias <C <U NilClass>>\l<U <blockReturnTemp>>$42: Sorbet::Private::Builder = <U <statTemp>>$43: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$52: T.class_of(NilClass))\l<U <blockReturnTemp>>$53: T.noreturn = blockreturn<::<Class:Main>#<static-init>#<block>> <U <blockReturnTemp>>$42: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Main>#<static-init>_13" -> "bb::<Class:Main>#<static-init>_10" [style="bold"];
 }
 
 }

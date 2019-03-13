@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <arrayTemp>>$4: Integer(1) = 1\l<U <arrayTemp>>$5: Integer(2) = 2\l<U <magic>>$6: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$3: [Integer(1), Integer(2)] = <U <magic>>$6: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$4: Integer(1), <U <arrayTemp>>$5: Integer(2))\l<U <block-pre-call-temp>>$7: T::Array[U] = <U <statTemp>>$3: [Integer(1), Integer(2)].<U map>()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <arrayTemp>>$5: Integer(1) = 1\l<U <arrayTemp>>$6: Integer(2) = 2\l<U <magic>>$7: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$4: [Integer(1), Integer(2)] = <U <magic>>$7: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$5: Integer(1), <U <arrayTemp>>$6: Integer(2))\l<U <block-pre-call-temp>>$8: T::Array[U] = <U <statTemp>>$4: [Integer(1), Integer(2)].<U map>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -19,19 +19,42 @@ subgraph "cluster_::Object#foo" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
+    "bb::Object#foo_2" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: T::Array[T.noreturn] = Solve<::Object#foo#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T::Array[T.noreturn]\l<unconditional>\l"
+        label = "block[id=3]()\l<U target>: T::Array[T.noreturn] = Solve<::Object#foo#<block>>\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_3" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <blk>>$8: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$1: Integer = <U <blk>>$8: [Integer].<U []>(<U <blk>>$9: Integer(0))\l<unconditional>\l"
+        label = "block[id=4](<U target>: T.any(T::Array[T.noreturn], Integer))\l<U <statTemp>>$16: T.class_of(T) = alias <C <U T>>\l<U <returnMethodTemp>>$2: T.any(T::Array[T.noreturn], Integer) = <U <statTemp>>$16: T.class_of(T).<U reveal_type>(<U target>: T.any(T::Array[T.noreturn], Integer))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
+    "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <blk>>$9: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<U <blk>>$10: Integer(0) = 0\l<U x>$1: Integer = <U <blk>>$9: [Integer].<U []>(<U <blk>>$10: Integer(0))\l<U <block-break-assign>>$15: Integer = <U x>$1\l<U target>: Integer = <U <block-break-assign>>$15\l<unconditional>\l"
+    ];
+
+    "bb::Object#foo_5" -> "bb::Object#foo_4" [style="bold"];
+}
+
+subgraph "cluster_::Object#bar" {
+    label = "::Object#bar";
+    color = blue;
+    "bb::Object#bar_0" [shape = invhouse];
+    "bb::Object#bar_1" [shape = parallelogram];
+
+    "bb::Object#bar_0" [
+        label = "block[id=0]()\l<U <returnMethodTemp>>$2: String(\"foo bar\") = \"foo bar\"\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: String(\"foo bar\")\l<unconditional>\l"
+    ];
+
+    "bb::Object#bar_0" -> "bb::Object#bar_1" [style="bold"];
+    "bb::Object#bar_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::Object#bar_1" -> "bb::Object#bar_1" [style="bold"];
 }
 
 subgraph "cluster_#<static-init>" {
@@ -41,15 +64,129 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(<root>) = self\l<U <statTemp>>$5: T.class_of(<root>) = self\l<U <statTemp>>$4: T.untyped = <U <statTemp>>$5: T.class_of(<root>).<U foo>()\l<U <returnMethodTemp>>$2: NilClass = <U <statTemp>>$3: T.class_of(<root>).<U puts>(<U <statTemp>>$4: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <statTemp>>$4: T.class_of(<root>) = self\l<U <statTemp>>$6: T.class_of(<root>) = self\l<U <statTemp>>$5: T.untyped = <U <statTemp>>$6: T.class_of(<root>).<U foo>()\l<U <statTemp>>$3: NilClass = <U <statTemp>>$4: T.class_of(<root>).<U puts>(<U <statTemp>>$5: T.untyped)\l<U <statTemp>>$8: T.class_of(<root>) = self\l<U <block-pre-call-temp>>$9: RubyTyper::Void = <U <statTemp>>$8: T.class_of(<root>).<U sig>()\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
     "bb#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
+    ];
+
+    "bb#<static-init>_2" -> "bb#<static-init>_5" [style="bold"];
+    "bb#<static-init>_2" -> "bb#<static-init>_3" [style="tapered"];
+
+    "bb#<static-init>_3" [
+        label = "block[id=3]()\l<U <statTemp>>$7: RubyTyper::Void = Solve<#<static-init>#<block>>\l<U <statTemp>>$30: T.class_of(<root>) = self\l<U <block-pre-call-temp>>$31: String = <U <statTemp>>$30: T.class_of(<root>).<U bar>()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_3" -> "bb#<static-init>_6" [style="bold"];
+    "bb#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$14: Sorbet::Private::Builder = self\l<U <hashTemp>>$16: Symbol(:\"blk\") = :\"blk\"\l<U <statTemp>>$20: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$19: T.untyped = <U <statTemp>>$20: T.class_of(T).<U proc>()\l<U <hashTemp>>$22: Symbol(:\"x\") = :\"x\"\l<U <hashTemp>>$23: T.class_of(Integer) = alias <C <U Integer>>\l<U <magic>>$24: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$21: {x: T.class_of(Integer)} = <U <magic>>$24: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$22: Symbol(:\"x\"), <U <hashTemp>>$23: T.class_of(Integer))\l<U <statTemp>>$18: T.untyped = <U <statTemp>>$19: T.untyped.<U params>(<U <statTemp>>$21: {x: T.class_of(Integer)})\l<U <statTemp>>$25: T.class_of(String) = alias <C <U String>>\l<U <hashTemp>>$17: T.untyped = <U <statTemp>>$18: T.untyped.<U returns>(<U <statTemp>>$25: T.class_of(String))\l<U <magic>>$26: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$15: {blk: T.untyped} = <U <magic>>$26: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$16: Symbol(:\"blk\"), <U <hashTemp>>$17: T.untyped)\l<U <statTemp>>$13: Sorbet::Private::Builder = <U <statTemp>>$14: Sorbet::Private::Builder.<U params>(<U <statTemp>>$15: {blk: T.untyped})\l<U <statTemp>>$27: T.class_of(String) = alias <C <U String>>\l<U <blockReturnTemp>>$12: Sorbet::Private::Builder = <U <statTemp>>$13: Sorbet::Private::Builder.<U returns>(<U <statTemp>>$27: T.class_of(String))\l<U <blockReturnTemp>>$28: T.noreturn = blockreturn<#<static-init>#<block>> <U <blockReturnTemp>>$12: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_5" -> "bb#<static-init>_2" [style="bold"];
+    "bb#<static-init>_6" [
+        label = "block[id=6]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
+    ];
+
+    "bb#<static-init>_6" -> "bb#<static-init>_9" [style="bold"];
+    "bb#<static-init>_6" -> "bb#<static-init>_7" [style="tapered"];
+
+    "bb#<static-init>_7" [
+        label = "block[id=7]()\l<U a>: String = Solve<#<static-init>#<block>>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_7" -> "bb#<static-init>_8" [style="bold"];
+    "bb#<static-init>_8" [
+        label = "block[id=8](<U a>: T.any(String, Integer))\l<U <statTemp>>$43: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$42: T.any(String, Integer) = <U <statTemp>>$43: T.class_of(T).<U reveal_type>(<U a>: T.any(String, Integer))\l<U <statTemp>>$46: T.class_of(<root>) = self\l<U <block-pre-call-temp>>$47: String = <U <statTemp>>$46: T.class_of(<root>).<U bar>()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_8" -> "bb#<static-init>_12" [style="bold"];
+    "bb#<static-init>_9" [
+        label = "block[id=9]()\louterLoops: 1\l<U <blk>>$32: [Integer] = load_yield_params(#<static-init>#<block>, <static-init>#<block>)\l<U <blk>>$33: Integer(0) = 0\l<U x>$2: Integer = <U <blk>>$32: [Integer].<U []>(<U <blk>>$33: Integer(0))\l<U <statTemp>>$38: Integer(5) = 5\l<U <ifTemp>>$36: T.any(TrueClass, FalseClass) = <U x>$2: Integer.<U >>(<U <statTemp>>$38: Integer(5))\l<U <ifTemp>>$36: T.any(TrueClass, FalseClass)\l"
+    ];
+
+    "bb#<static-init>_9" -> "bb#<static-init>_10" [style="bold"];
+    "bb#<static-init>_9" -> "bb#<static-init>_11" [style="tapered"];
+
+    "bb#<static-init>_10" [
+        label = "block[id=10]()\louterLoops: 1\l<U <returnTemp>>$39: Integer(10) = 10\l<U <block-break-assign>>$40: Integer(10) = <U <returnTemp>>$39\l<U a>: Integer(10) = <U <block-break-assign>>$40\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_10" -> "bb#<static-init>_8" [style="bold"];
+    "bb#<static-init>_11" [
+        label = "block[id=11]()\louterLoops: 1\l<U <blockReturnTemp>>$34: String(\"test\") = \"test\"\l<U <blockReturnTemp>>$41: T.noreturn = blockreturn<#<static-init>#<block>> <U <blockReturnTemp>>$34: String(\"test\")\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_11" -> "bb#<static-init>_6" [style="bold"];
+    "bb#<static-init>_12" [
+        label = "block[id=12]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
+    ];
+
+    "bb#<static-init>_12" -> "bb#<static-init>_15" [style="bold"];
+    "bb#<static-init>_12" -> "bb#<static-init>_13" [style="tapered"];
+
+    "bb#<static-init>_13" [
+        label = "block[id=13]()\l<U b>: String = Solve<#<static-init>#<block>>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_13" -> "bb#<static-init>_14" [style="bold"];
+    "bb#<static-init>_14" [
+        label = "block[id=14](<U b>: T.nilable(String))\l<U <statTemp>>$59: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$58: T.nilable(String) = <U <statTemp>>$59: T.class_of(T).<U reveal_type>(<U b>: T.nilable(String))\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_14" -> "bb#<static-init>_18" [style="bold"];
+    "bb#<static-init>_15" [
+        label = "block[id=15]()\louterLoops: 1\l<U <blk>>$48: [Integer] = load_yield_params(#<static-init>#<block>, <static-init>#<block>)\l<U <blk>>$49: Integer(0) = 0\l<U x>$3: Integer = <U <blk>>$48: [Integer].<U []>(<U <blk>>$49: Integer(0))\l<U <statTemp>>$54: Integer(5) = 5\l<U <ifTemp>>$52: T.any(TrueClass, FalseClass) = <U x>$3: Integer.<U >>(<U <statTemp>>$54: Integer(5))\l<U <ifTemp>>$52: T.any(TrueClass, FalseClass)\l"
+    ];
+
+    "bb#<static-init>_15" -> "bb#<static-init>_16" [style="bold"];
+    "bb#<static-init>_15" -> "bb#<static-init>_17" [style="tapered"];
+
+    "bb#<static-init>_16" [
+        label = "block[id=16]()\louterLoops: 1\l<U <block-break-assign>>$56: NilClass = <U <returnTemp>>$55\l<U b>: NilClass = <U <block-break-assign>>$56\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_16" -> "bb#<static-init>_14" [style="bold"];
+    "bb#<static-init>_17" [
+        label = "block[id=17]()\louterLoops: 1\l<U <blockReturnTemp>>$50: String(\"test\") = \"test\"\l<U <blockReturnTemp>>$57: T.noreturn = blockreturn<#<static-init>#<block>> <U <blockReturnTemp>>$50: String(\"test\")\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_17" -> "bb#<static-init>_12" [style="bold"];
+    "bb#<static-init>_18" [
+        label = "block[id=18]()\louterLoops: 1\l<U <statTemp>>$64: Integer(1) = 1\l<U <statTemp>>$63: String = <U <statTemp>>$64: Integer(1).<U to_s>()\l<U <statTemp>>$65: String(\"\") = \"\"\l<U <whileTemp>>$62: T.any(TrueClass, FalseClass) = <U <statTemp>>$63: String.<U ==>(<U <statTemp>>$65: String(\"\"))\l<U <whileTemp>>$62: T.any(TrueClass, FalseClass)\l"
+    ];
+
+    "bb#<static-init>_18" -> "bb#<static-init>_21" [style="bold"];
+    "bb#<static-init>_18" -> "bb#<static-init>_19" [style="tapered"];
+
+    "bb#<static-init>_19" [
+        label = "block[id=19]()\l<U c>: NilClass = nil\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_19" -> "bb#<static-init>_20" [style="bold"];
+    "bb#<static-init>_20" [
+        label = "block[id=20](<U c>: T.nilable(Symbol))\l<U <statTemp>>$74: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$73: T.nilable(Symbol) = <U <statTemp>>$74: T.class_of(T).<U reveal_type>(<U c>: T.nilable(Symbol))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_20" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_21" [
+        label = "block[id=21]()\louterLoops: 1\l<U <statTemp>>$69: Integer(1) = 1\l<U <statTemp>>$68: String = <U <statTemp>>$69: Integer(1).<U to_s>()\l<U <statTemp>>$70: String(\"\") = \"\"\l<U <ifTemp>>$67: T.any(TrueClass, FalseClass) = <U <statTemp>>$68: String.<U ==>(<U <statTemp>>$70: String(\"\"))\l<U <ifTemp>>$67: T.any(TrueClass, FalseClass)\l"
+    ];
+
+    "bb#<static-init>_21" -> "bb#<static-init>_22" [style="bold"];
+    "bb#<static-init>_21" -> "bb#<static-init>_18" [style="tapered"];
+
+    "bb#<static-init>_22" [
+        label = "block[id=22]()\louterLoops: 1\l<U <returnTemp>>$71: Symbol(:\"abc\") = :\"abc\"\l<U <block-break-assign>>$72: Symbol(:\"abc\") = <U <returnTemp>>$71\l<U c>: Symbol(:\"abc\") = <U <block-break-assign>>$72\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_22" -> "bb#<static-init>_20" [style="bold"];
 }
 
 }

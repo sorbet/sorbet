@@ -27,6 +27,7 @@ public:
     core::Context ctx;
     CFG &inWhat;
     core::LocalVariable target;
+    core::LocalVariable blockBreakTarget;
     int loops;
     core::SymbolRef rubyBlock;
     BasicBlock *nextScope;
@@ -39,6 +40,7 @@ public:
     u4 &temporaryCounter;
 
     CFGContext withTarget(core::LocalVariable target);
+    CFGContext withBlockBreakTarget(core::LocalVariable blockBreakTarget);
     CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope,
                              core::SymbolRef rubyBlock = core::Symbols::noSymbol());
     CFGContext withSendAndBlockLink(const std::shared_ptr<core::SendAndBlockLink> &link);

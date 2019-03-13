@@ -127,6 +127,12 @@ CFGContext CFGContext::withTarget(core::LocalVariable target) {
     return ret;
 }
 
+CFGContext CFGContext::withBlockBreakTarget(core::LocalVariable blockBreakTarget) {
+    auto ret = CFGContext(*this);
+    ret.blockBreakTarget = blockBreakTarget;
+    return ret;
+}
+
 CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, core::SymbolRef rubyBlock) {
     auto ret = CFGContext(*this);
     ret.nextScope = nextScope;

@@ -85,7 +85,7 @@ subgraph "cluster_#<static-init>" {
         label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
-    "bb#<static-init>_2" -> "bb#<static-init>_4" [style="bold"];
+    "bb#<static-init>_2" -> "bb#<static-init>_5" [style="bold"];
     "bb#<static-init>_2" -> "bb#<static-init>_3" [style="tapered"];
 
     "bb#<static-init>_3" [
@@ -93,11 +93,11 @@ subgraph "cluster_#<static-init>" {
     ];
 
     "bb#<static-init>_3" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<U <statTemp>>$25: Sorbet::Private::Builder = self\l<U <hashTemp>>$27: Symbol(:\"x\") = :\"x\"\l<U <statTemp>>$29: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$30: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$31: T.class_of(Other) = alias <C <U Other>>\l<U <hashTemp>>$28: <Type: T.any(T.class_of(Concrete), Other)> = <U <statTemp>>$29: T.class_of(T).<U any>(<U <statTemp>>$30: T.class_of(Concrete), <U <statTemp>>$31: T.class_of(Other))\l<U <magic>>$32: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$26: {x: <Type: T.any(T.class_of(Concrete), Other)>} = <U <magic>>$32: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$27: Symbol(:\"x\"), <U <hashTemp>>$28: <Type: T.any(T.class_of(Concrete), Other)>)\l<U <statTemp>>$24: Sorbet::Private::Builder = <U <statTemp>>$25: Sorbet::Private::Builder.<U params>(<U <statTemp>>$26: {x: <Type: T.any(T.class_of(Concrete), Other)>})\l<U <blockReturnTemp>>$23: Sorbet::Private::Builder = <U <statTemp>>$24: Sorbet::Private::Builder.<U void>()\l<U <blockReturnTemp>>$33: T.noreturn = blockreturn<#<static-init>#<block>> <U <blockReturnTemp>>$23: Sorbet::Private::Builder\l<unconditional>\l"
+    "bb#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$25: Sorbet::Private::Builder = self\l<U <hashTemp>>$27: Symbol(:\"x\") = :\"x\"\l<U <statTemp>>$29: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$30: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$31: T.class_of(Other) = alias <C <U Other>>\l<U <hashTemp>>$28: <Type: T.any(T.class_of(Concrete), Other)> = <U <statTemp>>$29: T.class_of(T).<U any>(<U <statTemp>>$30: T.class_of(Concrete), <U <statTemp>>$31: T.class_of(Other))\l<U <magic>>$32: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$26: {x: <Type: T.any(T.class_of(Concrete), Other)>} = <U <magic>>$32: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$27: Symbol(:\"x\"), <U <hashTemp>>$28: <Type: T.any(T.class_of(Concrete), Other)>)\l<U <statTemp>>$24: Sorbet::Private::Builder = <U <statTemp>>$25: Sorbet::Private::Builder.<U params>(<U <statTemp>>$26: {x: <Type: T.any(T.class_of(Concrete), Other)>})\l<U <blockReturnTemp>>$23: Sorbet::Private::Builder = <U <statTemp>>$24: Sorbet::Private::Builder.<U void>()\l<U <blockReturnTemp>>$33: T.noreturn = blockreturn<#<static-init>#<block>> <U <blockReturnTemp>>$23: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_4" -> "bb#<static-init>_2" [style="bold"];
+    "bb#<static-init>_5" -> "bb#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::<Class:Concrete>#<static-init>" {

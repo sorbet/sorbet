@@ -208,31 +208,31 @@ subgraph "cluster_::Examples#variables_and_loop" {
         label = "block[id=5](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U <whileTemp>>$6: TrueClass = true\l<U <whileTemp>>$6: TrueClass\l"
     ];
 
-    "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_7" [style="bold"];
-    "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_6" [style="tapered"];
+    "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_8" [style="bold"];
+    "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_7" [style="tapered"];
 
-    "bb::Examples#variables_and_loop_6" [
-        label = "block[id=6](<U b>: NilClass)\l<U <returnMethodTemp>>$2 = <U b>\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_and_loop_6" -> "bb::Examples#variables_and_loop_1" [style="bold"];
     "bb::Examples#variables_and_loop_7" [
-        label = "block[id=7](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U cond>: T.untyped\l"
+        label = "block[id=7](<U b>: NilClass)\l<U <returnMethodTemp>>$2 = <U b>\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
     ];
 
-    "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_8" [style="bold"];
-    "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_9" [style="tapered"];
-
+    "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_1" [style="bold"];
     "bb::Examples#variables_and_loop_8" [
-        label = "block[id=8](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U b>: T.untyped = 1\l<unconditional>\l"
+        label = "block[id=8](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U cond>: T.untyped\l"
     ];
 
-    "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_5" [style="bold"];
+    "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_9" [style="bold"];
+    "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_10" [style="tapered"];
+
     "bb::Examples#variables_and_loop_9" [
-        label = "block[id=9](<U b>: NilClass, <U cond>: T.nilable(FalseClass))\louterLoops: 1\l<U b>: T.untyped = 2\l<unconditional>\l"
+        label = "block[id=9](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U b>: T.untyped = 1\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_and_loop_9" -> "bb::Examples#variables_and_loop_5" [style="bold"];
+    "bb::Examples#variables_and_loop_10" [
+        label = "block[id=10](<U b>: NilClass, <U cond>: T.nilable(FalseClass))\louterLoops: 1\l<U b>: T.untyped = 2\l<unconditional>\l"
+    ];
+
+    "bb::Examples#variables_and_loop_10" -> "bb::Examples#variables_and_loop_5" [style="bold"];
 }
 
 subgraph "cluster_::Examples#variables_loop_if" {
@@ -255,31 +255,31 @@ subgraph "cluster_::Examples#variables_loop_if" {
         label = "block[id=2](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U <whileTemp>>$4: TrueClass = true\l<U <whileTemp>>$4: TrueClass\l"
     ];
 
-    "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_4" [style="bold"];
-    "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_3" [style="tapered"];
+    "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_5" [style="bold"];
+    "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_4" [style="tapered"];
 
-    "bb::Examples#variables_loop_if_3" [
-        label = "block[id=3](<U b>: NilClass)\l<U <returnMethodTemp>>$2 = <U b>\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_loop_if_3" -> "bb::Examples#variables_loop_if_1" [style="bold"];
     "bb::Examples#variables_loop_if_4" [
-        label = "block[id=4](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U cond>: T.untyped\l"
+        label = "block[id=4](<U b>: NilClass)\l<U <returnMethodTemp>>$2 = <U b>\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
     ];
 
-    "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_5" [style="bold"];
-    "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_6" [style="tapered"];
-
+    "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_1" [style="bold"];
     "bb::Examples#variables_loop_if_5" [
-        label = "block[id=5](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U b>: T.untyped = 1\l<unconditional>\l"
+        label = "block[id=5](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U cond>: T.untyped\l"
     ];
 
-    "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_2" [style="bold"];
+    "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_6" [style="bold"];
+    "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_7" [style="tapered"];
+
     "bb::Examples#variables_loop_if_6" [
-        label = "block[id=6](<U b>: NilClass, <U cond>: T.nilable(FalseClass))\louterLoops: 1\l<U b>: T.untyped = 2\l<unconditional>\l"
+        label = "block[id=6](<U b>: NilClass, <U cond>: T.untyped)\louterLoops: 1\l<U b>: T.untyped = 1\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_6" -> "bb::Examples#variables_loop_if_2" [style="bold"];
+    "bb::Examples#variables_loop_if_7" [
+        label = "block[id=7](<U b>: NilClass, <U cond>: T.nilable(FalseClass))\louterLoops: 1\l<U b>: T.untyped = 2\l<unconditional>\l"
+    ];
+
+    "bb::Examples#variables_loop_if_7" -> "bb::Examples#variables_loop_if_2" [style="bold"];
 }
 
 subgraph "cluster_::Examples#take_arguments" {
