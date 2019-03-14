@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")/../.."
 
 list_sh_src() {
-    git ls-files -z -c -m -o --exclude-standard -- '*.sh *.bash'
+    git ls-files -z -c -m -o --exclude-standard -- '*.sh' '*.bash'
 }
 
 if [ "$1" = "-t" ]; then
