@@ -29,7 +29,7 @@ public:
             return;
         }
         u4 maxOff = file.data(gs).source().size();
-
+        file.data(gs).hasParseErrors = true;
         for (auto &diag : diagnostics) {
             string_view level = "unknown"sv;
             switch (diag.level()) {

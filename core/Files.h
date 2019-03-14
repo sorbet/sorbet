@@ -65,6 +65,7 @@ public:
     };
 
     bool cachedParseTree = false;
+    bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
     bool pluginGenerated = false;
 
     friend class GlobalState;

@@ -834,7 +834,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                         ctx, core::lsp::IdentResponse(ctx.owner, bind.loc, i->what, tp));
                 }
 
-                ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
+                ENFORCE((bind.loc.exists() && bind.loc.file().data(ctx).hasParseErrors) || !tp.origins.empty(),
+                        "Inferencer did not assign location");
             },
             [&](cfg::Alias *a) {
                 core::SymbolRef symbol = a->what.data(ctx)->dealias(ctx);
@@ -1048,7 +1049,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             }
             tp.type = core::Types::untypedUntracked();
         }
-        ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
+        ENFORCE((bind.loc.exists() && bind.loc.file().data(ctx).hasParseErrors) || !tp.origins.empty(),
+                "Inferencer did not assign location");
 
         if (!noLoopChecking && loopCount != bindMinLoops) {
             auto pin = pinnedTypes.find(bind.bind.variable);
