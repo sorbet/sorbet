@@ -1,0 +1,29 @@
+Send {
+  receiver = Regexp {
+    regex = [
+      Begin {
+        stmts = [
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      String {
+        val = <U (?<match>bar)>
+      }
+    ]
+    opts = Regopt {
+      opts = ""
+    }
+  }
+  method = <U =~>
+  args = [
+    DString {
+      nodes = [
+        String {
+          val = <U bar>
+        }
+      ]
+    }
+  ]
+}

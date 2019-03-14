@@ -1,0 +1,14 @@
+Assign {
+  lhs = ConstLhs {
+    scope = Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+      ]
+    }
+    name = <C <U A>>
+  }
+  rhs = Integer {
+    val = "1"
+  }
+}

@@ -1,0 +1,29 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Hash {
+      pairs = [
+        Pair {
+          key = Symbol {
+            val = <U foo>
+          }
+          value = Integer {
+            val = "2"
+          }
+        }
+        Kwsplat {
+          expr = Send {
+            receiver = NULL
+            method = <U bar>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Class {
+  name = Const {
+    scope = NULL
+    name = <C <U Foo>>
+  }
+  superclass = NULL
+  body = NULL
+}

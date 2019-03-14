@@ -1,0 +1,14 @@
+While {
+  cond = Send {
+    receiver = Begin {
+      stmts = [
+        True {
+        }
+      ]
+    }
+    method = <U !>
+    args = [
+    ]
+  }
+  body = NULL
+}

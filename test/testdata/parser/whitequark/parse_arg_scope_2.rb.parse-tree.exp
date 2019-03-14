@@ -1,0 +1,18 @@
+Block {
+  send = Send {
+    receiver = NULL
+    method = <U lambda>
+    args = [
+    ]
+  }
+  args = Args {
+    args = [
+      Shadowarg {
+        name = <U a>
+      }
+    ]
+  }
+  body = LVar {
+    name = <U a>
+  }
+}

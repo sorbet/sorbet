@@ -1,0 +1,9 @@
+OpAsgn {
+  left = IVarLhs {
+    name = <U @a>
+  }
+  op = <U |>
+  right = Integer {
+    val = "1"
+  }
+}

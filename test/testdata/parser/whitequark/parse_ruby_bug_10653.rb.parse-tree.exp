@@ -1,0 +1,57 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U p>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U cond>
+      args = NULL
+      body = NULL
+    }
+    If {
+      condition = Send {
+        receiver = NULL
+        method = <U cond>
+        args = [
+        ]
+      }
+      then_ = Block {
+        send = Send {
+          receiver = Integer {
+            val = "1"
+          }
+          method = <U tap>
+          args = [
+          ]
+        }
+        args = Args {
+          args = [
+            Arg {
+              name = <U n>
+            }
+          ]
+        }
+        body = Send {
+          receiver = NULL
+          method = <U p>
+          args = [
+            LVar {
+              name = <U n>
+            }
+          ]
+        }
+      }
+      else_ = Integer {
+        val = "0"
+      }
+    }
+  ]
+}

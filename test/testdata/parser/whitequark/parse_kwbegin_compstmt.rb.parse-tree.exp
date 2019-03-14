@@ -1,0 +1,30 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo!>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar!>
+      args = NULL
+      body = NULL
+    }
+    Kwbegin {
+      stmts = [
+        Send {
+          receiver = NULL
+          method = <U foo!>
+          args = [
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U bar!>
+          args = [
+          ]
+        }
+      ]
+    }
+  ]
+}

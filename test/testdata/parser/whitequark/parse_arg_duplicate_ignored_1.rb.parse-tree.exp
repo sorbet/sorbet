@@ -1,0 +1,14 @@
+DefMethod {
+  name = <U foo>
+  args = Args {
+    args = [
+      Arg {
+        name = <U _a>
+      }
+      Arg {
+        name = <U _a>
+      }
+    ]
+  }
+  body = NULL
+}

@@ -1,0 +1,35 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U tap>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U tap>
+      args = [
+        Begin {
+          stmts = [
+            Block {
+              send = Send {
+                receiver = NULL
+                method = <U proc>
+                args = [
+                ]
+              }
+              args = NULL
+              body = NULL
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

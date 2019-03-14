@@ -1,0 +1,22 @@
+Kwbegin {
+  stmts = [
+    Rescue {
+      body = NULL
+      rescue = [
+        Resbody {
+          exception = Array {
+            elts = [
+              Const {
+                scope = NULL
+                name = <C <U LoadError>>
+              }
+            ]
+          }
+          var = NULL
+          body = NULL
+        }
+      ]
+      else_ = NULL
+    }
+  ]
+}

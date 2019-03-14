@@ -1,0 +1,6 @@
+Block {
+  send = ZSuper {
+  }
+  args = NULL
+  body = NULL
+}

@@ -1,0 +1,9 @@
+Send {
+  receiver = Begin {
+    stmts = [
+    ]
+  }
+  method = <U !>
+  args = [
+  ]
+}

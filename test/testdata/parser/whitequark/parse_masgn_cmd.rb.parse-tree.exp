@@ -1,0 +1,36 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U m>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U foo>
+          }
+          LVarLhs {
+            name = <U bar>
+          }
+        ]
+      }
+      rhs = Send {
+        receiver = NULL
+        method = <U m>
+        args = [
+          LVar {
+            name = <U foo>
+          }
+        ]
+      }
+    }
+  ]
+}

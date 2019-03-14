@@ -1,0 +1,31 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    OrAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      right = Integer {
+        val = "2"
+      }
+    }
+  ]
+}

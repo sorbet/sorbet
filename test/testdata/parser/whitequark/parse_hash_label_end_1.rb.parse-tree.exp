@@ -1,0 +1,29 @@
+Hash {
+  pairs = [
+    Pair {
+      key = DSymbol {
+        nodes = [
+          String {
+            val = <U foo>
+          }
+        ]
+      }
+      value = Integer {
+        val = "2"
+      }
+    }
+    Pair {
+      key = DSymbol {
+        nodes = [
+          String {
+            val = <U bar>
+          }
+        ]
+      }
+      value = Hash {
+        pairs = [
+        ]
+      }
+    }
+  ]
+}

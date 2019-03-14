@@ -1,0 +1,73 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U a>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a1>
+          }
+          Arg {
+            name = <U a2>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U b>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U c>
+      args = Args {
+        args = [
+          Arg {
+            name = <U c1>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U d>
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U a>
+        args = [
+          Block {
+            send = Send {
+              receiver = NULL
+              method = <U b>
+              args = [
+              ]
+            }
+            args = NULL
+            body = Send {
+              receiver = NULL
+              method = <U c>
+              args = [
+                Send {
+                  receiver = NULL
+                  method = <U d>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          }
+          Float {
+            val = "1.0"
+          }
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+  ]
+}

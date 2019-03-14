@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Regexp {
+      regex = [
+        String {
+          val = <U foo>
+        }
+        Begin {
+          stmts = [
+            Send {
+              receiver = NULL
+              method = <U bar>
+              args = [
+              ]
+            }
+          ]
+        }
+        String {
+          val = <U baz>
+        }
+      ]
+      opts = Regopt {
+        opts = ""
+      }
+    }
+  ]
+}

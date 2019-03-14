@@ -1,0 +1,40 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U p>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+        ]
+      }
+      body = NULL
+    }
+    For {
+      vars = LVarLhs {
+        name = <U a>
+      }
+      expr = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U p>
+        args = [
+          LVar {
+            name = <U a>
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+DefMethod {
+  name = <U a>
+  args = NULL
+  body = OpAsgn {
+    left = CVarLhs {
+      name = <U @@var>
+    }
+    op = <U |>
+    right = Integer {
+      val = "10"
+    }
+  }
+}

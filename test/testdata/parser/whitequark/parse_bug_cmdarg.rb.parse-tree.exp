@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U assert>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U dogs>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U assert>
+      args = [
+        Send {
+          receiver = NULL
+          method = <U dogs>
+          args = [
+          ]
+        }
+      ]
+    }
+  ]
+}

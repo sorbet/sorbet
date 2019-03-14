@@ -1,0 +1,54 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U f>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U meth>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U f>
+      args = [
+        Hash {
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U x>
+              }
+              value = Block {
+                send = Send {
+                  receiver = NULL
+                  method = <U lambda>
+                  args = [
+                  ]
+                }
+                args = NULL
+                body = Block {
+                  send = Send {
+                    receiver = NULL
+                    method = <U meth>
+                    args = [
+                    ]
+                  }
+                  args = NULL
+                  body = NULL
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

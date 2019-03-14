@@ -1,0 +1,20 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U a>
+      args = NULL
+      body = NULL
+    }
+    CSend {
+      receiver = Send {
+        receiver = NULL
+        method = <U a>
+        args = [
+        ]
+      }
+      method = <U b>
+      args = [
+      ]
+    }
+  ]
+}

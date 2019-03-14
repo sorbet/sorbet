@@ -1,0 +1,44 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U meth>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = Block {
+        send = Send {
+          receiver = NULL
+          method = <U meth>
+          args = [
+            Integer {
+              val = "1"
+            }
+          ]
+        }
+        args = NULL
+        body = NULL
+      }
+      method = <U fun>
+      args = [
+        Send {
+          receiver = NULL
+          method = <U bar>
+          args = [
+          ]
+        }
+      ]
+    }
+  ]
+}

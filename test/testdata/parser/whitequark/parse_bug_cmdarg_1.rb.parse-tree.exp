@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U assert>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U assert>
+      args = [
+        Hash {
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U do>
+              }
+              value = True {
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

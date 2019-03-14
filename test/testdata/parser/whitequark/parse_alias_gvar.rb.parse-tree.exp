@@ -1,0 +1,8 @@
+Alias {
+  from = GVar {
+    name = <U $a>
+  }
+  to = GVar {
+    name = <U $b>
+  }
+}

@@ -1,0 +1,17 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Alias {
+      from = Symbol {
+        val = <U foo>
+      }
+      to = Symbol {
+        val = <U bar>
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+Begin {
+  stmts = [
+    Class {
+      name = Const {
+        scope = Const {
+          scope = NULL
+          name = <C <U A>>
+        }
+        name = <C <U B>>
+      }
+      superclass = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Arg {
+            name = <U raise>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U raise>
+        args = [
+          Const {
+            scope = Const {
+              scope = NULL
+              name = <C <U A>>
+            }
+            name = <C <U B>>
+          }
+          DString {
+            nodes = [
+              String {
+                val = <U >
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

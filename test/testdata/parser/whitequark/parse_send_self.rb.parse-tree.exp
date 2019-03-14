@@ -1,0 +1,15 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U fun>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U fun>
+      args = [
+      ]
+    }
+  ]
+}

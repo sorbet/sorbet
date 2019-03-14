@@ -1,0 +1,43 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      method = <U []>
+      args = [
+        Send {
+          receiver = NULL
+          method = <U bar>
+          args = [
+          ]
+        }
+        Hash {
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U baz>
+              }
+              value = Integer {
+                val = "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

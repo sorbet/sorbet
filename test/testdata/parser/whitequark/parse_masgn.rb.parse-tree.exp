@@ -1,0 +1,22 @@
+Masgn {
+  lhs = Mlhs {
+    exprs = [
+      LVarLhs {
+        name = <U foo>
+      }
+      LVarLhs {
+        name = <U bar>
+      }
+    ]
+  }
+  rhs = Array {
+    elts = [
+      Integer {
+        val = "1"
+      }
+      Integer {
+        val = "2"
+      }
+    ]
+  }
+}

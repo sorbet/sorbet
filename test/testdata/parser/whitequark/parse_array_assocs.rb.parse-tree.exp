@@ -1,0 +1,16 @@
+Array {
+  elts = [
+    Hash {
+      pairs = [
+        Pair {
+          key = Integer {
+            val = "1"
+          }
+          value = Integer {
+            val = "2"
+          }
+        }
+      ]
+    }
+  ]
+}

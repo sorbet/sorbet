@@ -1,0 +1,22 @@
+Send {
+  receiver = Regexp {
+    regex = [
+      String {
+        val = <U \\xa8>
+      }
+    ]
+    opts = Regopt {
+      opts = "n"
+    }
+  }
+  method = <U =~>
+  args = [
+    DString {
+      nodes = [
+        String {
+          val = <U >
+        }
+      ]
+    }
+  ]
+}

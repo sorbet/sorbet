@@ -1,0 +1,10 @@
+Block {
+  send = Send {
+    receiver = NULL
+    method = <U lambda>
+    args = [
+    ]
+  }
+  args = NULL
+  body = NULL
+}

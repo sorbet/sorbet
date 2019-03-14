@@ -1,0 +1,33 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          IVarLhs {
+            name = <U @foo>
+          }
+          CVarLhs {
+            name = <U @@bar>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Splat {
+            var = Send {
+              receiver = NULL
+              method = <U foo>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Array {
+      elts = [
+        Integer {
+          val = "1"
+        }
+        Splat {
+          var = Send {
+            receiver = NULL
+            method = <U foo>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+DefMethod {
+  name = <U a>
+  args = Args {
+    args = [
+      Kwoptarg {
+        name = <U b>
+        default_ = Return {
+          exprs = [
+          ]
+        }
+      }
+    ]
+  }
+  body = NULL
+}

@@ -1,0 +1,26 @@
+DefMethod {
+  name = <U f>
+  args = Args {
+    args = [
+      Kwoptarg {
+        name = <U foo>
+        default_ = Integer {
+          val = "1"
+        }
+      }
+      Kwoptarg {
+        name = <U bar>
+        default_ = Integer {
+          val = "2"
+        }
+      }
+      Kwrestarg {
+        name = <U baz>
+      }
+      Blockarg {
+        name = <U b>
+      }
+    ]
+  }
+  body = NULL
+}

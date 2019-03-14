@@ -1,0 +1,17 @@
+Assign {
+  lhs = LVarLhs {
+    name = <U o>
+  }
+  rhs = Hash {
+    pairs = [
+      Pair {
+        key = Symbol {
+          val = <U a>
+        }
+        value = Integer {
+          val = "1"
+        }
+      }
+    ]
+  }
+}

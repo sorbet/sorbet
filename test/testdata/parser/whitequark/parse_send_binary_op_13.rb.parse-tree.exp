@@ -1,0 +1,23 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      method = <U >=>
+      args = [
+        Integer {
+          val = "1"
+        }
+      ]
+    }
+  ]
+}

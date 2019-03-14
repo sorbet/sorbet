@@ -1,0 +1,34 @@
+OrAsgn {
+  left = Const {
+    scope = Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+      ]
+    }
+    name = <C <U C>>
+  }
+  right = Rescue {
+    body = Send {
+      receiver = NULL
+      method = <U raise>
+      args = [
+        Send {
+          receiver = NULL
+          method = <U bar>
+          args = [
+          ]
+        }
+      ]
+    }
+    rescue = [
+      Resbody {
+        exception = NULL
+        var = NULL
+        body = Nil {
+        }
+      }
+    ]
+    else_ = NULL
+  }
+}

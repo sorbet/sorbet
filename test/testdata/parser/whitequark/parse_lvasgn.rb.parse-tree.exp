@@ -1,0 +1,15 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = LVarLhs {
+        name = <U var>
+      }
+      rhs = Integer {
+        val = "10"
+      }
+    }
+    LVar {
+      name = <U var>
+    }
+  ]
+}

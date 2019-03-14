@@ -1,0 +1,37 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U foo>
+      }
+      rhs = Rescue {
+        body = Send {
+          receiver = NULL
+          method = <U raise>
+          args = [
+            Send {
+              receiver = NULL
+              method = <U bar>
+              args = [
+              ]
+            }
+          ]
+        }
+        rescue = [
+          Resbody {
+            exception = NULL
+            var = NULL
+            body = Nil {
+            }
+          }
+        ]
+        else_ = NULL
+      }
+    }
+  ]
+}

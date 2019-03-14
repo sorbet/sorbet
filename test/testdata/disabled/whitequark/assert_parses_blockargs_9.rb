@@ -1,5 +1,0 @@
-# typed: true
-
-f{ |;
-a
-| }

@@ -1,0 +1,23 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    If {
+      condition = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      then_ = Integer {
+        val = "1"
+      }
+      else_ = Integer {
+        val = "2"
+      }
+    }
+  ]
+}

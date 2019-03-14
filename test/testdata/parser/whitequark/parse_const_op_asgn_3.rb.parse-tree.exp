@@ -1,0 +1,14 @@
+DefMethod {
+  name = <U x>
+  args = NULL
+  body = OrAsgn {
+    left = Const {
+      scope = Self {
+      }
+      name = <C <U A>>
+    }
+    right = Integer {
+      val = "1"
+    }
+  }
+}

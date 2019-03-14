@@ -1,0 +1,18 @@
+DefMethod {
+  name = <U f>
+  args = Args {
+    args = [
+      Optarg {
+        name = <U var>
+        default_ = Defined {
+          value = LVar {
+            name = <U var>
+          }
+        }
+      }
+    ]
+  }
+  body = LVar {
+    name = <U var>
+  }
+}

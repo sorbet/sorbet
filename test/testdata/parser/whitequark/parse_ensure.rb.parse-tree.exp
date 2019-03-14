@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U meth>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Send {
+            receiver = NULL
+            method = <U meth>
+            args = [
+            ]
+          }
+          ensure = Send {
+            receiver = NULL
+            method = <U bar>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

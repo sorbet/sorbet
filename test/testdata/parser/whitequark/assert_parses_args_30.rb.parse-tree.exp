@@ -1,0 +1,14 @@
+DefMethod {
+  name = <U f>
+  args = Args {
+    args = [
+      Restarg {
+        name = <P <U *> $2>
+      }
+      Kwrestarg {
+        name = <P <U **> $3>
+      }
+    ]
+  }
+  body = NULL
+}

@@ -1,0 +1,10 @@
+Kwbegin {
+  stmts = [
+    Integer {
+      val = "1"
+    }
+    Integer {
+      val = "2"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+DString {
+  nodes = [
+    DString {
+      nodes = [
+        IVar {
+          name = <U @a>
+        }
+        String {
+          val = <U  >
+        }
+        CVar {
+          name = <U @@a>
+        }
+        String {
+          val = <U  >
+        }
+        GVar {
+          name = <U $a>
+        }
+      ]
+    }
+  ]
+}

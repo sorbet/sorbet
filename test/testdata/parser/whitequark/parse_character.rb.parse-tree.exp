@@ -1,0 +1,7 @@
+DString {
+  nodes = [
+    String {
+      val = <U a>
+    }
+  ]
+}

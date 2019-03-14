@@ -1,0 +1,25 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U f>
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U f>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Restarg {
+            name = <P <U *> $2>
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+Block {
+  send = Send {
+    receiver = NULL
+    method = <U lambda>
+    args = [
+    ]
+  }
+  args = Args {
+    args = [
+      Kwarg {
+        name = <U a>
+      }
+    ]
+  }
+  body = NULL
+}

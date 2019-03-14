@@ -1,0 +1,10 @@
+Array {
+  elts = [
+    Symbol {
+      val = <U foo>
+    }
+    Symbol {
+      val = <U bar>
+    }
+  ]
+}

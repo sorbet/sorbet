@@ -1,0 +1,16 @@
+Class {
+  name = Const {
+    scope = NULL
+    name = <C <U Foo>>
+  }
+  superclass = Send {
+    receiver = NULL
+    method = <U a>
+    args = [
+      Symbol {
+        val = <U b>
+      }
+    ]
+  }
+  body = NULL
+}

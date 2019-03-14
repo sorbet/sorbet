@@ -1,0 +1,40 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U fun>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Break {
+      exprs = [
+        Block {
+          send = Send {
+            receiver = NULL
+            method = <U fun>
+            args = [
+              Send {
+                receiver = NULL
+                method = <U foo>
+                args = [
+                ]
+              }
+            ]
+          }
+          args = NULL
+          body = NULL
+        }
+      ]
+    }
+  ]
+}

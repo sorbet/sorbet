@@ -1,0 +1,8 @@
+Module {
+  name = Const {
+    scope = Cbase {
+    }
+    name = <C <U Foo>>
+  }
+  body = NULL
+}

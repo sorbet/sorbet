@@ -1,0 +1,28 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U meth>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    WhilePost {
+      cond = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U meth>
+        args = [
+        ]
+      }
+    }
+  ]
+}

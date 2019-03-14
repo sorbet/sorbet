@@ -1,0 +1,44 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U f>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U a>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U f>
+      args = [
+        If {
+          condition = Send {
+            receiver = NULL
+            method = <U a>
+            args = [
+            ]
+          }
+          then_ = DString {
+            nodes = [
+              String {
+                val = <U a>
+              }
+            ]
+          }
+          else_ = Integer {
+            val = "1"
+          }
+        }
+      ]
+    }
+  ]
+}

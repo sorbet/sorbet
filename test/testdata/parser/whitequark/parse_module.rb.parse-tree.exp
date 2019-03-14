@@ -1,0 +1,7 @@
+Module {
+  name = Const {
+    scope = NULL
+    name = <C <U Foo>>
+  }
+  body = NULL
+}

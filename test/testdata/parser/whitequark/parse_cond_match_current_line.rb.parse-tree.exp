@@ -1,0 +1,16 @@
+If {
+  condition = MatchCurLine {
+    cond = Regexp {
+      regex = [
+        String {
+          val = <U wat>
+        }
+      ]
+      opts = Regopt {
+        opts = ""
+      }
+    }
+  }
+  then_ = NULL
+  else_ = NULL
+}

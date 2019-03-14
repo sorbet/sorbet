@@ -1,0 +1,29 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U fun>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U fun>
+        args = [
+          Begin {
+            stmts = [
+            ]
+          }
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+  ]
+}

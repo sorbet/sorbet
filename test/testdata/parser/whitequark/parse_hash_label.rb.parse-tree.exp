@@ -1,0 +1,12 @@
+Hash {
+  pairs = [
+    Pair {
+      key = Symbol {
+        val = <U foo>
+      }
+      value = Integer {
+        val = "2"
+      }
+    }
+  ]
+}

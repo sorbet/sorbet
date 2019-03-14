@@ -1,0 +1,69 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U a=>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U []=>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg1>
+          }
+          Arg {
+            name = <U arg2>
+          }
+          Arg {
+            name = <U arg3>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          Send {
+            receiver = Self {
+            }
+            method = <U a=>
+            args = [
+            ]
+          }
+          Send {
+            receiver = Self {
+            }
+            method = <U []=>
+            args = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+    }
+  ]
+}

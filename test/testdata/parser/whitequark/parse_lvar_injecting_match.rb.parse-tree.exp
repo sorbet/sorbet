@@ -1,0 +1,37 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U match>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = Regexp {
+        regex = [
+          String {
+            val = <U (?<match>bar)>
+          }
+        ]
+        opts = Regopt {
+          opts = ""
+        }
+      }
+      method = <U =~>
+      args = [
+        DString {
+          nodes = [
+            String {
+              val = <U bar>
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U match>
+      args = [
+      ]
+    }
+  ]
+}

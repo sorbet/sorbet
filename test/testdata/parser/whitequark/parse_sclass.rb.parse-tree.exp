@@ -1,0 +1,10 @@
+SClass {
+  expr = Send {
+    receiver = NULL
+    method = <U foo>
+    args = [
+    ]
+  }
+  body = Nil {
+  }
+}

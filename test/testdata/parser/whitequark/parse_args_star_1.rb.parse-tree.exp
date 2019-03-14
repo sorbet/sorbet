@@ -1,0 +1,41 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U fun>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U baz>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U fun>
+      args = [
+        Splat {
+          var = Send {
+            receiver = NULL
+            method = <U bar>
+            args = [
+            ]
+          }
+        }
+        BlockPass {
+          block = Send {
+            receiver = NULL
+            method = <U baz>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

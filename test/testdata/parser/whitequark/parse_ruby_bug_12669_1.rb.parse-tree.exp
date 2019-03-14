@@ -1,0 +1,24 @@
+OpAsgn {
+  left = LVarLhs {
+    name = <U a>
+  }
+  op = <U +>
+  right = Assign {
+    lhs = LVarLhs {
+      name = <U b>
+    }
+    rhs = Send {
+      receiver = NULL
+      method = <U raise>
+      args = [
+        DString {
+          nodes = [
+            String {
+              val = <U x>
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U foo>
+      }
+      rhs = Array {
+        elts = [
+          Send {
+            receiver = NULL
+            method = <U bar>
+            args = [
+            ]
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+    }
+  ]
+}

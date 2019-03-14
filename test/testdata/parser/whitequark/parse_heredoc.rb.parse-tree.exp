@@ -1,0 +1,16 @@
+DString {
+  nodes = [
+    DString {
+      nodes = [
+        String {
+          val = <U foo
+>
+        }
+        String {
+          val = <U bar
+>
+        }
+      ]
+    }
+  ]
+}

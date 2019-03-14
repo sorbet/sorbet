@@ -1,0 +1,16 @@
+Send {
+  receiver = Send {
+    receiver = Float {
+      val = "2.0"
+    }
+    method = <U **>
+    args = [
+      Integer {
+        val = "10"
+      }
+    ]
+  }
+  method = <U -@>
+  args = [
+  ]
+}

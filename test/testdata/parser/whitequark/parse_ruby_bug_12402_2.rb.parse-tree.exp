@@ -1,0 +1,54 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U +>
+      right = Rescue {
+        body = Send {
+          receiver = NULL
+          method = <U raise>
+          args = [
+            Send {
+              receiver = NULL
+              method = <U bar>
+              args = [
+              ]
+            }
+          ]
+        }
+        rescue = [
+          Resbody {
+            exception = NULL
+            var = NULL
+            body = Nil {
+            }
+          }
+        ]
+        else_ = NULL
+      }
+    }
+  ]
+}

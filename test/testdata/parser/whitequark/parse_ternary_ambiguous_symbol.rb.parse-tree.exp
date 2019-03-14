@@ -1,0 +1,36 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U t>
+      }
+      rhs = Integer {
+        val = "1"
+      }
+    }
+    If {
+      condition = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = <U foo>
+            args = [
+            ]
+          }
+        ]
+      }
+      then_ = LVar {
+        name = <U t>
+      }
+      else_ = Const {
+        scope = NULL
+        name = <C <U T>>
+      }
+    }
+  ]
+}

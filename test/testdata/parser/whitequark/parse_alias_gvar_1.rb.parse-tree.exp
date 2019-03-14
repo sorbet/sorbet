@@ -1,0 +1,8 @@
+Alias {
+  from = GVar {
+    name = <U $a>
+  }
+  to = Backref {
+    name = <U $+>
+  }
+}

@@ -1,0 +1,60 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U baz>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U fun>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Arg {
+            name = <U b>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U fun>
+      args = [
+        Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        Hash {
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U foo>
+              }
+              value = Integer {
+                val = "1"
+              }
+            }
+          ]
+        }
+        BlockPass {
+          block = Send {
+            receiver = NULL
+            method = <U baz>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

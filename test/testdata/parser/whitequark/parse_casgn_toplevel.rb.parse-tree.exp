@@ -1,0 +1,10 @@
+Assign {
+  lhs = ConstLhs {
+    scope = Cbase {
+    }
+    name = <C <U Foo>>
+  }
+  rhs = Integer {
+    val = "10"
+  }
+}

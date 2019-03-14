@@ -1,0 +1,73 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U p>
+      args = Args {
+        args = [
+          Restarg {
+            name = <U args>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U tap>
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U p>
+        args = [
+          Block {
+            send = Send {
+              receiver = NULL
+              method = <U p>
+              args = [
+              ]
+            }
+            args = NULL
+            body = Begin {
+              stmts = [
+                Send {
+                  receiver = NULL
+                  method = <U p>
+                  args = [
+                    Send {
+                      receiver = NULL
+                      method = <U p>
+                      args = [
+                      ]
+                    }
+                  ]
+                }
+                Send {
+                  receiver = NULL
+                  method = <U p>
+                  args = [
+                    Send {
+                      receiver = NULL
+                      method = <U p>
+                      args = [
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          Send {
+            receiver = NULL
+            method = <U tap>
+            args = [
+            ]
+          }
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+  ]
+}

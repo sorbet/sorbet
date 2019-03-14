@@ -1,0 +1,24 @@
+Undef {
+  exprs = [
+    Symbol {
+      val = <U foo>
+    }
+    Symbol {
+      val = <U bar>
+    }
+    DSymbol {
+      nodes = [
+        String {
+          val = <U foo>
+        }
+        Begin {
+          stmts = [
+            Integer {
+              val = "1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

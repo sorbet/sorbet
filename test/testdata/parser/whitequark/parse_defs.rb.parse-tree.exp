@@ -1,0 +1,7 @@
+DefS {
+  singleton = Self {
+  }
+  name = <U foo>
+  args = NULL
+  body = NULL
+}

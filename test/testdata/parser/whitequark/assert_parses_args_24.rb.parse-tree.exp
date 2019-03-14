@@ -1,0 +1,17 @@
+DefMethod {
+  name = <U f>
+  args = Args {
+    args = [
+      Restarg {
+        name = <U r>
+      }
+      Arg {
+        name = <U p>
+      }
+      Blockarg {
+        name = <U b>
+      }
+    ]
+  }
+  body = NULL
+}

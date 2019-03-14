@@ -1,0 +1,14 @@
+DefMethod {
+  name = <U f>
+  args = Args {
+    args = [
+      Kwoptarg {
+        name = <U foo>
+        default_ = Integer {
+          val = "1"
+        }
+      }
+    ]
+  }
+  body = NULL
+}

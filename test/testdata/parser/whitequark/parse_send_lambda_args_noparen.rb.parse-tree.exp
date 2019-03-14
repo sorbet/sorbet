@@ -1,0 +1,19 @@
+Block {
+  send = Send {
+    receiver = NULL
+    method = <U lambda>
+    args = [
+    ]
+  }
+  args = Args {
+    args = [
+      Kwoptarg {
+        name = <U a>
+        default_ = Integer {
+          val = "1"
+        }
+      }
+    ]
+  }
+  body = NULL
+}

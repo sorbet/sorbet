@@ -1,0 +1,17 @@
+Masgn {
+  lhs = Mlhs {
+    exprs = [
+      ConstLhs {
+        scope = Cbase {
+        }
+        name = <C <U A>>
+      }
+      LVarLhs {
+        name = <U foo>
+      }
+    ]
+  }
+  rhs = LVar {
+    name = <U foo>
+  }
+}

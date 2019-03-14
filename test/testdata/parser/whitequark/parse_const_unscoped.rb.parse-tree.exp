@@ -1,0 +1,17 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = ConstLhs {
+        scope = NULL
+        name = <C <U Foo>>
+      }
+      rhs = Integer {
+        val = "1"
+      }
+    }
+    Const {
+      scope = NULL
+      name = <C <U Foo>>
+    }
+  ]
+}

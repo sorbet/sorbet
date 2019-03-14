@@ -1,0 +1,39 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U meth>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Send {
+            receiver = NULL
+            method = <U meth>
+            args = [
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Send {
+                receiver = NULL
+                method = <U foo>
+                args = [
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+  ]
+}

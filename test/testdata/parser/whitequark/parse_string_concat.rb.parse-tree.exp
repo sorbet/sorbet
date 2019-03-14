@@ -1,0 +1,17 @@
+DString {
+  nodes = [
+    DString {
+      nodes = [
+        String {
+          val = <U foo>
+        }
+        IVar {
+          name = <U @a>
+        }
+      ]
+    }
+    String {
+      val = <U bar>
+    }
+  ]
+}

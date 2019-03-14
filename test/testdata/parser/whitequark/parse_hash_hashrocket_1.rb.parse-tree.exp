@@ -1,0 +1,24 @@
+Hash {
+  pairs = [
+    Pair {
+      key = Integer {
+        val = "1"
+      }
+      value = Integer {
+        val = "2"
+      }
+    }
+    Pair {
+      key = Symbol {
+        val = <U foo>
+      }
+      value = DString {
+        nodes = [
+          String {
+            val = <U bar>
+          }
+        ]
+      }
+    }
+  ]
+}

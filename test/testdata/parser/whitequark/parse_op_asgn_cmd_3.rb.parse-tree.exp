@@ -1,0 +1,24 @@
+OpAsgn {
+  left = Const {
+    scope = Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+      ]
+    }
+    name = <C <U A>>
+  }
+  op = <U +>
+  right = Send {
+    receiver = NULL
+    method = <U m>
+    args = [
+      Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+    ]
+  }
+}

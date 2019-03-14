@@ -1,0 +1,40 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U f>
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U f>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Optarg {
+            name = <U o>
+            default_ = Integer {
+              val = "1"
+            }
+          }
+          Restarg {
+            name = <U r>
+          }
+          Arg {
+            name = <U p>
+          }
+          Blockarg {
+            name = <U b>
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}

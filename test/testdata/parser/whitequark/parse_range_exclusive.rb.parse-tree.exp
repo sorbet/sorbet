@@ -1,0 +1,8 @@
+ERange {
+  from = Integer {
+    val = "1"
+  }
+  to = Integer {
+    val = "2"
+  }
+}

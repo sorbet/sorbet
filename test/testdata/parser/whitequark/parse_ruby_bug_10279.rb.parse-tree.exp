@@ -1,0 +1,17 @@
+Hash {
+  pairs = [
+    Pair {
+      key = Symbol {
+        val = <U a>
+      }
+      value = If {
+        condition = True {
+        }
+        then_ = Integer {
+          val = "42"
+        }
+        else_ = NULL
+      }
+    }
+  ]
+}

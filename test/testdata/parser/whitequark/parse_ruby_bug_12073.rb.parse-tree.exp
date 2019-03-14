@@ -1,0 +1,41 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U a>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U a>
+      }
+      rhs = Integer {
+        val = "1"
+      }
+    }
+    Send {
+      receiver = NULL
+      method = <U a>
+      args = [
+        Hash {
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U b>
+              }
+              value = Integer {
+                val = "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

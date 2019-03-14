@@ -1,0 +1,16 @@
+Block {
+  send = Send {
+    receiver = NULL
+    method = <U lambda>
+    args = [
+    ]
+  }
+  args = Args {
+    args = [
+      Restarg {
+        name = <P <U *> $2>
+      }
+    ]
+  }
+  body = NULL
+}

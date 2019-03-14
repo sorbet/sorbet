@@ -1,0 +1,21 @@
+Array {
+  elts = [
+    Regexp {
+      regex = [
+        String {
+          val = <U ()\\1>
+        }
+      ]
+      opts = Regopt {
+        opts = ""
+      }
+    }
+    DString {
+      nodes = [
+        String {
+          val = <U #>
+        }
+      ]
+    }
+  ]
+}

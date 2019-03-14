@@ -1,0 +1,23 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Break {
+      exprs = [
+        Begin {
+          stmts = [
+            Send {
+              receiver = NULL
+              method = <U foo>
+              args = [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

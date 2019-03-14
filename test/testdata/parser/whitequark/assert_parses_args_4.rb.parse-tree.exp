@@ -1,0 +1,18 @@
+DefMethod {
+  name = <U f>
+  args = Args {
+    args = [
+      Mlhs {
+        exprs = [
+          Arg {
+            name = <U a>
+          }
+          Restarg {
+            name = <P <U *> $2>
+          }
+        ]
+      }
+    ]
+  }
+  body = NULL
+}

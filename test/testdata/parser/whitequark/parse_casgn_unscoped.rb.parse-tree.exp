@@ -1,0 +1,9 @@
+Assign {
+  lhs = ConstLhs {
+    scope = NULL
+    name = <C <U Foo>>
+  }
+  rhs = Integer {
+    val = "10"
+  }
+}

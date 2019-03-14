@@ -1,0 +1,23 @@
+Assign {
+  lhs = LVarLhs {
+    name = <U a>
+  }
+  rhs = Assign {
+    lhs = LVarLhs {
+      name = <U b>
+    }
+    rhs = Send {
+      receiver = NULL
+      method = <U raise>
+      args = [
+        DString {
+          nodes = [
+            String {
+              val = <U x>
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,64 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U baz>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    Case {
+      condition = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      whens = [
+        When {
+          patterns = [
+            Integer {
+              val = "1"
+            }
+            Splat {
+              var = Send {
+                receiver = NULL
+                method = <U baz>
+                args = [
+                ]
+              }
+            }
+          ]
+          body = Send {
+            receiver = NULL
+            method = <U bar>
+            args = [
+            ]
+          }
+        }
+        When {
+          patterns = [
+            Splat {
+              var = Send {
+                receiver = NULL
+                method = <U foo>
+                args = [
+                ]
+              }
+            }
+          ]
+          body = NULL
+        }
+      ]
+      else_ = NULL
+    }
+  ]
+}

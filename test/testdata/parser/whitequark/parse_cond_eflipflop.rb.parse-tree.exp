@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    If {
+      condition = EFlipflop {
+        left = Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        right = Send {
+          receiver = NULL
+          method = <U bar>
+          args = [
+          ]
+        }
+      }
+      then_ = NULL
+      else_ = NULL
+    }
+  ]
+}

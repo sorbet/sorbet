@@ -1,0 +1,13 @@
+OpAsgn {
+  left = Const {
+    scope = Const {
+      scope = NULL
+      name = <C <U B>>
+    }
+    name = <C <U A>>
+  }
+  op = <U +>
+  right = Integer {
+    val = "1"
+  }
+}

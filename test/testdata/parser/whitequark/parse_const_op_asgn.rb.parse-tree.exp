@@ -1,0 +1,10 @@
+OpAsgn {
+  left = ConstLhs {
+    scope = NULL
+    name = <C <U A>>
+  }
+  op = <U +>
+  right = Integer {
+    val = "1"
+  }
+}

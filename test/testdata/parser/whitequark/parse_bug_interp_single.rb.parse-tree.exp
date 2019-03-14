@@ -1,0 +1,15 @@
+DString {
+  nodes = [
+    DString {
+      nodes = [
+        Begin {
+          stmts = [
+            Integer {
+              val = "1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

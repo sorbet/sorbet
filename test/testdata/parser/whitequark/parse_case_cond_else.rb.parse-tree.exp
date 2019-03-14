@@ -1,0 +1,38 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Case {
+      condition = NULL
+      whens = [
+        When {
+          patterns = [
+            Send {
+              receiver = NULL
+              method = <U foo>
+              args = [
+              ]
+            }
+          ]
+          body = DString {
+            nodes = [
+              String {
+                val = <U foo>
+              }
+            ]
+          }
+        }
+      ]
+      else_ = DString {
+        nodes = [
+          String {
+            val = <U bar>
+          }
+        ]
+      }
+    }
+  ]
+}

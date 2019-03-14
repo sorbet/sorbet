@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U desc>
+      args = Args {
+        args = [
+          Arg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U desc>
+        args = [
+          DString {
+            nodes = [
+              String {
+                val = <U foo>
+              }
+            ]
+          }
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+  ]
+}

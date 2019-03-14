@@ -1,0 +1,9 @@
+DefS {
+  singleton = Const {
+    scope = NULL
+    name = <C <U String>>
+  }
+  name = <U foo>
+  args = NULL
+  body = NULL
+}

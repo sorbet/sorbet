@@ -1,0 +1,57 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U meth>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Send {
+            receiver = NULL
+            method = <U meth>
+            args = [
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = Array {
+                elts = [
+                  Const {
+                    scope = NULL
+                    name = <C <U Exception>>
+                  }
+                  Send {
+                    receiver = NULL
+                    method = <U foo>
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              var = NULL
+              body = Send {
+                receiver = NULL
+                method = <U bar>
+                args = [
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+  ]
+}

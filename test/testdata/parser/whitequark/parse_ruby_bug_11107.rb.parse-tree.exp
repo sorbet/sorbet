@@ -1,0 +1,48 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U a>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U p>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U p>
+      args = [
+        Block {
+          send = Send {
+            receiver = NULL
+            method = <U lambda>
+            args = [
+            ]
+          }
+          args = Args {
+            args = [
+            ]
+          }
+          body = Block {
+            send = Send {
+              receiver = NULL
+              method = <U a>
+              args = [
+              ]
+            }
+            args = NULL
+            body = NULL
+          }
+        }
+      ]
+    }
+  ]
+}
