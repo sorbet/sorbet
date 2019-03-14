@@ -1,4 +1,5 @@
 #include "common/Subprocess.h"
+#include "common/common.h"
 #include <array>
 #include <spawn.h>
 #include <sstream>
@@ -54,6 +55,9 @@ private:
 
 // can't take string_views because we need char * not const char *
 optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arguments) {
+    if (emscripten_build) {
+        return nullopt;
+    }
     int readWrite[2];
     int ret;
     pid_t childPid;
