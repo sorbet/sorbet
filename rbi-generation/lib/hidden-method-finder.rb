@@ -237,16 +237,18 @@ class SorbetRBIGeneration::HiddenMethodFinder
       if !source_entry
         source_children = []
         source_mixins = []
+        is_stub = true
       else
         source_children = source_entry.fetch("children", [])
         source_mixins = source_entry.fetch("mixins", [])
+        is_stub = source_entry['superClass'] && source_symbols[source_entry['superClass']] == 'RubyTyper::StubClass'
       end
       rbi_children = rbi_entry.fetch("children", [])
       rbi_mixins = rbi_entry.fetch("mixins", [])
 
       methods = serialize_methods(source_children, rbi_children, my_klass, my_klass_is_singleton)
       includes = serialize_includes(source_mixins, rbi_mixins, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
-      if !methods.empty? || !includes.empty?
+      if !methods.empty? || !includes.empty? || is_stub
         fqn = real_name(my_klass)
         klass_str = String.new
         klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
