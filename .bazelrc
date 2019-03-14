@@ -216,5 +216,4 @@ build:webasm --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
 ## Stripe's ci passes --config=ci, we need it to exist
 ##
 common:stripeci --config=ci
-build:ci --announce_rc
 common:ci --color yes
