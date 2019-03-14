@@ -27,11 +27,16 @@ args="--config=test-sanitized-linux --config=stripeci"
 bazel test //... $args --test_output=errors || err=$?
 
 mkdir -p /log/junit
+
+# Don't spew into the logs for every single text.xml file being copied
+set +x
+
 bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
     path="${line/://}"
     path="${path#//}"
     cp "bazel-testlogs/$path/test.xml" /log/junit/"${path//\//_}.xml"
 done
+set -x
 
 if [ "$err" -ne 0 ]; then
     exit "$err"
