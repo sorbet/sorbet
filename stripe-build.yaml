@@ -1,0 +1,9 @@
+# See go/stripe-build for more information about customizing this file
+---
+henson_tarball:
+  docker: {}
+network:
+  restrict_network: true
+  http_proxy_report_only: true
+bazel:
+  version: "0.21.0"
