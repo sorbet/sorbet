@@ -918,11 +918,13 @@ public:
         if (shouldBeSelf == nullptr) {
             auto ret = fillAssign(ctx, std::move(asgn));
             if (send->fun == core::Names::typeAlias()) {
-                core::SymbolRef sym;
-                if (auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get())) {
-                    sym = id->constantSymbol();
-                }
-                if (sym.exists() && sym.data(ctx)->isStaticField()) {
+                auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get());
+                ENFORCE(id != nullptr, "fillAssign did not make lhs into a ConstantLit");
+
+                auto sym = id->constantSymbol();
+                ENFORCE(sym.exists(), "fillAssign did not make symbol for ConstantLit");
+
+                if (sym.data(ctx)->isStaticField()) {
                     sym.data(ctx)->setStaticTypeAlias();
                 }
             }

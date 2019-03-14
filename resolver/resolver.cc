@@ -1108,10 +1108,7 @@ public:
                     }
                 }
             }
-        } else if (data->isStaticField()) {
-            if (data->resultType != nullptr) {
-                return asgn;
-            }
+        } else if (data->isStaticField() && data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs, id->constantSymbol());
         }
 
