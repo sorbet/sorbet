@@ -3,6 +3,8 @@
 # frozen_string_literal: true
 # typed: true
 
+require_relative './require_eveything'
+
 require 'set'
 
 module SorbetRBIGeneration; end
@@ -90,8 +92,7 @@ class SorbetRBIGeneration::RbiGenerator
     end
 
     def require_eveything
-      require_rails
-      require_bundler # this comes second since rails projects fail `Bundler.require'
+      SorbetRBIGeneration::RequireEverything.require_everything
     end
 
     private
@@ -378,27 +379,6 @@ class SorbetRBIGeneration::RbiGenerator
       parameters = parameters.join(', ')
       parameters = "(#{parameters})" unless parameters.empty?
       "#{prefix}def #{instance ? '' : 'self.'}#{method.name}#{parameters}; end"
-    end
-
-    def require_bundler
-      begin
-        require 'bundler'
-      rescue
-        return
-      end
-      Bundler.require
-    end
-
-    def require_rails
-      begin
-        require 'rails'
-      rescue
-        return
-      end
-      require './config/application'
-      require 'rails/test_help'
-      Rails.application.require_environment!
-      Rails.application.load_runner
     end
   end
 end
