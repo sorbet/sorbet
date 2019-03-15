@@ -9,6 +9,7 @@
 #include "main/options/FileFlatMapper.h"
 #include "main/options/options.h"
 #include "options.h"
+#include "sys/stat.h"
 #include "version/version.h"
 
 namespace spd = spdlog;
@@ -187,6 +188,13 @@ cxxopts::Options buildOptions() {
         "suggest-runtime-profiled",
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
+    options.add_options("advanced")(
+        "ignore",
+        "Ignores input files that contain the given string in their paths (relative to the input path passed to "
+        "Sorbet). Strings beginning with / match against the prefix of these relative paths; others are substring "
+        "matchs. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
+        "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
+        cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
     // Developer options
@@ -248,7 +256,7 @@ cxxopts::Options buildOptions() {
 
     // Positional params
     options.parse_positional("files");
-    options.positional_help("<file1.rb> <file2.rb> ...");
+    options.positional_help("<path 1> <path 2> ...");
     return options;
 }
 
@@ -311,8 +319,36 @@ void readOptions(Options &opts, int argc, char *argv[],
             Exception::raise("simulated crash");
         }
 
+        if (raw.count("ignore") > 0) {
+            auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
+            for (auto &p : rawIgnorePatterns) {
+                if (p.at(0) == '/') {
+                    opts.absoluteIgnorePatterns.push_back(p);
+                } else {
+                    opts.relativeIgnorePatterns.push_back(fmt::format("/{}", p));
+                }
+            }
+        }
+
         if (raw.count("files") > 0) {
-            opts.inputFileNames = raw["files"].as<vector<string>>();
+            auto rawFiles = raw["files"].as<vector<string>>();
+            UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
+            struct stat s;
+            for (auto &file : rawFiles) {
+                if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
+                    opts.rawInputDirNames.push_back(file);
+                    // Expand directory into list of files.
+                    auto containedFiles = opts.fs->listFilesInDir(
+                        file, acceptableExtensions, true, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+                    opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
+                    opts.inputFileNames.insert(opts.inputFileNames.end(),
+                                               std::make_move_iterator(containedFiles.begin()),
+                                               std::make_move_iterator(containedFiles.end()));
+                } else {
+                    opts.rawInputFileNames.push_back(file);
+                    opts.inputFileNames.push_back(file);
+                }
+            }
         }
 
         opts.cacheDir = raw["cache-dir"].as<string>();
@@ -409,7 +445,8 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
-            logger->error("You must pass either `{}` or at least one ruby file.\n\n{}", "-e", options.help({""}));
+            logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
+                          options.help({""}));
             throw EarlyReturnWithCode(1);
         }
 

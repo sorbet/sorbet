@@ -191,7 +191,7 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
                                        const vector<string> &files) {
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
-        auto files = FileOps::listFilesInDir(folder, {".yaml"}, true);
+        auto files = FileOps::listFilesInDir(folder, {".yaml"}, true, {}, {});
         const int prefixLen = folder.length() + 1;
         for (const auto &file : files) {
             constexpr int extLen = 5; // strlen(".yaml");

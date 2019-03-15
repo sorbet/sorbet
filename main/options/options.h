@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "core/StrictLevel.h"
 #include "spdlog/spdlog.h"
+
 namespace sorbet::realmain::options {
 
 // Terminate execution of sorbet with specific return code
@@ -100,6 +101,15 @@ struct Options {
     std::string metricsBranch;
     std::string metricsSha;
 
+    // Contains the file names passed in to Sorbet.
+    std::vector<std::string> rawInputFileNames;
+    // Contains the directory names passed in to Sorbet.
+    std::vector<std::string> rawInputDirNames;
+    // Ignore patterns beginning from the root of an input folder.
+    std::vector<std::string> absoluteIgnorePatterns;
+    // Ignore patterns that can occur anywhere in a file's path from an input folder.
+    std::vector<std::string> relativeIgnorePatterns;
+    // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

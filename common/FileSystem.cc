@@ -11,9 +11,10 @@ void OSFileSystem::writeFile(string_view filename, string_view text) {
     return FileOps::write(filename, text);
 }
 
-vector<string> OSFileSystem::listFilesInDir(string_view path, UnorderedSet<std::string> extensions,
-                                            bool recursive) const {
-    return FileOps::listFilesInDir(path, extensions, recursive);
+vector<string> OSFileSystem::listFilesInDir(string_view path, UnorderedSet<std::string> extensions, bool recursive,
+                                            const std::vector<std::string> &absoluteIgnorePatterns,
+                                            const std::vector<std::string> &relativeIgnorePatterns) const {
+    return FileOps::listFilesInDir(path, extensions, recursive, absoluteIgnorePatterns, relativeIgnorePatterns);
 }
 
 } // namespace sorbet

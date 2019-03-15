@@ -1,10 +1,10 @@
 ----- Abbreviated help output: -------------------------------------------
 
-You must pass either `-e` or at least one ruby file.
+You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] <file1.rb> <file2.rb> ...
+  sorbet [OPTION...] <path 1> <path 2> ...
 
   -e, string                    Parse an inline ruby string (default: )
   -q, --quiet                   Silence all non-critical errors
@@ -20,7 +20,7 @@ Usage:
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] <file1.rb> <file2.rb> ...
+  sorbet [OPTION...] <path 1> <path 2> ...
 
   -e, string                    Parse an inline ruby string (default: )
   -q, --quiet                   Silence all non-critical errors
@@ -44,6 +44,14 @@ Usage:
                                 When suggesting signatures in `typed: strict`
                                 mode, suggest `::T::Utils::RuntimeProfiled`
       --lsp                     Start in language-server-protocol mode
+      --ignore string           Ignores input files that contain the given
+                                string in their paths (relative to the input
+                                path passed to Sorbet). Strings beginning with /
+                                match against the prefix of these relative
+                                paths; others are substring matchs. Matches must
+                                be against whole folder and file names, so
+                                `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb`
+                                but not `/foo.rb` or `/foo2/bar.rb`.
       --no-error-count          Do not print the error count summary line
       --autogen-version arg     Autogen version to output
 

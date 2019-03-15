@@ -23,10 +23,17 @@ public:
 
     /**
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.
+     *
+     * absoluteIgnorePatterns and relativeIgnorePatterns specify non-regexp strings that indicate if a file
+     * should not be included in the results by matching against that file's path relative to the directory.
+     * Use sorbet::FileOps::isIgnoredFile to check if a file is a match.
+     *
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
      */
     virtual std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions,
-                                                    bool recursive) const = 0;
+                                                    bool recursive,
+                                                    const std::vector<std::string> &absoluteIgnorePatterns,
+                                                    const std::vector<std::string> &relativeIgnorePatterns) const = 0;
 };
 
 /**
@@ -38,8 +45,9 @@ public:
 
     std::string readFile(std::string_view path) const override;
     void writeFile(std::string_view filename, std::string_view text) override;
-    std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions,
-                                            bool recursive) const override;
+    std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions, bool recursive,
+                                            const std::vector<std::string> &absoluteIgnorePatterns,
+                                            const std::vector<std::string> &relativeIgnorePatterns) const override;
 };
 
 } // namespace sorbet

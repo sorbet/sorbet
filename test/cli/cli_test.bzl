@@ -10,7 +10,7 @@ def cli_test(path):
         name = "run_{}".format(name),
         srcs = [path],
         data = native.glob([
-            "{}/*.rb".format(name),
+            "{}/**/*.rb".format(name),
             "{}/*.rbi".format(name),
             "{}/*.yaml".format(name),
             "{}/*.input".format(name),
