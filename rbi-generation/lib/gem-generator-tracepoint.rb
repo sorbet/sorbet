@@ -3,11 +3,11 @@
 # frozen_string_literal: true
 # typed: true
 
+module SorbetRBIGeneration; end
+
 require_relative './require_eveything'
 
 require 'set'
-
-module SorbetRBIGeneration; end
 
 alias DelegateClass_without_rbi_generator DelegateClass
 def DelegateClass(superclass)
