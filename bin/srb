@@ -50,12 +50,12 @@ typecheck() {
 
 case $command in
   "initialize" | "init")
-    bundle exec sorbet-rbi-generation
+    bundle exec sorbet-rbi-generation $@
     ;;
 
   "typecheck" | "tc")
     # shellcheck disable=SC2119
-    typecheck
+    typecheck $@
     ;;
 
   *)
