@@ -1477,6 +1477,10 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto res = unsupportedNode(dctx, redo);
                 result.swap(res);
             },
+            [&](parser::EncodingLiteral *redo) {
+                auto res = unsupportedNode(dctx, redo);
+                result.swap(res);
+            },
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: {}", node->nodeName()); });
