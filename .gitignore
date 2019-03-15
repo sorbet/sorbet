@@ -24,4 +24,6 @@
 /fuzz_corpus
 /fuzz_crashers
 
+# We are bulding gems here, so don't commit these things
+Gemfile.lock
 *.gem
