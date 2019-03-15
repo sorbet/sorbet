@@ -259,7 +259,7 @@ class SorbetRBIGeneration::RbiGenerator
       if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
         warn("Invalid class name: #{name}")
         id = anonymous_map[real_object_id(klass)] ||= new_anonymous_id
-        return "InvalidName_#{name.gsub(/[^\w]/, '_')}_#{id}"
+        return "InvalidName_#{name.gsub(/[^\w]/, '_').gsub(/0x([0-9a-f]+)/, '0x00')}_#{id}"
       end
 
       name
