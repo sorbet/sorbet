@@ -30,7 +30,7 @@ shift
 
 # shellcheck disable=SC2120
 typecheck() {
-  files=""
+  fileList=$(mktemp)
   cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet"
 
   [ -d "$cache_dir" ] || mkdir "$cache_dir"
@@ -38,14 +38,13 @@ typecheck() {
     cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
     cache_file="${cache_dir}/${cache_hash}"
     if [ ! -f "$cache_file" ]; then
-      bundle exec rbis > "$cache_file"
+      bundle exec rbis | tr " " "\n" > "$cache_file"
     fi
-    files+=$(cat "$cache_file")
-    files+=" "
+    cat "$cache_file" >> "${fileList}"
   fi
 
   # shellcheck disable=SC2086
-  "$(dirname "${BASH_SOURCE[0]}")"/sorbet . $files "$@"
+  "$(dirname "${BASH_SOURCE[0]}")"/sorbet . @$fileList "$@"
 }
 
 case $command in
