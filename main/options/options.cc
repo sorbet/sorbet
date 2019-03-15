@@ -322,10 +322,15 @@ void readOptions(Options &opts, int argc, char *argv[],
         if (raw.count("ignore") > 0) {
             auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
             for (auto &p : rawIgnorePatterns) {
+                string_view pNormalized = p;
+                // Strip any trailing slashes.
+                while (pNormalized.back() == '/') {
+                    pNormalized = pNormalized.substr(0, pNormalized.length() - 1);
+                }
                 if (p.at(0) == '/') {
-                    opts.absoluteIgnorePatterns.push_back(p);
+                    opts.absoluteIgnorePatterns.emplace_back(pNormalized);
                 } else {
-                    opts.relativeIgnorePatterns.push_back(fmt::format("/{}", p));
+                    opts.relativeIgnorePatterns.push_back(fmt::format("/{}", pNormalized));
                 }
             }
         }
