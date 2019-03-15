@@ -72,7 +72,7 @@ class SorbetRBIGeneration::RbiGenerator
     end
 
     def register_delegate_class(klass, delegate)
-      delegate_classes[delegate.object_id] = klass
+      delegate_classes[real_object_id(delegate)] = klass
     end
 
     def module_created(mod)
@@ -141,7 +141,7 @@ class SorbetRBIGeneration::RbiGenerator
 
     def pre_cache_module_methods
       ObjectSpace.each_object(Module) do |mod|
-        modules[mod.object_id] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
+        modules[real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
       end
     end
 
@@ -182,7 +182,7 @@ class SorbetRBIGeneration::RbiGenerator
             singleton = tp.method_id == :singleton_method_added
             receiver = singleton ? tp.self.singleton_class : tp.self
             methods = receiver.instance_methods(false) + receiver.private_instance_methods(false)
-            set = modules[receiver.object_id] ||= Set.new
+            set = modules[real_object_id(receiver)] ||= Set.new
             added = methods.find { |m| !set.include?(m) }
             if added.nil?
               # warn("Warning: could not find method added to #{tp.self} at #{tp.path}:#{tp.lineno}")
@@ -230,28 +230,35 @@ class SorbetRBIGeneration::RbiGenerator
     end
 
     def real_is_a?(klass, type)
-      Module.instance_method(:is_a?).bind(klass).call(type)
+      @real_is_a ||= Module.instance_method(:is_a?)
+      @real_is_a.bind(klass).call(type)
     end
 
     def real_name(klass)
-      Module.instance_method(:name).bind(klass).call
+      @real_name ||= Module.instance_method(:name)
+      @real_name.bind(klass).call
+    end
+
+    def real_object_id(klass)
+      @real_object_id ||= Module.instance_method(:object_id)
+      @real_object_id.bind(klass).call
     end
 
     def class_name(klass)
-      klass = delegate_classes[klass.object_id] || klass
+      klass = delegate_classes[real_object_id(klass)] || klass
       name = real_name(klass) if real_is_a?(klass, Module)
 
       # class/module has no name; it must be anonymous
       if name.nil? || name == ""
         middle = real_is_a?(klass, Class) ? klass.superclass : klass.class
-        id = anonymous_map[klass.object_id] ||= new_anonymous_id
+        id = anonymous_map[real_object_id(klass)] ||= new_anonymous_id
         return "Anonymous_#{class_name(middle).gsub('::', '_')}_#{id}"
       end
 
       # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
       if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
         warn("Invalid class name: #{name}")
-        id = anonymous_map[klass.object_id] ||= new_anonymous_id
+        id = anonymous_map[real_object_id(klass)] ||= new_anonymous_id
         return "InvalidName_#{name.gsub(/[^\w]/, '_')}_#{id}"
       end
 
@@ -283,13 +290,13 @@ class SorbetRBIGeneration::RbiGenerator
         grouped[gem] ||= {}
         defined.each do |item|
           klass = item[:module]
-          klass_id = klass.object_id
+          klass_id = real_object_id(klass)
           values = grouped[gem][klass_id] ||= []
           values << item unless item[:type] == :module
 
           # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
-          used_value = real_is_a?(klass, Module) && !real_name(klass).nil? ? true : klass.object_id # if non-anon, set it to true, otherwise link to next anon class
-          (used[klass.superclass.object_id] ||= Set.new) << used_value if real_is_a?(klass, Class)
+          used_value = real_is_a?(klass, Module) && !real_name(klass).nil? ? true : real_object_id(klass) # if non-anon, set it to true, otherwise link to next anon class
+          (used[real_object_id(klass.superclass)] ||= Set.new) << used_value if real_is_a?(klass, Class)
           (used[item[item[:type]].object_id] ||= Set.new) << used_value if [:extend, :include].include?(item[:type])
         end
       end
