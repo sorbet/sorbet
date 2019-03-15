@@ -1,5 +1,5 @@
 GEM
-  remote: https://rubygems.org/
+  remote: https://intgems.local.corp.stripe.com:446/
   specs:
     metaclass (0.0.4)
     minitest (5.11.3)

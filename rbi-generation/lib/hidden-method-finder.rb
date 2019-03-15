@@ -35,8 +35,8 @@ class SorbetRBIGeneration::HiddenMethodFinder
     mkdir
     if hidden_rbi
       require_everything
-      classes, _ = all_modules_and_aliases
-      gen_source_rbi(classes)
+      classes, aliases = all_modules_and_aliases
+      gen_source_rbi(classes, aliases)
     end
     if hidden_json
       rm_rbis
@@ -105,8 +105,8 @@ class SorbetRBIGeneration::HiddenMethodFinder
     constant_cache.name_by_class(mod)
   end
 
-  def gen_source_rbi(classes)
-    puts "Generating #{TMP_RBI} with #{classes.count} modules"
+  def gen_source_rbi(classes, aliases)
+    puts "Generating #{TMP_RBI} with #{classes.count} modules and #{aliases.count} aliases"
     serializer = SorbetRBIGeneration::Serialize.new
     buffer = []
     buffer << SorbetRBIGeneration::Serialize.header
@@ -114,8 +114,11 @@ class SorbetRBIGeneration::HiddenMethodFinder
     # should we do something with these errors?
     capture_stderr do
       classes.each do |class_name|
-        begin
-          buffer << serializer.class_or_module(class_name)
+        buffer << serializer.class_or_module(class_name)
+      end
+      aliases.each do |base, other_names|
+        other_names.each do |other_name|
+          buffer << serializer.alias(base, other_name)
         end
       end
     end
@@ -133,6 +136,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
         '--silence-dev-message',
         '--no-error-count',
       ] + files,
+      err: '/dev/null'
     )
     File.write(SOURCE_CONSTANTS, io.read)
     io.close
@@ -148,6 +152,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
         '--no-error-count',
         TMP_RBI,
       ],
+      err: '/dev/null'
     )
     File.write(RBI_CONSTANTS, io.read)
     io.close
@@ -217,7 +222,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
 
       # We specifically don't typecheck anything in T:: since it is hardcoded
       # into sorbet
-      next if my_klass.name == 'T'
+      next if real_name(my_klass) == 'T'
 
       source_entry = source_by_name[rbi_entry["name"]["name"]]
 

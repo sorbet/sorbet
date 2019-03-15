@@ -9,6 +9,8 @@ class SorbetRBIGeneration::Serialize
     ['Net', :OpenSSL], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
   ]
 
+  SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
+
   def constant_cache
     @constant_cache ||= SorbetRBIGeneration::ConstantLookupCache.new
     @constant_cache
@@ -156,6 +158,12 @@ class SorbetRBIGeneration::Serialize
     ret
   end
 
+  def alias(base, other_name)
+    ret = String.new
+    ret << "#{other_name} = #{base}"
+    ret
+  end
+
   def comparable?(value)
     return false if value.is_a?(BigDecimal) && value.nan?
     return false if value.is_a?(Float) && value.nan?
@@ -165,6 +173,11 @@ class SorbetRBIGeneration::Serialize
 
   def blacklisted_method(method)
     method.name =~ /__validator__[0-9]{8}/ || method.name =~ /.*:.*/
+  end
+
+  def valid_method_name(name)
+    return true if SPECIAL_METHOD_NAMES.include?(name)
+    name =~ /^[[:word:]]+[?!=]?$/
   end
 
   def constant(const, value)
@@ -180,19 +193,9 @@ class SorbetRBIGeneration::Serialize
 
   def serialize_method(method, static=false, with_sig: true)
     name = method.name.to_s
-    if name[0] =~ /[0-9]/ ||
-        name.slice(1, name.length).include?('-') ||
-        name.slice(0, name.length - 1).include?('?') ||
-        name.slice(0, name.length - 1).include?('!') ||
-        name.slice(0, name.length - 1).include?('=') ||
-        name.include?('.') || name.include?(' ') || name.include?('/') || name.include?(',') ||
-        name.include?('[') || name.include?(']')
-      if name != '==' && name != '===' &&
-          name != '<=>' && name != '!~' && name != '=~' &&
-          name != '[]' && name != '[]='
-        $stderr.puts "Illegal method name: #{name}"
-        return
-      end
+    if !valid_method_name(name)
+      $stderr.puts "Illegal method name: #{name}"
+      return
     end
     ret = String.new
     parameters = from_method(method)

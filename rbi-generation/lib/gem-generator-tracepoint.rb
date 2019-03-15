@@ -229,13 +229,21 @@ class SorbetRBIGeneration::RbiGenerator
       end
     end
 
+    def real_is_a?(klass, type)
+      Module.instance_method(:is_a?).bind(klass).call(type)
+    end
+
+    def real_name(klass)
+      Module.instance_method(:name).bind(klass).call
+    end
+
     def class_name(klass)
       klass = delegate_classes[klass.object_id] || klass
-      name = klass.name.to_s if klass.is_a?(Module)
+      name = real_name(klass) if real_is_a?(klass, Module)
 
       # class/module has no name; it must be anonymous
       if name.nil? || name == ""
-        middle = klass.is_a?(Class) ? klass.superclass : klass.class
+        middle = real_is_a?(klass, Class) ? klass.superclass : klass.class
         id = anonymous_map[klass.object_id] ||= new_anonymous_id
         return "Anonymous_#{class_name(middle).gsub('::', '_')}_#{id}"
       end
@@ -275,22 +283,13 @@ class SorbetRBIGeneration::RbiGenerator
         grouped[gem] ||= {}
         defined.each do |item|
           klass = item[:module]
-
-          begin
-            is_a_module = klass.is_a?(Module)
-          rescue ArgumentError => e
-            # active_support/option_merger.rb passes additional arguments to is_a?, so rescue and ignore
-            warn("Ignoring #{klass.class}: #{e.message}")
-            next
-          end
-
           klass_id = klass.object_id
           values = grouped[gem][klass_id] ||= []
           values << item unless item[:type] == :module
 
           # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
-          used_value = is_a_module && !klass.name.nil? ? true : klass.object_id # if non-anon, set it to true, otherwise link to next anon class
-          (used[klass.superclass.object_id] ||= Set.new) << used_value if klass.is_a?(Class)
+          used_value = real_is_a?(klass, Module) && !real_name(klass).nil? ? true : klass.object_id # if non-anon, set it to true, otherwise link to next anon class
+          (used[klass.superclass.object_id] ||= Set.new) << used_value if real_is_a?(klass, Class)
           (used[item[item[:type]].object_id] ||= Set.new) << used_value if [:extend, :include].include?(item[:type])
         end
       end
@@ -307,13 +306,13 @@ class SorbetRBIGeneration::RbiGenerator
           klass_ids.each do |klass_id, defined|
             klass = ObjectSpace._id2ref(klass_id)
 
-            next if !((klass.is_a?(Module) && !klass.name.nil?) || used?(klass_id, used))
-            next if klass.is_a?(Class) && klass.superclass == Delegator && !klass.name
+            next if !((real_is_a?(klass, Module) && !real_name(klass).nil?) || used?(klass_id, used))
+            next if real_is_a?(klass, Class) && klass.superclass == Delegator && !klass.name
 
             # next if [Object, BasicObject, Hash].include?(klass) # TODO should this be here?
 
-            f.write("#{klass.is_a?(Class) ? 'class' : 'module'} #{class_name(klass)}")
-            f.write(" < #{class_name(klass.superclass)}") if klass.is_a?(Class) && ![Object, nil].include?(klass.superclass)
+            f.write("#{real_is_a?(klass, Class) ? 'class' : 'module'} #{class_name(klass)}")
+            f.write(" < #{class_name(klass.superclass)}") if real_is_a?(klass, Class) && ![Object, nil].include?(klass.superclass)
             f.write("\n")
 
             rows = defined.map do |item|

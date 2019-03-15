@@ -40,7 +40,7 @@ class SorbetRBIGeneration::ConstantLookupCache
     'Sequel::UnbindDuplicate',
     'Sequel::Unbinder',
     'YARD::Parser::Ruby::Legacy::RipperParser',
-  ]
+  ].freeze
 
   def initialize
     @all_constants = {}
@@ -73,7 +73,7 @@ class SorbetRBIGeneration::ConstantLookupCache
 
     @all_constants.map do |_key, struct|
       next if struct.nil? || !real_is_a?(struct.const, Module) || struct.aliases.size < 2
-      ret[struct.primary_name] = struct.aliases # drop first element
+      ret[struct.primary_name] = struct.aliases.reject {|name| name == struct.primary_name}
     end
     ret
   end
@@ -106,7 +106,7 @@ class SorbetRBIGeneration::ConstantLookupCache
     begin
       constants = get_constants(mod)
     rescue TypeError
-      puts "Failed to call `constants` on #{prefix}" # rubocop:disable PrisonGuard/NoBarePuts
+      puts "Failed to call `constants` on #{prefix}"
       return nil
     end
     go_deeper = [] # make this a bfs to prefer shorter names
@@ -124,10 +124,10 @@ class SorbetRBIGeneration::ConstantLookupCache
         begin
           nested_constant = mod.const_get(nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
         rescue LoadError
-          puts "Failed to load #{mod.name}::#{nested}" # rubocop:disable PrisonGuard/NoBarePuts
+          puts "Failed to load #{mod.name}::#{nested}"
           next
         rescue NameError
-          puts "Failed to load #{mod.name}::#{nested}" # rubocop:disable PrisonGuard/NoBarePuts
+          puts "Failed to load #{mod.name}::#{nested}"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
           # Did you mean?  YARD::Parser::Ruby::Legacy::RipperParser
@@ -140,11 +140,12 @@ class SorbetRBIGeneration::ConstantLookupCache
           nested_name = prefix + "::" + nested.to_s
         end
         if maybe_seen_already
+          if nested_name != maybe_seen_already.primary_name
+            maybe_seen_already.aliases << nested_name
+          end
           if maybe_seen_already.primary_name.nil? && real_is_a?(nested_constant, Module)
             realName = nested_constant.name
             maybe_seen_already.primary_name = realName
-          else
-            maybe_seen_already.aliases << nested_name
           end
         else
           entry = ConstantEntry.new(nested, nested_name, nil, [nested_name], nested_constant, owner)

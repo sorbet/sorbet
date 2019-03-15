@@ -1,4 +1,7 @@
-source 'https://rubygems.org'
+['~/.', '/etc/'].any? do |file|
+  File.lstat(path = File.expand_path(file + 'bundle-gemfile-hook')) rescue next
+  eval(File.read(path), binding, path); break true
+end || source('https://rubygems.org/')
 
 gem 'minitest', '~> 5.11'
 gem 'mocha', '~> 1.7', require: false

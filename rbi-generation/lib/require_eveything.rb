@@ -1,3 +1,8 @@
+# frozen_string_literal: true
+# typed: true
+
+require_relative './gem_loader'
+
 class SorbetRBIGeneration::RequireEverything
   # Goes through the most common ways to require all your userland code
   def self.require_everything
@@ -16,31 +21,16 @@ class SorbetRBIGeneration::RequireEverything
     require './config/application'
     Rails.application.require_environment!
     Rails.application.eager_load!
-
-    [
-      'ActionCable::Connection::Base',
-      'ActionController::Base',
-      'ActionDispatch::SystemTestCase',
-      'ActionMailer::Base',
-      'ActionMailer::MessageDelivery',
-      'ActiveJob::Base',
-      'ActiveRecord::Schema',
-      'ActiveRecord::Migration::Current',
-    ].each do |const|
-      begin
-        Object.const_get(const, false)
-      rescue
-      end
-    end
   end
 
   def self.load_bundler
+    return unless File.exists?('Gemfile')
     begin
       require 'bundler'
     rescue
       return
     end
-    Bundler.require
+    SorbetRBIGeneration::GemLoader.require_all_gems
   end
 
   def self.require_all_files
