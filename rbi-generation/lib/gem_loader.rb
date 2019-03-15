@@ -485,6 +485,17 @@ class SorbetRBIGeneration::GemLoader
         ActiveRecord::Migration::Current,
       ]
     end,
+    'activesupport' => proc do
+      [
+        ClearanceMailer,
+        ActionView::TestCase,
+      ]
+    end,
+    'rdoc' => proc do
+      [
+        RDoc::Options,
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
