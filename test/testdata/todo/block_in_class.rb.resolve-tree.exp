@@ -4,7 +4,7 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       ::C::L = begin
         ::RubyTyper.<U keep_for_typechecking>(::T.<U proc>().<U params>({:"x" => ::Integer}).<U returns>(::Integer))
-        T.<U let>(self(<S <C <U C>> $1>).<U lambda>() do |x|
+        T.<U let>(<U <self>>.<U lambda>() do |x|
           <U x>$1.<U *>(<U x>$1)
         end, AppliedType {
           klass = <C <U Proc1>>

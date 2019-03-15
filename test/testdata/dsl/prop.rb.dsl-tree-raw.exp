@@ -29,7 +29,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U prop>
           block = nullptr
           args = [
@@ -37,7 +39,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U prop>
           block = nullptr
           args = [
@@ -47,7 +51,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U prop>
           block = nullptr
           args = [
@@ -60,7 +66,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U prop>
           block = nullptr
           args = [
@@ -74,7 +82,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U prop>
           block = nullptr
           args = [
@@ -92,7 +102,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U optional>
           block = nullptr
           args = [
@@ -106,7 +118,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U optional>
           block = nullptr
           args = [
@@ -137,7 +151,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U optional>
           block = nullptr
           args = [
@@ -156,7 +172,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U optional>
           block = nullptr
           args = [
@@ -176,7 +194,9 @@ ClassDef{
               block = nullptr
               args = [
                 Send{
-                  recv = Self{ claz = ::<todo sym> }
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
                   fun = <U how_many_cases>
                   block = nullptr
                   args = [
@@ -208,7 +228,9 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U optional>
           block = nullptr
           args = [
@@ -241,7 +263,9 @@ ClassDef{
         }]
       rhs = [
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U extend>
           block = nullptr
           args = [
@@ -267,7 +291,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -339,7 +365,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -410,13 +438,17 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U sig>
           block = Block {
             args = [
             ]
             body = Send{
-              recv = Self{ claz = ::<todo sym> }
+              recv = Local{
+                localVariable = <U <self>>
+              }
               fun = <U returns>
               block = nullptr
               args = [
@@ -486,14 +518,18 @@ ClassDef{
         }
 
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U sig>
           block = Block {
             args = [
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -593,7 +629,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -665,7 +703,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -747,7 +787,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -839,7 +881,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -951,7 +995,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1023,7 +1069,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1105,7 +1153,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1179,7 +1229,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1264,7 +1316,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1336,7 +1390,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1426,7 +1482,9 @@ ClassDef{
                 ]
                 body = Send{
                   recv = Send{
-                    recv = Self{ claz = ::<todo sym> }
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
                     fun = <U params>
                     block = nullptr
                     args = [
@@ -1507,7 +1565,9 @@ ClassDef{
                 args = [
                 ]
                 body = Send{
-                  recv = Self{ claz = ::<todo sym> }
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
                   fun = <U returns>
                   block = nullptr
                   args = [
@@ -1638,7 +1698,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1732,7 +1794,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1847,7 +1911,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -1919,7 +1985,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -2009,7 +2077,9 @@ ClassDef{
                 ]
                 body = Send{
                   recv = Send{
-                    recv = Self{ claz = ::<todo sym> }
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
                     fun = <U params>
                     block = nullptr
                     args = [
@@ -2090,7 +2160,9 @@ ClassDef{
                 args = [
                 ]
                 body = Send{
-                  recv = Self{ claz = ::<todo sym> }
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
                   fun = <U returns>
                   block = nullptr
                   args = [
@@ -2221,7 +2293,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -2319,7 +2393,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -2448,7 +2524,9 @@ ClassDef{
                 ]
                 body = Send{
                   recv = Send{
-                    recv = Self{ claz = ::<todo sym> }
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
                     fun = <U params>
                     block = nullptr
                     args = [
@@ -2568,7 +2646,9 @@ ClassDef{
                 args = [
                 ]
                 body = Send{
-                  recv = Self{ claz = ::<todo sym> }
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
                   fun = <U returns>
                   block = nullptr
                   args = [
@@ -2685,7 +2765,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -2791,7 +2873,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -2932,7 +3016,9 @@ ClassDef{
                 ]
                 body = Send{
                   recv = Send{
-                    recv = Self{ claz = ::<todo sym> }
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
                     fun = <U params>
                     block = nullptr
                     args = [
@@ -3064,7 +3150,9 @@ ClassDef{
                 args = [
                 ]
                 body = Send{
-                  recv = Self{ claz = ::<todo sym> }
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
                   fun = <U returns>
                   block = nullptr
                   args = [
@@ -3189,7 +3277,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3261,7 +3351,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3333,7 +3425,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3413,7 +3507,9 @@ ClassDef{
                 ]
                 body = Send{
                   recv = Send{
-                    recv = Self{ claz = ::<todo sym> }
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
                     fun = <U params>
                     block = nullptr
                     args = [
@@ -3494,7 +3590,9 @@ ClassDef{
                 args = [
                 ]
                 body = Send{
-                  recv = Self{ claz = ::<todo sym> }
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
                   fun = <U returns>
                   block = nullptr
                   args = [
@@ -3625,7 +3723,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3689,7 +3789,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3761,7 +3863,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3843,7 +3947,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -3928,7 +4034,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4000,7 +4108,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4082,7 +4192,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4167,7 +4279,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4239,7 +4353,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4321,7 +4437,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4406,7 +4524,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4478,7 +4598,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4560,7 +4682,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4641,7 +4765,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4713,7 +4839,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4795,7 +4923,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -4887,7 +5017,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5013,7 +5145,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5087,7 +5221,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5172,7 +5308,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5246,7 +5384,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5345,7 +5485,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5419,7 +5561,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5504,7 +5648,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5592,7 +5738,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5680,7 +5828,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5776,7 +5926,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -5900,7 +6052,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -6018,7 +6172,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -6178,7 +6334,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [
@@ -6274,7 +6432,9 @@ ClassDef{
             ]
             body = Send{
               recv = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U params>
                 block = nullptr
                 args = [

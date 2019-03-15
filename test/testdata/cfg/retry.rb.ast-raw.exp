@@ -54,7 +54,9 @@ ClassDef{
                 }
               ],
               expr = Send{
-                recv = Self{ claz = ::<todo sym> }
+                recv = Local{
+                  localVariable = <U <self>>
+                }
                 fun = <U raise>
                 block = nullptr
                 args = [
@@ -75,7 +77,9 @@ ClassDef{
               body = InsSeq{
                 stats = [
                   Send{
-                    recv = Self{ claz = ::<todo sym> }
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
                     fun = <U puts>
                     block = nullptr
                     args = [
@@ -95,7 +99,9 @@ ClassDef{
     }
 
     Send{
-      recv = Self{ claz = ::<todo sym> }
+      recv = Local{
+        localVariable = <U <self>>
+      }
       fun = <U main>
       block = nullptr
       args = [

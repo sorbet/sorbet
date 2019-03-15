@@ -608,6 +608,7 @@ public:
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
+    SymbolRef blockSpec; // used only by LoadSelf to change type of self inside method.
     TypePtr sendTp;
     SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams);
     std::shared_ptr<SendAndBlockLink> duplicate();

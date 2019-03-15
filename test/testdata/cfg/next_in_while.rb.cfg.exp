@@ -6,17 +6,17 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<U <statTemp>>$10 = self\l<U <statTemp>>$4 = <U <statTemp>>$10.<U bad>()\l<unconditional>\l"
+        label = "block[id=1](<U <self>>)\l<U <statTemp>>$10 = <U <self>>\l<U <statTemp>>$4 = <U <statTemp>>$10.<U bad>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2]()\louterLoops: 1\l<U <whileTemp>>$3: TrueClass = true\l<U <whileTemp>>$3: TrueClass\l"
+        label = "block[id=2](<U <self>>: Object)\louterLoops: 1\l<U <whileTemp>>$3: TrueClass = true\l<U <whileTemp>>$3: TrueClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_5" [style="bold"];
@@ -28,7 +28,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_5" [
-        label = "block[id=5]()\louterLoops: 1\l<U <statTemp>>$6: Object = self\l<U <statTemp>>$5: T.untyped = <U <statTemp>>$6: Object.<U good>()\l<U <statTemp>>$9: Object = self\l<U <nextTemp>>$8: T.untyped = <U <statTemp>>$9: Object.<U value>()\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: Object)\louterLoops: 1\l<U <statTemp>>$5: T.untyped = <U <self>>: Object.<U good>()\l<U <nextTemp>>$8: T.untyped = <U <self>>: Object.<U value>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_2" [style="bold"];

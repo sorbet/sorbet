@@ -4,32 +4,32 @@ class <emptyTree><<C <U <root>>>> < ()
       <emptyTree>
     end
 
-    self(<C <U <todo sym>>>).<U prop>()
+    <U <self>>.<U prop>()
 
-    self(<C <U <todo sym>>>).<U prop>(:"foo", :"not_a_string")
+    <U <self>>.<U prop>(:"foo", :"not_a_string")
 
-    self(<C <U <todo sym>>>).<U prop>("not_a_symbol", <emptyTree>::<C <U String>>)
+    <U <self>>.<U prop>("not_a_symbol", <emptyTree>::<C <U String>>)
 
-    self(<C <U <todo sym>>>).<U prop>(:"foo", <emptyTree>::<C <U String>>, "not_a_hash")
+    <U <self>>.<U prop>(:"foo", <emptyTree>::<C <U String>>, "not_a_hash")
 
-    self(<C <U <todo sym>>>).<U prop>("too", <emptyTree>::<C <U String>>, {}, "many")
+    <U <self>>.<U prop>("too", <emptyTree>::<C <U String>>, {}, "many")
 
-    self(<C <U <todo sym>>>).<U optional>(:"company_name", <emptyTree>::<C <U String>>, :"nonempty_string")
+    <U <self>>.<U optional>(:"company_name", <emptyTree>::<C <U String>>, :"nonempty_string")
 
-    self(<C <U <todo sym>>>).<U optional>(:"day", <emptyTree>::<C <U IntegerParam>>.<U new>({:"min" => 1, :"max" => 31}))
+    <U <self>>.<U optional>(:"day", <emptyTree>::<C <U IntegerParam>>.<U new>({:"min" => 1, :"max" => 31}))
 
-    self(<C <U <todo sym>>>).<U optional>(:"name", <emptyTree>::<C <U StringParam>>.<U alphanumeric>())
+    <U <self>>.<U optional>(:"name", <emptyTree>::<C <U StringParam>>.<U alphanumeric>())
 
-    self(<C <U <todo sym>>>).<U optional>(:"how_many", <emptyTree>::<C <U Opus>>::<C <U Param>>::<C <U CaseParam>>.<U new>(self(<C <U <todo sym>>>).<U how_many_cases>(), <emptyTree>::<C <U Opus>>::<C <U Param>>::<C <U ParamSpecsParam>>.<U new>(<emptyTree>::<C <U Default>>)))
+    <U <self>>.<U optional>(:"how_many", <emptyTree>::<C <U Opus>>::<C <U Param>>::<C <U CaseParam>>.<U new>(<U <self>>.<U how_many_cases>(), <emptyTree>::<C <U Opus>>::<C <U Param>>::<C <U ParamSpecsParam>>.<U new>(<emptyTree>::<C <U Default>>)))
 
-    self(<C <U <todo sym>>>).<U optional>(:"optional_param", <emptyTree>::<C <U IntegerParam>>.<U new>())
+    <U <self>>.<U optional>(:"optional_param", <emptyTree>::<C <U IntegerParam>>.<U new>())
   end
 
   class <emptyTree>::<C <U SomeODM>><<C <U <todo sym>>>> < (::<todo sym>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
@@ -37,23 +37,23 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
       ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
     end
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
     def <U foo2><<C <U <todo sym>>>>(&<U <blk>>)
       <emptyTree>::<C <U T>>.<U cast>(<emptyTree>::<C <U T>>.<U unsafe>(nil), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo2=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -67,7 +67,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U AdvancedODM>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U default><<C <U <todo sym>>>>(&<U <blk>>)
@@ -75,7 +75,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U default=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -83,7 +83,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
     def <U t_nilable><<C <U <todo sym>>>>(&<U <blk>>)
@@ -91,7 +91,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
     def <U t_nilable=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -99,7 +99,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U type><<C <U <todo sym>>>>(&<U <blk>>)
@@ -107,7 +107,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U type=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -115,7 +115,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::Object)
+      <U <self>>.<U params>({}).<U returns>(::Object)
     end
 
     def <U object><<C <U <todo sym>>>>(&<U <blk>>)
@@ -123,7 +123,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::Object}).<U returns>(::Object)
+      <U <self>>.<U params>({:"arg0" => ::Object}).<U returns>(::Object)
     end
 
     def <U object=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -131,7 +131,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
     def <U array><<C <U <todo sym>>>>(&<U <blk>>)
@@ -139,7 +139,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
     def <U array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -148,7 +148,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
     class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
+        <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
       end
 
       def <U array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -156,7 +156,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
+        <U <self>>.<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
 
       def <U array><<C <U <todo sym>>>>(&<U <blk>>)
@@ -165,7 +165,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T::Array.<U []>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({}).<U returns>(::T::Array.<U []>(<emptyTree>::<C <U String>>))
     end
 
     def <U array_of><<C <U <todo sym>>>>(&<U <blk>>)
@@ -173,7 +173,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T::Array.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(::T::Array.<U []>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({:"arg0" => ::T::Array.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(::T::Array.<U []>(<emptyTree>::<C <U String>>))
     end
 
     def <U array_of=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -181,7 +181,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
     def <U array_of_explicit><<C <U <todo sym>>>>(&<U <blk>>)
@@ -189,7 +189,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
     def <U array_of_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -198,7 +198,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
     class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
+        <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
       end
 
       def <U array_of_explicit=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -206,7 +206,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
+        <U <self>>.<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
 
       def <U array_of_explicit><<C <U <todo sym>>>>(&<U <blk>>)
@@ -215,7 +215,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
     end
 
     def <U t_array><<C <U <todo sym>>>>(&<U <blk>>)
@@ -223,7 +223,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
     end
 
     def <U t_array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -232,7 +232,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
     class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
+        <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Array>>.<U []>(<emptyTree>::<C <U String>>))
       end
 
       def <U t_array=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -240,7 +240,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(<emptyTree>::<C <U String>>))
+        <U <self>>.<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(<emptyTree>::<C <U String>>))
       end
 
       def <U t_array><<C <U <todo sym>>>>(&<U <blk>>)
@@ -249,7 +249,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
     end
 
     def <U hash_of><<C <U <todo sym>>>>(&<U <blk>>)
@@ -257,7 +257,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
     end
 
     def <U hash_of=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -266,7 +266,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
     class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+        <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>::<C <U Hash>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
       end
 
       def <U hash_of=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -274,7 +274,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U HashMutator>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
+        <U <self>>.<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U HashMutator>>.<U []>(<emptyTree>::<C <U Symbol>>, <emptyTree>::<C <U String>>))
       end
 
       def <U hash_of><<C <U <todo sym>>>>(&<U <blk>>)
@@ -283,7 +283,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U const_explicit><<C <U <todo sym>>>>(&<U <blk>>)
@@ -291,7 +291,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U const><<C <U <todo sym>>>>(&<U <blk>>)
@@ -299,7 +299,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U Array>>)
     end
 
     def <U no_class_arg><<C <U <todo sym>>>>(&<U <blk>>)
@@ -308,7 +308,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
     class <emptyTree>::<C <U Mutator>><<C <U <todo sym>>>> < ()
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
+        <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U Array>>}).<U returns>(<emptyTree>::<C <U Array>>)
       end
 
       def <U no_class_arg=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -316,7 +316,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        self(<C <U <todo sym>>>).<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
+        <U <self>>.<U returns>(::<root>::<C <U Chalk>>::<C <U ODM>>::<C <U Mutator>>::<C <U Private>>::<C <U ArrayMutator>>.<U []>(::T.<U untyped>()))
       end
 
       def <U no_class_arg><<C <U <todo sym>>>>(&<U <blk>>)
@@ -325,7 +325,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U untyped>())
+      <U <self>>.<U params>({}).<U returns>(::T.<U untyped>())
     end
 
     def <U enum_prop><<C <U <todo sym>>>>(&<U <blk>>)
@@ -333,7 +333,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign><<C <U <todo sym>>>>(&<U <blk>>)
@@ -341,7 +341,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -349,7 +349,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
     end
 
     def <U foreign_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
@@ -357,7 +357,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_lazy><<C <U <todo sym>>>>(&<U <blk>>)
@@ -365,7 +365,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_lazy=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -373,7 +373,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
     end
 
     def <U foreign_lazy_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
@@ -381,7 +381,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_proc><<C <U <todo sym>>>>(&<U <blk>>)
@@ -389,7 +389,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_proc=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -397,7 +397,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U ForeignClass>>))
     end
 
     def <U foreign_proc_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
@@ -405,7 +405,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_invalid><<C <U <todo sym>>>>(&<U <blk>>)
@@ -413,7 +413,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foreign_invalid=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -421,7 +421,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U untyped>())
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U untyped>())
     end
 
     def <U foreign_invalid_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
@@ -429,7 +429,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U ifunset><<C <U <todo sym>>>>(&<U <blk>>)
@@ -437,7 +437,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U ifunset=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -445,7 +445,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
     def <U ifunset_nilable><<C <U <todo sym>>>>(&<U <blk>>)
@@ -453,7 +453,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
     end
 
     def <U ifunset_nilable=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -463,7 +463,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U PropHelpers>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::String)
+      <U <self>>.<U params>({}).<U returns>(::String)
     end
 
     def <U token><<C <U <todo sym>>>>(&<U <blk>>)
@@ -471,7 +471,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::String}).<U returns>(::String)
+      <U <self>>.<U params>({:"arg0" => ::String}).<U returns>(::String)
     end
 
     def <U token=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -479,7 +479,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::Float)
+      <U <self>>.<U params>({}).<U returns>(::Float)
     end
 
     def <U created><<C <U <todo sym>>>>(&<U <blk>>)
@@ -487,7 +487,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::Float}).<U returns>(::Float)
+      <U <self>>.<U params>({:"arg0" => ::Float}).<U returns>(::Float)
     end
 
     def <U created=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -497,7 +497,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U PropHelpers2>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::String)
+      <U <self>>.<U params>({}).<U returns>(::String)
     end
 
     def <U token><<C <U <todo sym>>>>(&<U <blk>>)
@@ -505,7 +505,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::String}).<U returns>(::String)
+      <U <self>>.<U params>({:"arg0" => ::String}).<U returns>(::String)
     end
 
     def <U token=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -513,7 +513,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::Float)
+      <U <self>>.<U params>({}).<U returns>(::Float)
     end
 
     def <U created><<C <U <todo sym>>>>(&<U <blk>>)
@@ -523,7 +523,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U ShardingProp>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::String)
+      <U <self>>.<U params>({}).<U returns>(::String)
     end
 
     def <U merchant><<C <U <todo sym>>>>(&<U <blk>>)
@@ -533,7 +533,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U EncryptedProp>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(::String))
+      <U <self>>.<U params>({}).<U returns>(::T.<U nilable>(::String))
     end
 
     def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
@@ -541,7 +541,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+      <U <self>>.<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
     end
 
     def <U encrypted_foo><<C <U <todo sym>>>>(&<U <blk>>)
@@ -549,7 +549,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(::String)}).<U returns>(::T.<U nilable>(::String))
+      <U <self>>.<U params>({:"arg0" => ::T.<U nilable>(::String)}).<U returns>(::T.<U nilable>(::String))
     end
 
     def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -557,7 +557,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+      <U <self>>.<U params>({:"arg0" => ::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>)}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
     end
 
     def <U encrypted_foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -565,7 +565,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(::String))
+      <U <self>>.<U params>({}).<U returns>(::T.<U nilable>(::String))
     end
 
     def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
@@ -573,7 +573,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
+      <U <self>>.<U params>({}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<C <U EncryptedValue>>))
     end
 
     def <U encrypted_bar><<C <U <todo sym>>>>(&<U <blk>>)

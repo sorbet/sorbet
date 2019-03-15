@@ -1,19 +1,19 @@
 class <emptyTree><<C <U <root>>>> < ()
   class <emptyTree>::<C <U Opus>>::<C <U Command>><<C <U <todo sym>>>> < (::<todo sym>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
   end
 
   class <emptyTree>::<C <U MyCommand>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Opus>>::<C <U Command>>)
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
       <U x>.<U to_s>()
     end
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def self.<U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
@@ -24,16 +24,16 @@ class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U MyCommand>>.<U call>(7), <emptyTree>::<C <U String>>)
 
   class <emptyTree>::<C <U OtherCommand>><<C <U <todo sym>>>> < (::<root>::<C <U Opus>>::<C <U Command>>)
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
     end
 
     def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
-      self(<C <U <todo sym>>>).<U Integer>(<U x>)
+      <U <self>>.<U Integer>(<U x>)
     end
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
     end
 
     def self.<U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
@@ -44,14 +44,14 @@ class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U OtherCommand>>.<U call>("8"), <emptyTree>::<C <U Integer>>)
 
   class <emptyTree>::<C <U NotACommand>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Llamas>>::<C <U Opus>>::<C <U Command>>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U Integer>>)
     end
 
     def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
-      self(<C <U <todo sym>>>).<U Integer>(<U x>)
+      <U <self>>.<U Integer>(<U x>)
     end
   end
 
@@ -59,7 +59,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U CallNoSig>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Opus>>::<C <U Command>>)
     def <U call><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
-      self(<C <U <todo sym>>>).<U Integer>(<U x>)
+      <U <self>>.<U Integer>(<U x>)
     end
   end
 

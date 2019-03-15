@@ -22,8 +22,8 @@ begin
     end
 
     def self.<U <static-init>><<U <static-init>>>(<blk>)
-      self(<S <C <U Main>> $1>).<U sig>() do ||
-        self(<C <U Builder>>).<U params>({:"a" => ::Integer}).<U returns>(::Integer)
+      <U <self>>.<U sig>() do ||
+        <U <self>>.<U params>({:"a" => ::Integer}).<U returns>(::Integer)
       end
     end
   end

@@ -84,7 +84,9 @@ ClassDef{
           }
         ],
         expr = Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U proc>
           block = Block {
             args = [

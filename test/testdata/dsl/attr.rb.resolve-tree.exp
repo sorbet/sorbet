@@ -78,29 +78,29 @@ begin
 
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        self(<S <C <U TestAttr>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U void>()
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U void>()
         end
-        self(<S <C <U TestAttr>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U returns>(::Integer)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U returns>(::Integer)
         end
-        self(<S <C <U TestAttr>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"v1" => ::Integer}).<U returns>(::Integer)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U params>({:"v1" => ::Integer}).<U returns>(::Integer)
         end
-        self(<S <C <U TestAttr>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U returns>(::String)
         end
-        self(<S <C <U TestAttr>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"v2" => ::String}).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U params>({:"v2" => ::String}).<U returns>(::String)
         end
-        self(<S <C <U TestAttr>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U returns>(::String)
-        end
-        ::Sorbet.<U sig>() do ||
-          self(<C <U Builder>>).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U returns>(::String)
         end
         ::Sorbet.<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"v6" => ::String}).<U returns>(::String)
+          <U <self>>.<U returns>(::String)
+        end
+        ::Sorbet.<U sig>() do ||
+          <U <self>>.<U params>({:"v6" => ::String}).<U returns>(::String)
         end
         <emptyTree>
       end

@@ -2,24 +2,12 @@ class <emptyTree><<C <U <root>>>> < ()
   <emptyTree>
 
   def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
-    self(<S <C <U <root>>> $1>).<U foobar>() do ||
-      begin
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-      end
+    <U <self>>.<U foobar>() do ||
+      <emptyTree>
     end
   end
 
   def <U a_method><<U a_method>>(<blk>)
-    <emptyTree>
-  end
-
-  def <U a_method_with_param><<U a_method_with_param>>(a, <blk>)
-    <emptyTree>
-  end
-
-  def self.<U a_static_method><<U a_static_method>>(<blk>)
     <emptyTree>
   end
 end

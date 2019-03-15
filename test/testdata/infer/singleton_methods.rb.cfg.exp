@@ -1,20 +1,20 @@
 digraph "singleton_methods.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Foo))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Foo))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:Foo>#bar" {
@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:Foo>#bar" {
     "bb::<Class:Foo>#bar_1" [shape = parallelogram];
 
     "bb::<Class:Foo>#bar_0" [
-        label = "block[id=0]()\l<U <returnMethodTemp>>$2: Integer(1) = 1\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(Foo) = cast(<U <self>>: NilClass, T.class_of(Foo));\l<U <returnMethodTemp>>$2: Integer(1) = 1\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:Foo>#bar_0" -> "bb::<Class:Foo>#bar_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\l<U <statTemp>>$3: T.class_of(Foo) = alias <C <U Foo>>\l<U <returnMethodTemp>>$2: T.untyped = <U <statTemp>>$3: T.class_of(Foo).<U bar>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: Bar = cast(<U <self>>: NilClass, Bar);\l<U <statTemp>>$3: T.class_of(Foo) = alias <C <U Foo>>\l<U <returnMethodTemp>>$2: T.untyped = <U <statTemp>>$3: T.class_of(Foo).<U bar>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];

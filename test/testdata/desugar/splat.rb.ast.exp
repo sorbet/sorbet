@@ -25,7 +25,7 @@ class <emptyTree><<C <U <root>>>> < ()
     def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
       begin
         <U a> = [1, 2]
-        ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>), :"super", <U a>.<U to_a>())
+        ::<Magic>.<U <call-with-splat>>(<U <self>>, :"super", <U a>.<U to_a>())
       end
     end
   end
@@ -36,8 +36,8 @@ class <emptyTree><<C <U <root>>>> < ()
       <U a>.<U to_a>().<U concat>([2])
       [1].<U concat>(<U a>.<U to_a>())
       [1].<U concat>(<U a>.<U to_a>()).<U concat>([2])
-      ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>), :"bar", <U a>.<U to_a>())
-      ::<Magic>.<U <call-with-splat>>(self(<C <U <todo sym>>>), :"bar", <emptyTree>::<C <U Splatable>>.<U new>().<U to_a>())
+      ::<Magic>.<U <call-with-splat>>(<U <self>>, :"bar", <U a>.<U to_a>())
+      ::<Magic>.<U <call-with-splat>>(<U <self>>, :"bar", <emptyTree>::<C <U Splatable>>.<U new>().<U to_a>())
       <emptyTree>::<C <U Child>>.<U new>().<U foo>()
       <U b> = <emptyTree>::<C <U Splatable>>.<U new>().<U to_a>()
       begin
@@ -48,14 +48,14 @@ class <emptyTree><<C <U <root>>>> < ()
           <emptyTree>
         end
       end
-      self(<C <U <todo sym>>>).<U raise>("a")
+      <U <self>>.<U raise>("a")
     rescue <emptyTree>::<C <U Rescueable>>.<U new>().<U to_a>() => <D <U <rescueTemp>> $3>
       <emptyTree>
-      self(<C <U <todo sym>>>).<U raise>("a")
+      <U <self>>.<U raise>("a")
     rescue [<emptyTree>::<C <U Array>>].<U concat>(<emptyTree>::<C <U Rescueable>>.<U new>().<U to_a>()).<U concat>([<emptyTree>::<C <U Float>>]) => <D <U <rescueTemp>> $4>
       <emptyTree>
     end
   end
 
-  self(<C <U <todo sym>>>).<U foo>()
+  <U <self>>.<U foo>()
 end

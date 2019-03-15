@@ -40,14 +40,14 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   class <emptyTree>::<C <U Child>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Parent>>)
-    self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Mixin>>)
+    <U <self>>.<U include>(<emptyTree>::<C <U Mixin>>)
 
-    self(<C <U <todo sym>>>).<U include>(3)
+    <U <self>>.<U include>(3)
 
-    self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Mixin>>) do ||
+    <U <self>>.<U include>(<emptyTree>::<C <U Mixin>>) do ||
       <emptyTree>
     end
 
-    self(<C <U <todo sym>>>).<U whatever>().<U include>(<emptyTree>::<C <U OtherMixin>>)
+    <U <self>>.<U whatever>().<U include>(<emptyTree>::<C <U OtherMixin>>)
   end
 end

@@ -158,7 +158,7 @@ end
   )
 )
 class Sorbet
-  sig {params(blk: T.proc.void).void}
+  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
   def self.sig(&blk)
   end
 end
@@ -175,6 +175,8 @@ class Sorbet::Private::Builder
   def override; end
   Sorbet.sig {returns(Sorbet::Private::Builder)}
   def overridable; end
+  Sorbet.sig {params(type: T.untyped).returns(Sorbet::Private::Builder)}
+  def bind(type); end
   Sorbet.sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def params(**params); end
   Sorbet.sig {params(type: T.untyped).returns(Sorbet::Private::Builder)}
@@ -187,7 +189,7 @@ class Sorbet::Private::Builder
   def checked(arg); end
 end
 module T::Sig
-  sig {params(blk: T.proc.void).void}
+  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
   def sig(&blk); end
 end
 module T

@@ -48,8 +48,7 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
-    auto self = ast::cast_tree<ast::Self>(send->recv.get());
-    if (self == nullptr) {
+    if (!send->recv->isSelfReference()) {
         return nullptr;
     }
 

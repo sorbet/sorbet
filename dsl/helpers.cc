@@ -41,7 +41,7 @@ unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression 
     if (send->fun != core::Names::lambda() && send->fun != core::Names::proc()) {
         return nullptr;
     }
-    if (!ast::isa_tree<ast::Self>(send->recv.get())) {
+    if (!send->recv->isSelfReference()) {
         return nullptr;
     }
     if (send->block == nullptr) {

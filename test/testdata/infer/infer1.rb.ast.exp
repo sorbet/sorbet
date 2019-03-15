@@ -18,7 +18,7 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   def <U baz4><<C <U <todo sym>>>>(&<U <blk>>)
-    <U b> = self(<C <U <todo sym>>>).<U a>().<U getbyte>("foo")
+    <U b> = <U <self>>.<U a>().<U getbyte>("foo")
   end
 
   def <U baz5><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)

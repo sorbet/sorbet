@@ -5,7 +5,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U SomeDataInterface>><<C <U <todo sym>>>> < (::<todo sym>)
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
@@ -13,7 +13,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
@@ -21,7 +21,7 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Other>>))
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Other>>))
     end
 
     def <U foo_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)

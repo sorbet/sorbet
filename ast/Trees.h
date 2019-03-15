@@ -46,6 +46,8 @@ public:
 
     // This function should be private but it makes it hard to access from template methods in TreeCopy.cc
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const = 0;
+
+    bool isSelfReference() const;
 };
 // CheckSize(Expression, 16, 8);
 
@@ -618,21 +620,6 @@ private:
     virtual void _sanityCheck();
 };
 // CheckSize(ZSuperArgs, 16, 8);
-
-class Self final : public Expression {
-public:
-    core::SymbolRef claz;
-
-    Self(core::Loc loc, core::SymbolRef claz);
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-// CheckSize(Self, 24, 8);
 
 class Block final : public Expression {
 public:

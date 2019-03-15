@@ -6,7 +6,7 @@ subgraph "cluster_::TestMetaType#_" {
     "bb::TestMetaType#__1" [shape = parallelogram];
 
     "bb::TestMetaType#__0" [
-        label = "block[id=0]()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: TestMetaType = cast(<U <self>>: NilClass, TestMetaType);\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#__0" -> "bb::TestMetaType#__1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_1" [shape = parallelogram];
 
     "bb::TestMetaType#testit_0" [
-        label = "block[id=0]()\l<U <statTemp>>$4: TestMetaType = self\l<U keep_for_ide>$7: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$6: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$8: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$5: <Type: T::Array[String]> = <U <statTemp>>$6: T.class_of(T::Array).<U []>(<U <statTemp>>$8: T.class_of(String))\l<U <statTemp>>$3: NilClass = <U <statTemp>>$4: TestMetaType.<U puts>(<U <statTemp>>$5: <Type: T::Array[String]>)\l<U <statTemp>>$10: TestMetaType = self\l<U <statTemp>>$13: TestMetaType = self\l<U <ifTemp>>$12: T.untyped = <U <statTemp>>$13: TestMetaType.<U _>()\l<U <ifTemp>>$12: T.untyped\l"
+        label = "block[id=0]()\l<U <self>>: TestMetaType = cast(<U <self>>: NilClass, TestMetaType);\l<U keep_for_ide>$7: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$6: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$8: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$5: <Type: T::Array[String]> = <U <statTemp>>$6: T.class_of(T::Array).<U []>(<U <statTemp>>$8: T.class_of(String))\l<U <statTemp>>$3: NilClass = <U <self>>: TestMetaType.<U puts>(<U <statTemp>>$5: <Type: T::Array[String]>)\l<U <ifTemp>>$12: T.untyped = <U <self>>: TestMetaType.<U _>()\l<U <ifTemp>>$12: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_2" [style="bold"];
@@ -36,34 +36,34 @@ subgraph "cluster_::TestMetaType#testit" {
 
     "bb::TestMetaType#testit_1" -> "bb::TestMetaType#testit_1" [style="bold"];
     "bb::TestMetaType#testit_2" [
-        label = "block[id=2](<U <statTemp>>$10: TestMetaType)\l<U keep_for_ide>$15: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$14: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$16: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$11: <Type: T::Array[String]> = <U <statTemp>>$14: T.class_of(T::Array).<U []>(<U <statTemp>>$16: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=2](<U <self>>: TestMetaType)\l<U keep_for_ide>$15: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$14: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$16: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$11: <Type: T::Array[String]> = <U <statTemp>>$14: T.class_of(T::Array).<U []>(<U <statTemp>>$16: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_2" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_3" [
-        label = "block[id=3](<U <statTemp>>$10: TestMetaType)\l<U <statTemp>>$11: FalseClass = false\l<unconditional>\l"
+        label = "block[id=3](<U <self>>: TestMetaType)\l<U <statTemp>>$11: FalseClass = false\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_3" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_4" [
-        label = "block[id=4](<U <statTemp>>$10: TestMetaType, <U <statTemp>>$11: Object)\l<U <statTemp>>$9: NilClass = <U <statTemp>>$10: TestMetaType.<U puts>(<U <statTemp>>$11: Object)\l<U <statTemp>>$17: TestMetaType = self\l<U <statTemp>>$20: TestMetaType = self\l<U <ifTemp>>$19: T.untyped = <U <statTemp>>$20: TestMetaType.<U _>()\l<U <ifTemp>>$19: T.untyped\l"
+        label = "block[id=4](<U <statTemp>>$11: Object, <U <self>>: TestMetaType)\l<U <statTemp>>$9: NilClass = <U <self>>: TestMetaType.<U puts>(<U <statTemp>>$11: Object)\l<U <ifTemp>>$19: T.untyped = <U <self>>: TestMetaType.<U _>()\l<U <ifTemp>>$19: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_5" [style="bold"];
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_6" [style="tapered"];
 
     "bb::TestMetaType#testit_5" [
-        label = "block[id=5](<U <statTemp>>$17: TestMetaType)\l<U keep_for_ide>$22: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$21: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$23: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$18: <Type: T::Array[String]> = <U <statTemp>>$21: T.class_of(T::Array).<U []>(<U <statTemp>>$23: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: TestMetaType)\l<U keep_for_ide>$22: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$21: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$23: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$18: <Type: T::Array[String]> = <U <statTemp>>$21: T.class_of(T::Array).<U []>(<U <statTemp>>$23: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_5" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_6" [
-        label = "block[id=6](<U <statTemp>>$17: TestMetaType)\l<U keep_for_ide>$25: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$24: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$26: T.class_of(Float) = alias <C <U Float>>\l<U <statTemp>>$18: <Type: T::Array[Float]> = <U <statTemp>>$24: T.class_of(T::Array).<U []>(<U <statTemp>>$26: T.class_of(Float))\l<unconditional>\l"
+        label = "block[id=6](<U <self>>: TestMetaType)\l<U keep_for_ide>$25: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$24: T.class_of(T::Array) = alias <C <U Array>>\l<U <statTemp>>$26: T.class_of(Float) = alias <C <U Float>>\l<U <statTemp>>$18: <Type: T::Array[Float]> = <U <statTemp>>$24: T.class_of(T::Array).<U []>(<U <statTemp>>$26: T.class_of(Float))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_7" [
-        label = "block[id=7](<U <statTemp>>$17: TestMetaType, <U <statTemp>>$18: Object)\l<U <returnMethodTemp>>$2: NilClass = <U <statTemp>>$17: TestMetaType.<U puts>(<U <statTemp>>$18: Object)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7](<U <statTemp>>$18: Object, <U <self>>: TestMetaType)\l<U <returnMethodTemp>>$2: NilClass = <U <self>>: TestMetaType.<U puts>(<U <statTemp>>$18: Object)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];

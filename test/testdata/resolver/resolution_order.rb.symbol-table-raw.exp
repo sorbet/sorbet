@@ -1,6 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/resolution_order.rb start=8:1 end=64:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=8:1 end=64:4}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/resolution_order.rb start=8:1 end=64:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=8:1 end=64:4}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <C <U A>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:1 end=34:9}
     static-field <C <U A>><C <U AB>> -> AliasType { symbol = <C <U B>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=35:3 end=35:5}
     static-field <C <U A>><C <U AV>> -> Integer @ Loc {file=test/testdata/resolver/resolution_order.rb start=37:3 end=37:5}

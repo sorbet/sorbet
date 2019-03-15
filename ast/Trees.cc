@@ -32,7 +32,6 @@ template class std::unique_ptr<sorbet::ast::Array>;
 template class std::unique_ptr<sorbet::ast::Literal>;
 template class std::unique_ptr<sorbet::ast::UnresolvedConstantLit>;
 template class std::unique_ptr<sorbet::ast::ZSuperArgs>;
-template class std::unique_ptr<sorbet::ast::Self>;
 template class std::unique_ptr<sorbet::ast::Block>;
 template class std::unique_ptr<sorbet::ast::InsSeq>;
 template class std::unique_ptr<sorbet::ast::EmptyTree>;
@@ -236,11 +235,6 @@ ConstantLit::ConstantLit(core::Loc loc, core::SymbolRef symbol, unique_ptr<Unres
                          unique_ptr<Expression> resolved)
     : Expression(loc), symbol(symbol), original(std::move(original)), typeAlias(std::move(resolved)) {
     categoryCounterInc("trees", "resolvedconstantlit");
-    _sanityCheck();
-}
-
-Self::Self(core::Loc loc, core::SymbolRef claz) : Expression(loc), claz(claz) {
-    categoryCounterInc("trees", "self");
     _sanityCheck();
 }
 
@@ -604,6 +598,11 @@ string Local::nodeName() {
     return "Local";
 }
 
+bool Expression::isSelfReference() const {
+    auto asLocal = cast_tree_const<Local>(this);
+    return asLocal && asLocal->localVariable == core::LocalVariable::selfVariable();
+}
+
 string Field::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << '\n';
@@ -678,14 +677,6 @@ string Return::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 
 string Next::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "next(" + this->expr->toStringWithTabs(gs, tabs + 1) + ")";
-}
-
-string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    if (this->claz.exists()) {
-        return "self(" + this->claz.data(gs)->name.data(gs)->toString(gs) + ")";
-    } else {
-        return "self(TODO)";
-    }
 }
 
 string Break::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1138,10 +1129,6 @@ string ConstantLit::nodeName() {
     return "ConstantLit";
 }
 
-string Self::nodeName() {
-    return "Self";
-}
-
 string Block::nodeName() {
     return "Block";
 }
@@ -1166,9 +1153,6 @@ string RestArg::nodeName() {
     return "RestArg";
 }
 
-string Self::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ claz = " + this->claz.data(gs)->showFullName(gs) + " }";
-}
 string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }

@@ -28,7 +28,7 @@ class <emptyTree><<C <U <root>>>> < ()
               <U a> = <D <U <assignTemp>> $3>.<U []>(0)
               <D <U <assignTemp>> $3>
             end
-            self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
+            <U <self>>.<U puts>(<U a>.<U inspect>())
           end
         end
         <emptyTree>::<C <U A>>.<U each>() do |*<U forTemp>|
@@ -38,7 +38,7 @@ class <emptyTree><<C <U <root>>>> < ()
               <U a> = <D <U <assignTemp>> $4>.<U []>(0)
               <D <U <assignTemp>> $4>
             end
-            self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
+            <U <self>>.<U puts>(<U a>.<U inspect>())
           end
         end
         <emptyTree>::<C <U A>>.<U each>() do |*<D <U forTemp> $5>|
@@ -50,8 +50,8 @@ class <emptyTree><<C <U <root>>>> < ()
               <D <U <assignTemp>> $6>
             end
             begin
-              self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
-              self(<C <U <todo sym>>>).<U puts>(<U b>.<U inspect>())
+              <U <self>>.<U puts>(<U a>.<U inspect>())
+              <U <self>>.<U puts>(<U b>.<U inspect>())
             end
           end
         end
@@ -63,11 +63,11 @@ class <emptyTree><<C <U <root>>>> < ()
               <U b> = <D <U <assignTemp>> $7>.<U []>(1)
               <D <U <assignTemp>> $7>
             end
-            self(<C <U <todo sym>>>).<U puts>(<U a>.<U inspect>())
-            self(<C <U <todo sym>>>).<U puts>(<U b>.<U inspect>())
+            <U <self>>.<U puts>(<U a>.<U inspect>())
+            <U <self>>.<U puts>(<U b>.<U inspect>())
           end
         end
-        self(<C <U <todo sym>>>).<U puts>("main")
+        <U <self>>.<U puts>("main")
         <emptyTree>::<C <U A>>.<U each>() do |*<D <U forTemp> $8>|
           begin
             begin
@@ -80,11 +80,11 @@ class <emptyTree><<C <U <root>>>> < ()
               <D <U <assignTemp>> $9>
             end
             begin
-              self(<C <U <todo sym>>>).<U puts>(<U @a>.<U inspect>())
-              self(<C <U <todo sym>>>).<U puts>(<U @@b>.<U inspect>())
-              self(<C <U <todo sym>>>).<U puts>(<U $c>.<U inspect>())
-              self(<C <U <todo sym>>>).<U puts>(<U d>.<U inspect>())
-              self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U E>>.<U e>().<U inspect>())
+              <U <self>>.<U puts>(<U @a>.<U inspect>())
+              <U <self>>.<U puts>(<U @@b>.<U inspect>())
+              <U <self>>.<U puts>(<U $c>.<U inspect>())
+              <U <self>>.<U puts>(<U d>.<U inspect>())
+              <U <self>>.<U puts>(<emptyTree>::<C <U E>>.<U e>().<U inspect>())
             end
           end
         end
@@ -99,11 +99,11 @@ class <emptyTree><<C <U <root>>>> < ()
               <emptyTree>::<C <U E>>.<U e=>(<D <U <assignTemp>> $10>.<U []>(4))
               <D <U <assignTemp>> $10>
             end
-            self(<C <U <todo sym>>>).<U puts>(<U @a>.<U inspect>())
-            self(<C <U <todo sym>>>).<U puts>(<U @@b>.<U inspect>())
-            self(<C <U <todo sym>>>).<U puts>(<U $c>.<U inspect>())
-            self(<C <U <todo sym>>>).<U puts>(<U d>.<U inspect>())
-            self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U E>>.<U e>().<U inspect>())
+            <U <self>>.<U puts>(<U @a>.<U inspect>())
+            <U <self>>.<U puts>(<U @@b>.<U inspect>())
+            <U <self>>.<U puts>(<U $c>.<U inspect>())
+            <U <self>>.<U puts>(<U d>.<U inspect>())
+            <U <self>>.<U puts>(<emptyTree>::<C <U E>>.<U e>().<U inspect>())
           end
         end
       end

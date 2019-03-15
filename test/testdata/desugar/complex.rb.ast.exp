@@ -1,25 +1,25 @@
 class <emptyTree><<C <U <root>>>> < ()
   class <emptyTree>::<C <U MyBasicClass>><<C <U <todo sym>>>> < (<emptyTree>::<C <U BasicObject>>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U Complex>>}).<U void>()
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U Complex>>}).<U void>()
     end
 
     def <U foo><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
       <emptyTree>::<C <U Kernel>>.<U puts>(<U x>)
     end
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U Complex>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U returns>(<emptyTree>::<C <U Complex>>)
     end
 
     def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
       ::Kernel.<U Complex>(0, "11")
     end
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U void>()
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U void>()
     end
 
     def <U baz><<C <U <todo sym>>>>(&<U <blk>>)
@@ -28,14 +28,14 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   class <emptyTree>::<C <U MyKernelClass>><<C <U <todo sym>>>> < (::<todo sym>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U Complex>>}).<U void>()
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U Complex>>}).<U void>()
     end
 
     def <U foo><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
-      self(<C <U <todo sym>>>).<U puts>(<U x>)
+      <U <self>>.<U puts>(<U x>)
     end
   end
 
@@ -45,11 +45,11 @@ class <emptyTree><<C <U <root>>>> < ()
 
   <U bc>.<U foo>(::Kernel.<U Complex>(0, "1").<U -@>())
 
-  <U bc>.<U foo>(self(<C <U <todo sym>>>).<U Complex>(0, 1))
+  <U bc>.<U foo>(<U <self>>.<U Complex>(0, 1))
 
-  <U bc>.<U foo>(self(<C <U <todo sym>>>).<U Complex>(0, 1).<U -@>())
+  <U bc>.<U foo>(<U <self>>.<U Complex>(0, 1).<U -@>())
 
-  <U bc>.<U foo>(self(<C <U <todo sym>>>).<U Complex>(0, -1))
+  <U bc>.<U foo>(<U <self>>.<U Complex>(0, -1))
 
   <U bc>.<U foo>(-1)
 
@@ -61,11 +61,11 @@ class <emptyTree><<C <U <root>>>> < ()
 
   <U kc>.<U foo>(::Kernel.<U Complex>(0, "1").<U -@>())
 
-  <U kc>.<U foo>(self(<C <U <todo sym>>>).<U Complex>(0, 1))
+  <U kc>.<U foo>(<U <self>>.<U Complex>(0, 1))
 
-  <U kc>.<U foo>(self(<C <U <todo sym>>>).<U Complex>(0, 1).<U -@>())
+  <U kc>.<U foo>(<U <self>>.<U Complex>(0, 1).<U -@>())
 
-  <U kc>.<U foo>(self(<C <U <todo sym>>>).<U Complex>(0, -1))
+  <U kc>.<U foo>(<U <self>>.<U Complex>(0, -1))
 
   <U kc>.<U foo>(-1)
 end

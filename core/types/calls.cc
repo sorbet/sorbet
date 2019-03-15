@@ -670,6 +670,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                                        : Types::approximate(ctx, blockType, *constr);
 
         args.block->blockPreType = blockType;
+        args.block->blockSpec = bspec;
     }
 
     TypePtr resultType = nullptr;

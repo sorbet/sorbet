@@ -250,7 +250,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 // side effects -- but doing it this way is more robust to us
                 // adding more instruction types in the future.
                 if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<Literal>(bind.value.get()) ||
-                    isa_instruction<Self>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get()) ||
+                    isa_instruction<LoadSelf>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get()) ||
                     isa_instruction<LoadYieldParams>(bind.value.get())) {
                     expIt = it->exprs.erase(expIt);
                 } else {

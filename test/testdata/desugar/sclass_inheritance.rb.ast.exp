@@ -5,37 +5,37 @@ class <emptyTree><<C <U <root>>>> < ()
 
   class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
     class <U <singleton class>><<C <U <todo sym>>>> < ()
-      self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U MM>>)
+      <U <self>>.<U include>(<emptyTree>::<C <U MM>>)
 
       def <U newer><<C <U <todo sym>>>>(&<U <blk>>)
-        self(<C <U <todo sym>>>).<U new>()
+        <U <self>>.<U new>()
       end
     end
   end
 
   class <emptyTree>::<C <U B>><<C <U <todo sym>>>> < (::<todo sym>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U MM>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U MM>>)
 
     def self.<U newer><<C <U <todo sym>>>>(&<U <blk>>)
-      self(<C <U <todo sym>>>).<U new>()
+      <U <self>>.<U new>()
     end
   end
 
   class <emptyTree>::<C <U C>><<C <U <todo sym>>>> < (<emptyTree>::<C <U A>>)
     class <U <singleton class>><<C <U <todo sym>>>> < ()
       def <U newerer><<C <U <todo sym>>>>(&<U <blk>>)
-        self(<C <U <todo sym>>>).<U newer>()
+        <U <self>>.<U newer>()
       end
     end
   end
 
   def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U A>>.<U newer>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U B>>.<U newer>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U C>>.<U newerer>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U A>>.<U newer>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U B>>.<U newer>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U C>>.<U newerer>())
     end
   end
 
-  self(<C <U <todo sym>>>).<U main>()
+  <U <self>>.<U main>()
 end

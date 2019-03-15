@@ -84,275 +84,279 @@ public:
         return SymbolRef(nullptr, 3);
     }
 
-    static SymbolRef todo() {
+    static SymbolRef rootSingleton() {
         return SymbolRef(nullptr, 4);
     }
 
-    static SymbolRef Object() {
+    static SymbolRef todo() {
         return SymbolRef(nullptr, 5);
     }
 
-    static SymbolRef Integer() {
+    static SymbolRef Object() {
         return SymbolRef(nullptr, 6);
     }
 
-    static SymbolRef Float() {
+    static SymbolRef Integer() {
         return SymbolRef(nullptr, 7);
     }
 
-    static SymbolRef String() {
+    static SymbolRef Float() {
         return SymbolRef(nullptr, 8);
     }
 
-    static SymbolRef Symbol() {
+    static SymbolRef String() {
         return SymbolRef(nullptr, 9);
     }
 
-    static SymbolRef Array() {
+    static SymbolRef Symbol() {
         return SymbolRef(nullptr, 10);
     }
 
-    static SymbolRef Hash() {
+    static SymbolRef Array() {
         return SymbolRef(nullptr, 11);
     }
 
-    static SymbolRef TrueClass() {
+    static SymbolRef Hash() {
         return SymbolRef(nullptr, 12);
     }
 
-    static SymbolRef FalseClass() {
+    static SymbolRef TrueClass() {
         return SymbolRef(nullptr, 13);
     }
 
-    static SymbolRef NilClass() {
+    static SymbolRef FalseClass() {
         return SymbolRef(nullptr, 14);
     }
 
-    static SymbolRef untyped() {
+    static SymbolRef NilClass() {
         return SymbolRef(nullptr, 15);
     }
 
-    static SymbolRef Opus() {
+    static SymbolRef untyped() {
         return SymbolRef(nullptr, 16);
     }
 
-    static SymbolRef T() {
+    static SymbolRef Opus() {
         return SymbolRef(nullptr, 17);
     }
 
-    static SymbolRef Class() {
+    static SymbolRef T() {
         return SymbolRef(nullptr, 18);
     }
 
-    static SymbolRef BasicObject() {
+    static SymbolRef Class() {
         return SymbolRef(nullptr, 19);
     }
 
-    static SymbolRef Kernel() {
+    static SymbolRef BasicObject() {
         return SymbolRef(nullptr, 20);
     }
 
-    static SymbolRef Range() {
+    static SymbolRef Kernel() {
         return SymbolRef(nullptr, 21);
     }
 
-    static SymbolRef Regexp() {
+    static SymbolRef Range() {
         return SymbolRef(nullptr, 22);
     }
 
-    static SymbolRef Magic() {
+    static SymbolRef Regexp() {
         return SymbolRef(nullptr, 23);
     }
 
-    static SymbolRef MagicSingleton() {
+    static SymbolRef Magic() {
         return SymbolRef(nullptr, 24);
     }
 
-    static SymbolRef Module() {
+    static SymbolRef MagicSingleton() {
         return SymbolRef(nullptr, 25);
     }
 
-    static SymbolRef StandardError() {
+    static SymbolRef Module() {
         return SymbolRef(nullptr, 26);
     }
 
-    static SymbolRef Complex() {
+    static SymbolRef StandardError() {
         return SymbolRef(nullptr, 27);
     }
 
-    static SymbolRef Rational() {
+    static SymbolRef Complex() {
         return SymbolRef(nullptr, 28);
     }
 
-    static SymbolRef T_Array() {
+    static SymbolRef Rational() {
         return SymbolRef(nullptr, 29);
     }
 
-    static SymbolRef T_Hash() {
+    static SymbolRef T_Array() {
         return SymbolRef(nullptr, 30);
     }
 
-    static SymbolRef T_Proc() {
+    static SymbolRef T_Hash() {
         return SymbolRef(nullptr, 31);
     }
 
-    static SymbolRef Proc() {
+    static SymbolRef T_Proc() {
         return SymbolRef(nullptr, 32);
     }
 
-    static SymbolRef Enumerable() {
+    static SymbolRef Proc() {
         return SymbolRef(nullptr, 33);
     }
 
-    static SymbolRef Set() {
+    static SymbolRef Enumerable() {
         return SymbolRef(nullptr, 34);
     }
 
-    static SymbolRef Struct() {
+    static SymbolRef Set() {
         return SymbolRef(nullptr, 35);
     }
 
-    static SymbolRef File() {
+    static SymbolRef Struct() {
         return SymbolRef(nullptr, 36);
     }
 
-    static SymbolRef RubyTyper() {
+    static SymbolRef File() {
         return SymbolRef(nullptr, 37);
+    }
+
+    static SymbolRef RubyTyper() {
+        return SymbolRef(nullptr, 38);
     }
 
     // Used as the superclass for symbols created to populate unresolvable ruby
     // constants
     static SymbolRef StubClass() {
-        return SymbolRef(nullptr, 38);
+        return SymbolRef(nullptr, 39);
     }
 
     // Used to mark the presence of an ancestor that we were unable to
     // statically resolve to a class or module
     static SymbolRef StubAncestor() {
-        return SymbolRef(nullptr, 39);
-    }
-
-    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 40);
     }
 
-    static SymbolRef T_Range() {
+    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 41);
     }
 
-    static SymbolRef T_Set() {
+    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 42);
     }
 
-    static SymbolRef Configatron() {
+    static SymbolRef T_Set() {
         return SymbolRef(nullptr, 43);
     }
 
-    static SymbolRef Configatron_Store() {
+    static SymbolRef Configatron() {
         return SymbolRef(nullptr, 44);
     }
 
-    static SymbolRef Configatron_RootStore() {
+    static SymbolRef Configatron_Store() {
         return SymbolRef(nullptr, 45);
     }
 
-    static SymbolRef Sinatra() {
+    static SymbolRef Configatron_RootStore() {
         return SymbolRef(nullptr, 46);
     }
 
-    static SymbolRef SinatraBase() {
+    static SymbolRef Sinatra() {
         return SymbolRef(nullptr, 47);
     }
 
-    static SymbolRef void_() {
+    static SymbolRef SinatraBase() {
         return SymbolRef(nullptr, 48);
+    }
+
+    static SymbolRef void_() {
+        return SymbolRef(nullptr, 49);
     }
 
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 49);
+        return SymbolRef(nullptr, 50);
     }
 
     static SymbolRef Chalk() {
-        return SymbolRef(nullptr, 50);
-    }
-    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 51);
     }
-    static SymbolRef Chalk_Tools_Accessible() {
+    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 52);
     }
-
-    static SymbolRef T_Generic() {
+    static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 53);
     }
 
-    static SymbolRef Tuple() {
+    static SymbolRef T_Generic() {
         return SymbolRef(nullptr, 54);
     }
 
-    static SymbolRef Shape() {
+    static SymbolRef Tuple() {
         return SymbolRef(nullptr, 55);
     }
 
-    static SymbolRef Subclasses() {
+    static SymbolRef Shape() {
         return SymbolRef(nullptr, 56);
     }
 
-    static SymbolRef Sorbet() {
+    static SymbolRef Subclasses() {
         return SymbolRef(nullptr, 57);
     }
 
-    static SymbolRef RubyTyper_ImplicitModuleSuperClass() {
+    static SymbolRef Sorbet() {
         return SymbolRef(nullptr, 58);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference() {
+    static SymbolRef RubyTyper_ImplicitModuleSuperClass() {
         return SymbolRef(nullptr, 59);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder() {
+    static SymbolRef RubyTyper_ReturnTypeInference() {
         return SymbolRef(nullptr, 60);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return SymbolRef(nullptr, 61);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
         return SymbolRef(nullptr, 62);
     }
 
-    static SymbolRef Sorbet_Private() {
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 63);
     }
 
-    static SymbolRef Sorbet_Private_Builder() {
+    static SymbolRef Sorbet_Private() {
         return SymbolRef(nullptr, 64);
     }
 
-    static SymbolRef T_Sig() {
+    static SymbolRef Sorbet_Private_Builder() {
         return SymbolRef(nullptr, 65);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub() {
+    static SymbolRef T_Sig() {
         return SymbolRef(nullptr, 66);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub_blk() {
+    static SymbolRef Magic_undeclaredFieldStub() {
         return SymbolRef(nullptr, 67);
     }
 
-    static SymbolRef RubyTyper_badAliasMethodStub() {
+    static SymbolRef Magic_undeclaredFieldStub_blk() {
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef RubyTyper_badAliasMethodStub_arg0() {
+    static SymbolRef RubyTyper_badAliasMethodStub() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef RubyTyper_badAliasMethodStub_blk() {
+    static SymbolRef RubyTyper_badAliasMethodStub_arg0() {
         return SymbolRef(nullptr, 70);
+    }
+
+    static SymbolRef RubyTyper_badAliasMethodStub_blk() {
+        return SymbolRef(nullptr, 71);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

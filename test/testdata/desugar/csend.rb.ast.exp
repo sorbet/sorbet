@@ -2,7 +2,7 @@ class <emptyTree><<C <U <root>>>> < ()
   def <U test_csend><<C <U <todo sym>>>>(&<U <blk>>)
     begin
       begin
-        <D <U <assignTemp>> $2> = self(<C <U <todo sym>>>).<U foo>()
+        <D <U <assignTemp>> $2> = <U <self>>.<U foo>()
         if <D <U <assignTemp>> $2>.<U ==>(nil)
           nil
         else
@@ -10,7 +10,7 @@ class <emptyTree><<C <U <root>>>> < ()
         end
       end
       begin
-        <D <U <assignTemp>> $3> = self(<C <U <todo sym>>>).<U foo>()
+        <D <U <assignTemp>> $3> = <U <self>>.<U foo>()
         if <D <U <assignTemp>> $3>.<U ==>(nil)
           nil
         else
@@ -32,10 +32,10 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
-    self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-    self(<C <U <todo sym>>>).<U sig>() do ||
-      self(<C <U <todo sym>>>).<U params>({:"x" => <emptyTree>::<C <U T>>.<U any>(<emptyTree>::<C <U FalseClass>>, <emptyTree>::<C <U NilClass>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U TrueClass>>))
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U T>>.<U any>(<emptyTree>::<C <U FalseClass>>, <emptyTree>::<C <U NilClass>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U TrueClass>>))
     end
 
     def <U foo><<C <U <todo sym>>>>(<U x>, &<U <blk>>)

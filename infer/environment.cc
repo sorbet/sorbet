@@ -773,8 +773,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                           core::TypePtr &methodReturnType) {
     try {
         core::TypeAndOrigins tp;
-        bool noLoopChecking =
-            cfg::isa_instruction<cfg::Alias>(bind.value.get()) || cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
+        bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
+                              cfg::isa_instruction<cfg::LoadArg>(bind.value.get()) ||
+                              cfg::isa_instruction<cfg::LoadSelf>(bind.value.get());
 
         bool checkFullyDefined = true;
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
@@ -889,10 +890,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.type = std::move(type);
                 tp.origins.emplace_back(bind.loc);
             },
-            [&](cfg::Self *i) {
-                tp.type = i->klass.data(ctx)->selfType(ctx);
-                tp.origins.emplace_back(bind.loc);
-            },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
                 /*
@@ -994,6 +991,15 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(bind.loc);
             },
+            [&](cfg::LoadSelf *l) {
+                if (l->link->blockSpec.exists() && l->link->blockSpec.data(ctx)->rebind().exists()) {
+                    tp.type = l->link->blockSpec.data(ctx)->rebind().data(ctx)->externalType(ctx);
+                    tp.origins.emplace_back(bind.loc);
+
+                } else {
+                    tp = getTypeAndOrigin(ctx, l->fallback);
+                }
+            },
             [&](cfg::Cast *c) {
                 auto klass = ctx.owner.data(ctx)->enclosingClass(ctx);
                 auto castType = core::Types::instantiate(ctx, c->type, klass.data(ctx)->typeMembers(),
@@ -1027,7 +1033,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `T.unsafe(...)` to cast to T.untyped");
                         }
-                    } else if (!ty.type->isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
+                    } else if (!c->isSynthetic && !ty.type->isUntyped() &&
+                               core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
                                         ty.type->show(ctx), castType->show(ctx));
@@ -1099,6 +1106,14 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                             if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                                 // See cfg/builder/builder_walk.cc for an explanation of why this is here.
                                 if (ident->what._name == core::Names::blockBreakAssign()) {
+                                    break;
+                                }
+
+                                if (ident->what._name == core::Names::selfRestore()) {
+                                    // this is a restoration of `self` variable.
+                                    // our current analysis isn't smart enogh to see that it's safe to do this by
+                                    // construction either https://github.com/stripe/sorbet/issues/222 or
+                                    // https://github.com/stripe/sorbet/issues/224 should allow us to remove this case
                                     break;
                                 }
                             }

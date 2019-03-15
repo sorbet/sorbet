@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
   class <C <U Test>> < <C <U Object>> () @ Loc {file=test/testdata/todo/const_in_block.rb start=2:1 end=2:11}
     static-field <C <U Test>><C <U B>> -> Integer(17) @ Loc {file=test/testdata/todo/const_in_block.rb start=7:5 end=7:6}
   class <S <C <U Test>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/const_in_block.rb start=2:7 end=2:11}

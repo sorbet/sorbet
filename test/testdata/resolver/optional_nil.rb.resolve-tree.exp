@@ -41,17 +41,17 @@ begin
 
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        self(<S <C <U Test>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"x" => ::String}).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U params>({:"x" => ::String}).<U returns>(::String)
         end
-        self(<S <C <U Test>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"y" => ::String}).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U params>({:"y" => ::String}).<U returns>(::String)
         end
-        self(<S <C <U Test>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"z" => ::String}).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U params>({:"z" => ::String}).<U returns>(::String)
         end
-        self(<S <C <U Test>> $1>).<U sig>() do ||
-          self(<C <U Builder>>).<U params>({:"w" => ::String}).<U returns>(::String)
+        <U <self>>.<U sig>() do ||
+          <U <self>>.<U params>({:"w" => ::String}).<U returns>(::String)
         end
         <emptyTree>
       end

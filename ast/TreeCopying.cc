@@ -230,13 +230,6 @@ unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root)
     return make_unique<ZSuperArgs>(loc);
 }
 
-unique_ptr<Expression> Self::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    return make_unique<Self>(loc, claz);
-}
-
 unique_ptr<Expression> Block::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();

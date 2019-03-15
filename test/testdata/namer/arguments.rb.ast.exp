@@ -3,7 +3,7 @@ class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
     begin
       [<U a>, <U b>, <U c>, <U d>, <U e>, <U f>, <U g>]
       <U h> = 1
-      self(<C <U <todo sym>>>).<U proc>() do |<U a>, <U b> = 1, *<U c>, <U d>:, <U e>: = 2, *<U f>:, &<U g>; <U h>|
+      <U <self>>.<U proc>() do |<U a>, <U b> = 1, *<U c>, <U d>:, <U e>: = 2, *<U f>:, &<U g>; <U h>|
         [<U a>, <U b>, <U c>, <U d>, <U e>, <U f>, <U g>, <U h>]
       end
     end

@@ -65,8 +65,6 @@ public:
     unique_ptr<Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                               unique_ptr<UnresolvedConstantLit> original);
 
-    unique_ptr<Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<Self> original);
-
     unique_ptr<Block> preTransformBlock(core::MutableContext ctx, unique_ptr<Block> original);
     unique_ptr<Expression> postTransformBlock(core::MutableContext ctx, unique_ptr<Block> original);
 
@@ -123,7 +121,6 @@ GENERATE_HAS_MEMBER(preTransformLocal);
 GENERATE_HAS_MEMBER(preTransformUnresolvedConstantLit);
 GENERATE_HAS_MEMBER(preTransformConstantLit);
 GENERATE_HAS_MEMBER(preTransformLiteral);
-GENERATE_HAS_MEMBER(preTransformSelf);
 GENERATE_HAS_MEMBER(preTransformCast);
 
 GENERATE_HAS_MEMBER(postTransformClassDef);
@@ -148,7 +145,6 @@ GENERATE_HAS_MEMBER(postTransformUnresolvedConstantLit);
 GENERATE_HAS_MEMBER(postTransformConstantLit);
 GENERATE_HAS_MEMBER(postTransformArraySplat);
 GENERATE_HAS_MEMBER(postTransformHashSplat);
-GENERATE_HAS_MEMBER(postTransformSelf);
 GENERATE_HAS_MEMBER(postTransformBlock);
 GENERATE_HAS_MEMBER(postTransformInsSeq);
 GENERATE_HAS_MEMBER(postTransformCast);
@@ -240,7 +236,6 @@ GENERATE_POSTPONE_POSTCLASS(Local);
 GENERATE_POSTPONE_POSTCLASS(Literal);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit);
 GENERATE_POSTPONE_POSTCLASS(ConstantLit);
-GENERATE_POSTPONE_POSTCLASS(Self);
 GENERATE_POSTPONE_POSTCLASS(Block);
 GENERATE_POSTPONE_POSTCLASS(InsSeq);
 GENERATE_POSTPONE_POSTCLASS(Cast);
@@ -268,7 +263,6 @@ private:
     static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
 
     TreeMapper(FUNC &func) : func(func) {}
@@ -574,14 +568,6 @@ private:
         return v;
     }
 
-    unique_ptr<Expression> mapSelf(unique_ptr<Self> v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformSelf<FUNC>::value) {
-            return PostPonePostTransform_Self<FUNC, CTX, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(ctx, move(v),
-                                                                                                          func);
-        }
-        return v;
-    }
-
     unique_ptr<Expression> mapBlock(unique_ptr<Block> v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformBlock<FUNC>::value) {
             v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(ctx, move(v),
@@ -677,8 +663,6 @@ private:
                     std::unique_ptr<UnresolvedIdent>(static_cast<UnresolvedIdent *>(what.release())), ctx);
             } else if (isa_tree<Local>(what.get())) {
                 return mapLocal(std::unique_ptr<Local>(static_cast<Local *>(what.release())), ctx);
-            } else if (isa_tree<Self>(what.get())) {
-                return mapSelf(std::unique_ptr<Self>(static_cast<Self *>(what.release())), ctx);
             } else if (isa_tree<MethodDef>(what.get())) {
                 return mapMethodDef(std::unique_ptr<MethodDef>(static_cast<MethodDef *>(what.release())), ctx);
             } else if (isa_tree<InsSeq>(what.get())) {

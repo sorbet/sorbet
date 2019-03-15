@@ -6,9 +6,9 @@ begin
 
     def <U main><<U main>>(<blk>)
       begin
-        self(<C <U Object>>).<U puts>(::A.<U newer>())
-        self(<C <U Object>>).<U puts>(::B.<U newer>())
-        self(<C <U Object>>).<U puts>(::C.<U newerer>())
+        <U <self>>.<U puts>(::A.<U newer>())
+        <U <self>>.<U puts>(::B.<U newer>())
+        <U <self>>.<U puts>(::C.<U newerer>())
       end
     end
 
@@ -31,7 +31,7 @@ begin
           ::RubyTyper.<U keep_for_ide>(::A)
           <emptyTree>
         end
-        self(<S <C <U <root>>> $1>).<U main>()
+        <U <self>>.<U main>()
         <emptyTree>
       end
     end
@@ -47,12 +47,12 @@ begin
   end
   class <U <singleton class>><<S <C <U A>> $1>> < (::MM)
     def <U newer><<U newer>>(<blk>)
-      self(<S <C <U A>> $1>).<U new>()
+      <U <self>>.<U new>()
     end
   end
   class ::B<<C <U B>>> < (::<todo sym>)
     def self.<U newer><<U newer>>(<blk>)
-      self(<S <C <U B>> $1>).<U new>()
+      <U <self>>.<U new>()
     end
   end
   class ::C<<C <U C>>> < (::A)
@@ -60,7 +60,7 @@ begin
   end
   class <U <singleton class>><<S <C <U C>> $1>> < ()
     def <U newerer><<U newerer>>(<blk>)
-      self(<S <C <U C>> $1>).<U newer>()
+      <U <self>>.<U newer>()
     end
   end
   <emptyTree>

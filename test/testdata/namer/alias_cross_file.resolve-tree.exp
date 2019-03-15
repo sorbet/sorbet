@@ -10,8 +10,8 @@ begin
     end
 
     def self.<U <static-init>><<U <static-init>>>(<blk>)
-      self(<S <C <U TestSig>> $1>).<U sig>() do ||
-        self(<C <U Builder>>).<U returns>(::T2)
+      <U <self>>.<U sig>() do ||
+        <U <self>>.<U returns>(::T2)
       end
     end
   end

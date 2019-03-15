@@ -1,6 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/self.rb start=3:1 end=44:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=44:4}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/self.rb start=3:1 end=44:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=44:4}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <C <U TestSelf>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=3:15}
     method <C <U TestSelf>><U good1> (s, <blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=10:3 end=10:15}
       argument <C <U TestSelf>><U good1>s<> -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=7:12 end=7:13}

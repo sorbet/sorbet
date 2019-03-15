@@ -1,20 +1,20 @@
 digraph "huge_unions.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(C1) = alias <C <U C1>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(C1))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(C2) = alias <C <U C2>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(C2))\l<U <statTemp>>$13: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$14: T.class_of(C3) = alias <C <U C3>>\l<U <statTemp>>$12: RubyTyper::Void = <U <statTemp>>$13: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$14: T.class_of(C3))\l<U <statTemp>>$17: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$18: T.class_of(C4) = alias <C <U C4>>\l<U <statTemp>>$16: RubyTyper::Void = <U <statTemp>>$17: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$18: T.class_of(C4))\l<U <statTemp>>$21: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$22: T.class_of(C5) = alias <C <U C5>>\l<U <statTemp>>$20: RubyTyper::Void = <U <statTemp>>$21: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$22: T.class_of(C5))\l<U <statTemp>>$25: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$26: T.class_of(C6) = alias <C <U C6>>\l<U <statTemp>>$24: RubyTyper::Void = <U <statTemp>>$25: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$26: T.class_of(C6))\l<U <statTemp>>$29: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$30: T.class_of(C7) = alias <C <U C7>>\l<U <statTemp>>$28: RubyTyper::Void = <U <statTemp>>$29: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$30: T.class_of(C7))\l<U <statTemp>>$33: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$34: T.class_of(C8) = alias <C <U C8>>\l<U <statTemp>>$32: RubyTyper::Void = <U <statTemp>>$33: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$34: T.class_of(C8))\l<U <statTemp>>$37: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$38: T.class_of(C9) = alias <C <U C9>>\l<U <statTemp>>$36: RubyTyper::Void = <U <statTemp>>$37: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$38: T.class_of(C9))\l<U <statTemp>>$41: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$42: T.class_of(C10) = alias <C <U C10>>\l<U <statTemp>>$40: RubyTyper::Void = <U <statTemp>>$41: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$42: T.class_of(C10))\l<U <statTemp>>$45: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$46: T.class_of(C11) = alias <C <U C11>>\l<U <statTemp>>$44: RubyTyper::Void = <U <statTemp>>$45: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$46: T.class_of(C11))\l<U <statTemp>>$49: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$50: T.class_of(C12) = alias <C <U C12>>\l<U <statTemp>>$48: RubyTyper::Void = <U <statTemp>>$49: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$50: T.class_of(C12))\l<U <statTemp>>$53: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$54: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$52: RubyTyper::Void = <U <statTemp>>$53: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$54: T.class_of(C13))\l<U <statTemp>>$57: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$58: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$56: RubyTyper::Void = <U <statTemp>>$57: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$58: T.class_of(C13))\l<U <statTemp>>$61: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$62: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$60: RubyTyper::Void = <U <statTemp>>$61: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$62: T.class_of(C13))\l<U <statTemp>>$65: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$66: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$64: RubyTyper::Void = <U <statTemp>>$65: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$66: T.class_of(C13))\l<U <statTemp>>$69: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$70: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$68: RubyTyper::Void = <U <statTemp>>$69: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$70: T.class_of(C13))\l<U <statTemp>>$73: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$74: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$72: RubyTyper::Void = <U <statTemp>>$73: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$74: T.class_of(C13))\l<U <statTemp>>$77: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$78: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$76: RubyTyper::Void = <U <statTemp>>$77: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$78: T.class_of(C13))\l<U <statTemp>>$81: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$82: T.class_of(C14) = alias <C <U C14>>\l<U <statTemp>>$80: RubyTyper::Void = <U <statTemp>>$81: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$82: T.class_of(C14))\l<U <statTemp>>$85: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$86: T.class_of(C15) = alias <C <U C15>>\l<U <statTemp>>$84: RubyTyper::Void = <U <statTemp>>$85: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$86: T.class_of(C15))\l<U <statTemp>>$89: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$90: T.class_of(C16) = alias <C <U C16>>\l<U <statTemp>>$88: RubyTyper::Void = <U <statTemp>>$89: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$90: T.class_of(C16))\l<U <statTemp>>$93: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$94: T.class_of(C17) = alias <C <U C17>>\l<U <statTemp>>$92: RubyTyper::Void = <U <statTemp>>$93: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$94: T.class_of(C17))\l<U <statTemp>>$97: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$98: T.class_of(C18) = alias <C <U C18>>\l<U <statTemp>>$96: RubyTyper::Void = <U <statTemp>>$97: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$98: T.class_of(C18))\l<U <statTemp>>$101: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$102: T.class_of(C19) = alias <C <U C19>>\l<U <statTemp>>$100: RubyTyper::Void = <U <statTemp>>$101: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$102: T.class_of(C19))\l<U <statTemp>>$105: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$106: T.class_of(C20) = alias <C <U C20>>\l<U <statTemp>>$104: RubyTyper::Void = <U <statTemp>>$105: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$106: T.class_of(C20))\l<U <statTemp>>$109: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$110: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$108: RubyTyper::Void = <U <statTemp>>$109: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$110: T.class_of(A))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(C1) = alias <C <U C1>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(C1))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(C2) = alias <C <U C2>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(C2))\l<U <statTemp>>$13: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$14: T.class_of(C3) = alias <C <U C3>>\l<U <statTemp>>$12: RubyTyper::Void = <U <statTemp>>$13: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$14: T.class_of(C3))\l<U <statTemp>>$17: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$18: T.class_of(C4) = alias <C <U C4>>\l<U <statTemp>>$16: RubyTyper::Void = <U <statTemp>>$17: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$18: T.class_of(C4))\l<U <statTemp>>$21: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$22: T.class_of(C5) = alias <C <U C5>>\l<U <statTemp>>$20: RubyTyper::Void = <U <statTemp>>$21: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$22: T.class_of(C5))\l<U <statTemp>>$25: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$26: T.class_of(C6) = alias <C <U C6>>\l<U <statTemp>>$24: RubyTyper::Void = <U <statTemp>>$25: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$26: T.class_of(C6))\l<U <statTemp>>$29: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$30: T.class_of(C7) = alias <C <U C7>>\l<U <statTemp>>$28: RubyTyper::Void = <U <statTemp>>$29: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$30: T.class_of(C7))\l<U <statTemp>>$33: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$34: T.class_of(C8) = alias <C <U C8>>\l<U <statTemp>>$32: RubyTyper::Void = <U <statTemp>>$33: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$34: T.class_of(C8))\l<U <statTemp>>$37: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$38: T.class_of(C9) = alias <C <U C9>>\l<U <statTemp>>$36: RubyTyper::Void = <U <statTemp>>$37: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$38: T.class_of(C9))\l<U <statTemp>>$41: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$42: T.class_of(C10) = alias <C <U C10>>\l<U <statTemp>>$40: RubyTyper::Void = <U <statTemp>>$41: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$42: T.class_of(C10))\l<U <statTemp>>$45: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$46: T.class_of(C11) = alias <C <U C11>>\l<U <statTemp>>$44: RubyTyper::Void = <U <statTemp>>$45: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$46: T.class_of(C11))\l<U <statTemp>>$49: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$50: T.class_of(C12) = alias <C <U C12>>\l<U <statTemp>>$48: RubyTyper::Void = <U <statTemp>>$49: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$50: T.class_of(C12))\l<U <statTemp>>$53: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$54: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$52: RubyTyper::Void = <U <statTemp>>$53: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$54: T.class_of(C13))\l<U <statTemp>>$57: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$58: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$56: RubyTyper::Void = <U <statTemp>>$57: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$58: T.class_of(C13))\l<U <statTemp>>$61: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$62: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$60: RubyTyper::Void = <U <statTemp>>$61: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$62: T.class_of(C13))\l<U <statTemp>>$65: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$66: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$64: RubyTyper::Void = <U <statTemp>>$65: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$66: T.class_of(C13))\l<U <statTemp>>$69: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$70: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$68: RubyTyper::Void = <U <statTemp>>$69: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$70: T.class_of(C13))\l<U <statTemp>>$73: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$74: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$72: RubyTyper::Void = <U <statTemp>>$73: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$74: T.class_of(C13))\l<U <statTemp>>$77: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$78: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$76: RubyTyper::Void = <U <statTemp>>$77: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$78: T.class_of(C13))\l<U <statTemp>>$81: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$82: T.class_of(C14) = alias <C <U C14>>\l<U <statTemp>>$80: RubyTyper::Void = <U <statTemp>>$81: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$82: T.class_of(C14))\l<U <statTemp>>$85: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$86: T.class_of(C15) = alias <C <U C15>>\l<U <statTemp>>$84: RubyTyper::Void = <U <statTemp>>$85: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$86: T.class_of(C15))\l<U <statTemp>>$89: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$90: T.class_of(C16) = alias <C <U C16>>\l<U <statTemp>>$88: RubyTyper::Void = <U <statTemp>>$89: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$90: T.class_of(C16))\l<U <statTemp>>$93: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$94: T.class_of(C17) = alias <C <U C17>>\l<U <statTemp>>$92: RubyTyper::Void = <U <statTemp>>$93: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$94: T.class_of(C17))\l<U <statTemp>>$97: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$98: T.class_of(C18) = alias <C <U C18>>\l<U <statTemp>>$96: RubyTyper::Void = <U <statTemp>>$97: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$98: T.class_of(C18))\l<U <statTemp>>$101: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$102: T.class_of(C19) = alias <C <U C19>>\l<U <statTemp>>$100: RubyTyper::Void = <U <statTemp>>$101: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$102: T.class_of(C19))\l<U <statTemp>>$105: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$106: T.class_of(C20) = alias <C <U C20>>\l<U <statTemp>>$104: RubyTyper::Void = <U <statTemp>>$105: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$106: T.class_of(C20))\l<U <statTemp>>$109: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$110: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$108: RubyTyper::Void = <U <statTemp>>$109: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$110: T.class_of(A))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:A>#send_beta_invitation" {
@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<Class:A>#send_beta_invitation_0" [
-        label = "block[id=0]()\l<U invite>: T.untyped = load_arg(A.send_beta_invitation#invite)\l<U <statTemp>>$6: Integer(1) = 1\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass) = <U <statTemp>>$6: Integer(1).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(A) = cast(<U <self>>: NilClass, T.class_of(A));\l<U invite>: T.untyped = load_arg(A.send_beta_invitation#invite)\l<U <statTemp>>$6: Integer(1) = 1\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass) = <U <statTemp>>$6: Integer(1).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];
@@ -41,7 +41,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" [
-        label = "block[id=3](<U invite>: T.untyped)\l<U <statTemp>>$9: Integer(2) = 2\l<U <ifTemp>>$8: T.any(TrueClass, FalseClass) = <U <statTemp>>$9: Integer(2).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$8: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=3](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$9: Integer(2) = 2\l<U <ifTemp>>$8: T.any(TrueClass, FalseClass) = <U <statTemp>>$9: Integer(2).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$8: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_4" [style="bold"];
@@ -53,7 +53,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" [
-        label = "block[id=5](<U invite>: T.untyped)\l<U <statTemp>>$12: Integer(3) = 3\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass) = <U <statTemp>>$12: Integer(3).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=5](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$12: Integer(3) = 3\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass) = <U <statTemp>>$12: Integer(3).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_6" [style="bold"];
@@ -65,7 +65,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" [
-        label = "block[id=7](<U invite>: T.untyped)\l<U <statTemp>>$15: Integer(4) = 4\l<U <ifTemp>>$14: T.any(TrueClass, FalseClass) = <U <statTemp>>$15: Integer(4).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$14: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=7](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$15: Integer(4) = 4\l<U <ifTemp>>$14: T.any(TrueClass, FalseClass) = <U <statTemp>>$15: Integer(4).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$14: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_8" [style="bold"];
@@ -77,7 +77,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" [
-        label = "block[id=9](<U invite>: T.untyped)\l<U <statTemp>>$18: Integer(5) = 5\l<U <ifTemp>>$17: T.any(TrueClass, FalseClass) = <U <statTemp>>$18: Integer(5).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$17: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=9](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$18: Integer(5) = 5\l<U <ifTemp>>$17: T.any(TrueClass, FalseClass) = <U <statTemp>>$18: Integer(5).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$17: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_10" [style="bold"];
@@ -89,7 +89,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" [
-        label = "block[id=11](<U invite>: T.untyped)\l<U <statTemp>>$21: Integer(6) = 6\l<U <ifTemp>>$20: T.any(TrueClass, FalseClass) = <U <statTemp>>$21: Integer(6).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$20: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=11](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$21: Integer(6) = 6\l<U <ifTemp>>$20: T.any(TrueClass, FalseClass) = <U <statTemp>>$21: Integer(6).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$20: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_12" [style="bold"];
@@ -101,7 +101,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" [
-        label = "block[id=13](<U invite>: T.untyped)\l<U <statTemp>>$24: Integer(7) = 7\l<U <ifTemp>>$23: T.any(TrueClass, FalseClass) = <U <statTemp>>$24: Integer(7).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$23: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=13](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$24: Integer(7) = 7\l<U <ifTemp>>$23: T.any(TrueClass, FalseClass) = <U <statTemp>>$24: Integer(7).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$23: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_14" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" [
-        label = "block[id=15](<U invite>: T.untyped)\l<U <statTemp>>$27: Integer(8) = 8\l<U <ifTemp>>$26: T.any(TrueClass, FalseClass) = <U <statTemp>>$27: Integer(8).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$26: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=15](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$27: Integer(8) = 8\l<U <ifTemp>>$26: T.any(TrueClass, FalseClass) = <U <statTemp>>$27: Integer(8).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$26: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_16" [style="bold"];
@@ -125,7 +125,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" [
-        label = "block[id=17](<U invite>: T.untyped)\l<U <statTemp>>$30: Integer(9) = 9\l<U <ifTemp>>$29: T.any(TrueClass, FalseClass) = <U <statTemp>>$30: Integer(9).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$29: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=17](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$30: Integer(9) = 9\l<U <ifTemp>>$29: T.any(TrueClass, FalseClass) = <U <statTemp>>$30: Integer(9).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$29: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_18" [style="bold"];
@@ -137,7 +137,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" [
-        label = "block[id=19](<U invite>: T.untyped)\l<U <statTemp>>$33: Integer(10) = 10\l<U <ifTemp>>$32: T.any(TrueClass, FalseClass) = <U <statTemp>>$33: Integer(10).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$32: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=19](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$33: Integer(10) = 10\l<U <ifTemp>>$32: T.any(TrueClass, FalseClass) = <U <statTemp>>$33: Integer(10).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$32: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_20" [style="bold"];
@@ -149,7 +149,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" [
-        label = "block[id=21](<U invite>: T.untyped)\l<U <statTemp>>$36: Integer(11) = 11\l<U <ifTemp>>$35: T.any(TrueClass, FalseClass) = <U <statTemp>>$36: Integer(11).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$35: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=21](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$36: Integer(11) = 11\l<U <ifTemp>>$35: T.any(TrueClass, FalseClass) = <U <statTemp>>$36: Integer(11).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$35: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_22" [style="bold"];
@@ -161,7 +161,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" [
-        label = "block[id=23](<U invite>: T.untyped)\l<U <statTemp>>$39: Integer(12) = 12\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass) = <U <statTemp>>$39: Integer(12).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=23](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$39: Integer(12) = 12\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass) = <U <statTemp>>$39: Integer(12).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_24" [style="bold"];
@@ -173,7 +173,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" [
-        label = "block[id=25](<U invite>: T.untyped)\l<U <statTemp>>$42: Integer(13) = 13\l<U <ifTemp>>$41: T.any(TrueClass, FalseClass) = <U <statTemp>>$42: Integer(13).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$41: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=25](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$42: Integer(13) = 13\l<U <ifTemp>>$41: T.any(TrueClass, FalseClass) = <U <statTemp>>$42: Integer(13).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$41: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_26" [style="bold"];
@@ -185,7 +185,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" [
-        label = "block[id=27](<U invite>: T.untyped)\l<U <statTemp>>$45: Integer(14) = 14\l<U <ifTemp>>$44: T.any(TrueClass, FalseClass) = <U <statTemp>>$45: Integer(14).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$44: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=27](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$45: Integer(14) = 14\l<U <ifTemp>>$44: T.any(TrueClass, FalseClass) = <U <statTemp>>$45: Integer(14).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$44: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_28" [style="bold"];
@@ -197,7 +197,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" [
-        label = "block[id=29](<U invite>: T.untyped)\l<U <statTemp>>$48: Integer(15) = 15\l<U <ifTemp>>$47: T.any(TrueClass, FalseClass) = <U <statTemp>>$48: Integer(15).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$47: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=29](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$48: Integer(15) = 15\l<U <ifTemp>>$47: T.any(TrueClass, FalseClass) = <U <statTemp>>$48: Integer(15).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$47: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_30" [style="bold"];
@@ -209,7 +209,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" [
-        label = "block[id=31](<U invite>: T.untyped)\l<U <statTemp>>$51: Integer(16) = 16\l<U <ifTemp>>$50: T.any(TrueClass, FalseClass) = <U <statTemp>>$51: Integer(16).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$50: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=31](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$51: Integer(16) = 16\l<U <ifTemp>>$50: T.any(TrueClass, FalseClass) = <U <statTemp>>$51: Integer(16).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$50: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_32" [style="bold"];
@@ -221,7 +221,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" [
-        label = "block[id=33](<U invite>: T.untyped)\l<U <statTemp>>$54: Integer(17) = 17\l<U <ifTemp>>$53: T.any(TrueClass, FalseClass) = <U <statTemp>>$54: Integer(17).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$53: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=33](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$54: Integer(17) = 17\l<U <ifTemp>>$53: T.any(TrueClass, FalseClass) = <U <statTemp>>$54: Integer(17).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$53: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_34" [style="bold"];
@@ -233,7 +233,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" [
-        label = "block[id=35](<U invite>: T.untyped)\l<U <statTemp>>$57: Integer(18) = 18\l<U <ifTemp>>$56: T.any(TrueClass, FalseClass) = <U <statTemp>>$57: Integer(18).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$56: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=35](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$57: Integer(18) = 18\l<U <ifTemp>>$56: T.any(TrueClass, FalseClass) = <U <statTemp>>$57: Integer(18).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$56: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_36" [style="bold"];
@@ -245,7 +245,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" [
-        label = "block[id=37](<U invite>: T.untyped)\l<U <statTemp>>$60: Integer(19) = 19\l<U <ifTemp>>$59: T.any(TrueClass, FalseClass) = <U <statTemp>>$60: Integer(19).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$59: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=37](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$60: Integer(19) = 19\l<U <ifTemp>>$59: T.any(TrueClass, FalseClass) = <U <statTemp>>$60: Integer(19).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$59: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_38" [style="bold"];
@@ -257,7 +257,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" [
-        label = "block[id=39](<U invite>: T.untyped)\l<U <statTemp>>$63: Integer(20) = 20\l<U <ifTemp>>$62: T.any(TrueClass, FalseClass) = <U <statTemp>>$63: Integer(20).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$62: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=39](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$63: Integer(20) = 20\l<U <ifTemp>>$62: T.any(TrueClass, FalseClass) = <U <statTemp>>$63: Integer(20).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$62: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_40" [style="bold"];
@@ -269,7 +269,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_40" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_41" [
-        label = "block[id=41]()\l<U <statTemp>>$65: T.class_of(A) = self\l<U <statTemp>>$66: String(\"Bla bla bla\") = \"Bla bla bla\"\l<U <statTemp>>$3: T.noreturn = <U <statTemp>>$65: T.class_of(A).<U raise>(<U <statTemp>>$66: String(\"Bla bla bla\"))\l<unconditional>\l"
+        label = "block[id=41](<U <self>>: T.class_of(A))\l<U <statTemp>>$66: String(\"Bla bla bla\") = \"Bla bla bla\"\l<U <statTemp>>$3: T.noreturn = <U <self>>: T.class_of(A).<U raise>(<U <statTemp>>$66: String(\"Bla bla bla\"))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_41" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];

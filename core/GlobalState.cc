@@ -74,6 +74,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::bottom());
     id = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE(id == Symbols::root());
+    id = core::Symbols::root().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
     id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject()._id);
@@ -1223,7 +1225,7 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
 SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();
-    auto sym = enterMethodSymbol(loc, core::Symbols::root(), nm);
+    auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
     auto blkLoc = core::Loc::none(loc.file());
     if (prevCount != this->symbolsUsed()) {
         auto blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());

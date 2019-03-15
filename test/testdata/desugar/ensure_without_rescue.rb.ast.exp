@@ -1,8 +1,8 @@
 class <emptyTree><<C <U <root>>>> < ()
   def <U main><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U a>()
+    <U <self>>.<U a>()
   ensure
-    self(<C <U <todo sym>>>).<U b>()
+    <U <self>>.<U b>()
   end
 
   def <U a><<C <U <todo sym>>>>(&<U <blk>>)
@@ -13,5 +13,5 @@ class <emptyTree><<C <U <root>>>> < ()
     <emptyTree>
   end
 
-  self(<C <U <todo sym>>>).<U main>()
+  <U <self>>.<U main>()
 end

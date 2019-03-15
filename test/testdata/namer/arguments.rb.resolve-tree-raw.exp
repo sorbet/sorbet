@@ -94,7 +94,9 @@ InsSeq{
               }
             ],
             expr = Send{
-              recv = Self{ claz = ::A }
+              recv = Local{
+                localVariable = <U <self>>
+              }
               fun = <U proc>
               block = Block {
                 args = [

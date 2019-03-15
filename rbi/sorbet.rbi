@@ -5,7 +5,7 @@ class Sorbet
   # Identical to `T::Sig`'s `sig` in semantics, but couldn't work at
   # runtime since it doesn't know `self`. Used in `rbi`s that don't `extend
   # T::Sig`.
-  sig {params(blk: T.proc.void).void}
+  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
   def self.sig(&blk)
   end
 end
@@ -28,6 +28,9 @@ class Sorbet::Private::Builder
 
   Sorbet.sig {returns(Sorbet::Private::Builder)}
   def overridable; end
+
+  Sorbet.sig {params(claz: T.untyped).returns(Sorbet::Private::Builder)}
+  def bind(claz); end
 
   Sorbet.sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def params(**params); end

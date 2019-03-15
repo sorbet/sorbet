@@ -34,7 +34,7 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   def <U baz4><<U baz4>>(<blk>)
-    <U b> = self(<C <U Object>>).<U a>().<U getbyte>("foo")
+    <U b> = <U <self>>.<U a>().<U getbyte>("foo")
   end
 
   def <U baz5><<U baz5>>(cond, <blk>)

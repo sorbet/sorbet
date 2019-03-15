@@ -147,10 +147,6 @@ void RestArg::_sanityCheck() {
 
 void Retry::_sanityCheck() {}
 
-void Self::_sanityCheck() {
-    ENFORCE(claz.exists());
-}
-
 void Send::_sanityCheck() {
     ENFORCE(recv);
     ENFORCE(fun.exists());

@@ -1,20 +1,20 @@
 digraph "zsuper.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Foo))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <statTemp>>$12: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$13: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$11: RubyTyper::Void = <U <statTemp>>$12: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(Foo))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Foo))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <statTemp>>$12: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$13: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$11: RubyTyper::Void = <U <statTemp>>$12: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(Foo))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::Foo#baz" {
@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_1" [shape = parallelogram];
 
     "bb::Foo#baz_0" [
-        label = "block[id=0]()\l<U a>: T.untyped = load_arg(Foo#baz#a)\l<U <statTemp>>$3: Foo = self\l<U <returnMethodTemp>>$2: NilClass = <U <statTemp>>$3: Foo.<U puts>(<U a>: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: Foo = cast(<U <self>>: NilClass, Foo);\l<U a>: T.untyped = load_arg(Foo#baz#a)\l<U <returnMethodTemp>>$2: NilClass = <U <self>>: Foo.<U puts>(<U a>: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\l<U b>: T.untyped = load_arg(Bar#baz#b)\l<U <blk>>: T.untyped = load_arg(Bar#baz#<blk>)\l<U <statTemp>>$3: Bar = self\l<U <block-pre-call-temp>>$6: T.untyped = <U <statTemp>>$3: Bar.<U super>(<U b>: T.untyped, <U <blk>>: T.untyped)\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: Bar = cast(<U <self>>: NilClass, Bar);\l<U b>: T.untyped = load_arg(Bar#baz#b)\l<U <blk>>: T.untyped = load_arg(Bar#baz#<blk>)\l<U <block-pre-call-temp>>$6: T.untyped = <U <self>>: Bar.<U super>(<U b>: T.untyped, <U <blk>>: T.untyped)\l<U <selfRestore>>$7: Bar = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_2" [style="bold"];
@@ -52,19 +52,19 @@ subgraph "cluster_::Bar#baz" {
 
     "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_2" [
-        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<U <self>>: Bar, <U <selfRestore>>$7: Bar)\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::Bar#baz_2" -> "bb::Bar#baz_5" [style="bold"];
     "bb::Bar#baz_2" -> "bb::Bar#baz_3" [style="tapered"];
 
     "bb::Bar#baz_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: T.untyped = Solve<::Bar#baz#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$7: Bar)\l<U <returnMethodTemp>>$2: T.untyped = Solve<::Bar#baz#<block>>\l<U <self>>: Bar = <U <selfRestore>>$7\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_5" [
-        label = "block[id=5]()\louterLoops: 1\l<U <blk>>$7: T.untyped = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>)\l<U <blk>>$8: Integer(0) = 0\l<U a>$1: T.untyped = <U <blk>>$7: T.untyped.<U []>(<U <blk>>$8: Integer(0))\l<U <statTemp>>$10: Bar = self\l<U <blockReturnTemp>>$9: NilClass = <U <statTemp>>$10: Bar.<U puts>(<U a>$1: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::Bar#baz#<block>> <U <blockReturnTemp>>$9: NilClass\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: Bar, <U <selfRestore>>$7: Bar)\louterLoops: 1\l<U <self>>: Bar = loadSelf\l<U <blk>>$8: T.untyped = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U a>$1: T.untyped = <U <blk>>$8: T.untyped.<U []>(<U <blk>>$9: Integer(0))\l<U <blockReturnTemp>>$10: NilClass = <U <self>>: Bar.<U puts>(<U a>$1: T.untyped)\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::Bar#baz#<block>> <U <blockReturnTemp>>$10: NilClass\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_5" -> "bb::Bar#baz_2" [style="bold"];

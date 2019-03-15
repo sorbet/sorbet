@@ -82,10 +82,10 @@ begin
   class ::Child<<C <U Child>>> < (::Parent, ::Mixin)
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        self(<S <C <U Child>> $1>).<U include>(::Mixin) do ||
+        <U <self>>.<U include>(::Mixin) do ||
           <emptyTree>
         end
-        self(<S <C <U Child>> $1>).<U whatever>().<U include>(::OtherMixin)
+        <U <self>>.<U whatever>().<U include>(::OtherMixin)
         ::RubyTyper.<U keep_for_ide>(::Mixin)
         <emptyTree>
       end

@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <rescueStartTemp>>$4: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$4: T.untyped\l"
+        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <rescueStartTemp>>$4: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$4: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<D <U <rescueTemp>> $2>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$7: T.class_of(StandardError) = alias <C <U StandardError>>\l<U <isaCheckTemp>>$8: T.untyped = <D <U <rescueTemp>> $2>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$7: T.class_of(StandardError))\l<U <isaCheckTemp>>$8: T.untyped\l"
+        label = "block[id=3](<U <self>>: Object)\l<D <U <rescueTemp>> $2>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$7: T.class_of(StandardError) = alias <C <U StandardError>>\l<U <isaCheckTemp>>$8: T.untyped = <D <U <rescueTemp>> $2>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$7: T.class_of(StandardError))\l<U <isaCheckTemp>>$8: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
@@ -35,14 +35,14 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" [
-        label = "block[id=9]()\l<U <gotoDeadTemp>>$10: TrueClass(true) = true\l<U <gotoDeadTemp>>$10: TrueClass(true)\l"
+        label = "block[id=9](<U <self>>: Object)\l<U <gotoDeadTemp>>$10: TrueClass(true) = true\l<U <gotoDeadTemp>>$10: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10]()\l<U <statTemp>>$12 = self\l<U <returnMethodTemp>>$2 = <U <statTemp>>$12.<U deadcode>()\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
+        label = "block[id=10](<U <self>>: Object)\l<U <returnMethodTemp>>$2 = <U <self>>.<U deadcode>()\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];

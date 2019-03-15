@@ -4,7 +4,9 @@ ClassDef{
   ancestors = []
   rhs = [
     Send{
-      recv = Self{ claz = ::<todo sym> }
+      recv = Local{
+        localVariable = <U <self>>
+      }
       fun = <U extend>
       block = nullptr
       args = [
@@ -19,14 +21,18 @@ ClassDef{
     }
 
     Send{
-      recv = Self{ claz = ::<todo sym> }
+      recv = Local{
+        localVariable = <U <self>>
+      }
       fun = <U sig>
       block = Block {
         args = [
         ]
         body = Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
+            recv = Local{
+              localVariable = <U <self>>
+            }
             fun = <U params>
             block = nullptr
             args = [

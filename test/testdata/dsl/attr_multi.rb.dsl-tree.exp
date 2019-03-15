@@ -1,96 +1,96 @@
 class <emptyTree>::<C <U Test>><<C <U <todo sym>>>> < (::<todo sym>)
-  self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+  <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
   end
 
   def <U a><<C <U <todo sym>>>>(&<U <blk>>)
     <U @a>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U params>({:"a" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U params>({:"a" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
   end
 
   def <U a=><<C <U <todo sym>>>>(<U a>, &<U <blk>>)
     <U @a> = <U a>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
   end
 
   def <U b><<C <U <todo sym>>>>(&<U <blk>>)
     <U @b>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
   end
 
   def <U c><<C <U <todo sym>>>>(&<U <blk>>)
     <U @c>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U params>({:"b" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U params>({:"b" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
   end
 
   def <U b=><<C <U <todo sym>>>>(<U b>, &<U <blk>>)
     <U @b> = <U b>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U params>({:"c" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U params>({:"c" => <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U Integer>>))
   end
 
   def <U c=><<C <U <todo sym>>>>(<U c>, &<U <blk>>)
     <U @c> = <U c>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U String>>)
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
   end
 
   def <U d><<C <U <todo sym>>>>(&<U <blk>>)
     <U @d>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U String>>)
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
   end
 
   def <U e><<C <U <todo sym>>>>(&<U <blk>>)
     <U @e>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U returns>(<emptyTree>::<C <U String>>)
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
   end
 
   def <U f><<C <U <todo sym>>>>(&<U <blk>>)
     <U @f>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U params>({:"g" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U params>({:"g" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
   end
 
   def <U g=><<C <U <todo sym>>>>(<U g>, &<U <blk>>)
     <U @g> = <U g>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U params>({:"h" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U params>({:"h" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
   end
 
   def <U h=><<C <U <todo sym>>>>(<U h>, &<U <blk>>)
     <U @h> = <U h>
   end
 
-  self(<C <U <todo sym>>>).<U sig>() do ||
-    self(<C <U <todo sym>>>).<U params>({:"i" => <emptyTree>::<C <U String>>}).<U params>({:"h" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+  <U <self>>.<U sig>() do ||
+    <U <self>>.<U params>({:"i" => <emptyTree>::<C <U String>>}).<U params>({:"h" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
   end
 
   def <U i=><<C <U <todo sym>>>>(<U i>, &<U <blk>>)

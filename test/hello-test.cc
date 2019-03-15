@@ -118,11 +118,6 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
             return original;
         }
 
-        unique_ptr<ast::Self> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> original) {
-            count++;
-            return original;
-        }
-
         unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
             count++;
             return original;

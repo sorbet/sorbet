@@ -1,14 +1,14 @@
 module <emptyTree>::<C <U MyRoutes>><<C <U <todo sym>>>> < ()
-  self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Sinatra>>::<C <U Base>>)
+  <U <self>>.<U include>(<emptyTree>::<C <U Sinatra>>::<C <U Base>>)
 
-  self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Helpers>>)
+  <U <self>>.<U include>(<emptyTree>::<C <U Helpers>>)
 
   def <U <instance_registered>><<C <U <todo sym>>>>(<U app>, &<U <blk>>)
     <U app>.<U get>("/route/") do ||
       begin
-        self(<C <U <todo sym>>>).<U my_helper>()
-        self(<C <U <todo sym>>>).<U params>()
-        self(<C <U <todo sym>>>).<U my_helper>()
+        <U <self>>.<U my_helper>()
+        <U <self>>.<U params>()
+        <U <self>>.<U my_helper>()
       end
     end
   end

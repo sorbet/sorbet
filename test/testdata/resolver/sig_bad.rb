@@ -2,6 +2,11 @@
 class T1; end
 class T2; end
 
+class Sorbet::Private::Builder
+  def unsupported
+  end
+end
+
 class A
   extend T::Sig
 

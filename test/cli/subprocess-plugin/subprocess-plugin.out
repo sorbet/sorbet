@@ -374,8 +374,9 @@ class Kick;module Down;
 end;end;
 ------ Multi file symbol table
 class ::<root> < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/random.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/logger.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/msgpack.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/net.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/openssl.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/pp.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/racc.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tsort.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  method #<static-init> (<blk>) @ test/cli/subprocess-plugin/multi1.rb:15
-    argument #<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi1.rb
+  class ::<Class:<root>> < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi1.rb:15
+      argument ::<Class:<root>>#<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi1.rb
   class ::Fish < ::RubyTyper::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi2.rb//plugin-generated|1:1, test/cli/subprocess-plugin/multi2.rb//plugin-generated|0:1, test/cli/subprocess-plugin/multi2.rb:3)
     method ::Fish#foo (<blk>) @ test/cli/subprocess-plugin/multi2.rb//plugin-generated|0:2
       argument ::Fish#foo#<blk><block> @ test/cli/subprocess-plugin/multi2.rb//plugin-generated|0
@@ -385,7 +386,7 @@ class ::<root> < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:3, https://
     static-field ::<Class:Fish>::Fish -> TrueClass @ test/cli/subprocess-plugin/multi2.rb//plugin-generated|1:3
     method ::<Class:Fish>#fish (<blk>) @ test/cli/subprocess-plugin/multi2.rb//plugin-generated|1:2
       argument ::<Class:Fish>#fish#<blk><block> @ test/cli/subprocess-plugin/multi2.rb//plugin-generated|1
-  class ::<Class:<Class:Fish>> < ::<Class:Module> () @ test/cli/subprocess-plugin/multi2.rb:3
+  class ::<Class:<Class:Fish>> < ::<Class:Module> () @ test/cli/subprocess-plugin/multi2.rb:5
     method ::<Class:<Class:Fish>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi2.rb:6
       argument ::<Class:<Class:Fish>>#<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi2.rb
   class ::Haze < ::Object () @ (test/cli/subprocess-plugin/multi4.rb//plugin-generated|1:1, test/cli/subprocess-plugin/multi4.rb//plugin-generated|0:1, test/cli/subprocess-plugin/multi4.rb:3)
@@ -420,7 +421,7 @@ class ::<root> < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:3, https://
       argument ::<Class:Hi>#cat#<blk><block> @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|3
     method ::<Class:Hi>#fish (<blk>) @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|2:2
       argument ::<Class:Hi>#fish#<blk><block> @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|2
-  class ::<Class:<Class:Hi>> < ::<Class:Module> () @ test/cli/subprocess-plugin/multi1.rb:15
+  class ::<Class:<Class:Hi>> < ::<Class:Module> () @ test/cli/subprocess-plugin/multi1.rb:17
     method ::<Class:<Class:Hi>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi1.rb:17
       argument ::<Class:<Class:Hi>>#<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi1.rb
   class ::Kick < ::Object () @ (test/cli/subprocess-plugin/multi6.rb//plugin-generated|1:1, test/cli/subprocess-plugin/multi6.rb//plugin-generated|0:1, test/cli/subprocess-plugin/multi6.rb:3)
@@ -445,7 +446,7 @@ class ::<root> < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:3, https://
     static-field ::<Class:Nope>::Whale -> TrueClass @ test/cli/subprocess-plugin/multi5.rb//plugin-generated|1:3
     method ::<Class:Nope>#whale (<blk>) @ test/cli/subprocess-plugin/multi5.rb//plugin-generated|1:2
       argument ::<Class:Nope>#whale#<blk><block> @ test/cli/subprocess-plugin/multi5.rb//plugin-generated|1
-  class ::<Class:<Class:Nope>> < ::<Class:<Class:Object>> () @ test/cli/subprocess-plugin/multi5.rb:3
+  class ::<Class:<Class:Nope>> < ::<Class:<Class:Object>> () @ test/cli/subprocess-plugin/multi5.rb:4
     method ::<Class:<Class:Nope>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi5.rb:5
       argument ::<Class:<Class:Nope>>#<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi5.rb
   class ::Object < ::BasicObject (Kernel) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L848

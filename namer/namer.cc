@@ -214,7 +214,7 @@ class NameInserter {
         } else {
             return false;
         }
-        if (!ast::isa_tree<ast::Self>(send->recv.get())) {
+        if (!send->recv->isSelfReference()) {
             // ignore `something.include`
             return false;
         }
@@ -239,7 +239,7 @@ class NameInserter {
             if (ast::isa_tree<ast::EmptyTree>(arg.get())) {
                 continue;
             }
-            if (ast::isa_tree<ast::Self>(arg.get())) {
+            if (arg->isSelfReference()) {
                 dest->emplace_back(std::move(arg));
                 continue;
             }
@@ -275,10 +275,8 @@ class NameInserter {
         }
         return owner;
     }
-
     bool isValidAncestor(ast::Expression *exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || ast::isa_tree<ast::Self>(exp) ||
-            ast::isa_tree<ast::ConstantLit>(exp)) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || exp->isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
@@ -362,7 +360,7 @@ public:
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
     bool shouldLeaveAncestorForIDE(const unique_ptr<ast::Expression> &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        if (ast::isa_tree<ast::EmptyTree>(anc.get()) || ast::isa_tree<ast::Self>(anc.get())) {
+        if (ast::isa_tree<ast::EmptyTree>(anc.get()) || anc->isSelfReference()) {
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc.get());
@@ -493,7 +491,7 @@ public:
             }
             return std::move(original->args[0]);
         }
-        if (ast::isa_tree<ast::Self>(original->recv.get())) {
+        if (original->recv->isSelfReference()) {
             switch (original->fun._id) {
                 case core::Names::moduleFunction()._id: {
                     if (original->args.empty()) {
@@ -734,11 +732,6 @@ public:
         }
     }
 
-    unique_ptr<ast::Self> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> self) {
-        self->claz = ctx.selfClass();
-        return self;
-    }
-
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
     // context is a class, in which case return it.
     core::SymbolRef contextClass(core::GlobalState &gs, core::SymbolRef ofWhat) const {
@@ -914,8 +907,8 @@ public:
         if (send == nullptr) {
             return fillAssign(ctx, std::move(asgn));
         }
-        auto *shouldBeSelf = ast::cast_tree<ast::Self>(send->recv.get());
-        if (shouldBeSelf == nullptr) {
+
+        if (!send->recv->isSelfReference()) {
             auto ret = fillAssign(ctx, std::move(asgn));
             if (send->fun == core::Names::typeAlias()) {
                 auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get());

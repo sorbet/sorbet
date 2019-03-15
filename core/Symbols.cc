@@ -591,11 +591,26 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
     }
 
+    if (this->isMethodArgument() || this->isMethod()) {
+        if (this->rebind().exists()) {
+            fmt::format_to(buf, " rebindTo {}",
+                           useToString ? this->rebind().data(gs)->toStringFullName(gs)
+                                       : this->rebind().data(gs)->showFullName(gs));
+        }
+    }
+
     fmt::format_to(buf, "\n");
     for (auto pair : membersStableOrderSlow(gs)) {
         if (!pair.second.exists()) {
+            ENFORCE(ref(gs) == core::Symbols::root());
             continue;
         }
+
+        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+            pair.first == Names::classMethods()) {
+            continue;
+        }
+
         if (!showHidden && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
             bool hadPrintableChild = false;
             for (auto childPair : pair.second.data(gs)->members) {
@@ -607,11 +622,6 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
             if (!hadPrintableChild) {
                 continue;
             }
-        }
-
-        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
-            continue;
         }
 
         auto str = pair.second.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
@@ -796,6 +806,10 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         SymbolRef current2 =
             const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
         ENFORCE(current == current2);
+        for (auto &e : members) {
+            ENFORCE(e.first.exists(), "symbol without a name in scope");
+            ENFORCE(e.second.exists(), "name corresponding to a <none> in scope");
+        }
     }
     if (this->isMethod() && !this->isBlockSymbol(gs)) {
         if (isa_type<AliasType>(this->resultType.get())) {

@@ -1,6 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/yield.rb start=2:1 end=27:14}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/yield.rb start=2:1 end=27:14}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/yield.rb start=??? end=???}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/yield.rb start=2:1 end=27:14}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/yield.rb start=2:1 end=27:14}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/yield.rb start=??? end=???}
   class <C <U Main>> < <C <U Object>> () @ Loc {file=test/testdata/namer/yield.rb start=2:1 end=2:11}
     method <C <U Main>><U blockpass> (&blk) @ Loc {file=test/testdata/namer/yield.rb start=7:5 end=7:24}
       argument <C <U Main>><U blockpass>&blk<block> @ Loc {file=test/testdata/namer/yield.rb start=7:19 end=7:23}

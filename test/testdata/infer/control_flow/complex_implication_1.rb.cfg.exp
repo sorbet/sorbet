@@ -6,7 +6,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_1" [shape = parallelogram];
 
     "bb::ModuleMethods#instrumented_request_0" [
-        label = "block[id=0]()\l<U final_attempt>: T.untyped = load_arg(ModuleMethods#instrumented_request#final_attempt)\l<U foo>: T.untyped = load_arg(ModuleMethods#instrumented_request#foo)\l<U <rescueStartTemp>>$4: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$4: T.untyped\l"
+        label = "block[id=0]()\l<U <self>>: ModuleMethods = cast(<U <self>>: NilClass, ModuleMethods);\l<U final_attempt>: T.untyped = load_arg(ModuleMethods#instrumented_request#final_attempt)\l<U foo>: T.untyped = load_arg(ModuleMethods#instrumented_request#foo)\l<U <rescueStartTemp>>$4: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$4: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];

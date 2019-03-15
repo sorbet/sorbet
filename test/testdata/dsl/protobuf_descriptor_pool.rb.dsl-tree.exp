@@ -25,7 +25,7 @@ class <emptyTree><<C <U <root>>>> < ()
 
   <emptyTree>::<C <U Skip1>> = <emptyTree>::<C <U Protobuf>>::<C <U DescriptorPool>>.<U generated_pool>().<U lookup>("...").<U msgclass>()
 
-  <emptyTree>::<C <U Skip2>> = self(<C <U <todo sym>>>).<U msgclass>()
+  <emptyTree>::<C <U Skip2>> = <U <self>>.<U msgclass>()
 
-  <emptyTree>::<C <U Skip3>> = self(<C <U <todo sym>>>).<U enummodule>()
+  <emptyTree>::<C <U Skip3>> = <U <self>>.<U enummodule>()
 end

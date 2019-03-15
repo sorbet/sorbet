@@ -13,7 +13,7 @@ begin
       begin
         <U t> = begin
           ::RubyTyper.<U keep_for_typechecking>(::Integer)
-          T.<U assert_type!>(self(<C <U TestCasts>>).<U untyped>(), Integer)
+          T.<U assert_type!>(<U <self>>.<U untyped>(), Integer)
         end
         <U t>.<U +>(4)
         <U t1> = begin
@@ -23,7 +23,7 @@ begin
         <U t1>.<U +>(1)
         <U s> = begin
           ::RubyTyper.<U keep_for_typechecking>(::String)
-          T.<U cast>(self(<C <U TestCasts>>).<U untyped>(), String)
+          T.<U cast>(<U <self>>.<U untyped>(), String)
         end
         <U s>.<U +>("hi")
         <U s> = begin

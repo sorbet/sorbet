@@ -3,7 +3,7 @@ module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
 
-  sig {params(blk: T.proc.void).void}
+  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
   def sig(&blk); end
 end
 

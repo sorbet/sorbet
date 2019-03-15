@@ -100,7 +100,7 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     }
 }
 
-void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, unique_ptr<Instruction> inst) {
+void CFGBuilder::synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, unique_ptr<Instruction> inst) {
     auto &inserted = bb->exprs.emplace_back(var, loc, move(inst));
     inserted.value->isSynthetic = true;
 }
@@ -234,10 +234,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(a->localVariable));
                 ret = current;
             },
-            [&](ast::Self *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Self>(a->claz));
-                ret = current;
-            },
             [&](ast::Assign *a) {
                 core::LocalVariable lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
@@ -305,6 +301,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
+                    core::LocalVariable restoreSelf = cctx.newTemporary(core::Names::selfRestore());
+                    synthesizeExpr(current, restoreSelf, core::Loc::none(),
+                                   make_unique<Ident>(core::LocalVariable::selfVariable()));
+
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                     // solveConstraintBlock is only entered if break is not called
                     // in the block body.
@@ -314,6 +314,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     core::LocalVariable argTemp = cctx.newTemporary(core::Names::blkArg());
                     core::LocalVariable idxTmp = cctx.newTemporary(core::Names::blkArg());
+                    bodyBlock->exprs.emplace_back(core::LocalVariable::selfVariable(), s->loc,
+                                                  make_unique<LoadSelf>(link, core::LocalVariable::selfVariable()));
                     bodyBlock->exprs.emplace_back(argTemp, data->loc(), make_unique<LoadYieldParams>(link, sym));
 
                     for (int i = 0; i < data->arguments().size(); ++i) {
@@ -364,6 +366,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     solveConstraintBlock->exprs.emplace_back(cctx.target, s->loc, move(solveConstraint));
                     current = postBlock;
+                    synthesizeExpr(current, core::LocalVariable::selfVariable(), s->loc,
+                                   make_unique<Ident>(restoreSelf));
 
                     /*
                      * This code:

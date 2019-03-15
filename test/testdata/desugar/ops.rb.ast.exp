@@ -2,17 +2,17 @@ class <emptyTree><<C <U <root>>>> < ()
   def <U test_ops><<C <U <todo sym>>>>(&<U <blk>>)
     begin
       begin
-        <D <U ||> $2> = self(<C <U <todo sym>>>).<U a>()
+        <D <U ||> $2> = <U <self>>.<U a>()
         if <D <U ||> $2>
           <D <U ||> $2>
         else
-          self(<C <U <todo sym>>>).<U b>()
+          <U <self>>.<U b>()
         end
       end
       begin
-        <D <U &&> $3> = self(<C <U <todo sym>>>).<U c>()
+        <D <U &&> $3> = <U <self>>.<U c>()
         if <D <U &&> $3>
-          self(<C <U <todo sym>>>).<U d>()
+          <U <self>>.<U d>()
         else
           <D <U &&> $3>
         end

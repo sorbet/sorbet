@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <rescueStartTemp>>$3: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$3: T.untyped\l"
+        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <rescueStartTemp>>$3: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -25,7 +25,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4]()\l<U <statTemp>>$4: Object = self\l<U <statTemp>>$5: String(\"boop\") = \"boop\"\l<U <returnMethodTemp>>$2: T.noreturn = <U <statTemp>>$4: Object.<U raise>(<U <statTemp>>$5: String(\"boop\"))\l<U <rescueEndTemp>>$6 = <unanalyzable>\l<U <rescueEndTemp>>$6\l"
+        label = "block[id=4](<U <self>>: Object)\l<U <statTemp>>$5: String(\"boop\") = \"boop\"\l<U <returnMethodTemp>>$2: T.noreturn = <U <self>>: Object.<U raise>(<U <statTemp>>$5: String(\"boop\"))\l<U <rescueEndTemp>>$6 = <unanalyzable>\l<U <rescueEndTemp>>$6\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
@@ -59,22 +59,22 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];
 }
 
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(MyClass) = alias <C <U MyClass>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(MyClass))\l<U <statTemp>>$8: T.class_of(<root>) = self\l<U <statTemp>>$10: T.class_of(<root>) = self\l<U <statTemp>>$9: T.untyped = <U <statTemp>>$10: T.class_of(<root>).<U foo>()\l<U <statTemp>>$7: NilClass = <U <statTemp>>$8: T.class_of(<root>).<U puts>(<U <statTemp>>$9: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(MyClass) = alias <C <U MyClass>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(MyClass))\l<U <statTemp>>$9: T.untyped = <U <self>>: T.class_of(<root>).<U foo>()\l<U <statTemp>>$7: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$9: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::MyClass#foo=" {
@@ -84,7 +84,7 @@ subgraph "cluster_::MyClass#foo=" {
     "bb::MyClass#foo=_1" [shape = parallelogram];
 
     "bb::MyClass#foo=_0" [
-        label = "block[id=0]()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: MyClass = cast(<U <self>>: NilClass, MyClass);\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::MyClass#foo=_0" -> "bb::MyClass#foo=_1" [style="bold"];

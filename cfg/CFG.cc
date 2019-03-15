@@ -58,6 +58,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 reads[v->what.variable].insert(bb.get());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
                 reads[v->value.variable].insert(bb.get());
+            } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
+                reads[v->fallback].insert(bb.get());
             }
 
             auto fnd = reads.find(bind.bind.variable);

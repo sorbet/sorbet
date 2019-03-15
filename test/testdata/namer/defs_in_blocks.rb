@@ -5,9 +5,9 @@ foobar do
   def a_method
   end
 
-  def a_method_with_param(a)
-  end
+#  def a_method_with_param(a)
+#  end
 
-  def self.a_static_method
-  end
+#  def self.a_static_method
+#  end
 end

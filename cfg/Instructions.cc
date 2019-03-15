@@ -23,12 +23,21 @@ string Return::toString(core::Context ctx) {
 }
 
 BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what)
-    : link(move(link)), what(what) {
+    : link(link), what(what) {
     categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(core::Context ctx) {
     return fmt::format("blockreturn<{}> {}", this->link->block.data(ctx)->showFullName(ctx), this->what.toString(ctx));
+}
+
+LoadSelf::LoadSelf(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable fallback)
+    : link(link), fallback(fallback) {
+    categoryCounterInc("cfg", "loadself");
+}
+
+string LoadSelf::toString(core::Context ctx) {
+    return "loadSelf";
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
@@ -86,10 +95,6 @@ string Alias::toString(core::Context ctx) {
 string Send::toString(core::Context ctx) {
     return fmt::format("{}.{}({})", this->recv.toString(ctx), this->fun.data(ctx)->toString(ctx),
                        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(ctx); }));
-}
-
-string Self::toString(core::Context ctx) {
-    return "self";
 }
 
 string LoadArg::toString(core::Context ctx) {

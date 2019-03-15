@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
   class <C <U TestProc>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=3:15}
     method <C <U TestProc>><U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=30:3 end=30:22}
       argument <C <U TestProc>><U bad>x<> -> AppliedType {

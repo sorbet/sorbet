@@ -3,19 +3,19 @@ class <emptyTree><<C <U <root>>>> < ()
 
   {:"a" => "a"}
 
-  self(<C <U <todo sym>>>).<U x>().<U to_hash>()
+  <U <self>>.<U x>().<U to_hash>()
 
-  self(<C <U <todo sym>>>).<U x>()
+  <U <self>>.<U x>()
 
-  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>())
+  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>())
 
-  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>())
+  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>())
 
-  self(<C <U <todo sym>>>).<U x>().<U to_hash>().<U merge>({:"a" => "a"})
+  <U <self>>.<U x>().<U to_hash>().<U merge>({:"a" => "a"})
 
-  self(<C <U <todo sym>>>).<U x>().<U to_hash>().<U merge>({:"a" => "a"})
+  <U <self>>.<U x>().<U to_hash>().<U merge>({:"a" => "a"})
 
-  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>()).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
+  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>()).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
 
-  {:"a" => "a"}.<U merge>(self(<C <U <todo sym>>>).<U x>().<U to_hash>()).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(self(<C <U <todo sym>>>).<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
+  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>()).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
 end

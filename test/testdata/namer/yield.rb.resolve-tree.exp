@@ -44,23 +44,23 @@ begin
     end
 
     def <U blockyield><<U blockyield>>(<blk>)
-      self(<C <U Main>>).<U yielder>() do |i|
+      <U <self>>.<U yielder>() do |i|
         <U <blk>>.<U call>(<U i>$1)
       end
     end
 
     def <U main><<U main>>(<blk>)
       begin
-        <U l> = self(<C <U Main>>).<U lambda>() do |x|
+        <U l> = <U <self>>.<U lambda>() do |x|
           begin
-            self(<C <U Main>>).<U puts>(<U x>$1)
+            <U <self>>.<U puts>(<U x>$1)
             3
           end
         end
-        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"yielder", <U l>)
-        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"blockpass", <U l>)
-        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"mixed", <U l>)
-        ::<Magic>.<U <call-with-block>>(self(<C <U Main>>), :"blockyield", <U l>)
+        ::<Magic>.<U <call-with-block>>(<U <self>>, :"yielder", <U l>)
+        ::<Magic>.<U <call-with-block>>(<U <self>>, :"blockpass", <U l>)
+        ::<Magic>.<U <call-with-block>>(<U <self>>, :"mixed", <U l>)
+        ::<Magic>.<U <call-with-block>>(<U <self>>, :"blockyield", <U l>)
       end
     end
   end

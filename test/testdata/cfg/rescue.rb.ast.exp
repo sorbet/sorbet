@@ -1,12 +1,12 @@
 class <emptyTree><<C <U <root>>>> < ()
   def <U main><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U a>()
+    <U <self>>.<U a>()
   rescue => <D <U <rescueTemp>> $2>
-    self(<C <U <todo sym>>>).<U b>()
+    <U <self>>.<U b>()
   else
-    self(<C <U <todo sym>>>).<U c>()
+    <U <self>>.<U c>()
   ensure
-    self(<C <U <todo sym>>>).<U d>()
+    <U <self>>.<U d>()
   end
 
   def <U a><<C <U <todo sym>>>>(&<U <blk>>)
@@ -25,5 +25,5 @@ class <emptyTree><<C <U <root>>>> < ()
     <emptyTree>
   end
 
-  self(<C <U <todo sym>>>).<U puts>(self(<C <U <todo sym>>>).<U foo>())
+  <U <self>>.<U puts>(<U <self>>.<U foo>())
 end

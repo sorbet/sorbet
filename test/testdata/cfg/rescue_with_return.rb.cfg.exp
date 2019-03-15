@@ -6,7 +6,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_1" [shape = parallelogram];
 
     "bb::Object#a_0" [
-        label = "block[id=0]()\l<U <rescueStartTemp>>$3: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$3: T.untyped\l"
+        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <rescueStartTemp>>$3: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$3: T.untyped\l"
     ];
 
     "bb::Object#a_0" -> "bb::Object#a_3" [style="bold"];

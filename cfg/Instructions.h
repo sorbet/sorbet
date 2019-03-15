@@ -111,6 +111,15 @@ public:
 };
 CheckSize(BlockReturn, 56, 8);
 
+class LoadSelf final : public Instruction {
+public:
+    std::shared_ptr<core::SendAndBlockLink> link;
+    core::LocalVariable fallback;
+    LoadSelf(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable fallback);
+    virtual std::string toString(core::Context ctx);
+};
+CheckSize(LoadSelf, 40, 8);
+
 class Literal final : public Instruction {
 public:
     core::TypePtr value;
@@ -139,17 +148,6 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 CheckSize(NotSupported, 40, 8);
-
-class Self final : public Instruction {
-public:
-    core::SymbolRef klass;
-
-    Self(core::SymbolRef klass) : klass(klass) {
-        categoryCounterInc("cfg", "self");
-    };
-    virtual std::string toString(core::Context ctx);
-};
-CheckSize(Self, 16, 8);
 
 class LoadArg final : public Instruction {
 public:

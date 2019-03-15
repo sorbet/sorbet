@@ -6,29 +6,29 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <arrayTemp>>$4: Integer(1) = 1\l<U <magic>>$5: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$3: [Integer(1)] = <U <magic>>$5: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$4: Integer(1))\l<U <block-pre-call-temp>>$6: T::Array[U] = <U <statTemp>>$3: [Integer(1)].<U map>()\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <arrayTemp>>$4: Integer(1) = 1\l<U <magic>>$5: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$3: [Integer(1)] = <U <magic>>$5: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$4: Integer(1))\l<U <block-pre-call-temp>>$6: T::Array[U] = <U <statTemp>>$3: [Integer(1)].<U map>()\l<U <selfRestore>>$7: Object = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<U <statTemp>>$15 = self\l<U <blockReturnTemp>>$9 = <U <statTemp>>$15.<U bad>()\l<unconditional>\l"
+        label = "block[id=1](<U <self>>)\l<U <statTemp>>$16 = <U <self>>\l<U <blockReturnTemp>>$10 = <U <statTemp>>$16.<U bad>()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2]()\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<U <self>>: Object, <U <selfRestore>>$7: Object)\louterLoops: 1\l<U <block-call>>: NilClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2: T::Array[Integer] = Solve<::Object#foo#<block>>\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T::Array[Integer]\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$7: Object)\l<U <returnMethodTemp>>$2: T::Array[Integer] = Solve<::Object#foo#<block>>\l<U <self>>: Object = <U <selfRestore>>$7\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T::Array[Integer]\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_5" [
-        label = "block[id=5]()\louterLoops: 1\l<U <blk>>$7: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<U <blk>>$8: Integer(0) = 0\l<U x>$1: Integer = <U <blk>>$7: [Integer].<U []>(<U <blk>>$8: Integer(0))\l<U <statTemp>>$11: Object = self\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: Object.<U good>()\l<U <nextTemp>>$13: Integer = <U x>$1\l<U <nextTemp>>$14: T.noreturn = blockreturn<::Object#foo#<block>> <U <nextTemp>>$13: Integer\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: Object, <U <selfRestore>>$7: Object)\louterLoops: 1\l<U <self>>: Object = loadSelf\l<U <blk>>$8: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<U <blk>>$9: Integer(0) = 0\l<U x>$1: Integer = <U <blk>>$8: [Integer].<U []>(<U <blk>>$9: Integer(0))\l<U <statTemp>>$11: T.untyped = <U <self>>: Object.<U good>()\l<U <nextTemp>>$14: Integer = <U x>$1\l<U <nextTemp>>$15: T.noreturn = blockreturn<::Object#foo#<block>> <U <nextTemp>>$14: Integer\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_2" [style="bold"];

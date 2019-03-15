@@ -1,20 +1,20 @@
 digraph "redefines_object.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Object) = alias <C <U Object>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Object))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Trigger) = alias <C <U Trigger>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Trigger))\l<U <statTemp>>$13: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$14: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$12: RubyTyper::Void = <U <statTemp>>$13: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$14: T.class_of(Foo))\l<U <statTemp>>$16: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$17: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$15: RubyTyper::Void = <U <statTemp>>$16: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$17: T.class_of(Bar))\l<U <statTemp>>$20: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$21: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$19: RubyTyper::Void = <U <statTemp>>$20: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$21: T.class_of(Bar))\l<U <statTemp>>$23: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$24: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$22: RubyTyper::Void = <U <statTemp>>$23: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$24: T.class_of(Foo))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Object) = alias <C <U Object>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Object))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Trigger) = alias <C <U Trigger>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Trigger))\l<U <statTemp>>$13: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$14: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$12: RubyTyper::Void = <U <statTemp>>$13: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$14: T.class_of(Foo))\l<U <statTemp>>$16: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$17: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$15: RubyTyper::Void = <U <statTemp>>$16: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$17: T.class_of(Bar))\l<U <statTemp>>$20: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$21: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$19: RubyTyper::Void = <U <statTemp>>$20: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$21: T.class_of(Bar))\l<U <statTemp>>$23: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$24: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$22: RubyTyper::Void = <U <statTemp>>$23: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$24: T.class_of(Foo))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::Trigger#trigger" {
@@ -24,7 +24,7 @@ subgraph "cluster_::Trigger#trigger" {
     "bb::Trigger#trigger_1" [shape = parallelogram];
 
     "bb::Trigger#trigger_0" [
-        label = "block[id=0]()\l<U @__fake_logger>$3: T.untyped = alias <C <U <undeclared-field-stub>>>\l<U <returnMethodTemp>>$2: T.untyped = <U @__fake_logger>$3\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<U @__fake_logger>$3: T.untyped = alias <C <U <undeclared-field-stub>>>\l<U <self>>: Trigger = cast(<U <self>>: NilClass, Trigger);\l<U <returnMethodTemp>>$2: T.untyped = <U @__fake_logger>$3\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Trigger#trigger_0" -> "bb::Trigger#trigger_1" [style="bold"];

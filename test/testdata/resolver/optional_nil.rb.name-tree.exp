@@ -1,32 +1,32 @@
 begin
   ::RubyTyper.<U keep_for_ide>(::Test)
   class ::Test<<C <U Test>>> < (::<todo sym>)
-    self(<S <C <U Test>> $1>).<U sig>() do ||
-      self(<S <C <U Test>> $1>).<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U foo><<U foo>>(x, <blk>)
       <U x>
     end
 
-    self(<S <C <U Test>> $1>).<U sig>() do ||
-      self(<S <C <U Test>> $1>).<U params>({:"y" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"y" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U bar><<U bar>>(y, <blk>)
       <U y>
     end
 
-    self(<S <C <U Test>> $1>).<U sig>() do ||
-      self(<S <C <U Test>> $1>).<U params>({:"z" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"z" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U qux><<U qux>>(z, <blk>)
       <U z>
     end
 
-    self(<S <C <U Test>> $1>).<U sig>() do ||
-      self(<S <C <U Test>> $1>).<U params>({:"w" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    <U <self>>.<U sig>() do ||
+      <U <self>>.<U params>({:"w" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
     def <U baz><<U baz>>(w, <blk>)

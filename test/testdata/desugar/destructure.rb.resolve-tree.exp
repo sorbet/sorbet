@@ -11,7 +11,7 @@ begin
         end
         begin
           <U x>.<U +>(<U y>)
-          self(<C <U Destructure>>).<U lambda>() do |(a,b)|
+          <U <self>>.<U lambda>() do |(a,b)|
             begin
               begin
                 <D <U <assignTemp>> $5>$1 = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $4>$1, 2, 0)

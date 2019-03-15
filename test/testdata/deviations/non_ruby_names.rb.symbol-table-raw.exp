@@ -1,6 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=9:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=9:4}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=??? end=???}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=9:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=9:4}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=??? end=???}
   class <C <U A>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:1 end=5:9}
     class <C <U A>><C <U B>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
       class <C <U A>><C <U B>><C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:3 end=7:13}

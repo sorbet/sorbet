@@ -26,14 +26,21 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());
 
     BasicBlock *entry = res->entry();
-
+    auto selfClaz = md.symbol.data(ctx)->rebind();
+    if (!selfClaz.exists()) {
+        selfClaz = md.symbol;
+    }
+    synthesizeExpr(entry, core::LocalVariable::selfVariable(), md.loc,
+                   make_unique<Cast>(core::LocalVariable::selfVariable(),
+                                     selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
+                                     core::Names::cast()));
     int i = -1;
     for (auto &argExpr : md.args) {
         i++;
         auto *a = ast::MK::arg2Local(argExpr.get());
         auto argSym = md.symbol.data(ctx)->arguments()[i];
-        auto &inserted = entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(argSym));
-        inserted.value->isSynthetic = true;
+
+        synthesizeExpr(entry, a->localVariable, a->loc, make_unique<LoadArg>(argSym));
         aliases[argSym] = a->localVariable;
     }
     auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
@@ -42,8 +49,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto rvLoc = cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())
                      ? md.loc
                      : cont->exprs.back().loc;
-    auto &inserted = cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
-    inserted.value->isSynthetic = true;
+    synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
     vector<Binding> aliasesPrefix;

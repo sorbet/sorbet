@@ -12,7 +12,9 @@ ClassDef{
         } }]
       rhs = Rescue{
         body = Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U a>
           block = nullptr
           args = [
@@ -27,7 +29,9 @@ ClassDef{
               name = <D <U <rescueTemp>> $2>
             }
             body = Send{
-              recv = Self{ claz = ::<todo sym> }
+              recv = Local{
+                localVariable = <U <self>>
+              }
               fun = <U b>
               block = nullptr
               args = [
@@ -36,14 +40,18 @@ ClassDef{
           }
         ]
         else = Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U c>
           block = nullptr
           args = [
           ]
         }
         ensure = Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U d>
           block = nullptr
           args = [
@@ -93,12 +101,16 @@ ClassDef{
     }
 
     Send{
-      recv = Self{ claz = ::<todo sym> }
+      recv = Local{
+        localVariable = <U <self>>
+      }
       fun = <U puts>
       block = nullptr
       args = [
         Send{
-          recv = Self{ claz = ::<todo sym> }
+          recv = Local{
+            localVariable = <U <self>>
+          }
           fun = <U foo>
           block = nullptr
           args = [

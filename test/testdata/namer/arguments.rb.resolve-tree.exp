@@ -5,7 +5,7 @@ begin
       begin
         [<U a>, <U b>, <U c>, <U d>, <U e>, <U f>, <U g>]
         <U h> = 1
-        self(<C <U A>>).<U proc>() do |a, b, *c, d:, e:, *f:, &&g|
+        <U <self>>.<U proc>() do |a, b, *c, d:, e:, *f:, &&g|
           [<U a>$1, <U b>$1, <U c>$1, <U d>$1, <U e>$1, <U f>$1, <U g>$1, <U h>$1]
         end
       end

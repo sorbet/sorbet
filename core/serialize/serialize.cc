@@ -476,6 +476,10 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     for (int i = 0; i < membersSize; i++) {
         auto name = NameRef(*gs, p.getU4());
         auto sym = SymbolRef(gs, p.getU4());
+        if (result.name != core::Names::Constants::Root()) {
+            ENFORCE(name.exists());
+            ENFORCE(sym.exists());
+        }
         result.members[name] = sym;
     }
     result.resultType = unpickleType(p, gs);
@@ -732,10 +736,6 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  p.putU4(a->localVariable._name._id);
                  p.putU4(a->localVariable.unique);
              },
-             [&](ast::Self *a) {
-                 pickleAstHeader(p, 11, a);
-                 p.putU4(a->claz._id);
-             },
              [&](ast::Assign *a) {
                  pickleAstHeader(p, 12, a);
                  pickle(p, file, a->lhs);
@@ -944,10 +944,6 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             auto unique = p.getU4();
             LocalVariable lv(nm, unique);
             return make_unique<ast::Local>(loc, lv);
-        }
-        case 11: {
-            SymbolRef clazId(gs, p.getU4());
-            return make_unique<ast::Self>(loc, clazId);
         }
         case 12: {
             auto lhs = unpickleExpr(p, gs, file);

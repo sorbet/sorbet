@@ -1,5 +1,5 @@
 class <emptyTree><<C <U <root>>>> < ()
-  self(<C <U <todo sym>>>).<U puts>(self(<C <U <todo sym>>>).<U `>("echo hi"))
+  <U <self>>.<U puts>(<U <self>>.<U `>("echo hi"))
 
-  self(<C <U <todo sym>>>).<U puts>(self(<C <U <todo sym>>>).<U `>("echo".<U concat>(" hi")))
+  <U <self>>.<U puts>(<U <self>>.<U `>("echo".<U concat>(" hi")))
 end

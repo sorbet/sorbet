@@ -35,7 +35,7 @@ begin
           <U a>
         end
         begin
-          <D <U b> $2> = self(<C <U OpEq>>)
+          <D <U b> $2> = <U <self>>
           <D <U b> $3> = <D <U b> $2>.<U b>()
           if <D <U b> $3>
             <D <U b> $2>.<U b=>(:"b")
@@ -45,8 +45,8 @@ begin
         end
         begin
           <D <U []> $4> = <U a>
-          <D <U []> $5> = self(<C <U OpEq>>).<U y>()
-          <D <U []> $6> = self(<C <U OpEq>>).<U z>()
+          <D <U []> $5> = <U <self>>.<U y>()
+          <D <U []> $6> = <U <self>>.<U z>()
           <D <U []> $7> = <D <U []> $4>.<U []>(<D <U []> $5>, <D <U []> $6>)
           if <D <U []> $7>
             <D <U []> $4>.<U []=>(<D <U []> $5>, <D <U []> $6>, 1)
@@ -60,7 +60,7 @@ begin
           <U a> = :"a"
         end
         begin
-          <D <U b> $8> = self(<C <U OpEq>>)
+          <D <U b> $8> = <U <self>>
           <D <U b> $9> = <D <U b> $8>.<U b>()
           if <D <U b> $9>
             <D <U b> $9>
@@ -70,8 +70,8 @@ begin
         end
         begin
           <D <U []> $10> = <U a>
-          <D <U []> $11> = self(<C <U OpEq>>).<U y>()
-          <D <U []> $12> = self(<C <U OpEq>>).<U z>()
+          <D <U []> $11> = <U <self>>.<U y>()
+          <D <U []> $12> = <U <self>>.<U z>()
           <D <U []> $13> = <D <U []> $10>.<U []>(<D <U []> $11>, <D <U []> $12>)
           if <D <U []> $13>
             <D <U []> $13>

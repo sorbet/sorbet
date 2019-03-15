@@ -36,7 +36,7 @@ class <emptyTree><<C <U <root>>>> < ()
       end
     end
 
-    self(<C <U <todo sym>>>).<U wrapper>()
+    <U <self>>.<U wrapper>()
   end
 
   class <emptyTree>::<C <U F>><<C <U <todo sym>>>> < (::<todo sym>)
@@ -45,13 +45,13 @@ class <emptyTree><<C <U <root>>>> < ()
         <U @f> = <emptyTree>::<C <U T>>.<U let>(0, <emptyTree>::<C <U Integer>>)
       end
 
-      self(<C <U <todo sym>>>).<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+      <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
 
-      self(<C <U <todo sym>>>).<U sig>() do ||
-        self(<C <U <todo sym>>>).<U params>({:"f" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U Integer>>)
+      <U <self>>.<U sig>() do ||
+        <U <self>>.<U params>({:"f" => <emptyTree>::<C <U Integer>>}).<U returns>(<emptyTree>::<C <U Integer>>)
       end
 
-      self(<C <U <todo sym>>>).<U attr_writer>(:"f")
+      <U <self>>.<U attr_writer>(:"f")
     end
   end
 
@@ -60,10 +60,10 @@ class <emptyTree><<C <U <root>>>> < ()
       begin
         class <U <singleton class>><<C <U <todo sym>>>> < ()
           def <U inner><<C <U <todo sym>>>>(&<U <blk>>)
-            <emptyTree>::<C <U T>>.<U reveal_type>(self(<C <U <todo sym>>>))
+            <emptyTree>::<C <U T>>.<U reveal_type>(<U <self>>)
           end
         end
-        self(<C <U <todo sym>>>).<U inner>()
+        <U <self>>.<U inner>()
       end
     end
 
@@ -84,16 +84,16 @@ class <emptyTree><<C <U <root>>>> < ()
 
   def <U main><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U A>>.<U a>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U B>>.<U b>())
-      self(<C <U <todo sym>>>).<U puts>(<U $c>.<U c>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U D>>.<U singleton_class>().<U d>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U E>>.<U e>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U F>>.<U f=>(91))
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U G>>.<U new>().<U wrapper>())
-      self(<C <U <todo sym>>>).<U puts>(<emptyTree>::<C <U H>>.<U singleton_class>()::<C <U H2>>.<U h>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U A>>.<U a>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U B>>.<U b>())
+      <U <self>>.<U puts>(<U $c>.<U c>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U D>>.<U singleton_class>().<U d>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U E>>.<U e>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U F>>.<U f=>(91))
+      <U <self>>.<U puts>(<emptyTree>::<C <U G>>.<U new>().<U wrapper>())
+      <U <self>>.<U puts>(<emptyTree>::<C <U H>>.<U singleton_class>()::<C <U H2>>.<U h>())
     end
   end
 
-  self(<C <U <todo sym>>>).<U main>()
+  <U <self>>.<U main>()
 end

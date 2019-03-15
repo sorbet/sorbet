@@ -5,19 +5,19 @@ class <emptyTree><<C <U <root>>>> < ()
       if <U try>.<U <>(3)
         begin
           <U try> = <U try>.<U +>(1)
-          self(<C <U <todo sym>>>).<U raise>("e")
+          <U <self>>.<U raise>("e")
         end
       else
         <emptyTree>
       end
     rescue => <D <U <rescueTemp>> $2>
       begin
-        self(<C <U <todo sym>>>).<U puts>("rescue")
+        <U <self>>.<U puts>("rescue")
         retry
         1
       end
     end
   end
 
-  self(<C <U <todo sym>>>).<U main>()
+  <U <self>>.<U main>()
 end

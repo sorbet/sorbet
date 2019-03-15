@@ -3,17 +3,17 @@ class <emptyTree><<C <U <root>>>> < ()
     begin
       <U a> = <U a>.<U +>(<U a>)
       begin
-        <D <U []> $2> = <U a>.<U []>(self(<C <U <todo sym>>>).<U b>()).<U []>(self(<C <U <todo sym>>>).<U c>())
-        <D <U []> $3> = self(<C <U <todo sym>>>).<U d>()
-        <D <U []> $4> = self(<C <U <todo sym>>>).<U e>()
+        <D <U []> $2> = <U a>.<U []>(<U <self>>.<U b>()).<U []>(<U <self>>.<U c>())
+        <D <U []> $3> = <U <self>>.<U d>()
+        <D <U []> $4> = <U <self>>.<U e>()
         <D <U []> $2>.<U []=>(<D <U []> $3>, <D <U []> $4>, <D <U []> $2>.<U []>(<D <U []> $3>, <D <U []> $4>).<U +>(3))
       end
       begin
         <D <U []> $5> = <U a>.<U b>().<U c>()
-        <D <U []> $6> = self(<C <U <todo sym>>>).<U d>().<U e>()
+        <D <U []> $6> = <U <self>>.<U d>().<U e>()
         <D <U []> $5>.<U []=>(<D <U []> $6>, <D <U []> $5>.<U []>(<D <U []> $6>).<U +>(4))
       end
-      <U a>.<U b>().<U c>().<U []=>(self(<C <U <todo sym>>>).<U d>().<U e>(), <U a>.<U b>().<U c>().<U []>(self(<C <U <todo sym>>>).<U d>().<U e>()).<U +>(4))
+      <U a>.<U b>().<U c>().<U []=>(<U <self>>.<U d>().<U e>(), <U a>.<U b>().<U c>().<U []>(<U <self>>.<U d>().<U e>()).<U +>(4))
     end
   end
 end

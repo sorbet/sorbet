@@ -2,14 +2,14 @@ begin
   ::RubyTyper.<U keep_for_ide>(::Test)
   class ::Test<<C <U Test>>> < (::<todo sym>)
     def <U test_next_break><<U test_next_break>>(<blk>)
-      self(<C <U Test>>).<U each>() do ||
+      <U <self>>.<U each>() do ||
         begin
-          if self(<C <U Test>>).<U rand>()
+          if <U <self>>.<U rand>()
             next(::Test::Foo)
           else
             <emptyTree>
           end
-          if self(<C <U Test>>).<U rand>()
+          if <U <self>>.<U rand>()
             break(::Test::Bar)
           else
             <emptyTree>

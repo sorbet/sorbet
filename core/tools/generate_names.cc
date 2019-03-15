@@ -63,6 +63,8 @@ NameDef names[] = {
     {"blockReturnTemp", "<blockReturnTemp>"},
     {"nextTemp", "<nextTemp>"},
     {"selfMethodTemp", "<selfMethodTemp>"},
+    {"selfLocal", "<self>"},
+    {"selfRestore", "<selfRestore>"}, // used to restore self in case block changes it
     {"hashTemp", "<hashTemp>"},
     {"arrayTemp", "<arrayTemp>"},
     {"rescueTemp", "<rescueTemp>"},
@@ -93,6 +95,7 @@ NameDef names[] = {
     {"overridable"},
 
     // Sig builders
+    {"bind"},
     {"params"},
     {"final"},
     {"returns"},

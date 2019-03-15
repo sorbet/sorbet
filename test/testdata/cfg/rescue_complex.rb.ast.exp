@@ -24,25 +24,25 @@ class <emptyTree>::<C <U TestRescue>><<C <U <todo sym>>>> < (::<todo sym>)
   end
 
   def <U multiple_rescue><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <D <U <rescueTemp>> $2>
-    self(<C <U <todo sym>>>).<U baz>()
+    <U <self>>.<U baz>()
   rescue => <D <U <rescueTemp>> $3>
-    self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U bar>()
   end
 
   def <U multiple_rescue_classes><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue <emptyTree>::<C <U Foo>>, <emptyTree>::<C <U Bar>> => <U baz>
     <U baz>
   end
 
   def <U parse_rescue_ensure><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <D <U <rescueTemp>> $2>
-    self(<C <U <todo sym>>>).<U baz>()
+    <U <self>>.<U baz>()
   ensure
-    self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U bar>()
   end
 
   def <U parse_bug_rescue_empty_else><<C <U <todo sym>>>>(&<U <blk>>)
@@ -52,77 +52,77 @@ class <emptyTree>::<C <U TestRescue>><<C <U <todo sym>>>> < (::<todo sym>)
   end
 
   def <U parse_ruby_bug_12686><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U take_arg>(self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U take_arg>(<U <self>>.<U bar>()
     rescue => <D <U <rescueTemp>> $2>
       nil)
   end
 
   def <U parse_rescue_mod><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <D <U <rescueTemp>> $2>
-    self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U bar>()
   end
 
   def <U parse_resbody_list_var><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
-  rescue self(<C <U <todo sym>>>).<U foo>() => <U ex>
-    self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U meth>()
+  rescue <U <self>>.<U foo>() => <U ex>
+    <U <self>>.<U bar>()
   end
 
   def <U parse_rescue_else_ensure><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <D <U <rescueTemp>> $2>
-    self(<C <U <todo sym>>>).<U baz>()
+    <U <self>>.<U baz>()
   else
-    self(<C <U <todo sym>>>).<U foo>()
+    <U <self>>.<U foo>()
   ensure
-    self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U bar>()
   end
 
   def <U parse_rescue><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <D <U <rescueTemp>> $2>
-    self(<C <U <todo sym>>>).<U foo>()
+    <U <self>>.<U foo>()
   end
 
   def <U parse_resbody_var><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <U ex>
-    self(<C <U <todo sym>>>).<U bar>()
+    <U <self>>.<U bar>()
   end
 
   def <U parse_resbody_var_1><<C <U <todo sym>>>>(&<U <blk>>)
-    self(<C <U <todo sym>>>).<U meth>()
+    <U <self>>.<U meth>()
   rescue => <D <U <rescueTemp>> $2>
     begin
       <U @ex> = <D <U <rescueTemp>> $2>
-      self(<C <U <todo sym>>>).<U bar>()
+      <U <self>>.<U bar>()
     end
   end
 
   def <U parse_rescue_mod_op_assign><<C <U <todo sym>>>>(&<U <blk>>)
-    <U foo> = <U foo>.<U +>(self(<C <U <todo sym>>>).<U meth>()
+    <U foo> = <U foo>.<U +>(<U <self>>.<U meth>()
     rescue => <D <U <rescueTemp>> $2>
-      self(<C <U <todo sym>>>).<U bar>())
+      <U <self>>.<U bar>())
   end
 
   def <U parse_ruby_bug_12402><<C <U <todo sym>>>>(&<U <blk>>)
-    <U foo> = self(<C <U <todo sym>>>).<U raise>(self(<C <U <todo sym>>>).<U bar>())
+    <U foo> = <U <self>>.<U raise>(<U <self>>.<U bar>())
   rescue => <D <U <rescueTemp>> $2>
     nil
   end
 
   def <U parse_ruby_bug_12402_1><<C <U <todo sym>>>>(&<U <blk>>)
-    <U foo> = <U foo>.<U +>(self(<C <U <todo sym>>>).<U raise>(self(<C <U <todo sym>>>).<U bar>())
+    <U foo> = <U foo>.<U +>(<U <self>>.<U raise>(<U <self>>.<U bar>())
     rescue => <D <U <rescueTemp>> $2>
       nil)
   end
 
   def <U parse_ruby_bug_12402_2><<C <U <todo sym>>>>(&<U <blk>>)
     begin
-      <D <U []> $3> = self(<C <U <todo sym>>>).<U foo>()
+      <D <U []> $3> = <U <self>>.<U foo>()
       <D <U []> $4> = 0
-      <D <U []> $3>.<U []=>(<D <U []> $4>, <D <U []> $3>.<U []>(<D <U []> $4>).<U +>(self(<C <U <todo sym>>>).<U raise>(self(<C <U <todo sym>>>).<U bar>())
+      <D <U []> $3>.<U []=>(<D <U []> $4>, <D <U []> $3>.<U []>(<D <U []> $4>).<U +>(<U <self>>.<U raise>(<U <self>>.<U bar>())
         rescue => <D <U <rescueTemp>> $2>
           nil))
     end

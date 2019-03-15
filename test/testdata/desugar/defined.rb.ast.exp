@@ -1,5 +1,5 @@
 class <emptyTree><<C <U <root>>>> < ()
-  ::<Magic>.<U defined?>(self(<C <U <todo sym>>>).<U foo>())
+  ::<Magic>.<U defined?>(<U <self>>.<U foo>())
 
-  self(<C <U <todo sym>>>).<U defined_>(self(<C <U <todo sym>>>).<U foo>())
+  <U <self>>.<U defined_>(<U <self>>.<U foo>())
 end

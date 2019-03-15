@@ -141,7 +141,7 @@ public:
     }
 
     static std::unique_ptr<Expression> Self(core::Loc loc) {
-        return std::make_unique<ast::Self>(loc, core::Symbols::todo());
+        return std::make_unique<ast::Local>(loc, core::LocalVariable::selfVariable());
     }
 
     static std::unique_ptr<Expression> InsSeq(core::Loc loc, InsSeq::STATS_store stats,

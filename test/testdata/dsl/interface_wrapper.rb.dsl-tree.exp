@@ -6,7 +6,7 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   class <emptyTree>::<C <U SomeClass>><<C <U <todo sym>>>> < (::<todo sym>)
-    self(<C <U <todo sym>>>).<U include>(<emptyTree>::<C <U Interface>>)
+    <U <self>>.<U include>(<emptyTree>::<C <U Interface>>)
 
     def <U other_method><<C <U <todo sym>>>>(&<U <blk>>)
       <emptyTree>

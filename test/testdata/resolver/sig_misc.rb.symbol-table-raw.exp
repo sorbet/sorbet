@@ -1,81 +1,82 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=107:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=107:4}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=106:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=106:4}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=5:1 end=5:8}
     method <C <U A>><U f1> (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=26:3 end=26:12}
       argument <C <U A>><U f1>x<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=26:10 end=26:11}
       argument <C <U A>><U f1><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U f2> (x, <blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=32:3 end=32:12}
-      argument <C <U A>><U f2>x<> @ Loc {file=test/testdata/resolver/sig_misc.rb start=32:10 end=32:11}
+    method <C <U A>><U f2> (x, <blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=31:3 end=31:12}
+      argument <C <U A>><U f2>x<> @ Loc {file=test/testdata/resolver/sig_misc.rb start=31:10 end=31:11}
       argument <C <U A>><U f2><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U f3> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=37:3 end=37:9}
+    method <C <U A>><U f3> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=36:3 end=36:9}
       argument <C <U A>><U f3><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U f4> (y, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=63:3 end=63:12}
-      argument <C <U A>><U f4>y<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=61:15 end=61:16}
+    method <C <U A>><U f4> (y, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=62:3 end=62:12}
+      argument <C <U A>><U f4>y<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=60:15 end=60:16}
       argument <C <U A>><U f4><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U no_params> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=13:3 end=13:16}
       argument <C <U A>><U no_params><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U noreturn> (<blk>) -> T.noreturn @ Loc {file=test/testdata/resolver/sig_misc.rb start=8:3 end=8:15}
       argument <C <U A>><U noreturn><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U private> : private (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=42:11 end=42:25}
-      argument <C <U A>><U private>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=41:15 end=41:16}
+    method <C <U A>><U private> : private (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=41:11 end=41:25}
+      argument <C <U A>><U private>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=40:15 end=40:16}
       argument <C <U A>><U private><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U protected> : protected (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=47:13 end=47:29}
-      argument <C <U A>><U protected>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=46:15 end=46:16}
+    method <C <U A>><U protected> : protected (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=46:13 end=46:29}
+      argument <C <U A>><U protected>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=45:15 end=45:16}
       argument <C <U A>><U protected><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U public> (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=52:10 end=52:23}
-      argument <C <U A>><U public>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=51:15 end=51:16}
+    method <C <U A>><U public> (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=51:10 end=51:23}
+      argument <C <U A>><U public>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=50:15 end=50:16}
       argument <C <U A>><U public><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_abstract> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=75:3 end=75:20}
+    method <C <U A>><U test_abstract> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=74:3 end=74:20}
       argument <C <U A>><U test_abstract><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_abstract_untyped> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=99:3 end=99:28}
+    method <C <U A>><U test_abstract_untyped> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=98:3 end=98:28}
       argument <C <U A>><U test_abstract_untyped><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_implementation> (x, <blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=80:3 end=80:29}
-      argument <C <U A>><U test_implementation>x<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=80:27 end=80:28}
+    method <C <U A>><U test_implementation> (x, <blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=79:3 end=79:29}
+      argument <C <U A>><U test_implementation>x<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=79:27 end=79:28}
       argument <C <U A>><U test_implementation><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_junk_inside> (<blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=104:19 end=104:39}
+    method <C <U A>><U test_junk_inside> (<blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=103:19 end=103:39}
       argument <C <U A>><U test_junk_inside><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U test_kwargs> (returns, <blk>) -> T2 @ Loc {file=test/testdata/resolver/sig_misc.rb start=21:3 end=21:27}
       argument <C <U A>><U test_kwargs>returns<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=18:12 end=18:19}
       argument <C <U A>><U test_kwargs><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_overridable> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=89:3 end=89:23}
+    method <C <U A>><U test_overridable> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=88:3 end=88:23}
       argument <C <U A>><U test_overridable><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_overridable_implementation> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=94:3 end=94:38}
+    method <C <U A>><U test_overridable_implementation> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=93:3 end=93:38}
       argument <C <U A>><U test_overridable_implementation><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_override> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=84:3 end=84:20}
+    method <C <U A>><U test_override> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=83:3 end=83:20}
       argument <C <U A>><U test_override><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_standard_untyped> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=102:11 end=102:36}
+    method <C <U A>><U test_standard_untyped> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=101:11 end=101:36}
       argument <C <U A>><U test_standard_untyped><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_yield_no_block_type> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=68:3 end=68:34}
-      argument <C <U A>><U test_yield_no_block_type>x<> -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=67:15 end=67:16}
+    method <C <U A>><U test_yield_no_block_type> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=67:3 end=67:34}
+      argument <C <U A>><U test_yield_no_block_type>x<> -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=66:15 end=66:16}
       argument <C <U A>><U test_yield_no_block_type><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=5:7 end=5:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=7:3 end=7:28}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $10> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=51:3 end=51:34}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $11> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=56:3 end=56:34}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $12> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=61:3 end=61:34}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $13> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=62:3 end=62:34}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $14> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=67:3 end=67:44}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $15> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=74:3 end=74:29}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $16> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=79:3 end=79:30}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $17> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=83:3 end=83:29}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $18> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=88:3 end=88:32}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $19> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=93:3 end=93:47}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $20> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=98:3 end=98:17}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $21> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=102:3 end=102:9}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $22> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=104:3 end=104:17}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $23> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=106:3 end=106:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $10> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=50:3 end=50:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $11> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=55:3 end=55:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $12> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=60:3 end=60:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $13> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=61:3 end=61:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $14> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=66:3 end=66:44}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $15> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=73:3 end=73:29}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $16> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=78:3 end=78:30}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $17> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=82:3 end=82:29}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $18> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=87:3 end=87:32}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $19> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=92:3 end=92:47}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $20> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=97:3 end=97:17}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $21> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=101:3 end=101:9}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $22> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=103:3 end=103:17}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $23> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=105:3 end=105:34}
       method <S <C <U A>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=7:3 end=7:28}
       method <S <C <U A>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=12:3 end=12:20}
       method <S <C <U A>> $1><U <static-init>><N <U <block>> $4> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=17:3 end=20:6}
       method <S <C <U A>> $1><U <static-init>><N <U <block>> $5> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=25:3 end=25:34}
       method <S <C <U A>> $1><U <static-init>><N <U <block>> $6> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=30:3 end=30:39}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $7> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=36:3 end=36:34}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $8> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=41:3 end=41:34}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $9> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=46:3 end=46:34}
-    method <S <C <U A>> $1><U static> : private (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=57:24 end=57:42}
-      argument <S <C <U A>> $1><U static>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=56:15 end=56:16}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $7> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=35:3 end=35:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $8> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=40:3 end=40:34}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $9> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=45:3 end=45:34}
+    method <S <C <U A>> $1><U static> : private (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=56:24 end=56:42}
+      argument <S <C <U A>> $1><U static>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=55:15 end=55:16}
       argument <S <C <U A>> $1><U static><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=2:9}
   class <S <C <U T1>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:7 end=2:9}

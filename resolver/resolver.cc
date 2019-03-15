@@ -400,7 +400,7 @@ private:
                 return;
             }
             job.ancestor = cnst;
-        } else if (auto *self = ast::cast_tree<ast::Self>(ancestor.get())) {
+        } else if (ancestor->isSelfReference()) {
             auto loc = ancestor->loc;
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             auto nw = make_unique<ast::UnresolvedConstantLit>(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
@@ -699,6 +699,9 @@ private:
         if (sig.seen.final) {
             method.data(ctx)->setFinalMethod();
         }
+        if (sig.seen.bind) {
+            method.data(ctx)->setReBind(sig.bind);
+        }
         auto methodInfo = method.data(ctx);
 
         methodInfo->resultType = sig.returns;
@@ -714,6 +717,7 @@ private:
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx)->resultType = spec->type;
                 arg.data(ctx)->addLoc(ctx, spec->loc);
+                arg.data(ctx)->setReBind(spec->rebind);
                 sig.argTypes.erase(spec);
                 ++it;
                 ++argIt;
@@ -1083,8 +1087,7 @@ public:
         if (data->isTypeMember()) {
             ENFORCE(data->isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-            auto recv = ast::cast_tree<ast::Self>(send->recv.get());
-            ENFORCE(recv);
+            ENFORCE(send->recv->isSelfReference());
             ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
             int arg;
             if (send->args.size() == 1) {
@@ -1148,7 +1151,7 @@ public:
                 default:
                     return send;
             }
-        } else if (auto *self = ast::cast_tree<ast::Self>(send->recv.get())) {
+        } else if (send->recv.get()->isSelfReference()) {
             if (send->fun != core::Names::aliasMethod()) {
                 return send;
             }
@@ -1495,7 +1498,7 @@ class ResolveMixesInClassMethodsWalk {
 
 public:
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        if (ast::isa_tree<ast::Self>(original->recv.get()) && original->fun == core::Names::mixesInClassMethods()) {
+        if (original->recv->isSelfReference() && original->fun == core::Names::mixesInClassMethods()) {
             processMixesInClassMethods(ctx, original.get());
             return ast::MK::EmptyTree();
         }
@@ -1518,11 +1521,6 @@ public:
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
         ENFORCE(false, "These should have all been removed: {}", original->toString(ctx));
-        return original;
-    }
-    unique_ptr<ast::Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> original) {
-        ENFORCE(original->claz != core::Symbols::todo(), "These should have all been resolved: {}",
-                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {

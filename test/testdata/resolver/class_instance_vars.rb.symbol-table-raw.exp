@@ -1,6 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=38:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=38:4}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=38:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=38:4}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
   static-field <C <U Alias>> -> AliasType { symbol = <C <U Parent>> } @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=35:1 end=35:6}
   class <C <U Child>> < <C <U Parent>> (<C <U Mixin>>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=20:1 end=20:21}
     method <C <U Child>><U child_method> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=27:3 end=27:19}

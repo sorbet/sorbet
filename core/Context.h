@@ -23,12 +23,6 @@ public:
     Context(const Context &other) noexcept : state(other.state), owner(other.owner) {}
     Context(const MutableContext &other) noexcept;
 
-    // Returns a SymbolRef corresponding to the class `self.class` for code
-    // executed in this MutableContext, or, if `self` is a class,
-    // `self.singleton_class` (We model classes as being normal instances of
-    // their singleton classes for most purposes)
-    SymbolRef selfClass();
-
     bool permitOverloadDefinitions() const;
 
     Context withOwner(SymbolRef sym) const;

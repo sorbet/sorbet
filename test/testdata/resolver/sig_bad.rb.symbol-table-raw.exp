@@ -1,32 +1,33 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=34:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3322:4})
-  method <N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=34:4}
-    argument <N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
-  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=5:1 end=5:8}
-    method <C <U A>><U bad> (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, <blk>) -> T2 @ Loc {file=test/testdata/resolver/sig_bad.rb start=31:3 end=31:55}
-      argument <C <U A>><U bad>j<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=22:7 end=22:8}
-      argument <C <U A>><U bad>k<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=23:7 end=23:8}
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=39:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=39:4}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
+  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:1 end=10:8}
+    method <C <U A>><U bad> (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, <blk>) -> T2 @ Loc {file=test/testdata/resolver/sig_bad.rb start=36:3 end=36:55}
+      argument <C <U A>><U bad>j<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=27:7 end=27:8}
+      argument <C <U A>><U bad>k<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=28:7 end=28:8}
       argument <C <U A>><U bad>l<> -> ShapeType {
-      } @ Loc {file=test/testdata/resolver/sig_bad.rb start=24:7 end=24:8}
+      } @ Loc {file=test/testdata/resolver/sig_bad.rb start=29:7 end=29:8}
       argument <C <U A>><U bad>m<> -> ShapeType {
         Symbol(:"foo") => T.untyped
-      } @ Loc {file=test/testdata/resolver/sig_bad.rb start=25:7 end=25:8}
-      argument <C <U A>><U bad>n<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=26:7 end=26:8}
-      argument <C <U A>><U bad>o<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=27:7 end=27:8}
-      argument <C <U A>><U bad>a<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=12:7 end=12:8}
-      argument <C <U A>><U bad>b<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=13:7 end=13:8}
-      argument <C <U A>><U bad>c<> -> Object @ Loc {file=test/testdata/resolver/sig_bad.rb start=14:7 end=14:8}
-      argument <C <U A>><U bad>d<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=15:7 end=15:8}
-      argument <C <U A>><U bad>e<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=16:7 end=16:8}
-      argument <C <U A>><U bad>f<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=17:7 end=17:8}
-      argument <C <U A>><U bad>g<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=18:7 end=18:8}
-      argument <C <U A>><U bad>h<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=19:7 end=19:8}
-      argument <C <U A>><U bad>i<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=21:7 end=21:8}
+      } @ Loc {file=test/testdata/resolver/sig_bad.rb start=30:7 end=30:8}
+      argument <C <U A>><U bad>n<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=31:7 end=31:8}
+      argument <C <U A>><U bad>o<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=32:7 end=32:8}
+      argument <C <U A>><U bad>a<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=17:7 end=17:8}
+      argument <C <U A>><U bad>b<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=18:7 end=18:8}
+      argument <C <U A>><U bad>c<> -> Object @ Loc {file=test/testdata/resolver/sig_bad.rb start=19:7 end=19:8}
+      argument <C <U A>><U bad>d<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=20:7 end=20:8}
+      argument <C <U A>><U bad>e<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=21:7 end=21:8}
+      argument <C <U A>><U bad>f<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=22:7 end=22:8}
+      argument <C <U A>><U bad>g<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=23:7 end=23:8}
+      argument <C <U A>><U bad>h<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=24:7 end=24:8}
+      argument <C <U A>><U bad>i<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=26:7 end=26:8}
       argument <C <U A>><U bad><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
-  class <S <C <U A>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=5:7 end=5:8}
-    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:3 end=30:6}
+  class <S <C <U A>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:7 end=10:8}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=15:3 end=35:6}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
-      method <S <C <U A>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:3 end=30:6}
-    method <S <C <U A>> $1><U unsupported> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=8:3 end=8:23}
+      method <S <C <U A>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=15:3 end=35:6}
+    method <S <C <U A>> $1><U unsupported> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=13:3 end=13:23}
       argument <S <C <U A>> $1><U unsupported><blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=2:9}
   class <S <C <U T1>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:7 end=2:9}
