@@ -6,13 +6,23 @@ require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-method-finder'
 require_relative '../lib/fetch-rbis'
 
-# Pull in the hand-written RBIs
-SorbetRBIGeneration::FetchRBIs.main
+module SorbetRBIGeneration::Main
+  def self.main
+    puts "This script should take a few minutes and will print all sorts of things. If it errors you probably care most about the last few lines."
 
-# Generate the RBIs from bundler
-SorbetRBIGeneration::RbiGenerator.start
-SorbetRBIGeneration::RbiGenerator.require_eveything
-SorbetRBIGeneration::RbiGenerator.finish
+    # Pull in the hand-written RBIs
+    SorbetRBIGeneration::FetchRBIs.main
 
-# Find the hidden methods
-SorbetRBIGeneration::HiddenMethodFinder.main
+    # Generate the RBIs from bundler
+    SorbetRBIGeneration::RbiGenerator.start
+    SorbetRBIGeneration::RbiGenerator.require_eveything
+    SorbetRBIGeneration::RbiGenerator.finish
+
+    # Find the hidden methods
+    SorbetRBIGeneration::HiddenMethodFinder.main
+
+    puts "This script has probably generated many changed files in your current directory. Please commit them all. The typechecker will make sure they are all still valid."
+  end
+end
+
+SorbetRBIGeneration::Main.main

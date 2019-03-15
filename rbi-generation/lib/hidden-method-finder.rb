@@ -30,7 +30,6 @@ class SorbetRBIGeneration::HiddenMethodFinder
   end
 
   def main
-    puts "This script should take a few minutes and will print all sorts of things. If it errors you probably care most about the last few lines."
     remove_temp_files # comment this out if you want to use incremental
     mkdir
     if hidden_rbi
@@ -51,7 +50,6 @@ class SorbetRBIGeneration::HiddenMethodFinder
     if hidden_splits
       split_rbi
     end
-    puts "You probably have many changed files in #{PATH}. Please commit them all. The typechecker will make sure they are all still valid."
   end
 
   def mkdir
