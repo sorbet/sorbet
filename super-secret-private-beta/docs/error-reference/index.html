@@ -79,6 +79,16 @@ predictions about a codebase. To silence this error, use <code>T.unsafe</code>:<
 method is problematic, because it can make a codebase's behavior dependent on
 the order in which files are loaded.</p>
 <p>The only way to silence this error currently is to make the offending file as <code># typed: false</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="4015"></a><a href="#4015" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4015</h2>
+<p>This error usually comes when a class or module is dynamically defined and
+stored into a constant, like this:</p>
+<pre><code class="hljs css language-ruby">A = ...
+A::B = <span class="hljs-number">1</span>
+</code></pre>
+<p>where <code>...</code> is some expression which computes a class or module. Sorbet can't
+know statically what this <code>...</code> code does (and for example even if could assume
+that it's defining a class, Sorbet can't know what methods or constants it has).
+Therefore, Sorbet does not support this pattern.</p>
 <h2><a class="anchor" aria-hidden="true" id="5002"></a><a href="#5002" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5002</h2>
 <p>This means that the typechecker has been unable to resolve a reference to a
 constant (e.g. a Ruby class). Most commonly, this indicates that there's a typo.</p>
@@ -309,4 +319,54 @@ xs = Array.new(<span class="hljs-number">3</span>) {<span class="hljs-params">|i
 foo(*T.unsafe(xs))
 <span class="hljs-comment"># ---------------------------------------------</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#2001">2001</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#5002">5002</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#6002">6002</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7014">7014</a></li><li><a href="#7017">7017</a></li><li><a href="#7019">7019</a></li></ul></nav></div></div></body></html>
+<h2><a class="anchor" aria-hidden="true" id="7021"></a><a href="#7021" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7021</h2>
+<p>The method called declares a block parameter that is not <code>T.nilable</code>,
+but a block was not passed when it was called.</p>
+<p>This can be fixed by either passing a block to the method, or changing the method's
+signature for the block parameter from <code>T.proc...</code> to <code>T.nilable(T.proc...)</code> (and then
+changing the method to deal with a nilable block parameter).</p>
+<h2><a class="anchor" aria-hidden="true" id="7023"></a><a href="#7023" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7023</h2>
+<p>This error occurs when a method is passed in a <code>Proc</code> object that Sorbet does not
+know the arity for statically.</p>
+<p>One instance where this can happen is when using <code>method</code>, since the arity of method
+corresponding to the symbol is unknown. This can be fixed by passing in a block with the correct arity:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+
+extend T::Sig
+
+sig {params(<span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> String).void).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ----- AVOID THIS ----------------------------</span>
+foo(&amp;method(<span class="hljs-symbol">:puts</span>))
+<span class="hljs-comment"># ---------------------------------------------</span>
+
+<span class="hljs-comment"># ----- Do this instead -----------------------</span>
+foo <span class="hljs-keyword">do</span> <span class="hljs-params">|arg0|</span>
+    method(<span class="hljs-symbol">:puts</span>).call(arg<span class="hljs-number">0</span>)
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment"># ---------------------------------------------</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="7024"></a><a href="#7024" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7024</h2>
+<p>This error occurs when a generic argument is passed in as a block parameter.</p>
+<p>In <code># typed: strict</code> files, using a parameter from a method that does not have a signature will
+cause this issue to be reported. Adding a signature to the method will fix the issue.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+
+extend T::Sig
+
+<span class="hljs-comment"># ----- This will error -----------------------</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
+    proc(&amp;blk)
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment"># ---------------------------------------------</span>
+
+<span class="hljs-comment"># ----- This will not error -------------------</span>
+sig {params(<span class="hljs-symbol">blk:</span> T.untyped).returns(T.untyped)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span><span class="hljs-params">(&amp;blk)</span></span>
+    proc(&amp;blk)
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment"># ---------------------------------------------</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#2001">2001</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#4015">4015</a></li><li><a href="#5002">5002</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#6002">6002</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7014">7014</a></li><li><a href="#7017">7017</a></li><li><a href="#7019">7019</a></li><li><a href="#7021">7021</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li></ul></nav></div></div></body></html>

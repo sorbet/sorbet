@@ -60,6 +60,7 @@ sigils, each defining a <strong>strictness level</strong>:</p>
 <tr><td><code># typed: false</code></td><td><code># typed: true</code></td><td><code># typed: strict</code></td><td><code># typed: strong</code></td></tr>
 </tbody>
 </table>
+<!-- TODO(jez) It's unclear if we want annotations.md, or just to discuss implicit T.untyped in untyped.md. -->
 <p>Each strictness level reports all errors at lower levels, plus new errors:</p>
 <ul>
 <li><p>At <code># typed: false</code>, only errors related to things like syntax and constant
@@ -72,7 +73,7 @@ mismatched argument counts, using variables inconsistently with their types,
 etc.</p></li>
 <li><p>At <code># typed: strict</code>, Sorbet no longer implicitly marks things as being
 <a href="/sorbet/super-secret-private-beta/docs/untyped">dynamically typed</a>. At this level all methods, constants, and
-instance variables must have <a href="/sorbet/super-secret-private-beta/docs/annotations">explicitly annotated types</a>.
+instance variables must have <a href="annotations.md">explicitly annotated types</a>.
 This is analogous to TypeScript's <code>noImplicitAny</code> flag.</p></li>
 <li><p>At <code># typed: strong</code>, Sorbet no longer allows <a href="/sorbet/super-secret-private-beta/docs/untyped"><code>T.untyped</code></a> as the
 intermediate result of any method call. This effectively means that Sorbet
@@ -82,7 +83,6 @@ impossible to write code with no errors at this strictness level.</p></li>
 <p>To recap: adding one of these comments to the top of a Ruby file controls which
 errors <code>sorbet</code> reports or silences in that file. The strictness level only
 affects which errors are reported.</p>
-<!-- TODO(jez) It's unclear if we want annotations.md, or just to discuss implicit T.untyped in untyped.md. -->
 <blockquote>
 <p><strong>Note</strong>: Type annotations from <code># typed: false</code> files are <em>still parsed and
 used</em> by Sorbet if that method is called in other files. Specifically, adding
