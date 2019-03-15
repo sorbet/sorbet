@@ -216,11 +216,7 @@ unique_ptr<Expression> ConstantLit::_deepCopy(const Expression *avoid, bool root
     if (original) {
         originalC = unique_ptr<UnresolvedConstantLit>(cast_tree<UnresolvedConstantLit>(original->deepCopy().release()));
     }
-    unique_ptr<Expression> typeAliasC;
-    if (this->typeAlias) {
-        typeAliasC = typeAlias->_deepCopy(avoid);
-    }
-    return make_unique<ConstantLit>(this->loc, this->symbol, move(originalC), move(typeAliasC));
+    return make_unique<ConstantLit>(this->loc, this->symbol, move(originalC), this->typeAlias);
 }
 
 unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root) const {

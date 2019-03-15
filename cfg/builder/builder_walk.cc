@@ -223,12 +223,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         current = walk(cctx.withTarget(deadSym), nested, current);
                     }
                 }
-                if (!a->typeAlias) {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->constantSymbol()));
-                    ret = current;
-                } else {
-                    ret = walk(cctx, a->typeAlias.get(), current);
-                }
+
+                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->typeAliasOrConstantSymbol()));
+                ret = current;
             },
             [&](ast::Local *a) {
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(a->localVariable));
@@ -237,7 +234,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Assign *a) {
                 core::LocalVariable lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
-                    lhs = global2Local(cctx, lhsIdent->constantSymbol());
+                    lhs = global2Local(cctx, lhsIdent->typeAliasOrConstantSymbol());
                 } else if (auto field = ast::cast_tree<ast::Field>(a->lhs.get())) {
                     lhs = global2Local(cctx, field->symbol);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {

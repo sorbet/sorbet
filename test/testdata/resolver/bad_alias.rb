@@ -7,16 +7,16 @@ end
 
 
 class B
-  S = T.type_alias(S) # error: Type alias `B::S` expands to to an infinite type
+  S = T.type_alias(S) # error: Unable to resolve right hand side of type alias `B::S`
 end
 
 class C
-  S1 = T.type_alias(S2)
-  S2 = T.type_alias(S1) # error: Type alias `C::S2` expands to to an infinite type
+  S1 = T.type_alias(S2) # error: Unable to resolve right hand side of type alias `C::S1`
+  S2 = T.type_alias(S1) # error: Unable to resolve right hand side of type alias `C::S2`
 end
 
 class D
-  U = T.type_alias([U, U]) # error: Type alias `D::U` expands to to an infinite type
+  U = T.type_alias([U, U]) # error: Unable to resolve right hand side of type alias `D::U`
 end
 
-E = T.type_alias(E) # error: Type alias `E` expands to to an infinite type
+E = T.type_alias(E) # error: Unable to resolve right hand side of type alias `E`

@@ -232,8 +232,8 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::Loc loc, unique_ptr<Expressio
 }
 
 ConstantLit::ConstantLit(core::Loc loc, core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original,
-                         unique_ptr<Expression> resolved)
-    : Expression(loc), symbol(symbol), original(std::move(original)), typeAlias(std::move(resolved)) {
+                         bool typeAlias)
+    : Expression(loc), symbol(symbol), original(std::move(original)), typeAlias(typeAlias) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
@@ -565,9 +565,6 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
     if (symbol.exists()) {
         return this->symbol.dataAllowingNone(gs)->showFullName(gs);
     }
-    if (this->typeAlias) {
-        return this->typeAlias->toStringWithTabs(gs, tabs);
-    }
     return "Unresolved: " + this->original->toStringWithTabs(gs, tabs);
 }
 
@@ -580,7 +577,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
     printTabs(buf, tabs + 1);
-    buf << "typeAlias = " << (this->typeAlias ? this->typeAlias->showRaw(gs, tabs + 1) : "nullptr") << '\n';
+    buf << "typeAlias = " << (this->typeAlias ? "true" : "false") << '\n';
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();

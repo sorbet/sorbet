@@ -22,39 +22,61 @@ namespace sorbet::resolver {
 namespace {
 
 /*
- * Ruby supports resolving constants via your ancestors -- superclasses and
- * mixins. Since superclass and mixins are themselves constant references, we
- * thus may not be able to resolve certain constants until after we've resolved
- * others.
+ * Note: There are multiple separate tree walks defined in this file, the main
+ * ones being:
  *
- * To solve this, we collect any failed resolutions into a pair of TODO lists,
- * and repeatedly walk them until we succeed or stop making progress. In
- * practice this loop terminates after 3 or fewer passes on most real codebases.
- * We also track defined type aliases in a separate map.
+ * - ResolveConstantsWalk
+ * - ResolveSignaturesWalk
+ * - FlattenWalk
  *
- * This walk replaces ast::UnresolvedConstantLit nodes with ast::ConstantLit nodes.
- * Successful resolutions are removed from the `todo_` lists.
+ * There are also other important parts of resolver found elsewhere in the
+ * resolver/ package (GlobalPass, type_syntax). Below we describe
+ * ResolveConstantsWalk, which is particularly sophisticated.
  *
- * There are 4 items maintained by these fixed point computations:
- *  - list of constants to be resolved
- *  - list of ancestors to be filled that require constants to be resolved
- *  - map of class aliases
- *  - map of type aliases to their respective trees
+ *                                - - - - -
  *
- * We track the latter ancestors separately for the dual reasons that (1) Upon
- * successful resolution, we need to do additional work (mutating the symbol
- * table to reflect the new ancestors) and (2) Resolving those constants
- * potentially renders additional constants resolvable, and so if any constant
- * on the second list succeeds, we need to keep looping in the outer loop.
+ * Ruby supports resolving constants via ancestors--superclasses and mixins.
+ * Since superclass and mixins are themselves constant references, we thus may
+ * not be able to resolve certain constants until after we've resolved others.
  *
- * We also track aliases to constants that we were not yet able to resolve and
- * define those aliases when their right hand sides resolve successfully.
+ * To solve this, we collect any failed resolutions in a number of TODO lists,
+ * and iterate over them to a fixed point (namely, either all constants
+ * resolve, or no new constants resolve and we stub out any that remain).
+ * In practice this fixed point computation terminates after 3 or fewer passes
+ * on most real codebases.
  *
- * The resolveConstants static method function at the bottom of this class
- * implements the iterate-to-fixpoint outer loop.
+ * The four TODO lists that this loop maintains are:
+ *
+ *  - constants to be resolved
+ *  - ancestors to be filled that require constants to be resolved
+ *  - class aliases (class aliases know the symbol they alias to)
+ *  - type aliases (type aliases know the fully parsed type of their RHS, and
+ *    thus require their RHS to be resolved)
+ *
+ * Successful resolutions are removed from the lists, and then we loop again.
+ * We track all these lists separately for the dual reasons that
+ *
+ * 1. Upon successful resolution, we need to do additional work (mutating the
+ *    symbol table to reflect the new ancestors) and
+ * 2. Resolving those constants potentially renders additional constants
+ *    resolvable, and so if any resolution succeeds, we need to keep looping in
+ *    the outer loop.
+ *
+ * After this pass:
+ *
+ * - ast::UnresolvedConstantLit nodes (constants that have a NameRef) are
+ *   replaced with ast::ConstantLit nodes (constants that have a SymbolRef).
+ * - Every constant SymbolRef has enough to completely understand it's own
+ *   place in the ancestor hierarchy.
+ * - Every type alias symbol carries with it the type it should be treated as.
+ *
+ * The resolveConstants method is the best place to start if you want to browse
+ * the fixed point loop at a high level.
  */
 
 class ResolveConstantsWalk {
+    friend class ResolveSanityCheckWalk;
+
 private:
     struct Nesting {
         const shared_ptr<Nesting> parent;
@@ -66,7 +88,6 @@ private:
 
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
-        // setting out->typeAlias to non-nullptr indicates that the tree was already resolved.
         ast::ConstantLit *out;
 
         ResolutionItem() = default;
@@ -102,11 +123,22 @@ private:
         const ClassAliasResolutionItem &operator=(const ClassAliasResolutionItem &) = delete;
     };
 
+    struct TypeAliasResolutionItem {
+        core::SymbolRef lhs;
+        ast::Expression *rhs;
+
+        TypeAliasResolutionItem(core::SymbolRef lhs, ast::Expression *rhs) : lhs(lhs), rhs(rhs) {}
+        TypeAliasResolutionItem(TypeAliasResolutionItem &&) noexcept = default;
+        TypeAliasResolutionItem &operator=(TypeAliasResolutionItem &&rhs) noexcept = default;
+
+        TypeAliasResolutionItem(const TypeAliasResolutionItem &) = delete;
+        const TypeAliasResolutionItem &operator=(const TypeAliasResolutionItem &) = delete;
+    };
+
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
     vector<ClassAliasResolutionItem> todoClassAliases_;
-    using TypeAliasMap = UnorderedMap<core::SymbolRef, const ast::Expression *>;
-    TypeAliasMap typeAliases;
+    vector<TypeAliasResolutionItem> todoTypeAliases_;
 
     static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
@@ -120,13 +152,22 @@ private:
         return nesting->scope.data(ctx)->findMemberTransitive(ctx, name);
     }
 
+    static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
+        if (original.typeAlias) {
+            auto sym = original.typeAliasSymbol();
+            return sym.exists() && sym.data(ctx)->resultType != nullptr;
+        } else {
+            return original.constantSymbol().exists();
+        }
+    }
+
     class ResolutionChecker {
     public:
         bool seenUnresolved = false;
 
         unique_ptr<ast::ConstantLit> postTransformConstantLit(core::Context ctx,
                                                               unique_ptr<ast::ConstantLit> original) {
-            seenUnresolved = seenUnresolved || (original->typeAlias == nullptr && !original->constantSymbol().exists());
+            seenUnresolved |= !isAlreadyResolved(ctx, *original);
             return original;
         };
     };
@@ -141,8 +182,7 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
-                                           const unique_ptr<ast::UnresolvedConstantLit> &c,
-                                           const TypeAliasMap &typeAliases) {
+                                           const unique_ptr<ast::UnresolvedConstantLit> &c) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst);
             return result;
@@ -171,14 +211,19 @@ private:
     }
 
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
-    static void stubOneConstantNesting(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases);
+    static void stubOneConstantNesting(core::MutableContext ctx, ResolutionItem &job) {
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original);
         if (resolved.exists() && resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
-            if (auto e = ctx.state.beginError(resolved.data(ctx)->loc(), core::errors::Resolver::RecursiveTypeAlias)) {
-                e.setHeader("Type alias `{}` expands to to an infinite type", resolved.data(ctx)->show(ctx));
-                e.addErrorLine(job.out->original->loc, "Constant used here");
+            if (resolved.data(ctx)->resultType == nullptr) {
+                // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
+                auto loc = resolved.data(ctx)->loc();
+                if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
+                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.data(ctx)->show(ctx));
+                    e.addErrorLine(job.out->original->loc, "Type alias used here");
+                }
+                resolved.data(ctx)->resultType = core::Types::untyped(ctx, resolved);
             }
-            job.out->typeAlias = ast::MK::Constant(job.out->loc, core::Symbols::untyped());
+            job.out->typeAlias = true;
             job.out->setAliasSymbol(resolved);
             return;
         }
@@ -243,25 +288,21 @@ private:
                                              // type_syntax.cc that intentionally side-steps this
     }
 
-    static bool resolveJob(core::Context ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
-        if (job.out->typeAlias || job.out->constantSymbol().exists()) {
+    static bool resolveJob(core::Context ctx, ResolutionItem &job) {
+        if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original);
         if (!resolved.exists()) {
             return false;
         }
         if (resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
-            auto fnd = typeAliases.find(resolved);
-            if (fnd != typeAliases.end()) {
-                if (isFullyResolved(ctx, fnd->second)) {
-                    auto ret = fnd->second->deepCopy();
-                    if (ret) {
-                        job.out->typeAlias = std::move(ret);
-                        job.out->setAliasSymbol(resolved);
-                        return true;
-                    }
-                }
+            if (resolved.data(ctx)->resultType != nullptr) {
+                // A TypeAliasResolutionItem job completed successfully,
+                // or we forced the type alias this constant refers to to resolve.
+                job.out->typeAlias = true;
+                job.out->setAliasSymbol(resolved);
+                return true;
             }
             return false;
         }
@@ -270,15 +311,24 @@ private:
         return true;
     }
 
-    static bool forceResolveJob(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
-        if (resolveJob(ctx, job, typeAliases)) {
+    static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
+        if (isFullyResolved(ctx, job.rhs)) {
+            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool forceResolveJob(core::MutableContext ctx, ResolutionItem &job) {
+        if (resolveJob(ctx, job)) {
             return true;
         }
 
         int depth = 0;
         while (depth < 256) {
-            stubOneConstantNesting(ctx, job, typeAliases);
-            if (resolveJob(ctx, job, typeAliases)) {
+            stubOneConstantNesting(ctx, job);
+            if (resolveJob(ctx, job)) {
                 return true;
             }
             depth++;
@@ -314,8 +364,7 @@ private:
         return false;
     }
 
-    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
-                                   const TypeAliasMap &typeAliases, bool lastRun) {
+    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         if (!job.ancestor->typeAliasOrConstantSymbol().exists()) {
             return false;
         }
@@ -413,7 +462,7 @@ private:
             ENFORCE(false, "Namer should have not allowed this");
         }
 
-        if (resolveAncestorJob(ctx, job, typeAliases, false)) {
+        if (resolveAncestorJob(ctx, job, false)) {
             categoryCounterInc("resolve.constants.ancestor", "firstpass");
         } else {
             todoAncestors_.emplace_back(std::move(job));
@@ -438,7 +487,7 @@ public:
         auto loc = c->loc;
         auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(c), nullptr);
         ResolutionItem job{nesting_, out.get()};
-        if (resolveJob(ctx, job, typeAliases)) {
+        if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
         } else {
             todo_.emplace_back(std::move(job));
@@ -488,7 +537,23 @@ public:
                     e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
                 }
             } else {
-                typeAliases[id->constantSymbol()] = send->args[0].get();
+                // TODO(jez) Can we just get rid of typeAlias?
+                id->typeAlias = true;
+                auto typeAliasItem = TypeAliasResolutionItem{id->typeAliasSymbol(), send->args[0].get()};
+                if (resolveTypeAliasJob(ctx, typeAliasItem)) {
+                    categoryCounterInc("resolve.constants.typealiases", "firstpass");
+                } else {
+                    this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
+                }
+
+                // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
+                // we'll still emit a warning when the rhs of a type alias doesn't resolve.
+                auto item = ResolutionItem{nesting_, id};
+                if (resolveJob(ctx, item)) {
+                    categoryCounterInc("resolve.constants.typealiases", "firstpass");
+                } else {
+                    this->todo_.emplace_back(std::move(item));
+                }
             }
             return asgn;
         }
@@ -553,7 +618,7 @@ public:
         auto todo = std::move(constants.todo_);
         auto todoAncestors = std::move(constants.todoAncestors_);
         auto todoClassAliases = std::move(constants.todoClassAliases_);
-        const auto typeAliases = std::move(constants.typeAliases);
+        auto todoTypeAliases = std::move(constants.todoTypeAliases_);
         bool progress = true;
 
         while (!(todo.empty() && todoAncestors.empty()) && progress) {
@@ -563,19 +628,18 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
                 // else.
                 int origSize = todoAncestors.size();
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(),
-                                    [ctx, &typeAliases](AncestorResolutionItem &job) -> bool {
-                                        return resolveAncestorJob(ctx, job, typeAliases, false);
-                                    });
+                auto it =
+                    remove_if(todoAncestors.begin(), todoAncestors.end(), [ctx](AncestorResolutionItem &job) -> bool {
+                        return resolveAncestorJob(ctx, job, false);
+                    });
                 todoAncestors.erase(it, todoAncestors.end());
                 progress = (origSize != todoAncestors.size());
                 categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
             }
             {
                 int origSize = todo.size();
-                auto it = remove_if(todo.begin(), todo.end(), [ctx, &typeAliases](ResolutionItem &job) -> bool {
-                    return resolveJob(ctx, job, typeAliases);
-                });
+                auto it = remove_if(todo.begin(), todo.end(),
+                                    [ctx](ResolutionItem &job) -> bool { return resolveJob(ctx, job); });
                 todo.erase(it, todo.end());
                 progress = progress || (origSize != todo.size());
                 categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
@@ -593,6 +657,15 @@ public:
                 todoClassAliases.erase(it, todoClassAliases.end());
                 progress = progress || (origSize != todoClassAliases.size());
                 categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
+            }
+            {
+                int origSize = todoTypeAliases.size();
+                auto it =
+                    remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
+                              [ctx](TypeAliasResolutionItem &it) -> bool { return resolveTypeAliasJob(ctx, it); });
+                todoTypeAliases.erase(it, todoTypeAliases.end());
+                progress = progress || (origSize != todoTypeAliases.size());
+                categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
             }
         }
         // We can no longer resolve new constants. All the code below reports errors
@@ -631,14 +704,14 @@ public:
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
         for (auto &job : todo) {
-            auto resolved = forceResolveJob(ctx, job, typeAliases);
+            auto resolved = forceResolveJob(ctx, job);
             ENFORCE(resolved);
         }
 
         for (auto &job : todoAncestors) {
-            auto resolved = resolveAncestorJob(ctx, job, typeAliases, true);
+            auto resolved = resolveAncestorJob(ctx, job, true);
             if (!resolved) {
-                resolved = resolveAncestorJob(ctx, job, typeAliases, true);
+                resolved = resolveAncestorJob(ctx, job, true);
                 ENFORCE(resolved);
             }
         }
@@ -1079,7 +1152,7 @@ public:
         }
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
-        if (id == nullptr || !id->constantSymbol().exists()) {
+        if (id == nullptr || id->typeAlias || !id->constantSymbol().exists()) {
             return asgn;
         }
 
@@ -1107,7 +1180,7 @@ public:
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
                         data->resultType =
-                            TypeSyntax::getResultType(ctx, hash->values[i], emptySig, false, id->constantSymbol());
+                            TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, id->constantSymbol());
                     }
                 }
             }
@@ -1144,7 +1217,7 @@ public:
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
                     auto type =
-                        TypeSyntax::getResultType(ctx, send->args[1], emptySig, false, core::Symbols::noSymbol());
+                        TypeSyntax::getResultType(ctx, *(send->args[1]), emptySig, false, core::Symbols::noSymbol());
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
@@ -1530,7 +1603,7 @@ public:
     }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
                                                           unique_ptr<ast::ConstantLit> original) {
-        ENFORCE(original->typeAlias.get() != nullptr || original->constantSymbol().exists());
+        ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, *original));
         return original;
     }
 };

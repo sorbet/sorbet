@@ -12,7 +12,7 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         EmptyTree

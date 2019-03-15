@@ -1,4 +1,4 @@
 # typed: false
   T = T.type_alias
-# ^ error: Type alias `T` expands to to an infinite type
+# ^ error: Unable to resolve right hand side of type alias `T`
 # ^^^^^^^^^^^^^^^^ error: Redefining constant `T`

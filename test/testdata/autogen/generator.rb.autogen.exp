@@ -53,15 +53,8 @@ requires: []
  is_defining_ref=0
 [ref id=5]
  scope=[Gener]
- name=[DOES_NOT_EXIST]
- nesting=[[Gener]]
- resolved=[]
- loc=test/testdata/autogen/generator.rb:5
- is_defining_ref=0
-[ref id=6]
- scope=[Gener]
  name=[HydraResource]
  nesting=[[Gener]]
  resolved=[Gener HydraResource]
- loc=test/testdata/autogen/generator.rb:8
+ loc=test/testdata/autogen/generator.rb:9
  is_defining_ref=0

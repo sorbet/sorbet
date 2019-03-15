@@ -57,7 +57,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Range
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U new>
               block = nullptr

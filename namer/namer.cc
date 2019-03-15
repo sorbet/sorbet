@@ -784,7 +784,7 @@ public:
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
         asgn->lhs.release();
-        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, std::move(lhsU), nullptr);
+        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, std::move(lhsU), false);
         return asgn;
     }
 

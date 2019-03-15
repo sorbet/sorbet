@@ -1,8 +1,15 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
   class <C <U Foo>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=2:10}
-    static-field-type-alias <C <U Foo>><C <U A>> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=5:3 end=5:4}
-    static-field-type-alias <C <U Foo>><C <U ADDRESS_TYPE>> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=18:3 end=18:15}
-    static-field-type-alias <C <U Foo>><C <U Reactions>> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=11:3 end=11:12}
+    static-field-type-alias <C <U Foo>><C <U A>> -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=5:3 end=5:4}
+    static-field-type-alias <C <U Foo>><C <U ADDRESS_TYPE>> -> NilClass | ShapeType {
+          Symbol(:"line1") => String | NilClass
+          Symbol(:"line2") => String | NilClass
+          Symbol(:"city") => String | NilClass
+          Symbol(:"state") => String | NilClass
+          Symbol(:"postal_code") => String | NilClass
+          Symbol(:"country") => String | NilClass
+        } @ Loc {file=test/testdata/resolver/alias.rb start=18:3 end=18:15}
+    static-field-type-alias <C <U Foo>><C <U Reactions>> -> String @ Loc {file=test/testdata/resolver/alias.rb start=11:3 end=11:12}
     method <C <U Foo>><U address> (<blk>) -> NilClass | ShapeType {
           Symbol(:"line1") => String | NilClass
           Symbol(:"line2") => String | NilClass

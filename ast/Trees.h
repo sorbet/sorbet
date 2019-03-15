@@ -100,8 +100,7 @@ public:
 
     RHS_store rhs;
     std::unique_ptr<Expression> name;
-    // For unresolved names. Once they are typeAlias to Symbols they go into the
-    // Symbol
+    // For unresolved names. Once they are typeAlias to Symbols they go into the Symbol
 
     static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT> ANCESTORS_store;
@@ -569,22 +568,21 @@ class ConstantLit final : public Expression {
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
 public:
     std::unique_ptr<UnresolvedConstantLit> original;
-    std::unique_ptr<Expression> typeAlias; // if this constant used to point to type alias
+    bool typeAlias; // if this constant used to point to type alias
 
-    ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original,
-                std::unique_ptr<Expression> resolved);
+    ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original, bool typeAlias);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
     inline core::SymbolRef constantSymbol() const {
-        ENFORCE(typeAlias == nullptr, "Accessing a type alias constant as-if normal constant");
+        ENFORCE(!typeAlias, "Accessing a type alias constant as-if normal constant");
         return symbol;
     }
 
     inline core::SymbolRef typeAliasSymbol() const {
-        ENFORCE(typeAlias != nullptr, "Accessing a type alias constant as-if normal constant");
+        ENFORCE(typeAlias, "Accessing a type alias constant as-if normal constant");
         return symbol;
     }
 
@@ -593,12 +591,12 @@ public:
     }
 
     inline void setConstantSymbol(core::SymbolRef newSymbol) {
-        ENFORCE(typeAlias == nullptr, "Accessing a type alias constant as-if normal constant");
+        ENFORCE(!typeAlias, "Accessing a type alias constant as-if normal constant");
         symbol = newSymbol;
     }
 
     inline void setAliasSymbol(core::SymbolRef newSymbol) {
-        ENFORCE(typeAlias != nullptr, "Accessing a type alias constant as-if normal constant");
+        ENFORCE(typeAlias, "Accessing a type alias constant as-if normal constant");
         symbol = newSymbol;
     }
 

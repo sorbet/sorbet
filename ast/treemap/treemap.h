@@ -558,9 +558,6 @@ private:
     }
 
     unique_ptr<Expression> mapConstantLit(unique_ptr<ConstantLit> v, CTX ctx) {
-        if (v->typeAlias) {
-            v->typeAlias = mapIt(move(v->typeAlias), ctx);
-        }
         if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
             return PostPonePostTransform_ConstantLit<FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(
                 ctx, move(v), func);

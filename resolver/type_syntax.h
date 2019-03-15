@@ -56,11 +56,10 @@ public:
         core::TypePtr type;
         core::SymbolRef rebind;
     };
-    static ResultType getResultTypeAndBind(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr,
-                                           const ParsedSig &, bool allowSelfType, bool allowRebind,
-                                           core::SymbolRef untypedBlame);
-    static core::TypePtr getResultType(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr,
-                                       const ParsedSig &, bool allowSelfType, core::SymbolRef untypedBlame);
+    static ResultType getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
+                                           bool allowSelfType, bool allowRebind, core::SymbolRef untypedBlame);
+    static core::TypePtr getResultType(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
+                                       bool allowSelfType, core::SymbolRef untypedBlame);
 
     TypeSyntax() = delete;
 };

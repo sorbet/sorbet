@@ -147,7 +147,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 }
 
-                auto bind = getResultType(ctx, send->args.front(), *parent, allowSelfType, untypedBlame);
+                auto bind = getResultType(ctx, *(send->args.front()), *parent, allowSelfType, untypedBlame);
                 auto classType = core::cast_type<core::ClassType>(bind.get());
                 if (!classType) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -191,7 +191,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     if (lit && lit->isSymbol(ctx)) {
                         core::NameRef name = lit->asSymbol(ctx);
                         auto resultAndBind =
-                            getResultTypeAndBind(ctx, value, *parent, allowSelfType, true, untypedBlame);
+                            getResultTypeAndBind(ctx, *value, *parent, allowSelfType, true, untypedBlame);
                         sig.argTypes.emplace_back(
                             ParsedSig::ArgSpec{key->loc, name, resultAndBind.type, resultAndBind.rebind});
                     }
@@ -236,7 +236,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 }
 
-                sig.returns = getResultType(ctx, send->args.front(), *parent, allowSelfType, untypedBlame);
+                sig.returns = getResultType(ctx, *(send->args.front()), *parent, allowSelfType, untypedBlame);
 
                 break;
             }
@@ -286,18 +286,18 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
             return core::Types::any(ctx,
-                                    TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType, untypedBlame),
+                                    TypeSyntax::getResultType(ctx, *(send->args[0]), sig, allowSelfType, untypedBlame),
                                     core::Types::nilClass());
         case core::Names::all()._id: {
             if (send->args.empty()) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType, untypedBlame);
+            auto result = TypeSyntax::getResultType(ctx, *(send->args[0]), sig, allowSelfType, untypedBlame);
             int i = 1;
             while (i < send->args.size()) {
                 result = core::Types::all(
-                    ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig, allowSelfType, untypedBlame));
+                    ctx, result, TypeSyntax::getResultType(ctx, *(send->args[i]), sig, allowSelfType, untypedBlame));
                 i++;
             }
             return result;
@@ -307,11 +307,11 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType, untypedBlame);
+            auto result = TypeSyntax::getResultType(ctx, *(send->args[0]), sig, allowSelfType, untypedBlame);
             int i = 1;
             while (i < send->args.size()) {
                 result = core::Types::any(
-                    ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig, allowSelfType, untypedBlame));
+                    ctx, result, TypeSyntax::getResultType(ctx, *(send->args[i]), sig, allowSelfType, untypedBlame));
                 i++;
             }
             return result;
@@ -423,22 +423,22 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
     }
 }
 
-core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
+core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
                                         const ParsedSig &sigBeingParsed, bool allowSelfType,
                                         core::SymbolRef untypedBlame) {
     return getResultTypeAndBind(ctx, expr, sigBeingParsed, allowSelfType, false, untypedBlame).type;
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
+TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
                                                         const ParsedSig &sigBeingParsed, bool allowSelfType,
                                                         bool allowRebind, core::SymbolRef untypedBlame) {
     ResultType result;
     typecase(
-        expr.get(),
+        &expr,
         [&](ast::Array *arr) {
             vector<core::TypePtr> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultType(ctx, el, sigBeingParsed, false, untypedBlame));
+                elems.emplace_back(getResultType(ctx, *el, sigBeingParsed, false, untypedBlame));
             }
             result.type = core::TupleType::build(ctx, elems);
         },
@@ -448,7 +448,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultType(ctx, vtree, sigBeingParsed, false, untypedBlame);
+                auto val = getResultType(ctx, *vtree, sigBeingParsed, false, untypedBlame);
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
                     ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
@@ -464,7 +464,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
         },
         [&](ast::ConstantLit *i) {
             if (i->typeAlias) {
-                result.type = getResultType(ctx, i->typeAlias, sigBeingParsed, allowSelfType, untypedBlame);
+                result.type = i->typeAliasSymbol().data(ctx)->resultType;
                 return;
             }
             bool silenceGenericError = i->typeAliasOrConstantSymbol() == core::Symbols::Hash() ||
@@ -592,7 +592,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
                 ty.type = core::make_type<core::MetaType>(
-                    TypeSyntax::getResultType(ctx, arg, sigBeingParsed, false, untypedBlame));
+                    TypeSyntax::getResultType(ctx, *arg, sigBeingParsed, false, untypedBlame));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg->loc);

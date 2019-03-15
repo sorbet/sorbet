@@ -12,7 +12,7 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         MethodDef{
@@ -259,7 +259,7 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         Send{
@@ -283,7 +283,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -328,7 +328,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -337,7 +337,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -357,7 +357,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -412,7 +412,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -421,7 +421,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -598,7 +598,7 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         EmptyTree
@@ -614,14 +614,14 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -666,7 +666,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -675,7 +675,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -695,7 +695,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -750,7 +750,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -759,7 +759,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -779,7 +779,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -834,7 +834,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -843,7 +843,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -873,7 +873,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -948,7 +948,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -957,7 +957,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -987,7 +987,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1032,7 +1032,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1041,7 +1041,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1061,7 +1061,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1116,7 +1116,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1125,7 +1125,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1145,7 +1145,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1171,7 +1171,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::Object
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -1191,7 +1191,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1200,7 +1200,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1211,7 +1211,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::Object
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -1221,7 +1221,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1242,7 +1242,7 @@ ClassDef{
                         value = ConstantLit{
                           orig = nullptr
                           symbol = ::Object
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                       ]
                     ]
@@ -1255,7 +1255,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::Object
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -1278,7 +1278,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1287,7 +1287,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1298,7 +1298,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::Object
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -1308,7 +1308,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1353,7 +1353,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1362,7 +1362,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1382,7 +1382,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1437,7 +1437,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1446,7 +1446,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1474,7 +1474,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -1529,7 +1529,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -1538,7 +1538,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -1558,7 +1558,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -1580,7 +1580,7 @@ ClassDef{
                                 scope = ConstantLit{
                                   orig = nullptr
                                   symbol = ::<root>
-                                  typeAlias = nullptr
+                                  typeAlias = false
                                 }
                                 cnst = <C <U Chalk>>
                               }
@@ -1599,7 +1599,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -1626,7 +1626,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -1635,7 +1635,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -1652,7 +1652,7 @@ ClassDef{
                               scope = ConstantLit{
                                 orig = nullptr
                                 symbol = ::<root>
-                                typeAlias = nullptr
+                                typeAlias = false
                               }
                               cnst = <C <U Chalk>>
                             }
@@ -1671,7 +1671,7 @@ ClassDef{
                         recv = ConstantLit{
                           orig = nullptr
                           symbol = ::T
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                         fun = <U untyped>
                         block = nullptr
@@ -1690,7 +1690,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1717,7 +1717,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T::Array
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U []>
                   block = nullptr
@@ -1746,7 +1746,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1755,7 +1755,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1767,7 +1767,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T::Array
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U []>
                 block = nullptr
@@ -1786,7 +1786,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1808,7 +1808,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T::Array
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U []>
                           block = nullptr
@@ -1831,7 +1831,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T::Array
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U []>
                   block = nullptr
@@ -1863,7 +1863,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1872,7 +1872,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1884,7 +1884,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T::Array
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U []>
                 block = nullptr
@@ -1903,7 +1903,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -1948,7 +1948,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -1957,7 +1957,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1977,7 +1977,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -2032,7 +2032,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -2041,7 +2041,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -2069,7 +2069,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -2124,7 +2124,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -2133,7 +2133,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -2153,7 +2153,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -2175,7 +2175,7 @@ ClassDef{
                                 scope = ConstantLit{
                                   orig = nullptr
                                   symbol = ::<root>
-                                  typeAlias = nullptr
+                                  typeAlias = false
                                 }
                                 cnst = <C <U Chalk>>
                               }
@@ -2194,7 +2194,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -2221,7 +2221,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -2230,7 +2230,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -2247,7 +2247,7 @@ ClassDef{
                               scope = ConstantLit{
                                 orig = nullptr
                                 symbol = ::<root>
-                                typeAlias = nullptr
+                                typeAlias = false
                               }
                               cnst = <C <U Chalk>>
                             }
@@ -2266,7 +2266,7 @@ ClassDef{
                         recv = ConstantLit{
                           orig = nullptr
                           symbol = ::T
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                         fun = <U untyped>
                         block = nullptr
@@ -2285,7 +2285,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -2343,7 +2343,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -2352,7 +2352,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -2385,7 +2385,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -2466,7 +2466,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -2475,7 +2475,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -2516,7 +2516,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -2597,7 +2597,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -2606,7 +2606,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -2639,7 +2639,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -2661,7 +2661,7 @@ ClassDef{
                                 scope = ConstantLit{
                                   orig = nullptr
                                   symbol = ::<root>
-                                  typeAlias = nullptr
+                                  typeAlias = false
                                 }
                                 cnst = <C <U Chalk>>
                               }
@@ -2700,7 +2700,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -2709,7 +2709,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -2726,7 +2726,7 @@ ClassDef{
                               scope = ConstantLit{
                                 orig = nullptr
                                 symbol = ::<root>
-                                typeAlias = nullptr
+                                typeAlias = false
                               }
                               cnst = <C <U Chalk>>
                             }
@@ -2757,7 +2757,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -2819,7 +2819,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -2828,7 +2828,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -2865,7 +2865,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -2954,7 +2954,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -2963,7 +2963,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -3008,7 +3008,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -3097,7 +3097,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -3106,7 +3106,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -3143,7 +3143,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -3165,7 +3165,7 @@ ClassDef{
                                 scope = ConstantLit{
                                   orig = nullptr
                                   symbol = ::<root>
-                                  typeAlias = nullptr
+                                  typeAlias = false
                                 }
                                 cnst = <C <U Chalk>>
                               }
@@ -3208,7 +3208,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -3217,7 +3217,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -3234,7 +3234,7 @@ ClassDef{
                               scope = ConstantLit{
                                 orig = nullptr
                                 symbol = ::<root>
-                                typeAlias = nullptr
+                                typeAlias = false
                               }
                               cnst = <C <U Chalk>>
                             }
@@ -3269,7 +3269,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3314,7 +3314,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -3323,7 +3323,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -3343,7 +3343,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3388,7 +3388,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -3397,7 +3397,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -3417,7 +3417,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3462,7 +3462,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -3471,7 +3471,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -3499,7 +3499,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -3554,7 +3554,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -3563,7 +3563,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -3583,7 +3583,7 @@ ClassDef{
               recv = ConstantLit{
                 orig = nullptr
                 symbol = ::Sorbet
-                typeAlias = nullptr
+                typeAlias = false
               }
               fun = <U sig>
               block = Block {
@@ -3605,7 +3605,7 @@ ClassDef{
                                 scope = ConstantLit{
                                   orig = nullptr
                                   symbol = ::<root>
-                                  typeAlias = nullptr
+                                  typeAlias = false
                                 }
                                 cnst = <C <U Chalk>>
                               }
@@ -3624,7 +3624,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -3651,7 +3651,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U cast>
                 block = nullptr
@@ -3660,7 +3660,7 @@ ClassDef{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = ::T
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                     fun = <U unsafe>
                     block = nullptr
@@ -3677,7 +3677,7 @@ ClassDef{
                               scope = ConstantLit{
                                 orig = nullptr
                                 symbol = ::<root>
-                                typeAlias = nullptr
+                                typeAlias = false
                               }
                               cnst = <C <U Chalk>>
                             }
@@ -3696,7 +3696,7 @@ ClassDef{
                         recv = ConstantLit{
                           orig = nullptr
                           symbol = ::T
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                         fun = <U untyped>
                         block = nullptr
@@ -3715,7 +3715,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3742,7 +3742,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -3767,7 +3767,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U unsafe>
             block = nullptr
@@ -3781,7 +3781,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3826,7 +3826,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -3835,7 +3835,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -3855,7 +3855,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3910,7 +3910,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -3919,7 +3919,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -3939,7 +3939,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -3961,7 +3961,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -3980,7 +3980,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -4012,7 +4012,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U unsafe>
             block = nullptr
@@ -4026,7 +4026,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4071,7 +4071,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4080,7 +4080,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4100,7 +4100,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4155,7 +4155,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4164,7 +4164,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4184,7 +4184,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4206,7 +4206,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -4225,7 +4225,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -4257,7 +4257,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U unsafe>
             block = nullptr
@@ -4271,7 +4271,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4316,7 +4316,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4325,7 +4325,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4345,7 +4345,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4400,7 +4400,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4409,7 +4409,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4429,7 +4429,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4451,7 +4451,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -4470,7 +4470,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -4502,7 +4502,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U unsafe>
             block = nullptr
@@ -4516,7 +4516,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4561,7 +4561,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4570,7 +4570,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4590,7 +4590,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4645,7 +4645,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4654,7 +4654,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4674,7 +4674,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4696,7 +4696,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U untyped>
                           block = nullptr
@@ -4715,7 +4715,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -4743,7 +4743,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U unsafe>
             block = nullptr
@@ -4757,7 +4757,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4802,7 +4802,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4811,7 +4811,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4831,7 +4831,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4886,7 +4886,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4895,7 +4895,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -4915,7 +4915,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -4970,7 +4970,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -4979,7 +4979,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5009,7 +5009,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5084,7 +5084,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5093,7 +5093,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5130,14 +5130,14 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5163,7 +5163,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::String
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5183,7 +5183,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5192,7 +5192,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5203,7 +5203,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::String
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5213,7 +5213,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5234,7 +5234,7 @@ ClassDef{
                         value = ConstantLit{
                           orig = nullptr
                           symbol = ::String
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                       ]
                     ]
@@ -5247,7 +5247,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::String
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5270,7 +5270,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5279,7 +5279,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5290,7 +5290,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::String
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5300,7 +5300,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5326,7 +5326,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::Float
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5346,7 +5346,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5355,7 +5355,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5366,7 +5366,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::Float
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5376,7 +5376,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5397,7 +5397,7 @@ ClassDef{
                         value = ConstantLit{
                           orig = nullptr
                           symbol = ::Float
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                       ]
                     ]
@@ -5410,7 +5410,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::Float
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5433,7 +5433,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5442,7 +5442,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5453,7 +5453,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::Float
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5470,14 +5470,14 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5503,7 +5503,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::String
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5523,7 +5523,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5532,7 +5532,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5543,7 +5543,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::String
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5553,7 +5553,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5574,7 +5574,7 @@ ClassDef{
                         value = ConstantLit{
                           orig = nullptr
                           symbol = ::String
-                          typeAlias = nullptr
+                          typeAlias = false
                         }
                       ]
                     ]
@@ -5587,7 +5587,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::String
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5610,7 +5610,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5619,7 +5619,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5630,7 +5630,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::String
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5640,7 +5640,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5666,7 +5666,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::Float
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5686,7 +5686,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5695,7 +5695,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5706,7 +5706,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::Float
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5723,14 +5723,14 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5756,7 +5756,7 @@ ClassDef{
                 ConstantLit{
                   orig = nullptr
                   symbol = ::String
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
               ]
             }
@@ -5776,7 +5776,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5785,7 +5785,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5796,7 +5796,7 @@ ClassDef{
               ConstantLit{
                 orig = nullptr
                 symbol = ::String
-                typeAlias = nullptr
+                typeAlias = false
               }
             ]
           }
@@ -5813,14 +5813,14 @@ ClassDef{
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = nullptr
+          typeAlias = false
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5847,7 +5847,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -5855,7 +5855,7 @@ ClassDef{
                     ConstantLit{
                       orig = nullptr
                       symbol = ::String
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                   ]
                 }
@@ -5877,7 +5877,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5886,7 +5886,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -5898,7 +5898,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U nilable>
                 block = nullptr
@@ -5906,7 +5906,7 @@ ClassDef{
                   ConstantLit{
                     orig = nullptr
                     symbol = ::String
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                 ]
               }
@@ -5918,7 +5918,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -5945,7 +5945,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -5989,7 +5989,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -5998,7 +5998,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -6010,7 +6010,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U nilable>
                 block = nullptr
@@ -6044,7 +6044,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -6066,7 +6066,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U nilable>
                           block = nullptr
@@ -6074,7 +6074,7 @@ ClassDef{
                             ConstantLit{
                               orig = nullptr
                               symbol = ::String
-                              typeAlias = nullptr
+                              typeAlias = false
                             }
                           ]
                         }
@@ -6090,7 +6090,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -6098,7 +6098,7 @@ ClassDef{
                     ConstantLit{
                       orig = nullptr
                       symbol = ::String
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                   ]
                 }
@@ -6123,7 +6123,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -6132,7 +6132,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -6144,7 +6144,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U nilable>
                 block = nullptr
@@ -6152,7 +6152,7 @@ ClassDef{
                   ConstantLit{
                     orig = nullptr
                     symbol = ::String
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                 ]
               }
@@ -6164,7 +6164,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -6186,7 +6186,7 @@ ClassDef{
                           recv = ConstantLit{
                             orig = nullptr
                             symbol = ::T
-                            typeAlias = nullptr
+                            typeAlias = false
                           }
                           fun = <U nilable>
                           block = nullptr
@@ -6224,7 +6224,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -6271,7 +6271,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -6280,7 +6280,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -6292,7 +6292,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U nilable>
                 block = nullptr
@@ -6326,7 +6326,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -6353,7 +6353,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -6361,7 +6361,7 @@ ClassDef{
                     ConstantLit{
                       orig = nullptr
                       symbol = ::String
-                      typeAlias = nullptr
+                      typeAlias = false
                     }
                   ]
                 }
@@ -6383,7 +6383,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -6392,7 +6392,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -6404,7 +6404,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U nilable>
                 block = nullptr
@@ -6412,7 +6412,7 @@ ClassDef{
                   ConstantLit{
                     orig = nullptr
                     symbol = ::String
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                 ]
               }
@@ -6424,7 +6424,7 @@ ClassDef{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet
-            typeAlias = nullptr
+            typeAlias = false
           }
           fun = <U sig>
           block = Block {
@@ -6451,7 +6451,7 @@ ClassDef{
                   recv = ConstantLit{
                     orig = nullptr
                     symbol = ::T
-                    typeAlias = nullptr
+                    typeAlias = false
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -6495,7 +6495,7 @@ ClassDef{
             recv = ConstantLit{
               orig = nullptr
               symbol = ::T
-              typeAlias = nullptr
+              typeAlias = false
             }
             fun = <U cast>
             block = nullptr
@@ -6504,7 +6504,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -6516,7 +6516,7 @@ ClassDef{
                 recv = ConstantLit{
                   orig = nullptr
                   symbol = ::T
-                  typeAlias = nullptr
+                  typeAlias = false
                 }
                 fun = <U nilable>
                 block = nullptr

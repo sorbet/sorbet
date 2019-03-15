@@ -40,12 +40,8 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
         }
         auto ptr = ast::cast_tree<ast::UnresolvedConstantLit>(orig.get());
         orig.release();
-        auto typeAlias = dupType(ident->typeAlias.get());
-        if (ident->typeAlias && !typeAlias) {
-            return nullptr;
-        }
         return make_unique<ast::ConstantLit>(ident->loc, ident->typeAliasOrConstantSymbol(),
-                                             unique_ptr<ast::UnresolvedConstantLit>(ptr), std::move(typeAlias));
+                                             unique_ptr<ast::UnresolvedConstantLit>(ptr), ident->typeAlias);
     }
 
     auto cons = ast::cast_tree_const<ast::UnresolvedConstantLit>(orig);
