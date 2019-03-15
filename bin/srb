@@ -44,9 +44,8 @@ typecheck() {
     files+=" "
   fi
 
-  files+=$(find . -name '*.rb' -or -name '*.rbi')
   # shellcheck disable=SC2086
-  "$(dirname "${BASH_SOURCE[0]}")"/sorbet $files "$@"
+  "$(dirname "${BASH_SOURCE[0]}")"/sorbet . $files "$@"
 }
 
 case $command in
