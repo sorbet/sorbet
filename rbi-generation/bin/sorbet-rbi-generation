@@ -15,7 +15,7 @@ module SorbetRBIGeneration::Main
 
     # Generate the RBIs from bundler
     SorbetRBIGeneration::RbiGenerator.start
-    SorbetRBIGeneration::RbiGenerator.require_eveything
+    SorbetRBIGeneration::RbiGenerator.require_everything
     SorbetRBIGeneration::RbiGenerator.finish
 
     # Find the hidden methods

@@ -5,7 +5,7 @@
 
 module SorbetRBIGeneration; end
 
-require_relative './require_eveything'
+require_relative './require_everything'
 
 require 'set'
 
@@ -91,7 +91,7 @@ class SorbetRBIGeneration::RbiGenerator
       add_to_context(type: :method, module: mod, method: method, singleton: singleton)
     end
 
-    def require_eveything
+    def require_everything
       SorbetRBIGeneration::RequireEverything.require_everything
     end
 
@@ -391,6 +391,6 @@ end
 
 if $PROGRAM_NAME == __FILE__
   SorbetRBIGeneration::RbiGenerator.start
-  SorbetRBIGeneration::RbiGenerator.require_eveything
+  SorbetRBIGeneration::RbiGenerator.require_everything
   SorbetRBIGeneration::RbiGenerator.finish
 end

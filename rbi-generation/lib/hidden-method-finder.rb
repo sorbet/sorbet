@@ -6,7 +6,7 @@ module SorbetRBIGeneration; end
 
 require_relative './serialize'
 require_relative './constant_cache'
-require_relative './require_eveything'
+require_relative './require_everything'
 
 require 'fileutils'
 require 'json'
