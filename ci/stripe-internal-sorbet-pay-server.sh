@@ -101,7 +101,14 @@ done
 
 # ----- Still no type errors, even in incremental resolver mode ---------------
 
-# TODO(jez) Run scripts/bin/typecheck with --stress-incremental-resolver
+/usr/local/bin/junit-script-output \
+    typecheck-incremental-resolver \
+    /usr/bin/time -o "$TIMEFILE" ./scripts/bin/typecheck --stress-incremental-resolver 2>&1 | tee "$OUT"
+if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
+    exit 1
+fi
+cat "$TIMEFILE"
+
 
 
 # ----- Run a --typed=strict run for metrics only -----------------------------
