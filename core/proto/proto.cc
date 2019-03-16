@@ -68,6 +68,13 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
     }
 
+    if (data->isStaticField()) {
+        auto type = core::cast_type<core::AliasType>(data->resultType.get());
+        if (type) {
+            symbolProto.set_aliasto(type->symbol._id);
+        }
+    }
+
     for (auto pair : data->membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {

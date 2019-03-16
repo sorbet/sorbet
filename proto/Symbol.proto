@@ -65,4 +65,6 @@ message Symbol {
     // Loc loc = 13; Replaced by locs = 15
     repeated Symbol children = 14;
 //    repeated Loc locs = 15;
+
+    int32 aliasTo = 16;
 }
