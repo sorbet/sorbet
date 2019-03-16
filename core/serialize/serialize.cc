@@ -871,7 +871,6 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  pickleAstHeader(p, 32, a);
                  p.putU4(a->symbol._id);
                  pickleTree(p, file, a->original);
-                 p.putU1((u1)a->typeAlias);
              },
 
              [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: {}", n->nodeName()); });
@@ -1102,8 +1101,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             SymbolRef sym(gs, p.getU4());
             auto origTmp = unpickleExpr(p, gs, file);
             unique_ptr<ast::UnresolvedConstantLit> orig(static_cast<ast::UnresolvedConstantLit *>(origTmp.release()));
-            auto typeAlias = (bool)p.getU1();
-            return make_unique<ast::ConstantLit>(loc, sym, std::move(orig), typeAlias);
+            return make_unique<ast::ConstantLit>(loc, sym, std::move(orig));
         }
     }
     Exception::raise("Not handled {}", kind);

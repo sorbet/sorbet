@@ -70,7 +70,7 @@ bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::Sym
         }
 
         auto scopeCnstLit = ast::cast_tree<ast::ConstantLit>(cnst->scope.get());
-        if (scopeCnstLit && scopeCnstLit->constantSymbol() == core::Symbols::root()) {
+        if (scopeCnstLit && scopeCnstLit->symbol == core::Symbols::root()) {
             return true;
         }
         return false;

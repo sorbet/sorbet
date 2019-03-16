@@ -7,7 +7,6 @@ ClassDef{
   ancestors = [ConstantLit{
       orig = nullptr
       symbol = ::<todo sym>
-      typeAlias = false
     }]
   rhs = [
     MethodDef{

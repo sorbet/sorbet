@@ -231,9 +231,8 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::Loc loc, unique_ptr<Expressio
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::Loc loc, core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original,
-                         bool typeAlias)
-    : Expression(loc), symbol(symbol), original(std::move(original)), typeAlias(typeAlias) {
+ConstantLit::ConstantLit(core::Loc loc, core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original)
+    : Expression(loc), symbol(symbol), original(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
@@ -576,8 +575,6 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "typeAlias = " << (this->typeAlias ? "true" : "false") << '\n';
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();

@@ -40,8 +40,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
         }
         auto ptr = ast::cast_tree<ast::UnresolvedConstantLit>(orig.get());
         orig.release();
-        return make_unique<ast::ConstantLit>(ident->loc, ident->typeAliasOrConstantSymbol(),
-                                             unique_ptr<ast::UnresolvedConstantLit>(ptr), ident->typeAlias);
+        return make_unique<ast::ConstantLit>(ident->loc, ident->symbol, unique_ptr<ast::UnresolvedConstantLit>(ptr));
     }
 
     auto cons = ast::cast_tree_const<ast::UnresolvedConstantLit>(orig);
@@ -58,7 +57,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
         if (id == nullptr) {
             return nullptr;
         }
-        ENFORCE(id->constantSymbol() == core::Symbols::root());
+        ENFORCE(id->symbol == core::Symbols::root());
         return ast::MK::UnresolvedConstant(cons->loc, dupType(cons->scope.get()), cons->cnst);
     }
     auto scope = dupType(scopeCnst);

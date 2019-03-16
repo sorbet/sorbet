@@ -205,7 +205,7 @@ public:
         while (cnst != nullptr && cnst->original != nullptr) {
             cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
         }
-        if (cnst && cnst->typeAliasOrConstantSymbol() == core::Symbols::root()) {
+        if (cnst && cnst->symbol == core::Symbols::root()) {
             return true;
         }
         return false;
@@ -235,7 +235,7 @@ public:
         // where we set that flag.
         ref.definitionLoc = original->loc;
         ref.name = constantName(ctx, original.get());
-        auto sym = original->typeAliasOrConstantSymbol();
+        auto sym = original->symbol;
         if (!sym.data(ctx)->isClass() || !sym.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass())) {
             ref.resolved = symbolName(ctx, sym);
         }
@@ -254,7 +254,8 @@ public:
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
-        if (rhs && !rhs->typeAlias && rhs->constantSymbol().exists()) {
+        if (rhs && rhs->symbol.exists() &&
+            !(rhs->symbol.data(ctx)->isStaticField() && rhs->symbol.data(ctx)->isStaticTypeAlias())) {
             def.type = Definition::Alias;
             ENFORCE(refMap.count(rhs));
             def.aliased_ref = refMap[rhs];

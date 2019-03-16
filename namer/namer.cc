@@ -24,7 +24,7 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get());
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
-                return id->constantSymbol().data(ctx)->dealias(ctx);
+                return id->symbol.data(ctx)->dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
                 if (uid->kind != ast::UnresolvedIdent::Class || uid->name != core::Names::singleton()) {
@@ -64,7 +64,7 @@ class NameInserter {
 
         node.release();
         unique_ptr<ast::UnresolvedConstantLit> constTmp(constLit);
-        node = make_unique<ast::ConstantLit>(constLit->loc, existing, std::move(constTmp), nullptr);
+        node = make_unique<ast::ConstantLit>(constLit->loc, existing, std::move(constTmp));
         return existing;
     }
 
@@ -296,8 +296,8 @@ public:
             if (klass->symbol == core::Symbols::todo()) {
                 klass->symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass->name);
             } else {
-                // Desugar populates a top-level root() ClassDef. Nothing else
-                // should have been typeAlias by now.
+                // Desugar populates a top-level root() ClassDef.
+                // Nothing else should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
             }
             bool isModule = klass->kind == ast::ClassDefKind::Module;
@@ -364,7 +364,7 @@ public:
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc.get());
-        if (rcl && rcl->typeAliasOrConstantSymbol() == core::Symbols::todo()) {
+        if (rcl && rcl->symbol == core::Symbols::todo()) {
             return false;
         }
         return true;
@@ -784,7 +784,7 @@ public:
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
         asgn->lhs.release();
-        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, std::move(lhsU), false);
+        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, std::move(lhsU));
         return asgn;
     }
 
@@ -914,7 +914,7 @@ public:
                 auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get());
                 ENFORCE(id != nullptr, "fillAssign did not make lhs into a ConstantLit");
 
-                auto sym = id->constantSymbol();
+                auto sym = id->symbol;
                 ENFORCE(sym.exists(), "fillAssign did not make symbol for ConstantLit");
 
                 if (sym.data(ctx)->isStaticField()) {

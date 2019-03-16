@@ -153,11 +153,15 @@ private:
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
-        if (original.typeAlias) {
-            auto sym = original.typeAliasSymbol();
-            return sym.exists() && sym.data(ctx)->resultType != nullptr;
+        auto sym = original.symbol;
+        if (!sym.exists()) {
+            return false;
+        }
+        auto data = sym.data(ctx);
+        if (data->isStaticField() && data->isStaticTypeAlias()) {
+            return data->resultType != nullptr;
         } else {
-            return original.constantSymbol().exists();
+            return true;
         }
     }
 
@@ -189,17 +193,18 @@ private:
         }
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
-            if (id->typeAlias) {
+            auto sym = id->symbol;
+            if (sym.exists() && sym.data(ctx)->isStaticField() && sym.data(ctx)->isStaticTypeAlias()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
                 return core::Symbols::untyped();
             }
-            if (!id->constantSymbol().exists()) {
+            if (!id->symbol.exists()) {
                 // TODO: try to resolve if not resolved.
                 return core::Symbols::noSymbol();
             }
-            core::SymbolRef resolved = id->constantSymbol().data(ctx)->dealias(ctx);
+            core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c->cnst);
             return result;
         } else {
@@ -223,17 +228,16 @@ private:
                 }
                 resolved.data(ctx)->resultType = core::Types::untyped(ctx, resolved);
             }
-            job.out->typeAlias = true;
-            job.out->setAliasSymbol(resolved);
+            job.out->symbol = resolved;
             return;
         }
         ENFORCE(!resolved.exists());
 
         core::SymbolRef scope;
-        if (job.out->constantSymbol().exists()) {
-            scope = job.out->constantSymbol().data(ctx)->dealias(ctx);
+        if (job.out->symbol.exists()) {
+            scope = job.out->symbol.data(ctx)->dealias(ctx);
         } else if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
-            scope = id->constantSymbol().data(ctx)->dealias(ctx);
+            scope = id->symbol.data(ctx)->dealias(ctx);
         } else {
             scope = job.scope->scope;
         }
@@ -251,7 +255,7 @@ private:
                                                core::UniqueNameKind::ResolverMissingClass, scope.data(ctx)->name, 1)));
             // as we've name-mangled the class, we have to manually create the next level of resolution
             auto createdSym = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
-            job.out->setConstantSymbol(createdSym);
+            job.out->symbol = createdSym;
         } else if (!scope.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
             if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
@@ -300,14 +304,13 @@ private:
             if (resolved.data(ctx)->resultType != nullptr) {
                 // A TypeAliasResolutionItem job completed successfully,
                 // or we forced the type alias this constant refers to to resolve.
-                job.out->typeAlias = true;
-                job.out->setAliasSymbol(resolved);
+                job.out->symbol = resolved;
                 return true;
             }
             return false;
         }
 
-        job.out->setConstantSymbol(resolved);
+        job.out->symbol = resolved;
         return true;
     }
 
@@ -340,18 +343,23 @@ private:
     }
 
     static bool resolveClassAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
-        if (it.rhs->typeAlias) {
+        auto rhsSym = it.rhs->symbol;
+        if (!rhsSym.exists()) {
+            return false;
+        }
+
+        auto rhsData = rhsSym.data(ctx);
+        if (rhsData->isStaticField() && rhsData->isStaticTypeAlias()) {
             if (auto e = ctx.state.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
-                e.addErrorLine(it.rhs->typeAliasSymbol().data(ctx)->loc(), "Originally defined here:");
+                e.addErrorLine(rhsData->loc(), "Originally defined here");
                 e.replaceWith(it.rhs->loc, "T.type_alias({})", it.rhs->loc.source(ctx));
-                it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
-                return true;
             }
-        }
-        if (it.rhs->constantSymbol().exists()) {
-            if (it.rhs->constantSymbol().data(ctx)->dealias(ctx) != it.lhs) {
-                it.lhs.data(ctx)->resultType = core::make_type<core::AliasType>(it.rhs->constantSymbol());
+            it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
+            return true;
+        } else {
+            if (rhsData->dealias(ctx) != it.lhs) {
+                it.lhs.data(ctx)->resultType = core::make_type<core::AliasType>(rhsSym);
             } else {
                 if (auto e =
                         ctx.state.beginError(it.lhs.data(ctx)->loc(), core::errors::Resolver::RecursiveClassAlias)) {
@@ -361,16 +369,16 @@ private:
             }
             return true;
         }
-        return false;
     }
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
-        if (!job.ancestor->typeAliasOrConstantSymbol().exists()) {
+        auto ancestorSym = job.ancestor->symbol;
+        if (!ancestorSym.exists()) {
             return false;
         }
 
         core::SymbolRef resolved;
-        if (job.ancestor->typeAlias) {
+        if (ancestorSym.data(ctx)->isStaticField() && ancestorSym.data(ctx)->isStaticTypeAlias()) {
             if (!lastRun) {
                 return false;
             }
@@ -379,7 +387,7 @@ private:
             }
             resolved = core::Symbols::StubAncestor();
         } else {
-            resolved = job.ancestor->constantSymbol().data(ctx)->dealias(ctx);
+            resolved = ancestorSym.data(ctx)->dealias(ctx);
         }
 
         if (!resolved.data(ctx)->isClass()) {
@@ -437,15 +445,16 @@ private:
         job.isSuperclass = isSuperclass;
 
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
-            if (cnst->typeAlias) {
+            auto sym = cnst->symbol;
+            if (sym.exists() && sym.data(ctx)->isStaticField() && sym.data(ctx)->isStaticTypeAlias()) {
                 if (auto e = ctx.state.beginError(cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
                 return;
             }
-            ENFORCE(cnst->constantSymbol().exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope.get()) ||
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope.get()) ||
                     ast::isa_tree<ast::EmptyTree>(cnst->original->scope.get()));
-            if (isSuperclass && cnst->constantSymbol() == core::Symbols::todo()) {
+            if (isSuperclass && sym == core::Symbols::todo()) {
                 return;
             }
             job.ancestor = cnst;
@@ -453,7 +462,7 @@ private:
             auto loc = ancestor->loc;
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             auto nw = make_unique<ast::UnresolvedConstantLit>(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = make_unique<ast::ConstantLit>(loc, enclosingClass, std::move(nw), nullptr);
+            auto out = make_unique<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
             job.ancestor = out.get();
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor.get())) {
@@ -485,7 +494,7 @@ public:
             c->scope = postTransformUnresolvedConstantLit(ctx, std::move(inner));
         }
         auto loc = c->loc;
-        auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(c), nullptr);
+        auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(c));
         ResolutionItem job{nesting_, out.get()};
         if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
@@ -515,7 +524,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
-        if (id == nullptr || !id->typeAliasOrConstantSymbol().dataAllowingNone(ctx)->isStaticField()) {
+        if (id == nullptr || !id->symbol.dataAllowingNone(ctx)->isStaticField()) {
             return asgn;
         }
 
@@ -535,11 +544,11 @@ public:
                 if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
                     e.setHeader("Type aliases are not allowed in generic classes");
                     e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
+                    auto sym = id->symbol;
+                    sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
                 }
             } else {
-                // TODO(jez) Can we just get rid of typeAlias?
-                id->typeAlias = true;
-                auto typeAliasItem = TypeAliasResolutionItem{id->typeAliasSymbol(), send->args[0].get()};
+                auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
                 if (resolveTypeAliasJob(ctx, typeAliasItem)) {
                     categoryCounterInc("resolve.constants.typealiases", "firstpass");
                 } else {
@@ -563,7 +572,7 @@ public:
             return asgn;
         }
 
-        auto item = ClassAliasResolutionItem{id->constantSymbol(), rhs};
+        auto item = ClassAliasResolutionItem{id->symbol, rhs};
 
         if (resolveClassAliasJob(ctx, item)) {
             categoryCounterInc("resolve.constants.aliases", "firstpass");
@@ -1152,11 +1161,16 @@ public:
         }
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
-        if (id == nullptr || id->typeAlias || !id->constantSymbol().exists()) {
+        if (id == nullptr || !id->symbol.exists()) {
             return asgn;
         }
 
-        auto data = id->constantSymbol().data(ctx);
+        auto sym = id->symbol;
+        auto data = sym.data(ctx);
+        if (data->isStaticField() && data->isStaticTypeAlias()) {
+            return asgn;
+        }
+
         if (data->isTypeMember()) {
             ENFORCE(data->isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
@@ -1179,13 +1193,12 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data->resultType =
-                            TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, id->constantSymbol());
+                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, sym);
                     }
                 }
             }
         } else if (data->isStaticField() && data->resultType == nullptr) {
-            data->resultType = resolveConstantType(ctx, asgn->rhs, id->constantSymbol());
+            data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
         }
 
         return asgn;
@@ -1203,7 +1216,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(send->recv.get())) {
-            if (id->typeAliasOrConstantSymbol() != core::Symbols::T()) {
+            if (id->symbol != core::Symbols::T()) {
                 return send;
             }
             switch (send->fun._id) {
@@ -1538,35 +1551,35 @@ class ResolveMixesInClassMethodsWalk {
         }
         auto *front = send->args.front().get();
         auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->constantSymbol().exists() || !id->constantSymbol().data(ctx)->isClass()) {
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx)->isClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("Argument to `{}` must be statically resolvable to a module",
                             send->fun.data(ctx)->show(ctx));
             }
             return;
         }
-        if (id->constantSymbol().data(ctx)->isClassClass()) {
+        if (id->symbol.data(ctx)->isClassClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                            id->constantSymbol().data(ctx)->show(ctx));
+                            id->symbol.data(ctx)->show(ctx));
             }
             return;
         }
-        if (id->constantSymbol() == ctx.owner) {
+        if (id->symbol == ctx.owner) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("Must not pass your self to `{}`", send->fun.data(ctx)->show(ctx));
             }
             return;
         }
         auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
-        if (existing.exists() && existing != id->constantSymbol()) {
+        if (existing.exists() && existing != id->symbol) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.data(ctx)->show(ctx),
-                            existing.data(ctx)->show(ctx), id->constantSymbol().data(ctx)->show(ctx));
+                            existing.data(ctx)->show(ctx), id->symbol.data(ctx)->show(ctx));
             }
             return;
         }
-        ctx.owner.data(ctx)->members[core::Names::classMethods()] = id->constantSymbol();
+        ctx.owner.data(ctx)->members[core::Names::classMethods()] = id->symbol;
     }
 
 public:

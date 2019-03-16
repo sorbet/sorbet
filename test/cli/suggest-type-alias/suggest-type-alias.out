@@ -1,7 +1,7 @@
 suggest-type-alias.rb:4: Reassigning a type alias is not allowed http://go/e/5034
      4 |B = A
             ^
-    suggest-type-alias.rb:3: Originally defined here:
+    suggest-type-alias.rb:3: Originally defined here
      3 |A = T.type_alias(Integer)
         ^
   Autocorrect: Done

@@ -4,7 +4,6 @@ InsSeq{
       recv = ConstantLit{
         orig = nullptr
         symbol = ::RubyTyper
-        typeAlias = false
       }
       fun = <U keep_for_ide>
       block = nullptr
@@ -15,7 +14,6 @@ InsSeq{
             cnst = <C <U A>>
           }
           symbol = ::A
-          typeAlias = false
         }
       ]
     }
@@ -27,12 +25,10 @@ InsSeq{
           cnst = <C <U A>>
         }
         symbol = ::A
-        typeAlias = false
       }<<C <U A>>>
       ancestors = [ConstantLit{
           orig = nullptr
           symbol = ::<todo sym>
-          typeAlias = false
         }]
       rhs = [
         MethodDef{

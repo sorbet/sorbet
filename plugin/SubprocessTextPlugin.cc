@@ -31,7 +31,7 @@ private:
                 components.push_back(core::Names::singleton());
                 break;
             } else if (auto constLit = ast::cast_tree<ast::ConstantLit>(constant)) {
-                ENFORCE(constLit->constantSymbol() == core::Symbols::root());
+                ENFORCE(constLit->symbol == core::Symbols::root());
                 components.push_back(core::Names::Constants::Root());
                 break;
             } else {

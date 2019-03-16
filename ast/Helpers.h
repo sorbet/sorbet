@@ -85,7 +85,7 @@ public:
 
     static std::unique_ptr<ConstantLit> Constant(core::Loc loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
-        return std::make_unique<ast::ConstantLit>(loc, symbol, nullptr, nullptr);
+        return std::make_unique<ast::ConstantLit>(loc, symbol, nullptr);
     }
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {

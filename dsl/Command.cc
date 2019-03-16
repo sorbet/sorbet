@@ -35,7 +35,7 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (id == nullptr) {
         return false;
     }
-    return id->typeAliasOrConstantSymbol() == core::Symbols::root();
+    return id->symbol == core::Symbols::root();
 }
 
 void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {

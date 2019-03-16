@@ -564,41 +564,15 @@ private:
 // CheckSize(UnresolvedConstantLit, 32, 8);
 
 class ConstantLit final : public Expression {
-    friend class ::sorbet::core::serialize::SerializerImpl;
-    core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
 public:
+    core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
     std::unique_ptr<UnresolvedConstantLit> original;
-    bool typeAlias; // if this constant used to point to type alias
 
-    ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original, bool typeAlias);
+    ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-    inline core::SymbolRef constantSymbol() const {
-        ENFORCE(!typeAlias, "Accessing a type alias constant as-if normal constant");
-        return symbol;
-    }
-
-    inline core::SymbolRef typeAliasSymbol() const {
-        ENFORCE(typeAlias, "Accessing a type alias constant as-if normal constant");
-        return symbol;
-    }
-
-    inline core::SymbolRef typeAliasOrConstantSymbol() const {
-        return symbol;
-    }
-
-    inline void setConstantSymbol(core::SymbolRef newSymbol) {
-        ENFORCE(!typeAlias, "Accessing a type alias constant as-if normal constant");
-        symbol = newSymbol;
-    }
-
-    inline void setAliasSymbol(core::SymbolRef newSymbol) {
-        ENFORCE(typeAlias, "Accessing a type alias constant as-if normal constant");
-        symbol = newSymbol;
-    }
 
 private:
     virtual void _sanityCheck();

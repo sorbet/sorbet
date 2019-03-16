@@ -7,7 +7,6 @@ ClassDef{
       scope = ConstantLit{
         orig = nullptr
         symbol = ::<root>
-        typeAlias = false
       }
       cnst = <C <U TopLevelConst>>
     }
