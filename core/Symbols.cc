@@ -485,7 +485,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
     if (this->isClass()) {
         type = "class"sv;
     } else if (this->isStaticField()) {
-        if (this->isStaticTypeAlias()) {
+        if (this->isTypeAlias()) {
             type = "static-field-type-alias"sv;
         } else {
             type = "static-field"sv;

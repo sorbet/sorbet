@@ -918,7 +918,7 @@ public:
                 ENFORCE(sym.exists(), "fillAssign did not make symbol for ConstantLit");
 
                 if (sym.data(ctx)->isStaticField()) {
-                    sym.data(ctx)->setStaticTypeAlias();
+                    sym.data(ctx)->setTypeAlias();
                 }
             }
             return ret;

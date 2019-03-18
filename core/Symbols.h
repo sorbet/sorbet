@@ -495,13 +495,16 @@ public:
         flags |= Symbol::Flags::CLASS_LINEARIZATION_COMPUTED;
     }
 
-    inline void setStaticTypeAlias() {
+    inline void setTypeAlias() {
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
     }
-    inline bool isStaticTypeAlias() const {
-        ENFORCE(isStaticField());
-        return (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
+    inline bool isTypeAlias() const {
+        // We should only be able to set the type alias bit on static fields.
+        // But it's rather unweidly to ask "isStaticField() && isTypeAlias()" just to satisfy the ENFORCE.
+        // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type alias.
+        ENFORCE(isClass() || isStaticField() || isTypeMember());
+        return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
 
     inline void setDSLSynthesized() {

@@ -254,8 +254,7 @@ public:
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
-        if (rhs && rhs->symbol.exists() &&
-            !(rhs->symbol.data(ctx)->isStaticField() && rhs->symbol.data(ctx)->isStaticTypeAlias())) {
+        if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
             def.type = Definition::Alias;
             ENFORCE(refMap.count(rhs));
             def.aliased_ref = refMap[rhs];

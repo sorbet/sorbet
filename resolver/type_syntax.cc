@@ -381,7 +381,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 return core::Types::untypedUntracked();
             }
             auto maybeAliased = obj->symbol;
-            if (maybeAliased.data(ctx)->isStaticField() && maybeAliased.data(ctx)->isStaticTypeAlias()) {
+            if (maybeAliased.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_alias");
                 }
@@ -467,7 +467,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             auto maybeAliased = i->symbol;
             ENFORCE(maybeAliased.exists());
 
-            if (maybeAliased.data(ctx)->isStaticField() && maybeAliased.data(ctx)->isStaticTypeAlias()) {
+            if (maybeAliased.data(ctx)->isTypeAlias()) {
                 result.type = maybeAliased.data(ctx)->resultType;
                 return;
             }

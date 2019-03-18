@@ -847,7 +847,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType(ctx);
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
-                } else if (data->isField() || (data->isStaticField() && !data->isStaticTypeAlias()) ||
+                } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) ||
                            data->isMethodArgument() || data->isTypeMember()) {
                     if (data->resultType.get() != nullptr) {
                         if (data->isField()) {
@@ -862,7 +862,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                         tp.origins.emplace_back(core::Loc::none());
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
-                } else if (data->isStaticField() && data->isStaticTypeAlias()) {
+                } else if (data->isTypeAlias()) {
                     ENFORCE(data->resultType.get() != nullptr);
                     tp.origins.emplace_back(data->loc());
                     tp.type = core::make_type<core::MetaType>(data->resultType);

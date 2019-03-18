@@ -158,7 +158,7 @@ private:
             return false;
         }
         auto data = sym.data(ctx);
-        if (data->isStaticField() && data->isStaticTypeAlias()) {
+        if (data->isTypeAlias()) {
             return data->resultType != nullptr;
         } else {
             return true;
@@ -194,7 +194,7 @@ private:
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
             auto sym = id->symbol;
-            if (sym.exists() && sym.data(ctx)->isStaticField() && sym.data(ctx)->isStaticTypeAlias()) {
+            if (sym.exists() && sym.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
@@ -218,7 +218,7 @@ private:
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void stubOneConstantNesting(core::MutableContext ctx, ResolutionItem &job) {
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original);
-        if (resolved.exists() && resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
+        if (resolved.exists() && resolved.data(ctx)->isTypeAlias()) {
             if (resolved.data(ctx)->resultType == nullptr) {
                 // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
                 auto loc = resolved.data(ctx)->loc();
@@ -300,7 +300,7 @@ private:
         if (!resolved.exists()) {
             return false;
         }
-        if (resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
+        if (resolved.data(ctx)->isTypeAlias()) {
             if (resolved.data(ctx)->resultType != nullptr) {
                 // A TypeAliasResolutionItem job completed successfully,
                 // or we forced the type alias this constant refers to to resolve.
@@ -349,7 +349,7 @@ private:
         }
 
         auto rhsData = rhsSym.data(ctx);
-        if (rhsData->isStaticField() && rhsData->isStaticTypeAlias()) {
+        if (rhsData->isTypeAlias()) {
             if (auto e = ctx.state.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsData->loc(), "Originally defined here");
@@ -378,7 +378,7 @@ private:
         }
 
         core::SymbolRef resolved;
-        if (ancestorSym.data(ctx)->isStaticField() && ancestorSym.data(ctx)->isStaticTypeAlias()) {
+        if (ancestorSym.data(ctx)->isTypeAlias()) {
             if (!lastRun) {
                 return false;
             }
@@ -446,7 +446,7 @@ private:
 
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
             auto sym = cnst->symbol;
-            if (sym.exists() && sym.data(ctx)->isStaticField() && sym.data(ctx)->isStaticTypeAlias()) {
+            if (sym.exists() && sym.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.state.beginError(cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
@@ -1167,7 +1167,7 @@ public:
 
         auto sym = id->symbol;
         auto data = sym.data(ctx);
-        if (data->isStaticField() && data->isStaticTypeAlias()) {
+        if (data->isTypeAlias()) {
             return asgn;
         }
 
