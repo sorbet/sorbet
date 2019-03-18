@@ -293,7 +293,7 @@ int realmain(int argc, char *argv[]) {
                 auto file = gs->enterFile(string("-e"), opts.inlineInput + '\n');
                 inputFiles.emplace_back(file);
                 if (opts.forceMaxStrict < core::StrictLevel::Typed) {
-                    logger->error("`-e` is incompatible with `--typed=ruby`");
+                    logger->error("`-e` is incompatible with `--typed=false`");
                     return 1;
                 }
                 file.data(*gs).strictLevel = core::StrictLevel::Typed;
