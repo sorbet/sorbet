@@ -124,7 +124,18 @@ this step:
 
     Sorbet requires that all files parse as valid Ruby syntax.
 
-1.  Dynamic `include`s
+2.  Dynamic constant lookup
+
+    Sorbet follows a more restrictive constant resolution algorithm, in that it
+    does not lookup constants in ancestors of outer scope. This is in an attempt
+    to simplifly the constant resolution algorithm for users. So if you see
+    `[Unable to resolve constant][dynamic-ancestor]` errors for constants which can be referenced
+    multiple ways, update your source code to use the name where the constant
+    was originally defined.
+
+[dynamic-ancestor]: https://sorbet.run/#class%20Parent%0A%20%20A%20%3D%201%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0A%23%20Sorbet%20reports%20an%20error%2C%20even%20though%20in%20Ruby%20this%20works%0Aputs%20Child%3A%3AA%20%20%23%20error%3A%20Unable%20to%20resolve%20constant%20%60A%60%0A%0A%23%20Do%20this%20instead%0Aputs%20Parent%3A%3AA
+
+3.  Dynamic `include`s
 
     Sorbet cannot statically analyze a codebase that dynamically `include`s
     code. For example, [code like this][rand-include] is impossible to
@@ -133,7 +144,7 @@ this step:
     Dynamic includes must be rewritten so that all `include`s are constant
     literals.
 
-1.  Missing constants
+4.  Missing constants
 
     For Sorbet to be effective, it has to know about every class, module, and
     constant that's defined in a codebase. Constants are central to
@@ -141,7 +152,7 @@ this step:
 
 [rand-include]: https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
 
-To solve points (2) and (3), let's introduce [`*.rbi` files](rbi.md). We saw
+To solve points (3) and (4), let's introduce [`*.rbi` files](rbi.md). We saw
 `*.rbi` files mentioned before when we discussed building the `FILE_LIST`. RBI
 stands for "Ruby Interface." `*.rbi` files are purely type annotations, separate
 from runnable Ruby code.
