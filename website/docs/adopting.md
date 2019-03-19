@@ -129,11 +129,9 @@ this step:
     Sorbet follows a more restrictive constant resolution algorithm, in that it
     does not lookup constants in ancestors of outer scope. This is in an attempt
     to simplifly the constant resolution algorithm for users. So if you see
-    `[Unable to resolve constant][dynamic-ancestor]` errors for constants which can be referenced
-    multiple ways, update your source code to use the name where the constant
-    was originally defined.
-
-[dynamic-ancestor]: https://sorbet.run/#class%20Parent%0A%20%20A%20%3D%201%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0A%23%20Sorbet%20reports%20an%20error%2C%20even%20though%20in%20Ruby%20this%20works%0Aputs%20Child%3A%3AA%20%20%23%20error%3A%20Unable%20to%20resolve%20constant%20%60A%60%0A%0A%23%20Do%20this%20instead%0Aputs%20Parent%3A%3AA
+    "[Unable to resolve constant][dynamic-ancestor]" errors for constants which
+    can be referenced multiple ways, update your source code to use the name
+    where the constant was originally defined.
 
 3.  Dynamic `include`s
 
@@ -149,6 +147,8 @@ this step:
     For Sorbet to be effective, it has to know about every class, module, and
     constant that's defined in a codebase. Constants are central to
     understanding the inheritance hierarchy and to validating type annotations.
+
+[dynamic-ancestor]: https://sorbet.run/#class%20Parent%0A%20%20A%20%3D%201%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0A%23%20Sorbet%20reports%20an%20error%2C%20even%20though%20in%20Ruby%20this%20works%0Aputs%20Child%3A%3AA%20%20%23%20error%3A%20Unable%20to%20resolve%20constant%20%60A%60%0A%0A%23%20Do%20this%20instead%0Aputs%20Parent%3A%3AA
 
 [rand-include]: https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
 
