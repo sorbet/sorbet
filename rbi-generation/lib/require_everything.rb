@@ -38,12 +38,18 @@ class SorbetRBIGeneration::RequireEverything
     errors = []
     files.each do |file|
       begin
+        watching_thread = Thread.new do
+          sleep 5
+          puts "Requiring #{file} has taken more than 5 seconds."
+        end
         require_relative "#{Dir.pwd}/#{file}"
       rescue LoadError, NoMethodError, SyntaxError
         next
       rescue
         errors << file
         next
+      ensure
+        watching_thread.kill
       end
     end
     # one more chance for order dependent things
