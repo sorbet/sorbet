@@ -170,7 +170,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
     puts "Building source id to symbol map"
     source_symbols = symbols_id_to_name(source, '')
     puts "Writing #{DIFF_RBI}"
-    diff = serialize_classes(
+    diff = serialize_constants(
       source.fetch("children", []),
       rbi.fetch("children", []),
       Object, false, source_symbols, rbi_symbols)
@@ -197,79 +197,111 @@ class SorbetRBIGeneration::HiddenMethodFinder
     end
   end
 
-  def serialize_classes(source, rbi, klass, is_singleton, source_symbols, rbi_symbols)
+  def serialize_constants(source, rbi, klass, is_singleton, source_symbols, rbi_symbols)
     source_by_name = source.map {|v| [v["name"]["name"], v]}.to_h
     ret = []
 
     rbi.each do |rbi_entry|
-      next if rbi_entry["kind"] != "CLASS"
-      name = rbi_entry["name"]["name"]
-      if name.start_with?('<Class:')
-        name = name.sub('<Class:', '').sub('>', '')
-        my_klass_is_singleton = true
-      else
-        my_klass_is_singleton = false
-      end
-
-      begin
-        my_klass = klass.const_get(name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-      rescue => e
-        ret << "# #{e.message.gsub("\n", "\n# ")}"
-        next
-      end
-
-      # We specifically don't typecheck anything in T:: since it is hardcoded
-      # into sorbet
-      next if real_name(my_klass) == 'T'
-
       source_entry = source_by_name[rbi_entry["name"]["name"]]
 
-      source_type = nil
-      if !source_entry
-        if source_by_name[name]
-          source_type = source_by_name[name]["kind"]
-        end
-      else
-        source_type = source_entry["kind"]
-      end
-      if source_type && source_type != "CLASS"
-        ret << "# The source says #{real_name(my_klass)} is a #{source_type} but reflection says it is a #{rbi_entry['kind']}"
-        next
-      end
-
-      if !source_entry
-        source_children = []
-        source_mixins = []
-        is_stub = true
-      else
-        source_children = source_entry.fetch("children", [])
-        source_mixins = source_entry.fetch("mixins", [])
-        is_stub = source_entry['superClass'] && source_symbols[source_entry['superClass']] == 'RubyTyper::StubClass'
-      end
-      rbi_children = rbi_entry.fetch("children", [])
-      rbi_mixins = rbi_entry.fetch("mixins", [])
-
-      methods = serialize_methods(source_children, rbi_children, my_klass, my_klass_is_singleton)
-      includes = serialize_includes(source_mixins, rbi_mixins, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
-      if !methods.empty? || !includes.empty? || is_stub
-        fqn = real_name(my_klass)
-        klass_str = String.new
-        klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
-        klass_str << includes
-        klass_str << "\n" unless includes.empty?
-        klass_str << methods
-        klass_str << "\n" unless klass_str.end_with?("\n")
-        klass_str << "end\n"
-        ret << klass_str
-      end
-
-      child_classes = serialize_classes(source_children, rbi_children, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
-      if !child_classes.empty?
-        ret << child_classes
-      end
+      ret << serialize_alias(source_entry, rbi_entry, klass, source_symbols, rbi_symbols)
+      ret << serialize_class(source_entry, rbi_entry, klass, source_symbols, rbi_symbols, source_by_name)
     end
 
-    ret.join("\n")
+    ret.compact.join("\n")
+  end
+
+  def serialize_class(source_entry, rbi_entry, klass, source_symbols, rbi_symbols, source_by_name)
+    return if rbi_entry["kind"] != "CLASS"
+
+    name = rbi_entry["name"]["name"]
+    if name.start_with?('<Class:')
+      name = name.sub('<Class:', '').sub('>', '')
+      my_klass_is_singleton = true
+    else
+      my_klass_is_singleton = false
+    end
+    begin
+      my_klass = klass.const_get(name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+    rescue => e
+      return "# #{e.message.gsub("\n", "\n# ")}"
+    end
+
+    # We specifically don't typecheck anything in T:: since it is hardcoded
+    # into sorbet
+    return if real_name(my_klass) == 'T'
+
+    source_type = nil
+    if !source_entry
+      if source_by_name[name]
+        source_type = source_by_name[name]["kind"]
+      end
+    else
+      source_type = source_entry["kind"]
+    end
+    if source_type && source_type != "CLASS"
+      return "# The source says #{real_name(my_klass)} is a #{source_type} but reflection says it is a #{rbi_entry['kind']}"
+    end
+
+    if !source_entry
+      source_children = []
+      source_mixins = []
+      is_stub = true
+    else
+      source_children = source_entry.fetch("children", [])
+      source_mixins = source_entry.fetch("mixins", [])
+      is_stub = source_entry['superClass'] && source_symbols[source_entry['superClass']] == 'RubyTyper::StubClass'
+    end
+    rbi_children = rbi_entry.fetch("children", [])
+    rbi_mixins = rbi_entry.fetch("mixins", [])
+
+    methods = serialize_methods(source_children, rbi_children, my_klass, my_klass_is_singleton)
+    includes = serialize_includes(source_mixins, rbi_mixins, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
+
+    ret = []
+    if !methods.empty? || !includes.empty? || is_stub
+      fqn = real_name(my_klass)
+      klass_str = String.new
+      klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
+      klass_str << includes
+      klass_str << "\n" unless includes.empty?
+      klass_str << methods
+      klass_str << "\n" unless klass_str.end_with?("\n")
+      klass_str << "end\n"
+      ret << klass_str
+    end
+
+    source_children = source_entry ? source_entry.fetch("children", []) : []
+    rbi_children = rbi_entry.fetch("children", [])
+    children = serialize_constants(source_children, rbi_children, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
+    if children != ""
+      ret << children
+    end
+
+    ret.empty? ? nil : ret.join("\n")
+  end
+
+  def serialize_alias(source_entry, rbi_entry, my_klass, source_symbols, rbi_symbols)
+    return if rbi_entry["kind"] != "STATIC_FIELD"
+    return if source_entry == rbi_entry
+    if source_entry
+      is_stub = source_entry['superClass'] && source_symbols[source_entry['superClass']] == 'RubyTyper::StubClass'
+      if !is_stub
+        return
+      end
+    end
+    return if !rbi_entry["aliasTo"]
+
+    fqn = rbi_symbols[rbi_entry["id"]]
+    other_fqn = rbi_symbols[rbi_entry["aliasTo"]]
+    return if looks_like_stub_name(fqn)
+    ret = String.new
+    ret << "#{fqn} = #{other_fqn}\n"
+    return ret
+  end
+
+  def looks_like_stub_name(name)
+    name.include?('$')
   end
 
   # These methods are defined in C++ and we want our C++ definition to
