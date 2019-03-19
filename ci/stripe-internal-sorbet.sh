@@ -43,9 +43,16 @@ if [ "$err" -ne 0 ]; then
 fi
 
 bazel build main:sorbet $args
+cp "$(bazel info bazel-bin $args)/main/sorbet" bin/sorbet
+(
+    cd rbi-generation
+    gem build sorbet-rbi-generation.gemspec
+    gem install sorbet-rbi-generation-*.gem
+)
+gem build sorbet.gemspec
+gem install --no-wrappers sorbet*.gem
 (
     cd rbi-generation
     rbenv exec bundle
-    PATH="$PATH:$(bazel info bazel-bin $args)/main/"
     rbenv exec bundle exec rake test
 )

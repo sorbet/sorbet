@@ -125,15 +125,15 @@ class SorbetRBIGeneration::HiddenMethodFinder
 
   def write_constants
     puts "Printing you code's symbol table into #{SOURCE_CONSTANTS}"
-    files = Dir.glob("**/*.{rb,rbi}")
     io = IO.popen(
       [
-        'sorbet',
+        'srb',
+        'tc',
         '--print=symbol-table-json',
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
-      ] + files,
+      ],
       err: '/dev/null'
     )
     File.write(SOURCE_CONSTANTS, io.read)
@@ -142,7 +142,8 @@ class SorbetRBIGeneration::HiddenMethodFinder
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     io = IO.popen(
       [
-        'sorbet',
+        'srb',
+        'tc',
         '--print=symbol-table-json',
         '--error-black-list=4010',
         '--stdout-hup-hack',
