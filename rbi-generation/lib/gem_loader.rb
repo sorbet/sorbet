@@ -496,6 +496,11 @@ class SorbetRBIGeneration::GemLoader
         RDoc::Options,
       ]
     end,
+    'paul_revere' => proc do
+      [
+        Announcement,
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
