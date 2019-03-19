@@ -39,7 +39,7 @@ class SorbetRBIGeneration::RequireEverything
     files.each do |file|
       begin
         require_relative "#{Dir.pwd}/#{file}"
-      rescue LoadError, NoMethodError
+      rescue LoadError, NoMethodError, SyntaxError
         next
       rescue
         errors << file
