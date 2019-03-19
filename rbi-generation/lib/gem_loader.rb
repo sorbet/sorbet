@@ -298,6 +298,7 @@ class SorbetRBIGeneration::GemLoader
     end,
     'http-cookie' => proc do
       my_require 'http-cookie'
+      my_require 'http/cookie_jar'
       my_require 'mechanize'
       [
         HTTP::CookieJar::AbstractSaver,
