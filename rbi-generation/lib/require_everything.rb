@@ -34,28 +34,35 @@ class SorbetRBIGeneration::RequireEverything
   end
 
   def self.require_all_files
-    files = Dir.glob("**/*.rb")
+    abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
     errors = []
-    files.each do |file|
+    abs_paths.each do |abs_path|
+      # Executable files are likely not meant to be required.
+      # Some things we're trying to prevent against:
+      # - misbehaving require-time side effects (removing files, reading from stdin, etc.)
+      # - extra long runtime (making network requests, running a benchmark)
+      # While this isn't a perfect heuristic for these things, it's pretty good.
+      next if File.executable?(abs_path)
+
       begin
-        watching_thread = Thread.new do
+        watcher = Thread.new do
           sleep 5
-          puts "Requiring #{file} has taken more than 5 seconds."
+          puts "Requiring #{abs_path} has taken more than 5 seconds."
         end
-        require_relative "#{Dir.pwd}/#{file}"
+        require_relative abs_path
       rescue LoadError, NoMethodError, SyntaxError
         next
       rescue
-        errors << file
+        errors << abs_path
         next
       ensure
-        watching_thread.kill
+        watcher.kill
       end
     end
     # one more chance for order dependent things
-    errors.each do |file|
+    errors.each do |abs_path|
       begin
-        require_relative "#{Dir.pwd}/#{file}"
+        require_relative abs_path
       rescue
       end
     end
