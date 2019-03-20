@@ -486,9 +486,8 @@ class SorbetRBIGeneration::GemLoader
         ActiveRecord::Migration::Current,
       ]
     end,
-    'activesupport' => proc do
+    'actionview' => proc do
       [
-        ClearanceMailer,
         ActionView::TestCase,
       ]
     end,
@@ -500,6 +499,11 @@ class SorbetRBIGeneration::GemLoader
     'paul_revere' => proc do
       [
         Announcement,
+      ]
+    end,
+    'clearance' => proc do
+      [
+        ClearanceMailer,
       ]
     end,
   }
