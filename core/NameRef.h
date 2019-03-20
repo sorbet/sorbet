@@ -30,12 +30,10 @@ CheckSize(NameData, sizeof__Name, alignof__Name);
 
 struct NameRefDebugCheck {
     int globalStateId;
-    int parentGlobalStateId;
 
-    constexpr NameRefDebugCheck() : globalStateId(-1), parentGlobalStateId(-1) {}
+    constexpr NameRefDebugCheck() : globalStateId(-1) {}
 
-    NameRefDebugCheck(int globalStateId, int parentGlobalStateId)
-        : globalStateId(globalStateId), parentGlobalStateId(parentGlobalStateId) {}
+    NameRefDebugCheck(int globalStateId) : globalStateId(globalStateId) {}
 
     void check(const GlobalState &gs, int id) const;
     void check(const GlobalSubstitution &subst) const;

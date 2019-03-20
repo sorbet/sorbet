@@ -42,6 +42,7 @@ class GlobalState final {
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
     friend class UnfreezeFileTable;
+    friend struct NameRefDebugCheck;
 
 public:
     GlobalState(const std::shared_ptr<ErrorQueue> &errorQueue);
@@ -111,8 +112,6 @@ public:
     bool wasModified() const;
 
     int globalStateId;
-    int parentGlobalStateId;
-    int lastNameKnownByParentGlobalState;
     bool silenceErrors = false;
     bool autocorrect = false;
     bool suggestRuntimeProfiledType = false;
@@ -152,6 +151,12 @@ public:
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
+    struct DeepCloneHistoryEntry {
+        int globalStateId;
+        unsigned int lastNameKnownByParentGlobalState;
+    };
+    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
+
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     std::string_view enterString(std::string_view nm);

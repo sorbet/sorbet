@@ -11,8 +11,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, unsigned int id)
-    : DebugOnlyCheck(gs.globalStateId, gs.parentGlobalStateId), _id(id) {}
+NameRef::NameRef(const GlobalState &gs, unsigned int id) : DebugOnlyCheck(gs.globalStateId), _id(id) {}
 
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
@@ -172,9 +171,10 @@ void NameRefDebugCheck::check(const GlobalState &gs, int _id) const {
     if (globalStateId == gs.globalStateId) {
         return;
     }
-    auto inParent = parentGlobalStateId == gs.globalStateId || parentGlobalStateId == gs.parentGlobalStateId;
-    if (inParent && _id < gs.lastNameKnownByParentGlobalState) {
-        return;
+    for (const auto &deepCloneInfo : gs.deepCloneHistory) {
+        if (globalStateId == deepCloneInfo.globalStateId && _id < deepCloneInfo.lastNameKnownByParentGlobalState) {
+            return;
+        }
     }
     ENFORCE(false, "NameRef not owned by correct GlobalState");
 }
