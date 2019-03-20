@@ -19,7 +19,7 @@ class SorbetRBIGeneration::FetchRBIs
     File.open('Gemfile', 'a') {|f| f.write("gem 'rbis', git: 'git@github.com:coinbase/rbis.git'")}
 
     puts "Running `bundle install`"
-    `bundle install`
+    IO.popen(['bundle', 'install']) {|io| io.read}
   end
 end
 
