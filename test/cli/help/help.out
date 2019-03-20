@@ -79,7 +79,7 @@ Usage:
                                 Whitelist of errors to be reported
       --error-black-list errorCodes
                                 Blacklist of errors to be reported
-      --typed {ruby,true,strict,strong,[auto]}
+      --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)
       --typed-override filepath.yaml
