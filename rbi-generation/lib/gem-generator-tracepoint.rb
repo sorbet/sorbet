@@ -282,20 +282,25 @@ class SorbetRBIGeneration::RbiGenerator
       files.each do |path, defined|
         gem = gem_from_location(path)
         if gem.nil?
-          warn("Can't find gem for #{path}")
-          next
+          gem = {gem: '_unknown', version: '0.0.1'}
         end
         next if gem[:gem] == 'ruby'
 
         grouped[gem] ||= {}
         defined.each do |item|
           klass = item[:module]
+          is_anon = real_is_a?(klass, Module) && real_name(klass).nil?
+
+          # Anonymous classes which are uncategorized need to be serialized
+          # somewhere since they might be `include`d
+          next if !is_anon && gem[:gem] == '_unknown'
+
           klass_id = real_object_id(klass)
           values = grouped[gem][klass_id] ||= []
           values << item unless item[:type] == :module
 
           # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
-          used_value = real_is_a?(klass, Module) && !real_name(klass).nil? ? true : real_object_id(klass) # if non-anon, set it to true, otherwise link to next anon class
+          used_value = is_anon ? real_object_id(klass) : true # if anon, link to next anon class, otherwise always include it
           (used[real_object_id(klass.superclass)] ||= Set.new) << used_value if real_is_a?(klass, Class)
           (used[item[item[:type]].object_id] ||= Set.new) << used_value if [:extend, :include].include?(item[:type])
         end
