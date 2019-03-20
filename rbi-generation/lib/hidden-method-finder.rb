@@ -224,7 +224,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
     end
     begin
       my_klass = klass.const_get(name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-    rescue => e
+    rescue LoadError, NameError, ArgumentError => e
       return "# #{e.message.gsub("\n", "\n# ")}"
     end
 
