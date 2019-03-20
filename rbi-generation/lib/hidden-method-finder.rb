@@ -262,14 +262,16 @@ class SorbetRBIGeneration::HiddenMethodFinder
     ret = []
     if !methods.empty? || !includes.empty? || is_stub
       fqn = real_name(my_klass)
-      klass_str = String.new
-      klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
-      klass_str << includes
-      klass_str << "\n" unless includes.empty?
-      klass_str << methods
-      klass_str << "\n" unless klass_str.end_with?("\n")
-      klass_str << "end\n"
-      ret << klass_str
+      if fqn
+        klass_str = String.new
+        klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
+        klass_str << includes
+        klass_str << "\n" unless includes.empty?
+        klass_str << methods
+        klass_str << "\n" unless klass_str.end_with?("\n")
+        klass_str << "end\n"
+        ret << klass_str
+      end
     end
 
     source_children = source_entry ? source_entry.fetch("children", []) : []
