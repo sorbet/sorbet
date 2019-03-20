@@ -90,6 +90,9 @@ struct LSPMethod {
     static const inline LSPMethod TextDocumentDidChange() {
         return LSPMethod{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod TextDocumentDidClose() {
+        return LSPMethod{"textDocument/didClose", true, LSPMethod::Kind::ClientInitiated};
+    };
     static const inline LSPMethod TextDocumentDocumentSymbol() {
         return LSPMethod{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
     };
@@ -120,6 +123,12 @@ struct LSPMethod {
     static const inline LSPMethod Resume() {
         return LSPMethod{"__RESUME__", true, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod SorbetWatchmanFileChange() {
+        return LSPMethod{"sorbet/watchmanFileChange", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod SorbetWatchmanExit() {
+        return LSPMethod{"sorbet/watchmanExit", true, LSPMethod::Kind::ClientInitiated};
+    };
     static const std::vector<LSPMethod> ALL_METHODS;
     static const LSPMethod getByName(std::string_view name);
 };
@@ -148,9 +157,10 @@ class LSPLoop {
         std::deque<std::unique_ptr<LSPMessage>> pendingRequests;
         bool terminate;
         bool paused;
+        int requestCounter;
+        int errorCode;
     };
 
-    int requestCounter = 1;
     struct ResponseHandler {
         std::function<void(rapidjson::Value &)> onResult;
         std::function<void(rapidjson::Value &)> onError;
@@ -166,6 +176,8 @@ class LSPLoop {
     std::vector<core::FileRef> filesThatHaveErrors;
     /** Root of LSP client workspace */
     std::string rootUri;
+    /** File system root of LSP client workspace. May be empty if it is the current working directory. */
+    std::string rootPath;
 
     /** Concrete error queue shared by all global states */
     std::shared_ptr<core::ErrorQueue> errorQueue;
@@ -195,6 +207,16 @@ class LSPLoop {
     const bool skipConfigatron;
     /** If true, all queries will hit the slow path. */
     const bool disableFastPath;
+    /** The set of files currently open in the user's editor. */
+    UnorderedSet<std::string> openFiles;
+    /** The set of files that have been updated before initialization completes. Will be processed post-initialization.
+     */
+    UnorderedSet<std::string> deferredWatchmanUpdates;
+    /**
+     * Set to true once the server is initialized.
+     * TODO(jvilk): Use to raise server not initialized errors.
+     */
+    bool initialized = false;
 
     /* Send the following document to client */
     void sendRaw(std::string_view json);
@@ -215,7 +237,7 @@ class LSPLoop {
      * already registered request*/
     bool handleReplies(const LSPMessage &d);
 
-    core::FileRef addNewFile(const std::shared_ptr<core::File> &file);
+    core::FileRef updateFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.
      * This runs code that is not considered performance critical and this is expected to be slow */
     void reIndexFromFileSystem();
@@ -280,15 +302,18 @@ class LSPLoop {
     std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
                                                                const MessageId &id,
                                                                const TextDocumentPositionParams &params);
-    static void mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
-                                std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     /**
-     * Performs pre-processing on the incoming LSP request.
-     * Merges changes to the same document, and processes
-     * pause/ignore requests.
+     * Merges all pending Watchman updates into a single update, and merges any consecutive textDocumentDidChange events
+     * into a single update.
      */
-    static void preprocessRequest(rapidjson::MemoryPoolAllocator<> &alloc, const std::shared_ptr<spd::logger> &logger,
-                                  LSPLoop::QueueState &queue, std::unique_ptr<LSPMessage> msg, int requestCounter);
+    static void mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
+                                 std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
+    /**
+     * Performs pre-processing on the incoming LSP request and appends it to the queue.
+     * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.
+     */
+    static void enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const std::shared_ptr<spd::logger> &logger,
+                               LSPLoop::QueueState &queue, std::unique_ptr<LSPMessage> msg);
 
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
@@ -297,6 +322,9 @@ class LSPLoop {
     findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs,
                                                               const LSPMessage &msg);
+
+    std::unique_ptr<core::GlobalState> handleWatchmanUpdates(std::unique_ptr<core::GlobalState> gs,
+                                                             std::vector<std::string> changedFiles);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,

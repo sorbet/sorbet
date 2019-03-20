@@ -10,6 +10,7 @@ compilation_database(
     testonly = True,
     targets = [
         # BEGIN compile_commands targets
+        "//test/lsp:watchman_test_corpus",
         "//test/lsp:protocol_test_corpus",
         "//test/fuzz:fuzz_hover",
         "//test/fuzz:proto",

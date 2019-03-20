@@ -608,13 +608,17 @@ public:
 
 class FieldDef {
 public:
-    const std::string name;
+    const std::string jsonName;
+    const std::string cppName;
     std::shared_ptr<JSONType> type;
 
-    FieldDef(std::string_view name, std::shared_ptr<JSONType> type) : name(std::string(name)), type(type) {}
+    FieldDef(std::string_view name, std::shared_ptr<JSONType> type)
+        : jsonName(std::string(name)), cppName(std::string(name)), type(type) {}
+    FieldDef(std::string_view jsonName, std::string_view cppName, std::shared_ptr<JSONType> type)
+        : jsonName(jsonName), cppName(cppName), type(type) {}
 
     void emitDeclaration(fmt::memory_buffer &out) const {
-        fmt::format_to(out, "{} {};\n", type->getCPPType(), name);
+        fmt::format_to(out, "{} {};\n", type->getCPPType(), cppName);
     }
 };
 
@@ -741,7 +745,7 @@ public:
             // Constructor. Only accepts non-optional fields as arguments
             fmt::format_to(out, "{}({});\n", typeName,
                            fmt::map_join(getRequiredFields(), ", ", [](auto field) -> std::string {
-                               return fmt::format("{} {}", field->type->getCPPType(), field->name);
+                               return fmt::format("{} {}", field->type->getCPPType(), field->cppName);
                            }));
         }
         fmt::format_to(
@@ -755,13 +759,13 @@ public:
             fmt::format_to(out, "{}::{}({}): {} {{\n", typeName, typeName,
                            fmt::map_join(reqFields, ", ",
                                          [](auto field) -> std::string {
-                                             return fmt::format("{} {}", field->type->getCPPType(), field->name);
+                                             return fmt::format("{} {}", field->type->getCPPType(), field->cppName);
                                          }),
                            fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
                                if (field->type->cannotBeCopied()) {
-                                   return fmt::format("{}(move({}))", field->name, field->name);
+                                   return fmt::format("{}(move({}))", field->cppName, field->cppName);
                                }
-                               return fmt::format("{}({})", field->name, field->name);
+                               return fmt::format("{}({})", field->cppName, field->cppName);
                            }));
             fmt::format_to(out, "}}\n");
         }
@@ -786,33 +790,33 @@ public:
 
         // Process required fields first.
         for (std::shared_ptr<FieldDef> &fieldDef : reqFields) {
-            std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
-            fmt::format_to(out, "if (!val.HasMember(\"{}\")) {{\n", fieldDef->name);
-            fmt::format_to(out, "throw MissingFieldError(\"{}\", \"{}\");\n", typeName, fieldDef->name);
+            std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->cppName);
+            fmt::format_to(out, "if (!val.HasMember(\"{}\")) {{\n", fieldDef->jsonName);
+            fmt::format_to(out, "throw MissingFieldError(\"{}\", \"{}\");\n", typeName, fieldDef->jsonName);
             fmt::format_to(out, "}}\n");
-            fmt::format_to(out, "{} {};\n", fieldDef->type->getCPPType(), fieldDef->name);
+            fmt::format_to(out, "{} {};\n", fieldDef->type->getCPPType(), fieldDef->cppName);
             AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
-                fmt::format_to(out, "{} = {};\n", fieldDef->name, from);
+                fmt::format_to(out, "{} = {};\n", fieldDef->cppName, from);
             };
-            fieldDef->type->emitFromJSONValue(out, fmt::format("val[\"{}\"]", fieldDef->name), assign, fieldName);
+            fieldDef->type->emitFromJSONValue(out, fmt::format("val[\"{}\"]", fieldDef->jsonName), assign, fieldName);
         }
         fmt::format_to(out, "{} rv = std::make_unique<{}>({});\n", getCPPType(), typeName,
                        fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
                            if (field->type->cannotBeCopied()) {
-                               return fmt::format("move({})", field->name);
+                               return fmt::format("move({})", field->cppName);
                            } else {
-                               return field->name;
+                               return field->cppName;
                            }
                        }));
 
         // Assign optionally specified fields.
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             if (dynamic_cast<JSONOptionalType *>(fieldDef->type.get())) {
-                std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
-                fmt::format_to(out, "if (val.HasMember(\"{}\")) {{\n", fieldDef->name);
-                fmt::format_to(out, "const rapidjson::Value &fieldVal = val[\"{}\"];\n", fieldDef->name);
+                std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->cppName);
+                fmt::format_to(out, "if (val.HasMember(\"{}\")) {{\n", fieldDef->jsonName);
+                fmt::format_to(out, "const rapidjson::Value &fieldVal = val[\"{}\"];\n", fieldDef->jsonName);
                 AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
-                    fmt::format_to(out, "rv->{} = {};\n", fieldDef->name, from);
+                    fmt::format_to(out, "rv->{} = {};\n", fieldDef->cppName, from);
                 };
                 fieldDef->type->emitFromJSONValue(out, "fieldVal", assign, fieldName);
                 fmt::format_to(out, "}}\n");
@@ -827,11 +831,11 @@ public:
                        typeName, ALLOCATOR_VAR);
         fmt::format_to(out, "auto rv = std::make_unique<rapidjson::Value>(rapidjson::kObjectType);\n");
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
-            std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
+            std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->cppName);
             AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
-                fmt::format_to(out, "rv->AddMember(\"{}\", {}, {});\n", fieldDef->name, from, ALLOCATOR_VAR);
+                fmt::format_to(out, "rv->AddMember(\"{}\", {}, {});\n", fieldDef->jsonName, from, ALLOCATOR_VAR);
             };
-            fieldDef->type->emitToJSONValue(out, fieldDef->name, assign, fieldName);
+            fieldDef->type->emitToJSONValue(out, fieldDef->cppName, assign, fieldName);
         }
         fmt::format_to(out, "return rv;\n");
         fmt::format_to(out, "}}\n");

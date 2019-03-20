@@ -188,6 +188,8 @@ cxxopts::Options buildOptions() {
         "suggest-runtime-profiled",
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
+    options.add_options("advanced")("disable-watchman",
+                                    "When in language-server-protocol mode, disable file watching via Watchman");
     options.add_options("advanced")(
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
@@ -308,6 +310,14 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> log
     return Phase::INIT;
 }
 
+// Given a path, strips any trailing forward slashes (/) at the end of the path.
+string_view stripTrailingSlashes(string_view path) {
+    while (path.back() == '/') {
+        path = path.substr(0, path.length() - 1);
+    }
+    return path;
+}
+
 void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     FileFlatMapper flatMapper(argc, argv, logger);
@@ -322,11 +332,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         if (raw.count("ignore") > 0) {
             auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
             for (auto &p : rawIgnorePatterns) {
-                string_view pNormalized = p;
-                // Strip any trailing slashes.
-                while (pNormalized.back() == '/') {
-                    pNormalized = pNormalized.substr(0, pNormalized.length() - 1);
-                }
+                string_view pNormalized = stripTrailingSlashes(p);
                 if (p.at(0) == '/') {
                     opts.absoluteIgnorePatterns.emplace_back(pNormalized);
                 } else {
@@ -341,10 +347,12 @@ void readOptions(Options &opts, int argc, char *argv[],
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    opts.rawInputDirNames.push_back(file);
+                    auto fileNormalized = stripTrailingSlashes(file);
+                    opts.rawInputDirNames.emplace_back(fileNormalized);
                     // Expand directory into list of files.
-                    auto containedFiles = opts.fs->listFilesInDir(
-                        file, acceptableExtensions, true, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+                    auto containedFiles =
+                        opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true, opts.absoluteIgnorePatterns,
+                                                opts.relativeIgnorePatterns);
                     opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
                     opts.inputFileNames.insert(opts.inputFileNames.end(),
                                                std::make_move_iterator(containedFiles.begin()),
@@ -370,6 +378,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             logger->error("lsp mode does not yet support caching.");
             throw EarlyReturnWithCode(1);
         }
+        opts.disableWatchman = raw["disable-watchman"].as<bool>();
         if ((opts.print.Autogen || opts.print.AutogenMsgPack) && (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
                           opts.print.AutogenMsgPack ? "-msgpack" : "");

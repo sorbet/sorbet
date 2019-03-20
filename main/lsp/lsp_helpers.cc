@@ -12,12 +12,21 @@ string LSPLoop::remoteName2Local(string_view uri) {
     if (*start == '/') {
         ++start;
     }
-    return string(start, uri.end());
+    // Special case: Folder is '' (current directory).
+    if (rootPath.length() > 0) {
+        return absl::StrCat(rootPath, "/", string(start, uri.end()));
+    } else {
+        return string(start, uri.end());
+    }
 }
 
 string LSPLoop::localName2Remote(string_view uri) {
-    ENFORCE(!absl::StartsWith(uri, rootUri));
-    return absl::StrCat(rootUri, "/", uri);
+    ENFORCE(absl::StartsWith(uri, rootPath));
+    string_view relativeUri = uri.substr(rootPath.length());
+    if (relativeUri.at(0) == '/') {
+        relativeUri = relativeUri.substr(1);
+    }
+    return absl::StrCat(rootUri, "/", relativeUri);
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {

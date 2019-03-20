@@ -422,7 +422,10 @@ TEST_P(LSPTest, All) {
     }
 
     // Perform initialize / initialized handshake.
-    initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
+    {
+        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
+        EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
+    }
 
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {

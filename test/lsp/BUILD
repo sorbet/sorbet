@@ -9,10 +9,35 @@ sh_binary(
 cc_test(
     name = "protocol_test_corpus",
     size = "medium",
-    srcs = glob([
-        "*.cc",
-        "*.h",
-    ]),
+    srcs = [
+        "ProtocolTest.cc",
+        "ProtocolTest.h",
+        "protocol_test_corpus.cc",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//core",
+        "//main/lsp",
+        "//payload:light",
+        "//test/helpers",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "watchman_test_corpus",
+    size = "medium",
+    srcs = [
+        "ProtocolTest.cc",
+        "ProtocolTest.h",
+        "watchman_test_corpus.cc",
+    ],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,

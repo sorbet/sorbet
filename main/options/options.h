@@ -68,6 +68,7 @@ struct Options {
     bool suggestSig = false;
     bool supressNonCriticalErrors = false;
     bool runLSP = false;
+    bool disableWatchman = false;
     bool stressIncrementalResolver = false;
     bool noErrorCount = false;
     bool autocorrect = false;

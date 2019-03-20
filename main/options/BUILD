@@ -15,6 +15,7 @@ cc_library(
         "//core",
         "//version",
         "@cxxopts",
+        "@spdlog",
         "@yaml_cpp",
     ],
 )

@@ -9,6 +9,8 @@ namespace sorbet::realmain::lsp {
 
 regex contentLengthRegex("^Content-Length: ([0-9]+)$");
 
+const std::string LSPWrapper::EMPTY_STRING = "";
+
 vector<unique_ptr<LSPMessage>> LSPWrapper::drainLSPResponses() {
     vector<unique_ptr<LSPMessage>> rv;
     string responses = lspOstream.str();
@@ -112,7 +114,9 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
     lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), cin, lspOstream, true, disableFastPath);
 }
 
-LSPWrapper::LSPWrapper(bool disableFastPath) {
+LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
+    opts.rawInputDirNames.emplace_back(rootPath);
+
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
     stderrColorSink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
     auto logger = make_shared<spd::logger>("console", stderrColorSink);
@@ -132,4 +136,12 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&opti
     : opts(std::move(options)) {
     instantiate(std::move(gs), logger, disableFastPath);
 }
+
+int LSPWrapper::getTypecheckCount() const {
+    if (gs) {
+        return gs->lspTypecheckCount;
+    }
+    return 0;
+}
+
 } // namespace sorbet::realmain::lsp

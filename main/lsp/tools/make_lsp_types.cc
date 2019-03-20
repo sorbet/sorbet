@@ -24,6 +24,10 @@ shared_ptr<FieldDef> makeField(const string name, shared_ptr<JSONType> type) {
     return make_shared<FieldDef>(name, type);
 }
 
+shared_ptr<FieldDef> makeField(const string jsonName, const string cppName, shared_ptr<JSONType> type) {
+    return make_shared<FieldDef>(jsonName, cppName, type);
+}
+
 shared_ptr<JSONObjectType> makeObject(const string name, vector<shared_ptr<FieldDef>> fields,
                                       vector<shared_ptr<JSONObjectType>> &classTypes) {
     shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields);
@@ -1219,4 +1223,14 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("workspaceFolders", makeOptional(makeVariant({JSONNull, makeArray(WorkspaceFolder)}))),
                    },
                    classTypes);
+
+    /* Watchman JSON response objects */
+    auto WatchmanQueryResponse = makeObject("WatchmanQueryResponse",
+                                            {
+                                                makeField("version", JSONString),
+                                                makeField("clock", JSONString),
+                                                makeField("is_fresh_instance", "isFreshInstance", JSONBool),
+                                                makeField("files", makeArray(JSONString)),
+                                            },
+                                            classTypes);
 }

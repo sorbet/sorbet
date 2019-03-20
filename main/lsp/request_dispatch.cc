@@ -25,10 +25,9 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
 
 unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalState> gs,
                                                        vector<unique_ptr<LSPMessage>> messages) {
-    int requestCounter = 0;
-    LSPLoop::QueueState state{{}, false, false};
+    LSPLoop::QueueState state{{}, false, false, 0};
     for (auto &message : messages) {
-        preprocessRequest(alloc, logger, state, move(message), requestCounter++);
+        enqueueRequest(alloc, logger, state, move(message));
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 
@@ -62,14 +61,19 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
             // taught about it too: it merges consecutive TextDocumentDidChange
             if (absl::StartsWith(uri, rootUri)) {
-                auto currentFileRef = initialGS->findFileByPath(remoteName2Local(uri));
+                string localPath = remoteName2Local(uri);
+                if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
+                                           opts.relativeIgnorePatterns)) {
+                    return gs;
+                }
+                auto currentFileRef = initialGS->findFileByPath(localPath);
                 unique_ptr<core::File> file;
                 if (currentFileRef.exists()) {
                     file = make_unique<core::File>(string(currentFileRef.data(*initialGS).path()),
                                                    string(currentFileRef.data(*initialGS).source()),
                                                    core::File::Type::Normal);
                 } else {
-                    file = make_unique<core::File>(remoteName2Local(uri), "", core::File::Type::Normal);
+                    file = make_unique<core::File>(string(localPath), "", core::File::Type::Normal);
                 }
 
                 for (auto &change : edits->contentChanges) {
@@ -105,30 +109,84 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         if (method == LSPMethod::TextDocumentDidOpen()) {
             prodCategoryCounterInc("requests.processed", "textDocument.didOpen");
             Timer timeit(logger, "text_document_did_open");
-            vector<shared_ptr<core::File>> files;
             auto edits = DidOpenTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
             string_view uri = edits->textDocument->uri;
             if (absl::StartsWith(uri, rootUri)) {
-                files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(edits->textDocument->text),
+                auto localPath = remoteName2Local(uri);
+                if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
+                                           opts.relativeIgnorePatterns)) {
+                    return gs;
+                }
+                vector<shared_ptr<core::File>> files;
+                files.emplace_back(make_shared<core::File>(string(localPath), move(edits->textDocument->text),
                                                            core::File::Type::Normal));
-
+                openFiles.insert(localPath);
                 return pushDiagnostics(tryFastPath(move(gs), files));
             }
+        }
+        if (method == LSPMethod::TextDocumentDidClose()) {
+            prodCategoryCounterInc("requests.processed", "textDocument.didClose");
+            Timer timeit(logger, "text_document_did_close");
+            auto edits = DidCloseTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
+            string_view uri = edits->textDocument->uri;
+            if (absl::StartsWith(uri, rootUri)) {
+                auto localPath = remoteName2Local(uri);
+                if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
+                                           opts.relativeIgnorePatterns)) {
+                    return gs;
+                }
+                auto it = openFiles.find(localPath);
+                if (it != openFiles.end()) {
+                    openFiles.erase(it);
+                }
+                // Treat as if Watchman told us the file updated.
+                // Forces LSP to re-read file from disk, as the user may have discarded editor
+                // changes.
+                return handleWatchmanUpdates(move(gs), {localPath});
+            }
+        }
+        if (method == LSPMethod::SorbetWatchmanFileChange()) {
+            prodCategoryCounterInc("requests.processed", "watchmanFileChange");
+            Timer timeit(logger, "watchman_file_change");
+            auto queryResponse = WatchmanQueryResponse::fromJSONValue(alloc, msg.params(), "root.params");
+            // Watchman returns file paths that are relative to the rootPath. Turn them into absolute paths
+            // before they propagate further through the codebase.
+            vector<string> absoluteFilePaths;
+            absoluteFilePaths.reserve(queryResponse->files.size());
+            transform(queryResponse->files.begin(), queryResponse->files.end(), back_inserter(absoluteFilePaths),
+                      [&](const string &relPath) -> string { return absl::StrCat(rootPath, "/", relPath); });
+
+            if (!initialized) {
+                for (auto &file : absoluteFilePaths) {
+                    deferredWatchmanUpdates.insert(file);
+                }
+                return gs;
+            }
+            return handleWatchmanUpdates(move(gs), absoluteFilePaths);
         }
         if (method == LSPMethod::Initialized()) {
             prodCategoryCounterInc("requests.processed", "initialized");
             // initialize ourselves
+            unique_ptr<core::GlobalState> newGs;
             {
                 Timer timeit(logger, "initial_index");
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
-                auto newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
+                newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
                 ENFORCE(newGs);
                 if (!disableFastPath) {
                     this->globalStateHashes = computeStateHashes(newGs->getFiles());
                 }
-                return newGs;
+                initialized = true;
             }
+
+            // process deferred watchman updates
+            vector<string> deferredUpdatesVector;
+            for (auto &updatedFile : deferredWatchmanUpdates) {
+                deferredUpdatesVector.push_back(updatedFile);
+            }
+            deferredWatchmanUpdates.clear();
+            return handleWatchmanUpdates(move(newGs), deferredUpdatesVector);
         }
         if (method == LSPMethod::Exit()) {
             return gs;

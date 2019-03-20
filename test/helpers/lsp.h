@@ -40,7 +40,8 @@ std::optional<std::unique_ptr<PublishDiagnosticsParams>>
 getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc, const NotificationMessage &notifMsg);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
-void initializeLSP(std::string_view rootPath, std::string_view rootUri, LSPWrapper &lspWrapper, int &nextId);
+std::vector<std::unique_ptr<LSPMessage>> initializeLSP(std::string_view rootPath, std::string_view rootUri,
+                                                       LSPWrapper &lspWrapper, int &nextId);
 
 } // namespace sorbet::test
 #endif // TEST_HELPERS_LSP_H

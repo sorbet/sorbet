@@ -1,6 +1,8 @@
 #include "absl/synchronization/mutex.h"
 #include "common/Timer.h"
 #include "lsp.h"
+#include "main/lsp/watchman/WatchmanProcess.h"
+#include "main/options/options.h" // For EarlyReturnWithCode.
 #include <iostream>
 
 using namespace std;
@@ -81,32 +83,72 @@ public:
 
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
-    LSPLoop::QueueState guardedState{{}, false, false};
+    LSPLoop::QueueState guardedState{{}, false, false, 0};
     absl::Mutex mtx;
 
-    rapidjson::MemoryPoolAllocator<>
-        innerAlloc; // we need objects created by inner thread to outlive the thread itself.
+    unique_ptr<watchman::WatchmanProcess> watchmanProcess;
+    if (!opts.disableWatchman) {
+        if (opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.size() == 0) {
+            // The lambda below intentionally does not capture `this`.
+            watchmanProcess = make_unique<watchman::WatchmanProcess>(
+                logger, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
+                [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
+                                                             const WatchmanQueryResponse &response) {
+                    // TODO(jvilk): We are wastefully parsing from JSON + serializing to JSON value + parsing from JSON
+                    // value. Once we stop using JSON values internally, we can make this less wasteful.
+                    auto notifMsg = make_unique<NotificationMessage>("2.0", "sorbet/watchmanFileChange");
+                    notifMsg->params = response.toJSONValue(alloc);
+                    auto msg = make_unique<LSPMessage>(move(notifMsg));
+                    {
+                        absl::MutexLock lck(&mtx); // guards guardedState
+                        // Merge with any existing pending watchman file updates.
+                        enqueueRequest(alloc, logger, guardedState, move(msg));
+                    }
+                },
+                [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
+                                                             int watchmanExitCode) {
+                    auto notifMsg = make_unique<NotificationMessage>("2.0", "sorbet/watchmanExit");
+                    notifMsg->params = make_unique<rapidjson::Value>(watchmanExitCode);
+                    auto msg = make_unique<LSPMessage>(move(notifMsg));
+                    {
+                        absl::MutexLock lck(&mtx); // guards guardedState
+                        enqueueRequest(alloc, logger, guardedState, move(msg));
+                    }
+                });
+        } else {
+            logger->error("Watchman support currently only works when Sorbet is run with a single input directory. If "
+                          "Watchman is not needed, run Sorbet with `--disable-watchman`.");
+            throw options::EarlyReturnWithCode(1);
+        }
+    }
 
+    // !!DO NOT USE OUTSIDE OF READER THREAD!!
+    // We need objects created by the reader thread to outlive the thread itself. At the same time, MemoryPoolAllocator
+    // is not thread-safe.
+    // TODO(jvilk): This (+ Watchman's alloc) leak memory. If we stop using JSON values internally, then we can clear
+    // them after every request and only use them for intermediate objects generated during parsing.
+    rapidjson::MemoryPoolAllocator<> readerAlloc;
     auto readerThread = runInAThread(
-        "lspReader", [&guardedState, &mtx, logger = this->logger, &innerAlloc, &inputStream = this->inputStream] {
+        "lspReader", [&guardedState, &mtx, logger = this->logger, &readerAlloc, &inputStream = this->inputStream] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
-            int requestCounter = 0;
             while (true) {
-                rapidjson::Document d(&innerAlloc);
+                rapidjson::Document d(&readerAlloc);
 
                 if (!getNewRequest(d, logger, inputStream)) {
                     break;
                 }
-
-                absl::MutexLock lck(&mtx); // guards pendingRequests & paused
-
+                unique_ptr<LSPMessage> msg;
                 try {
-                    preprocessRequest(innerAlloc, logger, guardedState, make_unique<LSPMessage>(innerAlloc, d),
-                                      requestCounter++);
+                    msg = make_unique<LSPMessage>(readerAlloc, d);
                 } catch (DeserializationError e) {
                     logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));
+                }
+
+                if (msg) {
+                    absl::MutexLock lck(&mtx); // guards guardedState.
+                    enqueueRequest(readerAlloc, logger, guardedState, move(msg));
                 }
             }
         });
@@ -123,6 +165,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 &guardedState));
             ENFORCE(!guardedState.paused);
             if (guardedState.terminate) {
+                if (guardedState.errorCode > 0) {
+                    // Abnormal termination.
+                    throw options::EarlyReturnWithCode(guardedState.errorCode);
+                }
                 break;
             }
             msg = move(guardedState.pendingRequests.front());
@@ -130,10 +176,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         }
         prodCounterInc("lsp.requests.received");
         long requestReceiveTimeNanos = (long)msg->timestamp();
-
         gs = processRequest(move(gs), *msg);
         timingAdd("processing_time", (Timer::currentTimeNanos() - requestReceiveTimeNanos));
     }
+
     if (gs) {
         return gs;
     } else {
@@ -141,13 +187,15 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     }
 }
 
-void LSPLoop::mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
-                              std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
-    // make pass through pendingRequests and squish any consecutive didChanges that are for the same
-    // file together
+void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
+                               std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
+    // Squish any consecutive didChanges that are for the same file together, and combine all Watchman file system
+    // updates into a single update.
     // TODO: if we ever support diffs, this would need to be extended
-    int requestsMerged = 0;
+    int didChangeRequestsMerged = 0;
+    int foundWatchmanRequests = 0;
     int originalSize = pendingRequests.size();
+    UnorderedSet<string> updatedFiles;
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
         auto method = LSPMethod::getByName(current->method());
@@ -166,23 +214,63 @@ void LSPLoop::mergeDidChanges(rapidjson::MemoryPoolAllocator<> &alloc,
                         auto &nextUpdates = nextChanges->contentChanges;
                         std::move(std::begin(nextUpdates), std::end(nextUpdates), std::back_inserter(currentUpdates));
                         nextChanges->contentChanges = move(currentUpdates);
-                        requestsMerged += 1;
+                        didChangeRequestsMerged += 1;
                         next->setParams(nextChanges->toJSONValue(alloc));
                         it = pendingRequests.erase(it);
                         continue;
                     }
                 }
             }
+        } else if (method == LSPMethod::SorbetWatchmanFileChange()) {
+            auto changes = WatchmanQueryResponse::fromJSONValue(alloc, current->params(), "root.params");
+            updatedFiles.insert(changes->files.begin(), changes->files.end());
+            foundWatchmanRequests++;
+            it = pendingRequests.erase(it);
+            continue;
         }
         ++it;
     }
-    ENFORCE(pendingRequests.size() + requestsMerged == originalSize);
+    ENFORCE(pendingRequests.size() + didChangeRequestsMerged + foundWatchmanRequests == originalSize);
+
+    /**
+     * If we found any watchman updates, inject a single update that contains all of the FS updates.
+     *
+     * Ordering with textDocumentDidChange notifications effectively does *not* matter. We ignore Watchman updates on
+     * files that are open in the editor, and re-pick up the file system version when the editor closes the file.
+     *
+     * It's possible that this reordering will cause transient errors if the user intended the TextDocumentDidChange to
+     * apply against the other changed files on disk. For example, the user may have git pulled in changes to bar.rb,
+     * and are editing foo.rb which requires the updated bar.rb to pass typechecking. However, we already have that
+     * problem with the devbox rsync loop + autogen latency.
+     *
+     * I (jvilk) think the harm of these transient errors is small compared to the potential delay in this common
+     * scenario:
+     * 1. User runs git pull.
+     * 2. User begins editing file.
+     * 3. While user is editing file, pay up is rsyncing changes + autogen is running.
+     * 4. Sorbet is picking up user's edits mixed in with file system updates.
+     *
+     * If DidChange acts like a fence for combining file system updates, then Sorbet may have to run the slow path many
+     * times to catch up with the file system changes.
+     *
+     * TODO(jvilk): Since the slow path is slow, I actually think that we may want to (eventually) combine all file
+     * updates from different sources into a single event to make catching up faster. Then, we can merge all DidChange
+     * and Watchman updates into a single update.
+     */
+    if (foundWatchmanRequests > 0) {
+        // Enqueue the changes at *back* of the queue. Defers Sorbet from processing updates until the last
+        // possible moment.
+        WatchmanQueryResponse watchmanUpdates("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()));
+        auto notifMsg = make_unique<NotificationMessage>("2.0", "sorbet/watchmanFileChange");
+        notifMsg->params = watchmanUpdates.toJSONValue(alloc);
+        pendingRequests.push_back(make_unique<LSPMessage>(move(notifMsg)));
+    }
 }
 
-void LSPLoop::preprocessRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
-                                LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg, int requestCounter) {
+void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
+                             LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg) {
     try {
-        msg->setCounter(requestCounter);
+        msg->setCounter(state.requestCounter++);
         msg->setTimestamp((double)Timer::currentTimeNanos());
 
         const LSPMethod method = LSPMethod::getByName(msg->method());
@@ -198,7 +286,7 @@ void LSPLoop::preprocessRequest(rapidjson::MemoryPoolAllocator<> &alloc, const s
                 // move the canceled request to the front
                 auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
                 state.pendingRequests.insert(itFront, move(canceledRequest));
-                LSPLoop::mergeDidChanges(alloc, state.pendingRequests);
+                LSPLoop::mergeFileChanges(alloc, state.pendingRequests);
             }
             // if we started processing it already, well... swallow the cancellation request and
             // continue computing.
@@ -210,9 +298,12 @@ void LSPLoop::preprocessRequest(rapidjson::MemoryPoolAllocator<> &alloc, const s
             logger->error("Resuming");
             ENFORCE(state.paused);
             state.paused = false;
+        } else if (method == LSPMethod::SorbetWatchmanExit()) {
+            state.terminate = true;
+            state.errorCode = msg->params().GetInt();
         } else {
             state.pendingRequests.emplace_back(move(msg));
-            LSPLoop::mergeDidChanges(alloc, state.pendingRequests);
+            LSPLoop::mergeFileChanges(alloc, state.pendingRequests);
         }
     } catch (DeserializationError e) {
         logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));

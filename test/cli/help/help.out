@@ -44,6 +44,8 @@ Usage:
                                 When suggesting signatures in `typed: strict`
                                 mode, suggest `::T::Utils::RuntimeProfiled`
       --lsp                     Start in language-server-protocol mode
+      --disable-watchman        When in language-server-protocol mode,
+                                disable file watching via Watchman
       --ignore string           Ignores input files that contain the given
                                 string in their paths (relative to the input
                                 path passed to Sorbet). Strings beginning with /

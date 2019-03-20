@@ -3,6 +3,7 @@ cc_library(
     srcs = glob([
         "*.cc",
         "requests/*.cc",
+        "watchman/*.cc",
     ]) + ["lsp_messages_gen.cc"],
     hdrs = [
         "DefLocSaver.h",
@@ -12,6 +13,7 @@ cc_library(
         "lsp.h",
         "lsp_messages_gen.h",
         "lsp_messages_gen_helpers.h",
+        "watchman/WatchmanProcess.h",
         "wrapper.h",
     ],
     linkstatic = select({
@@ -32,6 +34,7 @@ cc_library(
         "//payload/binary",
         "//payload/text",
         "@com_google_absl//absl/synchronization",
+        "@cpp_subprocess",
         "@rapidjson",
     ],
 )

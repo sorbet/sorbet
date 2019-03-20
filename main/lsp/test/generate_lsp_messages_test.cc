@@ -288,4 +288,17 @@ TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
     ASSERT_TRUE(LSPMessage(alloc, notification->toJSON()).isNotification());
 }
 
+TEST(GenerateLSPMessagesTest, RenamedFieldsWorkProperly) {
+    parseTest<WatchmanQueryResponse>(alloc,
+                                     "{\"version\": \"versionstring\", \"clock\": \"clockvalue\", "
+                                     "\"is_fresh_instance\": true, \"files\": [\"foo.rb\"]}",
+                                     [](auto &watchmanQueryResponse) -> void {
+                                         ASSERT_EQ(watchmanQueryResponse->version, "versionstring");
+                                         ASSERT_EQ(watchmanQueryResponse->clock, "clockvalue");
+                                         ASSERT_TRUE(watchmanQueryResponse->isFreshInstance);
+                                         ASSERT_EQ(watchmanQueryResponse->files.size(), 1);
+                                         ASSERT_EQ(watchmanQueryResponse->files.at(0), "foo.rb");
+                                     });
+}
+
 } // namespace sorbet::realmain::lsp::test

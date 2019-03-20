@@ -228,3 +228,10 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/jmillikin/rules_m4",
         commit = "ae19f8df57f680c6dbad4887e162ca17ee97a13e",
     )
+
+    new_git_repository(
+        name="cpp_subprocess",
+        remote="https://github.com/arun11299/cpp-subprocess.git",
+        commit="de5f791d0457ffa866c371f16a3a53228515bb9a",
+        build_file="//third_party:cpp_subprocess.BUILD",
+    )

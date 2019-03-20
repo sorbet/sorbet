@@ -8,10 +8,13 @@
 #include "main/lsp/json_types.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <sstream>
+#include <string_view>
 namespace sorbet::realmain::lsp {
 
 class LSPWrapper {
 private:
+    static const std::string EMPTY_STRING;
+
     /** If true, then LSPLoop is initialized and is ready to receive requests. */
     bool initialized = false;
 
@@ -44,7 +47,7 @@ public:
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     options::Options opts;
 
-    LSPWrapper(bool disableFastPath = false);
+    LSPWrapper(std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&opts,
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
 
@@ -62,6 +65,11 @@ public:
      * Sends multiple messages to LSP, and returns any responses.
      */
     std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(std::vector<std::unique_ptr<LSPMessage>> &messages);
+
+    /**
+     * (For tests only) Retrieve the number of times typechecking has run.
+     */
+    int getTypecheckCount() const;
 };
 
 } // namespace sorbet::realmain::lsp

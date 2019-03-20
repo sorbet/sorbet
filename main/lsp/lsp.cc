@@ -16,6 +16,12 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes,
             "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
+
+    if (opts.rawInputDirNames.size() != 1) {
+        logger->error("Sorbet's language server requires a single input directory.");
+        throw options::EarlyReturnWithCode(1);
+    }
+    rootPath = opts.rawInputDirNames.at(0);
 }
 
 LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
@@ -80,11 +86,10 @@ bool silenceError(bool disableFastPath, core::ErrorClass what) {
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
                                 const unique_ptr<core::GlobalState> &currentGs) {
-    if (currentGs) {
-        return true;
-    }
-    if (forMethod == LSPMethod::Initialize() || forMethod == LSPMethod::Initialized() ||
-        forMethod == LSPMethod::Exit() || forMethod == LSPMethod::Shutdown()) {
+    // Note: Watchman file updates happen independent of the client. We tolerate these before initialization by
+    // deferring them.
+    if (initialized || forMethod == LSPMethod::SorbetWatchmanFileChange() || forMethod == LSPMethod::Initialize() ||
+        forMethod == LSPMethod::Initialized() || forMethod == LSPMethod::Exit() || forMethod == LSPMethod::Shutdown()) {
         return true;
     }
     logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
@@ -147,7 +152,7 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
                 if (file.data(gs).sourceType == core::File::Type::Payload) {
                     uri = string(file.data(gs).path());
                 } else {
-                    uri = fmt::format("{}/{}", rootUri, file.data(gs).path());
+                    uri = localName2Remote(file.data(gs).path());
                 }
             }
 
@@ -198,6 +203,7 @@ const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                PushDiagnostics(),
                                                TextDocumentDidOpen(),
                                                TextDocumentDidChange(),
+                                               TextDocumentDidClose(),
                                                TextDocumentDocumentSymbol(),
                                                TextDocumentDefinition(),
                                                TextDocumentHover(),
@@ -207,7 +213,8 @@ const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                WorkspaceSymbols(),
                                                CancelRequest(),
                                                Pause(),
-                                               Resume()};
+                                               Resume(),
+                                               SorbetWatchmanFileChange()};
 
 const LSPMethod LSPMethod::getByName(string_view name) {
     for (auto &candidate : ALL_METHODS) {

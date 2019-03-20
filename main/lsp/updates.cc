@@ -21,7 +21,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
+core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     core::FileRef fref;
     if (!file)
         return fref;
@@ -140,10 +140,9 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     logger->debug("Taking slow path");
 
     core::UnfreezeFileTable fileTableAccess(*initialGS);
-    vector<core::FileRef> changedFileRefs;
     indexed.reserve(indexed.size() + changedFiles.size());
     for (auto &t : changedFiles) {
-        addNewFile(t);
+        updateFile(t);
     }
 
     vector<ast::ParsedFile> indexedCopies;
@@ -193,7 +192,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                 continue;
             }
             auto wasFiles = initialGS->filesUsed();
-            auto fref = addNewFile(f);
+            auto fref = updateFile(f);
             if (wasFiles != initialGS->filesUsed()) {
                 logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
                 good = false;

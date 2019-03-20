@@ -10,7 +10,7 @@ using namespace std;
 
 void LSPTest::SetUp() {
     test = GetParam();
-    lspWrapper = make_unique<LSPWrapper>(fastpathDisabled);
+    lspWrapper = make_unique<LSPWrapper>("", fastpathDisabled);
     parseTestFile();
 }
 

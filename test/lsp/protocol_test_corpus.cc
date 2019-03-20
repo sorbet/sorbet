@@ -10,7 +10,7 @@ using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
 TEST_F(ProtocolTest, AddFile) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
     ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "doesn't match `Integer`"};
@@ -34,7 +34,7 @@ TEST_F(ProtocolTest, AddFile) {
 
 // Write to the same file twice. Sorbet should only return errors from the second version.
 TEST_F(ProtocolTest, AddFileJoiningRequests) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(
         changeFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n", 2));
@@ -45,7 +45,7 @@ TEST_F(ProtocolTest, AddFileJoiningRequests) {
 
 // Purposefully makes a change to a file that causes the slow path to trigger.
 TEST_F(ProtocolTest, CacheInvalidation1) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
     ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "doesn't match `Integer`"};
@@ -69,7 +69,7 @@ TEST_F(ProtocolTest, CacheInvalidation1) {
 
 // Cancels requests before they are processed, and ensures that they are actually not processed.
 TEST_F(ProtocolTest, Cancellation) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(
         send(*openFile("foo.rb",
                        "#typed: true\nmodule Bar\n    CONST = 2\n\n    def self.meth(x)\n        x\n    "
@@ -108,7 +108,7 @@ TEST_F(ProtocolTest, Cancellation) {
 
 // Asserts that Sorbet forbids requesting definitions on untyped Ruby files, and displays a helpful messages in VS Code.
 TEST_F(ProtocolTest, DefinitionError) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(
         send(*openFile("foobar.rb", "class Foobar\n  sig {returns(Integer)}\n  def bar\n    1\n  end\nend\n\nbar\n")),
         {});
@@ -128,7 +128,7 @@ TEST_F(ProtocolTest, DefinitionError) {
 
 // Tests that Sorbet LSP removes diagnostics from future responses when they are fixed.
 TEST_F(ProtocolTest, FixErrors) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(
         send(*openFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n")),
         {{"yolo1.rb", 3, "doesn't match `Integer`"}});
@@ -138,7 +138,7 @@ TEST_F(ProtocolTest, FixErrors) {
 
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
 TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
-    initializeLSP();
+    assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
     requests.push_back(openFile("foo.rb", ""));
