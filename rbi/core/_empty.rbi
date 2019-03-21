@@ -949,9 +949,6 @@ end
 class ThreadGroup < Object
 end
 
-class TracePoint < Object
-end
-
 class TypeError < StandardError
 end
 

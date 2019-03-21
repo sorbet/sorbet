@@ -485,6 +485,23 @@ class IO < Object
   end
   def self.copy_stream(src, dst, copy_length=T.unsafe(nil), src_offset=T.unsafe(nil)); end
 
+  # https://ruby-doc.org/core-2.3.0/IO.html#method-c-popen
+  # This signature is very hard to type. I'm giving up and making it untyped.
+  # As far as I can tell, at least one arg is required, and it must be an array,
+  # but sometimes it's the first arg and sometimes it's the second arg, so
+  # let's just make everything untyped.
+  #
+  # TODO(jez) Have to declare this as a rest arg, because pay-server runtime
+  # reflection sees it this way. Once it's out of the missing method file, we
+  # can add a better sig here.
+  sig do
+    params(
+        args: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def self.popen(*args); end
+
   sig do
     params(
         name: String,

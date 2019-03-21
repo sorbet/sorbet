@@ -15,6 +15,9 @@ class Thread < Object
 
   sig {returns(T.any(TrueClass, FalseClass))}
   def alive?; end
+
+  sig {returns(T.nilable(Thread))}
+  def kill; end
 end
 
 class Thread::Backtrace::Location

@@ -4,6 +4,7 @@
 
 module SorbetRBIGeneration; end
 
+require_relative './sorbet'
 require_relative './serialize'
 require_relative './constant_cache'
 require_relative './require_everything'
@@ -386,7 +387,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
     }
 
     valid = File.read(DIFF_RBI)
-    cur_output = nil
+    cur_output = T.let(nil, T.untyped)
 
     valid.split("\n").each do |line|
       category = categorize(line)

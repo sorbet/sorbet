@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: true
+# typed: ignore
 
 class SorbetRBIGeneration::GemLoader
   NO_GEM = "_unknown"

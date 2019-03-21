@@ -19,12 +19,13 @@ class SorbetRBIGeneration::RequireEverything
       return
     end
     require './config/application'
-    Rails.application.require_environment!
-    Rails.application.eager_load!
+    rails = Object.const_get(:Rails)
+    rails.application.require_environment!
+    rails.application.eager_load!
   end
 
   def self.load_bundler
-    return unless File.exists?('Gemfile')
+    return unless File.exist?('Gemfile')
     begin
       require 'bundler'
     rescue
@@ -56,7 +57,7 @@ class SorbetRBIGeneration::RequireEverything
         errors << abs_path
         next
       ensure
-        watcher.kill
+        watcher&.kill
       end
     end
     # one more chance for order dependent things

@@ -63,4 +63,7 @@ class BasicObject
 
   sig {returns(Integer)}
   def __id__(); end
+
+  sig {returns(Integer)}
+  def object_id(); end
 end

@@ -42,8 +42,17 @@ if [ "$err" -ne 0 ]; then
     exit "$err"
 fi
 
+export ASAN_OPTIONS=detect_leaks=0
+export UBSAN_OPTIONS=print_stacktrace=1
+export LSAN_OPTIONS=verbosity=1:log_threads=1
+
 bazel build main:sorbet $args
 cp "$(bazel info bazel-bin $args)/main/sorbet" bin/sorbet
+
+/usr/local/bin/junit-script-output \
+  rbi-generation-typecheck \
+  bin/sorbet ./rbi-generation
+
 (
     cd rbi-generation
     gem build sorbet-rbi-generation.gemspec

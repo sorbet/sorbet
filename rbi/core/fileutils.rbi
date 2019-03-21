@@ -16,6 +16,18 @@ module FileUtils
 
   sig do
     params(
+        list: T.any(String, T::Array[String]),
+        force: T.nilable(T.any(TrueClass, FalseClass)),
+        noop: T.nilable(T.any(TrueClass, FalseClass)),
+        verbose: T.nilable(T.any(TrueClass, FalseClass)),
+        secure: T.nilable(T.any(TrueClass, FalseClass)),
+    )
+    .returns(T::Array[String])
+  end
+  def self.rm_r(list, force: nil, noop: nil, verbose: nil, secure: nil); end
+
+  sig do
+    params(
         list: T.any(String, Pathname),
         mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
     )

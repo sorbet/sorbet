@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 
 require 'minitest/autorun'
 require 'minitest/spec'

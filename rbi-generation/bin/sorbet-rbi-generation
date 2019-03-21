@@ -2,6 +2,7 @@
 
 module SorbetRBIGeneration; end
 
+require_relative '../lib/sorbet'
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-method-finder'
 require_relative '../lib/fetch-rbis'
@@ -15,9 +16,7 @@ module SorbetRBIGeneration::Main
     SorbetRBIGeneration::FetchRBIs.main
 
     # Generate the RBIs from bundler
-    SorbetRBIGeneration::RbiGenerator.start
-    SorbetRBIGeneration::RbiGenerator.require_everything
-    SorbetRBIGeneration::RbiGenerator.finish
+    SorbetRBIGeneration::RbiGenerator.main
 
     # Find the hidden methods
     SorbetRBIGeneration::HiddenMethodFinder.main

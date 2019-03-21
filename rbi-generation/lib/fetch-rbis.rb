@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require_relative './sorbet'
 require 'bundler'
 require 'set'
 
@@ -10,7 +11,8 @@ class SorbetRBIGeneration::FetchRBIs
   end
 
   def self.add_bundler_line
-    gemspecs = Bundler.load.specs
+    bundler = Object.const_get(:Bundler)
+    gemspecs = bundler.load.specs
     gemspecs.each do |gemspec|
       return if gemspec.name == 'rbis'
     end
