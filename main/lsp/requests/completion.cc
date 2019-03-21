@@ -187,6 +187,12 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const CompletionParams &params) {
+    if (!opts.lspAutocompleteEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Autocomplete` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,

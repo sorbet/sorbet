@@ -7,7 +7,6 @@ namespace sorbet::realmain::lsp {
 void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
                           vector<unique_ptr<SignatureInformation>> &sigs, const core::lsp::SendResponse &resp,
                           int activeParameter) {
-    prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     // signature helps only exist for methods.
     if (!method.exists() || !method.data(gs)->isMethod() || hideSymbol(gs, method)) {
         return;
@@ -48,6 +47,12 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                                const TextDocumentPositionParams &params) {
+    if (!opts.lspSignatureHelpEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Signature Help` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentSignatureHelp(), false);

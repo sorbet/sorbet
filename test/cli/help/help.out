@@ -48,6 +48,25 @@ Usage:
       --lsp                     Start in language-server-protocol mode
       --disable-watchman        When in language-server-protocol mode,
                                 disable file watching via Watchman
+      --enable-lsp-hover        Enable experimental LSP feature: Hover
+      --enable-lsp-go-to-definition
+                                Enable experimental LSP feature:
+                                Go-to-definition
+      --enable-lsp-find-references
+                                Enable experimental LSP feature: Find
+                                References
+      --enable-lsp-autocomplete
+                                Enable experimental LSP feature: Autocomplete
+      --enable-lsp-workspace-symbols
+                                Enable experimental LSP feature: Workspace
+                                Symbols
+      --enable-lsp-document-symbol
+                                Enable experimental LSP feature: Document
+                                Symbol
+      --enable-lsp-signature-help
+                                Enable experimental LSP feature: Signature
+                                Help
+      --enable-lsp-all          Enable every experimental LSP feature.
       --ignore string           Ignores input files that contain the given
                                 string in their paths (relative to the input
                                 path passed to Sorbet). Strings beginning with /

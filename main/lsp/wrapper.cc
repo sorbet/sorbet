@@ -144,4 +144,40 @@ int LSPWrapper::getTypecheckCount() const {
     return 0;
 }
 
+void LSPWrapper::enableAllExperimentalFeatures() {
+    enableExperimentalFeature(LSPExperimentalFeature::Hover);
+    enableExperimentalFeature(LSPExperimentalFeature::GoToDefinition);
+    enableExperimentalFeature(LSPExperimentalFeature::FindReferences);
+    enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
+    enableExperimentalFeature(LSPExperimentalFeature::WorkspaceSymbols);
+    enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
+    enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
+}
+
+void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
+    switch (feature) {
+        case LSPExperimentalFeature::Hover:
+            opts.lspHoverEnabled = true;
+            break;
+        case LSPExperimentalFeature::GoToDefinition:
+            opts.lspGoToDefinitionEnabled = true;
+            break;
+        case LSPExperimentalFeature::FindReferences:
+            opts.lspFindReferencesEnabled = true;
+            break;
+        case LSPExperimentalFeature::Autocomplete:
+            opts.lspAutocompleteEnabled = true;
+            break;
+        case LSPExperimentalFeature::WorkspaceSymbols:
+            opts.lspWorkspaceSymbolsEnabled = true;
+            break;
+        case LSPExperimentalFeature::DocumentSymbol:
+            opts.lspDocumentSymbolEnabled = true;
+            break;
+        case LSPExperimentalFeature::SignatureHelp:
+            opts.lspSignatureHelpEnabled = true;
+            break;
+    }
+}
+
 } // namespace sorbet::realmain::lsp

@@ -230,19 +230,23 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
 
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
-            serverCap->definitionProvider = true;
-            serverCap->documentSymbolProvider = true;
-            serverCap->workspaceSymbolProvider = true;
-            serverCap->hoverProvider = true;
-            serverCap->referencesProvider = true;
+            serverCap->definitionProvider = opts.lspGoToDefinitionEnabled;
+            serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
+            serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
+            serverCap->hoverProvider = opts.lspHoverEnabled;
+            serverCap->referencesProvider = opts.lspFindReferencesEnabled;
 
-            auto sigHelpProvider = make_unique<SignatureHelpOptions>();
-            sigHelpProvider->triggerCharacters = {"(", ","};
-            serverCap->signatureHelpProvider = move(sigHelpProvider);
+            if (opts.lspSignatureHelpEnabled) {
+                auto sigHelpProvider = make_unique<SignatureHelpOptions>();
+                sigHelpProvider->triggerCharacters = {"(", ","};
+                serverCap->signatureHelpProvider = move(sigHelpProvider);
+            }
 
-            auto completionProvider = make_unique<CompletionOptions>();
-            completionProvider->triggerCharacters = {"."};
-            serverCap->completionProvider = move(completionProvider);
+            if (opts.lspAutocompleteEnabled) {
+                auto completionProvider = make_unique<CompletionOptions>();
+                completionProvider->triggerCharacters = {"."};
+                serverCap->completionProvider = move(completionProvider);
+            }
 
             sendResponse(id, InitializeResult(move(serverCap)));
         } else if (method == LSPMethod::Shutdown()) {

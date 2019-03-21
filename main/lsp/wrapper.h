@@ -41,6 +41,16 @@ private:
     std::vector<std::unique_ptr<LSPMessage>> drainLSPResponses();
 
 public:
+    enum class LSPExperimentalFeature {
+        Hover = 1,
+        GoToDefinition = 2,
+        FindReferences = 3,
+        Autocomplete = 4,
+        WorkspaceSymbols = 5,
+        DocumentSymbol = 6,
+        SignatureHelp = 7,
+    };
+
     /** Memory allocator for rapidjson objects. */
     rapidjson::MemoryPoolAllocator<> alloc;
 
@@ -70,6 +80,18 @@ public:
      * (For tests only) Retrieve the number of times typechecking has run.
      */
     int getTypecheckCount() const;
+
+    /**
+     * Enable an experimental LSP feature.
+     * Note: Use this method *before* the client performs initialization with the server.
+     */
+    void enableExperimentalFeature(LSPExperimentalFeature feature);
+
+    /**
+     * Enable all experimental LSP features.
+     * Note: Use this method *before* the client performs initialization with the server.
+     */
+    void enableAllExperimentalFeatures();
 };
 
 } // namespace sorbet::realmain::lsp

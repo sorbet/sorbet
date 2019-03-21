@@ -11,6 +11,7 @@ using namespace std;
 void LSPTest::SetUp() {
     test = GetParam();
     lspWrapper = make_unique<LSPWrapper>("", fastpathDisabled);
+    lspWrapper->enableAllExperimentalFeatures();
     parseTestFile();
 }
 

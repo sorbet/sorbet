@@ -9,6 +9,12 @@ namespace sorbet::realmain::lsp {
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const ReferenceParams &params) {
+    if (!opts.lspFindReferencesEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Find References` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.references");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,

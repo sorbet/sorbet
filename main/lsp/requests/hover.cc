@@ -6,6 +6,12 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                                const TextDocumentPositionParams &params) {
+    if (!opts.lspHoverEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Hover` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
 
     auto result =

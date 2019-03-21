@@ -13,6 +13,12 @@ void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<JSON
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const TextDocumentPositionParams &params) {
+    if (!opts.lspGoToDefinitionEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Go To Definition` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.definition");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentDefinition(), true);

@@ -20,6 +20,12 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
 
 unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                               const WorkspaceSymbolParams &params) {
+    if (!opts.lspWorkspaceSymbolsEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Workspace Symbols` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
 
     vector<unique_ptr<JSONBaseType>> result;

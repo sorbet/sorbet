@@ -58,6 +58,7 @@ void ProtocolTest::SetUp() {
     bool disableFastPath = false;
     lspWrapper = make_unique<LSPWrapper>(rootPath, disableFastPath);
     lspWrapper->opts.fs = fs;
+    lspWrapper->enableAllExperimentalFeatures();
 }
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP() {

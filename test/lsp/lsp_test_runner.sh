@@ -32,7 +32,7 @@ cleanup() {
 }
 trap cleanup exit
 
-main/sorbet --silence-dev-message --lsp --disable-watchman "$(dirname "$recfile")" < "$in_pipe" > "$out_pipe" &
+main/sorbet --silence-dev-message --lsp --disable-watchman --enable-lsp-all "$(dirname "$recfile")" < "$in_pipe" > "$out_pipe" &
 
 # This should be
 # exec {IN_FD}>"$in_pipe"

@@ -112,6 +112,15 @@ struct Options {
     std::vector<std::string> relativeIgnorePatterns;
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
+    // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
+    bool lspGoToDefinitionEnabled;
+    bool lspFindReferencesEnabled;
+    bool lspAutocompleteEnabled;
+    bool lspWorkspaceSymbolsEnabled;
+    bool lspDocumentSymbolEnabled;
+    bool lspSignatureHelpEnabled;
+    bool lspHoverEnabled;
+
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
 

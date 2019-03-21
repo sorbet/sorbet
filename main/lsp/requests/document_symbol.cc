@@ -67,6 +67,12 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs,
                                                                         const MessageId &id,
                                                                         const DocumentSymbolParams &params) {
+    if (!opts.lspDocumentSymbolEnabled) {
+        sendError(id, (int)LSPErrorCodes::InvalidRequest,
+                  "The `Document Symbol` LSP feature is experimental and disabled by default.");
+        return gs;
+    }
+
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.documentSymbol");
     vector<unique_ptr<JSONBaseType>> result;
     string_view uri = params.textDocument->uri;
