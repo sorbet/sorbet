@@ -12,6 +12,7 @@ Usage:
   -v, --verbose                 Verbosity level [0-3]
   -h, --help                    Show long help
       --version                 Show version
+      --licence                 Show licence
       --color {always,never,[auto]}
                                 Use color output (default: auto)
 
@@ -28,6 +29,7 @@ Usage:
   -v, --verbose                 Verbosity level [0-3]
   -h, --help                    Show long help
       --version                 Show version
+      --licence                 Show licence
       --color {always,never,[auto]}
                                 Use color output (default: auto)
 

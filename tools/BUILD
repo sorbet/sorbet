@@ -10,6 +10,7 @@ compilation_database(
     testonly = True,
     targets = [
         # BEGIN compile_commands targets
+        "//third_party/licences:generate_licences",
         "//test/lsp:watchman_test_corpus",
         "//test/lsp:protocol_test_corpus",
         "//test/fuzz:fuzz_hover",
@@ -59,6 +60,7 @@ compilation_database(
         "//infer:infer",
         "//main/options:options",
         "//version:version",
+        "//third_party/licences:licences",
         "//main/autogen:autogen",
         "//dsl:dsl",
         "//core/serialize:serialize_test",

@@ -686,7 +686,7 @@ vector<Expectations> getInputs(string singleTest) {
 } // namespace sorbet::test
 
 int main(int argc, char *argv[]) {
-    cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
+    cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<std::string>()->default_value(""), "testpath");
     options.add_options()("lsp-disable-fastpath", "disable fastpath in lsp tests");

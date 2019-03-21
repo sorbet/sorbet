@@ -10,6 +10,7 @@
 #include "main/options/options.h"
 #include "options.h"
 #include "sys/stat.h"
+#include "third_party/licences/licences.h"
 #include "version/version.h"
 
 namespace spd = spdlog;
@@ -161,6 +162,7 @@ cxxopts::Options buildOptions() {
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
     options.add_options()("version", "Show version");
+    options.add_options()("licence", "Show licence");
     options.add_options()("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
                           "{always,never,[auto]}");
 
@@ -402,7 +404,13 @@ void readOptions(Options &opts, int argc, char *argv[],
             throw EarlyReturnWithCode(0);
         }
         if (raw["version"].as<bool>()) {
-            fmt::print("Ruby Typer {}\n", Version::full_version_string);
+            fmt::print("Sorbet typechecker {}\n", Version::full_version_string);
+            throw EarlyReturnWithCode(0);
+        }
+        if (raw["licence"].as<bool>()) {
+            fmt::print(
+                "Sorbet typechecker is licenced under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
+                fmt::map_join(third_party::licences::all(), "\n\n", [](const auto &pair) { return pair.second; }));
             throw EarlyReturnWithCode(0);
         }
 

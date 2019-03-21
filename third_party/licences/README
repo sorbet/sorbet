@@ -1,0 +1,2 @@
+Every <name>.txt file here just gets concatenated into output of sorbet --licence
+It's a low-tech hack, that might be superceeded by https://github.com/bazelbuild/bazel/issues/7444.
