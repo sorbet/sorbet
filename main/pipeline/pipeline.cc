@@ -400,20 +400,70 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     fileData.strictLevel = decideStrictLevel(*gs, file, opts);
 }
 
-struct IndexResultPack {
+struct IndexResult {
     unique_ptr<core::GlobalState> gs;
-    CounterState counters;
     vector<ast::ParsedFile> trees;
     vector<shared_ptr<core::File>> pluginGeneratedFiles;
 };
 
-pair<unique_ptr<core::GlobalState>, vector<IndexResultPack>>
-indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                   const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
-                   shared_ptr<spdlog::logger> &logger) {
-    ProgressIndicator indexingProgress(opts.showProgress, "Indexing (supplied)", files.size());
+struct IndexThreadResultPack {
+    CounterState counters;
+    IndexResult res;
+};
 
-    auto resultq = make_shared<BlockingBoundedQueue<IndexResultPack>>(files.size());
+IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
+                              shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
+                              unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
+    ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
+    logger->trace("Collecting results from indexing threads");
+    IndexThreadResultPack threadResult;
+    IndexResult ret;
+    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
+         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+        if (result.gotItem()) {
+            logger->trace("Consuming counters");
+            counterConsume(move(threadResult.counters));
+            if (ret.gs == nullptr) {
+                ret.gs = move(threadResult.res.gs);
+                ENFORCE(ret.trees.empty());
+                ret.trees = move(threadResult.res.trees);
+                ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
+            } else {
+                logger->trace("Building global substitution");
+                core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
+                core::MutableContext ctx(*ret.gs, core::Symbols::root());
+                logger->trace("Running tree substitution");
+                for (auto &tree : threadResult.res.trees) {
+                    auto file = tree.file;
+                    core::ErrorRegion errs(*ret.gs, file);
+                    if (!file.data(*ret.gs).cachedParseTree) {
+                        tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+                        if (kvstore) {
+                            string fileHashKey = fileKey(*ret.gs, file);
+                            kvstore->write(fileHashKey,
+                                           core::serialize::Serializer::storeExpression(*ret.gs, tree.tree));
+                        }
+                    }
+                    ret.trees.emplace_back(move(tree));
+                }
+                ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
+                                                make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
+                                                make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
+
+                logger->trace("Tree substitution done");
+            }
+            progress.reportProgress(input->doneEstimate());
+            ret.gs->errorQueue->flushErrors();
+        }
+    }
+    logger->trace("Done collecting results from indexing threads");
+    return ret;
+}
+
+IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
+                               const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
+                               shared_ptr<spdlog::logger> &logger) {
+    auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
         fileq->push(move(file), 1);
@@ -423,7 +473,7 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
         logger->trace("worker deep copying global state");
         auto localGs = baseGs->deepCopy();
         logger->trace("worker done deep copying global state");
-        IndexResultPack threadResult;
+        IndexThreadResultPack threadResult;
 
         {
             core::FileRef job;
@@ -432,103 +482,85 @@ indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::Fil
                     core::FileRef file = job;
                     readFileWithStrictnessOverrides(localGs, file, opts, logger);
                     auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, kvstore, logger);
-                    threadResult.pluginGeneratedFiles.insert(threadResult.pluginGeneratedFiles.end(),
-                                                             make_move_iterator(pluginFiles.begin()),
-                                                             make_move_iterator(pluginFiles.end()));
-                    threadResult.trees.emplace_back(move(parsedFile));
+                    threadResult.res.pluginGeneratedFiles.insert(threadResult.res.pluginGeneratedFiles.end(),
+                                                                 make_move_iterator(pluginFiles.begin()),
+                                                                 make_move_iterator(pluginFiles.end()));
+                    threadResult.res.trees.emplace_back(move(parsedFile));
                 }
             }
         }
 
-        if (!threadResult.trees.empty()) {
+        if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
-            threadResult.gs = move(localGs);
-            resultq->push(move(threadResult), threadResult.trees.size());
+            threadResult.res.gs = move(localGs);
+            resultq->push(move(threadResult), threadResult.res.trees.size());
         }
     });
 
-    logger->trace("Deep copying global state");
-    unique_ptr<core::GlobalState> gsCopy = baseGs->deepCopy();
-    logger->trace("Done deep copying global state");
-
     logger->trace("Tallying plugin generated files from threads");
-    vector<IndexResultPack> threadResults;
-    {
-        IndexResultPack threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-             result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
-            if (result.gotItem()) {
-                threadResults.emplace_back(move(threadResult));
-            }
-            indexingProgress.reportProgress(fileq->doneEstimate());
-        }
-    }
+    auto ret = mergeIndexResults(baseGs, opts, resultq, kvstore, logger);
     logger->trace("Done tallying plugin generated files from threads");
 
-    return {move(gsCopy), move(threadResults)};
+    return ret;
 }
 
-struct PluginFileIndexResult {
-    size_t pluginFileCount;
-    shared_ptr<BlockingBoundedQueue<IndexResultPack>> resultq;
-    unique_ptr<core::GlobalState> gsWithPluginFiles;
-};
-
-PluginFileIndexResult indexPluginFiles(unique_ptr<core::GlobalState> gs, vector<IndexResultPack> firstPass,
-                                       const options::Options &opts, WorkerPool &workers,
-                                       unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
-    size_t pluginFileCount = 0;
-    size_t suppliedFileCount = 0;
-    for (const auto &threadResult : firstPass) {
-        pluginFileCount += threadResult.pluginGeneratedFiles.size();
-        suppliedFileCount += threadResult.trees.size();
+IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
+                             unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
+    if (firstPass.pluginGeneratedFiles.empty()) {
+        return firstPass;
     }
-
-    auto resultq = make_shared<BlockingBoundedQueue<IndexResultPack>>(suppliedFileCount + pluginFileCount);
-    auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(pluginFileCount);
-    for (auto &threadResult : firstPass) {
-        core::UnfreezeFileTable unfreezeFiles(*gs);
-        const auto processedByThread = threadResult.trees.size();
-        for (const auto &file : threadResult.pluginGeneratedFiles) {
+    auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(firstPass.pluginGeneratedFiles.size());
+    auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(firstPass.pluginGeneratedFiles.size());
+    {
+        core::UnfreezeFileTable unfreezeFiles(*firstPass.gs);
+        for (const auto &file : firstPass.pluginGeneratedFiles) {
             logger->trace("enqueue (plugin): {}", file->path());
-            auto generatedFile = gs->enterFile(file);
+            auto generatedFile = firstPass.gs->enterFile(file);
             pluginFileq->push(move(generatedFile), 1);
         }
-        resultq->push(move(threadResult), processedByThread);
     }
+    const shared_ptr<core::GlobalState> protoGs = move(firstPass.gs);
+    workers.multiplexJob("indexPluginFiles", [protoGs, &opts, pluginFileq, resultq, &kvstore, logger]() {
+        logger->trace("worker deep copying global state");
+        auto localGs = protoGs->deepCopy();
+        logger->trace("worker done deep copying global state");
+        IndexThreadResultPack threadResult;
+        core::FileRef job;
 
-    PluginFileIndexResult result{pluginFileCount, resultq, nullptr};
-    if (pluginFileCount > 0) {
-        shared_ptr<core::GlobalState> protoGs = move(gs);
-        workers.multiplexJob("indexPluginFiles", [protoGs, &opts, pluginFileq, resultq, &kvstore, logger]() {
-            logger->trace("worker deep copying global state");
-            auto localGs = protoGs->deepCopy();
-            logger->trace("worker done deep copying global state");
-            IndexResultPack threadResult;
-            core::FileRef job;
-
-            for (auto result = pluginFileq->try_pop(job); !result.done(); result = pluginFileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    core::FileRef file = job;
-                    decideStrictLevel(*localGs, file, opts);
-                    threadResult.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger));
-                }
+        for (auto result = pluginFileq->try_pop(job); !result.done(); result = pluginFileq->try_pop(job)) {
+            if (result.gotItem()) {
+                core::FileRef file = job;
+                decideStrictLevel(*localGs, file, opts);
+                threadResult.res.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger));
             }
+        }
 
-            if (!threadResult.trees.empty()) {
-                threadResult.counters = getAndClearThreadCounters();
-                threadResult.gs = move(localGs);
-                resultq->push(move(threadResult), threadResult.trees.size());
-            }
-        });
-        logger->trace("Deep copying global state (plugins)");
-        result.gsWithPluginFiles = protoGs->deepCopy();
-        logger->trace("Done deep copying global state (plugins)");
-    } else {
-        result.gsWithPluginFiles = move(gs);
+        if (!threadResult.res.trees.empty()) {
+            threadResult.counters = getAndClearThreadCounters();
+            threadResult.res.gs = move(localGs);
+            auto sizeIncrement = threadResult.res.trees.size();
+            resultq->push(move(threadResult), sizeIncrement);
+        }
+    });
+    auto indexedPluginFiles = mergeIndexResults(protoGs, opts, resultq, kvstore, logger);
+    IndexResult suppliedFilesAndPluginFiles;
+    if (indexedPluginFiles.trees.empty()) {
+        return firstPass;
     }
-
-    return result;
+    suppliedFilesAndPluginFiles.gs = move(indexedPluginFiles.gs);
+    core::GlobalSubstitution substitution(*protoGs, *suppliedFilesAndPluginFiles.gs, protoGs.get());
+    core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root());
+    logger->trace("Running tree substitution");
+    for (auto &tree : firstPass.trees) {
+        auto file = tree.file;
+        core::ErrorRegion errs(*suppliedFilesAndPluginFiles.gs, file);
+        tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+    }
+    suppliedFilesAndPluginFiles.trees = move(firstPass.trees);
+    suppliedFilesAndPluginFiles.trees.insert(suppliedFilesAndPluginFiles.trees.end(),
+                                             make_move_iterator(indexedPluginFiles.trees.begin()),
+                                             make_move_iterator(indexedPluginFiles.trees.end()));
+    return suppliedFilesAndPluginFiles;
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
@@ -563,48 +595,10 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
-        const shared_ptr<core::GlobalState> cgs = move(gs);
-
-        auto [pluginGs, firstPass] = indexSuppliedFiles(cgs, files, opts, workers, kvstore, logger);
-        auto pluginPass = indexPluginFiles(move(pluginGs), move(firstPass), opts, workers, kvstore, logger);
-        gs = move(pluginPass.gsWithPluginFiles);
-
-        {
-            ProgressIndicator progress(opts.showProgress, "Indexing (plugins + merge)",
-                                       files.size() + pluginPass.pluginFileCount);
-            logger->trace("Collecting results from indexing threads");
-            IndexResultPack threadResult;
-            for (auto result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS);
-                 !result.done();
-                 result = pluginPass.resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
-                if (result.gotItem()) {
-                    logger->trace("Building global substitution");
-                    core::GlobalSubstitution substitution(*threadResult.gs, *gs, cgs.get());
-                    logger->trace("Consuming counters");
-                    counterConsume(move(threadResult.counters));
-                    core::MutableContext ctx(*gs, core::Symbols::root());
-                    logger->trace("Running tree substitution");
-                    for (auto &tree : threadResult.trees) {
-                        auto file = tree.file;
-                        core::ErrorRegion errs(*gs, file);
-                        if (!file.data(*gs).cachedParseTree) {
-                            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
-                            if (kvstore) {
-                                string fileHashKey = fileKey(*gs, file);
-                                kvstore->write(fileHashKey,
-                                               core::serialize::Serializer::storeExpression(*gs, tree.tree));
-                            }
-                        }
-                        ret.emplace_back(move(tree));
-                    }
-                    logger->trace("Tree substitution done");
-                }
-                gs->errorQueue->flushErrors();
-            }
-            progress.reportProgress(pluginPass.resultq->doneEstimate());
-            logger->trace("Done collecting results from indexing threads");
-        }
-        ENFORCE(files.size() + pluginPass.pluginFileCount == ret.size());
+        auto firstPass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, logger);
+        auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore, logger);
+        gs = move(pluginPass.gs);
+        ret = move(pluginPass.trees);
     }
 
     auto by_file = [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; };
