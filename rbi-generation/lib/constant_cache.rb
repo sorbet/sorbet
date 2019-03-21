@@ -97,8 +97,13 @@ class SorbetRBIGeneration::ConstantLookupCache
   end
 
   private def real_is_a?(o, klass)
-    @read_is_a ||= Object.instance_method(:is_a?)
-    @read_is_a.bind(o).call(klass)
+    @real_is_a ||= Object.instance_method(:is_a?)
+    @real_is_a.bind(o).call(klass)
+  end
+
+  private def real_name(o)
+    @real_name ||= Module.instance_method(:name)
+    @real_name.bind(o).call
   end
 
   private def dfs_module(mod, prefix, ret, owner)
@@ -144,7 +149,7 @@ class SorbetRBIGeneration::ConstantLookupCache
             maybe_seen_already.aliases << nested_name
           end
           if maybe_seen_already.primary_name.nil? && real_is_a?(nested_constant, Module)
-            realName = nested_constant.name
+            realName = real_name(nested_constant)
             maybe_seen_already.primary_name = realName
           end
         else
