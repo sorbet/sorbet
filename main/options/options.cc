@@ -475,6 +475,13 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (opts.suggestTyped) {
+            if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code} &&
+                raw["typed"].as<string>() != "strict") {
+                logger->error(
+                    "--suggest-typed must also include `{}`",
+                    fmt::format("{}{}", "--typed=strict --error-white-list=", core::errors::Infer::SuggestTyped.code));
+                throw EarlyReturnWithCode(1);
+            }
             if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code}) {
                 logger->error("--suggest-typed must also include `{}`",
                               fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
