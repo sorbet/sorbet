@@ -95,7 +95,7 @@ class SorbetRBIGeneration::Serialize
       next if SorbetRBIGeneration::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym)
-      rescue LoadError, NameError
+      rescue LoadError, NameError, RuntimeError
         puts "Failed to load #{class_name}::#{const_sym}"
         next
       end
@@ -109,7 +109,7 @@ class SorbetRBIGeneration::Serialize
       next if SorbetRBIGeneration::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
-      rescue LoadError, NameError
+      rescue LoadError, NameError, RuntimeError
         puts "Failed to load #{class_name}::#{const_sym}"
         next
       end
