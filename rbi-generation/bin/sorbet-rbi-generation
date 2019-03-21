@@ -5,6 +5,7 @@ module SorbetRBIGeneration; end
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-method-finder'
 require_relative '../lib/fetch-rbis'
+require_relative '../lib/suggest-typed'
 
 module SorbetRBIGeneration::Main
   def self.main
@@ -20,6 +21,9 @@ module SorbetRBIGeneration::Main
 
     # Find the hidden methods
     SorbetRBIGeneration::HiddenMethodFinder.main
+
+    # Put some `typed:` sigils
+    SorbetRBIGeneration::SuggestTyped.main
 
     puts "This script has probably generated many changed files in your current directory. Please commit them all. The typechecker will make sure they are all still valid."
   end
