@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 module SorbetRBIGeneration; end
 class SorbetRBIGeneration::SuggestTyped
@@ -10,7 +11,8 @@ class SorbetRBIGeneration::SuggestTyped
         return true
       end
     end
-    return false
+    puts "Adding `typed:` sigils did not converge after 100 tries."
+    false
   end
 
   def self.suggest_typed
@@ -19,9 +21,9 @@ class SorbetRBIGeneration::SuggestTyped
       err: [:child, :out],
     ) do |io|
       out = io.read
-      return true if "No errors! Great job.\n" == out
+      return true if out == "No errors! Great job.\n"
     end
-    return false
+    false
   end
 end
 
