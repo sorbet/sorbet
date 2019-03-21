@@ -149,6 +149,44 @@ class <emptyTree><<C <U <root>>>> < ()
     end
   end
 
+  class <emptyTree>::<C <U MixinStruct>><<C <U <todo sym>>>> < (::<todo sym>)
+    module <emptyTree>::<C <U MyMixin>><<C <U <todo sym>>>> < ()
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+        <emptyTree>
+      end
+    end
+
+    class <emptyTree>::<C <U MyStruct>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <U <self>>.<U include>(<emptyTree>::<C <U MyMixin>>)
+
+      <U <self>>.<U new>().<U x>()
+
+      <U <self>>.<U new>().<U foo>()
+
+      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+
+      def <U x><<C <U <todo sym>>>>(&<U <blk>>)
+        <emptyTree>
+      end
+
+      def <U x=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
+      end
+
+      ::Sorbet.<U sig>() do ||
+        <U <self>>.<U params>({:"x" => ::BasicObject}).<U returns>(<emptyTree>::<C <U MyStruct>>)
+      end
+
+      def self.<U new><<C <U <todo sym>>>>(<U x> = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U MyStruct>>)
+      end
+    end
+
+    <emptyTree>::<C <U MyStruct>>.<U new>().<U x>()
+
+    <emptyTree>::<C <U MyStruct>>.<U new>().<U foo>()
+  end
+
   class <emptyTree>::<C <U Main>><<C <U <todo sym>>>> < (::<todo sym>)
     def <U main><<C <U <todo sym>>>>(&<U <blk>>)
       begin

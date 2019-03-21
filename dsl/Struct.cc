@@ -59,6 +59,18 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
     ast::Hash::ENTRY_store sigValues;
     ast::ClassDef::RHS_store body;
 
+    if (send->block != nullptr) {
+        // Steal the trees, because the replaceDSL is going to remove the original send node from the tree anyway.
+        if (auto insSeq = ast::cast_tree<ast::InsSeq>(send->block->body.get())) {
+            for (auto &&stat : insSeq->stats) {
+                body.emplace_back(move(stat));
+            }
+            body.emplace_back(move(insSeq->expr));
+        } else {
+            body.emplace_back(move(send->block->body));
+        }
+    }
+
     // Elem = type_member(fixed: T.untyped)
     body.emplace_back(ast::MK::Assign(
         loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),

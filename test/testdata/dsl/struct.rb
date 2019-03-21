@@ -41,6 +41,21 @@ class AccidentallyStruct
     A = Struct.new(:foo, :bar)
 end
 
+class MixinStruct
+  module MyMixin
+    def foo; end
+  end
+
+  MyStruct = Struct.new(:x) do
+    include MyMixin
+    self.new.x
+    self.new.foo
+  end
+
+  MyStruct.new.x
+  MyStruct.new.foo
+end
+
 class Main
     def main
         a = Struct.new(:foo)
