@@ -31,14 +31,14 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     string argString;
     if (argLit != nullptr) {
         if (argLit->isString(ctx)) {
-            return argLit->asString(ctx).toString(ctx);
+            return argLit->asString(ctx).show(ctx);
         } else if (argLit->isSymbol(ctx)) {
-            return argLit->asSymbol(ctx).toString(ctx);
+            return argLit->asSymbol(ctx).show(ctx);
         }
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
     if (argConstant != nullptr) {
-        return argConstant->cnst.toString(ctx);
+        return argConstant->cnst.show(ctx);
     }
     return arg->toString(ctx);
 }
