@@ -314,7 +314,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
     core::StrictLevel minStrict = opts.forceMinStrict;
     core::StrictLevel maxStrict = opts.forceMaxStrict;
-    if (level <= core::StrictLevel::Max && level >= core::StrictLevel::None) {
+    if (level <= core::StrictLevel::Max && level > core::StrictLevel::Ignore) {
         level = max(min(level, maxStrict), minStrict);
     }
 

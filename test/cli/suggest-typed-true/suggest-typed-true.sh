@@ -57,4 +57,8 @@ separator
 "$cwd/main/sorbet" --silence-dev-message --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-with-too-low.rb 2>&1
 separator
 
+"$cwd/main/sorbet" --silence-dev-message -a --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-already-ignore.rb 2>&1
+cat suggest-typed-already-ignore.rb
+separator
+
 rm -r "$tmp"
