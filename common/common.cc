@@ -25,6 +25,11 @@ shared_ptr<spdlog::logger> makeFatalLogger() {
 } // namespace
 shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
+bool sorbet::FileOps::exists(string_view filename) {
+    struct stat buffer;
+    return (stat((string(filename)).c_str(), &buffer) == 0);
+}
+
 string sorbet::FileOps::read(string_view filename) {
     FILE *fp = std::fopen((string(filename)).c_str(), "rb");
     if (fp) {

@@ -6,23 +6,39 @@
 using namespace std;
 namespace sorbet::realmain::options {
 
+void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename) {
+    try {
+        string argsP = FileOps::read(filename);
+        string_view argsPView = argsP;
+        if (!argsPView.empty() && argsPView.back() == '\n') {
+            argsPView = argsPView.substr(0, argsPView.size() - 1);
+        }
+        for (string_view arg : absl::StrSplit(argsPView, '\n')) {
+            stringArgs.emplace_back(string(arg));
+        }
+    } catch (FileNotFoundException e) {
+        logger->error("File Not Found: {}", filename);
+        throw EarlyReturnWithCode(11);
+    }
+}
+
 FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger)
     : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
-    for (int i = 0; i < argc; i++) {
+    if (argc > 0) {
+        // $0 / $PROGRAM_NAME should always be first
+        stringArgs.emplace_back(argv[0]);
+    }
+
+    // Look for .sorbet/config before all other args, so that the CLI args can overwrite the config file
+    auto configFilename = ".sorbet/config";
+    if (FileOps::exists(configFilename)) {
+        // TODO(jez) Recurse upwards to find file in parent directory
+        readArgsFromFile(logger, configFilename);
+    }
+
+    for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '@') {
-            try {
-                string argsP = FileOps::read(argv[i] + 1);
-                string_view argsPView = argsP;
-                if (!argsPView.empty() && argsPView.back() == '\n') {
-                    argsPView = argsPView.substr(0, argsPView.size() - 1);
-                }
-                for (string_view arg : absl::StrSplit(argsPView, '\n')) {
-                    stringArgs.emplace_back(string(arg));
-                }
-            } catch (FileNotFoundException e) {
-                logger->error("File Not Found: {}", argv[i]);
-                throw EarlyReturnWithCode(11);
-            }
+            readArgsFromFile(logger, argv[i] + 1);
         } else {
             stringArgs.emplace_back(argv[i]);
         }

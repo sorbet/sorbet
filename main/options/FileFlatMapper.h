@@ -16,6 +16,8 @@ class FileFlatMapper {
     // Pointers into those args will be passed in argv
     std::vector<std::string> stringArgs;
 
+    void readArgsFromFile(std::shared_ptr<spdlog::logger> logger, std::string_view filename);
+
 public:
     FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger);
 

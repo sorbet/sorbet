@@ -14,6 +14,7 @@ def cli_test(path):
             "{}/*.rbi".format(name),
             "{}/*.yaml".format(name),
             "{}/*.input".format(name),
+            "{}/.sorbet/*".format(name),
         ]) + ["//main:sorbet"]
     )
 

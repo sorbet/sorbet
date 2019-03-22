@@ -133,6 +133,7 @@ template <class From, class To> To *fast_cast(From *what) {
 
 class FileOps final {
 public:
+    static bool exists(std::string_view filename);
     static std::string read(std::string_view filename);
     static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
     static void write(std::string_view filename, std::string_view text);

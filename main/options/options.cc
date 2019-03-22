@@ -3,7 +3,6 @@
 #include "yaml-cpp/yaml.h"
 #include <cxxopts.hpp>
 
-#include "FileFlatMapper.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/FileFlatMapper.h"
