@@ -168,14 +168,15 @@ std::string_view LSPMessage::method() const {
 const rapidjson::Value &LSPMessage::params() const {
     if (isRequest()) {
         if (auto &params = asRequest().params) {
-            // optional unique_ptr => ref
-            return **params;
+            if (params.has_value()) {
+                // optional unique_ptr => ref
+                return **params;
+            }
         }
     } else if (isNotification()) {
         if (auto &params = asNotification().params) {
-            if (auto singleParam = get_if<unique_ptr<rapidjson::Value>>(&(*params))) {
-                // unique_ptr ptr -> ref
-                return **singleParam;
+            if (params.has_value()) {
+                return **params;
             }
         }
     }

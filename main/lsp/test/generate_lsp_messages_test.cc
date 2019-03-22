@@ -180,34 +180,30 @@ string makeNotificationMessage(string_view params) {
 }
 
 TEST(GenerateLSPMessagesTest, AnyObject) {
-    parseTest<NotificationMessage>(alloc, makeNotificationMessage("{\"jim\": \"henson\"}"), [](auto &msg) -> void {
-        auto &paramsOptional = msg->params;
-        ASSERT_TRUE(paramsOptional.has_value());
-        auto &paramsVariant = *paramsOptional;
-        auto paramsPtr = get_if<std::unique_ptr<rapidjson::Value>>(&paramsVariant);
-        ASSERT_NE(paramsPtr, nullptr);
-        auto &params = *paramsPtr;
-        ASSERT_TRUE(params->IsObject());
-    });
+    parseTest<DocumentFormattingParams>(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}",
+                                        [](auto &params) -> void { ASSERT_TRUE(params->options->IsObject()); });
 
     // Deserialization: Must be an object.
-    ASSERT_THROW(NotificationMessage::fromJSON(alloc, makeNotificationMessage("true")), JSONTypeError);
+    ASSERT_THROW(DocumentFormattingParams::fromJSON(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": true}"),
+                 JSONTypeError);
 
     // Serialization: Must be an object.
     // Null pointer case
-    auto notificationMessage = make_unique<NotificationMessage>("2.0", "foo");
-    notificationMessage->params = nullptr;
-    ASSERT_THROW(notificationMessage->toJSON(), NullPtrError);
+    auto formattingParams =
+        DocumentFormattingParams::fromJSON(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}");
+    formattingParams->options = nullptr;
+    ASSERT_THROW(formattingParams->toJSON(), NullPtrError);
 
     // Non-object case
-    notificationMessage->params = make_unique<rapidjson::Value>(rapidjson::kNullType);
-    ASSERT_THROW(notificationMessage->toJSON(), InvalidTypeError);
+    formattingParams->options = make_unique<rapidjson::Value>(rapidjson::kNullType);
+    ASSERT_THROW(formattingParams->toJSON(), InvalidTypeError);
 
     // New object case -- doesn't throw and stresses supported APIs for making values.
-    auto notifMsg = NotificationMessage::fromJSON(alloc, makeNotificationMessage("{}"));
+    auto formattingParams2 =
+        DocumentFormattingParams::fromJSON(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}");
     auto range = make_unique<Position>(0, 0);
-    notifMsg->params = range->toJSONValue(alloc);
-    ASSERT_NO_THROW(notifMsg->toJSON());
+    formattingParams2->options = range->toJSONValue(alloc);
+    ASSERT_NO_THROW(formattingParams2->toJSON());
 }
 
 TEST(GenerateLSPMessagesTest, StringConstant) {

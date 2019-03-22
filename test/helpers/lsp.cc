@@ -262,14 +262,7 @@ optional<unique_ptr<PublishDiagnosticsParams>> getPublishDiagnosticParams(rapidj
         return nullopt;
     }
     auto &params = *notifMsg.params;
-    auto paramsValuePtr = get_if<unique_ptr<rapidjson::Value>>(&params);
-    if (!paramsValuePtr) {
-        // It's an array rather than a single object.
-        ADD_FAILURE() << "textDocument/publishDiagnostics message unexpectedly had array in `params` field";
-        return nullopt;
-    }
-    auto &paramsValue = *paramsValuePtr;
-    return PublishDiagnosticsParams::fromJSONValue(alloc, *paramsValue.get(), "NotificationMessage.params");
+    return PublishDiagnosticsParams::fromJSONValue(alloc, *params.get(), "NotificationMessage.params");
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,

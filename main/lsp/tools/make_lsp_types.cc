@@ -85,11 +85,10 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
          makeField("result", makeOptional(JSONAny)), makeField("error", makeOptional(ResponseError))},
         classTypes);
-    auto NotificationMessage =
-        makeObject("NotificationMessage",
-                   {makeField("jsonrpc", JSONRPCConstant), makeField("method", JSONString),
-                    makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject})))},
-                   classTypes);
+    auto NotificationMessage = makeObject("NotificationMessage",
+                                          {makeField("jsonrpc", JSONRPCConstant), makeField("method", JSONString),
+                                           makeField("params", makeOptional(JSONAny))},
+                                          classTypes);
 
     auto CancelParams = makeObject("CancelParams",
                                    {
