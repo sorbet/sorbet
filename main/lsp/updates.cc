@@ -21,6 +21,23 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+LSPLoop::ShowOperation::ShowOperation(LSPLoop &loop, string_view operationName, string_view description)
+    : loop(loop), operationName(string(operationName)), description(string(description)) {
+    if (loop.enableOperationNotifications) {
+        SorbetShowOperationParams slowPathOp((double)Timer::currentTimeNanos(), this->operationName, this->description,
+                                             SorbetOperationStatus::Start);
+        loop.sendNotification(LSPMethod::SorbetShowOperation(), slowPathOp);
+    }
+}
+
+LSPLoop::ShowOperation::~ShowOperation() {
+    if (loop.enableOperationNotifications) {
+        SorbetShowOperationParams slowPathOp((double)Timer::currentTimeNanos(), operationName, description,
+                                             SorbetOperationStatus::End);
+        loop.sendNotification(LSPMethod::SorbetShowOperation(), slowPathOp);
+    }
+}
+
 core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     core::FileRef fref;
     if (!file)
@@ -101,6 +118,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 }
 
 void LSPLoop::reIndexFromFileSystem() {
+    ShowOperation op(*this, "Indexing", "Sorbet: Indexing files...");
     indexed.clear();
     vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames, logger);
     for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore, logger)) {
@@ -135,6 +153,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 }
 
 LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
+    ShowOperation slowPathOp(*this, "SlowPath", "Sorbet: Typechecking...");
     ENFORCE(initialGS->errorQueue->isEmpty());
     prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");

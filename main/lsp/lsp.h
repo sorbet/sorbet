@@ -129,6 +129,9 @@ struct LSPMethod {
     static const inline LSPMethod SorbetWatchmanExit() {
         return LSPMethod{"sorbet/watchmanExit", true, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod SorbetShowOperation() {
+        return LSPMethod{"sorbet/showOperation", true, LSPMethod::Kind::ServerInitiated};
+    };
     static const std::vector<LSPMethod> ALL_METHODS;
     static const LSPMethod getByName(std::string_view name);
 };
@@ -165,6 +168,22 @@ class LSPLoop {
         std::function<void(rapidjson::Value &)> onResult;
         std::function<void(rapidjson::Value &)> onError;
     };
+
+    /**
+     * Object that uses the RAII pattern to notify the client when a *slow* operation
+     * starts and ends. Is used to provide user feedback in the status line of VS Code.
+     */
+    class ShowOperation final {
+    private:
+        LSPLoop &loop;
+        const std::string operationName;
+        const std::string description;
+
+    public:
+        ShowOperation(LSPLoop &loop, std::string_view operationName, std::string_view description);
+        ~ShowOperation();
+    };
+
     UnorderedMap<std::string, ResponseHandler> awaitingResponse;
     /** LSP loop reuses a single arena for all json allocations. We never free memory used for JSON */
     rapidjson::MemoryPoolAllocator<> alloc;
@@ -217,6 +236,13 @@ class LSPLoop {
      * TODO(jvilk): Use to raise server not initialized errors.
      */
     bool initialized = false;
+    /**
+     * If true, then LSP will send the client notifications at the start and end of slow operations.
+     * We don't want to send these notifications to clients that don't know what to do with them,
+     * so this boolean gets set when the client sends the `initialize` request with
+     * `params.initializationOptions.supportsOperationNotifications` set to `true`.
+     */
+    bool enableOperationNotifications = false;
 
     /* Send the following document to client */
     void sendRaw(std::string_view json);

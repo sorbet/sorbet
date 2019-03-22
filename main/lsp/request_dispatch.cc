@@ -228,6 +228,15 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 }
             }
 
+            if (params->initializationOptions) {
+                auto &initOptions = *params->initializationOptions;
+                if (initOptions->IsObject()) {
+                    auto sorbetInitOptions =
+                        SorbetInitializationOptions::fromJSONValue(alloc, *initOptions, "params.initializationOptions");
+                    enableOperationNotifications = sorbetInitOptions->supportsOperationNotifications.value_or(false);
+                }
+            }
+
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
             serverCap->definitionProvider = opts.lspGoToDefinitionEnabled;

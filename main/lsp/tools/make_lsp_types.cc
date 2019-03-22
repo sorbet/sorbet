@@ -1224,6 +1224,22 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    },
                    classTypes);
 
+    auto SorbetInitializationOptions =
+        makeObject("SorbetInitializationOptions",
+                   {
+                       makeField("supportsOperationNotifications", makeOptional(JSONBool)),
+                   },
+                   classTypes);
+    auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
+    auto SorbetShowOperationParams = makeObject("SorbetShowOperationParams",
+                                                {
+                                                    makeField("timestamp", JSONDouble),
+                                                    makeField("operationName", JSONString),
+                                                    makeField("description", JSONString),
+                                                    makeField("status", SorbetOperationStatus),
+                                                },
+                                                classTypes);
+
     /* Watchman JSON response objects */
     auto WatchmanQueryResponse = makeObject("WatchmanQueryResponse",
                                             {
