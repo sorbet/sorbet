@@ -185,6 +185,10 @@ cxxopts::Options buildOptions() {
                                     "Preallocate the specified amount of memory for symbol+name tables",
                                     cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
+    options.add_options("advanced")("remove-path-prefix",
+                                    "Remove the provided path prefix from all printed paths. Defaults to the input "
+                                    "directory passed to Sorbet, if any.",
+                                    cxxopts::value<string>()->default_value(""), "prefix");
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
     options.add_options("advanced")(
         "suggest-runtime-profiled",
@@ -352,6 +356,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
         }
 
+        opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
             auto rawFiles = raw["files"].as<vector<string>>();
             UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
@@ -359,6 +364,11 @@ void readOptions(Options &opts, int argc, char *argv[],
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
                     auto fileNormalized = stripTrailingSlashes(file);
+                    if (opts.pathPrefix == "" && rawFiles.size() == 1) {
+                        // If Sorbet is provided with a single input directory, the
+                        // default path prefix is that directory.
+                        opts.pathPrefix = fmt::format("{}/", fileNormalized);
+                    }
                     opts.rawInputDirNames.emplace_back(fileNormalized);
                     // Expand directory into list of files.
                     auto containedFiles =

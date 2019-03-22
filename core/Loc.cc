@@ -2,6 +2,7 @@
 #include "rang.hpp"
 
 #include "core/Context.h"
+#include "core/GlobalState.h"
 #include "core/Loc.h"
 #include <iterator>
 #include <sstream>
@@ -166,7 +167,7 @@ string Loc::filePosToString(const GlobalState &gs) const {
     if (!file().exists()) {
         buf << "???";
     } else {
-        auto path = file().data(gs).path();
+        auto path = gs.getPrintablePath(file().data(gs).path());
         buf << path;
         if (exists()) {
             auto pos = position(gs);

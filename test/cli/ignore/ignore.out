@@ -1,22 +1,22 @@
-test/cli/ignore/bar.rb:4: `String("bar.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
+bar.rb:4: `String("bar.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      4 |1 + "bar.rb"
         ^^^^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("bar.rb") originating from:
-    test/cli/ignore/bar.rb:4:
+    bar.rb:4:
      4 |1 + "bar.rb"
             ^^^^^^^^
 
-test/cli/ignore/subfolder2/subfolder/bar.rb:4: `String("subfolder2/subfolder/bar.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
+subfolder2/subfolder/bar.rb:4: `String("subfolder2/subfolder/bar.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      4 |1 + "subfolder2/subfolder/bar.rb"
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("subfolder2/subfolder/bar.rb") originating from:
-    test/cli/ignore/subfolder2/subfolder/bar.rb:4:
+    subfolder2/subfolder/bar.rb:4:
      4 |1 + "subfolder2/subfolder/bar.rb"
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 2

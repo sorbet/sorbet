@@ -125,6 +125,11 @@ public:
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
+    // Contains a path prefix that should be stripped from all printed paths.
+    std::string pathPrefix;
+    // Returns a string_view of the given path with the path prefix removed.
+    std::string_view getPrintablePath(std::string_view path) const;
+
     // Contains a location / symbol / variable reference that various Sorbet passes are looking for.
     // See ErrorQueue#queryResponse
     lsp::Query lspQuery;

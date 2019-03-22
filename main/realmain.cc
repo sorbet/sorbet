@@ -228,6 +228,7 @@ int realmain(int argc, char *argv[]) {
 
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+    gs->pathPrefix = opts.pathPrefix;
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");

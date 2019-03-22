@@ -89,6 +89,8 @@ struct Options {
     std::vector<std::string> someCounters;
     std::vector<int> errorCodeWhiteList;
     std::vector<int> errorCodeBlackList;
+    /** Prefix to remove from all printed paths. */
+    std::string pathPrefix;
 
     u4 reserveMemKiB;
 

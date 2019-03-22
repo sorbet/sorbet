@@ -1045,8 +1045,17 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     for (auto &sym : this->symbols) {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
+    result->pathPrefix = this->pathPrefix;
     result->sanityCheck();
     return result;
+}
+
+string_view GlobalState::getPrintablePath(string_view path) const {
+    // Only strip the path prefix if the path has it.
+    if (path.substr(0, pathPrefix.length()) == pathPrefix) {
+        return path.substr(pathPrefix.length());
+    }
+    return path;
 }
 
 int GlobalState::totalErrors() const {
