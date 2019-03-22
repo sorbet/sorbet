@@ -149,23 +149,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 /*
                  * This code:
                  *
-                 * a = while cond
-                 *       break b
-                 *     end
-                 *
+                 *     a = while cond; break b; end
                  *
                  * generates this CFG:
                  *
-                 *   --->Loop Header -------
-                 *   |     |               |
-                 *   |     |               V
-                 *   |     V        breakNotCalledBlock
-                 *   --Loop Body         a = nil
-                 *         |               |
-                 *       a = b             |
-                 *         |               |
-                 *         V               |
-                 *    continueBlock <-------
+                 *   ┌──▶ Loop Header ──────┐
+                 *   │      │               │
+                 *   │      │               ▼
+                 *   │      ▼        breakNotCalledBlock
+                 *   └─ Loop Body         a = nil
+                 *          │               │
+                 *        a = b             │
+                 *          │               │
+                 *          ▼               │
+                 *    continueBlock ◀──────-┘
                  *
                  */
             },
