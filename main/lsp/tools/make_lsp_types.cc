@@ -71,10 +71,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto RequestMessage =
         makeObject("RequestMessage",
                    {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
-                    makeField("method", JSONString), makeField("params", makeOptional(JSONAny)),
-                    // Sorbet-custom property added to requests that have been canceled.
-                    makeField("canceled", makeOptional(JSONBool)), makeField("sorbetCounter", makeOptional(JSONInt)),
-                    makeField("sorbetReceiveTimestamp", makeOptional(JSONDouble))},
+                    makeField("method", JSONString), makeField("params", makeOptional(JSONAny))},
                    classTypes);
     auto ResponseError = makeObject("ResponseError",
                                     {
@@ -86,17 +83,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto ResponseMessage = makeObject(
         "ResponseMessage",
         {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
-         makeField("result", makeOptional(JSONAny)), makeField("error", makeOptional(ResponseError)),
-         makeField("sorbetCounter", makeOptional(JSONInt)),
-         makeField("sorbetReceiveTimestamp", makeOptional(JSONDouble))},
+         makeField("result", makeOptional(JSONAny)), makeField("error", makeOptional(ResponseError))},
         classTypes);
     auto NotificationMessage =
         makeObject("NotificationMessage",
                    {makeField("jsonrpc", JSONRPCConstant), makeField("method", JSONString),
-                    makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject}))),
-                    // Sorbet-specific fields; used internally.
-                    makeField("sorbetCounter", makeOptional(JSONInt)),
-                    makeField("sorbetReceiveTimestamp", makeOptional(JSONDouble))},
+                    makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject})))},
                    classTypes);
 
     auto CancelParams = makeObject("CancelParams",

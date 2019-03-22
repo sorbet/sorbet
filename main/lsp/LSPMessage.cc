@@ -182,60 +182,6 @@ const rapidjson::Value &LSPMessage::params() const {
     return NULL_VALUE;
 }
 
-void LSPMessage::setCounter(int count) {
-    if (isRequest()) {
-        auto &r = asRequest();
-        r.sorbetCounter = count;
-    } else if (isNotification()) {
-        auto &n = asNotification();
-        n.sorbetCounter = count;
-    } else if (isResponse()) {
-        auto &rs = asResponse();
-        rs.sorbetCounter = count;
-    } else {
-        Exception::raise("LSPMessage is not a request, notification, or a response.");
-    }
-}
-
-int LSPMessage::counter() const {
-    if (isRequest()) {
-        return asRequest().sorbetCounter.value_or(-1);
-    } else if (isNotification()) {
-        return asNotification().sorbetCounter.value_or(-1);
-    } else if (isResponse()) {
-        return asResponse().sorbetCounter.value_or(-1);
-    } else {
-        Exception::raise("LSPMessage is not a request, notification, or a response.");
-    }
-}
-
-void LSPMessage::setTimestamp(double timestamp) {
-    if (isRequest()) {
-        auto &r = asRequest();
-        r.sorbetReceiveTimestamp = timestamp;
-    } else if (isNotification()) {
-        auto &n = asNotification();
-        n.sorbetReceiveTimestamp = timestamp;
-    } else if (isResponse()) {
-        auto &rs = asResponse();
-        rs.sorbetReceiveTimestamp = timestamp;
-    } else {
-        Exception::raise("LSPMessage is not a request, notification, or a response.");
-    }
-}
-
-double LSPMessage::timestamp() const {
-    if (isRequest()) {
-        return asRequest().sorbetReceiveTimestamp.value_or(0.0);
-    } else if (isNotification()) {
-        return asNotification().sorbetReceiveTimestamp.value_or(0.0);
-    } else if (isResponse()) {
-        return asResponse().sorbetReceiveTimestamp.value_or(0.0);
-    } else {
-        Exception::raise("LSPMessage is not a request, notification, or a response.");
-    }
-}
-
 string LSPMessage::toJSON() const {
     if (isRequest()) {
         return asRequest().toJSON();

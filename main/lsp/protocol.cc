@@ -175,7 +175,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.requests.received");
-        long requestReceiveTimeNanos = (long)msg->timestamp();
+        long requestReceiveTimeNanos = msg->timestamp;
         gs = processRequest(move(gs), *msg);
         timingAdd("processing_time", (Timer::currentTimeNanos() - requestReceiveTimeNanos));
     }
@@ -194,6 +194,8 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
     // TODO: if we ever support diffs, this would need to be extended
     int didChangeRequestsMerged = 0;
     int foundWatchmanRequests = 0;
+    long firstWatchmanTimestamp;
+    int firstWatchmanCounter;
     int originalSize = pendingRequests.size();
     UnorderedSet<string> updatedFiles;
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
@@ -224,6 +226,11 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
         } else if (method == LSPMethod::SorbetWatchmanFileChange()) {
             auto changes = WatchmanQueryResponse::fromJSONValue(alloc, current->params(), "root.params");
             updatedFiles.insert(changes->files.begin(), changes->files.end());
+            if (foundWatchmanRequests == 0) {
+                // Use timestamp/counter from the earliest file system change.
+                firstWatchmanTimestamp = current->timestamp;
+                firstWatchmanCounter = current->counter;
+            }
             foundWatchmanRequests++;
             it = pendingRequests.erase(it);
             continue;
@@ -263,15 +270,18 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
         WatchmanQueryResponse watchmanUpdates("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()));
         auto notifMsg = make_unique<NotificationMessage>("2.0", "sorbet/watchmanFileChange");
         notifMsg->params = watchmanUpdates.toJSONValue(alloc);
-        pendingRequests.push_back(make_unique<LSPMessage>(move(notifMsg)));
+        auto msg = make_unique<LSPMessage>(move(notifMsg));
+        msg->counter = firstWatchmanCounter;
+        msg->timestamp = firstWatchmanTimestamp;
+        pendingRequests.push_back(move(msg));
     }
 }
 
 void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
                              LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg) {
     try {
-        msg->setCounter(state.requestCounter++);
-        msg->setTimestamp((double)Timer::currentTimeNanos());
+        msg->counter = state.requestCounter++;
+        msg->timestamp = Timer::currentTimeNanos();
 
         const LSPMethod method = LSPMethod::getByName(msg->method());
         if (method == LSPMethod::CancelRequest()) {
@@ -279,9 +289,8 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
             auto it = findRequestToBeCancelled(state.pendingRequests,
                                                *CancelParams::fromJSONValue(alloc, msg->params(), "root.params"));
             if (it != state.pendingRequests.end() && (*it)->isRequest()) {
-                auto &requestToBeCancelled = (*it)->asRequest();
-                requestToBeCancelled.canceled = true;
                 auto canceledRequest = move(*it);
+                canceledRequest->canceled = true;
                 state.pendingRequests.erase(it);
                 // move the canceled request to the front
                 auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);

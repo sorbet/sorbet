@@ -44,6 +44,15 @@ public:
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d);
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
 
+    /** Time at which this LSP message was received. */
+    long timestamp;
+
+    /** Request counter. */
+    int counter;
+
+    /** If `true`, then this LSPMessage contains a canceled LSP request. */
+    bool canceled = false;
+
     /**
      * Returns an ID if the message has one. Otherwise, returns nullopt.
      */
@@ -117,26 +126,6 @@ public:
      * returns a reference to a null rapidjson object.
      */
     const rapidjson::Value &params() const;
-
-    /**
-     * Set the internal `sorbetCounter` property on this message.
-     */
-    void setCounter(int count);
-
-    /**
-     * Retrieve the internal `sorbetCounter` property on this message. Returns -1 if not specified.
-     */
-    int counter() const;
-
-    /**
-     * Set the internal `sorbetReceiveTimestamp` property on this message.
-     */
-    void setTimestamp(double timestamp);
-
-    /**
-     * Retrieve the internal `sorbetReceiveTimestamp` property on this message. Returns 0.0 if not specified.
-     */
-    double timestamp() const;
 
     /**
      * Returns the message in JSON form.

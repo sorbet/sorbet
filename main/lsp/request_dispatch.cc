@@ -195,15 +195,11 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         logger->debug("Processing request {}", method.name);
         auto &requestMessage = msg.asRequest();
         auto id = requestMessage.id;
-
-        // LSP hack: We add the property 'canceled' to requests that were canceled before
-        // they hit processRequest.
-        if (requestMessage.canceled.value_or(false)) {
+        if (msg.canceled) {
             prodCounterInc("lsp.requests.canceled");
             sendError(id, (int)LSPErrorCodes::RequestCancelled, "Request was canceled");
             return gs;
         }
-
         if (!requestMessage.params) {
             sendError(id, (int)LSPErrorCodes::InternalError, "Expected parameters, but found none.");
             return gs;
