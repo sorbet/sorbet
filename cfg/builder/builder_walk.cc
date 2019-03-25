@@ -366,23 +366,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     /*
                      * This code:
                      *
-                     * a = foo do
-                     *   break b
-                     * end
+                     *     a = while cond; break b; end
                      *
                      * generates this CFG:
                      *
-                     *   --->headerBlock -------
-                     *   |     |               |
-                     *   |     |               |
-                     *   |     V               |
-                     *   --Block Body          V
-                     *         |    a = solveConstraintBlock
-                     *         |               |
-                     *       a = b             |
-                     *         |               |
-                     *         V               |
-                     *     Post Block <---------
+                     *   ┌──▶ headerBlock ──────┐
+                     *   │      │               │
+                     *   │      │               │
+                     *   │      ▼               │
+                     *   └─ Block Body          ▼
+                     *          │    a = solveConstraintBlock
+                     *        a = b             │
+                     *          │               │
+                     *          ▼               │
+                     *      Post Block ◀───────-┘
                      *
                      */
                 } else {
