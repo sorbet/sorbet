@@ -307,16 +307,16 @@ string getCounterStatistics(vector<string> names) {
             }
             if (e.second.size() == 1) {
                 string line =
-                    fmt::format("  {:>24.24}.value :{:10.10} ms\n", e.first, e.second[0] * TIMING_TO_MSEC_MULTIPLIER);
+                    fmt::format("  {:>24.24}.value :{:10.4} ms\n", e.first, e.second[0] * TIMING_TO_MSEC_MULTIPLIER);
                 sortedTimings.emplace_back(e.first, line);
                 continue;
             }
 
-            string line = fmt::format(
-                "  {:>26.26}.min :{:10.10} ms\n  {:>26.26}.max :{:10.10} ms\n  {:>26.26}.avg :{:10.10} ms\n", e.first,
-                *absl::c_min_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
-                *absl::c_max_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
-                absl::c_accumulate(e.second, 0) * TIMING_TO_MSEC_MULTIPLIER / e.second.size());
+            string line =
+                fmt::format("  {:>26.26}.min :{:10.4} ms\n  {:>26.26}.max :{:10.4} ms\n  {:>26.26}.avg :{:10.4} ms\n",
+                            e.first, *absl::c_min_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
+                            *absl::c_max_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
+                            absl::c_accumulate(e.second, 0) * TIMING_TO_MSEC_MULTIPLIER / e.second.size());
             sortedTimings.emplace_back(e.first, line);
         }
         fast_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
