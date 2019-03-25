@@ -3,7 +3,7 @@
 
 module SorbetRBIGeneration; end
 
-require_relative './module'
+require_relative './module_utils'
 
 require 'set'
 require 'fileutils'
@@ -45,8 +45,8 @@ class SorbetRBIGeneration::TracepointSerializer
         klass_ids.each do |klass_id, class_def|
           klass = class_def.klass
 
-          f.write("#{SorbetRBIGeneration::Module.real_is_a?(klass, Class) ? 'class' : 'module'} #{class_name(klass)}")
-          f.write(" < #{class_name(klass.superclass)}") if SorbetRBIGeneration::Module.real_is_a?(klass, Class) && ![Object, nil].include?(klass.superclass)
+          f.write("#{SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Class) ? 'class' : 'module'} #{class_name(klass)}")
+          f.write(" < #{class_name(klass.superclass)}") if SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Class) && ![Object, nil].include?(klass.superclass)
           f.write("\n")
 
           rows = class_def.defs.map do |item|
@@ -98,7 +98,7 @@ class SorbetRBIGeneration::TracepointSerializer
       gem_class_defs[gem] ||= {}
       defined.each do |item|
         klass = item[:module]
-        klass_id = SorbetRBIGeneration::Module.real_object_id(klass)
+        klass_id = SorbetRBIGeneration::ModuleUtils.real_object_id(klass)
         class_def = gem_class_defs[gem][klass_id] ||= SorbetRBIGeneration::ClassDefinition.new(klass_id, klass, [])
         class_def.defs << item unless item[:type] == :module
       end
@@ -113,10 +113,10 @@ class SorbetRBIGeneration::TracepointSerializer
         klass = klass_def.klass
 
         # Unused anon classes
-        next if !((SorbetRBIGeneration::Module.real_is_a?(klass, Module) && !SorbetRBIGeneration::Module.real_name(klass).nil?) || used?(klass_id, used))
+        next if !((SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Module) && !SorbetRBIGeneration::ModuleUtils.real_name(klass).nil?) || used?(klass_id, used))
 
         # Anon delegate classes
-        next if SorbetRBIGeneration::Module.real_is_a?(klass, Class) && klass.superclass == Delegator && !klass.name
+        next if SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Class) && klass.superclass == Delegator && !klass.name
 
         # TODO should this be here?
         # next if [Object, BasicObject, Hash].include?(klass) 
@@ -134,8 +134,8 @@ class SorbetRBIGeneration::TracepointSerializer
         klass = class_def.klass
 
         # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
-        used_value = SorbetRBIGeneration::Module.real_is_a?(klass, Module) && !SorbetRBIGeneration::Module.real_name(klass).nil? ? true : SorbetRBIGeneration::Module.real_object_id(klass) # if non-anon, set it to true
-        (used[SorbetRBIGeneration::Module.real_object_id(klass.superclass)] ||= Set.new) << used_value if SorbetRBIGeneration::Module.real_is_a?(klass, Class)
+        used_value = SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Module) && !SorbetRBIGeneration::ModuleUtils.real_name(klass).nil? ? true : SorbetRBIGeneration::ModuleUtils.real_object_id(klass) # if non-anon, set it to true
+        (used[SorbetRBIGeneration::ModuleUtils.real_object_id(klass.superclass)] ||= Set.new) << used_value if SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Class)
         # otherwise link to next anon class
         class_def.defs.each do |item|
           (used[item[item[:type]].object_id] ||= Set.new) << used_value if [:extend, :include].include?(item[:type])
@@ -214,20 +214,20 @@ class SorbetRBIGeneration::TracepointSerializer
   end
 
   def class_name(klass)
-    klass = @delegate_classes[SorbetRBIGeneration::Module.real_object_id(klass)] || klass
-    name = SorbetRBIGeneration::Module.real_name(klass) if SorbetRBIGeneration::Module.real_is_a?(klass, Module)
+    klass = @delegate_classes[SorbetRBIGeneration::ModuleUtils.real_object_id(klass)] || klass
+    name = SorbetRBIGeneration::ModuleUtils.real_name(klass) if SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Module)
 
     # class/module has no name; it must be anonymous
     if name.nil? || name == ""
-      middle = SorbetRBIGeneration::Module.real_is_a?(klass, Class) ? klass.superclass : klass.class
-      id = @anonymous_map[SorbetRBIGeneration::Module.real_object_id(klass)] ||= anonymous_id
+      middle = SorbetRBIGeneration::ModuleUtils.real_is_a?(klass, Class) ? klass.superclass : klass.class
+      id = @anonymous_map[SorbetRBIGeneration::ModuleUtils.real_object_id(klass)] ||= anonymous_id
       return "Anonymous_#{class_name(middle).gsub('::', '_')}_#{id}"
     end
 
     # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
     if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
       warn("Invalid class name: #{name}")
-      id = @anonymous_map[SorbetRBIGeneration::Module.real_object_id(klass)] ||= anonymous_id
+      id = @anonymous_map[SorbetRBIGeneration::ModuleUtils.real_object_id(klass)] ||= anonymous_id
       return "InvalidName_#{name.gsub(/[^\w]/, '_').gsub(/0x([0-9a-f]+)/, '0x00')}_#{id}"
     end
 

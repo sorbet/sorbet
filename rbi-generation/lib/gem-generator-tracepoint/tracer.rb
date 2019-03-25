@@ -3,7 +3,7 @@
 
 module SorbetRBIGeneration; end
 
-require_relative './module'
+require_relative './module_utils'
 
 require 'set'
 
@@ -43,7 +43,7 @@ class SorbetRBIGeneration::Tracer
   Class.prepend(ClassOverride)
 
   def self.register_delegate_class(klass, delegate)
-    @delegate_classes[SorbetRBIGeneration::Module.real_object_id(delegate)] = klass
+    @delegate_classes[SorbetRBIGeneration::ModuleUtils.real_object_id(delegate)] = klass
   end
 
   def self.module_created(mod)
@@ -99,7 +99,7 @@ class SorbetRBIGeneration::Tracer
   def self.pre_cache_module_methods
     ObjectSpace.each_object(Module) do |mod_|
       mod = T.cast(mod_, Module)
-      @modules[SorbetRBIGeneration::Module.real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
+      @modules[SorbetRBIGeneration::ModuleUtils.real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
     end
   end
 
@@ -148,7 +148,7 @@ class SorbetRBIGeneration::Tracer
           singleton = tp.method_id == :singleton_method_added
           receiver = singleton ? tp.self.singleton_class : tp.self
           methods = receiver.instance_methods(false) + receiver.private_instance_methods(false)
-          set = @modules[SorbetRBIGeneration::Module.real_object_id(receiver)] ||= Set.new
+          set = @modules[SorbetRBIGeneration::ModuleUtils.real_object_id(receiver)] ||= Set.new
           added = methods.find { |m| !set.include?(m) }
           if added.nil?
             # warn("Warning: could not find method added to #{tp.self} at #{tp.path}:#{tp.lineno}")

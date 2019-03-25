@@ -3,7 +3,7 @@
 
 module SorbetRBIGeneration; end
 
-class SorbetRBIGeneration::Module
+class SorbetRBIGeneration::ModuleUtils
   @real_is_a = Module.instance_method(:is_a?)
   @real_name = Module.instance_method(:name)
   @real_object_id = Module.instance_method(:object_id)
