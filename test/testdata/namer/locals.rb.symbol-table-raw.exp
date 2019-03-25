@@ -2,9 +2,5 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
   class <C <U TestLocals>> < <C <U Object>> () @ Loc {file=test/testdata/namer/locals.rb start=2:1 end=2:17}
     method <C <U TestLocals>><U method> (<blk>) @ Loc {file=test/testdata/namer/locals.rb start=3:3 end=3:13}
       argument <C <U TestLocals>><U method><blk><block> @ Loc {file=test/testdata/namer/locals.rb start=??? end=???}
-      method <C <U TestLocals>><U method><N <U <block>> $2> () @ Loc {file=test/testdata/namer/locals.rb start=7:5 end=13:8}
-        method <C <U TestLocals>><U method><N <U <block>> $2><N <U <block>> $2> () @ Loc {file=test/testdata/namer/locals.rb start=10:7 end=12:10}
-      method <C <U TestLocals>><U method><N <U <block>> $3> (a) @ Loc {file=test/testdata/namer/locals.rb start=17:5 end=19:8}
-        argument <C <U TestLocals>><U method><N <U <block>> $3>a<> @ Loc {file=test/testdata/namer/locals.rb start=17:14 end=17:15}
   class <S <C <U TestLocals>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/locals.rb start=2:7 end=2:17}
 

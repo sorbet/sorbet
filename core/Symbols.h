@@ -610,6 +610,7 @@ public:
 
 private:
     friend class serialize::SerializerImpl;
+    friend class GlobalState;
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                                                                 int betterThan = -1) const;

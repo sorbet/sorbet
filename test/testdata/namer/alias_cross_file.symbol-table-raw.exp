@@ -11,5 +11,4 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/alias_
   class <S <C <U TestSig>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=2:7 end=2:14}
     method <S <C <U TestSig>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=3:3 end=3:20}
       argument <S <C <U TestSig>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=??? end=???}
-      method <S <C <U TestSig>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=3:3 end=3:20}
 

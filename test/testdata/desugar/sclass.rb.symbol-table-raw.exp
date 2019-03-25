@@ -36,7 +36,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/scla
   class <S <S <C <U F>> $1> $1> < <S <S <C <U Object>> $1> $1> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=47:7 end=47:8}
     method <S <S <C <U F>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=55:9 end=55:50}
       argument <S <S <C <U F>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-      method <S <S <C <U F>> $1> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/desugar/sclass.rb start=55:9 end=55:50}
   class <C <U G>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=60:1 end=60:8}
     method <C <U G>><U wrapper> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=61:5 end=61:16}
       argument <C <U G>><U wrapper><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}

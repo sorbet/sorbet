@@ -419,11 +419,14 @@ public:
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ParsedArg> parsedArgs) {
         ast::MethodDef::ARGS_store args;
         bool inShadows = false;
-
-        if (isIntrinsic(ctx, ctx.owner)) {
+        bool intrinsic = isIntrinsic(ctx, ctx.owner);
+        bool swapArgs = intrinsic && (ctx.owner.data(ctx)->arguments().size() == 1);
+        core::SymbolRef swappedArg;
+        if (swapArgs) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.
-            ENFORCE(ctx.owner.data(ctx)->arguments().back().data(ctx)->isBlockArgument());
+            ENFORCE(ctx.owner.data(ctx)->arguments()[0].data(ctx)->isBlockArgument());
+            swappedArg = ctx.owner.data(ctx)->arguments()[0];
             ctx.owner.data(ctx)->arguments().clear();
         }
 
@@ -439,14 +442,15 @@ public:
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
+                if (swapArgs && arg.block) {
+                    // see commnent on if (swapArgs) above
+                    ctx.owner.data(ctx)->arguments().emplace_back(swappedArg);
+                }
                 auto pair = arg2Symbol(ctx, i, move(arg));
                 core::SymbolRef sym = pair.first;
                 args.emplace_back(move(pair.second));
-                if (i < ctx.owner.data(ctx)->arguments().size()) {
-                    ENFORCE(ctx.owner.data(ctx)->arguments()[i] == sym);
-                } else {
-                    ctx.owner.data(ctx)->arguments().emplace_back(sym);
-                }
+                ENFORCE(i < ctx.owner.data(ctx)->arguments().size());
+                ENFORCE(swapArgs || (ctx.owner.data(ctx)->arguments()[i] == sym));
             }
 
             scopeStack.back().locals[name] = localVariable;

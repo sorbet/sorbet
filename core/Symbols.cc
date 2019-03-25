@@ -608,33 +608,41 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
     }
 
     fmt::format_to(buf, "\n");
-    for (auto pair : membersStableOrderSlow(gs)) {
-        if (!pair.second.exists()) {
-            ENFORCE(ref(gs) == core::Symbols::root());
-            continue;
-        }
-
-        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
-            continue;
-        }
-
-        if (!showHidden && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
-            bool hadPrintableChild = false;
-            for (auto childPair : pair.second.data(gs)->members) {
-                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
-                    hadPrintableChild = true;
-                    break;
-                }
-            }
-            if (!hadPrintableChild) {
+    if (!isMethod()) {
+        for (auto pair : membersStableOrderSlow(gs)) {
+            if (!pair.second.exists()) {
+                ENFORCE(ref(gs) == core::Symbols::root());
                 continue;
             }
-        }
 
-        auto str = pair.second.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
-        ENFORCE(!str.empty());
-        fmt::format_to(buf, "{}", move(str));
+            if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+                pair.first == Names::classMethods()) {
+                continue;
+            }
+
+            if (!showHidden && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                bool hadPrintableChild = false;
+                for (auto childPair : pair.second.data(gs)->members) {
+                    if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                        hadPrintableChild = true;
+                        break;
+                    }
+                }
+                if (!hadPrintableChild) {
+                    continue;
+                }
+            }
+
+            auto str = pair.second.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
+            ENFORCE(!str.empty());
+            fmt::format_to(buf, "{}", move(str));
+        }
+    } else {
+        for (auto arg : arguments()) {
+            auto str = arg.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
+            ENFORCE(!str.empty());
+            fmt::format_to(buf, "{}", move(str));
+        }
     }
 
     return to_string(buf);
@@ -811,8 +819,12 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
     SymbolRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2 =
-            const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
+        SymbolRef current2;
+        if (isMethodArgument()) {
+            current2 = const_cast<GlobalState &>(gs).enterMethodArgumentSymbol(this->loc(), this->owner, this->name);
+        } else {
+            current2 = const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
+        }
         ENFORCE(current == current2);
         for (auto &e : members) {
             ENFORCE(e.first.exists(), "symbol without a name in scope");

@@ -123,7 +123,6 @@ struct Path {
 
                 core::SymbolRef blkArg = gs.enterMethodArgumentSymbol(core::Loc::none(), method, core::Names::blkArg());
                 blkArg.data(gs)->setBlockArgument();
-                method.data(gs)->arguments().emplace_back(blkArg);
             }
             //            cout << classSym.toStringWithTabs(gs, 1, 1);
         }
@@ -212,6 +211,5 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
 
     core::SymbolRef blkArg = gs.enterMethodArgumentSymbol(core::Loc::none(), configatron, core::Names::blkArg());
     blkArg.data(gs)->setBlockArgument();
-    configatron.data(gs)->arguments().emplace_back(blkArg);
 }
 } // namespace sorbet::namer

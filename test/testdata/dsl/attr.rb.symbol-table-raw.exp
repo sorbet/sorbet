@@ -31,12 +31,4 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
   class <S <C <U TestAttr>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr.rb start=2:7 end=2:15}
     method <S <C <U TestAttr>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr.rb start=5:3 end=5:13}
       argument <S <C <U TestAttr>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/dsl/attr.rb start=5:3 end=5:13}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $3> () @ Loc {file=test/testdata/dsl/attr.rb start=12:3 end=12:25}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $4> () @ Loc {file=test/testdata/dsl/attr.rb start=14:3 end=14:45}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $5> () @ Loc {file=test/testdata/dsl/attr.rb start=17:3 end=17:24}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $6> () @ Loc {file=test/testdata/dsl/attr.rb start=17:3 end=17:24}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $7> () @ Loc {file=test/testdata/dsl/attr.rb start=20:3 end=20:24}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $8> () @ Loc {file=test/testdata/dsl/attr.rb start=27:3 end=27:31}
-      method <S <C <U TestAttr>> $1><U <static-init>><N <U <block>> $9> () @ Loc {file=test/testdata/dsl/attr.rb start=27:3 end=27:31}
 

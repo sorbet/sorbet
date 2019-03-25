@@ -214,8 +214,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Magic_undeclaredFieldStub());
     id = enterMethodArgumentSymbol(
         Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(), Names::blkArg());
-    Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder().data(*this)->arguments().emplace_back(
-        id);
     id.data(*this)->setBlockArgument();
 
     // RubyTyper#badAliasMethodStub(*arg0 : T.untyped) => T.untyped
@@ -228,7 +226,6 @@ void GlobalState::initEmpty() {
     id = enterMethodArgumentSymbol(Loc::none(), Symbols::RubyTyper_badAliasMethodStub(), core::Names::blkArg());
     id.data(*this)->setBlockArgument();
     id.data(*this)->resultType = Types::untyped(*this, id);
-    Symbols::RubyTyper_badAliasMethodStub().data(*this)->arguments().emplace_back(id);
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -241,91 +238,73 @@ void GlobalState::initEmpty() {
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->setRepeated();
     arg.data(*this)->resultType = Types::untyped(*this, arg);
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::hashOfUntyped();
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->setRepeated();
     arg.data(*this)->resultType = Types::untyped(*this, arg);
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::arrayOfUntyped();
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::arrayOfUntyped();
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::Object();
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::expandSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
-    method.data(*this)->arguments().emplace_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
     arg.data(*this)->resultType = Types::Integer();
-    method.data(*this)->arguments().emplace_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
     arg.data(*this)->resultType = Types::Integer();
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-splat>(args: *T.untyped) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-block>(args: *T.untyped) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithBlock());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Synthesize <Magic>#<call-with-splat-and-block>(args: *T.untyped) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithSplatAndBlock());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
-    method.data(*this)->arguments().emplace_back(arg);
     method.data(*this)->resultType = Types::untyped(*this, method);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
-    method.data(*this)->arguments().emplace_back(arg);
 
     // Some of these are Modules
     Symbols::T().data(*this)->setIsModule(true);
@@ -415,7 +394,6 @@ void GlobalState::installIntrinsics() {
         if (countBefore != symbolsUsed()) {
             SymbolRef blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
             blkArg.data(*this)->setBlockArgument();
-            method.data(*this)->arguments().emplace_back(blkArg);
         }
     }
 }
@@ -454,6 +432,7 @@ void GlobalState::reserveMemory(u4 kb) {
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
+    ENFORCE((flags & Symbol::Flags::METHOD_ARGUMENT) == 0, "use specialized version: EnterMethodArgumentSymbol");
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -476,25 +455,17 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data->flags = flags;
     data->owner = owner;
     data->addLoc(*this, loc);
-    if (data->isBlockSymbol(*this)) {
-        categoryCounterInc("symbols", "block");
-    } else if (data->isClass()) {
+    DEBUG_ONLY(if (data->isBlockSymbol(*this)) { categoryCounterInc("symbols", "block"); } else if (data->isClass()) {
         categoryCounterInc("symbols", "class");
-    } else if (data->isMethod()) {
-        categoryCounterInc("symbols", "method");
-    } else if (data->isField()) {
+    } else if (data->isMethod()) { categoryCounterInc("symbols", "method"); } else if (data->isField()) {
         categoryCounterInc("symbols", "field");
     } else if (data->isStaticField()) {
         categoryCounterInc("symbols", "static_field");
-    } else if (data->isMethodArgument()) {
-        categoryCounterInc("symbols", "argument");
     } else if (data->isTypeArgument()) {
         categoryCounterInc("symbols", "type_argument");
-    } else if (data->isTypeMember()) {
-        categoryCounterInc("symbols", "type_member");
-    } else {
+    } else if (data->isTypeMember()) { categoryCounterInc("symbols", "type_member"); } else {
         Exception::notImplemented();
-    }
+    });
 
     wasModified_ = true;
     return ret;
@@ -554,20 +525,30 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
-SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 num) {
-    NameRef name = freshNameUnique(UniqueNameKind::Overload, original.data(*this)->name, num);
-    auto &owner = original.data(*this)->owner;
+SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u2 num,
+                                              const vector<SymbolRef> &argsToKeep) {
+    NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
+    core::Loc loc = num == 0 ? original.data(*this)->loc()
+                             : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
+    auto owner = original.data(*this)->owner;
     SymbolRef res = enterMethodSymbol(loc, owner, name);
+    ENFORCE(res != original);
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
         ENFORCE(res.data(*this)->arguments().size() == 0);
         res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
         auto originalArguments = original.data(*this)->arguments();
         for (auto &arg : originalArguments) {
             Loc loc = arg.data(*this)->loc();
+            if (!absl::c_linear_search(argsToKeep, arg)) {
+                if (arg.data(*this)->isBlockArgument()) {
+                    loc = Loc::none();
+                } else {
+                    continue;
+                }
+            }
             NameRef nm = arg.data(*this)->name;
             SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
             newArg.data(*this)->flags = arg.data(*this)->flags;
-            res.data(*this)->arguments().emplace_back(newArg);
         }
     }
     return res;
@@ -584,8 +565,33 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
 }
 
 SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(owner.data(*this)->isMethod(), "entering method argument symbol into not-a-method");
-    return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
+    ENFORCE(name.exists(), "entering symbol with non-existing name");
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members.size());
+
+    for (auto arg : ownerScope->argumentsOrMixins) {
+        if (arg.data(*this)->name == name) {
+            return arg;
+        }
+    }
+    auto &store = ownerScope->argumentsOrMixins.emplace_back();
+
+    ENFORCE(!symbolTableFrozen);
+
+    SymbolRef ret = SymbolRef(this, symbols.size());
+    store = ret; // DO NOT MOVE this assignment down. emplace_back on symbol invalidates `store`
+    symbols.emplace_back();
+    SymbolData data = ret.dataAllowingNone(*this);
+    data->name = name;
+    data->flags = Symbol::Flags::METHOD_ARGUMENT;
+    data->owner = owner;
+    data->addLoc(*this, loc);
+    DEBUG_ONLY(categoryCounterInc("symbols", "argument"););
+
+    wasModified_ = true;
+    return ret;
 }
 
 string_view GlobalState::enterString(string_view nm) {
@@ -1226,7 +1232,6 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
         auto blkLoc = core::Loc::none(loc.file());
         auto blkSym = enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.data(*this)->setBlockArgument();
-        sym.data(*this)->arguments().emplace_back(blkSym);
     }
     return sym;
 }
@@ -1239,7 +1244,6 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     if (prevCount != this->symbolsUsed()) {
         auto blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.data(*this)->setBlockArgument();
-        sym.data(*this)->arguments().emplace_back(blkSym);
     }
     return sym;
 }

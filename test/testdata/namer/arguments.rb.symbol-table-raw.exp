@@ -4,17 +4,9 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
       argument <C <U A>><U take_arguments>a<> @ Loc {file=test/testdata/namer/arguments.rb start=3:22 end=3:23}
       argument <C <U A>><U take_arguments>b<optional> @ Loc {file=test/testdata/namer/arguments.rb start=3:25 end=3:26}
       argument <C <U A>><U take_arguments>c<repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:31 end=3:32}
-      argument <C <U A>><U take_arguments>&g<block> @ Loc {file=test/testdata/namer/arguments.rb start=3:48 end=3:50}
-      method <C <U A>><U take_arguments><N <U <block>> $2> (a, b, c, d, e, f, &g) @ Loc {file=test/testdata/namer/arguments.rb start=6:5 end=8:8}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>a<> @ Loc {file=test/testdata/namer/arguments.rb start=6:14 end=6:15}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>b<optional> @ Loc {file=test/testdata/namer/arguments.rb start=6:17 end=6:18}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>c<repeated> @ Loc {file=test/testdata/namer/arguments.rb start=6:23 end=6:24}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>&g<block> @ Loc {file=test/testdata/namer/arguments.rb start=6:40 end=6:42}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>d<keyword> @ Loc {file=test/testdata/namer/arguments.rb start=6:26 end=6:28}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>e<optional, keyword> @ Loc {file=test/testdata/namer/arguments.rb start=6:30 end=6:32}
-        argument <C <U A>><U take_arguments><N <U <block>> $2>f<keyword, repeated> @ Loc {file=test/testdata/namer/arguments.rb start=6:35 end=6:38}
       argument <C <U A>><U take_arguments>d<keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:34 end=3:36}
       argument <C <U A>><U take_arguments>e<optional, keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:38 end=3:40}
       argument <C <U A>><U take_arguments>f<keyword, repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:43 end=3:46}
+      argument <C <U A>><U take_arguments>&g<block> @ Loc {file=test/testdata/namer/arguments.rb start=3:48 end=3:50}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/arguments.rb start=2:7 end=2:8}
 

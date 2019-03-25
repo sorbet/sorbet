@@ -5,7 +5,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
       argument <C <U F>><U bar><blk><block> @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=??? end=???}
     method <C <U F>><U bla> (<blk>) @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=6:3 end=6:10}
       argument <C <U F>><U bla><blk><block> @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=??? end=???}
-      method <C <U F>><U bla><N <U <block>> $2> () @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=7:5 end=10:8}
     method <C <U F>><U foo> (<blk>) @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=3:3 end=3:10}
       argument <C <U F>><U foo><blk><block> @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=??? end=???}
   class <S <C <U F>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/dynamic_method_with_class.rb start=2:7 end=2:8}

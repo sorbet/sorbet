@@ -731,13 +731,28 @@ public:
 
 class ResolveSignaturesWalk {
 private:
-    void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded,
-                           const ast::MethodDef &mdef) {
-        ENFORCE(mdef.symbol.data(ctx)->isOverloaded() || mdef.symbol == method);
-        ENFORCE(mdef.symbol.data(ctx)->isOverloaded() || method.data(ctx)->arguments().size() == mdef.args.size());
-        auto exprLoc = send->loc;
+    ast::Local *getArgLocal(core::Context ctx, core::SymbolRef argSym, const ast::MethodDef &mdef, int pos,
+                            bool isOverloaded) {
+        if (!isOverloaded) {
+            return ast::MK::arg2Local(mdef.args[pos].get());
+        } else {
+            // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
+            // we roundtrip through original symbol that is stored in mdef.
+            ENFORCE(mdef.symbol != argSym.data(ctx)->owner);
+            auto internalNameToLookFor = argSym.data(ctx)->name;
+            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments(), [&](auto arg) {
+                return arg.data(ctx)->name == internalNameToLookFor;
+            });
+            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments().end());
+            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments().begin();
+            return ast::MK::arg2Local(mdef.args[realPos].get());
+        }
+    }
 
-        auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true, method);
+    void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::Loc exprLoc, ParsedSig sig,
+                           bool isOverloaded, const ast::MethodDef &mdef) {
+        ENFORCE(isOverloaded || mdef.symbol == method);
+        ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -787,11 +802,10 @@ private:
         auto methodInfo = method.data(ctx);
 
         methodInfo->resultType = sig.returns;
-        auto argIt = mdef.args.begin();
-        for (auto it = methodInfo->arguments().begin(); it != methodInfo->arguments().end(); /* nothing */) {
-            core::SymbolRef arg = *it;
-            const auto &argTree = *argIt;
-            const auto local = ast::MK::arg2Local(argTree.get());
+        int i = -1;
+        for (auto arg : methodInfo->arguments()) {
+            ++i;
+            const auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
             auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
@@ -801,24 +815,7 @@ private:
                 arg.data(ctx)->addLoc(ctx, spec->loc);
                 arg.data(ctx)->setReBind(spec->rebind);
                 sig.argTypes.erase(spec);
-                ++it;
-                ++argIt;
-            } else if (isOverloaded) {
-                if (arg.data(ctx)->isBlockArgument()) {
-                    // It's ok for an overloaded sig to not mention the implicit block arg:
-                    // the method argument symbol for the block should still appear on the overload,
-                    // but we should make the loc for it not exist.
-                    const auto blkLoc = core::Loc::none(arg.data(ctx)->loc().file());
-                    arg.data(ctx)->addLoc(ctx, blkLoc);
-                    ++it;
-                } else {
-                    it = methodInfo->arguments().erase(it);
-                }
-                ++argIt;
-            } else if (arg.data(ctx)->resultType != nullptr) {
-                ++it;
-                ++argIt;
-            } else {
+            } else if (arg.data(ctx)->resultType == nullptr) {
                 arg.data(ctx)->resultType = core::Types::untyped(ctx, arg);
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
                 bool isBlkArg = arg.data(ctx)->name == core::Names::blkArg();
@@ -828,11 +825,9 @@ private:
                                                       core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     treeArgName.show(ctx));
-                        e.addErrorLine(send->block->loc, "Signature");
+                        e.addErrorLine(exprLoc, "Signature");
                     }
                 }
-                ++it;
-                ++argIt;
             }
 
             if (isOverloaded && arg.data(ctx)->isKeyword()) {
@@ -984,22 +979,42 @@ private:
                     prodCounterInc("types.sig.count");
 
                     bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions();
-
+                    auto originalName = mdef->symbol.data(ctx)->name;
                     if (isOverloaded) {
-                        mdef->symbol.data(ctx)->setOverloaded();
-                        int i = 1;
-
-                        while (i < lastSigs.size()) {
-                            auto overload = ctx.state.enterNewMethodOverload(lastSigs[i]->loc, mdef->symbol, i);
-                            fillInInfoFromSig(ctx, overload, lastSigs[i], isOverloaded, *mdef);
-                            if (i + 1 < lastSigs.size()) {
-                                overload.data(ctx)->setOverloaded();
-                            }
-                            i++;
-                        }
+                        ctx.state.mangleRenameSymbol(mdef->symbol, originalName);
                     }
+                    int i = 0;
 
-                    fillInInfoFromSig(ctx, mdef->symbol, lastSigs[0], isOverloaded, *mdef);
+                    while (i < lastSigs.size()) {
+                        auto sig = TypeSyntax::parseSig(ctx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
+                                                        mdef->symbol);
+                        core::SymbolRef overloadSym;
+                        if (isOverloaded) {
+                            vector<core::SymbolRef> argsToKeep;
+                            int argId = -1;
+                            for (auto &argTree : mdef->args) {
+                                argId++;
+                                auto arg = mdef->symbol.data(ctx)->arguments()[argId];
+                                const auto local = ast::MK::arg2Local(argTree.get());
+                                auto treeArgName = local->localVariable._name;
+                                ENFORCE(local != nullptr);
+                                auto spec =
+                                    absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
+                                if (spec != sig.argTypes.end()) {
+                                    argsToKeep.emplace_back(arg);
+                                }
+                            }
+                            overloadSym = ctx.state.enterNewMethodOverload(lastSigs[i]->loc, mdef->symbol, originalName,
+                                                                           i, argsToKeep);
+                            if (i != lastSigs.size() - 1) {
+                                overloadSym.data(ctx)->setOverloaded();
+                            }
+                        } else {
+                            overloadSym = mdef->symbol;
+                        }
+                        fillInInfoFromSig(ctx, overloadSym, lastSigs[i]->loc, move(sig), isOverloaded, *mdef);
+                        i++;
+                    }
 
                     if (!isOverloaded) {
                         injectOptionalArgs(ctx, mdef);

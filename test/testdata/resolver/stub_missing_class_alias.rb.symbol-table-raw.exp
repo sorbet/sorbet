@@ -14,7 +14,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
     class <C <U O>><S <C <U B>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:7 end=4:11}
       method <C <U O>><S <C <U B>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=14:3 end=20:6}
         argument <C <U O>><S <C <U B>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=??? end=???}
-        method <C <U O>><S <C <U B>> $1><U <static-init>><N <U <block>> $2> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=14:3 end=20:6}
       method <C <U O>><S <C <U B>> $1><U foo> (arg0, arg1, <blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=21:3 end=21:27}
         argument <C <U O>><S <C <U B>> $1><U foo>arg0<> -> O::B::Document::J @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=16:7 end=16:11}
         argument <C <U O>><S <C <U B>> $1><U foo>arg1<> -> O::B::Doc1::J @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=17:7 end=17:11}

@@ -4,7 +4,5 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
       argument <C <U Destructure>><U f>(x,y)<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:9 end=3:14}
       argument <C <U Destructure>><U f>z<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:16 end=3:17}
       argument <C <U Destructure>><U f><blk><block> @ Loc {file=test/testdata/desugar/destructure.rb start=??? end=???}
-      method <C <U Destructure>><U f><N <U <block>> $2> ((a,b)) @ Loc {file=test/testdata/desugar/destructure.rb start=6:5 end=7:8}
-        argument <C <U Destructure>><U f><N <U <block>> $2>(a,b)<> @ Loc {file=test/testdata/desugar/destructure.rb start=6:16 end=6:21}
   class <S <C <U Destructure>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/destructure.rb start=2:7 end=2:18}
 

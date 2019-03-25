@@ -2,8 +2,5 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://git.corp.stripe.co
   class <C <U BlockTest>> < <C <U Object>> () @ Loc {file=test/testdata/cfg/blocks.rb start=2:1 end=2:16}
     method <C <U BlockTest>><U blockPass> (<blk>) @ Loc {file=test/testdata/cfg/blocks.rb start=3:3 end=3:16}
       argument <C <U BlockTest>><U blockPass><blk><block> @ Loc {file=test/testdata/cfg/blocks.rb start=??? end=???}
-      method <C <U BlockTest>><U blockPass><N <U <block>> $2> (x, y) @ Loc {file=test/testdata/cfg/blocks.rb start=4:5 end=6:8}
-        argument <C <U BlockTest>><U blockPass><N <U <block>> $2>x<> @ Loc {file=test/testdata/cfg/blocks.rb start=4:22 end=4:23}
-        argument <C <U BlockTest>><U blockPass><N <U <block>> $2>y<> @ Loc {file=test/testdata/cfg/blocks.rb start=4:25 end=4:26}
   class <S <C <U BlockTest>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/blocks.rb start=2:7 end=2:16}
 
