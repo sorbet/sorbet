@@ -69,10 +69,13 @@ unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::File
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached) {
             logger->trace("Reading from cache: {}", file.data(gs).path());
+            prodCounterInc("types.input.files.kvstore.hit");
             auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
             file.data(gs).cachedParseTree = true;
             ENFORCE(cachedTree->loc.file() == file);
             return cachedTree;
+        } else {
+            prodCounterInc("types.input.files.kvstore.miss");
         }
     }
     return nullptr;
