@@ -17,7 +17,7 @@ class SorbetRBIGeneration::SuggestTyped
 
   def self.suggest_typed
     IO.popen(
-      ['srb', 'tc', '--suggest-typed', '--error-white-list=7022', '--typed=strict', '-a'],
+      ['srb', 'tc', '--suggest-typed', '--error-white-list=7022', '--typed=strict', '--silence-dev-message', '-a'],
       err: [:child, :out],
     ) do |io|
       out = io.read
