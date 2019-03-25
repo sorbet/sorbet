@@ -8,7 +8,7 @@ module SorbetRBIGeneration; end
 require_relative './sorbet'
 require_relative './require_everything'
 require_relative './gem-generator-tracepoint/tracer'
-require_relative './gem-generator-tracepoint/serializer'
+require_relative './gem-generator-tracepoint/tracepoint_serializer'
 
 require 'set'
 
@@ -33,7 +33,7 @@ class SorbetRBIGeneration::RbiGenerator
     end
 
     FileUtils.rm_r(output_dir) if Dir.exist?(output_dir)
-    SorbetRBIGeneration::RbiSerializer.new(trace_results).serialize(output_dir)
+    SorbetRBIGeneration::TracepointSerializer.new(trace_results).serialize(output_dir)
   end
 end
 

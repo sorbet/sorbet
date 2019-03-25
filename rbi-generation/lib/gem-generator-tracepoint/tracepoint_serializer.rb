@@ -10,7 +10,7 @@ require 'fileutils'
 
 SorbetRBIGeneration::ClassDefinition = Struct.new(:id, :klass, :defs)
 
-class SorbetRBIGeneration::RbiSerializer
+class SorbetRBIGeneration::TracepointSerializer
   SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
   # These methods don't match the signatures of their parents, so if we let
