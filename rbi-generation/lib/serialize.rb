@@ -96,7 +96,7 @@ class SorbetRBIGeneration::Serialize
       begin
         value = klass.const_get(const_sym)
       rescue LoadError, NameError, RuntimeError
-        puts "Failed to load #{class_name}::#{const_sym}"
+        ret << "# Failed to load #{class_name}::#{const_sym}"
         next
       end
       # next if !value.is_a?(T::Types::TypeVariable)
@@ -110,7 +110,7 @@ class SorbetRBIGeneration::Serialize
       begin
         value = klass.const_get(const_sym, false)
       rescue LoadError, NameError, RuntimeError
-        puts "Failed to load #{class_name}::#{const_sym}"
+        ret << "# Failed to load #{class_name}::#{const_sym}"
         next
       end
       next if value.is_a?(Module)
@@ -144,7 +144,7 @@ class SorbetRBIGeneration::Serialize
       begin
         method = klass.instance_method(method_sym)
       rescue => e
-        $stderr.puts e
+        ret << "# #{e}"
         next
       end
       next if blacklisted_method(method)
@@ -155,7 +155,7 @@ class SorbetRBIGeneration::Serialize
       begin
         method = klass.singleton_method(method_sym)
       rescue => e
-        $stderr.puts e
+        ret << "# #{e}"
         next
       end
       next if blacklisted_method(method)
@@ -202,11 +202,11 @@ class SorbetRBIGeneration::Serialize
 
   def serialize_method(method, static=false, with_sig: true)
     name = method.name.to_s
+    ret = String.new
     if !valid_method_name(name)
-      $stderr.puts "Illegal method name: #{name}"
+      ret << "# Illegal method name: #{name}"
       return
     end
-    ret = String.new
     parameters = from_method(method)
     ret << serialize_sig(parameters) if with_sig
     args = parameters.map do |(kind, param_name)|
