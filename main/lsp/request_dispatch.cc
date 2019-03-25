@@ -52,7 +52,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
     if (method.isNotification) {
         logger->debug("Processing notification {} ", method.name);
         if (method == LSPMethod::TextDocumentDidChange()) {
-            prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
+            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
             Timer timeit(logger, "text_document_did_change");
             vector<shared_ptr<core::File>> files;
             auto edits = DidChangeTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
@@ -107,7 +107,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
-            prodCategoryCounterInc("requests.processed", "textDocument.didOpen");
+            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
             Timer timeit(logger, "text_document_did_open");
             auto edits = DidOpenTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
             string_view uri = edits->textDocument->uri;
@@ -125,7 +125,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
         }
         if (method == LSPMethod::TextDocumentDidClose()) {
-            prodCategoryCounterInc("requests.processed", "textDocument.didClose");
+            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
             Timer timeit(logger, "text_document_did_close");
             auto edits = DidCloseTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
             string_view uri = edits->textDocument->uri;
@@ -146,7 +146,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
         }
         if (method == LSPMethod::SorbetWatchmanFileChange()) {
-            prodCategoryCounterInc("requests.processed", "watchmanFileChange");
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
             Timer timeit(logger, "watchman_file_change");
             auto queryResponse = WatchmanQueryResponse::fromJSONValue(alloc, msg.params(), "root.params");
             // Watchman returns file paths that are relative to the rootPath. Turn them into absolute paths
@@ -165,7 +165,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             return handleWatchmanUpdates(move(gs), absoluteFilePaths);
         }
         if (method == LSPMethod::Initialized()) {
-            prodCategoryCounterInc("requests.processed", "initialized");
+            prodCategoryCounterInc("lsp.messages.processed", "initialized");
             // initialize ourselves
             unique_ptr<core::GlobalState> newGs;
             {
@@ -196,7 +196,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         auto &requestMessage = msg.asRequest();
         auto id = requestMessage.id;
         if (msg.canceled) {
-            prodCounterInc("lsp.requests.canceled");
+            prodCounterInc("lsp.messages.canceled");
             sendError(id, (int)LSPErrorCodes::RequestCancelled, "Request was canceled");
             return gs;
         }
@@ -207,7 +207,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         auto &rawParams = *requestMessage.params;
 
         if (method == LSPMethod::Initialize()) {
-            prodCategoryCounterInc("lsp.requests.processed", "initialize");
+            prodCategoryCounterInc("lsp.messages.processed", "initialize");
             auto params = InitializeParams::fromJSONValue(alloc, *rawParams, "root.params");
             if (auto rootUriString = get_if<string>(&params->rootUri)) {
                 rootUri = *rootUriString;
@@ -255,7 +255,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
 
             sendResponse(id, InitializeResult(move(serverCap)));
         } else if (method == LSPMethod::Shutdown()) {
-            prodCategoryCounterInc("lsp.requests.processed", "shutdown");
+            prodCategoryCounterInc("lsp.messages.processed", "shutdown");
             sendNullResponse(id);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
             auto params = DocumentSymbolParams::fromJSONValue(alloc, *rawParams);

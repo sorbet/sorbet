@@ -12,7 +12,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
         return gs;
     }
 
-    prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
+    prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     auto result =
         setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover(), false);

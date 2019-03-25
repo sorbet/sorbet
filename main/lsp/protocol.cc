@@ -174,7 +174,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             msg = move(guardedState.pendingRequests.front());
             guardedState.pendingRequests.pop_front();
         }
-        prodCounterInc("lsp.requests.received");
+        prodCounterInc("lsp.messages.received");
         long requestReceiveTimeNanos = msg->timestamp;
         gs = processRequest(move(gs), *msg);
         timingAdd("processing_time", (Timer::currentTimeNanos() - requestReceiveTimeNanos));
@@ -239,6 +239,8 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
     }
     ENFORCE(pendingRequests.size() + didChangeRequestsMerged + foundWatchmanRequests == originalSize);
 
+    prodCategoryCounterAdd("lsp.messages.processed", "text_document_did_change_merged", didChangeRequestsMerged);
+
     /**
      * If we found any watchman updates, inject a single update that contains all of the FS updates.
      *
@@ -265,6 +267,7 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
      * and Watchman updates into a single update.
      */
     if (foundWatchmanRequests > 0) {
+        prodCategoryCounterAdd("lsp.messages.processed", "watchman_file_change_merged", foundWatchmanRequests - 1);
         // Enqueue the changes at *back* of the queue. Defers Sorbet from processing updates until the last
         // possible moment.
         WatchmanQueryResponse watchmanUpdates("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()));

@@ -26,7 +26,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::G
         return gs;
     }
 
-    prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
+    prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
 
     vector<unique_ptr<JSONBaseType>> result;
     string_view searchString = params.query;

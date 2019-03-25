@@ -73,7 +73,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_p
         return gs;
     }
 
-    prodCategoryCounterInc("lsp.requests.processed", "textDocument.documentSymbol");
+    prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentSymbol");
     vector<unique_ptr<JSONBaseType>> result;
     string_view uri = params.textDocument->uri;
     auto fref = uri2FileRef(uri);

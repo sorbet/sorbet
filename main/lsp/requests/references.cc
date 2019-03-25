@@ -15,7 +15,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
         return gs;
     }
 
-    prodCategoryCounterInc("lsp.requests.processed", "textDocument.references");
+    prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentCompletion(), false);
