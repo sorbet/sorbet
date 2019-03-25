@@ -1,6 +1,12 @@
 steps:
   - label: Example Test
     command: echo "Hello!"
-  - label: quick test
+  - label: quick test on mac
     command: bazel test test
+    agents:
+      os: mac
+  - label: quick test on linux
+    command: bazel test test
+    agents:
+      os: linux
 
