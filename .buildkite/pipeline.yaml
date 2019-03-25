@@ -1,4 +1,6 @@
 steps:
   - label: Example Test
     command: echo "Hello!"
+  - label: quick test
+    command: bazel test test
 
