@@ -14,8 +14,8 @@ require 'json'
 require 'set'
 
 class SorbetRBIGeneration::HiddenMethodFinder
-  PATH = "rbi/hidden-methods/"
-  TMP_PATH = "/tmp/sorbet-hidden-methods/"
+  PATH = "rbi/hidden-definitions/"
+  TMP_PATH = "/tmp/sorbet-hidden-definitions/"
   TMP_RBI = TMP_PATH + "reflection.rbi"
   DIFF_RBI = TMP_PATH + "hidden.rbi.tmp"
   RBI_CONSTANTS = TMP_PATH + "reflection.json"
