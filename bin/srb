@@ -44,7 +44,7 @@ typecheck() {
   fi
 
   # shellcheck disable=SC2086
-  "$(dirname "${BASH_SOURCE[0]}")"/sorbet . @$fileList "$@"
+  "$(dirname "${BASH_SOURCE[0]}")"/sorbet-typechecker . @$fileList "$@"
 }
 
 case $command in

@@ -29,4 +29,4 @@ Gemfile.lock
 *.gem
 
 # To fake the gemfile we copy a sorbet binary here, don't commit it
-/bin/sorbet
+/bin/sorbet-typechecker

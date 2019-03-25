@@ -32,7 +32,7 @@ matrix:
     script:
     - brew install bazel
     - travis_wait 90 bazel build main:sorbet --config=release-mac
-    - cp bazel-bin/main/sorbet bin/sorbet
+    - cp bazel-bin/main/sorbet bin/sorbet-typechecker
     - gem build sorbet.gemspec
     # eventually we'll have gem versions but for now erase them
     - mv sorbet-0.0.1-x86_64-darwin-16.gem sorbet-x86_64-darwin-16.gem
@@ -49,10 +49,10 @@ matrix:
     language: cpp
     script:
     - travis_wait 90 bazel build main:sorbet --config=release-linux
-    - cp bazel-bin/main/sorbet bin/sorbet
-    - chmod u+w bin/sorbet
-    - strip bin/sorbet
-    - chmod u-w bin/sorbet
+    - cp bazel-bin/main/sorbet bin/sorbet-typechecker
+    - chmod u+w bin/sorbet-typechecker
+    - strip bin/sorbet-typechecker
+    - chmod u-w bin/sorbet-typechecker
     - gem build sorbet.gemspec
     # eventually we'll have gem versions but for now erase them
     - mv sorbet-0.0.1-x86_64-linux.gem sorbet-x86_64-linux.gem

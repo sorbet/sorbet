@@ -47,11 +47,11 @@ export UBSAN_OPTIONS=print_stacktrace=1
 export LSAN_OPTIONS=verbosity=1:log_threads=1
 
 bazel build main:sorbet $args
-cp "$(bazel info bazel-bin $args)/main/sorbet" bin/sorbet
+cp "$(bazel info bazel-bin $args)/main/sorbet" bin/sorbet-typechecker
 
 /usr/local/bin/junit-script-output \
   rbi-generation-typecheck \
-  bin/sorbet ./rbi-generation
+  bin/sorbet-typechecker ./rbi-generation
 
 (
     cd rbi-generation
