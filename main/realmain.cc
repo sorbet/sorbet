@@ -365,6 +365,10 @@ int realmain(int argc, char *argv[]) {
                 if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
+                if (file.data(*gs).originalSigil > core::StrictLevel::Max) {
+                    // don't change the sigil on "special" files
+                    continue;
+                }
                 auto minErrorLevel = levelMinusOne(file.data(*gs).minErrorLevel());
                 if (file.data(*gs).originalSigil == minErrorLevel) {
                     continue;
