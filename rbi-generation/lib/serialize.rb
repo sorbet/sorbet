@@ -220,6 +220,11 @@ class SorbetRBIGeneration::Serialize
     name.split("::").each do |piece|
       return false if piece[0].upcase != piece[0]
     end
+    return false if [
+      'SorbetRBIGeneration::RbiGenerator::ClassOverride',
+      'SorbetRBIGeneration::RbiGenerator::ModuleOverride',
+      'SorbetRBIGeneration::RbiGenerator::ObjectOverride',
+    ].include?(name)
     true
   end
 
