@@ -17,12 +17,9 @@ int main(int argc, char **argv) {
     vector<std::shared_ptr<JSONObjectType>> classTypes;
     makeLSPTypes(enumTypes, classTypes);
 
-    // Emits enums before class forward decls before class definitions themselves.
+    // Emits enums before class definitions themselves.
     for (auto &enumType : enumTypes) {
         enumType->emit(headerBuffer, classFileBuffer);
-    }
-    for (auto &classType : classTypes) {
-        classType->emitForwardDeclaration(headerBuffer);
     }
     for (auto &classType : classTypes) {
         classType->emit(headerBuffer, classFileBuffer);

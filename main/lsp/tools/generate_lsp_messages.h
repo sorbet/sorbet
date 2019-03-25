@@ -719,13 +719,6 @@ public:
         assign(out, fmt::format("*({}->toJSONValue({}))", from, ALLOCATOR_VAR));
     }
 
-    /**
-     * Emits a forward declaration for the C++ class this object type defines.
-     */
-    void emitForwardDeclaration(fmt::memory_buffer &out) {
-        fmt::format_to(out, "class {};\n", typeName);
-    }
-
     void emitDeclaration(fmt::memory_buffer &out) {
         fmt::format_to(out, "class {} final : public JSONBaseType {{\n", typeName);
         fmt::format_to(out, "public:\n");
