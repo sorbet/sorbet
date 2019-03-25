@@ -2,9 +2,6 @@
 #!/usr/bin/env ruby
 
 # A total hack, but this file is both a valid ruby script and a bash script.
-puts() { return; }
-# shellcheck disable=SC2016
-puts 'If you are seeing this, you need to run `gem install --no-wrappers sorbet`'
 =begin 2>/dev/null
 
 # From here on in, it is all bash until the last line
@@ -12,12 +9,11 @@ puts 'If you are seeing this, you need to run `gem install --no-wrappers sorbet`
 display_help() {
   echo "Sorbet - A Typechecker for Ruby
 
-Usage $0 [command] [command_options]
+$0 [command] [command_options]
 
   Where [command] is one of:
     initialize, init
-    typecheck, tc
-  "
+    typecheck, tc"
   exit 0
 }
 
@@ -49,12 +45,12 @@ typecheck() {
 
 case $command in
   "initialize" | "init")
-    bundle exec sorbet-rbi-generation $@
+    bundle exec sorbet-rbi-generation "$@"
     ;;
 
   "typecheck" | "tc")
     # shellcheck disable=SC2119
-    typecheck $@
+    typecheck "$@"
     ;;
 
   *)
@@ -65,3 +61,4 @@ esac
 exit $?
 # The closing comment for ruby to be ok with this file
 =end
+exec(__FILE__, *ARGV)
