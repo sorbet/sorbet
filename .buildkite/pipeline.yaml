@@ -1,4 +1,6 @@
 steps:
+  - label: "linters"
+    command: .buildkite/linters.sh
   - label: ":mac: test static"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
