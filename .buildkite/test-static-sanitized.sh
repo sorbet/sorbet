@@ -12,8 +12,8 @@ case "${unameOut}" in
 esac
 
 if [[ "linux" == $platform ]]; then
-  apt-get update
-  apt-get install pkg-config zip g++ zlib1g-dev unzip python
+  apt-get update -yy
+  apt-get install -yy pkg-config zip g++ zlib1g-dev unzip python
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == $platform ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
