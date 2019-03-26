@@ -22,6 +22,16 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
+  - label: ":ruby: runtime"
+    command: .buildkite/test-and-build-ruby-runtime.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: ":ruby: rbi-generation"
+    command: .buildkite/test-and-build-rbi-generation.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
   - wait: ~
   - label: ":mac: :shipit:"
     artifact_paths: _out_/**/*
