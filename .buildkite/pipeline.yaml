@@ -22,5 +22,12 @@ steps:
     plugins:
       - junit-annotate#v1.6.0:
           artifacts: _out_/log/junit/*.xml
+  - label: ":mac: :shipit:"
+    branches: "master"
+    command: true
+    agents:
+      os: mac
+  - label: ":linux: :shiptit:"
+    branches: "master"
     agents:
       os: linux
