@@ -13,10 +13,11 @@ esac
 
 if [[ "linux" == $platform ]]; then
   apt-get update -yy
-  apt-get install -yy pkg-config zip g++ zlib1g-dev unzip python ruby
+  apt-get install -yy pkg-config zip g++ zlib1g-dev unzip python ruby autoconf
   CONFIG_OPTS="--config=release-linux"
 elif [[ "mac" == $platform ]]; then
   CONFIG_OPTS="--config=release-mac"
+  brew install autoconf
 fi
 
 echo will run with $CONFIG_OPTS
