@@ -27,7 +27,7 @@ steps:
     command: .buildkite/release-static.sh
     agents:
       os: mac
-  - label: ":linux: :shiptit:"
+  - label: ":linux: :shipit:"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
     agents:
