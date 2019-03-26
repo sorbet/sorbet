@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 echo "--- Pre-setup :bazel:"
 
 unameOut="$(uname -s)"
@@ -10,6 +12,7 @@ case "${unameOut}" in
 esac
 
 if [[ "linux" == $platform ]]; then
+  apt-get update
   apt-get install pkg-config zip g++ zlib1g-dev unzip python
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == $platform ]]; then

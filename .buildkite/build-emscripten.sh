@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 echo "--- Pre-setup"
 
 unameOut="$(uname -s)"
