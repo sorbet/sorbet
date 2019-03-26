@@ -1,12 +1,12 @@
 steps:
   - label: Example Test
     command: echo "Hello!"
-  - label: quick test on mac
-    command: ./bazel test test
+  - label: test static on mac
+    command: .buildkite/test-static-sanitized.sh
     agents:
       os: mac
-  - label: quick test on linux
-    command: ./bazel test test
+  - label: test static on linux
+    command: .buildkite/test-static-sanitized.sh
     agents:
       os: linux
 

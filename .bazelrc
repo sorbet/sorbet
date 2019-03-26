@@ -101,13 +101,24 @@ test:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostam
 test:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 test:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
 
+build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
+test:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
+test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+
+build:buildfarm --curses=no
+test:buildfarm --curses=no
+test:buildfarm --test_output=errors
+build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
+test:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
+build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
+test:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
+
 build:travis --config=test-sanitized-linux
-build:travis --crosstool_top=@llvm_toolchain//:toolchain
 build:travis --curses=no
 test:travis --ram_utilization_factor=10
 test:travis --test_strategy=standalone
-test:travis --test_output=errors
 test:travis --curses=no
+test:travis --test_output=errors
 
 ##
 ## Shared fragments of configuration
