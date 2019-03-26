@@ -39,6 +39,8 @@ echo "+++ tests"
 err=0
 ./bazel test //... $CONFIG_OPTS || err=$?
 
+echo "--- uploading test results"
+
 rm -rf _tmp_
 mkdir -p _tmp_/log/junit/
 
@@ -53,14 +55,13 @@ annotation_dir="$(mktemp -d "junit-annotate-plugin-annotation-tmp.XXXXXXXXXX")"
 annotation_path="${annotation_dir}/annotation.md"
 
 function cleanup {
-  rm -rf "${artifacts_dir}"
   rm -rf "${annotation_dir}"
 }
 
 trap cleanup EXIT
 
 
-.buildkite/annotate > "$annotation_path"
+.buildkite/annotate.rb > "$annotation_path"
 
 cat "$annotation_path"
 
