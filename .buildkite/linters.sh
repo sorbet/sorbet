@@ -26,35 +26,35 @@ if [ "$err" -ne 0 ]; then
 fi
 
 err=0
-script -q format_cxx ./tools/scripts/format_cxx.sh -t
+script -q format_cxx ./tools/scripts/format_cxx.sh -t || err=$?
 if [ "$err" -ne 0 ]; then
     cat format_cxx | buildkite-agent annotate --context tools/scripts/format_cxx.sh --style error --append
     globalErr=$err
 fi
 
 err=0
-script -q compdb ./tools/scripts/build_compilation_db.sh
+script -q compdb ./tools/scripts/build_compilation_db.sh || err=$?
 if [ "$err" -ne 0 ]; then
     cat compdb | buildkite-agent annotate --context tools/scripts/build_compilation_db.sh --style error --append
     globalErr=$err
 fi
 
 err=0
-script -q compdb-targets ./tools/scripts/generate_compdb_targets.sh -t
+script -q compdb-targets ./tools/scripts/generate_compdb_targets.sh -t || err=$?
 if [ "$err" -ne 0 ]; then
     cat compdb-targets | buildkite-agent annotate --context tools/scripts/generate_compdb_targets.sh --style error --append
     globalErr=$err
 fi
 
 err=0
-script -q std_check ./tools/scripts/check_using_namespace_std.sh
+script -q std_check ./tools/scripts/check_using_namespace_std.sh || err=$?
 if [ "$err" -ne 0 ]; then
     cat std_check | buildkite-agent annotate --context tools/scripts/check_using_namespace_std.sh --style error --append
     globalErr=$err
 fi
 
 err=0
-script -q lint_sh ./tools/scripts/lint_sh.sh -t
+script -q lint_sh ./tools/scripts/lint_sh.sh -t || err=$?
 if [ "$err" -ne 0 ]; then
     cat lint_sh | buildkite-agent annotate --context tools/scripts/lint_sh.sh --style error --append
     globalErr=$err
