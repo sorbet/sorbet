@@ -15,9 +15,11 @@ if [[ "linux" == $platform ]]; then
   echo "only mac builds are supported"
   exit 1
 elif [[ "mac" == $platform ]]; then
-  # echo running on mac
+  echo "mac builds are supported"
 fi
 
+git checkout .bazelrc
+rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 echo 'common --curses=no --color=yes' >> .bazelrc
 echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/emscripten' >> .bazelrc
