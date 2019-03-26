@@ -24,5 +24,5 @@ echo "--- compilation"
 ./bazel build //... $CONFIG_OPTS
 
 echo "+++ tests"
-./bazel build //... $CONFIG_OPTS
+./bazel test //... $CONFIG_OPTS
 
