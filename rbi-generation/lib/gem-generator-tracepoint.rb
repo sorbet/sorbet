@@ -29,12 +29,12 @@ module SorbetRBIGeneration
   module GemGeneratorTracepoint
     Sorbet.sig {params(output_dir: String).void}
     def self.main(output_dir = './rbi/gems/')
-      trace_results = SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.trace do
+      trace_results = Tracer.trace do
         SorbetRBIGeneration::RequireEverything.require_everything
       end
 
       FileUtils.rm_r(output_dir) if Dir.exist?(output_dir)
-      SorbetRBIGeneration::GemGeneratorTracepoint::TracepointSerializer.new(trace_results).serialize(output_dir)
+      TracepointSerializer.new(trace_results).serialize(output_dir)
     end
   end
 end

@@ -46,8 +46,8 @@ module SorbetRBIGeneration
             klass_ids.each do |klass_id, class_def|
               klass = class_def.klass
 
-              f.write("#{SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Class) ? 'class' : 'module'} #{class_name(klass)}")
-              f.write(" < #{class_name(klass.superclass)}") if SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Class) && ![Object, nil].include?(klass.superclass)
+              f.write("#{ModuleUtils.real_is_a?(klass, Class) ? 'class' : 'module'} #{class_name(klass)}")
+              f.write(" < #{class_name(klass.superclass)}") if ModuleUtils.real_is_a?(klass, Class) && ![Object, nil].include?(klass.superclass)
               f.write("\n")
 
               rows = class_def.defs.map do |item|
@@ -99,8 +99,8 @@ module SorbetRBIGeneration
           gem_class_defs[gem] ||= {}
           defined.each do |item|
             klass = item[:module]
-            klass_id = SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_object_id(klass)
-            class_def = gem_class_defs[gem][klass_id] ||= SorbetRBIGeneration::GemGeneratorTracepoint::ClassDefinition.new(klass_id, klass, [])
+            klass_id = ModuleUtils.real_object_id(klass)
+            class_def = gem_class_defs[gem][klass_id] ||= ClassDefinition.new(klass_id, klass, [])
             class_def.defs << item unless item[:type] == :module
           end
         end
@@ -114,10 +114,10 @@ module SorbetRBIGeneration
             klass = klass_def.klass
 
             # Unused anon classes
-            next if !((SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Module) && !SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_name(klass).nil?) || used?(klass_id, used))
+            next if !((ModuleUtils.real_is_a?(klass, Module) && !ModuleUtils.real_name(klass).nil?) || used?(klass_id, used))
 
             # Anon delegate classes
-            next if SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Class) && klass.superclass == Delegator && !klass.name
+            next if ModuleUtils.real_is_a?(klass, Class) && klass.superclass == Delegator && !klass.name
 
             # TODO should this be here?
             # next if [Object, BasicObject, Hash].include?(klass) 
@@ -135,8 +135,8 @@ module SorbetRBIGeneration
             klass = class_def.klass
 
             # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
-            used_value = SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Module) && !SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_name(klass).nil? ? true : SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_object_id(klass) # if non-anon, set it to true
-            (used[SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_object_id(klass.superclass)] ||= Set.new) << used_value if SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Class)
+            used_value = ModuleUtils.real_is_a?(klass, Module) && !ModuleUtils.real_name(klass).nil? ? true : ModuleUtils.real_object_id(klass) # if non-anon, set it to true
+            (used[ModuleUtils.real_object_id(klass.superclass)] ||= Set.new) << used_value if ModuleUtils.real_is_a?(klass, Class)
             # otherwise link to next anon class
             class_def.defs.each do |item|
               (used[item[item[:type]].object_id] ||= Set.new) << used_value if [:extend, :include].include?(item[:type])
@@ -215,20 +215,20 @@ module SorbetRBIGeneration
       end
 
       def class_name(klass)
-        klass = @delegate_classes[SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_object_id(klass)] || klass
-        name = SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_name(klass) if SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Module)
+        klass = @delegate_classes[ModuleUtils.real_object_id(klass)] || klass
+        name = ModuleUtils.real_name(klass) if ModuleUtils.real_is_a?(klass, Module)
 
         # class/module has no name; it must be anonymous
         if name.nil? || name == ""
-          middle = SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_is_a?(klass, Class) ? klass.superclass : klass.class
-          id = @anonymous_map[SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_object_id(klass)] ||= anonymous_id
+          middle = ModuleUtils.real_is_a?(klass, Class) ? klass.superclass : klass.class
+          id = @anonymous_map[ModuleUtils.real_object_id(klass)] ||= anonymous_id
           return "Anonymous_#{class_name(middle).gsub('::', '_')}_#{id}"
         end
 
         # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
         if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
           warn("Invalid class name: #{name}")
-          id = @anonymous_map[SorbetRBIGeneration::GemGeneratorTracepoint::ModuleUtils.real_object_id(klass)] ||= anonymous_id
+          id = @anonymous_map[ModuleUtils.real_object_id(klass)] ||= anonymous_id
           return "InvalidName_#{name.gsub(/[^\w]/, '_').gsub(/0x([0-9a-f]+)/, '0x00')}_#{id}"
         end
 
