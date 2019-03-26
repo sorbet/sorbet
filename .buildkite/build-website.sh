@@ -3,6 +3,7 @@
 set -euo pipefail
 
 pushd website
+yarn
 yarn build
 cp -cjf website.tar.bz2 -C website/build/sorbet .
 popd
