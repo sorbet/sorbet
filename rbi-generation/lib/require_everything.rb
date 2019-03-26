@@ -3,6 +3,27 @@
 
 require_relative './gem_loader'
 
+class ExitCalledError < RuntimeError
+end
+
+module Kernel
+  # TODO: hack to get around https://github.com/stripe/sorbet/issues/233
+  define_method(:exit) do |*|
+    puts 'Kernel#exit was called while requiring ruby source files'
+    raise ExitCalledError.new
+  end
+
+  def at_exit(&block)
+    if File.split($0).last == 'rake'
+      # Let `rake test` work
+      super
+      return proc {}
+    end
+    puts "Ignoring at_exit: #{block}"
+    proc {}
+  end
+end
+
 class SorbetRBIGeneration::RequireEverything
   # Goes through the most common ways to require all your userland code
   def self.require_everything
@@ -68,13 +89,4 @@ class SorbetRBIGeneration::RequireEverything
       end
     end
   end
-end
-
-def at_exit(*args, &block)
-  if File.split($0).last == 'rake'
-    # Let `rake test` work
-    super
-    return
-  end
-  puts "Ignoring at_exit: #{args} #{block}"
 end
