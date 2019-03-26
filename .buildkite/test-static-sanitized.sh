@@ -20,8 +20,16 @@ elif [[ "mac" == $platform ]]; then
 fi
 
 echo will run with $CONFIG_OPTS
-./bazel version
 
+git checkout .bazelrc
+rm -f bazel-*
+mkdir -p /usr/local/var/bazelcache/output-bases/test-pr /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
+echo 'common --curses=no --color=yes' >> .bazelrc
+echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/test-pr' >> .bazelrc
+echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos' >> .bazelrc
+echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos' >> .bazelrc
+
+./bazel version
 
 echo "--- compilation"
 ./bazel build //... $CONFIG_OPTS
