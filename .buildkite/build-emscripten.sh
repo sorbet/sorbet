@@ -32,3 +32,7 @@ echo "--- compilation"
 PATH=$PATH:$(pwd)
 export PATH
 tools/scripts/update-sorbet.run.sh
+
+rm -rf _out_
+mkdir -p _out_/webasm
+cp bazel-bin/emscripten/sorbet-wasm.tar _out_/webasm/sobet-wasm.tar

@@ -1,14 +1,17 @@
 steps:
   - label: ":mac: test static"
     command: .buildkite/test-static-sanitized.sh
+    artifact_paths: _out_/**/*
     agents:
       os: mac
   - label: ":ubuntu: test static"
     command: .buildkite/test-static-sanitized.sh
+    artifact_paths: _out_/**/*
     agents:
       os: linux
   - label: ":javascript: build"
     command: .buildkite/build-emscripten.sh
+    artifact_paths: _out_/**/*
     agents:
       os: mac
   - wait: ~
