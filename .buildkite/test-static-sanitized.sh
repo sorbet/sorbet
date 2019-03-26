@@ -31,9 +31,6 @@ echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/us
 
 ./bazel version
 
-echo "--- compilation"
-./bazel build //... $CONFIG_OPTS
-
 echo "+++ tests"
 
 err=0
