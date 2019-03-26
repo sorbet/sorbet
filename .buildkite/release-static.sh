@@ -36,5 +36,5 @@ echo "--- compilation"
 ./bazel build //main:sorbet $CONFIG_OPTS
 
 rm -rf _out_
-mkdir _out_/${platform}
+mkdir -p _out_/${platform}
 cp bazel-bin/main/sorbet _out_/${platform}
