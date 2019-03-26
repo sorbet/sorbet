@@ -3,7 +3,7 @@
 set -euo pipefail
 
 pushd runtime
-bundle install
+bundle install --path vendor/bundle
 bundle exec rake test
 gem build sorbet-runtime.gemspec
 popd
