@@ -62,6 +62,7 @@ class SorbetRBIGeneration::Tracer
     add_to_context(type: :method, module: mod, method: method, singleton: singleton)
   end
 
+  Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
   def self.trace
     start
     yield
@@ -69,15 +70,18 @@ class SorbetRBIGeneration::Tracer
     trace_results
   end
 
+  Sorbet.sig {void}
   def self.start
     pre_cache_module_methods
     install_tracepoints
   end
 
+  Sorbet.sig {void}
   def self.finish
     disable_tracepoints
   end
 
+  Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
   def self.trace_results
     {
       files: @files,

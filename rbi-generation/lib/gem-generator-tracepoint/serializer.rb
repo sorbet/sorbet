@@ -21,14 +21,16 @@ class SorbetRBIGeneration::RbiSerializer
     ['activesupport', 'Time', :initialize],
   ]
 
-  def initialize(trace_results)
-    @files = trace_results[:files]
-    @delegate_classes = trace_results[:delegate_classes]
+  Sorbet.sig {params(files: T::Hash, delegate_classes: T::Hash).void}
+  def initialize(files:, delegate_classes:)
+    @files = files
+    @delegate_classes = delegate_classes
 
     @anonymous_map = {}
     @prev_anonymous_id = 0
   end
 
+  Sorbet.sig {params(output_dir: String).void}
   def serialize(output_dir)
     gem_class_defs = preprocess(@files)
 

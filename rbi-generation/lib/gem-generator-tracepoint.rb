@@ -26,6 +26,7 @@ require 'set'
 # instead of manually defining every getter/setter
 
 class SorbetRBIGeneration::RbiGenerator
+  Sorbet.sig {params(output_dir: String).void}
   def self.main(output_dir = './rbi/gems/')
     trace_results = SorbetRBIGeneration::Tracer.trace do
       SorbetRBIGeneration::RequireEverything.require_everything
