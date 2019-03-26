@@ -1,5 +1,5 @@
 steps:
-  - label: "linters"
+  - label: ":cop: linters"
     command: .buildkite/linters.sh
   - label: ":mac: test static"
     command: .buildkite/test-static-sanitized.sh
