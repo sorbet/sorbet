@@ -22,3 +22,5 @@ steps:
     plugins:
       - junit-annotate#v1.6.0:
           artifacts: _out_/log/junit/*.xml
+    agents:
+      os: linux
