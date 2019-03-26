@@ -19,11 +19,13 @@ steps:
   - wait: ~
   - label: ":mac: :shipit:"
     branches: "master"
-    command: true
+    artifact_paths: _out_/**/*
+    command: .buildkite/release-static.sh
     agents:
       os: mac
   - label: ":linux: :shiptit:"
     branches: "master"
-    command: true
+    artifact_paths: _out_/**/*
+    command: .buildkite/release-static.sh
     agents:
       os: linux
