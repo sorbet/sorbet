@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [[ ! -z "$CLEAN_BUILD" ]]; then
+  echo "--- cleanup"
+  rm -rf /usr/local/var/bazelcache/*
+fi
+
 echo "--- Pre-setup"
 
 unameOut="$(uname -s)"
