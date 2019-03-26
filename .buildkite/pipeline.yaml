@@ -1,6 +1,12 @@
+# There are two reasons we intentionally put everything we can on mac machine:
+#  - our mac machine has 12 cores, while linux one has 4 cores.
+#  - we use macs for development thus we want to make sure all scripts run there
+
 steps:
   - label: ":cop: linters"
     command: .buildkite/linters.sh
+    agents:
+      os: mac
   - label: ":mac: test static"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
