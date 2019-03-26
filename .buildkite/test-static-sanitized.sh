@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "--- Pre-setup"
+echo "--- Pre-setup :bazel:"
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
