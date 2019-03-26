@@ -1,6 +1,4 @@
 steps:
-  - label: Example Test
-    command: echo "Hello!"
   - label: ":mac: test static"
     command: .buildkite/test-static-sanitized.sh
     agents:
