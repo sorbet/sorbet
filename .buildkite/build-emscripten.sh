@@ -29,5 +29,6 @@ echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/us
 ./bazel version
 
 echo "--- compilation"
-
+PATH=$PATH:$(pwd)
+export PATH
 tools/scripts/update-sorbet.run.sh
