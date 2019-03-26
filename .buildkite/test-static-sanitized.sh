@@ -11,9 +11,9 @@ esac
 
 if [[ "linux" == $platform ]]; then
   apt-get install pkg-config zip g++ zlib1g-dev unzip python
-  CONFIG_OPTS="--buildfarm-sanitized-linux"
+  CONFIG_OPTS="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == $platform ]]; then
-  CONFIG_OPTS="--buildfarm-sanitized-mac"
+  CONFIG_OPTS="--config=buildfarm-sanitized-mac"
 fi
 
 echo will run with $CONFIG_OPTS
