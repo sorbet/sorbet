@@ -18,6 +18,7 @@ steps:
       os: mac
   - wait: ~
     continue_on_failure: true
-  - plugins:
+  - label: ":junit:"
+    plugins:
       - junit-annotate#v1.6.0:
           artifacts: _out_/log/junit/*.xml
