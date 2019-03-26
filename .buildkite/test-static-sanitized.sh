@@ -40,7 +40,7 @@ err=0
 ./bazel test //... $CONFIG_OPTS || err=$?
 
 rm -rf _out_
-mkdir _out_
+mkdir -p _out_/log/junit/
 
 ./bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
     path="${line/://}"
