@@ -13,7 +13,7 @@ esac
 
 if [[ "linux" == $platform ]]; then
   apt-get update -yy
-  apt-get install -yy pkg-config zip g++ zlib1g-dev unzip python
+  apt-get install -yy pkg-config zip g++ zlib1g-dev unzip python ruby
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == $platform ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
