@@ -30,8 +30,7 @@ namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::realmain {
-shared_ptr<spd::logger> logger;
-int returnCode;
+  shared_ptr<spd::logger> logger;int returnCode;
 
 shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderrColorSink() {
     auto color_sink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
