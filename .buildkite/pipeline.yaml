@@ -16,6 +16,11 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
+  - label: ":yarn"
+    command: .buildkite/build-website.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
   - wait: ~
   - label: ":mac: :shipit:"
     artifact_paths: _out_/**/*
