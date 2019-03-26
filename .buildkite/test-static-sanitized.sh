@@ -35,5 +35,19 @@ echo "--- compilation"
 ./bazel build //... $CONFIG_OPTS
 
 echo "+++ tests"
-./bazel test //... $CONFIG_OPTS
 
+err=0
+./bazel test //... $CONFIG_OPTS || err=$?
+
+rm -rf _out_
+mkdir _out_
+
+./bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
+    path="${line/://}"
+    path="${path#//}"
+    cp "bazel-testlogs/$path/test.xml" _out_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
+done
+
+if [ "$err" -ne 0 ]; then
+    exit "$err"
+fi

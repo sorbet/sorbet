@@ -11,3 +11,8 @@ steps:
     command: .buildkite/build-emscripten.sh
     agents:
       os: mac
+  - wait: ~
+    continue_on_failure: true
+  - plugins:
+      - junit-annotate#v1.6.0:
+          artifacts: _out_/log/junit/*.xml
