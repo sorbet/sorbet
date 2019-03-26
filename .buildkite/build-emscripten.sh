@@ -16,6 +16,7 @@ if [[ "linux" == $platform ]]; then
   exit 1
 elif [[ "mac" == $platform ]]; then
   echo "mac builds are supported"
+  brew install node coreutils
 fi
 
 git checkout .bazelrc
