@@ -33,7 +33,7 @@ echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/us
 ./bazel version
 
 echo "--- compilation"
-./bazel build //main:sorbet $CONFIG_OPTS
+./bazel build //main:sorbet --strip=always $CONFIG_OPTS
 
 rm -rf _out_
 mkdir -p _out_/${platform}
