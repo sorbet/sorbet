@@ -1,4 +1,6 @@
 #include "main/lsp/lsp.h"
+#include "common/Timer.h"
+#include "common/statsd/statsd.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
@@ -11,7 +13,8 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
                  WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool skipConfigatron,
                  bool disableFastPath)
     : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputStream(inputStream),
-      outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath) {
+      outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath),
+      lastMetricUpdateTime(Timer::currentTimeNanos()) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes,
@@ -223,6 +226,23 @@ const LSPMethod LSPMethod::getByName(string_view name) {
         }
     }
     return LSPMethod{string(name), true, LSPMethod::Kind::ClientInitiated, false};
+}
+
+// 5 minutes in nanoseconds.
+constexpr long STATSD_INTERVAL = 5 * 60 * 1e+9;
+
+bool LSPLoop::shouldSendCountersToStatsd(long currentTime) {
+    return !opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
+}
+
+void LSPLoop::sendCountersToStatsd(long currentTime) {
+    ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
+    if (!opts.statsdHost.empty()) {
+        lastMetricUpdateTime = currentTime;
+        auto counters = getAndClearThreadCounters();
+        auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
+        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix);
+    }
 }
 
 } // namespace sorbet::realmain::lsp

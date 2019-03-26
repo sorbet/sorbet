@@ -19,6 +19,10 @@ CounterState::~CounterState() = default;
 CounterState::CounterState(CounterState &&rhs) = default;
 CounterState &CounterState::operator=(CounterState &&rhs) = default;
 
+bool CounterState::hasNullCounters() const {
+    return counters.get() == nullptr;
+}
+
 const char *CounterImpl::internKey(const char *str) {
     auto it1 = this->stringsByPtr.find(str);
     if (it1 != this->stringsByPtr.end()) {

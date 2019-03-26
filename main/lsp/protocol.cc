@@ -102,7 +102,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
                         // Merge with any existing pending watchman file updates.
-                        enqueueRequest(alloc, logger, guardedState, move(msg));
+                        enqueueRequest(alloc, logger, guardedState, move(msg), true);
                     }
                 },
                 [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
@@ -112,7 +112,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
-                        enqueueRequest(alloc, logger, guardedState, move(msg));
+                        enqueueRequest(alloc, logger, guardedState, move(msg), true);
                     }
                 });
         } else {
@@ -148,11 +148,12 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 
                 if (msg) {
                     absl::MutexLock lck(&mtx); // guards guardedState.
-                    enqueueRequest(readerAlloc, logger, guardedState, move(msg));
+                    enqueueRequest(readerAlloc, logger, guardedState, move(msg), true);
                 }
             }
         });
 
+    mainThreadId = this_thread::get_id();
     unique_ptr<core::GlobalState> gs;
     while (true) {
         unique_ptr<LSPMessage> msg;
@@ -177,7 +178,18 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         prodCounterInc("lsp.messages.received");
         long requestReceiveTimeNanos = msg->timestamp;
         gs = processRequest(move(gs), *msg);
-        timingAdd("processing_time", (Timer::currentTimeNanos() - requestReceiveTimeNanos));
+        long currentTime = Timer::currentTimeNanos();
+        timingAdd("processing_time", (currentTime - requestReceiveTimeNanos));
+        if (shouldSendCountersToStatsd(currentTime)) {
+            {
+                // Merge counters from worker threads.
+                absl::MutexLock counterLck(&mtx);
+                if (!guardedState.counters.hasNullCounters()) {
+                    counterConsume(move(guardedState.counters));
+                }
+            }
+            sendCountersToStatsd(currentTime);
+        }
     }
 
     if (gs) {
@@ -281,7 +293,7 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
 }
 
 void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
-                             LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg) {
+                             LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     try {
         msg->counter = state.requestCounter++;
         msg->timestamp = Timer::currentTimeNanos();
@@ -319,6 +331,13 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
         }
     } catch (DeserializationError e) {
         logger->error(fmt::format("Unable to deserialize LSP request: {}", e.what()));
+    }
+
+    if (collectThreadCounters) {
+        if (!state.counters.hasNullCounters()) {
+            counterConsume(move(state.counters));
+        }
+        state.counters = getAndClearThreadCounters();
     }
 }
 

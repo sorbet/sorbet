@@ -57,6 +57,9 @@ struct CounterState {
 
     CounterState(const CounterState &rhs) = delete;
 
+    /** If `true`, then `counters` is null. */
+    bool hasNullCounters() const;
+
 private:
     friend CounterState getAndClearThreadCounters();
     friend void counterConsume(CounterState cs);

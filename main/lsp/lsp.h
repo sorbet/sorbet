@@ -162,6 +162,8 @@ class LSPLoop {
         bool paused;
         int requestCounter;
         int errorCode;
+        // Counters collected from worker threads.
+        CounterState counters;
     };
 
     struct ResponseHandler {
@@ -243,6 +245,13 @@ class LSPLoop {
      * `params.initializationOptions.supportsOperationNotifications` set to `true`.
      */
     bool enableOperationNotifications = false;
+    /**
+     * The time, in nanoseconds since the epoch, that LSP last sent metrics to statsd -- if `opts.statsdHost` was
+     * specified.
+     */
+    long lastMetricUpdateTime;
+    /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
+    std::thread::id mainThreadId;
 
     /* Send the following document to client */
     void sendRaw(std::string_view json);
@@ -337,9 +346,11 @@ class LSPLoop {
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
      * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.
+     * If `collectThreadCounters` is `true`, it also merges in thread-local counters into the QueueState counters.
      */
     static void enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const std::shared_ptr<spd::logger> &logger,
-                               LSPLoop::QueueState &queue, std::unique_ptr<LSPMessage> msg);
+                               LSPLoop::QueueState &queue, std::unique_ptr<LSPMessage> msg,
+                               bool collectThreadCounters = false);
 
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
@@ -351,6 +362,11 @@ class LSPLoop {
 
     std::unique_ptr<core::GlobalState> handleWatchmanUpdates(std::unique_ptr<core::GlobalState> gs,
                                                              std::vector<std::string> changedFiles);
+
+    /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
+    bool shouldSendCountersToStatsd(long currentTime);
+    /** Sends counters to statsd. */
+    void sendCountersToStatsd(long currentTime);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
