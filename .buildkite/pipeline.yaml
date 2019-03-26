@@ -1,11 +1,11 @@
 steps:
   - label: Example Test
     command: echo "Hello!"
-  - label: test static on mac
+  - label: ":mac: test static"
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: mac
-  - label: test static on linux
+  - label: ":ubuntu: test static"
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: linux
