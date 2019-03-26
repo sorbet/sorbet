@@ -15,11 +15,10 @@ if [[ "linux" == $platform ]]; then
   echo "only mac builds are supported"
   exit 1
 elif [[ "mac" == $platform ]]; then
+  # echo running on mac
 fi
 
-echo will run with $CONFIG_OPTS
 ./bazel version
-
 
 echo "--- compilation"
 
