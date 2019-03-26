@@ -25,7 +25,7 @@ require 'set'
 #
 # instead of manually defining every getter/setter
 
-class SorbetRBIGeneration::RbiGenerator
+class SorbetRBIGeneration::GemGeneratorTracepoint
   Sorbet.sig {params(output_dir: String).void}
   def self.main(output_dir = './rbi/gems/')
     trace_results = SorbetRBIGeneration::Tracer.trace do
@@ -38,5 +38,5 @@ class SorbetRBIGeneration::RbiGenerator
 end
 
 if $PROGRAM_NAME == __FILE__
-  SorbetRBIGeneration::RbiGenerator.main
+  SorbetRBIGeneration::GemGeneratorTracepoint.main
 end
