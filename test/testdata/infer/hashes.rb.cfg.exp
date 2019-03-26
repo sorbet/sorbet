@@ -1,7 +1,7 @@
 digraph "hashes.rb" {
 subgraph "cluster_::Foo#bar" {
     label = "::Foo#bar";
-    color = red;
+    color = blue;
     "bb::Foo#bar_0" [shape = invhouse];
     "bb::Foo#bar_1" [shape = parallelogram];
 
