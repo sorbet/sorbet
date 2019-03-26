@@ -39,14 +39,36 @@ echo "+++ tests"
 err=0
 ./bazel test //... $CONFIG_OPTS || err=$?
 
-rm -rf _out_
-mkdir -p _out_/log/junit/
+rm -rf _tmp_
+mkdir -p _tmp_/log/junit/
 
 ./bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
     path="${line/://}"
     path="${path#//}"
-    cp "bazel-testlogs/$path/test.xml" _out_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
+    cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
 done
+
+
+annotation_dir="$(mktemp -d "junit-annotate-plugin-annotation-tmp.XXXXXXXXXX")"
+annotation_path="${annotation_dir}/annotation.md"
+
+function cleanup {
+  rm -rf "${artifacts_dir}"
+  rm -rf "${annotation_dir}"
+}
+
+trap cleanup EXIT
+
+
+.buildkite/annotate > "$annotation_path"
+
+cat "$annotation_path"
+
+if grep -q "<details>" "$annotation_path"; then
+  echo "--- :buildkite: Creating annotation"
+  # shellcheck disable=SC2002
+  cat "$annotation_path" | buildkite-agent annotate --context junit-${platform} --style error --append
+fi
 
 if [ "$err" -ne 0 ]; then
     exit "$err"
