@@ -9,4 +9,7 @@ steps:
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: linux
-
+  - label: build emscripten on mac
+    command: .buildkite/build-emscripten.sh
+    agents:
+      os: mac
