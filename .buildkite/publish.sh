@@ -19,6 +19,7 @@ release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=forma
 echo releasing "${release_version}"
 git tag -f "${release_version}"
 .buildkite/gh-release.sh stripe/sorbet "${release_version}" -- $(find release)
+git push origin "${release_version}"
 
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
