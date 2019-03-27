@@ -86,7 +86,7 @@ for file in $ASSETS; do
   curl --netrc \
        --header "Content-Type:application/gzip" \
        --data-binary "@$file" \
-       "$upload_url?name=$(basename "$file")"
+       "$upload_url?name=$file"
 done
 
 # Copyright (c) 2016 Nicolas Sanguinetti <hi@nicolassanguinetti.info>
