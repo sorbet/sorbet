@@ -146,7 +146,7 @@ module Sorbet::Private
               tp.disable
 
               singleton = tp.method_id == :singleton_method_added
-              receiver = singleton ? tp.self.singleton_class : tp.self
+              receiver = singleton ? Sorbet::Private::RealStdlib.real_singleton_class(tp.self) : tp.self
               methods = Sorbet::Private::RealStdlib.real_instance_methods(receiver, false) + Sorbet::Private::RealStdlib.real_private_instance_methods(receiver, false)
               set = @modules[Sorbet::Private::RealStdlib.real_object_id(receiver)] ||= Set.new
               added = methods.find { |m| !set.include?(m) }

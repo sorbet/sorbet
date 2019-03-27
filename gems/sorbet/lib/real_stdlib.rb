@@ -36,4 +36,9 @@ module Sorbet::Private::RealStdlib
     @real_ancestors ||= Module.instance_method(:private_instance_methods)
     @real_ancestors.bind(mod).call(arg)
   end
+
+  def self.real_singleton_class(obj)
+    @real_singleton_class ||= Object.instance_method(:singleton_class)
+    @real_singleton_class.bind(obj).call
+  end
 end
