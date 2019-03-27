@@ -159,6 +159,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         unique_ptr<LSPMessage> msg;
         {
             absl::MutexLock lck(&mtx);
+            Timer timeit(logger, "idle");
             mtx.Await(absl::Condition(
                 +[](LSPLoop::QueueState *guardedState) -> bool {
                     return guardedState->terminate || (!guardedState->paused && !guardedState->pendingRequests.empty());

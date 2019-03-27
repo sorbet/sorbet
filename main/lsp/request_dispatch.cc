@@ -12,6 +12,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     auto id = msg.id();
+    Timer timeit(logger, "process_request");
     try {
         return processRequestInternal(move(gs), msg);
     } catch (const DeserializationError &e) {
