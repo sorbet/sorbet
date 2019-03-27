@@ -61,3 +61,5 @@ main() {
         *)            usage;;
     esac
 }
+
+main
