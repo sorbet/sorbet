@@ -3,53 +3,53 @@
 #  - we use macs for development thus we want to make sure all scripts run there
 
 steps:
-  - label: ":cop: lint"
+  - label: "Linters"
     command: .buildkite/linters.sh
     agents:
       os: mac
-  - label: ":mac: test :bazel:"
+  - label: "Test: sorbet-static on Mac"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":ubuntu: test :bazel:"
+  - label: "Test: sorbet-static on Linux"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
     agents:
       os: linux
-  - label: ":yarn:"
+  - label: "Website"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":ruby: runtime"
+  - label: "Test: sorbet-runtime"
     command: .buildkite/test-and-build-ruby-runtime.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":ruby: rbi-generation"
+  - label: "Test: rbi-generation"
     command: .buildkite/test-and-build-rbi-generation.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
   - wait: ~
-  - label: ":mac: :package:"
+  - label: "Release build: static on Mac"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
     agents:
       os: mac
-  - label: ":javascript: :package:"
+  - label: "Release build: static on WebAsm"
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux: :package:"
+  - label: "Release build; static on Linux"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
     agents:
       os: linux
   - wait: ~
-  - label: ":shipit:"
+  - label: "Deploy"
     command: .buildkite/publish.sh
     branches: "master"
     agents:
