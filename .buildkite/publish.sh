@@ -16,12 +16,13 @@ release_version="0.1.${git_commit_count}.${git_rev}"
 .buildkite/gh-release.sh create stripe/sorbet "${release_version}" "$BUILDKITE_BRANCH" 
 
 echo "--- releasing stripe.dev/sorbet"
-git fetch gh-pages
+git fetch origin gh-pages
+git branch -D gh-pages || true
 git checkout gh-pages
 tar -xjf _out_/website/website.tar.bz2 -C super-secret-private-beta .
 git add super-secret-private-beta
 git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-git push github.com gh-pages
+git push origin gh-pages
 
 echo "--- releasing sorbet.run"
 rm -rf sorbet.run
