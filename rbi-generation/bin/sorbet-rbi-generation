@@ -16,7 +16,7 @@ module SorbetRBIGeneration::Main
     SorbetRBIGeneration::FetchRBIs.main
 
     # Generate the RBIs from bundler
-    SorbetRBIGeneration::RbiGenerator.main
+    SorbetRBIGeneration::GemGeneratorTracepoint.main
 
     # Find the hidden methods
     SorbetRBIGeneration::HiddenMethodFinder.main
