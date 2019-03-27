@@ -134,8 +134,8 @@ class SorbetRBIGeneration::Serialize
       # This method never apears in the reflection list...
       instance_methods += [:initialize]
     end
-    klass.ancestors.reject {|anc| constant_cache.name_by_class(anc)}.each do |sc|
-      instance_methods += sc.instance_methods(false)
+    klass.ancestors.reject {|ancestor| constant_cache.name_by_class(ancestor)}.each do |ancestor|
+      instance_methods += ancestor.instance_methods(false)
     end
 
     # uniq here is required because we populate additional methos from anonymous superclasses and there
@@ -148,6 +148,7 @@ class SorbetRBIGeneration::Serialize
         next
       end
       next if blacklisted_method(method)
+      next if ancestor_has_method(method, klass)
       serialize_method(method)
     end
     # uniq is not required here, but added to be on the safe side
@@ -159,6 +160,7 @@ class SorbetRBIGeneration::Serialize
         next
       end
       next if blacklisted_method(method)
+      next if ancestor_has_method(method, klass.singleton_class)
       serialize_method(method, true)
     end
     ret << methods.join("\n")
@@ -187,6 +189,20 @@ class SorbetRBIGeneration::Serialize
   def valid_method_name(name)
     return true if SPECIAL_METHOD_NAMES.include?(name)
     name =~ /^[[:word:]]+[?!=]?$/
+  end
+
+  def ancestor_has_method(method, klass)
+    return false if !klass.is_a?(Class)
+    ancestor = klass.ancestors.find do |ancestor|
+      next if ancestor == klass
+      begin
+        ancestor.instance_method(method.name)
+      rescue NameError
+        nil
+      end
+    end
+    return false unless ancestor
+    ancestor.instance_method(method.name).parameters == method.parameters
   end
 
   def constant(const, value)
