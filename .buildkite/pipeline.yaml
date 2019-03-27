@@ -49,6 +49,8 @@ steps:
     agents:
       os: linux
   - wait: ~
+  - label: "All tests and builds succeeded"
+    command: .buildkite/all-succeeded.sh
   - label: "Deploy"
     command: .buildkite/publish.sh
     branches: "master"
