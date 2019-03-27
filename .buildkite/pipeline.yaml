@@ -48,5 +48,6 @@ steps:
     command: .buildkite/release-static.sh
     agents:
       os: linux
+  - wait: ~
   - label: "publish"
     command: .buildkite/publish.sh
