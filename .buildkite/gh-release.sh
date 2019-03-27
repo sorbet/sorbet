@@ -68,7 +68,7 @@ payload=$(
      --arg tag "$TAG" \
      --arg name "$NAME" \
      --arg body "$BODY" \
-     '{ tag_name: $tag, name: $name, body: $body, draft: true }'
+     '{ tag_name: $tag, name: $name, body: $body}'
 )
 
 response=$(
