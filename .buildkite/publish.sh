@@ -3,9 +3,11 @@
 set -euo pipefail
 
 echo "--- Dowloading artifacts"
+rm -rf release
 mkdir release
 
 buildkite-agent artifact download "_out_/**/*" .
+cp -R _out_/* release/
 
 echo "--- making a github release"
 git_rev=$(git rev-parse HEAD)
