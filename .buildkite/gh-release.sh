@@ -82,11 +82,11 @@ response=$(
 
 upload_url="$(echo "$response" | jq -r .upload_url | sed -e "s/{?name,label}//")"
 
-for file in $ASSETS; do
+for asset in $ASSETS; do
   curl --netrc \
-       --header "Content-Type:application/gzip" \
-       --data-binary "@$file" \
-       "$upload_url?name=$file"
+       --header "Content-Type:$(file --mime-type -b ${asset})" \
+       --data-binary "@$asset" \
+       "$upload_url?name=$asset"
 done
 
 # Copyright (c) 2016 Nicolas Sanguinetti <hi@nicolassanguinetti.info>
