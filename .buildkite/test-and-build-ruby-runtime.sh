@@ -7,10 +7,10 @@ pushd runtime
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
 rbenv shell 2.4.3
-bundle install --path vendor/bundle
+rbenv exec bundle install --path vendor/bundle
 
 echo "+++ tests"
-bundle exec rake test
+rbenv exec bundle exec rake test
 
 echo "--- build"
 gem build sorbet-runtime.gemspec
