@@ -24,6 +24,8 @@ cc_binary(
             # JSON-RPC responses) as a function pointer for use in C++
             # (see addFunction above).
             "RESERVED_FUNCTION_POINTERS=1",
+            "-s",
+            "DISABLE_EXCEPTION_CATCHING=2",
         ],
         "//conditions:default": [],
     }),

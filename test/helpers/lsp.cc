@@ -111,7 +111,7 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
 }
 
 unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
-    auto initializeParams = make_unique<InitializeParams>(12345, rootPath, rootUri, make_unique<ClientCapabilities>());
+    auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities();
     initializeParams->trace = TraceKind::Off;

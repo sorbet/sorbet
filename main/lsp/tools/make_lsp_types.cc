@@ -1205,7 +1205,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto InitializeParams =
         makeObject("InitializeParams",
                    {
-                       makeField("processId", makeVariant({JSONDouble, JSONNull})),
+                       makeField("processId", makeOptional(makeVariant({JSONDouble, JSONNull}))),
                        makeField("rootPath", makeVariant({JSONString, JSONNull})),
                        makeField("rootUri", makeVariant({JSONString, JSONNull})),
                        makeField("initializationOptions", makeOptional(JSONAny)),
