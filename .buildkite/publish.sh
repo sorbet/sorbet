@@ -5,6 +5,9 @@ echo "--- setup"
 apt-get update
 apt-get install -yy curl jq
 
+git config --global user.email "sorbet+bot@stripe.com"
+git config --global user.name "Sorbet build farm"
+
 echo "--- Dowloading artifacts"
 rm -rf release
 mkdir release
@@ -22,7 +25,7 @@ git push origin "${release_version}"
 pushd release
 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- $(find * -type f -print)
 popd
-
+echo ""
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
 git branch -D gh-pages || true
