@@ -12,11 +12,6 @@ addons:
     - bazel
 before_script:
 - echo 'common --curses no' >> .bazelrc
-- git config --local user.name "Sorbet Travis bot"
-- git config --local user.email "sorbet@stripe.com"
-- export TRAVIS_TAG=${TRAVIS_TAG:-$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)}
-before_deploy:
-- git tag -f $TRAVIS_TAG
 matrix:
   include:
   - name: "Test: static"
@@ -36,15 +31,6 @@ matrix:
     - gem build sorbet.gemspec
     # eventually we'll have gem versions but for now erase them
     - mv sorbet-0.0.1-x86_64-darwin-16.gem sorbet-x86_64-darwin-16.gem
-    deploy: &deploy_base
-      provider: releases
-      skip_cleanup: true
-      api_key:
-        secure: jUxOnSkUQu1x7u6bjKEM8dPI5ckBf41oTcmRvqLvqGClxM9wte4QO4K8XtLRhO3iEtOYf+XQbaGLoSUos74DdYg9YSc338F7CW6Jy3LsXnUe37zlS7tL+xmSAvEJ1QYWKz8NHmkETWY8iu7qJYZQidikAVlwm5yPKwoz22izronar5gCI1sqt3En5JxDhqZ/Cl40iof8IfpCH5l+PvN04mUI+Vk7gY1DBAb9KIVDBVqtFdwCSiAhernFTJS5JAEkThepFq8ShAu3zOgrZl+h8GHzyVcTamVPBdonaTCYJHbCgHn4r1skz+zaPSuayq4PbwnRIrsAA+YyQ4NIFyO27Rz2lgpGtsqqzoLNPs7LMaBJ+bA4AIU+hfzPBabiOF6+326gVxCQ1jGwN5KTK5xAXGHXTvbguUxj4ImALmXSwAZIP0/Umfp7NFQ/q82gZrmCfEFZcrAmndO6I7L3G9IR2WN3S5NSPDpPpnurppA8t1BWFTs9DFU6F5wjS6O5SeJkNR1FQNsxhuLpxmq15F6k90Z0MUN4W7kMWS7TwXRZu5i3Gikb8o0g84dSpsm0LFbxUymZR5lZgOAD+Hr7syjVQ33pTaT2TaLfq5nvzwTJfm+k3LH5rhQt6CR+K8aplUXLKhBiupmX+RpA4PyXjOjEuVE5Lw7Ga1+6TMw5LZTqOFQ=
-      file:
-      - sorbet-x86_64-darwin-16.gem
-      on:
-        repo: stripe/sorbet
   - name: "Release: static for linux"
     language: cpp
     script:
@@ -56,10 +42,6 @@ matrix:
     - gem build sorbet.gemspec
     # eventually we'll have gem versions but for now erase them
     - mv sorbet-0.0.1-x86_64-linux.gem sorbet-x86_64-linux.gem
-    deploy:
-      <<: *deploy_base
-      file:
-      - sorbet-x86_64-linux.gem
   - name: "Test: runtime on Ruby 2.4 & Release"
     language: ruby
     rvm: 2.4
@@ -70,9 +52,6 @@ matrix:
     - gem build sorbet-runtime.gemspec
     - mv sorbet-runtime-*.gem sorbet-runtime.gem
     - cd .. # cd above breaks deploy step
-    deploy:
-      <<: *deploy_base
-      file: runtime/sorbet-runtime.gem
   - name: "Test: rbi-generation on Ruby 2.4 & Release"
     language: ruby
     rvm: 2.4
@@ -82,9 +61,6 @@ matrix:
     - gem build sorbet-rbi-generation.gemspec
     - mv sorbet-rbi-generation-*.gem sorbet-rbi-generation.gem
     - cd .. # cd above breaks deploy step
-    deploy:
-      <<: *deploy_base
-      file: rbi-generation/sorbet-rbi-generation.gem
   - name: "Test: runtime on Ruby 2.5"
     language: ruby
     rvm: 2.5
