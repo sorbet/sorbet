@@ -62,4 +62,4 @@ main() {
     esac
 }
 
-main
+main $@
