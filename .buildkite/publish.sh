@@ -10,7 +10,7 @@ buildkite-agent artifact download "_out_/**/*" .
 echo "--- making a github release"
 git_rev=$(git rev-parse HEAD)
 git_commit_count=$(git rev-list --count HEAD)
-release_version="0.1.${gic_commit_count}.${git_rev}"
+release_version="0.1.${git_commit_count}.${git_rev}"
 .buildkite/gh-release.sh create stripe/sorbet "${release_version}" "$BUILDKITE_BRANCH" 
 
 echo "--- releasing stripe.dev/sorbet"
