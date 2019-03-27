@@ -33,6 +33,11 @@ steps:
     agents:
       os: mac
   - wait: ~
+  - label: "Coverage: sorbet-static on Mac"
+    command: .buildkite/coverage-static-sanitized.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
   - label: "Release build: static on Mac"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
