@@ -3,16 +3,16 @@
 #  - we use macs for development thus we want to make sure all scripts run there
 
 steps:
-  - label: ":cop: linters"
+  - label: ":cop: lint"
     command: .buildkite/linters.sh
     agents:
       os: mac
-  - label: ":mac: test static"
+  - label: ":mac: test :bazel:"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":ubuntu: test static"
+  - label: ":ubuntu: test :bazel:"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
     agents:
@@ -33,21 +33,21 @@ steps:
     agents:
       os: mac
   - wait: ~
-  - label: ":mac: :shipit:"
+  - label: ":mac: :package:"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
     agents:
       os: mac
-  - label: ":javascript: build"
+  - label: ":javascript: :package:"
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux: :shipit:"
+  - label: ":linux: :package:"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
     agents:
       os: linux
   - wait: ~
-  - label: "publish"
+  - label: ":shipit:"
     command: .buildkite/publish.sh
