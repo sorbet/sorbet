@@ -229,13 +229,13 @@ const LSPMethod LSPMethod::getByName(string_view name) {
 }
 
 // 5 minutes in nanoseconds.
-constexpr long STATSD_INTERVAL = 5 * 60 * 1e+9;
+constexpr long long STATSD_INTERVAL = 300000000000;
 
-bool LSPLoop::shouldSendCountersToStatsd(long currentTime) {
+bool LSPLoop::shouldSendCountersToStatsd(long long currentTime) {
     return !opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
 }
 
-void LSPLoop::sendCountersToStatsd(long currentTime) {
+void LSPLoop::sendCountersToStatsd(long long currentTime) {
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;

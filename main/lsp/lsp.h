@@ -364,9 +364,9 @@ class LSPLoop {
                                                              std::vector<std::string> changedFiles);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
-    bool shouldSendCountersToStatsd(long currentTime);
+    bool shouldSendCountersToStatsd(long long currentTime);
     /** Sends counters to statsd. */
-    void sendCountersToStatsd(long currentTime);
+    void sendCountersToStatsd(long long currentTime);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,

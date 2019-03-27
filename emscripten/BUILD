@@ -7,7 +7,7 @@ cc_binary(
             "-s",
             "MODULARIZE=1",
             "-s",
-            "EXPORTED_FUNCTIONS=[\"_typecheck\",\"_lsp_initialize\",\"_lsp_send\"]",
+            "EXPORTED_FUNCTIONS=[\"_typecheck\",\"_lsp\"]",
             "-s",
             # - `addFunction` converts a JavaScript function to a C++ function
             #    pointer. It is used in the Sourcegraph extension
