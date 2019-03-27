@@ -43,7 +43,7 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "Release build; static on Linux"
+  - label: "Release build: static on Linux"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
     agents:
