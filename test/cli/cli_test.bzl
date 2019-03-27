@@ -15,6 +15,7 @@ def cli_test(path):
             "{}/*.yaml".format(name),
             "{}/*.input".format(name),
             "{}/.sorbet/*".format(name),
+            "{}/**/file_with_no_dot".format(name),
         ]) + ["//main:sorbet"]
     )
 

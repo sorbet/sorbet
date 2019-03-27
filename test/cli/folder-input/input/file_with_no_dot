@@ -1,0 +1,1 @@
+File inputs used to crash if they encountered a file without a dot in the name.

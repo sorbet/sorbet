@@ -143,9 +143,13 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
             appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
                              relativeIgnorePatterns);
         } else {
-            auto ext = fullPath.substr(fullPath.rfind('.'));
-            if (extensions.find(ext) != extensions.end()) {
-                result.emplace_back(fullPath);
+            auto dotLocation = fullPath.rfind('.');
+            // Note: Can't call substr with an index > string length, so explicitly check if a dot isn't found.
+            if (dotLocation != string::npos) {
+                auto ext = fullPath.substr(dotLocation);
+                if (extensions.find(ext) != extensions.end()) {
+                    result.emplace_back(fullPath);
+                }
             }
         }
     }
