@@ -4,7 +4,7 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-bazel build //emscripten:sorbet-wasm.tar --config=webasm-darwin
+bazel build //emscripten:sorbet-wasm.tar --config=webasm-darwin --strip=always
 
 echo
 echo "./bazel-bin/emscripten:sorbet-wasm.tar should contain \".wasm\" and \".js\" file"

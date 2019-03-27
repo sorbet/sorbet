@@ -1,0 +1,56 @@
+# There are two reasons we intentionally put everything we can on mac machine:
+#  - our mac machine has 12 cores, while linux one has 4 cores.
+#  - we use macs for development thus we want to make sure all scripts run there
+
+steps:
+  - label: ":cop: lint"
+    command: .buildkite/linters.sh
+    agents:
+      os: mac
+  - label: ":mac: test :bazel:"
+    command: .buildkite/test-static-sanitized.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: ":ubuntu: test :bazel:"
+    command: .buildkite/test-static-sanitized.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: linux
+  - label: ":yarn:"
+    command: .buildkite/build-website.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: ":ruby: runtime"
+    command: .buildkite/test-and-build-ruby-runtime.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: ":ruby: rbi-generation"
+    command: .buildkite/test-and-build-rbi-generation.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - wait: ~
+  - label: ":mac: :package:"
+    artifact_paths: _out_/**/*
+    command: .buildkite/release-static.sh
+    agents:
+      os: mac
+  - label: ":javascript: :package:"
+    command: .buildkite/build-emscripten.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: ":linux: :package:"
+    artifact_paths: _out_/**/*
+    command: .buildkite/release-static.sh
+    agents:
+      os: linux
+  - wait: ~
+  - label: ":shipit:"
+    command: .buildkite/publish.sh
+    branches: "master"
+    agents:
+      os: linux

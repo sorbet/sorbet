@@ -10,7 +10,7 @@ fi
 
 cd "$(dirname "$0")/../.."
 
-bazel build //tools:clang-format
+bazel build //tools:clang-format &> /dev/null
 
 # shellcheck disable=SC2207
 cxx_src=(
