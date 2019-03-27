@@ -18,8 +18,10 @@ git_commit_count=$(git rev-list --count HEAD)
 release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 echo releasing "${release_version}"
 git tag -f "${release_version}"
-.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- $(find release)
 git push origin "${release_version}"
+pushd release
+../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- $(find * -type f -print)
+popd
 
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
