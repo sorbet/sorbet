@@ -1,65 +1,113 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# taken from https://github.com/progrium/gh-release/blob/master/bash/gh-release.bash
-readonly ref_endpoint="${GITHUB_API_URL:-https://api.github.com}/repos/%s/git/refs/tags/%s"
-readonly release_endpoint="${GITHUB_API_URL:-https://api.github.com}/repos/%s/releases"
-readonly release_json='{"tag_name": "v%s", "name": "%s", "target_commitish": "%s"}'
-
-release-create() {
-    declare reponame="$1" version="${2#v}" branch="${3:-master}" name="$4"
-    local release="$(printf "$release_json" "$version" "$name" "$branch")"
-    local release_url="$(printf "$release_endpoint" "$reponame")"
-    echo "Creating release v$version from branch $branch ..."
-    upload_url="$(curl -s -d "$release" "$release_url?access_token=$GITHUB_ACCESS_TOKEN" | upload-url)"
-    for asset in $(find release); do
-        local name="$asset"
-        echo "Uploading $name ..."
-        curl -X POST -H "Content-Type: $(mimetype ${name})" --data-binary "@${asset}" \
-            "$upload_url=$name&access_token=$GITHUB_ACCESS_TOKEN" > /dev/null
-    done
-}
-
-release-destroy() {
-    declare reponame="$1" version="$2"
-    local release_url="$(printf "$release_endpoint" "$reponame")"
-    
-    [[ "$version" == [0-9]* ]] && version="v$version"
-
-    release_id="$(curl -s "$release_url?access_token=$GITHUB_ACCESS_TOKEN" | release-id-from-tagname "$version")"
-    echo "Deleting release..."
-    curl -s -X DELETE "$release_url/$release_id?access_token=$GITHUB_ACCESS_TOKEN"
-    echo "Deleting tag..."
-    tag_url="$(printf "$ref_endpoint" "$reponame" "$version")"
-    curl -s -X DELETE "$tag_url?access_token=$GITHUB_ACCESS_TOKEN"
-}
+set -e
+[ -z "$DEBUG" ] || set -x;
 
 usage() {
-    echo "Usage: gh-release [-v] subcommand"
-    echo
-    echo "Subcommands:"
-    echo "  create <reponame> <version> [branch] [name]"
-    echo "  destroy <reponame> <version>"
-    echo "  checksums <algorithm>"
-    echo
+  echo "$0 <repo> <tag> [<release name>] [-- <asset>...]" >&2;
 }
 
-release-checksums() {
-    declare alg="$1"
-    echo "Writing $alg checksum files..."
-    for asset in $(ls -A release); do
-        cat "release/$asset" | checksum "$alg" > "release/${asset}.$alg"
-    done
-}
+if [ "$1" = "-h" -o "$1" = "--help" ]; then
+  usage
+  cat >&2 <<EOS
+Pass the following arguments:
+    * \`<repo>\`: ":user/:name" of the repository. For example, "foca/mpp".
+    * \`<tag>\`: Name of the tag for this release. For example, "v1.0.0".
+    * \`<release name>\`: Optional suffix for the release name.
+You can pass a list of files to upload as release assets by giving them after a
+\`--\` argument.
+If you supply text on \`STDIN\` it will be used as the release notes.
+EXAMPLES:
+    $ $0 foca/mpp v1.0.0 -- pkg/*.tar.gz
+    Creates a release named "mpp v1.0.0" and adds any tar.gz file in
+    \`./pkg\` as an asset.
+    $ $0 foca/mpp v1.0.1 "Bugfixes" -- pkg/*.tar.gz < notes.md
+    Creates a release named "mpp v1.0.1: Bugfixes", adds any tar.gz
+    file in \`./pkg\` as an asset, and uses the contents of \`notes.md\`
+    as the release notes.
+NOTE:
+This uses your \`.netrc\` file to authenticate with GitHub. In order to run the
+script, make sure you have **both** \`api.github.com\` and \`upload.github.com\` in
+this file. For example:
+machine api.github.com
+  login foca
+  password <an access token>
+machine upload.github.com
+  login foca
+  password <an access token>
+Generate this access token at https://github.com/settings/tokens and make sure
+it has access to the \`"repo"\` scope.
+EOS
+  exit 1;
+fi
 
-main() {
-    set -eo pipefail; [[ "$TRACE" ]] && set -x
-    case "$1" in
-        create)        shift; release-create "$@";;
-        destroy)    shift; release-destroy "$@";;
-        checksums)    shift; release-checksums "$@";;
-        -v)            echo "$VERSION";;
-        *)            usage;;
-    esac
-}
+[ -n "$2" ] || (usage; exit 1);
 
-main $@
+REPO="$1"
+shift
+
+TAG="$1"
+shift
+
+NAME="$(basename "$REPO") ${TAG}"
+if [ -n "$1" -a "$1" != "--" ]; then
+  NAME="${NAME}: $1";
+  shift
+fi
+
+BODY=""
+[ -t 0 ] || BODY=`cat`;
+
+if [ "$1" = "--" -a "$#" -ge "2" ]; then
+  shift
+  ASSETS="$@"
+fi
+
+payload=$(
+  jq --null-input \
+     --arg tag "$TAG" \
+     --arg name "$NAME" \
+     --arg body "$BODY" \
+     '{ tag_name: $tag, name: $name, body: $body, draft: true }'
+)
+
+response=$(
+  curl --fail \
+       --netrc \
+       --silent \
+       --location \
+       --data "$payload" \
+       "https://api.github.com/repos/${REPO}/releases"
+)
+
+upload_url="$(echo "$response" | jq -r .upload_url | sed -e "s/{?name,label}//")"
+
+for file in $ASSETS; do
+  curl --netrc \
+       --header "Content-Type:application/gzip" \
+       --data-binary "@$file" \
+       "$upload_url?name=$(basename "$file")"
+done
+
+# Copyright (c) 2016 Nicolas Sanguinetti <hi@nicolassanguinetti.info>
+# 
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation
+# files (the "Software"), to deal in the Software without
+# restriction, including without limitation the rights to use,
+# copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following
+# conditions:
+# 
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.

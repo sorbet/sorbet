@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -euo pipefail
+echo "--- setup"
+apt-get update
+apt-get install -yy curl jq
 
 echo "--- Dowloading artifacts"
 rm -rf release
@@ -12,8 +15,10 @@ cp -R _out_/* release/
 echo "--- making a github release"
 git_rev=$(git rev-parse HEAD)
 git_commit_count=$(git rev-list --count HEAD)
-release_version="0.1.${git_commit_count}.${git_rev}"
-.buildkite/gh-release.sh create stripe/sorbet "${release_version}" "$BUILDKITE_BRANCH" 
+release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
+echo releasing "${release_version}"
+git tag -f "${release_version}"
+.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- $(find release)
 
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
