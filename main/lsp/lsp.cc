@@ -166,6 +166,7 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
                     for (auto &e : errorsAccumulated[file]) {
                         auto diagnostic = make_unique<Diagnostic>(loc2Range(gs, e->loc), e->header);
                         diagnostic->code = e->what.code;
+                        diagnostic->severity = DiagnosticSeverity::Error;
 
                         typecase(e.get(), [&](core::Error *ce) {
                             vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
