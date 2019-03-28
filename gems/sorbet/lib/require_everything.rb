@@ -16,7 +16,7 @@ class Sorbet::Private::RequireEverything
   end
 
   def self.load_rails
-    return unless File.exist?('config/application.rb')
+    return unless rails?
     begin
       require 'rails'
     rescue
@@ -40,6 +40,9 @@ class Sorbet::Private::RequireEverything
   end
 
   def self.require_all_files
+    excluded_paths = Set.new
+    excluded_paths += excluded_rails_files if rails?
+
     abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
     errors = []
     abs_paths.each_with_index do |abs_path, i|
@@ -49,6 +52,7 @@ class Sorbet::Private::RequireEverything
       # - extra long runtime (making network requests, running a benchmark)
       # While this isn't a perfect heuristic for these things, it's pretty good.
       next if File.executable?(abs_path)
+      next if excluded_paths.include?(abs_path)
 
       begin
         my_require(abs_path, i+1, abs_paths.size)
@@ -89,5 +93,27 @@ class Sorbet::Private::RequireEverything
       puts "Ignoring at_exit: #{block}"
       proc {}
     end
+  end
+
+  private
+
+  def self.excluded_rails_files
+    excluded_paths = Set.new
+
+    # Exclude files that have already been loaded by rails
+    rails = Object.const_get(:Rails)
+    load_paths = rails.application.send(:_all_load_paths)
+    load_paths.each do |path|
+      excluded_paths += Dir.glob("#{Dir.pwd}/#{path}/**/*.rb")
+    end
+
+    # Exclude initializers, as they have already been run by rails and
+    # can contain side-effects like monkey-patching that should
+    # only be run once.
+    excluded_paths += Dir.glob("#{Dir.pwd}/config/initializers/**/*.rb")
+  end
+
+  def self.rails?
+    File.exist?('config/application.rb')
   end
 end

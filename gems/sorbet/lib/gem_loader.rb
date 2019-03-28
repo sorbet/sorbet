@@ -535,7 +535,11 @@ class Sorbet::Private::GemLoader
     require 'bundler/setup'
     Bundler.require
 
-    Bundler.load.specs.sort_by(&:name).each do |gemspec|
+    # Do not load gems in Gemfile where require is false
+    deps = Bundler.load.dependencies.reject { |dep| dep.autorequire && dep.autorequire.empty? }
+    specs = deps.flat_map { |dep| dep.to_specs }.to_set
+
+    specs.sort_by(&:name).each do |gemspec|
       begin
         require_gem(gemspec.name)
       rescue LoadError
