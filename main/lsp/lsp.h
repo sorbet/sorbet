@@ -155,6 +155,8 @@ enum class LSPErrorCodes {
 };
 
 class LSPLoop {
+    friend class LSPWrapper;
+
     /** Used to store the state of LSPLoop's internal request queue.  */
     struct QueueState {
         std::deque<std::unique_ptr<LSPMessage>> pendingRequests;

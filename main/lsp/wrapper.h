@@ -92,6 +92,15 @@ public:
      * Note: Use this method *before* the client performs initialization with the server.
      */
     void enableAllExperimentalFeatures();
+
+    /**
+     * WARNING! Only use this if you know what you are doing!
+     *
+     * This is only safe to use if you are no longer holding references to anything transitively held by a LSPMessage.
+     *
+     * Frees all memory associated with JSON objects.
+     */
+    void freeJSONObjects();
 };
 
 } // namespace sorbet::realmain::lsp

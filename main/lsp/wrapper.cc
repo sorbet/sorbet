@@ -180,4 +180,9 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
     }
 }
 
+void LSPWrapper::freeJSONObjects() {
+    alloc.Clear();
+    lspLoop->alloc.Clear();
+}
+
 } // namespace sorbet::realmain::lsp
