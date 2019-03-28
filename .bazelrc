@@ -56,6 +56,9 @@ build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
 build:dbg --config=nopie
 
+build:coverage --config=dbg
+test:coverage --spawn_strategy=standalone
+
 ##
 ## Configurations used for releases
 ##
