@@ -176,7 +176,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern) &&
-                    !sym.data(gs)->derivesFrom(gs, core::Symbols::StubClass())) {
+                    !(sym.data(gs)->isClass() && sym.data(gs)->derivesFrom(gs, core::Symbols::StubClass()))) {
                     items.push_back(getCompletionItem(gs, sym, receiverType, nullptr));
                 }
             }

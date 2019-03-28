@@ -219,4 +219,19 @@ TEST_F(ProtocolTest, EmptyRootUri) {
     }
 }
 
+TEST_F(ProtocolTest, CompletionOnNonClass) {
+    assertDiagnostics(initializeLSP(), {});
+    assertDiagnostics(send(*openFile("yolo1.rb", "# typed: true\nclass A\nend\nA")), {});
+
+    // TODO: Once we have better helpers for completion, clean this up.
+    auto completionParams = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(getUri("yolo1.rb")),
+                                                          make_unique<Position>(3, 1));
+    completionParams->context = make_unique<CompletionContext>(CompletionTriggerKind::Invoked);
+
+    auto completionReq = make_unique<RequestMessage>("2.0", 100, "textDocument/completion");
+    completionReq->params = completionParams->toJSONValue(lspWrapper->alloc);
+    // We don't care about the result. We just care that Sorbet didn't die due to an ENFORCE failure.
+    send(LSPMessage(move(completionReq)));
+}
+
 } // namespace sorbet::test::lsp
