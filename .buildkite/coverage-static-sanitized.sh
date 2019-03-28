@@ -20,10 +20,8 @@ if [[ "linux" == "$platform" ]]; then
   echo "linux coverage is not supported"
   exit 1
 elif [[ "mac" == "$platform" ]]; then
-  CONFIG_OPTS="--config=buildfarm --config=coverage --javabase=@embedded_jdk//:jdk" # workaround https://github.com/bazelbuild/bazel/issues/6993
+  echo "mac is supported"
 fi
-
-echo will run with $CONFIG_OPTS
 
 git checkout .bazelrc
 rm -f bazel-*
@@ -40,7 +38,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcac
 echo "+++ tests"
 
 err=0
-./bazel coverage //... $CONFIG_OPTS || err=$?
+./bazel coverage //... --config=buildfarm --config=coverage --javabase=@embedded_jdk//:jdk || err=$?  # workaround https://github.com/bazelbuild/bazel/issues/6993
 
 echo "--- uploading coverage results"
 
@@ -55,7 +53,7 @@ touch _tmp_/reports
 done
 
 rm -rf ./_tmp_/profdata_combined.profdata
-cat _tmp_/reports | xargs .buildkite/combine-coverage.sh
+xargs .buildkite/combine-coverage.sh < _tmp_/reports
 
 ./bazel-sorbet/external/llvm_toolchain/bin/llvm-cov show -instr-profile ./_tmp_/profdata_combined.profdata ./bazel-bin/test/test_corpus_sharded -object ./bazel-bin/main/sorbet > combined.coverage.txt
 
