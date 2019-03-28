@@ -42,6 +42,11 @@ mkdir -p /usr/local/var/bazelcache/output-bases/release /usr/local/var/bazelcach
 echo "--- compilation"
 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
 
+cp bazel-bin/main/sorbet bin/sorbet-typechecker
+gem build sorbet.gemspec
+
+
 rm -rf _out_
 mkdir -p _out_/${platform}
 cp bazel-bin/main/sorbet _out_/${platform}
+mv sorbet-*.gem _out_/sorbet-x86_64-${platform}.gem
