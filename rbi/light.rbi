@@ -1888,18 +1888,18 @@ class Hash < Object
     .returns(V)
   end
   sig do
-    params(
-        arg0: K,
-        arg1: V,
+   type_parameters(:X).params(
+      arg0: K,
+      arg1: T.type_parameter(:X),
     )
-    .returns(V)
+    .returns(T.any(V, T.type_parameter(:X)))
   end
   sig do
-    params(
+   type_parameters(:X).params(
         arg0: K,
-        blk: T.proc.params(arg0: K).returns(V),
+        blk: T.proc.params(arg0: K).returns(T.type_parameter(:X)),
     )
-    .returns(V)
+    .returns(T.any(V, T.type_parameter(:X)))
   end
   def fetch(arg0, arg1=T.unsafe(nil), &blk); end
   sig {returns(Hash)}
