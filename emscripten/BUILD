@@ -18,7 +18,7 @@ cc_binary(
             # - `Pointer_stringify` converts a C++ char* to a JavaScript string.
             "EXTRA_EXPORTED_RUNTIME_METHODS=[\"ccall\",\"cwrap\",\"addFunction\",\"Pointer_stringify\"]",
             "-s",
-            "TOTAL_MEMORY=33554432",
+            "TOTAL_MEMORY=67108864",
             "-s",
             # This let's us allocate 1 JavaScript function (the callback for
             # JSON-RPC responses) as a function pointer for use in C++
