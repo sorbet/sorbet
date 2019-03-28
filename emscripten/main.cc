@@ -17,7 +17,11 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *rubySrc) {
 }
 
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
-    static sorbet::realmain::lsp::LSPWrapper *wrapper = new sorbet::realmain::lsp::LSPWrapper();
+    static sorbet::realmain::lsp::LSPWrapper *wrapper;
+    if (!wrapper) {
+        wrapper = new sorbet::realmain::lsp::LSPWrapper();
+        wrapper->enableAllExperimentalFeatures();
+    }
 
     auto responses = wrapper->getLSPResponsesFor(message);
     for (auto &response : responses) {
