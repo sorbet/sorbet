@@ -234,4 +234,29 @@ TEST_F(ProtocolTest, CompletionOnNonClass) {
     send(LSPMessage(move(completionReq)));
 }
 
+// Hides synthetic, internal arguments when sending hover results to client.
+TEST_F(ProtocolTest, HidesSyntheticArgumentsOnHover) {
+    assertDiagnostics(initializeLSP(), {});
+
+    // There will be diagnostics, but we don't care about them.
+    send(*openFile("yolo1.rb",
+                   "# typed: true\nclass A\n  extend T::Sig\n\n  sig {params(x: Integer).returns(String)}\n "
+                   " def bar(x)\n    x.to_s\n  end\nend\n\ndef main\n  A.new.bar(\"91\")\nend"));
+
+    // TODO: Make this nicer once we have good hover helpers.
+    auto hoverParams = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("yolo1.rb")),
+                                                               make_unique<Position>(11, 9));
+    auto hoverReq = make_unique<RequestMessage>("2.0", 100, "textDocument/hover");
+    hoverReq->params = hoverParams->toJSONValue(lspWrapper->alloc);
+
+    auto response = send(LSPMessage(move(hoverReq)));
+    EXPECT_EQ(response.size(), 1);
+    if (response.size() == 1) {
+        auto &result = response.at(0);
+        auto hover = Hover::fromJSONValue(lspWrapper->alloc, result->result());
+        auto content = MarkupContent::fromJSONValue(lspWrapper->alloc, *hover->contents);
+        EXPECT_EQ(content->value, "sig {params(x: Integer).returns(String)}");
+    }
+}
+
 } // namespace sorbet::test::lsp

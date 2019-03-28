@@ -183,6 +183,18 @@ const rapidjson::Value &LSPMessage::params() const {
     return NULL_VALUE;
 }
 
+const rapidjson::Value &LSPMessage::result() const {
+    if (isResponse()) {
+        if (auto &result = asResponse().result) {
+            if (result.has_value()) {
+                // optional unique_ptr => ref
+                return **result;
+            }
+        }
+    }
+    return NULL_VALUE;
+}
+
 string LSPMessage::toJSON() const {
     if (isRequest()) {
         return asRequest().toJSON();

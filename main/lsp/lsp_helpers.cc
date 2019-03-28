@@ -140,8 +140,11 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
 
     if (method.data(gs)->isMethod()) {
         for (auto &argSym : method.data(gs)->arguments()) {
-            typeAndArgNames.emplace_back(absl::StrCat(argSym.data(gs)->argumentName(gs), ": ",
-                                                      getResultType(gs, argSym, receiver, constraint)->show(gs)));
+            // Don't display synthetic arguments (like blk).
+            if (!argSym.data(gs)->isSyntheticBlockArgument()) {
+                typeAndArgNames.emplace_back(absl::StrCat(argSym.data(gs)->argumentName(gs), ": ",
+                                                          getResultType(gs, argSym, receiver, constraint)->show(gs)));
+            }
         }
     }
 
