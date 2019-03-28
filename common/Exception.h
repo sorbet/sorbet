@@ -34,7 +34,7 @@ public:
         raise("Not Implemented");
     }
 
-    static void print_backtrace() noexcept;
+    static void printBacktrace() noexcept;
     static void failInFuzzer() noexcept;
 
     [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line)
@@ -57,7 +57,7 @@ template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... 
     } else {
         fatalLogger->error("Exception::raise() (sadly without a message)\n");
     }
-    print_backtrace();
+    printBacktrace();
     stopInDebugger();
     throw SorbetException(message);
 }

@@ -168,7 +168,7 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, UnorderedSet<st
 class SetTerminateHandler {
 public:
     static void on_terminate() {
-        sorbet::Exception::print_backtrace();
+        sorbet::Exception::printBacktrace();
     }
 
     SetTerminateHandler() {

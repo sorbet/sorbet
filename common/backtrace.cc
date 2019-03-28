@@ -36,7 +36,7 @@ void filter_unnecessary(string &out) {
     }
 }
 
-void sorbet::Exception::print_backtrace() noexcept {
+void sorbet::Exception::printBacktrace() noexcept {
     int traceSize = 0;
     auto **messages = (char **)nullptr;
     string programName = getProgramName();
@@ -55,7 +55,7 @@ void sorbet::Exception::print_backtrace() noexcept {
 
 #else
 
-void sorbet::Exception::print_backtrace() noexcept {}
+void sorbet::Exception::printBacktrace() noexcept {}
 #endif // ifndef EMSCRIPTEN
 void sorbet::Exception::failInFuzzer() noexcept {
     if (fuzz_mode) {
