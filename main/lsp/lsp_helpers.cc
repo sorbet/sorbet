@@ -26,6 +26,12 @@ string LSPLoop::localName2Remote(string_view uri) {
     if (relativeUri.at(0) == '/') {
         relativeUri = relativeUri.substr(1);
     }
+
+    // Special case: Root uri is '' (happens in Monaco)
+    if (rootUri.length() == 0) {
+        return string(relativeUri);
+    }
+
     return absl::StrCat(rootUri, "/", relativeUri);
 }
 

@@ -195,4 +195,28 @@ TEST_F(ProtocolTest, NotInitialized) {
     assertResponseError(-32002, "not initialize", *msg1);
 }
 
+// Monaco doesn't send a root URI.
+TEST_F(ProtocolTest, EmptyRootUri) {
+    // Manually reset rootUri before initializing.
+    rootUri = "";
+    assertDiagnostics(initializeLSP(), {});
+
+    // Manually construct an openFile with text that has a typechecking error.
+    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
+        "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", "textDocument/didOpen");
+    didOpenNotif->params = didOpenParams->toJSONValue(lspWrapper->alloc);
+    auto diagnostics = send(LSPMessage(move(didOpenNotif)));
+
+    // Check the response for the expected URI.
+    EXPECT_EQ(diagnostics.size(), 1);
+    auto &msg = diagnostics.at(0);
+    if (assertNotificationMessage("textDocument/publishDiagnostics", *msg)) {
+        // Will fail test if this does not parse.
+        if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
+            EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
+        }
+    }
+}
+
 } // namespace sorbet::test::lsp
