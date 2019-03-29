@@ -108,6 +108,7 @@ module SorbetRBIGeneration
 
       def filter_unused(gem_class_defs)
         used = detect_used(gem_class_defs)
+        defining_gems = detect_defining_gems(gem_class_defs)
 
         gem_class_defs.each_with_object({}) do |(gem, klass_defs), hsh|
           hsh[gem] = klass_defs.select do |klass_id, klass_def|
@@ -119,10 +120,41 @@ module SorbetRBIGeneration
             # Anon delegate classes
             next if ModuleUtils.real_is_a?(klass, Class) && klass.superclass == Delegator && !klass.name
 
+            # Classes which have no definitions in this gem
+            next if !T.must(defining_gems[klass_def.id]).include?(gem)
+
             # TODO should this be here?
             # next if [Object, BasicObject, Hash].include?(klass) 
             true
           end
+        end
+      end
+
+      Sorbet.sig do
+        params(
+          gem_class_defs: T::Hash[String, T::Hash[String, ClassDefinition]]
+        ).returns(T::Hash[String, T::Set[String]])
+      end
+      def detect_defining_gems(gem_class_defs)
+        klass_to_gem_counts = {}
+
+        gem_class_defs.each do |gem, klass_defs|
+          klass_defs.each do |klass_id, klass_def|
+            klass_to_gem_counts[klass_def.id] ||= {}
+            klass_to_gem_counts[klass_def.id][gem] ||= 0
+            klass_to_gem_counts[klass_def.id][gem] += klass_def.defs.count
+          end
+        end
+
+        klass_to_defining_gems = klass_to_gem_counts.each_with_object({}) do |(klass_id, gem_counts), hsh|
+          gems_with_at_least_one_definition = Set.new
+          gem_counts.each do |gem, count|
+            gems_with_at_least_one_definition << gem if count.positive?
+          end
+          defining_gem = gem_counts.keys.first
+          gems_with_at_least_one_definition << defining_gem if gems_with_at_least_one_definition.empty?
+
+          hsh[klass_id] = gems_with_at_least_one_definition
         end
       end
 

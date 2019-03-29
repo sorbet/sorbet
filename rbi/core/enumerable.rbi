@@ -136,6 +136,14 @@ module Enumerable
   sig {returns(Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
+  sig do
+    params(
+      obj: T.untyped,
+      blk: T.proc.params(arg0: Elem, arg1: T.untyped).void
+    ).returns(T.untyped)
+  end
+  def each_with_object(obj, &blk); end
+
   sig {returns(T::Array[Elem])}
   def entries(); end
 

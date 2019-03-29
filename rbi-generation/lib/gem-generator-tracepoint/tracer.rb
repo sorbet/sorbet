@@ -48,6 +48,13 @@ module SorbetRBIGeneration
 
       def self.module_created(mod)
         add_to_context(type: :module, module: mod)
+
+        # Record the class as a subclass so we don't accidentally pick it up
+        # when processing Class#inherited in next require
+        if ModuleUtils.real_is_a?(mod, Class)
+          @subclasses[ModuleUtils.real_object_id(mod.superclass)] ||= Set.new
+          @subclasses[ModuleUtils.real_object_id(mod.superclass)] << ModuleUtils.real_object_id(mod)
+        end
       end
 
       def self.module_included(included, includer)
@@ -60,6 +67,10 @@ module SorbetRBIGeneration
 
       def self.method_added(mod, method, singleton)
         add_to_context(type: :method, module: mod, method: method, singleton: singleton)
+      end
+
+      def self.module_inherited(mod)
+        add_to_context(type: :inherited, module: mod)
       end
 
       Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
@@ -95,11 +106,13 @@ module SorbetRBIGeneration
       @context_stack = [[]]
       @files = {}
       @delegate_classes = {}
+      @subclasses = {}
 
       def self.pre_cache_module_methods
         ObjectSpace.each_object(Module) do |mod_|
           mod = T.cast(mod_, Module)
           @modules[ModuleUtils.real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
+          new_subclasses(mod_)
         end
       end
 
@@ -117,6 +130,8 @@ module SorbetRBIGeneration
         end
         @c_call_tracepoint = TracePoint.new(:c_call) do |tp|
           case tp.method_id
+          when :inherited
+            module_inherited(tp.self)
           when :require, :require_relative
             @context_stack << []
           end
@@ -136,6 +151,8 @@ module SorbetRBIGeneration
 
             # raise 'Unexpected: constants or methods were defined without a file added to $LOADED_FEATURES' if path.nil?
             # raise "Unexpected: #{path} is already defined in files" if files.key?(path)
+
+            process_inherited(popped, path)
 
             @files[path] ||= []
             @files[path] += popped
@@ -172,6 +189,40 @@ module SorbetRBIGeneration
         @c_call_tracepoint.disable
         @c_return_tracepoint.disable
       end
+
+      def self.process_inherited(context, path)
+        inherited = Set.new
+        context.reject! do |item|
+          next false unless item[:type] == :inherited
+          inherited << ModuleUtils.real_object_id(item[:module])
+          true
+        end
+
+        # Inherited classes defined in Ruby .rb source files are detected using the
+        # Class.new and :class Tracepoints. Classes that are created in C extensions
+        # (required from .bundle files) are not. So we detect any new classes below
+        # and add them as modules to the current context.
+        return if path =~ /\.rb$/
+        inherited.each do |object_id|
+          superclass = ObjectSpace._id2ref(object_id)
+          subclasses = new_subclasses(superclass)
+          subclasses.each do |subclass|
+            context << { type: :module, module: subclass }
+          end
+        end
+      end
+
+      def self.new_subclasses(klass)
+        previous = @subclasses[ModuleUtils.real_object_id(klass)] ||= Set.new
+        added = []
+        ObjectSpace.each_object(klass.singleton_class) do |k|
+          if previous.add?(ModuleUtils.real_object_id(k))
+            added << k if ModuleUtils.real_is_a?(k, Class) && T.cast(k, Class).superclass == klass
+          end
+        end
+        added
+      end
+
     end
   end
 end
