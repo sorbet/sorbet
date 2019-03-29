@@ -28,7 +28,7 @@ require 'set'
 module SorbetRBIGeneration
   module GemGeneratorTracepoint
     Sorbet.sig {params(output_dir: String).void}
-    def self.main(output_dir = './rbi/gems/')
+    def self.main(output_dir = './sorbet/rbi/gems/')
       trace_results = Tracer.trace do
         SorbetRBIGeneration::RequireEverything.require_everything
       end

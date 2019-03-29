@@ -4,7 +4,7 @@ cwd="$(pwd)"
 
 cd test/cli/config-file || exit 1
 
-# Look ma, no args! (the args are in .sorbet/config)
+# Look ma, no args! (the args are in sorbet/config)
 "$cwd/main/sorbet" 2>&1
 
 echo ------------------------------

@@ -14,7 +14,11 @@ void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_
             argsPView = argsPView.substr(0, argsPView.size() - 1);
         }
         for (string_view arg : absl::StrSplit(argsPView, '\n')) {
-            stringArgs.emplace_back(string(arg));
+            if (arg[0] == '@') {
+                readArgsFromFile(logger, arg.substr(min(arg.find_first_not_of("@"), arg.size())));
+            } else {
+                stringArgs.emplace_back(string(arg));
+            }
         }
     } catch (FileNotFoundException e) {
         logger->error("File Not Found: {}", filename);
@@ -30,7 +34,7 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logge
     }
 
     // Look for .sorbet/config before all other args, so that the CLI args can overwrite the config file
-    auto configFilename = ".sorbet/config";
+    auto configFilename = "sorbet/config";
     if (FileOps::exists(configFilename)) {
         // TODO(jez) Recurse upwards to find file in parent directory
         readArgsFromFile(logger, configFilename);

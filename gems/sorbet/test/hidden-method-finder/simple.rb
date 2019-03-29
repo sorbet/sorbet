@@ -28,7 +28,7 @@ class SorbetRBIGeneration::HiddenMethodFinder::Test::Simple < MiniTest::Spec
       # that yet
       # assert_equal(File.read(olddir + '/simple.errors.txt'), File.read('rbi/hidden-definitions/errors.txt'))
       # assert_equal(File.read(olddir + '/simple.hidden.rbi'), File.read('rbi/hidden-definitions/hidden.rbi'))
-      assert_match("class Foo\n  def bar()", File.read('rbi/hidden-definitions/hidden.rbi'))
+      assert_match("class Foo\n  def bar()", File.read('sorbet/rbi/hidden-definitions/hidden.rbi'))
     end
   end
 end

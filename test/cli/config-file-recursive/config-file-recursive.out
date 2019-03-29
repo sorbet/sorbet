@@ -1,0 +1,6 @@
+config-file-recursive.rb:2: Method `+` does not exist on `Symbol` component of `Symbol(:"sym")` http://go/e/7003
+     2 |puts :sym + ''
+             ^^^^^^^^^
+Errors: 1
+------------------------------
+No errors! Great job.
