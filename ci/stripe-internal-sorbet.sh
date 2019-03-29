@@ -14,7 +14,7 @@ local_repository(
 ./tools/scripts/ci_checks.sh
 rbenv exec gem install bundler
 (
-    cd runtime
+    cd gems/sorbet-runtime
     rbenv exec bundle
     rbenv exec bundle exec rake test
 )
@@ -47,21 +47,24 @@ export UBSAN_OPTIONS=print_stacktrace=1
 export LSAN_OPTIONS=verbosity=1:log_threads=1
 
 bazel build main:sorbet $args
-cp "$(bazel info bazel-bin $args)/main/sorbet" bin/sorbet-typechecker
+mkdir gems/sorbet-static/libexec/
+sorbet="$(bazel info bazel-bin $args)/main/sorbet"
+cp "$sorbet" gems/sorbet-static/libexec/
+
+(
+    cd gems/sorbet-static
+    gem build sorbet-static.gemspec
+)
 
 /usr/local/bin/junit-script-output \
-  rbi-generation-typecheck \
-  bin/sorbet-typechecker ./rbi-generation
+  gems-sorbet-typecheck \
+  "$sorbet" ./gems/sorbet
 
 (
-    cd rbi-generation
-    gem build sorbet-rbi-generation.gemspec
-    gem install sorbet-rbi-generation-*.gem
-)
-gem build sorbet.gemspec
-gem install --no-wrappers sorbet*.gem
-(
-    cd rbi-generation
+    cd gems/sorbet
+    gem build sorbet.gemspec
+
+    rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*.gem
     rbenv exec bundle
     rbenv exec bundle exec rake test
 )

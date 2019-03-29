@@ -18,8 +18,6 @@
 /website/node_modules
 /website/i18n/*
 
-/runtime/Gemfile.lock
-
 # used for fuzzing
 /fuzz_corpus
 /fuzz_crashers
@@ -28,5 +26,5 @@
 Gemfile.lock
 *.gem
 
-# To fake the gemfile we copy a sorbet binary here, don't commit it
-/bin/sorbet-typechecker
+# To distribute sorbet, we copy the built C++ binary here.
+/gems/sorbet-static/libexec/sorbet

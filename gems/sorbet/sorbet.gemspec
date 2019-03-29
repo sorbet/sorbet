@@ -2,28 +2,29 @@ Gem::Specification.new do |s|
   s.name        = 'sorbet'
   s.version     = '0.0.1'
   s.summary     = 'A Typechecker for Ruby'
-  s.description = 'The main entrypoint for the Sorbet suite of gems. It depends on many other gems which provide some of the sub commands'
+  s.description = 'The main entrypoint for using Sorbet.'
   s.authors     = ['Stripe']
   s.files       = Dir.glob('lib/**/*')
   s.executables = Dir.glob('bin/**/*').map {|path| path.gsub('bin/', '')}
   s.homepage    = 'https://sorbet.run'
 
-  s.add_dependency('sorbet-rbi-generation')
+  s.add_dependency 'sorbet-static'
 
-  # The binary `sorbet` is included, so it is platform dependent
-  s.platform = Gem::Platform::CURRENT
+  s.add_development_dependency 'minitest', '~> 5.11'
+  s.add_development_dependency 'mocha', '~> 1.7'
+  s.add_development_dependency 'rake'
 
   s.post_install_message = %q{
   Thanks for installing Sorbet! To use it in your project, first run:
 
     srb init
 
-  which should make all sorts of `.rbi` shims for you as well as include the `rbis` gem in your Gemfile.
-  After that, whenever you want to typecheck your code use:
+  which will get your project ready to use with Sorbet.
+  After that whenever you want to typecheck your code, run:
 
     srb tc
 
-  For more docs see: https://sorbet.tech
+  For more docs see: https://stripe.dev/sorbet/super-secret-private-beta
   }
 
   # TODO this is temporary, to prevent leaking publicly.

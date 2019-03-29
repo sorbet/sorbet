@@ -39,8 +39,23 @@ typecheck() {
     cat "$cache_file" >> "${fileList}"
   fi
 
+  # We're using bash string operations here to avoid forking
+  # (using dirname / basename) etc. would mean ~15ms for each call.
+
+  # /path/to/gems/sorbet-0.0.1/bin/srb
+  srb_path="${BASH_SOURCE[0]}"
+  # /path/to/gems/sorbet-0.0.1
+  without_bin_srb="${srb_path%/bin/srb}"
+  # -0.0.1
+  version_suffix="${without_bin_srb##*/sorbet}"
+  # /path/to/gems
+  gems_path="${without_bin_srb%/sorbet*}"
+  # /path/to/gems/sorbet-static-0.0.1-darwin-17/libexec/sorbet
+  # (assumes people only have one platform-depdendent gem installed per version)
+  sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
+
   # shellcheck disable=SC2086
-  "$(dirname "${BASH_SOURCE[0]}")"/sorbet-typechecker . @$fileList "$@"
+  "${sorbet[0]}" . @$fileList "$@"
 }
 
 case $command in

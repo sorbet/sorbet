@@ -1,16 +1,15 @@
 Gem::Specification.new do |s|
-  s.name        = 'sorbet-rbi-generation'
+  s.name        = 'sorbet-static'
   s.version     = '0.0.1'
-  s.summary     = 'Sorbet RBI Generation'
-  s.description = "Scripts to generate RBI files"
+  s.summary     = 'A Typechecker for Ruby'
+  s.description = 'The Sorbet typechecker binary'
   s.authors     = ['Stripe']
-  s.files       = Dir.glob('lib/**/*')
-  s.executables = Dir.glob('bin/**/*').map {|path| path.gsub('bin/', '')}
+  s.files       = ['libexec/sorbet']
+  s.executables = []
   s.homepage    = 'https://sorbet.run'
 
-  s.add_development_dependency 'minitest', '~> 5.11'
-  s.add_development_dependency 'mocha', '~> 1.7'
-  s.add_development_dependency 'rake'
+  # We include a pre-built binary (in libexec/), making us platform dependent.
+  s.platform = Gem::Platform::CURRENT
 
   # TODO this is temporary, to prevent leaking publicly.
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
