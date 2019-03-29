@@ -17,6 +17,25 @@ Usage:
                                 Use color output (default: auto)
 
 
+----- Abbreviated help output with empty config file: --------------------
+
+You must pass either `-e` or at least one folder or ruby file.
+
+Typechecker for Ruby
+Usage:
+  sorbet [OPTION...] <path 1> <path 2> ...
+
+  -e, string                    Parse an inline ruby string (default: )
+  -q, --quiet                   Silence all non-critical errors
+  -P, --progress                Draw progressbar
+  -v, --verbose                 Verbosity level [0-3]
+  -h, --help                    Show long help
+      --version                 Show version
+      --licence                 Show licence
+      --color {always,never,[auto]}
+                                Use color output (default: auto)
+
+
 ----- Full help output: --------------------------------------------------
 
 Typechecker for Ruby

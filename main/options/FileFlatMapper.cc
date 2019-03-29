@@ -14,7 +14,10 @@ void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_
             argsPView = argsPView.substr(0, argsPView.size() - 1);
         }
         for (string_view arg : absl::StrSplit(argsPView, '\n')) {
-            if (arg[0] == '@') {
+            if (arg.size() == 0) {
+                // skip empty line
+                continue;
+            } else if (arg[0] == '@') {
                 readArgsFromFile(logger, arg.substr(min(arg.find_first_not_of("@"), arg.size())));
             } else {
                 stringArgs.emplace_back(string(arg));

@@ -6,6 +6,16 @@ echo
 main/sorbet 2>&1
 
 echo
+echo ----- Abbreviated help output with empty config file: --------------------
+echo
+
+mkdir -p sorbet
+touch sorbet/config
+trap 'rm -rf sorbet/' EXIT
+
+main/sorbet 2>&1
+
+echo
 echo ----- Full help output: --------------------------------------------------
 echo
 
