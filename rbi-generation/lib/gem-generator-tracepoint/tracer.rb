@@ -15,32 +15,35 @@ end
 module SorbetRBIGeneration 
   module GemGeneratorTracepoint 
     class Tracer
-      module ModuleOverride
-        def include(mod, *smth)
-          result = super
-          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_included(mod, self)
-          result
-        end
+      Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
+      def self.trace
+        start
+        yield
+        finish
+        trace_results
       end
-      Module.prepend(ModuleOverride)
 
-      module ObjectOverride
-        def extend(mod, *args)
-          result = super
-          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_extended(mod, self)
-          result
-        end
+      Sorbet.sig {void}
+      def self.start
+        pre_cache_module_methods
+        install_tracepoints
       end
-      Object.prepend(ObjectOverride)
 
-      module ClassOverride
-        def new(*)
-          result = super
-          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_created(result)
-          result
-        end
+      Sorbet.sig {void}
+      def self.finish
+        force_autoloading
+        disable_tracepoints
       end
-      Class.prepend(ClassOverride)
+
+      Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
+      def self.trace_results
+        {
+          files: @files,
+          delegate_classes: @delegate_classes
+        }
+      end
+
+      # Public methods called from SorbetRBIGeneration::GemGeneratorTracepoint::Overrides
 
       def self.register_delegate_class(klass, delegate)
         @delegate_classes[ModuleUtils.real_object_id(delegate)] = klass
@@ -73,31 +76,8 @@ module SorbetRBIGeneration
         add_to_context(type: :inherited, module: mod)
       end
 
-      Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
-      def self.trace
-        start
-        yield
-        finish
-        trace_results
-      end
-
-      Sorbet.sig {void}
-      def self.start
-        pre_cache_module_methods
-        install_tracepoints
-      end
-
-      Sorbet.sig {void}
-      def self.finish
-        disable_tracepoints
-      end
-
-      Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
-      def self.trace_results
-        {
-          files: @files,
-          delegate_classes: @delegate_classes
-        }
+      def self.const_autoloaded(mod, const)
+        @autoloaded_constants << { object_id: ModuleUtils.real_object_id(mod), const: const }
       end
 
       private
@@ -108,6 +88,7 @@ module SorbetRBIGeneration
       @delegate_classes = {}
       @subclasses = {}
       @module_constants = {}
+      @autoloaded_constants = Set.new
 
       def self.pre_cache_module_methods
         ObjectSpace.each_object(Module) do |mod_|
@@ -238,7 +219,66 @@ module SorbetRBIGeneration
           add_to_context(type: :const, module: mod, const: const)
         end
       end
+
+      def self.force_autoloading
+        until @autoloaded_constants.empty?
+          constants = @autoloaded_constants
+          @autoloaded_constants = Set.new
+          constants.each do |object_id:, const:|
+            begin
+              mod = ObjectSpace._id2ref(object_id)
+            rescue TypeError
+              warn("Could not load object with #{object_id} to resolve autoloaded const #{const}")
+              next
+            end
+            begin
+              mod.const_get(const)
+            rescue Exception => e # rubocop:disable Lint/RescueException
+              warn("Could not load constant #{mod}.#{const}: #{e.message}")
+              next
+            end
+          end
+        end
+      end
     end
   end
 end
 
+module SorbetRBIGeneration
+  module GemGeneratorTracepoint
+    module Overrides
+      module ModuleOverride
+        def include(mod, *smth)
+          result = super
+          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_included(mod, self)
+          result
+        end
+
+        def autoload(const, path)
+          result = super
+          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.const_autoloaded(self, const)
+          result
+        end
+      end
+      Module.prepend(ModuleOverride)
+
+      module ObjectOverride
+        def extend(mod, *args)
+          result = super
+          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_extended(mod, self)
+          result
+        end
+      end
+      Object.prepend(ObjectOverride)
+
+      module ClassOverride
+        def new(*)
+          result = super
+          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_created(result)
+          result
+        end
+      end
+      Class.prepend(ClassOverride)
+    end
+  end
+end
