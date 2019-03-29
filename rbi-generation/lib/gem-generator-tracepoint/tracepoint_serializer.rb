@@ -68,6 +68,13 @@ module SorbetRBIGeneration
                 when :include, :extend
                   name = class_name(item[item[:type]])
                   "  #{item[:type]} #{name}"
+                when :const
+                  const = item[:const]
+                  value = item[:value]
+                  next if value.nil? || value.is_a?(Module)
+                  constant_type = class_name(value.class, for_constant: true)
+                  constant_type = 'T::Range[T.untyped]' if constant_type == 'Range'
+                  "  #{const} = T.let(T.unsafe(nil), #{constant_type})"
                 end
               end
               rows = rows.compact.sort
@@ -83,7 +90,8 @@ module SorbetRBIGeneration
 
       def preprocess(files)
         gem_class_defs = files_to_gem_class_defs(files)
-        filter_unused(gem_class_defs)
+        gem_class_defs = filter_unused(gem_class_defs)
+        resolve_constants(gem_class_defs)
       end
 
       def files_to_gem_class_defs(files)
@@ -102,6 +110,16 @@ module SorbetRBIGeneration
             klass_id = ModuleUtils.real_object_id(klass)
             class_def = gem_class_defs[gem][klass_id] ||= ClassDefinition.new(klass_id, klass, [])
             class_def.defs << item unless item[:type] == :module
+          end
+
+          gem_class_defs[gem].each do |klass_id, klass_def|
+            # Some classes override Object#hash, causing uniq to fail.
+            # For these classes, just don't uniq the definitions.
+            begin
+              klass_def.defs.uniq!
+            rescue TypeError
+              next
+            end
           end
         end
       end
@@ -184,6 +202,31 @@ module SorbetRBIGeneration
         used_by.any? { |user| user == true || used?(user, used) }
       end
 
+      Sorbet.sig do
+        params(
+          gem_class_defs: T::Hash[String, T::Hash[String, ClassDefinition]]
+        ).returns(T::Hash[String, T::Hash[String, ClassDefinition]])
+      end
+      def resolve_constants(gem_class_defs)
+        gem_class_defs.each do |gem, klass_ids|
+          klass_ids.each do |klass_id, class_def|
+            class_def.defs.each do |definition|
+              if definition[:type] == :const
+                const = definition[:const]
+                value =
+                  begin
+                    class_def.klass.const_get(const)
+                  rescue Exception => e # rubocop:disable Lint/RescueException
+                    warn("Could not load constant #{class_name(class_def.klass)}.#{const}: #{e.message}")
+                    nil
+                  end
+                definition[:value] = value
+              end
+            end
+          end
+        end
+      end
+
       def generate_method(method, instance, spaces = 2)
         # method.parameters is an array of:
         # a      [:req, :a]
@@ -246,7 +289,7 @@ module SorbetRBIGeneration
         end
       end
 
-      def class_name(klass)
+      def class_name(klass, for_constant: false)
         klass = @delegate_classes[ModuleUtils.real_object_id(klass)] || klass
         name = ModuleUtils.real_name(klass) if ModuleUtils.real_is_a?(klass, Module)
 
@@ -254,7 +297,9 @@ module SorbetRBIGeneration
         if name.nil? || name == ""
           middle = ModuleUtils.real_is_a?(klass, Class) ? klass.superclass : klass.class
           id = @anonymous_map[ModuleUtils.real_object_id(klass)] ||= anonymous_id
-          return "Anonymous_#{class_name(middle).gsub('::', '_')}_#{id}"
+          middle_name = class_name(middle)
+          return middle_name if for_constant && middle_name == 'Struct'
+          return "Anonymous_#{middle_name.gsub('::', '_')}_#{id}"
         end
 
         # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it

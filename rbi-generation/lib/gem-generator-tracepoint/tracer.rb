@@ -107,6 +107,7 @@ module SorbetRBIGeneration
       @files = {}
       @delegate_classes = {}
       @subclasses = {}
+      @module_constants = {}
 
       def self.pre_cache_module_methods
         ObjectSpace.each_object(Module) do |mod_|
@@ -127,6 +128,13 @@ module SorbetRBIGeneration
       def self.install_tracepoints
         @class_tracepoint = TracePoint.new(:class) do |tp|
           module_created(tp.self)
+          @module_constants[ModuleUtils.real_object_id(tp.self)] ||= tp.self.constants(false)
+        end
+        @end_tracepoint = TracePoint.new(:end) do |tp|
+          old_constants = @module_constants[ModuleUtils.real_object_id(tp.self)] || []
+          current_constants = tp.self.constants(false)
+          new_constants = current_constants - old_constants
+          constants_added(tp.self, new_constants)
         end
         @c_call_tracepoint = TracePoint.new(:c_call) do |tp|
           case tp.method_id
@@ -180,12 +188,14 @@ module SorbetRBIGeneration
           end
         end
         @class_tracepoint.enable
+        @end_tracepoint.enable
         @c_call_tracepoint.enable
         @c_return_tracepoint.enable
       end
 
       def self.disable_tracepoints
         @class_tracepoint.disable
+        @end_tracepoint.disable
         @c_call_tracepoint.disable
         @c_return_tracepoint.disable
       end
@@ -223,6 +233,11 @@ module SorbetRBIGeneration
         added
       end
 
+      def self.constants_added(mod, consts)
+        consts.each do |const|
+          add_to_context(type: :const, module: mod, const: const)
+        end
+      end
     end
   end
 end
