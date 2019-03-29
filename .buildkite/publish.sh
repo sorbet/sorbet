@@ -29,20 +29,38 @@ popd
 
 echo ""
 echo "--- releasing stripe.dev/sorbet"
+set -x
 git fetch origin gh-pages
 git branch -D gh-pages || true
 git checkout gh-pages
 tar -xjf _out_/website/website.tar.bz2 -C super-secret-private-beta .
 git add super-secret-private-beta
-git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-git push origin gh-pages
+dirty=1
+git diff-index --quiet HEAD -- || dirty=0
+if [ "$dirty" -ne 0 ]; then
+  echo "$BUILDKITE_COMMIT" > super-secret-private-beta/sha.html
+  git add super-secret-private-beta/sha.html
+  git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+  git push origin gh-pages
+  echo "pushed an update"
+else
+  echo "nothing to update"
+fi
 
 echo "--- releasing sorbet.run"
+
 rm -rf sorbet.run
 git clone git@github.com:stripe/sorbet.run.git
 tar -C sorbet.run/docs -xvf ./_out_/webasm/sorbet-wasm.tar sorbet-wasm.wasm sorbet-wasm.js
-git rev-parse HEAD > sorbet.run/docs/sha.html
 cd sorbet.run
 git add sorbet-wasm.wasm sorbet-wasm.js
-git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-git push
+dirty=1
+git diff-index --quiet HEAD -- || dirty=0
+if [ "$dirty" -ne 0 ]; then
+  echo "$BUILDKITE_COMMIT" > docs/sha.html
+  git add docs/sha.html
+  git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+  git push
+else
+  echo "Nothing to update"
+fi
