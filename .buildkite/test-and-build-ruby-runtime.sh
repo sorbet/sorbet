@@ -17,5 +17,5 @@ gem build sorbet-runtime.gemspec
 popd
 
 rm -rf _out_
-mkdir -p _out_/gems
-cp gems/sorbet-runtime/sorbet-runtime-*.gem _out_/gems
+mkdir -p _out_
+cp gems/sorbet-runtime/sorbet-runtime-*.gem _out_/

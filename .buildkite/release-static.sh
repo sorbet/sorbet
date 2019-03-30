@@ -59,10 +59,9 @@ fi
 popd
 
 rm -rf _out_
-mkdir -p _out_/${platform} _out_/gems
+mkdir -p _out_/gems
 
-cp bazel-bin/main/sorbet _out_/${platform}
-mv gems/sorbet-static/sorbet-static-*.gem _out_/$platform/
+mv gems/sorbet-static/sorbet-static-*.gem _out_/
 if [[ "mac" == "$platform" ]]; then
-  mv gems/sorbet/sorbet*.gem _out_/gems
+  mv gems/sorbet/sorbet*.gem _out_/
 fi
