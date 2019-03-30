@@ -27,11 +27,6 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "Test: rbi-generation"
-    command: .buildkite/test-and-build-rbi-generation.sh
-    artifact_paths: _out_/**/*
-    agents:
-      os: mac
   - wait: ~
   - label: "Release build: static on Mac"
     artifact_paths: _out_/**/*
@@ -59,5 +54,7 @@ steps:
   - label: "Coverage: sorbet-static on Mac"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*
+    retry:
+      automatic: true
     agents:
       os: mac

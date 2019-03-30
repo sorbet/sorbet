@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -exuo pipefail
 
 if [[ -n "${CLEAN_BUILD-}" ]]; then
   echo "--- cleanup"
@@ -42,11 +42,27 @@ mkdir -p /usr/local/var/bazelcache/output-bases/release /usr/local/var/bazelcach
 echo "--- compilation"
 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
 
-cp bazel-bin/main/sorbet bin/sorbet-typechecker
-gem build sorbet.gemspec
+mkdir gems/sorbet-static/libexec/
+cp bazel-bin/main/sorbet gems/sorbet-static/libexec/
 
+pushd gems/sorbet-static
+gem build sorbet-static.gemspec
+popd
+
+pushd gems/sorbet
+gem build sorbet.gemspec
+if [[ "mac" == "$platform" ]]; then
+  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*.gem
+  rbenv exec bundle
+  rbenv exec bundle exec rake test
+fi
+popd
 
 rm -rf _out_
-mkdir -p _out_/${platform}
+mkdir -p _out_/${platform} _out_/gems
+
 cp bazel-bin/main/sorbet _out_/${platform}
-mv sorbet-*.gem _out_/sorbet-x86_64-${platform}.gem
+mv gems/sorbet-static/sorbet-static-*.gem _out_/$platform/
+if [[ "mac" == "$platform" ]]; then
+  mv gems/sorbet/sorbet*.gem _out_/gems
+fi

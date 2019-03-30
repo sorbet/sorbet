@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-pushd runtime
+pushd gems/sorbet-runtime
 
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
@@ -18,4 +18,4 @@ popd
 
 rm -rf _out_
 mkdir -p _out_/gems
-cp runtime/sorbet-runtime-*.gem _out_/gems
+cp gems/sorbet-runtime/sorbet-runtime-*.gem _out_/gems
