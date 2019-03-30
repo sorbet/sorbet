@@ -4,7 +4,7 @@ load(":third_party/externals.bzl", "externals")
 
 externals()
 
-load("@com_grail_bazel_toolchain//toolchain:configure.bzl", "llvm_toolchain")
+load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
     name = "llvm_toolchain",
