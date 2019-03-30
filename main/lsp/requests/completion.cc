@@ -73,6 +73,9 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     if (method.data(gs)->isMethod()) {
         for (auto &argSym : method.data(gs)->arguments()) {
             string s;
+            if (argSym.data(gs)->isBlockArgument()) {
+                continue;
+            }
             if (argSym.data(gs)->isKeyword()) {
                 absl::StrAppend(&s, argSym.data(gs)->name.data(gs)->shortName(gs), ": ");
             }
