@@ -79,16 +79,6 @@ TypePtr Types::Float() {
     return res;
 }
 
-TypePtr Types::arrayClass() {
-    static auto res = make_type<ClassType>(Symbols::Array());
-    return res;
-}
-
-TypePtr Types::hashClass() {
-    static auto res = make_type<ClassType>(Symbols::Hash());
-    return res;
-}
-
 TypePtr Types::arrayOfUntyped() {
     static vector<TypePtr> targs{Types::untypedUntracked()};
     static auto res = make_type<AppliedType>(Symbols::Array(), targs);
@@ -278,11 +268,6 @@ core::SymbolRef Type::untypedBlame() const {
         return Symbols::noSymbol();
     }
     return t->blame;
-}
-
-bool Type::isTop() const {
-    auto *t = cast_type<ClassType>(this);
-    return t != nullptr && t->symbol == Symbols::top();
 }
 
 bool Type::isBottom() const {

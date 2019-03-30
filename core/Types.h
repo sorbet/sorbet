@@ -99,8 +99,6 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
-    static TypePtr arrayClass();
-    static TypePtr hashClass();
     static TypePtr arrayOfUntyped();
     static TypePtr hashOfUntyped();
     static TypePtr procClass();
@@ -191,7 +189,6 @@ public:
     bool isUntyped() const;
     core::SymbolRef untypedBlame() const;
     bool isBottom() const;
-    bool isTop() const;
     virtual bool hasUntyped();
     virtual bool isFullyDefined() = 0;
     virtual int kind() = 0;

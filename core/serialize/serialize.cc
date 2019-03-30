@@ -116,20 +116,11 @@ void Pickler::putU1(u1 u) {
     }
     data.emplace_back(u);
 }
-void Pickler::putU2(u2 u) {
-    putU1(u >> 8);
-    putU1(u & 255);
-}
 
 u1 UnPickler::getU1() {
     ENFORCE(zeroCounter == 0);
     auto res = data[pos++];
     return res;
-}
-u2 UnPickler::getU2() {
-    auto high = getU1();
-    auto low = getU1();
-    return (((u2)high) << 8) + low;
 }
 
 void Pickler::putU4(u4 u) {

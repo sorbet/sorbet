@@ -180,16 +180,6 @@ string BasicBlock::toString(core::Context ctx) {
     return to_string(buf);
 }
 
-core::Loc BasicBlock::loc() const {
-    core::Loc loc;
-    if (!this->exprs.empty()) {
-        loc = loc.join(this->exprs.front().loc);
-        loc = loc.join(this->exprs.back().loc);
-    }
-    loc = loc.join(this->bexit.loc);
-    return loc;
-}
-
 Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 

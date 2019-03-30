@@ -1188,8 +1188,4 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
-core::SymbolRef ClassDef::parent(core::MutableContext ctx) const {
-    return symbol.data(ctx)->superClass();
-}
-
 } // namespace sorbet::ast

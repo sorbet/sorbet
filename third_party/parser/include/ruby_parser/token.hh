@@ -174,7 +174,6 @@ namespace ruby_parser {
     token(token_type type, size_t start, size_t end, const std::string& str);
 
     token_type type() const;
-    const std::string& type_name() const;
     size_t start() const;
     size_t end() const;
     const std::string& string() const;

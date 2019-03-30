@@ -65,7 +65,6 @@ public:
     };
 
     std::string toString(core::Context ctx);
-    core::Loc loc() const;
 };
 
 class CFGContext;

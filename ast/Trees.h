@@ -92,8 +92,6 @@ enum ClassDefKind : u1 { Module, Class };
 
 class ClassDef final : public Declaration {
 public:
-    core::SymbolRef parent(core::MutableContext ctx) const;
-
     ClassDefKind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;

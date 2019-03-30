@@ -11,10 +11,6 @@ using namespace std;
 
 namespace sorbet::dsl {
 
-unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) {
-    return ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
-}
-
 pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression *name) {
     core::Loc loc;
     core::NameRef res = core::NameRef::noName();

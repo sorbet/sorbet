@@ -11,16 +11,6 @@ token_type token::type() const {
   return _type;
 }
 
-const std::string& token::type_name() const {
-  static std::map<int, std::string> type_names {
-    #define XX(name, value) { value, #name },
-    RUBY_PARSER_TOKEN_TYPES(XX)
-    #undef XX
-  };
-
-  return type_names.at(static_cast<int>(type()));
-}
-
 size_t token::start() const {
   return _start;
 }
