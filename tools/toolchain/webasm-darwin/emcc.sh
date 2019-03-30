@@ -2,6 +2,11 @@
 set -eo pipefail
 
 export PATH="${PATH}:/usr/local/bin/" # this is where we find node
+EM_CACHE_ARCHIVE="tools/toolchain/webasm-darwin/em_cache_existing.tar.gz"
+
+if [ ! -f "$EM_CACHE_ARCHIVE" ]; then
+  echo "can't find stdlib compilation cache";
+fi
 
 command -v node >/dev/null 2>&1 || { echo 'will need node' ; exit 1; }
 command -v realpath > /dev/null 2>&1 || { echo 'will need realpath' ; exit 1; }
@@ -57,7 +62,6 @@ for i in "$@"; do
         mkdir -p "${OUT_DIR}/${folder_name}"
         out_name="${OUT_DIR}/${tar_name}.html"
         args=("${args[@]}" "$out_name")
-
     elif [[ "$i" =~ ^(.*)\.a$ ]]; then
         core_name="${BASH_REMATCH[1]}"
         folder_name=$(dirname "$i")
@@ -73,6 +77,9 @@ for i in "$@"; do
     fi
 done
 
+if [ -n "$tar_name" ]; then
+  tar -xf "$EM_CACHE_ARCHIVE" -C "$EM_CACHE"
+fi
 # Run emscripten to compile and link
 #echo "original_args" "$@"
 #echo "transformed_args" "${args[@]}"
