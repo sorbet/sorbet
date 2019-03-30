@@ -41,6 +41,7 @@ build --host_cxxopt=-O0
 build --host_copt=-O0
 build --host_cxxopt=-DFORCE_DEBUG
 build --host_copt=-DFORCE_DEBUG
+build --host_cxxopt=-Wno-unused-variable --host_cxxopt=-Wno-overloaded-virtual --host_cxxopt=-Wno-unused-const-variable # ragel violates those and we want a silent build
 
 # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
 # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
