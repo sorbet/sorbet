@@ -3,6 +3,9 @@
 set -euo pipefail
 
 pushd rbi-generation
+git_commit_count=$(git rev-list --count HEAD)
+release_version="v0.4.${git_commit_count}"
+sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-rbi-generation.gemspec
 gem build sorbet-rbi-generation.gemspec
 popd
 

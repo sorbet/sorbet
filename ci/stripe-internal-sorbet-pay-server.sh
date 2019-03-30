@@ -19,7 +19,7 @@ source ci/pay-server-common.bash
 # Validate the version  (we can't do this as a CLI test because the snapshot
 # test would fail when not building release builds)
 VERSION=$(./bazel-bin/main/sorbet --version)
-EXPECTED_VERSION='Sorbet typechecker rev [0-9]* git [0-9a-f]{40} built on 201.* GMT with debug symbols'
+EXPECTED_VERSION='Sorbet typechecker 0.4.[0-9]* git [0-9a-f]{40} built on 201.* GMT with debug symbols'
 if ! [[ $VERSION =~ $EXPECTED_VERSION ]]; then
     git status
     echo "Bad Version: $VERSION"

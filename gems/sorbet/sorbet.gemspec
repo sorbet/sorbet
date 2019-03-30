@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'sorbet'
-  s.version     = '0.0.1'
+  s.version     = '0.0.0'
   s.summary     = 'A Typechecker for Ruby'
   s.description = 'The main entrypoint for using Sorbet.'
   s.authors     = ['Stripe']

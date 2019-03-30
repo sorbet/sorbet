@@ -34,8 +34,8 @@ const bool Version::withDebugSymbols = true;
 const bool Version::withDebugSymbols = false;
 #endif
 
-const string Version::version = "";  // 0.01 alpha
-const string Version::codename = ""; // We Try Furiously
+const string Version::version = "0.4"; // 0.01 alpha
+const string Version::codename = "";   // We Try Furiously
 
 const bool Version::isReleaseBuild = is_release_build;
 
@@ -71,9 +71,9 @@ string makeBuildTimeString() {
 }
 const string Version::build_timestamp_string = makeBuildTimeString(); // non-release builds have 1970-01-01 00:00:00 GMT
 
-const string Version::full_version_string =
-    Version::version + Version::codename + "rev " + to_string(Version::build_scm_commit_count) +
-    (Version::isReleaseBuild ? "" : " (non-release)") + " git " + Version::build_scm_revision +
-    Version::build_scm_status + " built on " + Version::build_timestamp_string +
-    (Version::withDebugSymbols ? " with debug symbols" : "");
+const string Version::full_version_string = Version::version + "." + to_string(Version::build_scm_commit_count) +
+                                            (Version::isReleaseBuild ? "" : " (non-release)") + " git " +
+                                            Version::build_scm_revision + Version::build_scm_status + " built on " +
+                                            Version::build_timestamp_string +
+                                            (Version::withDebugSymbols ? " with debug symbols" : "");
 } // namespace sorbet
