@@ -12,6 +12,7 @@ echo "--- Dowloading artifacts"
 rm -rf release
 mkdir release
 
+rm -rf _out_
 buildkite-agent artifact download "_out_/**/*" .
 cp -R _out_/* release/
 
@@ -36,8 +37,6 @@ else
 fi
 popd
 
-rm _out_/webasm/sorbet-wasm.tar
-
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
 git branch -D gh-pages || true
@@ -56,8 +55,6 @@ else
   echo "nothing to update"
 fi
 
-rm _out_/website/website.tar.bz2
-
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
 release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
@@ -65,6 +62,9 @@ echo releasing "${release_version}"
 git tag -f "${release_version}"
 git push origin "${release_version}"
 pushd release
+
+rm release/website/website.tar.bz2
+rm release/webasm/sorbet-wasm.tar
 
 # shellcheck disable=SC2035
 find * -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
