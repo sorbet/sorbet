@@ -80,11 +80,9 @@ genrule(
     outs = [
         "binary.cc",
     ],
-    cmd = "$(location :gen_state_payload) $(location state-payload-raw) $(location binary.cc) && \
-             $(location //tools:clang-format) -i $(location binary.cc)",
+    cmd = "$(location :gen_state_payload) $(location state-payload-raw) $(location binary.cc)",
     tools = [
         ":gen_state_payload",
-        "//tools:clang-format",
     ],
 )
 
@@ -94,11 +92,9 @@ genrule(
     outs = [
         "light.cc",
     ],
-    cmd = "$(location :gen_state_payload) $(location state-payload-raw-light) $(location light.cc) && \
-             $(location //tools:clang-format) -i $(location light.cc)",
+    cmd = "$(location :gen_state_payload) $(location state-payload-raw-light) $(location light.cc)",
     tools = [
         ":gen_state_payload",
-        "//tools:clang-format",
     ],
 )
 

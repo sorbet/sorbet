@@ -64,7 +64,7 @@ genrule(
         "lsp_messages_gen.cc",
     ],
     cmd = "$(location :generate_lsp_messages) $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) && \
-             $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc)",
+             $(location //tools:clang-format) -i $(location lsp_messages_gen.h)",
     tools = [
         ":generate_lsp_messages",
         "//tools:clang-format",

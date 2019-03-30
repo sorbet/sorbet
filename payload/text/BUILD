@@ -72,11 +72,9 @@ genrule(
     outs = [
         "text.cc",
     ],
-    cmd = "$(location :generate_payload) $(location text.cc) $(locations //rbi) && \
-    $(location //tools:clang-format) -i $(location text.cc)",
+    cmd = "$(location :generate_payload) $(location text.cc) $(locations //rbi)",
     tools = [
         ":generate_payload",
-        "//tools:clang-format",
     ],
 )
 
@@ -86,11 +84,9 @@ genrule(
     outs = [
         "light.cc",
     ],
-    cmd = "$(location :generate_payload) $(location light.cc) $(locations //rbi:light) && \
-    $(location //tools:clang-format) -i $(location light.cc)",
+    cmd = "$(location :generate_payload) $(location light.cc) $(locations //rbi:light)",
     tools = [
         ":generate_payload",
-        "//tools:clang-format",
     ],
 )
 
@@ -99,10 +95,8 @@ genrule(
     outs = [
         "empty.cc",
     ],
-    cmd = "$(location :generate_payload) $(location empty.cc)&& \
-       $(location //tools:clang-format) -i $(location empty.cc)",
+    cmd = "$(location :generate_payload) $(location empty.cc)",
     tools = [
         ":generate_payload",
-        "//tools:clang-format",
     ],
 )
