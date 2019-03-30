@@ -221,7 +221,10 @@ build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=web
 # common webasm config
 # Use --cpu as a differentiator.
 build:webasm --cpu=webasm --spawn_strategy=standalone --genrule_strategy=standalone --copt=-Oz --cxxopt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0 --cxxopt=-DMDB_USE_ROBUST=0
+build:webasm --define release=true
+build:webasm --stamp
 build:webasm --compilation_mode=opt
+build:webasm --copt=-DNDEBUG --cxxopt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --cxxopt=--llvm-lto --cxxopt=3 --linkopt=--llvm-lto --linkopt=3
 # Specify a "sane" C++ toolchain for the host platform.
 build:webasm --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
