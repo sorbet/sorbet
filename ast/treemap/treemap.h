@@ -691,8 +691,7 @@ private:
             } else if (isa_tree<Cast>(what.get())) {
                 return mapCast(std::unique_ptr<Cast>(static_cast<Cast *>(what.release())), ctx);
             } else {
-                auto *ref = what.get();
-                Exception::raise("should never happen. Forgot to add new tree kind? {}", demangle(typeid(*ref).name()));
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
             }
         } catch (SorbetException &e) {
             Exception::failInFuzzer();

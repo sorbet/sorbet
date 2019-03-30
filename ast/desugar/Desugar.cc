@@ -57,8 +57,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
     } else if (argnode.get() == nullptr) {
         // do nothing
     } else {
-        auto node = argnode.get();
-        Exception::raise("not implemented: {}", demangle(typeid(*node).name()));
+        Exception::raise("not implemented: {}", argnode->nodeName());
     }
 
     return make_pair(std::move(args), std::move(destructures));
