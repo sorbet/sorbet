@@ -37,8 +37,8 @@ build --cxxopt=-fstack-protector
 build --copt=-Werror --copt=-Wimplicit-fallthrough
 build --cxxopt=-Werror --cxxopt=-Wimplicit-fallthrough
 
-build --host_cxxopt=-O0
-build --host_copt=-O0
+build --host_cxxopt=-O1
+build --host_copt=-O1
 build --host_cxxopt=-DFORCE_DEBUG
 build --host_copt=-DFORCE_DEBUG
 build --host_cxxopt=-Wno-unused-variable --host_cxxopt=-Wno-overloaded-virtual --host_cxxopt=-Wno-unused-const-variable # ragel violates those and we want a silent build
