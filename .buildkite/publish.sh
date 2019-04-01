@@ -10,11 +10,9 @@ git config --global user.name "Sorbet build farm"
 
 echo "--- Dowloading artifacts"
 rm -rf release
-mkdir release
 
 rm -rf _out_
 buildkite-agent artifact download "_out_/**/*" .
-cp -R _out_/* release/
 
 echo "--- releasing sorbet.run"
 
@@ -61,11 +59,15 @@ release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=forma
 echo releasing "${release_version}"
 git tag -f "${release_version}"
 git push origin "${release_version}"
-pushd release
 
+mkdir release
+cp -R _out_/* release/
+mv release/gems/* release
+rmdir release/gems
 rm release/website/website.tar.bz2
 rm release/webasm/sorbet-wasm.tar
 
+pushd release
 # shellcheck disable=SC2035
 find * -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
 popd

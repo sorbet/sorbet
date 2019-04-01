@@ -74,7 +74,7 @@ popd
 rm -rf _out_
 mkdir -p _out_/gems
 
-mv gems/sorbet-static/sorbet-static-*.gem _out_/
+mv gems/sorbet-static/sorbet-static-*.gem _out_/gems/
 if [[ "mac" == "$platform" ]]; then
-  mv gems/sorbet/sorbet*.gem _out_/
+  mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
