@@ -22,7 +22,7 @@ if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=release-linux"
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=release-mac"
-  brew install autoconf
+  command -v autoconf >/dev/null 2>&1 || brew install autoconf
 fi
 
 echo will run with $CONFIG_OPTS
