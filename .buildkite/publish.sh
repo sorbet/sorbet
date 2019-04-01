@@ -10,7 +10,6 @@ git config --global user.name "Sorbet build farm"
 
 echo "--- Dowloading artifacts"
 rm -rf release
-
 rm -rf _out_
 buildkite-agent artifact download "_out_/**/*" .
 
@@ -52,6 +51,17 @@ if [ "$dirty" -ne 0 ]; then
 else
   echo "nothing to update"
 fi
+
+echo "--- releasing stripe.dev/sorbet/repo"
+mkdir -p repo/super-secret-private-beta/gems/
+cp -R _out_/gems/*.gem repo/super-secret-private-beta/gems/
+pushd repo/super-secret-private-beta
+gem install builder
+gem generate_index
+popd
+git add repo/super-secret-private-beta/
+git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+git push origin gh-pages
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
