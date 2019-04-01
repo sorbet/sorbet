@@ -57,6 +57,8 @@ if [[ "mac" == "$platform" ]]; then
         gem build sorbet-static.gemspec
         mv sorbet-static.gemspec.bak sorbet-static.gemspec
     done
+else
+    gem build sorbet-static.gemspec
 fi
 popd
 
