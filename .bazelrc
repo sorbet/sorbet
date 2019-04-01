@@ -2,6 +2,7 @@
 ##  Workarounds for bugs and temporary things
 ##
 
+startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
 common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
 # enable https://github.com/google/googletest/pull/1653
