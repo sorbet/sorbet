@@ -82,33 +82,38 @@ core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> l
 
 UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileName, shared_ptr<spdlog::logger> logger) {
     UnorderedMap<string, core::StrictLevel> result;
-    YAML::Node config = YAML::LoadFile(fileName);
-    switch (config.Type()) {
-        case YAML::NodeType::Map:
-            for (const auto &child : config) {
-                auto key = child.first.as<string>();
-                core::StrictLevel level = text2StrictLevel(key, logger);
-                switch (child.second.Type()) {
-                    case YAML::NodeType::Sequence:
-                        for (const auto &file : child.second) {
-                            if (file.IsScalar()) {
-                                result[file.as<string>()] = level;
-                            } else {
-                                logger->error("Cannot parse strictness override format. Invalid file name.");
-                                throw EarlyReturnWithCode(1);
+    try {
+        YAML::Node config = YAML::LoadFile(fileName);
+        switch (config.Type()) {
+            case YAML::NodeType::Map:
+                for (const auto &child : config) {
+                    auto key = child.first.as<string>();
+                    core::StrictLevel level = text2StrictLevel(key, logger);
+                    switch (child.second.Type()) {
+                        case YAML::NodeType::Sequence:
+                            for (const auto &file : child.second) {
+                                if (file.IsScalar()) {
+                                    result[file.as<string>()] = level;
+                                } else {
+                                    logger->error("Cannot parse strictness override format. Invalid file name.");
+                                    throw EarlyReturnWithCode(1);
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        logger->error(
-                            "Cannot parse strictness override format. File names should be specified as a sequence.");
-                        throw EarlyReturnWithCode(1);
+                            break;
+                        default:
+                            logger->error("Cannot parse strictness override format. File names should be specified as "
+                                          "a sequence.");
+                            throw EarlyReturnWithCode(1);
+                    }
                 }
-            }
-            break;
-        default:
-            logger->error("Cannot parse strictness override format. Map is expected on top level.");
-            throw EarlyReturnWithCode(1);
+                break;
+            default:
+                logger->error("Cannot parse strictness override format. Map is expected on top level.");
+                throw EarlyReturnWithCode(1);
+        }
+    } catch (YAML::BadFile) {
+        logger->error("Failed to read strictness override file \"{}\". Does it exist?", fileName);
+        throw EarlyReturnWithCode(1);
     }
     return result;
 }

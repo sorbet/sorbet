@@ -11,3 +11,13 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: `String("s")` doesn't match
      2 |1 + "s"
             ^^^
 Errors: 2
+----
+Failed to read strictness override file "file-that-does-not-exist". Does it exist?
+----
+Cannot parse strictness override format. Map is expected on top level.
+----
+Unknown strictness level: `not a level`
+----
+Cannot parse strictness override format. File names should be specified as a sequence.
+----
+Cannot parse strictness override format. Invalid file name.
