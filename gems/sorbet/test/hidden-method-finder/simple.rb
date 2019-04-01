@@ -16,6 +16,7 @@ class SorbetRBIGeneration::HiddenMethodFinder::Test::Simple < MiniTest::Spec
 
     Dir.mktmpdir do |dir|
       FileUtils.cp_r(__dir__ + '/simple/', dir)
+      FileUtils.cp_r(__dir__ + '/sorbet/', dir)
       olddir = __dir__
       Dir.chdir dir
 

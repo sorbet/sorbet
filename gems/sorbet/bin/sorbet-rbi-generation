@@ -12,6 +12,9 @@ module SorbetRBIGeneration::Main
   def self.main
     puts "This script should take a few minutes and will print all sorts of things. If it errors you probably care most about the last few lines."
 
+    # Create sorbet/config file
+    SorbetRBIGeneration::CreateConfig.main
+
     # Pull in the hand-written RBIs
     SorbetRBIGeneration::FetchRBIs.main
 

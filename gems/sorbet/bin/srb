@@ -55,7 +55,7 @@ typecheck() {
   sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
 
   # shellcheck disable=SC2086
-  "${sorbet[0]}" . @$fileList "$@"
+  "${sorbet[0]}" @$fileList "$@"
 }
 
 case $command in
