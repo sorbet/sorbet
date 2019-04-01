@@ -8,6 +8,11 @@ apt-get install -yy curl jq
 git config --global user.email "sorbet+bot@stripe.com"
 git config --global user.name "Sorbet build farm"
 
+dryrun=""
+if [ "$BUILDKITE_BRANCH" == 'master' ]; then
+    dryrun="1"
+fi
+
 echo "--- Dowloading artifacts"
 rm -rf release
 rm -rf _out_
@@ -28,7 +33,9 @@ if [ "$dirty" -ne 0 ]; then
   echo "$BUILDKITE_COMMIT" > docs/sha.html
   git add docs/sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-  git push
+  if [ -z "$dryrun" ]; then
+      git push
+  fi
 else
   echo "Nothing to update"
 fi
@@ -46,7 +53,9 @@ if [ "$dirty" -ne 0 ]; then
   echo "$BUILDKITE_COMMIT" > super-secret-private-beta/sha.html
   git add super-secret-private-beta/sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-  git push origin gh-pages
+  if [ -z "$dryrun" ]; then
+      git push origin gh-pages
+  fi
   echo "pushed an update"
 else
   echo "nothing to update"
@@ -61,14 +70,18 @@ gem generate_index
 popd
 git add repo/super-secret-private-beta/
 git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-git push origin gh-pages
+if [ -z "$dryrun" ]; then
+    git push origin gh-pages
+fi
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
 release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 echo releasing "${release_version}"
 git tag -f "${release_version}"
-git push origin "${release_version}"
+if [ -z "$dryrun" ]; then
+    git push origin "${release_version}"
+fi
 
 mkdir release
 cp -R _out_/* release/
@@ -78,6 +91,9 @@ rm release/website/website.tar.bz2
 rm release/webasm/sorbet-wasm.tar
 
 pushd release
+ls -al
 # shellcheck disable=SC2035
-find * -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
+if [ -z "$dryrun" ]; then
+    find * -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
+fi
 popd

@@ -48,7 +48,6 @@ steps:
     command: .buildkite/all-succeeded.sh
   - label: "Deploy"
     command: .buildkite/publish.sh
-    branches: "master"
     agents:
       os: linux
   - label: "Coverage: sorbet-static on Mac"
