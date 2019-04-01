@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Stripe']
   s.files       = Dir.glob('lib/**/*')
   s.homepage    = 'https://sorbet.run'
+  s.license     = 'Apache-2.0'
 
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 1.7'

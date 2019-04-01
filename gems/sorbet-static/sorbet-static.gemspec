@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.files       = ['libexec/sorbet']
   s.executables = []
   s.homepage    = 'https://sorbet.run'
+  s.license     = 'Apache-2.0'
 
   # We include a pre-built binary (in libexec/), making us platform dependent.
   s.platform = Gem::Platform::CURRENT
