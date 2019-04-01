@@ -49,13 +49,21 @@ pushd gems/sorbet-static
 git_commit_count=$(git rev-list --count HEAD)
 release_version="0.4.${git_commit_count}"
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
-gem build sorbet-static.gemspec
+if [[ "mac" == "$platform" ]]; then
+    # Our binary should work on almost all OSes. The oldest v8 publishes is -14
+    # so I'm going with that for now.
+    for i in {14..18}; do
+        sed -i.bak "s/Gem::Platform::CURRENT/'universal-darwin-$i'/" sorbet-static.gemspec
+        gem build sorbet-static.gemspec
+        mv sorbet-static.gemspec.bak sorbet-static.gemspec
+    done
+fi
 popd
 
 pushd gems/sorbet
 gem build sorbet.gemspec
 if [[ "mac" == "$platform" ]]; then
-  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*.gem
+  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
   rbenv exec bundle
   rbenv exec bundle exec rake test
 fi
