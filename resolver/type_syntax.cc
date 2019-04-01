@@ -10,13 +10,14 @@ namespace sorbet::resolver {
 
 core::TypePtr getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
     core::TypePtr result;
-    typecase(expr.get(), [&](ast::Literal *lit) { result = lit->value; },
-             [&](ast::Expression *expr) {
-                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                     e.setHeader("Unsupported type literal");
-                 }
-                 result = core::Types::untypedUntracked();
-             });
+    typecase(
+        expr.get(), [&](ast::Literal *lit) { result = lit->value; },
+        [&](ast::Expression *expr) {
+            if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Unsupported type literal");
+            }
+            result = core::Types::untypedUntracked();
+        });
     ENFORCE(result.get() != nullptr);
     result->sanityCheck(ctx);
     return result;

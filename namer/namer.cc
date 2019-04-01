@@ -81,37 +81,38 @@ class NameInserter {
     ParsedArg parseArg(core::MutableContext ctx, unique_ptr<ast::Reference> arg) {
         ParsedArg parsedArg;
 
-        typecase(arg.get(),
-                 [&](ast::UnresolvedIdent *nm) {
-                     parsedArg.name = nm->name;
-                     parsedArg.loc = nm->loc;
-                 },
-                 [&](ast::RestArg *rest) {
-                     parsedArg = parseArg(ctx, move(rest->expr));
-                     parsedArg.repeated = true;
-                 },
-                 [&](ast::KeywordArg *kw) {
-                     parsedArg = parseArg(ctx, move(kw->expr));
-                     parsedArg.keyword = true;
-                 },
-                 [&](ast::OptionalArg *opt) {
-                     parsedArg = parseArg(ctx, move(opt->expr));
-                     parsedArg.default_ = move(opt->default_);
-                 },
-                 [&](ast::BlockArg *blk) {
-                     parsedArg = parseArg(ctx, move(blk->expr));
-                     parsedArg.block = true;
-                 },
-                 [&](ast::ShadowArg *shadow) {
-                     parsedArg = parseArg(ctx, move(shadow->expr));
-                     parsedArg.shadow = true;
-                 },
-                 [&](ast::Local *local) {
-                     // Namer replaces args with locals, so to make namer idempotent,
-                     // we need to be able to handle Locals here.
-                     parsedArg.name = local->localVariable._name;
-                     parsedArg.loc = local->loc;
-                 });
+        typecase(
+            arg.get(),
+            [&](ast::UnresolvedIdent *nm) {
+                parsedArg.name = nm->name;
+                parsedArg.loc = nm->loc;
+            },
+            [&](ast::RestArg *rest) {
+                parsedArg = parseArg(ctx, move(rest->expr));
+                parsedArg.repeated = true;
+            },
+            [&](ast::KeywordArg *kw) {
+                parsedArg = parseArg(ctx, move(kw->expr));
+                parsedArg.keyword = true;
+            },
+            [&](ast::OptionalArg *opt) {
+                parsedArg = parseArg(ctx, move(opt->expr));
+                parsedArg.default_ = move(opt->default_);
+            },
+            [&](ast::BlockArg *blk) {
+                parsedArg = parseArg(ctx, move(blk->expr));
+                parsedArg.block = true;
+            },
+            [&](ast::ShadowArg *shadow) {
+                parsedArg = parseArg(ctx, move(shadow->expr));
+                parsedArg.shadow = true;
+            },
+            [&](ast::Local *local) {
+                // Namer replaces args with locals, so to make namer idempotent,
+                // we need to be able to handle Locals here.
+                parsedArg.name = local->localVariable._name;
+                parsedArg.loc = local->loc;
+            });
         return parsedArg;
     }
 

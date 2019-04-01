@@ -28,63 +28,64 @@ public:
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
-            typecase(stat.get(),
-                     [&](ast::Assign *assign) {
-                         auto nodes = Struct::replaceDSL(ctx, assign);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
+            typecase(
+                stat.get(),
+                [&](ast::Assign *assign) {
+                    auto nodes = Struct::replaceDSL(ctx, assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
 
-                         nodes = ProtobufDescriptorPool::replaceDSL(ctx, assign);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
-                     },
+                    nodes = ProtobufDescriptorPool::replaceDSL(ctx, assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+                },
 
-                     [&](ast::Send *send) {
-                         auto nodes = ChalkODMProp::replaceDSL(ctx, send);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
+                [&](ast::Send *send) {
+                    auto nodes = ChalkODMProp::replaceDSL(ctx, send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
 
-                         nodes = MixinEncryptedProp::replaceDSL(ctx, send);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
+                    nodes = MixinEncryptedProp::replaceDSL(ctx, send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
 
-                         nodes = Minitest::replaceDSL(ctx, send);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
-                             return;
-                         }
+                    nodes = Minitest::replaceDSL(ctx, send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = move(nodes);
+                        return;
+                    }
 
-                         nodes = DSLBuilder::replaceDSL(ctx, send);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
+                    nodes = DSLBuilder::replaceDSL(ctx, send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
 
-                         // This one is different: it gets an extra prevStat argument.
-                         nodes = AttrReader::replaceDSL(ctx, send, prevStat);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
-                     },
+                    // This one is different: it gets an extra prevStat argument.
+                    nodes = AttrReader::replaceDSL(ctx, send, prevStat);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+                },
 
-                     [&](ast::MethodDef *mdef) {
-                         auto nodes = Sinatra::replaceDSL(ctx, mdef);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = std::move(nodes);
-                             return;
-                         }
-                     },
+                [&](ast::MethodDef *mdef) {
+                    auto nodes = Sinatra::replaceDSL(ctx, mdef);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+                },
 
-                     [&](ast::Expression *e) {});
+                [&](ast::Expression *e) {});
 
             prevStat = stat.get();
         }

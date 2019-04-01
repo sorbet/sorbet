@@ -27,13 +27,14 @@ private:
     unique_ptr<Expression> substArg(core::MutableContext ctx, unique_ptr<Expression> argp) {
         Expression *arg = argp.get();
         while (arg != nullptr) {
-            typecase(arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
-                     [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *opt) { arg = opt->expr.get(); },
-                     [&](ShadowArg *opt) { arg = opt->expr.get(); },
-                     [&](UnresolvedIdent *nm) {
-                         nm->name = subst.substitute(nm->name);
-                         arg = nullptr;
-                     });
+            typecase(
+                arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
+                [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *opt) { arg = opt->expr.get(); },
+                [&](ShadowArg *opt) { arg = opt->expr.get(); },
+                [&](UnresolvedIdent *nm) {
+                    nm->name = subst.substitute(nm->name);
+                    arg = nullptr;
+                });
         }
         return argp;
     }

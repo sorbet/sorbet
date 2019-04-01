@@ -60,19 +60,20 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
 
 string Literal::toString(core::Context ctx) {
     string res;
-    typecase(this->value.get(), [&](core::LiteralType *l) { res = l->showValue(ctx); },
-             [&](core::ClassType *l) {
-                 if (l->symbol == core::Symbols::NilClass()) {
-                     res = "nil";
-                 } else if (l->symbol == core::Symbols::FalseClass()) {
-                     res = "false";
-                 } else if (l->symbol == core::Symbols::TrueClass()) {
-                     res = "true";
-                 } else {
-                     res = fmt::format("literal({})", this->value->toStringWithTabs(ctx, 0));
-                 }
-             },
-             [&](core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(ctx, 0)); });
+    typecase(
+        this->value.get(), [&](core::LiteralType *l) { res = l->showValue(ctx); },
+        [&](core::ClassType *l) {
+            if (l->symbol == core::Symbols::NilClass()) {
+                res = "nil";
+            } else if (l->symbol == core::Symbols::FalseClass()) {
+                res = "false";
+            } else if (l->symbol == core::Symbols::TrueClass()) {
+                res = "true";
+            } else {
+                res = fmt::format("literal({})", this->value->toStringWithTabs(ctx, 0));
+            }
+        },
+        [&](core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(ctx, 0)); });
     return res;
 }
 

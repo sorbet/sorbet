@@ -736,24 +736,25 @@ core::TypePtr Environment::getReturnType(core::Context ctx, core::TypePtr procTy
 core::TypePtr flattenArrays(core::Context ctx, core::TypePtr type) {
     core::TypePtr result;
 
-    typecase(type.get(),
+    typecase(
+        type.get(),
 
-             [&](core::OrType *o) {
-                 result = core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
-             },
+        [&](core::OrType *o) {
+            result = core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
+        },
 
-             [&](core::AppliedType *a) {
-                 if (a->klass != core::Symbols::Array()) {
-                     result = type;
-                     return;
-                 }
-                 ENFORCE(a->targs.size() == 1);
-                 result = a->targs.front();
-             },
+        [&](core::AppliedType *a) {
+            if (a->klass != core::Symbols::Array()) {
+                result = type;
+                return;
+            }
+            ENFORCE(a->targs.size() == 1);
+            result = a->targs.front();
+        },
 
-             [&](core::TupleType *t) { result = t->elementType(); },
+        [&](core::TupleType *t) { result = t->elementType(); },
 
-             [&](core::Type *t) { result = std::move(type); });
+        [&](core::Type *t) { result = std::move(type); });
     return result;
 }
 

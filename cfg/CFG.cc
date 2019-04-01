@@ -162,9 +162,10 @@ string CFG::toString(core::Context ctx) {
 
 string BasicBlock::toString(core::Context ctx) {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "block[id={}]({})\n", this->id,
-                   fmt::map_join(this->args.begin(), this->args.end(),
-                                 ", ", [&](const auto &arg) -> auto { return arg.toString(ctx); }));
+    fmt::format_to(
+        buf, "block[id={}]({})\n", this->id,
+        fmt::map_join(
+            this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.toString(ctx); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);

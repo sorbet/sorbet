@@ -43,17 +43,18 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
         auto stats = std::move(inseq->stats);
         inseq->stats.clear();
         for (auto &stat : stats) {
-            typecase(stat.get(),
-                     [&](ast::Send *send) {
-                         if (send->fun == core::Names::helpers() && send->args.size() == 1 &&
-                             ast::isa_tree<ast::UnresolvedConstantLit>(send->args[0].get())) {
-                             ret.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(loc), core::Names::include(),
-                                                             std::move(send->args[0])));
-                         } else {
-                             inseq->stats.emplace_back(std::move(stat));
-                         }
-                     },
-                     [&](ast::Expression *e) { inseq->stats.emplace_back(std::move(stat)); });
+            typecase(
+                stat.get(),
+                [&](ast::Send *send) {
+                    if (send->fun == core::Names::helpers() && send->args.size() == 1 &&
+                        ast::isa_tree<ast::UnresolvedConstantLit>(send->args[0].get())) {
+                        ret.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(loc), core::Names::include(),
+                                                        std::move(send->args[0])));
+                    } else {
+                        inseq->stats.emplace_back(std::move(stat));
+                    }
+                },
+                [&](ast::Expression *e) { inseq->stats.emplace_back(std::move(stat)); });
         }
         if (inseq->stats.empty()) {
             mdef->rhs = std::move(inseq->expr);

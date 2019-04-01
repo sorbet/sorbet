@@ -17,7 +17,6 @@ public:
 
     constexpr ErrorClass(u2 code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
     ErrorClass(const ErrorClass &rhs) = default;
-    ErrorClass &operator=(const ErrorClass &rhs) = default;
 
     bool operator==(const ErrorClass &rhs) const {
         return code == rhs.code;

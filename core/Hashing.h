@@ -25,7 +25,9 @@ inline unsigned int _hash(std::string_view utf8) {
     auto end = utf8.end();
     unsigned int res = 0;
     auto it = utf8.begin();
+#ifndef HAS_SANITIZER
 #pragma clang loop unroll(enable)
+#endif
     for (; it != end; it++) {
         res = mix(res, *it - '!'); // "!" is the first printable letter in ASCII.
         // This will help Latin1 but may harm utf8 multibyte

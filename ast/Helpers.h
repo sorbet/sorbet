@@ -321,14 +321,14 @@ public:
             }
 
             // Recurse into structure to find the Local
-            typecase(arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
-                     [&](class KeywordArg *kw) { arg = kw->expr.get(); },
-                     [&](class OptionalArg *opt) { arg = opt->expr.get(); },
-                     [&](BlockArg *blk) { arg = blk->expr.get(); },
-                     [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
-                     // ENFORCES are last so that we don't pay the price of casting in the happy path.
-                     [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                     [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+            typecase(
+                arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
+                [&](class KeywordArg *kw) { arg = kw->expr.get(); },
+                [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
+                [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
+                // ENFORCES are last so that we don't pay the price of casting in the happy path.
+                [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
+                [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
         }
     }
 };

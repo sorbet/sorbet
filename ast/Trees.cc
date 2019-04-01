@@ -687,19 +687,20 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string res;
-    typecase(this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-             [&](core::ClassType *l) {
-                 if (l->symbol == core::Symbols::NilClass()) {
-                     res = "nil";
-                 } else if (l->symbol == core::Symbols::FalseClass()) {
-                     res = "false";
-                 } else if (l->symbol == core::Symbols::TrueClass()) {
-                     res = "true";
-                 } else {
-                     res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
-                 }
-             },
-             [&](core::Type *t) { res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")"; });
+    typecase(
+        this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
+        [&](core::ClassType *l) {
+            if (l->symbol == core::Symbols::NilClass()) {
+                res = "nil";
+            } else if (l->symbol == core::Symbols::FalseClass()) {
+                res = "false";
+            } else if (l->symbol == core::Symbols::TrueClass()) {
+                res = "true";
+            } else {
+                res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
+            }
+        },
+        [&](core::Type *t) { res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")"; });
     return res;
 }
 

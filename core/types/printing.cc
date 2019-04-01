@@ -263,9 +263,11 @@ string AppliedType::show(const GlobalState &gs) const {
             }
 
             int arg_num = 0;
-            fmt::format_to(buf, "{}", fmt::map_join(targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
-                               return fmt::format("arg{}: {}", arg_num++, targ->show(gs));
-                           }));
+            fmt::format_to(buf, "{}",
+                           fmt::map_join(
+                               targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
+                                   return fmt::format("arg{}: {}", arg_num++, targ->show(gs));
+                               }));
 
             if (*procArity > 0) {
                 fmt::format_to(buf, ")");

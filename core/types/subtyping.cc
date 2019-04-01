@@ -255,105 +255,105 @@ TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2) {
             categoryCounterInc("lub", "proxy>");
             // both are proxy
             TypePtr result;
-            typecase(p1,
-                     [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                         if (auto *a2 = cast_type<TupleType>(p2)) {
-                             if (a1->elems.size() ==
-                                 a2->elems.size()) { // lub arrays only if they have same element count
-                                 vector<TypePtr> elemLubs;
-                                 int i = -1;
-                                 bool differ1 = false;
-                                 bool differ2 = false;
-                                 for (auto &el2 : a2->elems) {
-                                     ++i;
-                                     auto &inserted = elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
-                                     differ1 = differ1 || inserted != a1->elems[i];
-                                     differ2 = differ2 || inserted != el2;
-                                 }
-                                 if (!differ1) {
-                                     result = t1;
-                                 } else if (!differ2) {
-                                     result = t2;
-                                 } else {
-                                     result = TupleType::build(ctx, elemLubs);
-                                 }
-                             } else {
-                                 result = Types::arrayOfUntyped();
-                             }
-                         } else {
-                             result = lub(ctx, p1->underlying(), p2->underlying());
-                         }
-                     },
-                     [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                         if (auto *h2 = cast_type<ShapeType>(p2)) {
-                             if (h2->keys.size() == h1->keys.size()) {
-                                 // have enough keys.
-                                 int i = -1;
-                                 vector<TypePtr> valueLubs;
-                                 valueLubs.reserve(h2->keys.size());
-                                 bool differ1 = false;
-                                 bool differ2 = false;
-                                 for (auto &el2 : h2->keys) {
-                                     ++i;
-                                     auto el2l = cast_type<LiteralType>(el2.get());
-                                     auto *u2 = cast_type<ClassType>(el2l->underlying().get());
-                                     ENFORCE(u2 != nullptr);
-                                     auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                         auto el1l = cast_type<LiteralType>(candidate.get());
-                                         ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
-                                         return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
-                                     });
-                                     if (fnd != h1->keys.end()) {
-                                         auto &inserted = valueLubs.emplace_back(
-                                             lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
-                                         differ1 = differ1 || inserted != h1->values[fnd - h1->keys.begin()];
-                                         differ2 = differ2 || inserted != h2->values[i];
-                                     } else {
-                                         result = Types::hashOfUntyped();
-                                         return;
-                                     }
-                                 }
-                                 if (!differ1) {
-                                     result = t1;
-                                 } else if (!differ2) {
-                                     result = t2;
-                                 } else {
-                                     result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
-                                 }
-                             } else {
-                                 result = Types::hashOfUntyped();
-                             }
-                         } else {
-                             result = lub(ctx, p1->underlying(), p2->underlying());
-                         }
-                     },
-                     [&](LiteralType *l1) {
-                         if (auto *l2 = cast_type<LiteralType>(p2)) {
-                             auto *u1 = cast_type<ClassType>(l1->underlying().get());
-                             auto *u2 = cast_type<ClassType>(l2->underlying().get());
-                             ENFORCE(u1 != nullptr && u2 != nullptr);
-                             if (u1->symbol == u2->symbol) {
-                                 if (l1->value == l2->value) {
-                                     result = t1;
-                                 } else {
-                                     result = l1->underlying();
-                                 }
-                             } else {
-                                 result = lubGround(ctx, l1->underlying(), l2->underlying());
-                             }
-                         } else {
-                             result = lub(ctx, p1->underlying(), p2->underlying());
-                         }
-                     },
-                     [&](MetaType *m1) {
-                         if (auto *m2 = cast_type<MetaType>(p2)) {
-                             if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
-                                 result = t1;
-                                 return;
-                             }
-                         }
-                         result = lub(ctx, p1->underlying(), p2->underlying());
-                     });
+            typecase(
+                p1,
+                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                    if (auto *a2 = cast_type<TupleType>(p2)) {
+                        if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
+                            vector<TypePtr> elemLubs;
+                            int i = -1;
+                            bool differ1 = false;
+                            bool differ2 = false;
+                            for (auto &el2 : a2->elems) {
+                                ++i;
+                                auto &inserted = elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
+                                differ1 = differ1 || inserted != a1->elems[i];
+                                differ2 = differ2 || inserted != el2;
+                            }
+                            if (!differ1) {
+                                result = t1;
+                            } else if (!differ2) {
+                                result = t2;
+                            } else {
+                                result = TupleType::build(ctx, elemLubs);
+                            }
+                        } else {
+                            result = Types::arrayOfUntyped();
+                        }
+                    } else {
+                        result = lub(ctx, p1->underlying(), p2->underlying());
+                    }
+                },
+                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                    if (auto *h2 = cast_type<ShapeType>(p2)) {
+                        if (h2->keys.size() == h1->keys.size()) {
+                            // have enough keys.
+                            int i = -1;
+                            vector<TypePtr> valueLubs;
+                            valueLubs.reserve(h2->keys.size());
+                            bool differ1 = false;
+                            bool differ2 = false;
+                            for (auto &el2 : h2->keys) {
+                                ++i;
+                                auto el2l = cast_type<LiteralType>(el2.get());
+                                auto *u2 = cast_type<ClassType>(el2l->underlying().get());
+                                ENFORCE(u2 != nullptr);
+                                auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
+                                    auto el1l = cast_type<LiteralType>(candidate.get());
+                                    ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
+                                    return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
+                                });
+                                if (fnd != h1->keys.end()) {
+                                    auto &inserted = valueLubs.emplace_back(
+                                        lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
+                                    differ1 = differ1 || inserted != h1->values[fnd - h1->keys.begin()];
+                                    differ2 = differ2 || inserted != h2->values[i];
+                                } else {
+                                    result = Types::hashOfUntyped();
+                                    return;
+                                }
+                            }
+                            if (!differ1) {
+                                result = t1;
+                            } else if (!differ2) {
+                                result = t2;
+                            } else {
+                                result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                            }
+                        } else {
+                            result = Types::hashOfUntyped();
+                        }
+                    } else {
+                        result = lub(ctx, p1->underlying(), p2->underlying());
+                    }
+                },
+                [&](LiteralType *l1) {
+                    if (auto *l2 = cast_type<LiteralType>(p2)) {
+                        auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                        auto *u2 = cast_type<ClassType>(l2->underlying().get());
+                        ENFORCE(u1 != nullptr && u2 != nullptr);
+                        if (u1->symbol == u2->symbol) {
+                            if (l1->value == l2->value) {
+                                result = t1;
+                            } else {
+                                result = l1->underlying();
+                            }
+                        } else {
+                            result = lubGround(ctx, l1->underlying(), l2->underlying());
+                        }
+                    } else {
+                        result = lub(ctx, p1->underlying(), p2->underlying());
+                    }
+                },
+                [&](MetaType *m1) {
+                    if (auto *m2 = cast_type<MetaType>(p2)) {
+                        if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
+                            result = t1;
+                            return;
+                        }
+                    }
+                    result = lub(ctx, p1->underlying(), p2->underlying());
+                });
             ENFORCE(result.get() != nullptr);
             return result;
         } else {
@@ -598,109 +598,110 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
                 return Types::bottom();
             }
             TypePtr result;
-            typecase(p1,
-                     [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                         auto *a2 = cast_type<TupleType>(p2);
-                         ENFORCE(a2 != nullptr);
-                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                             vector<TypePtr> elemGlbs;
-                             elemGlbs.reserve(a2->elems.size());
+            typecase(
+                p1,
+                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                    auto *a2 = cast_type<TupleType>(p2);
+                    ENFORCE(a2 != nullptr);
+                    if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
+                        vector<TypePtr> elemGlbs;
+                        elemGlbs.reserve(a2->elems.size());
 
-                             int i = -1;
-                             for (auto &el2 : a2->elems) {
-                                 ++i;
-                                 auto glbe = glb(ctx, a1->elems[i], el2);
-                                 if (glbe->isBottom()) {
-                                     result = Types::bottom();
-                                     return;
-                                 }
-                                 elemGlbs.emplace_back(glbe);
-                             }
-                             if (absl::c_equal(a1->elems, elemGlbs)) {
-                                 result = t1;
-                             } else if (absl::c_equal(a2->elems, elemGlbs)) {
-                                 result = t2;
-                             } else {
-                                 result = TupleType::build(ctx, elemGlbs);
-                             }
-                         } else {
-                             result = Types::bottom();
-                         }
+                        int i = -1;
+                        for (auto &el2 : a2->elems) {
+                            ++i;
+                            auto glbe = glb(ctx, a1->elems[i], el2);
+                            if (glbe->isBottom()) {
+                                result = Types::bottom();
+                                return;
+                            }
+                            elemGlbs.emplace_back(glbe);
+                        }
+                        if (absl::c_equal(a1->elems, elemGlbs)) {
+                            result = t1;
+                        } else if (absl::c_equal(a2->elems, elemGlbs)) {
+                            result = t2;
+                        } else {
+                            result = TupleType::build(ctx, elemGlbs);
+                        }
+                    } else {
+                        result = Types::bottom();
+                    }
 
-                     },
-                     [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                         auto *h2 = cast_type<ShapeType>(p2);
-                         ENFORCE(h2 != nullptr);
-                         if (h2->keys.size() == h1->keys.size()) {
-                             // have enough keys.
-                             int i = -1;
-                             vector<TypePtr> valueLubs;
-                             valueLubs.reserve(h2->keys.size());
-                             bool canReuseT1 = true;
-                             bool canReuseT2 = true;
-                             for (auto &el2 : h2->keys) {
-                                 ++i;
-                                 auto el2l = cast_type<LiteralType>(el2.get());
-                                 auto *u2 = cast_type<ClassType>(el2l->underlying().get());
-                                 ENFORCE(u2 != nullptr);
-                                 auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                     auto el1l = cast_type<LiteralType>(candidate.get());
-                                     ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
-                                     return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
-                                 });
-                                 if (fnd != h1->keys.end()) {
-                                     auto left = h1->values[fnd - h1->keys.begin()];
-                                     auto right = h2->values[i];
-                                     auto glbe = glb(ctx, left, right);
-                                     if (glbe->isBottom()) {
-                                         result = Types::bottom();
-                                         return;
-                                     }
-                                     canReuseT1 &= glbe == left;
-                                     canReuseT2 &= glbe == right;
-                                     valueLubs.emplace_back(glbe);
-                                 } else {
-                                     result = Types::bottom();
-                                     return;
-                                 }
-                             }
-                             if (canReuseT1) {
-                                 result = t1;
-                             } else if (canReuseT2) {
-                                 result = t2;
-                             } else {
-                                 result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
-                             }
-                         } else {
-                             result = Types::bottom();
-                         }
+                },
+                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                    auto *h2 = cast_type<ShapeType>(p2);
+                    ENFORCE(h2 != nullptr);
+                    if (h2->keys.size() == h1->keys.size()) {
+                        // have enough keys.
+                        int i = -1;
+                        vector<TypePtr> valueLubs;
+                        valueLubs.reserve(h2->keys.size());
+                        bool canReuseT1 = true;
+                        bool canReuseT2 = true;
+                        for (auto &el2 : h2->keys) {
+                            ++i;
+                            auto el2l = cast_type<LiteralType>(el2.get());
+                            auto *u2 = cast_type<ClassType>(el2l->underlying().get());
+                            ENFORCE(u2 != nullptr);
+                            auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
+                                auto el1l = cast_type<LiteralType>(candidate.get());
+                                ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
+                                return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
+                            });
+                            if (fnd != h1->keys.end()) {
+                                auto left = h1->values[fnd - h1->keys.begin()];
+                                auto right = h2->values[i];
+                                auto glbe = glb(ctx, left, right);
+                                if (glbe->isBottom()) {
+                                    result = Types::bottom();
+                                    return;
+                                }
+                                canReuseT1 &= glbe == left;
+                                canReuseT2 &= glbe == right;
+                                valueLubs.emplace_back(glbe);
+                            } else {
+                                result = Types::bottom();
+                                return;
+                            }
+                        }
+                        if (canReuseT1) {
+                            result = t1;
+                        } else if (canReuseT2) {
+                            result = t2;
+                        } else {
+                            result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                        }
+                    } else {
+                        result = Types::bottom();
+                    }
 
-                     },
-                     [&](LiteralType *l1) {
-                         auto *l2 = cast_type<LiteralType>(p2);
-                         ENFORCE(l2 != nullptr);
-                         auto *u1 = cast_type<ClassType>(l1->underlying().get());
-                         auto *u2 = cast_type<ClassType>(l2->underlying().get());
-                         ENFORCE(u1 != nullptr && u2 != nullptr);
-                         if (u1->symbol == u2->symbol) {
-                             if (l1->value == l2->value) {
-                                 result = t1;
-                             } else {
-                                 result = Types::bottom();
-                             }
-                         } else {
-                             result = Types::bottom();
-                         }
-                     },
-                     [&](MetaType *m1) {
-                         auto *m2 = cast_type<MetaType>(p2);
-                         ENFORCE(m2 != nullptr);
-                         if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
-                             result = t1;
-                         } else {
-                             result = Types::bottom();
-                         }
-                     });
+                },
+                [&](LiteralType *l1) {
+                    auto *l2 = cast_type<LiteralType>(p2);
+                    ENFORCE(l2 != nullptr);
+                    auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                    auto *u2 = cast_type<ClassType>(l2->underlying().get());
+                    ENFORCE(u1 != nullptr && u2 != nullptr);
+                    if (u1->symbol == u2->symbol) {
+                        if (l1->value == l2->value) {
+                            result = t1;
+                        } else {
+                            result = Types::bottom();
+                        }
+                    } else {
+                        result = Types::bottom();
+                    }
+                },
+                [&](MetaType *m1) {
+                    auto *m2 = cast_type<MetaType>(p2);
+                    ENFORCE(m2 != nullptr);
+                    if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
+                        result = t1;
+                    } else {
+                        result = Types::bottom();
+                    }
+                });
             ENFORCE(result.get() != nullptr);
             return result;
         } else {
@@ -1061,69 +1062,70 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
         if (auto *p2 = cast_type<ProxyType>(t2.get())) {
             bool result;
             // TODO: simply compare as memory regions
-            typecase(p1,
-                     [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                         auto *a2 = cast_type<TupleType>(p2);
-                         result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
-                         if (result) {
-                             int i = -1;
-                             for (auto &el2 : a2->elems) {
-                                 ++i;
-                                 result = Types::isSubTypeUnderConstraint(ctx, constr, a1->elems[i], el2);
-                                 if (!result) {
-                                     break;
-                                 }
-                             }
-                         }
-                     },
-                     [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                         auto *h2 = cast_type<ShapeType>(p2);
-                         result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
-                         if (!result) {
-                             return;
-                         }
-                         // have enough keys.
-                         int i = -1;
-                         for (auto &el2 : h2->keys) {
-                             ++i;
-                             auto el2l = cast_type<LiteralType>(el2.get());
-                             auto *u2 = cast_type<ClassType>(el2l->underlying().get());
-                             ENFORCE(u2 != nullptr);
-                             auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                 auto el1l = cast_type<LiteralType>(candidate.get());
-                                 ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
-                                 return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
-                             });
-                             result = fnd != h1->keys.end() &&
-                                      Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],
-                                                                      h2->values[i]);
-                             if (!result) {
-                                 return;
-                             }
-                         }
-                     },
-                     [&](LiteralType *l1) {
-                         auto *l2 = cast_type<LiteralType>(p2);
-                         if (l2 == nullptr) {
-                             // is a literal a subtype of a different kind of proxy
-                             result = false;
-                             return;
-                         }
-                         auto *u1 = cast_type<ClassType>(l1->underlying().get());
-                         auto *u2 = cast_type<ClassType>(l2->underlying().get());
-                         ENFORCE(u1 != nullptr && u2 != nullptr);
-                         result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
-                     },
-                     [&](MetaType *m1) {
-                         auto *m2 = cast_type<MetaType>(p2);
-                         if (m2 == nullptr) {
-                             // is a literal a subtype of a different kind of proxy
-                             result = false;
-                             return;
-                         }
+            typecase(
+                p1,
+                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                    auto *a2 = cast_type<TupleType>(p2);
+                    result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
+                    if (result) {
+                        int i = -1;
+                        for (auto &el2 : a2->elems) {
+                            ++i;
+                            result = Types::isSubTypeUnderConstraint(ctx, constr, a1->elems[i], el2);
+                            if (!result) {
+                                break;
+                            }
+                        }
+                    }
+                },
+                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                    auto *h2 = cast_type<ShapeType>(p2);
+                    result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
+                    if (!result) {
+                        return;
+                    }
+                    // have enough keys.
+                    int i = -1;
+                    for (auto &el2 : h2->keys) {
+                        ++i;
+                        auto el2l = cast_type<LiteralType>(el2.get());
+                        auto *u2 = cast_type<ClassType>(el2l->underlying().get());
+                        ENFORCE(u2 != nullptr);
+                        auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
+                            auto el1l = cast_type<LiteralType>(candidate.get());
+                            ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
+                            return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
+                        });
+                        result = fnd != h1->keys.end() &&
+                                 Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],
+                                                                 h2->values[i]);
+                        if (!result) {
+                            return;
+                        }
+                    }
+                },
+                [&](LiteralType *l1) {
+                    auto *l2 = cast_type<LiteralType>(p2);
+                    if (l2 == nullptr) {
+                        // is a literal a subtype of a different kind of proxy
+                        result = false;
+                        return;
+                    }
+                    auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                    auto *u2 = cast_type<ClassType>(l2->underlying().get());
+                    ENFORCE(u1 != nullptr && u2 != nullptr);
+                    result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
+                },
+                [&](MetaType *m1) {
+                    auto *m2 = cast_type<MetaType>(p2);
+                    if (m2 == nullptr) {
+                        // is a literal a subtype of a different kind of proxy
+                        result = false;
+                        return;
+                    }
 
-                         result = Types::equiv(ctx, m1->wrapped, m2->wrapped);
-                     });
+                    result = Types::equiv(ctx, m1->wrapped, m2->wrapped);
+                });
             return result;
             // both are proxy
         } else {

@@ -128,53 +128,54 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
         return from;
     }
 
-    typecase(from.get(),
-             [&](OrType *o) {
-                 auto lhs = dropSubtypesOf(ctx, o->left, klass);
-                 auto rhs = dropSubtypesOf(ctx, o->right, klass);
-                 if (lhs == o->left && rhs == o->right) {
-                     result = from;
-                 } else if (lhs->isBottom()) {
-                     result = rhs;
-                 } else if (rhs->isBottom()) {
-                     result = lhs;
-                 } else {
-                     result = OrType::make_shared(lhs, rhs);
-                 }
-             },
-             [&](AndType *a) {
-                 auto lhs = dropSubtypesOf(ctx, a->left, klass);
-                 auto rhs = dropSubtypesOf(ctx, a->right, klass);
-                 if (lhs != a->left || rhs != a->right) {
-                     result = Types::all(ctx, lhs, rhs);
-                 } else {
-                     result = from;
-                 }
-             },
-             [&](ClassType *c) {
-                 if (c->isUntyped()) {
-                     result = from;
-                 } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
-                     result = Types::bottom();
-                 } else {
-                     result = from;
-                 }
-             },
-             [&](AppliedType *c) {
-                 if (c->klass == klass || c->derivesFrom(ctx, klass)) {
-                     result = Types::bottom();
-                 } else {
-                     result = from;
-                 }
-             },
-             [&](ProxyType *c) {
-                 if (dropSubtypesOf(ctx, c->underlying(), klass)->isBottom()) {
-                     result = Types::bottom();
-                 } else {
-                     result = from;
-                 }
-             },
-             [&](Type *) { result = from; });
+    typecase(
+        from.get(),
+        [&](OrType *o) {
+            auto lhs = dropSubtypesOf(ctx, o->left, klass);
+            auto rhs = dropSubtypesOf(ctx, o->right, klass);
+            if (lhs == o->left && rhs == o->right) {
+                result = from;
+            } else if (lhs->isBottom()) {
+                result = rhs;
+            } else if (rhs->isBottom()) {
+                result = lhs;
+            } else {
+                result = OrType::make_shared(lhs, rhs);
+            }
+        },
+        [&](AndType *a) {
+            auto lhs = dropSubtypesOf(ctx, a->left, klass);
+            auto rhs = dropSubtypesOf(ctx, a->right, klass);
+            if (lhs != a->left || rhs != a->right) {
+                result = Types::all(ctx, lhs, rhs);
+            } else {
+                result = from;
+            }
+        },
+        [&](ClassType *c) {
+            if (c->isUntyped()) {
+                result = from;
+            } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
+                result = Types::bottom();
+            } else {
+                result = from;
+            }
+        },
+        [&](AppliedType *c) {
+            if (c->klass == klass || c->derivesFrom(ctx, klass)) {
+                result = Types::bottom();
+            } else {
+                result = from;
+            }
+        },
+        [&](ProxyType *c) {
+            if (dropSubtypesOf(ctx, c->underlying(), klass)->isBottom()) {
+                result = Types::bottom();
+            } else {
+                result = from;
+            }
+        },
+        [&](Type *) { result = from; });
     ENFORCE(Types::isSubType(ctx, result, from),
             "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from->toString(ctx),
             klass.data(ctx)->showFullName(ctx), result->toString(ctx));
@@ -201,12 +202,13 @@ bool Types::canBeFalsy(Context ctx, const TypePtr &what) {
 
 TypePtr Types::approximateSubtract(Context ctx, const TypePtr &from, const TypePtr &what) {
     TypePtr result;
-    typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
-             [&](AppliedType *c) { result = Types::dropSubtypesOf(ctx, from, c->klass); },
-             [&](OrType *o) {
-                 result = Types::approximateSubtract(ctx, Types::approximateSubtract(ctx, from, o->left), o->right);
-             },
-             [&](Type *) { result = from; });
+    typecase(
+        what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
+        [&](AppliedType *c) { result = Types::dropSubtypesOf(ctx, from, c->klass); },
+        [&](OrType *o) {
+            result = Types::approximateSubtract(ctx, Types::approximateSubtract(ctx, from, o->left), o->right);
+        },
+        [&](Type *) { result = from; });
     return result;
 }
 
@@ -769,19 +771,19 @@ void SelfType::_sanityCheck(Context ctx) {}
 TypePtr Types::widen(Context ctx, const TypePtr &type) {
     ENFORCE(type != nullptr);
     TypePtr ret;
-    typecase(type.get(),
-             [&](AndType *andType) { ret = all(ctx, widen(ctx, andType->left), widen(ctx, andType->right)); },
-             [&](OrType *orType) { ret = any(ctx, widen(ctx, orType->left), widen(ctx, orType->right)); },
-             [&](ProxyType *proxy) { ret = Types::widen(ctx, proxy->underlying()); },
-             [&](AppliedType *appliedType) {
-                 vector<TypePtr> newTargs;
-                 newTargs.reserve(appliedType->targs.size());
-                 for (const auto &t : appliedType->targs) {
-                     newTargs.emplace_back(widen(ctx, t));
-                 }
-                 ret = make_type<AppliedType>(appliedType->klass, newTargs);
-             },
-             [&](Type *tp) { ret = type; });
+    typecase(
+        type.get(), [&](AndType *andType) { ret = all(ctx, widen(ctx, andType->left), widen(ctx, andType->right)); },
+        [&](OrType *orType) { ret = any(ctx, widen(ctx, orType->left), widen(ctx, orType->right)); },
+        [&](ProxyType *proxy) { ret = Types::widen(ctx, proxy->underlying()); },
+        [&](AppliedType *appliedType) {
+            vector<TypePtr> newTargs;
+            newTargs.reserve(appliedType->targs.size());
+            for (const auto &t : appliedType->targs) {
+                newTargs.emplace_back(widen(ctx, t));
+            }
+            ret = make_type<AppliedType>(appliedType->klass, newTargs);
+        },
+        [&](Type *tp) { ret = type; });
     ENFORCE(ret);
     return ret;
 }

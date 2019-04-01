@@ -169,9 +169,11 @@ cxxopts::Options buildOptions() {
     fmt::memory_buffer all_stop_after;
 
     fmt::format_to(all_prints, "Print: [{}]",
-                   fmt::map_join(print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                   fmt::map_join(
+                       print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
     fmt::format_to(all_stop_after, "Stop After: [{}]",
-                   fmt::map_join(stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                   fmt::map_join(
+                       stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 
     // Advanced options
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",

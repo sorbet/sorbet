@@ -141,9 +141,6 @@ build:lto --linkopt=-flto=thin
 build:lto --config=nopie
 
 ## flags that substantially increase Clang&LLVMs ability to devirtualize calls
-build:lto-linux --copt=-fwhole-program-vtables --copt=-fvisibility=hidden --copt=-fforce-emit-vtables
-build:lto-linux --cxxopt=-fwhole-program-vtables --cxxopt=-fvisibility=hidden --cxxopt=-fforce-emit-vtables
-build:lto-linux --linkopt=-fwhole-program-vtables --linkopt=-fvisibility=hidden --linkopt=-fforce-emit-vtables
 build:lto-linux --linkopt=-Wl,--icf=all
 build:lto-linux --config=lto
 
@@ -163,16 +160,18 @@ build:asan --copt=-fsanitize=address --copt=-fsanitize-address-use-after-scope
 build:asan --cxxopt=-fsanitize=address --cxxopt=-fsanitize-address-use-after-scope
 build:asan --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-after-scope
 build:asan --cxxopt=-DADDRESS_SANITIZER # used by abseil
+build:asan --cxxopt=-DHAS_SANITIZER
 build:asan --define unsanitized=false
 
 build:ubsan --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:ubsan --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:ubsan --define unsanitized=false
+build:ubsan --cxxopt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-test:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+test:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 build:sanitize-linux --config=sanitize
 test:sanitize-linux --config=sanitize
 

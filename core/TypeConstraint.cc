@@ -243,17 +243,20 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
 std::string TypeConstraint::toString(Context ctx) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "upperBounds: [{}]\n",
-                   fmt::map_join(this->upperBounds.begin(), this->upperBounds.end(), ", ", [&ctx](auto pair) -> auto {
-                       return fmt::format("{}: {}", pair.first.toString(ctx), pair.second->show(ctx));
-                   }));
+                   fmt::map_join(
+                       this->upperBounds.begin(), this->upperBounds.end(), ", ", [&ctx](auto pair) -> auto {
+                           return fmt::format("{}: {}", pair.first.toString(ctx), pair.second->show(ctx));
+                       }));
     fmt::format_to(buf, "lowerBounds: [{}]\n",
-                   fmt::map_join(this->lowerBounds.begin(), this->lowerBounds.end(), ", ", [&ctx](auto pair) -> auto {
-                       return fmt::format("{}: {}", pair.first.toString(ctx), pair.second->show(ctx));
-                   }));
+                   fmt::map_join(
+                       this->lowerBounds.begin(), this->lowerBounds.end(), ", ", [&ctx](auto pair) -> auto {
+                           return fmt::format("{}: {}", pair.first.toString(ctx), pair.second->show(ctx));
+                       }));
     fmt::format_to(buf, "solution: [{}]\n",
-                   fmt::map_join(this->solution.begin(), this->solution.end(), ", ", [&ctx](auto pair) -> auto {
-                       return fmt::format("{}: {}", pair.first.toString(ctx), pair.second->show(ctx));
-                   }));
+                   fmt::map_join(
+                       this->solution.begin(), this->solution.end(), ", ", [&ctx](auto pair) -> auto {
+                           return fmt::format("{}: {}", pair.first.toString(ctx), pair.second->show(ctx));
+                       }));
     return to_string(buf);
 }
 

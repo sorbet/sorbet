@@ -194,9 +194,6 @@ public:
     void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}
 
     void cloneFrom(const Environment &rhs);
-
-private:
-    Environment &operator=(const Environment &rhs) = default;
 };
 
 } // namespace sorbet::infer

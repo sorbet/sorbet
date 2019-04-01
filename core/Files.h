@@ -79,7 +79,7 @@ public:
     bool isRBI() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType);
-    File(File &&other) = default;
+    File(File &&other) = delete;
     File(const File &other) = delete;
     File() = delete;
     std::unique_ptr<File> deepCopy(GlobalState &) const;

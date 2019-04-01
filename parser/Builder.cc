@@ -328,13 +328,14 @@ public:
         }
 
         sorbet::parser::NodeVec *exprs;
-        typecase(methodCall.get(), [&](Break *b) { exprs = &b->exprs; },
+        typecase(
+            methodCall.get(), [&](Break *b) { exprs = &b->exprs; },
 
-                 [&](Return *r) { exprs = &r->exprs; },
+            [&](Return *r) { exprs = &r->exprs; },
 
-                 [&](Next *n) { exprs = &n->exprs; },
+            [&](Next *n) { exprs = &n->exprs; },
 
-                 [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
+            [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
         core::Loc blockLoc = send->loc.join(tokLoc(end));
@@ -487,25 +488,26 @@ public:
         Dedenter dedenter(dedentLevel);
         unique_ptr<Node> result;
 
-        typecase(node.get(),
+        typecase(
+            node.get(),
 
-                 [&](String *s) {
-                     std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
-                     result = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
-                 },
+            [&](String *s) {
+                std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
+                result = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
+            },
 
-                 [&](DString *d) {
-                     for (auto &p : d->nodes) {
-                         if (auto *s = parser::cast_node<String>(p.get())) {
-                             std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
-                             unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
-                             p.swap(newstr);
-                         }
-                     }
-                     result = std::move(node);
-                 },
+            [&](DString *d) {
+                for (auto &p : d->nodes) {
+                    if (auto *s = parser::cast_node<String>(p.get())) {
+                        std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
+                        unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
+                        p.swap(newstr);
+                    }
+                }
+                result = std::move(node);
+            },
 
-                 [&](Node *n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
+            [&](Node *n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
 
         return result;
     }
