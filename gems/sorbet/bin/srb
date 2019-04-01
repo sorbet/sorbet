@@ -24,21 +24,7 @@ fi
 command=$1
 shift
 
-# shellcheck disable=SC2120
 typecheck() {
-  fileList=$(mktemp)
-  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet"
-
-  [ -d "$cache_dir" ] || mkdir "$cache_dir"
-  if [ -f Gemfile.lock ]; then
-    cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
-    cache_file="${cache_dir}/${cache_hash}"
-    if [ ! -f "$cache_file" ]; then
-      bundle exec rbis | tr " " "\n" > "$cache_file"
-    fi
-    cat "$cache_file" >> "${fileList}"
-  fi
-
   # We're using bash string operations here to avoid forking
   # (using dirname / basename) etc. would mean ~15ms for each call.
 
@@ -54,8 +40,7 @@ typecheck() {
   # (assumes people only have one platform-depdendent gem installed per version)
   sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
 
-  # shellcheck disable=SC2086
-  "${sorbet[0]}" @$fileList "$@"
+  "${sorbet[0]}" "$@"
 }
 
 case $command in
@@ -64,7 +49,6 @@ case $command in
     ;;
 
   "typecheck" | "tc")
-    # shellcheck disable=SC2119
     typecheck "$@"
     ;;
 
