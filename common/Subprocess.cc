@@ -68,7 +68,7 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
     }
     FileCloser closeRead(readWrite[0]);
     {
-        FileCloser closeRead(readWrite[1]);
+        FileCloser closeWrite(readWrite[1]);
 
         FileActions fileActions;
         if (!fileActions.initialized()) {
@@ -83,7 +83,6 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
         // close the read end of the pipe
         ret = posix_spawn_file_actions_addclose(fileActions, readWrite[0]);
         if (ret) {
-            close(readWrite[1]);
             return nullopt;
         }
 
