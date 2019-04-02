@@ -80,6 +80,12 @@ const siteConfig = {
 
   // Show documentation's last update time.
   // enableUpdateTime: true,
+
+  algolia: {
+    apiKey: 'fa1ec885ab70787d636759b88e509b92',
+    indexName: 'stripe_sorbet',
+    algoliaOptions: {} // Optional, if provided by Algolia
+  },
 };
 
 module.exports = siteConfig;
