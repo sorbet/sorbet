@@ -44,6 +44,7 @@ popd
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
 git branch -D gh-pages || true
+current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
 tar -xjf _out_/website/website.tar.bz2 -C super-secret-private-beta .
 git add super-secret-private-beta
@@ -60,8 +61,10 @@ if [ "$dirty" -ne 0 ]; then
 else
   echo "nothing to update"
 fi
+git checkout -f "$current_rev"
 
 echo "--- releasing stripe.dev/sorbet/repo"
+git checkout gh-pages
 mkdir -p repo/super-secret-private-beta/gems/
 cp -R _out_/gems/*.gem repo/super-secret-private-beta/gems/
 pushd repo/super-secret-private-beta
@@ -73,6 +76,7 @@ git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
 if [ -z "$dryrun" ]; then
     git push origin gh-pages
 fi
+git checkout -f "$current_rev"
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
@@ -93,9 +97,7 @@ rm release/webasm/sorbet-wasm.tar
 rmdir release/webasm
 
 pushd release
-ls -al
 if [ -z "$dryrun" ]; then
-    # shellcheck disable=SC2035
-    find . -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
+    find . -type f -exec ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- {} \;
 fi
 popd
