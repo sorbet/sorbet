@@ -110,6 +110,9 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
         } else if (bytesRead == 0) {
             break;
         } else /* bytesRead < 0 */ {
+            if (errno == EINTR) {
+                continue; // this happens when we are being debugged
+            }
             waitpid(childPid, nullptr, 0); // reap the child so we don't have zombies
             return nullopt;
         }
