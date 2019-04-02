@@ -136,7 +136,7 @@ end
 
 Instead of attempting understand this specific pattern, exposes a new construct:
 `mixes_in_class_methods`. At runtime, it behaves just like the above, but
-statically `sorbet` will know what class methods are being defined.
+statically `srb` will know what class methods are being defined.
 
 Here's an example:
 

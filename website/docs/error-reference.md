@@ -10,7 +10,7 @@ This is one of three docs aimed at helping answer common questions about Sorbet:
 1.  [Frequently Asked Questions](faq.md)
 1.  [Sorbet Error Reference](error-reference.md) (this doc)
 
-This page contains tips and tricks for common errors from `sorbet`. Note: this
+This page contains tips and tricks for common errors from `srb`. Note: this
 list is not exhaustive! Some errors are very context dependent to solve, and
 some error codes are very uncommon. Contributions to this list are welcome!
 

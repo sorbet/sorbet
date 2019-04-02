@@ -4,7 +4,7 @@ title: Enabling Runtime Checks
 ---
 
 As we've mentioned before, Sorbet is a [gradual](gradual.md) system: it can be
-turned on and off at will. This means the predications `sorbet` makes statically
+turned on and off at will. This means the predications `srb` makes statically
 can be wrong.
 
 That's why Sorbet also uses **runtime checks**: even if a static prediction was
@@ -70,8 +70,8 @@ Stripe's large Ruby codebase. Type annotations in a codebase are near useless if
 developers don't trust them (consider how often Yard annotations fall out of
 sync with the code... 😰).
 
-Adding a `sig` to a method is only as good as the predictions it lets `sorbet`
-make about a codebase. Wrong sigs are actively harmful.
+Adding a `sig` to a method is only as good as the predictions it lets `srb` make
+about a codebase. Wrong sigs are actively harmful.
 
 But, by leveraging runtime checks, we can gain lots of confidence in our type
 annotations:
