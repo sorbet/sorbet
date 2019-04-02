@@ -533,7 +533,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         for (auto result = pluginFileq->try_pop(job); !result.done(); result = pluginFileq->try_pop(job)) {
             if (result.gotItem()) {
                 core::FileRef file = job;
-                decideStrictLevel(*localGs, file, opts);
+                file.data(*localGs).strictLevel = decideStrictLevel(*localGs, file, opts);
                 threadResult.res.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger));
             }
         }
@@ -591,7 +591,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                 {
                     core::UnfreezeFileTable fileTableAccess(*gs);
                     pluginFileRef = gs->enterFile(pluginFile);
-                    decideStrictLevel(*gs, pluginFileRef, opts);
+                    pluginFileRef.data(*gs).strictLevel = decideStrictLevel(*gs, pluginFileRef, opts);
                 }
                 ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore, logger));
             }
