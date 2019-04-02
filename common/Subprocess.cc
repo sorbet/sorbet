@@ -68,7 +68,7 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
     }
     FileCloser closeRead(readWrite[0]);
     {
-        FileCloser closeRead(readWrite[1]);
+        FileCloser closeWrite(readWrite[1]);
 
         FileActions fileActions;
         if (!fileActions.initialized()) {
@@ -83,7 +83,6 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
         // close the read end of the pipe
         ret = posix_spawn_file_actions_addclose(fileActions, readWrite[0]);
         if (ret) {
-            close(readWrite[1]);
             return nullopt;
         }
 
@@ -110,6 +109,9 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
         } else if (bytesRead == 0) {
             break;
         } else /* bytesRead < 0 */ {
+            if (errno == EINTR) {
+                continue; // this happens when we are being debugged
+            }
             waitpid(childPid, nullptr, 0); // reap the child so we don't have zombies
             return nullopt;
         }
