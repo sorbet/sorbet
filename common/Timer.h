@@ -9,7 +9,6 @@ public:
     Timer(spdlog::logger &log, ConstExprStr name);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name);
     ~Timer();
-    static long currentTimeNanos();
 
 private:
     spdlog::logger &log;

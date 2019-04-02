@@ -12,6 +12,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include <chrono>
 #include <deque>
 #include <optional>
 
@@ -248,10 +249,9 @@ class LSPLoop {
      */
     bool enableOperationNotifications = false;
     /**
-     * The time, in nanoseconds since the epoch, that LSP last sent metrics to statsd -- if `opts.statsdHost` was
-     * specified.
+     * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
-    long lastMetricUpdateTime;
+    std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
 
@@ -366,9 +366,9 @@ class LSPLoop {
                                                              std::vector<std::string> changedFiles);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
-    bool shouldSendCountersToStatsd(long long currentTime);
+    bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
     /** Sends counters to statsd. */
-    void sendCountersToStatsd(long long currentTime);
+    void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,

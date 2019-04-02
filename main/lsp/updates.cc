@@ -24,16 +24,14 @@ namespace sorbet::realmain::lsp {
 LSPLoop::ShowOperation::ShowOperation(LSPLoop &loop, string_view operationName, string_view description)
     : loop(loop), operationName(string(operationName)), description(string(description)) {
     if (loop.enableOperationNotifications) {
-        SorbetShowOperationParams slowPathOp((double)Timer::currentTimeNanos(), this->operationName, this->description,
-                                             SorbetOperationStatus::Start);
+        SorbetShowOperationParams slowPathOp(this->operationName, this->description, SorbetOperationStatus::Start);
         loop.sendNotification(LSPMethod::SorbetShowOperation(), slowPathOp);
     }
 }
 
 LSPLoop::ShowOperation::~ShowOperation() {
     if (loop.enableOperationNotifications) {
-        SorbetShowOperationParams slowPathOp((double)Timer::currentTimeNanos(), operationName, description,
-                                             SorbetOperationStatus::End);
+        SorbetShowOperationParams slowPathOp(operationName, description, SorbetOperationStatus::End);
         loop.sendNotification(LSPMethod::SorbetShowOperation(), slowPathOp);
     }
 }

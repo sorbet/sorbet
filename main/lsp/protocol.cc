@@ -177,10 +177,12 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.messages.received");
-        long requestReceiveTimeNanos = msg->timestamp;
+        auto requestReceiveTime = msg->timestamp;
         gs = processRequest(move(gs), *msg);
-        long currentTime = Timer::currentTimeNanos();
-        timingAdd("processing_time", (currentTime - requestReceiveTimeNanos));
+        auto currentTime = chrono::steady_clock::now();
+        auto processingTime = currentTime - requestReceiveTime;
+        auto processingTime_ns = chrono::duration_cast<chrono::nanoseconds>(processingTime);
+        timingAdd("processing_time", processingTime_ns.count());
         if (shouldSendCountersToStatsd(currentTime)) {
             {
                 // Merge counters from worker threads.
@@ -201,13 +203,13 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 }
 
 void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
-                               std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
+                               deque<unique_ptr<LSPMessage>> &pendingRequests) {
     // Squish any consecutive didChanges that are for the same file together, and combine all Watchman file system
     // updates into a single update.
     // TODO: if we ever support diffs, this would need to be extended
     int didChangeRequestsMerged = 0;
     int foundWatchmanRequests = 0;
-    long firstWatchmanTimestamp;
+    chrono::time_point<chrono::steady_clock> firstWatchmanTimestamp;
     int firstWatchmanCounter;
     int originalSize = pendingRequests.size();
     UnorderedSet<string> updatedFiles;
@@ -297,7 +299,7 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
                              LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     try {
         msg->counter = state.requestCounter++;
-        msg->timestamp = Timer::currentTimeNanos();
+        msg->timestamp = chrono::steady_clock::now();
 
         const LSPMethod method = LSPMethod::getByName(msg->method());
         if (method == LSPMethod::CancelRequest()) {

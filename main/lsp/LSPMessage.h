@@ -3,6 +3,7 @@
 
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
+#include <chrono>
 #include <variant>
 
 namespace sorbet::realmain::lsp {
@@ -45,7 +46,7 @@ public:
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
 
     /** Time at which this LSP message was received. */
-    long timestamp;
+    std::chrono::time_point<std::chrono::steady_clock> timestamp;
 
     /** Request counter. */
     int counter;

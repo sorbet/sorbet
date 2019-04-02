@@ -1224,7 +1224,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
     auto SorbetShowOperationParams = makeObject("SorbetShowOperationParams",
                                                 {
-                                                    makeField("timestamp", JSONDouble),
                                                     makeField("operationName", JSONString),
                                                     makeField("description", JSONString),
                                                     makeField("status", SorbetOperationStatus),

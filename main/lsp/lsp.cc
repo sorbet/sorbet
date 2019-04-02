@@ -14,7 +14,7 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
                  bool disableFastPath)
     : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputStream(inputStream),
       outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath),
-      lastMetricUpdateTime(Timer::currentTimeNanos()) {
+      lastMetricUpdateTime(chrono::steady_clock::now()) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes,
@@ -229,14 +229,13 @@ const LSPMethod LSPMethod::getByName(string_view name) {
     return LSPMethod{string(name), true, LSPMethod::Kind::ClientInitiated, false};
 }
 
-// 5 minutes in nanoseconds.
-constexpr long long STATSD_INTERVAL = 300000000000;
+constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
-bool LSPLoop::shouldSendCountersToStatsd(long long currentTime) {
+bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
     return !opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
 }
 
-void LSPLoop::sendCountersToStatsd(long long currentTime) {
+void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;
