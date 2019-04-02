@@ -193,6 +193,7 @@ NameDef names[] = {
     {"Encryptable", "Encryptable", true},
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
+    {"Enum", "Enum", true},
 
     {"Google", "Google", true},
     {"Protobuf", "Protobuf", true},

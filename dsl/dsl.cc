@@ -7,6 +7,7 @@
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
+#include "dsl/OpusEnum.h"
 #include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Rails.h"
 #include "dsl/Sinatra.h"
@@ -24,6 +25,7 @@ public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         Command::patchDSL(ctx, classDef.get());
         Rails::patchDSL(ctx, classDef.get());
+        OpusEnum::patchDSL(ctx, classDef.get());
 
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
