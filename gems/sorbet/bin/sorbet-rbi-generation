@@ -3,6 +3,7 @@
 module SorbetRBIGeneration; end
 
 require_relative '../lib/sorbet'
+require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-definition-finder'
 require_relative '../lib/fetch-rbis'
