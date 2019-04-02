@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://sorbet.run'
   s.license     = 'Apache-2.0'
 
-  s.add_dependency 'sorbet-static'
+  s.add_dependency 'sorbet-static', '0.0.0'
 
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 1.7'
