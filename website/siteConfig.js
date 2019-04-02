@@ -19,11 +19,9 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
+    {label: 'Get started', doc: 'adopting'},
     {label: 'Docs', doc: 'overview'},
-    {label: 'Try', href: 'https://sorbet.run'},
-    {label: 'Community', doc: 'community'},
-    {label: 'Blog', blog: true},
-    {label: 'GitHub', href: 'https://github.com/stripe/sorbet'},
+    {label: 'Try it online', href: 'https://sorbet.run'},
   ],
 
   customDocsPath: 'website/docs',
