@@ -4,134 +4,121 @@ title: Adopting Sorbet in an Existing Codebase
 sidebar_label: Adopting Sorbet
 ---
 
-> **Heads up**: This process still requires a fair bit of manual work, and is
-> one of the main reasons why Sorbet is still in private beta.
-
-Here well outline the high level steps to start adopting Sorbet. As you have
-questions with this guide, please ask in the Sorbet slack, and feel free to
-contribute improvements!
+> **Heads up**: Sorbet is still in a private beta while we iron out the
+> onboarding experience. You'll only be able to follow these instructions if
+> you've been given access to the private beta.
+>
+> Interested in signing up? Email us at <sorbet@stripe.com>.
 
 
 ## Step 1: Install dependencies
 
-<!-- TODO(jez) How to install sorbet from a package manager / gem -->
+There are two components to Sorbet: the command line interface and runtime
+systems. We'll declare them in our Gemfile and install them with Bundler:
 
-There are two components to Sorbet: the static and runtime systems. They are
-currently installed separately:
+```ruby
+# -- Gemfile --
 
-1.  Download the `sorbet` binary.
-
-    Since Sorbet is still pre-release, it is not in any package managers.\
-    It can be downloaded from the [Releases] page.
-
-    It's best to put this somewhere that's on your `$PATH`.
-
-1.  Reference the `sorbet-runtime` gem in your `Gemfile`:
-
-    ```ruby
-    # -- Gemfile --
-    # TODO(jez) Update these instructions after moving sorbet-runtime to monorepo
-    gem 'sorbet-runtime'
-    ```
-
-1.  Install `sorbet-runtime` using bundler:
-
-    ```shell
-    ❯ bundle install
-    ```
-
-[Releases]: https://github.com/stripe/sorbet/releases
-
-To test that everything is working at this point, you should be able to run
-these two commands, and see output like this:
-
-```plain
-❯ sorbet -e 'puts "Hello"'
-No errors! Great job.
+gem 'sorbet', :group => :development
+gem 'sorbet-runtime'
 ```
 
-```plain
+```plaintext
+❯ bundle install
+```
+
+### Verify installation
+
+To test that everything is working so far, we can run these commands:
+
+```plaintext
+❯ srb
+[help output]
+
+❯ srb typecheck -e 'puts "Hello, world!"'
+No errors! Great job.
+
 ❯ bundle exec ruby -e 'puts(require "sorbet-runtime")'
 true
 ```
 
 
-## Step 2: Prepare the file list
+## Step 2: Initialize Sorbet in our project
 
-Sorbet makes no attempt to infer which files make up a given Ruby project. So
-before we can run `sorbet` for the first time, we need to list all the files in
-our project. One way to do this is using `find`:
+For small projects, Sorbet can run on a single file with no additional
+information. But for projects that have multiple files and depend on other gems,
+Sorbet needs to know more information to work.
 
-```bash
-❯ find . -name '*.rb' -o -name '*.rbi' > FILE_LIST
+To initialize Sorbet in an existing project run:
+
+```plaintext
+❯ srb init
 ```
 
-Some notes about what this command does:
+It's normal for this command to spew a bunch of output to the terminal. When
+it's done, there should be a `sorbet/` folder in the current directory. Be sure
+to check the entire folder into version control.
 
-- It lists all files under the current folder ending in `*.rb` or `*.rbi`
-- (We'll cover what `*.rbi` files are in a moment)
-- The files are stored in the `FILE_LIST` file (feel free to pick a different
-  name).
 
-Each project is different, so this `find` command might not work for everyone.
-Feel free to tailor it to meet your project's needs.[^file-list]
+### Verify initialization
 
-[^file-list]: For context, the file list at Stripe ties into our mono-repo build
-procedure. Our builds use code generation to create Ruby files in various
-places. The way we build our file list reflects our build procedure.
+The contents of the `sorbet/` folder should now look like this:
 
-To test that everything is working at this point, you should see a file called
-`FILE_LIST` in the current directory, and it should have a bunch of lines, each
-one with a path to a Ruby file in your project. For example:
-
-```bash
-❯ head FILE_LIST
-lib/foo.rb
-lib/bar.rb
-test/runner.rb
-...
+```plaintext
+sorbet/
+├── config
+└── rbi/
+    └── ···
 ```
 
-> **Warning**: Every file in our project should be accounted for in the file
-> list. Sorbet is not designed to work if files are withheld.
+- `sorbet/config` is the config file Sorbet will read (see [Command Line
+  Reference](cli.md))
+
+- `sorbet/rbi/` is a folder containing [RBI files](rbi.md). RBI files (or "Ruby
+  Interface" files) declare classes, modules, constants, and methods to Sorbet
+  that it can't see on it's own.
+
+  `srb init` creates many kinds of RBI files. For more information, see [RBI
+  files](rbi.md).
+
+If these two items exist, we're all set to typecheck our project for the first
+time.
 
 
-## Step 3: Run `sorbet` for the first time
+## Step 3: Run `srb tc` for the first time
 
-Now we can run `sorbet` by putting an `@` sign[^at-sign] in front of the name of
-our file list:
+Now that we've initialized Sorbet, type checking Sorbet should be as simple as:
 
-[^at-sign]: Prefixing the file list's name with an `@` tells Sorbet to read that
-file and treat each line as a separate argument. We could have instead passed
-filenames directly to `sorbet`, but there's a limit to how many files can be
-passed at the command line.
-
-```bash
-❯ sorbet @FILE_LIST
+```plaintext
+❯ srb tc
 ```
 
-At this point, it's likely that you'll see LOTS of error reported by `sorbet`.
-Our next job is to start fixing these errors.
+<!-- TODO(jez) It's hard to describe succintly which files will be checked if we
+     suggest-typed by default and ignore files -->
+
+By default, this will type check every Ruby file in the current folder. To
+configure this, see [Command Line Reference](cli.md).
 
 
 ## Step 4: Fix constant resolution errors
 
-Fixing the initial errors reported by Sorbet is the biggest hurdle to adoption.
-Empirically, there are a handful of categories of errors people encounter at
-this step:
+<!-- TODO(jez) How to unsilence the errors in ignored files. -->
+
+At this point, it's likely that there are lots of errors in our project, but
+Sorbet **silences** them by default. Our next job is to unsilence them and then
+fix the root causes. Empirically, there are a handful of categories of errors
+people encounter at this step:
 
 1.  Parse errors
 
     Sorbet requires that all files parse as valid Ruby syntax.
 
-2.  Dynamic constant lookup
+2.  Dynamic constant references
 
-    Sorbet follows a more restrictive constant resolution algorithm, in that it
-    does not lookup constants in ancestors of outer scope. This is in an attempt
-    to simplifly the constant resolution algorithm for users. So if you see
-    "[Unable to resolve constant][dynamic-ancestor]" errors for constants which
-    can be referenced multiple ways, update your source code to use the name
-    where the constant was originally defined.
+    Sorbet does not support resolving constants through expressions. For
+    example, `foo.bar::A` is not supported---all constants must be resolvable
+    without knowing what type an expression has. In most cases, it's possible to
+    rewrite this code to use method calls (like, `foo.bar.get_A`).
 
 3.  Dynamic `include`s
 
@@ -145,47 +132,45 @@ this step:
 4.  Missing constants
 
     For Sorbet to be effective, it has to know about every class, module, and
-    constant that's defined in a codebase. Constants are central to
-    understanding the inheritance hierarchy and to validating type annotations.
-
-[dynamic-ancestor]: https://sorbet.run/#class%20Parent%0A%20%20A%20%3D%201%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0A%23%20Sorbet%20reports%20an%20error%2C%20even%20though%20in%20Ruby%20this%20works%0Aputs%20Child%3A%3AA%20%20%23%20error%3A%20Unable%20to%20resolve%20constant%20%60A%60%0A%0A%23%20Do%20this%20instead%0Aputs%20Parent%3A%3AA
+    constant that's defined in a codebase, including all gems. Constants are
+    central to understanding the inheritance hierarchy and thus knowing which
+    types can be used in place of which other types.
 
 [rand-include]: https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
 
-To solve points (3) and (4), let's introduce [`*.rbi` files](rbi.md). We saw
-`*.rbi` files mentioned before when we discussed building the `FILE_LIST`. RBI
-stands for "Ruby Interface." `*.rbi` files are purely type annotations, separate
-from runnable Ruby code.
+To solve points (3) and (4), Sorbet uses [RBI files](rbi.md). We mentioned RBI
+files before when we introduced `srb init`. RBI files are purely annotations
+files, separate from Ruby source code. While `srb init` can automatically create
+these files, it's not a perfect process. To eliminate constant errors, sometimes
+Sorbet requires hand-written RBI files.
 
-There is currently no official way to generate `*.rbi` files to ease the
-adoption of Sorbet. For some tips, see [RBI Files](rbi.md).
-
-> **Note**: This procedure is likely to change greatly while Sorbet is in
-> private beta.
-
-<!-- TODO(jez) Replace these instructions when we have a concrete way to generate rbi's -->
+To learn more about RBI files and how they can help with adopting Sorbet, see
+[the docs here](rbi.md).
 
 
 ## Step 5: Enable type checking
 
-At this step, running `sorbet @FILE_LIST` should show zero errors.
+At this step, running `srb tc` should show zero errors.
 
 Congrats! Step 4 was the biggest hurdle to adopting Sorbet. To recap, Sorbet now
 enforces that...
 
 - all Ruby files parse.
 
-- we know every class, module, and constant in a codebase. These can be 100%
+- every class, module, and constant in a codebase is known. These can be 100%
   accurately shown in auto-complete suggestions and used in type annotations.
 
-- all gems have explicit interfaces. In addition to yard documentation, `*.rbi`
-  files are machine-checked documentation about the libraries we're using.
+- all gems have explicit interfaces. More than yard documentation, RBI files
+  are machine-checked documentation about the libraries we're using.
 
-But importantly, Sorbet does **not** yet report type errors. The final step is
-to start enabling more checks in our code by turning on type checking. The rest
-of this site is dedicated to learning about the extra checks you can enable. The
-tl;dr is that type checking happens when we add [`# typed: true`](static.md) to
-files and write [method signatures](sigs.md) in those files.
+Importantly, Sorbet does **not** yet report **type errors** (the errors we've
+seen so far have been syntax errors and constant resolution errors). The final
+step is to start enabling more type checks in our code.
+
+The rest of this site is dedicated to learning about the extra checks we can
+enable. The tl;dr is that type checking happens when we add [`# typed:
+true`](static.md) to files and write [method signatures](sigs.md) in those
+files.
 
 ## What next?
 
