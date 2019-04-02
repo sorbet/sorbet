@@ -10,7 +10,10 @@ require_relative '../lib/fetch-rbis'
 require_relative '../lib/suggest-typed'
 
 module SorbetRBIGeneration::Main
-  def self.main
+  def self.main(argv)
+    command = parse_command(argv)
+    return command.call if command
+
     puts "This script should take a few minutes and will print all sorts of things. If it errors you probably care most about the last few lines."
 
     # Create sorbet/config file
@@ -26,10 +29,61 @@ module SorbetRBIGeneration::Main
     SorbetRBIGeneration::HiddenMethodFinder.main
 
     # Put some `typed:` sigils
-    SorbetRBIGeneration::SuggestTyped.main
+    # SorbetRBIGeneration::SuggestTyped.main
 
-    puts "This script has probably generated many changed files in your current directory. Please commit them all. The typechecker will make sure they are all still valid."
+    puts "This script has probably generated many changed files in ./sorbet/. Please commit them all. The typechecker will make sure they are all still valid."
+  end
+
+  def self.parse_command(argv)
+    return nil if argv.length == 0
+
+    banner = "Usage: #{$PROGRAM_NAME} <command>
+  This script gets your current directory ready for using Sorbet by making all sorts of files in ./sorbet/. You should commit them to version control.
+
+  We recommend running it without any options which will execute all the commands in order. If you only need a certain piece, you can pass a command to just run that part.
+
+  You should re-run this script if your program ever stops typechecking due to dynamic code in your project."
+    commands = "
+  Commands:
+    help                Print this message
+    <empty>             Run all initialization commands
+
+  Default Commands:
+    config              Recreate sorbet/config
+    sorbet-typed        Download community maintained type definitions for gems
+    gems                Generate arity-only type definitions by requiring the gem
+    hidden-definitions  Load all your code and generate type definitions for any dynamic code
+    todo                Run Sorbet and generate constants which Sorbet errors on
+
+  Additional Commands:
+    suggest-typed       Put the highest `typed:` sigil in each of your files
+    "
+
+    case (argv[0])
+    when 'help', '--help'
+      puts banner
+      puts commands
+      exit(1)
+    when 'config', SorbetRBIGeneration::CreateConfig::SORBET_CONFIG_FILE
+      -> {SorbetRBIGeneration::CreateConfig.main}
+    when 'sorbet-typed', SorbetRBIGeneration::FetchRBIs::SORBET_RBI_SORBET_TYPED, SorbetRBIGeneration::FetchRBIs::SORBET_RBI_LIST
+      -> {SorbetRBIGeneration::FetchRBIs.main}
+    when 'gems', SorbetRBIGeneration::GemGeneratorTracepoint::OUTPUT
+      -> {SorbetRBIGeneration::GemGeneratorTracepoint.main}
+    when 'hidden-definitions', SorbetRBIGeneration::HiddenMethodFinder::PATH
+      -> {SorbetRBIGeneration::HiddenMethodFinder.main}
+    when 'suggest-typed'
+      -> {SorbetRBIGeneration::SuggestTyped.main}
+
+    when 'update'
+      nil
+
+    else
+      puts "Unknown comand: #{argv[0]}"
+      puts commands
+      exit(1)
+    end
   end
 end
 
-SorbetRBIGeneration::Main.main
+SorbetRBIGeneration::Main.main(ARGV)
