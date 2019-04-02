@@ -31,7 +31,8 @@ All commands must be run from within Sorbet's top-level `website/` folder.
     ❯ yarn start
     ```
 
-1.  To deploy the site to GitHub pages:
+1.  The build should be automatically deployed when pushing to `github.com`.
+    To deploy manually:
 
     ```sh
     # Build site into website/build/sorbet
@@ -44,8 +45,6 @@ All commands must be run from within Sorbet's top-level `website/` folder.
     ❯ git add super-secret-private-beta
     ❯ git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
     ❯ git push github.com gh-pages
-
-    # TODO(jez) Automate gh-pages deploys from CI
     ```
 
 
