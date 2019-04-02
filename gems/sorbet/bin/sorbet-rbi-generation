@@ -37,7 +37,7 @@ module SorbetRBIGeneration::Main
   def self.parse_command(argv)
     return nil if argv.length == 0
 
-    banner = "Usage: #{$PROGRAM_NAME} <command>
+    banner = "Usage: srb rbi <command>
   This script gets your current directory ready for using Sorbet by making all sorts of files in ./sorbet/. You should commit them to version control.
 
   We recommend running it without any options which will execute all the commands in order. If you only need a certain piece, you can pass a command to just run that part.
@@ -46,7 +46,7 @@ module SorbetRBIGeneration::Main
     commands = "
   Commands:
     help                Print this message
-    <empty>             Run all initialization commands
+    <empty> | update    Run all initialization commands
 
   Default Commands:
     config              Recreate sorbet/config
