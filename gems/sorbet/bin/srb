@@ -6,19 +6,25 @@
 
 # From here on in, it is all bash until the last line
 
-display_help() {
-  echo "Sorbet - A Typechecker for Ruby
+help_and_exit() {
+  cat <<EOF
+A type checker for Ruby
 
-$0 [command] [command_options]
+Usage:
+  $0 (init|initialize) [options]
+  $0 (tc|typecheck) [options]
 
-  Where [command] is one of:
-    initialize, init
-    typecheck, tc"
+Options:
+  -h, --help     View help for this subcommand.
+
+For full help:
+  https://stripe.dev/sorbet/super-secret-private-beta/
+EOF
   exit 0
 }
 
 if [ "$#" -eq 0 ]; then
-  display_help
+  help_and_exit
 fi
 
 command=$1
@@ -54,7 +60,7 @@ case $command in
 
   *)
     echo "Unknown command \`$command\`"
-    display_help
+    help_and_exit
 esac
 
 exit $?
