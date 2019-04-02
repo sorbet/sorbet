@@ -8,9 +8,9 @@ apt-get install -yy curl jq
 git config --global user.email "sorbet+bot@stripe.com"
 git config --global user.name "Sorbet build farm"
 
-dryrun=""
+dryrun="1"
 if [ "$BUILDKITE_BRANCH" == 'master' ]; then
-    dryrun="1"
+    dryrun=""
 fi
 
 echo "--- Dowloading artifacts"
@@ -22,10 +22,10 @@ echo "--- releasing sorbet.run"
 
 rm -rf sorbet.run
 git clone git@github.com:stripe/sorbet.run.git
-tar -xvf ./_out_/webasm/sorbet-wasm.tar sorbet-wasm.wasm sorbet-wasm.js
+tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
 mv sorbet-wasm.wasm sorbet.run/docs
 mv sorbet-wasm.js sorbet.run/docs
-push sorbet.run/docs
+pushd sorbet.run/docs
 git add sorbet-wasm.wasm sorbet-wasm.js
 dirty=1
 git diff-index --quiet HEAD -- || dirty=0
@@ -88,12 +88,14 @@ cp -R _out_/* release/
 mv release/gems/* release
 rmdir release/gems
 rm release/website/website.tar.bz2
+rmdir release/website
 rm release/webasm/sorbet-wasm.tar
+rmdir release/webasm
 
 pushd release
 ls -al
-# shellcheck disable=SC2035
 if [ -z "$dryrun" ]; then
-    find * -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
+    # shellcheck disable=SC2035
+    find . -type f -print0 | xargs -0 ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" --
 fi
 popd
