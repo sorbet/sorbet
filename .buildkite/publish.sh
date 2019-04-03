@@ -30,8 +30,8 @@ git add sorbet-wasm.wasm sorbet-wasm.js
 dirty=
 git diff-index --quiet HEAD -- || dirty=1
 if [ -n "$dirty" ]; then
-  echo "$BUILDKITE_COMMIT" > docs/sha.html
-  git add docs/sha.html
+  echo "$BUILDKITE_COMMIT" > sha.html
+  git add sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
   if [ -z "$dryrun" ]; then
       git push
@@ -63,24 +63,26 @@ else
 fi
 git checkout -f "$current_rev"
 
-echo "--- releasing stripe.dev/sorbet/repo"
+echo "--- releasing stripe.dev/sorbet-repo"
+rm -rf sorbet-repo
+git clone git@github.com:stripe/sorbet-repo.git
 git checkout gh-pages
-mkdir -p repo/super-secret-private-beta/gems/
-cp -R _out_/gems/*.gem repo/super-secret-private-beta/gems/
-pushd repo/super-secret-private-beta
+mkdir -p super-secret-private-beta/gems/
+cp -R _out_/gems/*.gem super-secret-private-beta/gems/
+pushd super-secret-private-beta
 gem install builder
 gem generate_index
 popd
-git add repo/super-secret-private-beta/
+git add super-secret-private-beta/
 git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
 if [ -z "$dryrun" ]; then
     git push origin gh-pages
 fi
-git checkout -f "$current_rev"
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
-release_version="v0.4.${git_commit_count}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
+prefix="0.4"
+release_version="v$prefix.$git_commit_count.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 echo releasing "${release_version}"
 git tag -f "${release_version}"
 if [ -z "$dryrun" ]; then
@@ -99,7 +101,11 @@ rmdir release/webasm
 pushd release
 files=()
 while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
-release_notes="To use Sorbet add this line to your Gemfile: \`\`\`gem 'sorbet' '$release_version'\`\`\`"
+release_notes="To use Sorbet add this line to your Gemfile: \`\`\`
+source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
+  gem 'sorbet', '$prefix.$git_commit_count'\`\`\`
+end
+\`\`\`"
 if [ -z "$dryrun" ]; then
     echo "$release_notes" | ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
 fi
