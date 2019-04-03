@@ -66,11 +66,14 @@ git checkout -f "$current_rev"
 echo "--- releasing stripe.dev/sorbet-repo"
 rm -rf sorbet-repo
 git clone git@github.com:stripe/sorbet-repo.git
+pushd sorbet-repo
+git fetch origin gh-pages
+git branch -D gh-pages || true
 git checkout gh-pages
 mkdir -p super-secret-private-beta/gems/
-cp -R _out_/gems/*.gem super-secret-private-beta/gems/
-pushd super-secret-private-beta
+cp -R ../_out_/gems/*.gem super-secret-private-beta/gems/
 gem install builder
+pushd super-secret-private-beta
 gem generate_index
 popd
 git add super-secret-private-beta/
@@ -78,6 +81,7 @@ git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
 if [ -z "$dryrun" ]; then
     git push origin gh-pages
 fi
+popd
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
