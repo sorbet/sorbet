@@ -27,9 +27,9 @@ mv sorbet-wasm.wasm sorbet.run/docs
 mv sorbet-wasm.js sorbet.run/docs
 pushd sorbet.run/docs
 git add sorbet-wasm.wasm sorbet-wasm.js
-dirty=1
-git diff-index --quiet HEAD -- || dirty=0
-if [ "$dirty" -ne 0 ]; then
+dirty=
+git diff-index --quiet HEAD -- || dirty=1
+if [ -n "$dirty" ]; then
   echo "$BUILDKITE_COMMIT" > docs/sha.html
   git add docs/sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
@@ -48,9 +48,9 @@ current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
 tar -xjf _out_/website/website.tar.bz2 -C super-secret-private-beta .
 git add super-secret-private-beta
-dirty=1
-git diff-index --quiet HEAD -- || dirty=0
-if [ "$dirty" -ne 0 ]; then
+dirty=
+git diff-index --quiet HEAD -- || dirty=1
+if [ -n "$dirty" ]; then
   echo "$BUILDKITE_COMMIT" > super-secret-private-beta/sha.html
   git add super-secret-private-beta/sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
