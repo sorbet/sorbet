@@ -63,23 +63,20 @@ FalseClass)`.
 Unfortunately, not all `BasicObject`s have `is_a?`, so we have to do one extra
 step in our `==` function: check whether `Object === other`. (In Ruby, `==` and
 `===` are completely unrelated. The latter has to do with [case subsumption]).
+The idiomatic way to write `Object === other` in Ruby is to use `case`:
 
-In contexts where `===` is flagged by Rubocop, an alternative is to use a switch 
-statement:
 ```ruby
 case other
-when MyClass
-  # add'l logic
-else
-  false
+when Object
+  # ...
 end
 ```
 
 [case subsumption]: https://stackoverflow.com/questions/3422223/vs-in-ruby
 
-Here's a complete example:
+Here's a complete example that uses `case` to implement `==`:
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20IntBox%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Aval%0A%20%20%0A%20%20sig%20%7Bparams(x%3A%20Integer).void%7D%0A%20%20def%20initialize(val)%0A%20%20%20%20%40val%20%3D%20val%0A%20%20end%0A%20%20%0A%20%20sig%20%7Bparams(other%3A%20BasicObject).returns(T.any(TrueClass%2C%20FalseClass))%7D%0A%20%20def%20%3D%3D(other)%0A%20%20%20%20return%20false%20unless%20Object%20%3D%3D%3D%20other%0A%20%20%20%20return%20false%20unless%20other.is_a%3F(IntBox)%0A%20%20%20%20return%20other.val%20%3D%3D%20val%0A%20%20end%0Aend">→ View on sorbet.run</a>
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20IntBox%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Aval%0A%20%20%0A%20%20sig%20%7Bparams(val%3A%20Integer).void%7D%0A%20%20def%20initialize(val)%0A%20%20%20%20%40val%20%3D%20val%0A%20%20end%0A%20%20%0A%20%20sig%20%7Bparams(other%3A%20BasicObject).returns(T.any(TrueClass%2C%20FalseClass))%7D%0A%20%20def%20%3D%3D(other)%0A%20%20%20%20case%20other%0A%20%20%20%20when%20IntBox%0A%20%20%20%20%20%20other.val%20%3D%3D%20val%0A%20%20%20%20else%0A%20%20%20%20%20%20false%0A%20%20%20%20end%0A%20%20end%0Aend">→ View on sorbet.run</a>
 
 
 ## I use `T.must` a lot with arrays and hashes. Is there a way around this?
