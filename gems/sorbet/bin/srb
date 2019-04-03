@@ -11,9 +11,10 @@ help_and_exit() {
 A type checker for Ruby
 
 Usage:
-  $0 (init|initialize)
-  $0 rbi [options]
-  $0 (tc|typecheck) [options]
+  srb                                 Same as "srb t"
+  srb (init | initialize)             Initializes the \`sorbet\` directory
+  srb rbi [options]                   Manage the \`sorbet\` directory
+  srb (t | tc | typecheck) [options]  Typechecks the code
 
 Options:
   -h, --help     View help for this subcommand.
@@ -23,10 +24,6 @@ For full help:
 EOF
   exit 0
 }
-
-if [ "$#" -eq 0 ]; then
-  help_and_exit
-fi
 
 command=$1
 shift
@@ -59,7 +56,14 @@ case $command in
     bundle exec sorbet-rbi-generation "$@"
     ;;
 
-  "typecheck" | "tc")
+  "" | "typecheck" | "tc" | "t")
+    if [ ! -d sorbet -a "$#" -eq 0 ]; then
+        cat <<EOF
+No \`./sorbet/\` directory found. Maybe you want to run \`srb init\`?
+
+EOF
+        help_and_exit
+    fi
     typecheck "$@"
     ;;
 

@@ -162,13 +162,10 @@ cxxopts::Options buildOptions() {
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>()->default_value(""), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
-    options.add_options()("h,help", "Show long help");
+    options.add_options()("h", "Show short help");
+    options.add_options()("help", "Show long help");
     options.add_options()("version", "Show version");
-    options.add_options()("licence", "Show licence");
-    options.add_options()("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
-                          "{always,never,[auto]}");
 
     fmt::memory_buffer all_prints;
     fmt::memory_buffer all_stop_after;
@@ -199,6 +196,10 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")(
         "suggest-runtime-profiled",
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
+    options.add_options("advanced")("P,progress", "Draw progressbar");
+    options.add_options("advanced")("licence", "Show licence");
+    options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
+                                    "{always,never,[auto]}");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("disable-watchman",
                                     "When in language-server-protocol mode, disable file watching via Watchman");
@@ -434,6 +435,10 @@ void readOptions(Options &opts, int argc, char *argv[],
                                    : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
 
         if (raw["h"].as<bool>()) {
+            logger->info("{}", options.help({""}));
+            throw EarlyReturnWithCode(0);
+        }
+        if (raw["help"].as<bool>()) {
             logger->info("{}", options.help({"", "advanced", "dev"}));
             throw EarlyReturnWithCode(0);
         }

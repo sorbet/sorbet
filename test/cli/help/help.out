@@ -6,15 +6,12 @@ Typechecker for Ruby
 Usage:
   sorbet [OPTION...] <path 1> <path 2> ...
 
-  -e, string                    Parse an inline ruby string (default: )
-  -q, --quiet                   Silence all non-critical errors
-  -P, --progress                Draw progressbar
-  -v, --verbose                 Verbosity level [0-3]
-  -h, --help                    Show long help
-      --version                 Show version
-      --licence                 Show licence
-      --color {always,never,[auto]}
-                                Use color output (default: auto)
+  -e, string     Parse an inline ruby string (default: )
+  -q, --quiet    Silence all non-critical errors
+  -v, --verbose  Verbosity level [0-3]
+  -h,            Show short help
+      --help     Show long help
+      --version  Show version
 
 
 ----- Abbreviated help output with empty config file: --------------------
@@ -25,15 +22,12 @@ Typechecker for Ruby
 Usage:
   sorbet [OPTION...] <path 1> <path 2> ...
 
-  -e, string                    Parse an inline ruby string (default: )
-  -q, --quiet                   Silence all non-critical errors
-  -P, --progress                Draw progressbar
-  -v, --verbose                 Verbosity level [0-3]
-  -h, --help                    Show long help
-      --version                 Show version
-      --licence                 Show licence
-      --color {always,never,[auto]}
-                                Use color output (default: auto)
+  -e, string     Parse an inline ruby string (default: )
+  -q, --quiet    Silence all non-critical errors
+  -v, --verbose  Verbosity level [0-3]
+  -h,            Show short help
+      --help     Show long help
+      --version  Show version
 
 
 ----- Full help output: --------------------------------------------------
@@ -42,15 +36,12 @@ Typechecker for Ruby
 Usage:
   sorbet [OPTION...] <path 1> <path 2> ...
 
-  -e, string                    Parse an inline ruby string (default: )
-  -q, --quiet                   Silence all non-critical errors
-  -P, --progress                Draw progressbar
-  -v, --verbose                 Verbosity level [0-3]
-  -h, --help                    Show long help
-      --version                 Show version
-      --licence                 Show licence
-      --color {always,never,[auto]}
-                                Use color output (default: auto)
+  -e, string     Parse an inline ruby string (default: )
+  -q, --quiet    Silence all non-critical errors
+  -v, --verbose  Verbosity level [0-3]
+  -h,            Show short help
+      --help     Show long help
+      --version  Show version
 
  advanced options:
       --configatron-dir path    Path to configatron yaml folders
@@ -68,6 +59,10 @@ Usage:
       --suggest-runtime-profiled
                                 When suggesting signatures in `typed: strict`
                                 mode, suggest `::T::Utils::RuntimeProfiled`
+  -P, --progress                Draw progressbar
+      --licence                 Show licence
+      --color {always,never,[auto]}
+                                Use color output (default: auto)
       --lsp                     Start in language-server-protocol mode
       --disable-watchman        When in language-server-protocol mode,
                                 disable file watching via Watchman
