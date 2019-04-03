@@ -105,9 +105,10 @@ rmdir release/webasm
 pushd release
 files=()
 while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
-release_notes="To use Sorbet add this line to your Gemfile: \`\`\`
+release_notes="To use Sorbet add this line to your Gemfile:
+\`\`\`
 source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
-  gem 'sorbet', '$prefix.$git_commit_count'\`\`\`
+  gem 'sorbet', '$prefix.$git_commit_count'
 end
 \`\`\`"
 if [ -z "$dryrun" ]; then
