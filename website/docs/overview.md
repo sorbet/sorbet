@@ -5,11 +5,12 @@ title: Overview
 
 Type checking with Sorbet is composed of two key components:
 
-- `sorbet`
+- `srb`
 
-  This is the command-line interface to Sorbet's type checker. It analyzes your
-  code **statically** (before your code runs) to report potential mistakes in
-  the code.
+  This is the command-line interface to Sorbet. It includes the core type
+  checker, which analyzes a project **statically** (before the code runs) to
+  report potential mistakes in the code. It also contains utilities to set up a
+  project to work with Sorbet for the first time.
 
 - `sorbet-runtime`
 

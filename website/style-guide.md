@@ -6,7 +6,9 @@
 
 - naming conventions:
   - Sorbet (capital S, no monospace) → the whole project / team
-  - `sorbet` → *specifically* the static system / command line
+    - sorbet (lowercase) is never allowed (unless talking specifically about the
+      name of the binary that we ship with `sorbet-static`)
+  - `srb` → *specifically* the static system / command line
   - `sorbet-runtime` → *specifically* the runtime system
   - `sig` or signature, never sig
 

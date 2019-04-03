@@ -23,6 +23,8 @@ about the types of our methods, we have to add [signatures](sigs.md) above the
 method:
 
 ```ruby
+# typed: true
+
 # (1) Bring T::Sig into scope:
 require 'sorbet-runtime'
 
