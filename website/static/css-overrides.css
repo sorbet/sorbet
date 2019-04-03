@@ -1,0 +1,13 @@
+/*
+ * Custom Docusaurus overrides.
+ * See here for mor information:
+ * https://docusaurus.io/docs/en/api-pages#styles
+ */
+
+a {
+  color: #8673FF;
+}
+a:hover {
+  color: #8673FF;
+  text-decoration: underline;
+}
