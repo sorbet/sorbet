@@ -125,7 +125,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
   end
 
   def write_constants
-    puts "Printing you code's symbol table into #{SOURCE_CONSTANTS}"
+    puts "Printing your code's symbol table into #{SOURCE_CONSTANTS}"
     io = IO.popen(
       [
         'srb',
@@ -228,6 +228,8 @@ class SorbetRBIGeneration::HiddenMethodFinder
     rescue LoadError, NameError, ArgumentError => e
       return "# #{e.message.gsub("\n", "\n# ")}"
     end
+
+    return if !SorbetRBIGeneration.real_is_a?(my_klass, Class) && !SorbetRBIGeneration.real_is_a?(my_klass, Module)
 
     # We specifically don't typecheck anything in T:: since it is hardcoded
     # into sorbet

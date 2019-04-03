@@ -8,6 +8,7 @@ require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-definition-finder'
 require_relative '../lib/fetch-rbis'
 require_relative '../lib/suggest-typed'
+require_relative '../lib/todo-rbi'
 
 module SorbetRBIGeneration::Main
   def self.main(argv)
@@ -28,8 +29,23 @@ module SorbetRBIGeneration::Main
     # Find the hidden methods
     SorbetRBIGeneration::HiddenMethodFinder.main
 
+    # Run sorbet and make constants to fix errors
+    SorbetRBIGeneration::TodoRBI.main
+
+    # Run type suggestion once, and then generate the todo.rbi again.
+    #
+    # The first time we suggest typed sigils, a few files may be ignored if they
+    # use Ruby features Sorbet does not support. However, since we ran the
+    # todo.rbi generation before they were ignored, we discovered the constants
+    # that they defined and did not add the constants to todo.rbi file.
+    #
+    # Regenerating after one run of sigil suggestion will put those constants
+    # into the todo.rbi file.
+    SorbetRBIGeneration::SuggestTyped.suggest_typed
+    SorbetRBIGeneration::TodoRBI.main
+
     # Put some `typed:` sigils
-    # SorbetRBIGeneration::SuggestTyped.main
+    SorbetRBIGeneration::SuggestTyped.main
 
     puts "This script has probably generated many changed files in ./sorbet/. Please commit them all. The typechecker will make sure they are all still valid."
   end
@@ -72,6 +88,8 @@ module SorbetRBIGeneration::Main
       -> {SorbetRBIGeneration::GemGeneratorTracepoint.main}
     when 'hidden-definitions', SorbetRBIGeneration::HiddenMethodFinder::PATH
       -> {SorbetRBIGeneration::HiddenMethodFinder.main}
+    when 'todo', SorbetRBIGeneration::TODO_FILE
+      -> {SorbetRBIGeneration::TodoRBI.main}
     when 'suggest-typed'
       -> {SorbetRBIGeneration::SuggestTyped.main}
 

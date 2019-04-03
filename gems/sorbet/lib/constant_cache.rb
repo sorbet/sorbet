@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 # typed: true
 
+
+module SorbetRBIGeneration
+  def self.real_is_a?(o, klass)
+    @real_is_a ||= Object.instance_method(:is_a?)
+    @real_is_a.bind(o).call(klass)
+  end
+end
+
 # This class walks global namespace to find all modules and discover all of their names.
 # At the time you ask for it it, it takes a "spashot" of the world.
 # If new modules were defined after an instance of this class was created,
@@ -53,7 +61,7 @@ class SorbetRBIGeneration::ConstantLookupCache
   end
 
   def all_module_names
-    ret = @all_constants.select {|_k, v| real_is_a?(v.const, Module)}.map do |_key, struct|
+    ret = @all_constants.select {|_k, v| SorbetRBIGeneration.real_is_a?(v.const, Module)}.map do |_key, struct|
       raise "should never happen" if !struct.primary_name
       struct.primary_name
     end
@@ -61,7 +69,7 @@ class SorbetRBIGeneration::ConstantLookupCache
   end
 
   def all_named_modules
-    ret = @all_constants.select {|_k, v| real_is_a?(v.const, Module)}.map do |_key, struct|
+    ret = @all_constants.select {|_k, v| SorbetRBIGeneration.real_is_a?(v.const, Module)}.map do |_key, struct|
       raise "should never happen" if !struct.primary_name
       struct.const
     end
@@ -72,7 +80,7 @@ class SorbetRBIGeneration::ConstantLookupCache
     ret = {}
 
     @all_constants.map do |_key, struct|
-      next if struct.nil? || !real_is_a?(struct.const, Module) || struct.aliases.size < 2
+      next if struct.nil? || !SorbetRBIGeneration.real_is_a?(struct.const, Module) || struct.aliases.size < 2
       ret[struct.primary_name] = struct.aliases.reject {|name| name == struct.primary_name}
     end
     ret
@@ -94,11 +102,6 @@ class SorbetRBIGeneration::ConstantLookupCache
   private def get_object_id(o)
     @real_object_id ||= Object.instance_method(:object_id)
     @real_object_id.bind(o).call
-  end
-
-  private def real_is_a?(o, klass)
-    @real_is_a ||= Object.instance_method(:is_a?)
-    @real_is_a.bind(o).call(klass)
   end
 
   private def real_name(o)
@@ -148,7 +151,7 @@ class SorbetRBIGeneration::ConstantLookupCache
           if nested_name != maybe_seen_already.primary_name
             maybe_seen_already.aliases << nested_name
           end
-          if maybe_seen_already.primary_name.nil? && real_is_a?(nested_constant, Module)
+          if maybe_seen_already.primary_name.nil? && SorbetRBIGeneration.real_is_a?(nested_constant, Module)
             realName = real_name(nested_constant)
             maybe_seen_already.primary_name = realName
           end
@@ -156,7 +159,7 @@ class SorbetRBIGeneration::ConstantLookupCache
           entry = ConstantEntry.new(nested, nested_name, nil, [nested_name], nested_constant, owner)
           ret[object_id] = entry
 
-          if real_is_a?(nested_constant, Module) && Object != nested_constant
+          if SorbetRBIGeneration.real_is_a?(nested_constant, Module) && Object != nested_constant
             go_deeper << [entry, nested_constant, nested_name]
           end
         end
