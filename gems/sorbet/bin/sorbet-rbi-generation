@@ -60,18 +60,16 @@ module SorbetRBIGeneration::Main
 
   You should re-run this script if your program ever stops typechecking due to dynamic code in your project."
     commands = "
-  Commands:
+  Common Commands:
     help                Print this message
     <empty> | update    Run all initialization commands
 
-  Default Commands:
+  Specific Commands:
     config              Recreate sorbet/config
     sorbet-typed        Download community maintained type definitions for gems
     gems                Generate arity-only type definitions by requiring the gem
     hidden-definitions  Load all your code and generate type definitions for any dynamic code
     todo                Run Sorbet and generate constants which Sorbet errors on
-
-  Additional Commands:
     suggest-typed       Put the highest `typed:` sigil in each of your files
     "
 
