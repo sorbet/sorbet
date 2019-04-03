@@ -45,19 +45,21 @@ class BasicObject
     .returns(T.untyped)
   end
   sig do
-    params(
-        blk: T.proc.params().returns(BasicObject),
+    type_parameters(:U)
+    .params(
+        blk: T.proc.bind(T.untyped).params().returns(T.type_parameter(:U)),
     )
-    .returns(T.untyped)
+    .returns(T.type_parameter(:U))
   end
   def instance_eval(arg0=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil), &blk); end
 
   sig do
-    params(
-        args: BasicObject,
-        blk: BasicObject,
+    type_parameters(:U, :V)
+    .params(
+        args: T.type_parameter(:V),
+        blk: T.proc.bind(T.untyped).params(args: T.untyped).returns(T.type_parameter(:U)),
     )
-    .returns(T.untyped)
+    .returns(T.type_parameter(:U))
   end
   def instance_exec(*args, &blk); end
 
