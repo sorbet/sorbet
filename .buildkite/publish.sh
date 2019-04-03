@@ -98,7 +98,7 @@ rmdir release/webasm
 
 pushd release
 files=()
-while IFS='' read -r line; do files+=("$line"); done < <(find . -type f)
+while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
 release_notes="To use Sorbet add this line to your Gemfile: \`\`\`gem 'sorbet' '$release_version'\`\`\`"
 if [ -z "$dryrun" ]; then
     echo "$release_notes" | ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
