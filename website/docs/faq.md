@@ -64,6 +64,17 @@ Unfortunately, not all `BasicObject`s have `is_a?`, so we have to do one extra
 step in our `==` function: check whether `Object === other`. (In Ruby, `==` and
 `===` are completely unrelated. The latter has to do with [case subsumption]).
 
+In contexts where `===` is flagged by Rubocop, an alternative is to use a switch 
+statement:
+```ruby
+case other
+when MyClass
+  # add'l logic
+else
+  false
+end
+```
+
 [case subsumption]: https://stackoverflow.com/questions/3422223/vs-in-ruby
 
 Here's a complete example:
