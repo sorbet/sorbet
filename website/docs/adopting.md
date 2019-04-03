@@ -19,8 +19,10 @@ systems. We'll declare them in our Gemfile and install them with Bundler:
 ```ruby
 # -- Gemfile --
 
-gem 'sorbet', :group => :development
-gem 'sorbet-runtime'
+source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
+  gem 'sorbet', :group => :development
+  gem 'sorbet-runtime'
+end
 ```
 
 ```plaintext
