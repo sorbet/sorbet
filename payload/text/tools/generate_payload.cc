@@ -34,7 +34,7 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
         } else {
             version = "master";
         }
-        string permalink = "https://git.corp.stripe.com/stripe-internal/sorbet/tree/" + version + "/" + file;
+        string permalink = "https://github.com/stripe/sorbet/tree/" + version + "/" + file;
         out << "  result.emplace_back(make_pair<string_view, string_view>(\"" + absl::CEscape(permalink) + "\"sv, " +
                    sourceName2funcName(file) + "()));"
             << '\n';

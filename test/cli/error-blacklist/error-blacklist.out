@@ -1,7 +1,7 @@
 test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      3 |1 + "1"
         ^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
+    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("1") originating from:

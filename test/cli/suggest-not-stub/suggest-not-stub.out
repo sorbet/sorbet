@@ -8,7 +8,7 @@ test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` 
     test/cli/suggest-not-stub/suggest-not-stub.rb:2: Did you mean: `A`?
      2 |class A
         ^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L10: Did you mean: `T`?
+    https://github.com/stripe/sorbet/tree/master/rbi/t.rbi#L10: Did you mean: `T`?
     10 |module T
         ^^^^^^^^
 Errors: 2

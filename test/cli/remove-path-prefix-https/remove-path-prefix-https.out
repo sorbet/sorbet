@@ -1,7 +1,7 @@
 test/cli/remove-path-prefix-https/remove-path-prefix-https.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      2 |1 + "s"
         ^^^^^^^
-    rbi/core/integer.rbi:103: Method `Integer#+` has specified `arg0` as `Integer`
+    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("s") originating from:

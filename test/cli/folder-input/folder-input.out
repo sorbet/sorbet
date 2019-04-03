@@ -1,7 +1,7 @@
 test/cli/folder-input/foo.rb:4: `String("foo.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      4 |1 + "foo.rb"
         ^^^^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
+    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("foo.rb") originating from:
@@ -12,7 +12,7 @@ test/cli/folder-input/foo.rb:4: `String("foo.rb")` doesn't match `Integer` for a
 test/cli/folder-input/input/bar.rb:3: `String("bar.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      3 |1 + "bar.rb"
         ^^^^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
+    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("bar.rb") originating from:
@@ -23,7 +23,7 @@ test/cli/folder-input/input/bar.rb:3: `String("bar.rb")` doesn't match `Integer`
 test/cli/folder-input/input/subfolder/baz.rb:4: `String("baz.rb")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      4 |1 + "baz.rb"
         ^^^^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
+    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
      103 |        arg0: Integer,
                   ^^^^
   Got String("baz.rb") originating from:
