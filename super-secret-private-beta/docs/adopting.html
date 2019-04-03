@@ -1,10 +1,10 @@
 <!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Adopting Sorbet in an Existing Codebase · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Heads up&lt;/strong&gt;: This process still requires a fair bit of manual work, and is&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Heads up&lt;/strong&gt;: Sorbet is still in a private beta while we iron out the&lt;/p&gt;
 &lt;/blockquote&gt;
 "/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Adopting Sorbet in an Existing Codebase · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://stripe.github.io/sorbet/super-secret-private-beta/index.html"/><meta property="og:description" content="&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Heads up&lt;/strong&gt;: This process still requires a fair bit of manual work, and is&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Heads up&lt;/strong&gt;: Sorbet is still in a private beta while we iron out the&lt;/p&gt;
 &lt;/blockquote&gt;
-"/><meta property="og:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/sorbet/super-secret-private-beta/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://stripe.github.io/sorbet/super-secret-private-beta/blog/feed.xml" title="Sorbet Blog RSS Feed"/><link rel="stylesheet" href="/sorbet/super-secret-private-beta/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/sorbet/super-secret-private-beta/"><img class="logo" src="/sorbet/super-secret-private-beta/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/sorbet/super-secret-private-beta/docs/community" target="_self">Community</a></li><li class=""><a href="/sorbet/super-secret-private-beta/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/stripe/sorbet" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/overview">Overview</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/rbi">RBI Files</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+"/><meta property="og:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/sorbet/super-secret-private-beta/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/sorbet/super-secret-private-beta/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/sorbet/super-secret-private-beta/"><img class="logo" src="/sorbet/super-secret-private-beta/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive siteNavItemActive"><a href="/sorbet/super-secret-private-beta/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/overview">Overview</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/rbi">RBI Files</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
             document.addEventListener('DOMContentLoaded', function() {
               createToggler('#navToggler', '#docsNav', 'docsSliderActive');
               createToggler('#tocToggler', 'body', 'tocActive');
@@ -32,87 +32,82 @@
               }
             });
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/adopting.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Adopting Sorbet in an Existing Codebase</h1></header><article><div><span><blockquote>
-<p><strong>Heads up</strong>: This process still requires a fair bit of manual work, and is
-one of the main reasons why Sorbet is still in private beta.</p>
+<p><strong>Heads up</strong>: Sorbet is still in a private beta while we iron out the
+onboarding experience. You'll only be able to follow these instructions if
+you've been given access to the private beta.</p>
+<p>Interested in signing up? Email us at <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>.</p>
 </blockquote>
-<p>Here well outline the high level steps to start adopting Sorbet. As you have
-questions with this guide, please ask in the Sorbet slack, and feel free to
-contribute improvements!</p>
 <h2><a class="anchor" aria-hidden="true" id="step-1-install-dependencies"></a><a href="#step-1-install-dependencies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1: Install dependencies</h2>
-<!-- TODO(jez) How to install sorbet from a package manager / gem -->
-<p>There are two components to Sorbet: the static and runtime systems. They are
-currently installed separately:</p>
-<ol>
-<li><p>Download the <code>sorbet</code> binary.</p>
-<p>Since Sorbet is still pre-release, it is not in any package managers.<br>
-It can be downloaded from the <a href="https://github.com/stripe/sorbet/releases">Releases</a> page.</p>
-<p>It's best to put this somewhere that's on your <code>$PATH</code>.</p></li>
-<li><p>Reference the <code>sorbet-runtime</code> gem in your <code>Gemfile</code>:</p>
+<p>There are two components to Sorbet: the command line interface and runtime
+systems. We'll declare them in our Gemfile and install them with Bundler:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- Gemfile --</span>
-<span class="hljs-comment"># TODO(jez) Update these instructions after moving sorbet-runtime to monorepo</span>
+
+gem <span class="hljs-string">'sorbet'</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
 gem <span class="hljs-string">'sorbet-runtime'</span>
-</code></pre></li>
-<li><p>Install <code>sorbet-runtime</code> using bundler:</p>
-<pre><code class="hljs css language-shell">❯ bundle install
-</code></pre></li>
-</ol>
-<p>To test that everything is working at this point, you should be able to run
-these two commands, and see output like this:</p>
-<pre><code class="hljs css language-plain">❯ sorbet -e <span class="hljs-symbol">'puts</span> <span class="hljs-string">"Hello"</span>'
+</code></pre>
+<pre><code class="hljs css language-plaintext">❯ bundle install
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="verify-installation"></a><a href="#verify-installation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Verify installation</h3>
+<p>To test that everything is working so far, we can run these commands:</p>
+<pre><code class="hljs css language-plaintext">❯ srb
+[help output]
+
+❯ srb typecheck -e 'puts "Hello, world!"'
 No errors! Great job.
+
+❯ bundle exec ruby -e 'puts(require "sorbet-runtime")'
+true
 </code></pre>
-<pre><code class="hljs css language-plain">❯ bundle exec ruby -e <span class="hljs-symbol">'puts</span>(require <span class="hljs-string">"sorbet-runtime"</span>)'
-<span class="hljs-literal">true</span>
+<h2><a class="anchor" aria-hidden="true" id="step-2-initialize-sorbet-in-our-project"></a><a href="#step-2-initialize-sorbet-in-our-project" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 2: Initialize Sorbet in our project</h2>
+<p>For small projects, Sorbet can run on a single file with no additional
+information. But for projects that have multiple files and depend on other gems,
+Sorbet needs to know more information to work.</p>
+<p>To initialize Sorbet in an existing project run:</p>
+<pre><code class="hljs css language-plaintext">❯ srb init
 </code></pre>
-<h2><a class="anchor" aria-hidden="true" id="step-2-prepare-the-file-list"></a><a href="#step-2-prepare-the-file-list" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 2: Prepare the file list</h2>
-<p>Sorbet makes no attempt to infer which files make up a given Ruby project. So
-before we can run <code>sorbet</code> for the first time, we need to list all the files in
-our project. One way to do this is using <code>find</code>:</p>
-<pre><code class="hljs css language-bash">❯ find . -name <span class="hljs-string">'*.rb'</span> -o -name <span class="hljs-string">'*.rbi'</span> &gt; FILE_LIST
+<p>It's normal for this command to spew a bunch of output to the terminal. When
+it's done, there should be a <code>sorbet/</code> folder in the current directory. Be sure
+to check the entire folder into version control.</p>
+<h3><a class="anchor" aria-hidden="true" id="verify-initialization"></a><a href="#verify-initialization" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Verify initialization</h3>
+<p>The contents of the <code>sorbet/</code> folder should now look like this:</p>
+<pre><code class="hljs css language-plaintext">sorbet/
+├── config
+└── rbi/
+    └── ···
 </code></pre>
-<p>Some notes about what this command does:</p>
 <ul>
-<li>It lists all files under the current folder ending in <code>*.rb</code> or <code>*.rbi</code></li>
-<li>(We'll cover what <code>*.rbi</code> files are in a moment)</li>
-<li>The files are stored in the <code>FILE_LIST</code> file (feel free to pick a different
-name).</li>
+<li><p><code>sorbet/config</code> is the config file Sorbet will read (see <a href="cli.md">Command Line
+Reference</a>)</p></li>
+<li><p><code>sorbet/rbi/</code> is a folder containing <a href="/sorbet/super-secret-private-beta/docs/rbi">RBI files</a>. RBI files (or &quot;Ruby
+Interface&quot; files) declare classes, modules, constants, and methods to Sorbet
+that it can't see on it's own.</p>
+<p><code>srb init</code> creates many kinds of RBI files. For more information, see <a href="/sorbet/super-secret-private-beta/docs/rbi">RBI
+files</a>.</p></li>
 </ul>
-<p>Each project is different, so this <code>find</code> command might not work for everyone.
-Feel free to tailor it to meet your project's needs.<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
-<p>To test that everything is working at this point, you should see a file called
-<code>FILE_LIST</code> in the current directory, and it should have a bunch of lines, each
-one with a path to a Ruby file in your project. For example:</p>
-<pre><code class="hljs css language-bash">❯ head FILE_LIST
-lib/foo.rb
-lib/bar.rb
-<span class="hljs-built_in">test</span>/runner.rb
-...
+<p>If these two items exist, we're all set to typecheck our project for the first
+time.</p>
+<h2><a class="anchor" aria-hidden="true" id="step-3-run-srb-tc-for-the-first-time"></a><a href="#step-3-run-srb-tc-for-the-first-time" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 3: Run <code>srb tc</code> for the first time</h2>
+<p>Now that we've initialized Sorbet, type checking Sorbet should be as simple as:</p>
+<pre><code class="hljs css language-plaintext">❯ srb tc
 </code></pre>
-<blockquote>
-<p><strong>Warning</strong>: Every file in our project should be accounted for in the file
-list. Sorbet is not designed to work if files are withheld.</p>
-</blockquote>
-<h2><a class="anchor" aria-hidden="true" id="step-3-run-sorbet-for-the-first-time"></a><a href="#step-3-run-sorbet-for-the-first-time" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 3: Run <code>sorbet</code> for the first time</h2>
-<p>Now we can run <code>sorbet</code> by putting an <code>@</code> sign<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> in front of the name of
-our file list:</p>
-<pre><code class="hljs css language-bash">❯ sorbet @FILE_LIST
-</code></pre>
-<p>At this point, it's likely that you'll see LOTS of error reported by <code>sorbet</code>.
-Our next job is to start fixing these errors.</p>
+<!-- TODO(jez) It's hard to describe succintly which files will be checked if we
+     suggest-typed by default and ignore files -->
+<p>By default, this will type check every Ruby file in the current folder. To
+configure this, see <a href="cli.md">Command Line Reference</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="step-4-fix-constant-resolution-errors"></a><a href="#step-4-fix-constant-resolution-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 4: Fix constant resolution errors</h2>
-<p>Fixing the initial errors reported by Sorbet is the biggest hurdle to adoption.
-Empirically, there are a handful of categories of errors people encounter at
-this step:</p>
+<!-- TODO(jez) How to unsilence the errors in ignored files. -->
+<p>At this point, it's likely that there are lots of errors in our project, but
+Sorbet <strong>silences</strong> them by default. Our next job is to unsilence them and then
+fix the root causes. Empirically, there are a handful of categories of errors
+people encounter at this step:</p>
 <ol>
 <li><p>Parse errors</p>
 <p>Sorbet requires that all files parse as valid Ruby syntax.</p></li>
-<li><p>Dynamic constant lookup</p>
-<p>Sorbet follows a more restrictive constant resolution algorithm, in that it
-does not lookup constants in ancestors of outer scope. This is in an attempt
-to simplifly the constant resolution algorithm for users. So if you see
-&quot;<a href="https://sorbet.run/#class%20Parent%0A%20%20A%20%3D%201%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0A%23%20Sorbet%20reports%20an%20error%2C%20even%20though%20in%20Ruby%20this%20works%0Aputs%20Child%3A%3AA%20%20%23%20error%3A%20Unable%20to%20resolve%20constant%20%60A%60%0A%0A%23%20Do%20this%20instead%0Aputs%20Parent%3A%3AA">Unable to resolve constant</a>&quot; errors for constants which
-can be referenced multiple ways, update your source code to use the name
-where the constant was originally defined.</p></li>
+<li><p>Dynamic constant references</p>
+<p>Sorbet does not support resolving constants through expressions. For
+example, <code>foo.bar::A</code> is not supported---all constants must be resolvable
+without knowing what type an expression has. In most cases, it's possible to
+rewrite this code to use method calls (like, <code>foo.bar.get_A</code>).</p></li>
 <li><p>Dynamic <code>include</code>s</p>
 <p>Sorbet cannot statically analyze a codebase that dynamically <code>include</code>s
 code. For example, <a href="https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend">code like this</a> is impossible to
@@ -121,36 +116,34 @@ statically analyze.</p>
 literals.</p></li>
 <li><p>Missing constants</p>
 <p>For Sorbet to be effective, it has to know about every class, module, and
-constant that's defined in a codebase. Constants are central to
-understanding the inheritance hierarchy and to validating type annotations.</p></li>
+constant that's defined in a codebase, including all gems. Constants are
+central to understanding the inheritance hierarchy and thus knowing which
+types can be used in place of which other types.</p></li>
 </ol>
-<p>To solve points (3) and (4), let's introduce <a href="/sorbet/super-secret-private-beta/docs/rbi"><code>*.rbi</code> files</a>. We saw
-<code>*.rbi</code> files mentioned before when we discussed building the <code>FILE_LIST</code>. RBI
-stands for &quot;Ruby Interface.&quot; <code>*.rbi</code> files are purely type annotations, separate
-from runnable Ruby code.</p>
-<p>There is currently no official way to generate <code>*.rbi</code> files to ease the
-adoption of Sorbet. For some tips, see <a href="/sorbet/super-secret-private-beta/docs/rbi">RBI Files</a>.</p>
-<blockquote>
-<p><strong>Note</strong>: This procedure is likely to change greatly while Sorbet is in
-private beta.</p>
-</blockquote>
-<!-- TODO(jez) Replace these instructions when we have a concrete way to generate rbi's -->
+<p>To solve points (3) and (4), Sorbet uses <a href="/sorbet/super-secret-private-beta/docs/rbi">RBI files</a>. We mentioned RBI
+files before when we introduced <code>srb init</code>. RBI files are purely annotations
+files, separate from Ruby source code. While <code>srb init</code> can automatically create
+these files, it's not a perfect process. To eliminate constant errors, sometimes
+Sorbet requires hand-written RBI files.</p>
+<p>To learn more about RBI files and how they can help with adopting Sorbet, see
+<a href="/sorbet/super-secret-private-beta/docs/rbi">the docs here</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="step-5-enable-type-checking"></a><a href="#step-5-enable-type-checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 5: Enable type checking</h2>
-<p>At this step, running <code>sorbet @FILE_LIST</code> should show zero errors.</p>
+<p>At this step, running <code>srb tc</code> should show zero errors.</p>
 <p>Congrats! Step 4 was the biggest hurdle to adopting Sorbet. To recap, Sorbet now
 enforces that...</p>
 <ul>
 <li><p>all Ruby files parse.</p></li>
-<li><p>we know every class, module, and constant in a codebase. These can be 100%
+<li><p>every class, module, and constant in a codebase is known. These can be 100%
 accurately shown in auto-complete suggestions and used in type annotations.</p></li>
-<li><p>all gems have explicit interfaces. In addition to yard documentation, <code>*.rbi</code>
-files are machine-checked documentation about the libraries we're using.</p></li>
+<li><p>all gems have explicit interfaces. More than yard documentation, RBI files
+are machine-checked documentation about the libraries we're using.</p></li>
 </ul>
-<p>But importantly, Sorbet does <strong>not</strong> yet report type errors. The final step is
-to start enabling more checks in our code by turning on type checking. The rest
-of this site is dedicated to learning about the extra checks you can enable. The
-tl;dr is that type checking happens when we add <a href="/sorbet/super-secret-private-beta/docs/static"><code># typed: true</code></a> to
-files and write <a href="/sorbet/super-secret-private-beta/docs/sigs">method signatures</a> in those files.</p>
+<p>Importantly, Sorbet does <strong>not</strong> yet report <strong>type errors</strong> (the errors we've
+seen so far have been syntax errors and constant resolution errors). The final
+step is to start enabling more type checks in our code.</p>
+<p>The rest of this site is dedicated to learning about the extra checks we can
+enable. The tl;dr is that type checking happens when we add <a href="/sorbet/super-secret-private-beta/docs/static"><code># typed: true</code></a> to files and write <a href="/sorbet/super-secret-private-beta/docs/sigs">method signatures</a> in those
+files.</p>
 <h2><a class="anchor" aria-hidden="true" id="what-next"></a><a href="#what-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What next?</h2>
 <ul>
 <li><p><a href="/sorbet/super-secret-private-beta/docs/static">Enable Static Checks</a></p>
@@ -166,18 +159,23 @@ enable them.</p></li>
 <p>Sorbet requires some type annotations in order to work. The most common kind
 of annotations are method signatures, or <code>sig</code>s.</p></li>
 </ul>
-<hr class="footnotes-sep">
-<section class="footnotes">
-<ol class="footnotes-list">
-<li id="fn1"  class="footnote-item"><p>For context, the file list at Stripe ties into our mono-repo build
-procedure. Our builds use code generation to create Ruby files in various
-places. The way we build our file list reflects our build procedure. <a href="#fnref1" class="footnote-backref">↩</a></p>
-</li>
-<li id="fn2"  class="footnote-item"><p>Prefixing the file list's name with an <code>@</code> tells Sorbet to read that
-file and treat each line as a separate argument. We could have instead passed
-filenames directly to <code>sorbet</code>, but there's a limit to how many files can be
-passed at the command line. <a href="#fnref2" class="footnote-backref">↩</a></p>
-</li>
-</ol>
-</section>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/overview"><span class="arrow-prev">← </span><span>Overview</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/quickref"><span>Quick Reference</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#step-1-install-dependencies">Step 1: Install dependencies</a></li><li><a href="#step-2-prepare-the-file-list">Step 2: Prepare the file list</a></li><li><a href="#step-3-run-sorbet-for-the-first-time">Step 3: Run <code>sorbet</code> for the first time</a></li><li><a href="#step-4-fix-constant-resolution-errors">Step 4: Fix constant resolution errors</a></li><li><a href="#step-5-enable-type-checking">Step 5: Enable type checking</a></li><li><a href="#what-next">What next?</a></li></ul></nav></div></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/overview"><span class="arrow-prev">← </span><span>Overview</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/quickref"><span>Quick Reference</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#step-1-install-dependencies">Step 1: Install dependencies</a><ul class="toc-headings"><li><a href="#verify-installation">Verify installation</a></li></ul></li><li><a href="#step-2-initialize-sorbet-in-our-project">Step 2: Initialize Sorbet in our project</a><ul class="toc-headings"><li><a href="#verify-initialization">Verify initialization</a></li></ul></li><li><a href="#step-3-run-srb-tc-for-the-first-time">Step 3: Run <code>srb tc</code> for the first time</a></li><li><a href="#step-4-fix-constant-resolution-errors">Step 4: Fix constant resolution errors</a></li><li><a href="#step-5-enable-type-checking">Step 5: Enable type checking</a></li><li><a href="#what-next">What next?</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
