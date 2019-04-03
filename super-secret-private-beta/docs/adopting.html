@@ -42,8 +42,10 @@ you've been given access to the private beta.</p>
 systems. We'll declare them in our Gemfile and install them with Bundler:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- Gemfile --</span>
 
-gem <span class="hljs-string">'sorbet'</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
-gem <span class="hljs-string">'sorbet-runtime'</span>
+source <span class="hljs-string">'https://stripe.dev/sorbet-repo/super-secret-private-beta/'</span> <span class="hljs-keyword">do</span>
+  gem <span class="hljs-string">'sorbet'</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
+  gem <span class="hljs-string">'sorbet-runtime'</span>
+<span class="hljs-keyword">end</span>
 </code></pre>
 <pre><code class="hljs css language-plaintext">❯ bundle install
 </code></pre>
