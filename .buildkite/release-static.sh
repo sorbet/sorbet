@@ -79,3 +79,6 @@ mv gems/sorbet-static/sorbet-static-*.gem _out_/gems/
 if [[ "mac" == "$platform" ]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
+
+mkdir -p _out_/$platform
+cp bazel-bin/main/sorbet _out_/$platform/

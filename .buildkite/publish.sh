@@ -97,7 +97,10 @@ rm release/webasm/sorbet-wasm.tar
 rmdir release/webasm
 
 pushd release
+files=()
+while IFS='' read -r line; do files+=("$line"); done < <(find . -type f)
+release_notes="To use Sorbet add this line to your Gemfile: \`\`\`gem 'sorbet' '$release_version'\`\`\`"
 if [ -z "$dryrun" ]; then
-    find . -type f -exec ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- {} \;
+    echo "$release_notes" | ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
 fi
 popd
