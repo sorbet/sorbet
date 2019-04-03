@@ -27,10 +27,6 @@ Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
 
     ENFORCE(off <= file.source().size(), "file offset out of bounds in file: {} @ {} <= {}", string(file.path()),
             to_string(off), to_string(file.source().size()));
-    if (off >= file.source().size()) {
-        // parser generate positions out of file \facepalm.
-        off = file.source().size() - 1;
-    }
     auto it = absl::c_lower_bound(file.lineBreaks(), off);
     if (it == file.lineBreaks().begin()) {
         pos.line = 1;
@@ -85,6 +81,7 @@ static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
 void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth) {
     printTabs(buf, tabs);
     buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
+    ENFORCE(file.lineBreaks().size() > line + 1);
     auto endPos = file.lineBreaks()[line + 1];
     if (endPos >= 0 && file.source()[endPos] == '\n') {
         endPos -= 1;
