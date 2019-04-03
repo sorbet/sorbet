@@ -29,10 +29,11 @@
             });
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/overview.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Overview</h1></header><article><div><span><p>Type checking with Sorbet is composed of two key components:</p>
 <ul>
-<li><p><code>sorbet</code></p>
-<p>This is the command-line interface to Sorbet's type checker. It analyzes your
-code <strong>statically</strong> (before your code runs) to report potential mistakes in
-the code.</p></li>
+<li><p><code>srb</code></p>
+<p>This is the command-line interface to Sorbet. It includes the core type
+checker, which analyzes a project <strong>statically</strong> (before the code runs) to
+report potential mistakes in the code. It also contains utilities to set up a
+project to work with Sorbet for the first time.</p></li>
 <li><p><code>sorbet-runtime</code></p>
 <p>This is the gem that enables adding type annotations to normal Ruby code. It
 exposes the top-level <code>T</code> namespace and the <code>sig</code> method, which we'll see more

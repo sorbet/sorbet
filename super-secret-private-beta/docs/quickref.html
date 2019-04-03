@@ -45,7 +45,9 @@ sigil) to the top of your Ruby file:</p>
 the standard library, but not methods we've defined ourselves. To teach Sorbet
 about the types of our methods, we have to add <a href="/sorbet/super-secret-private-beta/docs/sigs">signatures</a> above the
 method:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Bring T::Sig into scope:</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+
+<span class="hljs-comment"># (1) Bring T::Sig into scope:</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
