@@ -31,15 +31,15 @@ We'll cover these questions in order.
 These are the many commands to create or update RBI files within a Sorbet
 project:
 
-| I want to:                                                       | so I'll run:                 |
-| ---                                                              | ---                          |
-| Initialize a new Sorbet project, including all RBI files         | `srb init`                   |
-| Update every kind of RBI in an existing project                  | `srb rbi update`             |
-| &nbsp;                                                           | &nbsp;                       |
-| Fetch pre-written RBIs (either from gem sources or `flow-typed`) | `srb rbi flow-typed`         |
-| (Re)generate RBIs for all gems using runtime reflection          | `srb rbi gems`               |
-| (Re)generate an RBI for all "hidden definitions" in a projectc   | `srb rbi hidden-definitions` |
-| (Re)generate a the TODO RBI file (for missing constants)         | `srb rbi todo`               |
+| I want to:                                                         | so I'll run:                 |
+| ---                                                                | ---                          |
+| Initialize a new Sorbet project, including all RBI files           | `srb init`                   |
+| Update every kind of RBI in an existing project                    | `srb rbi update`             |
+| &nbsp;                                                             | &nbsp;                       |
+| Fetch pre-written RBIs (either from gem sources or `sorbet-typed`) | `srb rbi sorbet-typed`       |
+| (Re)generate RBIs for all gems using runtime reflection            | `srb rbi gems`               |
+| (Re)generate an RBI for all "hidden definitions" in a projectc     | `srb rbi hidden-definitions` |
+| (Re)generate a the TODO RBI file (for missing constants)           | `srb rbi todo`               |
 
 For more information about `srb init`, see [Adopting Sorbet](adopting.md).
 
