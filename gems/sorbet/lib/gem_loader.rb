@@ -523,7 +523,7 @@ class SorbetRBIGeneration::GemLoader
     if loader
       begin
         loader.call
-      rescue NameError
+      rescue NameError => e
         puts "NameError: #{e}"
       end
     else
