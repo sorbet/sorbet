@@ -3,10 +3,6 @@
 
 require 'json'
 
-module SorbetRBIGeneration
-  TODO_FILE = 'sorbet/rbi/todo.rbi'
-end
-
 class SorbetRBIGeneration::SymbolEntry
   attr_reader :name, :superclass_id, :parents
   attr_accessor :has_children
@@ -32,6 +28,8 @@ class SorbetRBIGeneration::SymbolEntry
 end
 
 class SorbetRBIGeneration::TodoRBI
+  OUTPUT = 'sorbet/rbi/todo.rbi'
+
   def self.find_all(symbol_map, symbols, parents=[])
     symbols.each do |s|
       name = s['name']['name']
@@ -46,7 +44,7 @@ class SorbetRBIGeneration::TodoRBI
   end
 
   def self.main
-    File.delete(SorbetRBIGeneration::TODO_FILE) if File.exist?(SorbetRBIGeneration::TODO_FILE)
+    File.delete(OUTPUT) if File.exist?(OUTPUT)
 
     IO.popen(
       [
@@ -75,7 +73,7 @@ class SorbetRBIGeneration::TodoRBI
           output << "#{s.final_name} = T.let(#{s.final_name}, T.untyped)\n"
         end
       end
-      File.write(SorbetRBIGeneration::TODO_FILE, output)
+      File.write(OUTPUT, output)
     end
   end
 end

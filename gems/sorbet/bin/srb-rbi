@@ -86,7 +86,7 @@ module SorbetRBIGeneration::Main
       -> {SorbetRBIGeneration::GemGeneratorTracepoint.main}
     when 'hidden-definitions', SorbetRBIGeneration::HiddenMethodFinder::PATH
       -> {SorbetRBIGeneration::HiddenMethodFinder.main}
-    when 'todo', SorbetRBIGeneration::TODO_FILE
+    when 'todo', SorbetRBIGeneration::TodoRBI::OUTPUT
       -> {SorbetRBIGeneration::TodoRBI.main}
     when 'suggest-typed'
       -> {SorbetRBIGeneration::SuggestTyped.main}
