@@ -521,7 +521,11 @@ class SorbetRBIGeneration::GemLoader
     end
     loader = GEM_LOADER[gem]
     if loader
-      loader.call
+      begin
+        loader.call
+      rescue NameError
+        puts "NameError: #{e}"
+      end
     else
       require gem # rubocop:disable PrisonGuard/NoDynamicRequire
     end
