@@ -183,9 +183,8 @@ build:tsan --cxxopt=-fsanitize=thread
 build:tsan --linkopt=-fsanitize=thread
 
 # Build optimized for executable size. Can be faster if size of executable code is a bottleneck.
-build:size --linkopt=-Os
-build:size --copt=-Os
-build:size --cxxopt=-Os
+build:size --linkopt=-Os --config=lto
+build:size --copt=-Os --config=lto
 
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc
