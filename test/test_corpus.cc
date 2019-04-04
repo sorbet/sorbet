@@ -91,7 +91,7 @@ public:
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
+        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         cfgs.emplace_back(cfg->toString(ctx));
         return m;
     }

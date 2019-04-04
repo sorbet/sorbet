@@ -261,6 +261,9 @@ class NameInserter {
                      core::SymbolRef method) {
         core::SymbolRef alias = ctx.state.enterMethodSymbol(loc, owner, newName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(method);
+        for (auto &arg : alias.data(ctx)->arguments()) {
+            arg.data(ctx)->owner = method;
+        }
     }
 
     void aliasModuleFunction(core::MutableContext ctx, core::Loc loc, core::SymbolRef method) {

@@ -12,7 +12,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->isOverloaded());
     unique_ptr<CFG> res(new CFG); // private constructor
-    res->symbol = md.symbol;
+    res->symbol = md.symbol.data(ctx)->dealias(ctx);
     if (res->symbol.data(ctx)->isAbstract()) {
         res->basicBlocks.clear();
         return res;

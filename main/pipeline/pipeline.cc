@@ -44,7 +44,7 @@ public:
         if (opts.stopAfterPhase == options::Phase::CFG) {
             return m;
         }
-        cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
+        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (print.CFG) {
             fmt::print("{}\n\n", cfg->toString(ctx));
         }
