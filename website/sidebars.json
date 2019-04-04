@@ -9,7 +9,8 @@
       "gradual",
       "static",
       "runtime",
-      "rbi"
+      "rbi",
+      "cli"
     ],
     "Troubleshooting": [
       "troubleshooting",

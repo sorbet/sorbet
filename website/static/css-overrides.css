@@ -4,10 +4,25 @@
  * https://docusaurus.io/docs/en/api-pages#styles
  */
 
+/*
+ * By default, the link color is the same as the top nav color.
+ * For us, this color is too dark, and links don't pop enough.
+ * Thus, we override the link color to be more vibrant.
+ */
 a {
   color: #8673FF;
 }
 a:hover {
   color: #8673FF;
   text-decoration: underline;
+}
+
+/*
+ * Docusaurus does not render footnotes in <sup> tags in superscript.
+ * This renders them in super script.
+ */
+sup {
+  vertical-align: super;
+  font-size: 11px;
+  font-weight: bold;
 }
