@@ -2,7 +2,7 @@
 # typed: false
 
 # This file contains runtime stubs to make Sorbet.sig work in the runtime.
-# We're using Sorbet.sig in rbi-generation because we don't want to have to
+# We're using Sorbet.sig in this gem because we don't want to have to
 # depend on the sorbet-runtime gem.
 
 # Note that in particular because sigs are lazily evaluated and Sorbet.sig

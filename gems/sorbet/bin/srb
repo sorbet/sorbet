@@ -49,11 +49,11 @@ typecheck() {
 
 case $command in
   "initialize" | "init")
-    bundle exec sorbet-rbi-generation
+    bundle exec srb-rbi
     ;;
 
   "rbi")
-    bundle exec sorbet-rbi-generation "$@"
+    bundle exec srb-rbi "$@"
     ;;
 
   "" | "typecheck" | "tc" | "t")
