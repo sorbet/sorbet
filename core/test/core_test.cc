@@ -68,7 +68,6 @@ TEST(ASTTest, SymbolRef) { // NOLINT
     EXPECT_EQ(ref, ref.data(gs)->ref(gs));
 }
 
-extern StrictLevel fileSigil(string_view source);
 struct FileIsTypedCase {
     string_view src;
     StrictLevel strict;
@@ -93,7 +92,7 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"\n# @typed\n", StrictLevel::None},
     };
     for (auto &tc : cases) {
-        EXPECT_EQ(tc.strict, fileSigil(tc.src));
+        EXPECT_EQ(tc.strict, File::fileSigil(tc.src));
     }
 }
 

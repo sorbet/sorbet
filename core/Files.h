@@ -71,6 +71,8 @@ public:
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;
 
+    static StrictLevel fileSigil(std::string_view source);
+
     std::string_view path() const;
     std::string_view source() const;
     Type sourceType;

@@ -27,7 +27,7 @@ vector<int> findLineBreaks(string_view s) {
     return res;
 }
 
-StrictLevel fileSigil(string_view source) {
+StrictLevel File::fileSigil(string_view source) {
     /*
      * StrictLevel::None: <none>
      * StrictLevel::Stripe: # typed: false

@@ -647,6 +647,7 @@ ClassDef{
   },
   {
    "path": "-e",
+   "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
   }

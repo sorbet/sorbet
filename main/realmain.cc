@@ -291,13 +291,13 @@ int realmain(int argc, char *argv[]) {
                 prodCounterAdd("types.input.bytes", opts.inlineInput.size());
                 prodCounterInc("types.input.lines");
                 prodCounterInc("types.input.files");
-                auto file = gs->enterFile(string("-e"), opts.inlineInput + '\n');
-                inputFiles.emplace_back(file);
-                if (opts.forceMaxStrict < core::StrictLevel::Typed) {
-                    logger->error("`-e` is incompatible with `--typed=false`");
-                    return 1;
+                auto input = opts.inlineInput;
+                if (core::File::fileSigil(opts.inlineInput) == core::StrictLevel::None) {
+                    // put it at the end so as to not upset line numbers
+                    input += "\n# typed: true";
                 }
-                file.data(*gs).strictLevel = core::StrictLevel::Typed;
+                auto file = gs->enterFile(string("-e"), input);
+                inputFiles.emplace_back(file);
             }
         }
 
