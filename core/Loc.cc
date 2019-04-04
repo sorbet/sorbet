@@ -83,14 +83,11 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
     buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
     ENFORCE(file.lineBreaks().size() > line + 1);
     auto endPos = file.lineBreaks()[line + 1];
-    if (endPos >= 0 && file.source()[endPos] == '\n') {
-        endPos -= 1;
-    }
     auto numToWrite = endPos - file.lineBreaks()[line];
     if (numToWrite <= 0) {
         return;
     }
-    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite);
+    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite - 1);
 }
 } // namespace
 
