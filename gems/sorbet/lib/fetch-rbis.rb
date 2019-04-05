@@ -52,6 +52,7 @@ class Sorbet::Private::FetchRBIs
           Gem::Requirement.create(requirement).satisfied_by?(version)
       end
     end
+    paths = paths.map {|dir| dir.chomp('/')}
     all_dir = "#{root}/all"
     paths << all_dir if Dir.exist?(all_dir)
     paths
@@ -107,7 +108,13 @@ class Sorbet::Private::FetchRBIs
       FileUtils.mkdir_p(dest)
 
       Dir.glob("#{vendor_path}/*.rbi").each do |rbi|
-        File.write("#{dest}/#{File.basename(rbi)}", HEADER + File.read(rbi))
+        extra_header = "#
+# If you would like to make changes to this file, great! Please upstream any changes you make here:
+#
+#   https://github.com/sorbet/sorbet-typed/edit/master#{relative_vendor_path}/#{File.basename(rbi)}
+#
+"
+        File.write("#{dest}/#{File.basename(rbi)}", HEADER + extra_header + File.read(rbi))
       end
     end
   end
