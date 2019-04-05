@@ -79,14 +79,6 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
     return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
 }
 
-bool silenceError(bool disableFastPath, core::ErrorClass what) {
-    if (disableFastPath) {
-        // We only need to silence errors during the fast path.
-        return false;
-    }
-    return false;
-}
-
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
                                 const unique_ptr<core::GlobalState> &currentGs) {
     // Note: Watchman file updates happen independent of the client. We tolerate these before initialization by
@@ -112,7 +104,7 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
     for (auto &e : run.errors) {
-        if (e->isSilenced || silenceError(disableFastPath, e->what)) {
+        if (e->isSilenced) {
             continue;
         }
         auto file = e->loc.file();
