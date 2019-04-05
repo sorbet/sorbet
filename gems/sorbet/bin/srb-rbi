@@ -72,7 +72,22 @@ top-level statements with `if __FILE__ == $PROGRAM_NAME` before re-running.
     # Put some `typed:` sigils
     SorbetRBIGeneration::SuggestTyped.main
 
-    puts "This script has probably generated many changed files in ./sorbet/. Please commit them all. The typechecker will make sure they are all still valid."
+    puts "
+*************************************
+
+Completed successfully, yay!
+
+This script has probably generated many changed files in ./sorbet/. Please commit them all.
+
+Some possible next steps:
+* Verify this script worked by running `srb tc`. It should say 'No errors!'.
+* Go change a file from `typed: false` to `typed: true`, and then run `srb tc`.
+  It should tell you some type errors. If you can fix those, please do and commit the changes.
+* Write as much new code as you can with `typed: true` or higher.
+* Turn your `typed: ignore` files into `typed: false` and see the errors. Try to fix those.
+
+************************************
+    "
   end
 
   def self.parse_command(argv)
