@@ -261,30 +261,35 @@ class SorbetRBIGeneration::HiddenMethodFinder
 
     methods = serialize_methods(source_children, rbi_children, my_klass, my_klass_is_singleton)
     includes = serialize_includes(source_mixins, rbi_mixins, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
+    values = serialize_values(source_children, rbi_children, my_klass, source_symbols)
 
     ret = []
-    if !methods.empty? || !includes.empty? || is_stub
+    if !without_errors(methods).empty? || !without_errors(includes).empty? || !without_errors(values).empty? || is_stub
       fqn = real_name(my_klass)
       if fqn
         klass_str = String.new
         klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
-        klass_str << includes
-        klass_str << "\n" unless includes.empty?
-        klass_str << methods
+        klass_str << includes.join("\n")
+        klass_str << "\n" unless klass_str.end_with?("\n")
+        klass_str << methods.join("\n")
+        klass_str << "\n" unless klass_str.end_with?("\n")
+        klass_str << values.join("\n")
         klass_str << "\n" unless klass_str.end_with?("\n")
         klass_str << "end\n"
         ret << klass_str
       end
     end
 
-    source_children = source_entry ? source_entry.fetch("children", []) : []
-    rbi_children = rbi_entry.fetch("children", [])
     children = serialize_constants(source_children, rbi_children, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
     if children != ""
       ret << children
     end
 
     ret.empty? ? nil : ret.join("\n")
+  end
+
+  private def without_errors(lines)
+    lines.reject {|line| line.start_with?("#")}
   end
 
   def serialize_alias(source_entry, rbi_entry, my_klass, source_symbols, rbi_symbols)
@@ -308,6 +313,28 @@ class SorbetRBIGeneration::HiddenMethodFinder
 
   def looks_like_stub_name(name)
     name.include?('$')
+  end
+
+  private def serialize_values(source, rbi, klass, source_symbols)
+    source_by_name = source.map {|v| [v["name"]["name"], v]}.to_h
+    ret = []
+    rbi.each do |rbi_entry|
+      name = rbi_entry["name"]["name"]
+      source_entry = source_by_name[name]
+      if source_entry
+        is_stub = source_entry['superClass'] && source_symbols[source_entry['superClass']] == 'RubyTyper::StubClass'
+        next unless is_stub
+      end
+      begin
+        my_value = klass.const_get(name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+      rescue StandardError, LoadError => e
+        ret << "# #{e.message.gsub("\n", "\n# ")}"
+        next
+      end
+      next if SorbetRBIGeneration.real_is_a?(my_value, Class) || SorbetRBIGeneration.real_is_a?(my_value, Module)
+      ret << "  #{name} = ::T.let(nil, ::T.untyped)"
+    end
+    ret
   end
 
   # These methods are defined in C++ and we want our C++ definition to
@@ -351,7 +378,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
       end
     end
 
-    ret.join("\n")
+    ret
   end
 
   private def serialize_includes(source, rbi, klass, is_singleton, source_symbols, rbi_symbols)
@@ -364,7 +391,7 @@ class SorbetRBIGeneration::HiddenMethodFinder
         ret << "  #{keyword} ::#{rbi_mixin}"
       end
     end
-    ret.join("\n")
+    ret
   end
 
   def capture_stderr
