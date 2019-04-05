@@ -26,11 +26,11 @@ module T
   def self.type_alias(type); end
   def self.type_parameter(name); end
 
-  def self.cast(value, type, checked: true); value; end
-  def self.let(value, type, checked: true); value; end
-  def self.assert_type!(value, type, checked: true); value; end
+  def self.cast(value, _type, checked: true); value; end
+  def self.let(value, _type, checked: true); value; end
+  def self.assert_type!(value, _type, checked: true); value; end
   def self.unsafe(value); value; end
-  def self.must(arg, msg=nil); arg; end
+  def self.must(arg, _msg=nil); arg; end
   def self.reveal_type(value); value; end
 
   module Array
@@ -53,4 +53,3 @@ module T
     def self.[](type); end
   end
 end
-

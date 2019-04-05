@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # typed: false
 
 require_relative './step_interface'
@@ -30,12 +32,12 @@ class Sorbet::Private::FetchRBIs
   def self.fetch_sorbet_typed
     if File.directory?(RBI_CACHE_DIR)
       FileUtils.cd(RBI_CACHE_DIR) do
-        IO.popen(%w{git pull}) {|pipe| pipe.read}
-        raise "Failed to git pull" if $?.exitstatus != 0
+        IO.popen(%w{git pull}, &:read)
+        raise "Failed to git pull" if $CHILD_STATUS.exitstatus != 0
       end
     else
-      IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR]) {|pipe| pipe.read}
-      raise "Failed to git pull" if $?.exitstatus != 0
+      IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR], &:read)
+      raise "Failed to git pull" if $CHILD_STATUS.exitstatus != 0
     end
   end
 
@@ -44,8 +46,8 @@ class Sorbet::Private::FetchRBIs
     params(
       root: String,
       version: Gem::Version,
-    )
-    .returns(T::Array[String])
+    ).
+      returns(T::Array[String])
   end
   def self.matching_version_directories(root, version)
     paths = Dir.glob("#{root}/*/").select do |dir|
@@ -73,7 +75,7 @@ class Sorbet::Private::FetchRBIs
   Sorbet.sig {params(gemspec: T.untyped).returns(T::Array[String])}
   def self.paths_within_gem_sources(gemspec)
     paths = T.let([], T::Array[String])
-    %w[rbi rbis].each do |dir|
+    %w{rbi rbis}.each do |dir|
       gem_rbi = "#{gemspec.full_gem_path}/#{dir}"
       paths << gem_rbi if Dir.exist?(gem_rbi)
     end
@@ -96,7 +98,7 @@ class Sorbet::Private::FetchRBIs
     end
 
     File.open(SORBET_CONFIG_FILE, 'r+') do |config|
-      if config.lines.all? {|line| !line.match(/^@#{SORBET_RBI_LIST}$/)}
+      if config.lines.all? {|line| !line.match(/\A@#{SORBET_RBI_LIST}\z/)}
         config.puts("@#{SORBET_RBI_LIST}")
       end
     end

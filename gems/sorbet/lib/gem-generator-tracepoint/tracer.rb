@@ -5,7 +5,7 @@ require_relative '../real_stdlib'
 
 require 'set'
 
-alias DelegateClass_without_rbi_generator DelegateClass
+alias_method :DelegateClass_without_rbi_generator, :DelegateClass
 def DelegateClass(superclass)
   result = DelegateClass_without_rbi_generator(superclass)
   Sorbet::Private::GemGeneratorTracepoint::Tracer.register_delegate_class(superclass, result)
@@ -62,7 +62,7 @@ module Sorbet::Private
         add_to_context(type: :method, module: mod, method: method, singleton: singleton)
       end
 
-      Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
+      Sorbet.sig {returns(files: T::Hash, delegate_classes: T::Hash)}
       def self.trace
         start
         yield
@@ -81,11 +81,11 @@ module Sorbet::Private
         disable_tracepoints
       end
 
-      Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
+      Sorbet.sig {returns(files: T::Hash, delegate_classes: T::Hash)}
       def self.trace_results
         {
           files: @files,
-          delegate_classes: @delegate_classes
+          delegate_classes: @delegate_classes,
         }
       end
 
@@ -149,7 +149,7 @@ module Sorbet::Private
               receiver = singleton ? tp.self.singleton_class : tp.self
               methods = receiver.instance_methods(false) + receiver.private_instance_methods(false)
               set = @modules[Sorbet::Private::RealStdlib.real_object_id(receiver)] ||= Set.new
-              added = methods.find { |m| !set.include?(m) }
+              added = methods.find {|m| !set.include?(m)}
               if added.nil?
                 # warn("Warning: could not find method added to #{tp.self} at #{tp.path}:#{tp.lineno}")
                 next
@@ -175,4 +175,3 @@ module Sorbet::Private
     end
   end
 end
-

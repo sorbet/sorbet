@@ -506,12 +506,12 @@ class Sorbet::Private::GemLoader
         ClearanceMailer,
       ]
     end,
-  }
+  }.freeze
 
   # This is so that the autoloader doesn't treat these as manditory requires
   # before loading this file
   def self.my_require(gem)
-    require gem # rubocop:disable PrisonGuard/NoDynamicRequire
+    require gem
   end
 
   def self.require_gem(gem)
@@ -527,7 +527,7 @@ class Sorbet::Private::GemLoader
         puts "NameError: #{e}"
       end
     else
-      require gem # rubocop:disable PrisonGuard/NoDynamicRequire
+      require gem
     end
   end
 
@@ -543,4 +543,3 @@ class Sorbet::Private::GemLoader
     end
   end
 end
-# rubocop:enable PrisonGuard/AutogenLoaderPreamble

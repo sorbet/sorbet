@@ -13,7 +13,7 @@ module Sorbet::Private
     ClassDefinition = Struct.new(:id, :klass, :defs)
 
     class TracepointSerializer
-      SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
+      SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `].freeze
 
       # These methods don't match the signatures of their parents, so if we let
       # them monkeypatch, they won't be subtypes anymore. Just don't support the
@@ -21,7 +21,7 @@ module Sorbet::Private
       BAD_METHODS = [
         ['activesupport', 'Time', :to_s],
         ['activesupport', 'Time', :initialize],
-      ]
+      ].freeze
 
       HEADER = Sorbet::Private::Serialize.header('true', 'gems')
 
@@ -50,7 +50,7 @@ module Sorbet::Private
 #
 ")
             f.write("# #{gem[:gem]}-#{gem[:version]}\n")
-            klass_ids.each do |klass_id, class_def|
+            klass_ids.each do |_klass_id, class_def|
               klass = class_def.klass
 
               f.write("#{Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? 'class' : 'module'} #{class_name(klass)}")
@@ -69,7 +69,7 @@ module Sorbet::Private
                   end
                   begin
                     method = item[:singleton] ? klass.method(item[:method]) : klass.instance_method(item[:method])
-                    "#{generate_method(method, !item[:singleton])}"
+                    (generate_method(method, !item[:singleton])).to_s
                   rescue NameError
                   end
                 when :include, :extend
@@ -108,7 +108,7 @@ module Sorbet::Private
             klass = item[:module]
             klass_id = Sorbet::Private::RealStdlib.real_object_id(klass)
             class_def = gem_class_defs[gem][klass_id] ||= ClassDefinition.new(klass_id, klass, [])
-            class_def.defs << item unless item[:type] == :module
+            class_def.defs << item if item[:type] != :module
           end
         end
       end
@@ -137,8 +137,8 @@ module Sorbet::Private
         # subclassed, included, or extended
         used = {}
 
-        gem_class_defs.each do |gem, klass_ids|
-          klass_ids.each do |klass_id, class_def|
+        gem_class_defs.each do |_gem, klass_ids|
+          klass_ids.each do |_klass_id, class_def|
             klass = class_def.klass
 
             # only add an anon module if it's used as a superclass of a non-anon module, or is included/extended by a non-anon module
@@ -156,10 +156,10 @@ module Sorbet::Private
 
       def used?(klass, used)
         used_by = used[klass] || []
-        used_by.any? { |user| user == true || used?(user, used) }
+        used_by.any? {|user| user == true || used?(user, used)}
       end
 
-      def generate_method(method, instance, spaces = 2)
+      def generate_method(method, instance, spaces=2)
         # method.parameters is an array of:
         # a      [:req, :a]
         # b = 1  [:opt, :b]
@@ -201,9 +201,9 @@ module Sorbet::Private
 
       def gem_from_location(location)
         match =
-          location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
-          location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
-          location&.match(/^.*\/gems\/[\d.]+(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
+          location&.match(%r{^.*/(ruby)/([\d.]+)/}) || # ruby stdlib
+          location&.match(%r{^.*/(site_ruby)/([\d.]+)/}) || # rubygems
+          location&.match(%r{^.*/gems/[\d.]+(?:/bundler)?/gems/([^/]+)-([^-/]+)/}i) # gem
         if match.nil?
           # uncomment to generate files for methods outside of gems
           # {
@@ -233,7 +233,7 @@ module Sorbet::Private
         end
 
         # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
-        if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
+        if name !~ /^[\w:]+$/ || !name.split('::').all? {|part| part =~ /^[A-Z]/}
           warn("Invalid class name: #{name}")
           id = @anonymous_map[Sorbet::Private::RealStdlib.real_object_id(klass)] ||= anonymous_id
           return "InvalidName_#{name.gsub(/[^\w]/, '_').gsub(/0x([0-9a-f]+)/, '0x00')}_#{id}"

@@ -34,7 +34,7 @@ module Sorbet::Private
     include Sorbet::Private::StepInterface
 
     Sorbet.sig {params(output_dir: String).void}
-    def self.main(output_dir = OUTPUT)
+    def self.main(output_dir=OUTPUT)
       trace_results = Tracer.trace do
         Sorbet::Private::RequireEverything.require_everything
       end

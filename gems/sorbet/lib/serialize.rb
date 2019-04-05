@@ -7,9 +7,9 @@ class Sorbet::Private::Serialize
   BLACKLIST_CONSTANTS = [
     ['DidYouMean', :NameErrorCheckers], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
     ['Net', :OpenSSL], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
-  ]
+  ].freeze
 
-  SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
+  SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `].freeze
 
   def constant_cache
     @constant_cache ||= Sorbet::Private::ConstantLookupCache.new
@@ -211,14 +211,14 @@ class Sorbet::Private::Serialize
     ancestor.instance_method(method.name).parameters == method.parameters
   end
 
-  def constant(const, value)
-    #if value.is_a?(T::Types::TypeTemplate)
-      #"  #{const} = type_template"
-    #elsif value.is_a?(T::Types::TypeMember)
-      #"  #{const} = type_member"
-    #else
-      #"  #{const} = ::T.let(nil, ::T.untyped)"
-    #end
+  def constant(const, _value)
+    # if value.is_a?(T::Types::TypeTemplate)
+    # "  #{const} = type_template"
+    # elsif value.is_a?(T::Types::TypeMember)
+    # "  #{const} = type_member"
+    # else
+    # "  #{const} = ::T.let(nil, ::T.untyped)"
+    # end
     "  #{const} = ::T.let(nil, ::T.untyped)"
   end
 
@@ -310,7 +310,7 @@ class Sorbet::Private::Serialize
     :when,
     :while,
     :yield,
-  ]
+  ].freeze
 
   def from_method(method)
     uniq = 0

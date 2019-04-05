@@ -217,7 +217,7 @@ class Sorbet::Private::HiddenMethodFinder
     end
   end
 
-  def serialize_constants(source, rbi, klass, is_singleton, source_symbols, rbi_symbols)
+  def serialize_constants(source, rbi, klass, _is_singleton, source_symbols, rbi_symbols)
     source_by_name = source.map {|v| [v["name"]["name"], v]}.to_h
     ret = []
 
@@ -310,7 +310,7 @@ class Sorbet::Private::HiddenMethodFinder
     lines.reject {|line| line.start_with?("#")}
   end
 
-  def serialize_alias(source_entry, rbi_entry, my_klass, source_symbols, rbi_symbols)
+  def serialize_alias(source_entry, rbi_entry, _my_klass, source_symbols, rbi_symbols)
     return if rbi_entry["kind"] != "STATIC_FIELD"
     return if source_entry == rbi_entry
     if source_entry
@@ -326,7 +326,7 @@ class Sorbet::Private::HiddenMethodFinder
     return if looks_like_stub_name(fqn)
     ret = String.new
     ret << "#{fqn} = #{other_fqn}\n"
-    return ret
+    ret
   end
 
   def looks_like_stub_name(name)
@@ -400,7 +400,7 @@ class Sorbet::Private::HiddenMethodFinder
     ret
   end
 
-  private def serialize_includes(source, rbi, klass, is_singleton, source_symbols, rbi_symbols)
+  private def serialize_includes(source, rbi, _klass, is_singleton, source_symbols, rbi_symbols)
     ret = []
     source_mixins = source.map {|id| source_symbols[id]}
     rbi_mixins = rbi.map {|id| rbi_symbols[id]}
@@ -458,7 +458,7 @@ class Sorbet::Private::HiddenMethodFinder
     if line.start_with?('#')
       return :errors
     end
-    return :hidden
+    :hidden
   end
 
   def self.output_file

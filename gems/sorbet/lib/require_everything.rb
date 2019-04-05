@@ -81,7 +81,7 @@ class Sorbet::Private::RequireEverything
     end
 
     Kernel.send(:define_method, :at_exit) do |&block|
-      if File.split($0).last == 'rake'
+      if File.split($PROGRAM_NAME).last == 'rake'
         # Let `rake test` work
         super
         return proc {}
