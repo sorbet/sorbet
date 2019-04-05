@@ -41,6 +41,7 @@ constexpr ErrorClass ReassignsTypeAlias{5034, StrictLevel::Stripe};
 constexpr ErrorClass BadMethodOverride{5035, StrictLevel::Stripe};
 constexpr ErrorClass EnumerableParentTypeNotDeclared{5036, StrictLevel::Strict};
 constexpr ErrorClass BadAliasMethod{5037, StrictLevel::Typed};
+constexpr ErrorClass SigInFileWithoutSigil{5038, StrictLevel::Stripe};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

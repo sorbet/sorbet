@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# typed: false
 
 require_relative './sorbet'
 require 'bundler'

@@ -978,6 +978,14 @@ private:
                 if (!lastSigs.empty()) {
                     prodCounterInc("types.sig.count");
 
+                    auto loc = lastSigs[0]->loc;
+                    if (loc.file().data(ctx).originalSigil == core::StrictLevel::None) {
+                        if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
+                            e.setHeader(
+                                "To use `sig`, this file must declare an explicit `# typed:` sigil (found: none)");
+                        }
+                    }
+
                     bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions();
                     auto originalName = mdef->symbol.data(ctx)->name;
                     if (isOverloaded) {
