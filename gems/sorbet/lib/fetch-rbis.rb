@@ -18,6 +18,8 @@ class SorbetRBIGeneration::FetchRBIs
 
   SORBET_TYPED_REPO = 'git@github.com:sorbet/sorbet-typed.git'
 
+  HEADER = SorbetRBIGeneration::Serialize.header(false, 'sorbet-typed')
+
   # Ensure our cache is up-to-date
   Sorbet.sig {void}
   def self.fetch_sorbet_typed
@@ -104,8 +106,7 @@ class SorbetRBIGeneration::FetchRBIs
       FileUtils.mkdir_p(dest)
 
       Dir.glob("#{vendor_path}/*.rbi").each do |rbi|
-        # TODO(jez) Write a preamble header into this file
-        FileUtils.cp(rbi, dest)
+        File.write("#{dest}/#{File.basename(rbi)}", HEADER + File.read(rbi))
       end
     end
   end

@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative './serialize'
+
 require 'json'
 
 class SorbetRBIGeneration::SymbolEntry
@@ -29,6 +31,7 @@ end
 
 class SorbetRBIGeneration::TodoRBI
   OUTPUT = 'sorbet/rbi/todo.rbi'
+  HEADER = SorbetRBIGeneration::Serialize.header('strong', 'todo')
 
   def self.find_all(symbol_map, symbols, parents=[])
     symbols.each do |s|
@@ -62,6 +65,7 @@ class SorbetRBIGeneration::TodoRBI
       find_all(symbol_by_id, [table])
 
       output = String.new
+      output << HEADER
       symbol_by_id.each do |_, s|
         superclass = symbol_by_id[s.superclass_id]
         next if !(superclass && superclass.name == 'StubClass')
