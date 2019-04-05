@@ -332,7 +332,7 @@ class Sorbet::Private::HiddenMethodFinder
         ret << "# #{e.message.gsub("\n", "\n# ")}"
         next
       end
-      next if SorbetRBIGeneration.real_is_a?(my_value, Class) || SorbetRBIGeneration.real_is_a?(my_value, Module)
+      next if Sorbet::Private.real_is_a?(my_value, Class) || Sorbet::Private.real_is_a?(my_value, Module)
       ret << "  #{name} = ::T.let(nil, ::T.untyped)"
     end
     ret
