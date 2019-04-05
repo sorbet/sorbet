@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Class Types · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
-&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Class types are used to describe values that are instances of a&lt;/p&gt;
 &lt;/blockquote&gt;
 "/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Class Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://stripe.github.io/sorbet/super-secret-private-beta/index.html"/><meta property="og:description" content="&lt;blockquote&gt;
-&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Class types are used to describe values that are instances of a&lt;/p&gt;
 &lt;/blockquote&gt;
 "/><meta property="og:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://stripe.github.io/sorbet/super-secret-private-beta/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/sorbet/super-secret-private-beta/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/sorbet/super-secret-private-beta/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/sorbet/super-secret-private-beta/"><img class="logo" src="/sorbet/super-secret-private-beta/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/sorbet/super-secret-private-beta/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/cli">Command Line Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/sigs">Signatures</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/sorbet/super-secret-private-beta/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -32,22 +32,63 @@
               }
             });
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/class-types.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Class Types</h1></header><article><div><span><blockquote>
-<p>TODO: This page is still a fragment. Contributions welcome!</p>
+<p><strong>Note</strong>: Class types are used to describe values that are instances of a
+class—these are the most commonly used types. To instead learn about types for
+class objects themselves, see <a href="/sorbet/super-secret-private-beta/docs/class-of">T.class_of</a>.</p>
 </blockquote>
-<p>Every Ruby class is a valid type. For example:</p>
-<ul>
-<li><code>String</code></li>
-<li><code>Symbol</code></li>
-<li><code>Integer</code></li>
-</ul>
-<p>The type of <code>nil</code> is <code>NilClass</code>. See also: <a href="/sorbet/super-secret-private-beta/docs/nilable-types">Nilable Types</a>.</p>
-<p>There is no <code>Boolean</code> type in Ruby. Instead, it has <code>TrueClass</code> and
-<code>FalseClass</code>. For convenience, <code>sorbet-runtime</code> uses a <a href="/sorbet/super-secret-private-beta/docs/type-aliases">type
-alias</a> to define a global <code>T::Boolean</code> type:</p>
-<ul>
-<li><code>T::Boolean</code></li>
-</ul>
-<p>Any user-defined class can be a type:</p>
+<p>Every Ruby class and module doubles as a type in Sorbet. Class types supercede
+the notion some other languages have of &quot;primitive&quot; types. For example, <code>&quot;abc&quot;</code>
+is an instance of the <code>String</code> class, and so <code>&quot;abc&quot;</code> has type <code>String</code>. The same
+goes for many other values in Ruby:</p>
+<table>
+<thead>
+<tr><th>Type</th><th>Example value</th></tr>
+</thead>
+<tbody>
+<tr><td><code>&quot;abc&quot;</code></td><td><code>String</code></td></tr>
+<tr><td><code>:abc</code></td><td><code>Symbol</code></td></tr>
+<tr><td><code>42</code></td><td><code>Integer</code></td></tr>
+<tr><td><code>3.14</code></td><td><code>Float</code></td></tr>
+<tr><td><code>nil</code></td><td><code>NilClass</code></td></tr>
+</tbody>
+</table>
+<p>To reiterate: a class type means &quot;any value which is an instance of this class&quot;.
+If <code>x.is_a?(SomeClass)</code> would return <code>true</code> when run, then <code>x</code> has type
+<code>SomeClass</code>.</p>
+<p>We can mention class types directly in a <a href="/sorbet/super-secret-private-beta/docs/sigs">method signature</a>:</p>
+<pre><code class="hljs css language-ruby">sig {returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">age</span></span>
+  <span class="hljs-number">25</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> Float).returns(String)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">float_to_string</span><span class="hljs-params">(x)</span></span>
+  x.to_s
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="booleans"></a><a href="#booleans" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Booleans</h2>
+<p>One gotcha is that <code>false</code> is an instance of <code>FalseClass</code>, and <code>true</code> is an
+instance of <code>TrueClass</code>—there is no <code>Boolean</code> class in Ruby. So to represent the
+type of booleans in Sorbet, the <code>sorbet-runtime</code> uses <a href="/sorbet/super-secret-private-beta/docs/type-aliases">type
+aliases</a> and <a href="/sorbet/super-secret-private-beta/docs/union-types">union types</a> to define a
+convenient name for &quot;either <code>true</code> or <code>false</code>&quot;: <code>T::Boolean</code>.</p>
+<pre><code class="hljs css language-ruby">extend T::Sig
+
+sig {params(<span class="hljs-symbol">new_value:</span> T::Boolean).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set_flag</span><span class="hljs-params">(new_value)</span></span>
+  @flag = new_value
+  puts <span class="hljs-string">"Set value to <span class="hljs-subst">#{new_value}</span>"</span>
+<span class="hljs-keyword">end</span>
+
+set_flag(<span class="hljs-literal">true</span>)
+set_flag(<span class="hljs-literal">false</span>)
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="nil"></a><a href="#nil" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>nil</code></h2>
+<p>Note that the class (and type) of <code>nil</code> is <code>NilClass</code>.</p>
+<p>There's a lot to say about <code>nil</code>, so it gets <a href="/sorbet/super-secret-private-beta/docs/nilable-types">it's own doc</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="user-defined-class-types"></a><a href="#user-defined-class-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>User-defined class types</h2>
+<p>Everything we've seen so far has used classes built into Ruby, but it works the
+exact same for any classes we define ourselves:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>;</span> <span class="hljs-keyword">end</span>
@@ -57,9 +98,13 @@ sig {returns(MyClass)}
   MyClass.new
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>A subclass can be used in place of a parent:</p>
+<h2><a class="anchor" aria-hidden="true" id="inheritance"></a><a href="#inheritance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Inheritance</h2>
+<p>Ruby is object-oriented, so an instance of a child class is also an instance of
+the child class's superclass. To make this more explicit, let's look at an
+example:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
+<span class="hljs-comment"># Set up an inheritance relationship between three classes</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GrandParentClass</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ParentClass</span> &lt; GrandParentClass;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildClass</span> &lt; ParentClass;</span> <span class="hljs-keyword">end</span>
@@ -72,7 +117,37 @@ foo(GrandParentClass.new)  <span class="hljs-comment"># error</span>
 foo(ParentClass.new)       <span class="hljs-comment"># ok</span>
 foo(ChildClass.new)        <span class="hljs-comment"># ok</span>
 </code></pre>
-<p>You can use modules to mean &quot;any class which includes this module&quot;:</p>
+<h2><a class="anchor" aria-hidden="true" id="object-vs-basicobject"></a><a href="#object-vs-basicobject" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Object</code> vs <code>BasicObject</code></h2>
+<p>Another note about inheritance in Ruby concerns the distinction between <code>Object</code>
+and <code>BasicObject</code>. <code>Object</code> is what classes subclass by default, unless they
+explicitly subclass from <code>BasicObject</code>. <code>Object</code> subclasses from <code>BasicObject</code>.
+Again, let's make this clear with an example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Some helper methods to play with</span>
+sig {params(<span class="hljs-symbol">x:</span> Object).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_object</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
+sig {params(<span class="hljs-symbol">x:</span> BasicObject).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_basic_object</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># The one error is because an instance</span>
+takes_object(Object.new)              <span class="hljs-comment"># ok</span>
+takes_object(BasicObject.new)         <span class="hljs-comment"># error</span>
+takes_basic_object(Object.new)        <span class="hljs-comment"># ok</span>
+takes_basic_object(BasicObject.new)   <span class="hljs-comment"># ok</span>
+
+<span class="hljs-comment"># Some classes to play around with</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ObjectChild</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BasicObjectChild</span> &lt; BasicObject;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># The class that explicitly subclasses `BasicObject`</span>
+<span class="hljs-comment"># can't be given to `takes_object`.</span>
+takes_object(ObjectChild.new)              <span class="hljs-comment"># ok</span>
+takes_object(BasicObjectChild.new)         <span class="hljs-comment"># error</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="modules"></a><a href="#modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modules</h2>
+<p>Modules can be used as &quot;class types&quot; in exactly the same way as classes can. For
+a module, the meaning is not &quot;an instance of this class&quot; but &quot;an instance of a
+class which <code>include</code>s this module&quot;. This is compatible with how
+<code>x.is_a?(SomeModule)</code> works in Ruby. Here's an example:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span></span>
@@ -92,7 +167,7 @@ sig {params(<span class="hljs-symbol">x:</span> MyModule).void}
 
 foo(MyClass.new)  <span class="hljs-comment"># ok; MyClass mixes in MyModule</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/sigs"><span class="arrow-prev">← </span><span>Signatures</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/nilable-types"><span>Nilable Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/sorbet/super-secret-private-beta/docs/sigs"><span class="arrow-prev">← </span><span>Signatures</span></a><a class="docs-next button" href="/sorbet/super-secret-private-beta/docs/nilable-types"><span>Nilable Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#booleans">Booleans</a></li><li><a href="#nil"><code>nil</code></a></li><li><a href="#user-defined-class-types">User-defined class types</a></li><li><a href="#inheritance">Inheritance</a></li><li><a href="#object-vs-basicobject"><code>Object</code> vs <code>BasicObject</code></a></li><li><a href="#modules">Modules</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
