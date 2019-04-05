@@ -113,7 +113,7 @@ Some possible next steps:
     suggest-typed       Put the highest `typed:` sigil in each of your files
     "
 
-    case (argv[0])
+    command = case (argv[0])
     when 'help', '--help'
       puts banner
       puts commands
@@ -139,6 +139,9 @@ Some possible next steps:
       puts commands
       exit(1)
     end
+
+    puts "Running command: #{argv[0]}"
+    command
   end
 end
 
