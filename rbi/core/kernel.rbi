@@ -602,6 +602,9 @@ module Kernel
   end
   def open(name, rest=T.unsafe(nil), block=T.unsafe(nil)); end
 
+  sig {params(args: Kernel).returns(NilClass)}
+  def print(*args); end
+
   sig do
     params(
         arg0: IO,
