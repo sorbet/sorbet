@@ -52,10 +52,10 @@ files).
 
 The syntax of RBI files is the same as normal Ruby files, except that method
 definitions do not need implementations. The only new syntax is for method
-signatures (which [are themselves valid Ruby syntax][design-principles]). See
+signatures (which [are themselves valid Ruby syntax][why-ruby-syntax]). See
 [Writing sigs](sigs.md) for the syntax of method signatures.
 
-[design-principles]: https://github.com/stripe/sorbet#sorbet-user-facing-design-principles
+[why-ruby-syntax]: sigs.md#why-are-signatures-ruby-syntax
 
 ```ruby
 # -- example.rbi --
