@@ -5,8 +5,8 @@ sidebar_label: Signatures
 ---
 
 > This page describes the syntax of method signatures, or `sig`s. For a complete
-> reference of the types available to be used within a `sig`, see the "Type
-> System" section to the left.
+> reference of the types available for use within a `sig`, see the "Type System"
+> section to the left.
 
 Method signatures are the primary way that we enable static and dynamic type
 checking in our code. In this document, we'll answer:
