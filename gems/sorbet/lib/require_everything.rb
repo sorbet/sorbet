@@ -10,9 +10,9 @@ class SorbetRBIGeneration::RequireEverything
   # Goes through the most common ways to require all your userland code
   def self.require_everything
     patch_kernel
-    load_rails
+    is_rails = load_rails
     load_bundler # this comes second since some rails projects fail `Bundler.require' before rails is loaded
-    require_all_files
+    require_all_files if !is_rails
   end
 
   def self.load_rails
@@ -20,12 +20,13 @@ class SorbetRBIGeneration::RequireEverything
     begin
       require 'rails'
     rescue
-      return
+      return false
     end
     require './config/application'
     rails = Object.const_get(:Rails)
     rails.application.require_environment!
     rails.application.eager_load!
+    true
   end
 
   def self.load_bundler
