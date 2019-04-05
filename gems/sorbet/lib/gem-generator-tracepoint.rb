@@ -3,7 +3,8 @@
 # frozen_string_literal: true
 # typed: true
 
-module SorbetRBIGeneration; end
+class Sorbet; end
+module Sorbet::Private; end
 
 require_relative './sorbet'
 require_relative './require_everything'
@@ -25,13 +26,13 @@ require 'set'
 #
 # instead of manually defining every getter/setter
 
-module SorbetRBIGeneration
+module Sorbet::Private
   module GemGeneratorTracepoint
     OUTPUT = './sorbet/rbi/gems/'
     Sorbet.sig {params(output_dir: String).void}
     def self.main(output_dir = OUTPUT)
       trace_results = Tracer.trace do
-        SorbetRBIGeneration::RequireEverything.require_everything
+        Sorbet::Private::RequireEverything.require_everything
       end
 
       FileUtils.rm_r(output_dir) if Dir.exist?(output_dir)
@@ -41,5 +42,5 @@ module SorbetRBIGeneration
 end
 
 if $PROGRAM_NAME == __FILE__
-  SorbetRBIGeneration::GemGeneratorTracepoint.main
+  Sorbet::Private::GemGeneratorTracepoint.main
 end

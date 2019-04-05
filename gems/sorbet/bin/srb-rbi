@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-module SorbetRBIGeneration; end
+class Sorbet; end
+module Sorbet::Private; end
 
 require_relative '../lib/sorbet'
 require_relative '../lib/create-config'
@@ -10,7 +11,7 @@ require_relative '../lib/fetch-rbis'
 require_relative '../lib/suggest-typed'
 require_relative '../lib/todo-rbi'
 
-module SorbetRBIGeneration::Main
+module Sorbet::Private::Main
   def self.main(argv)
     command = parse_command(argv)
     return command.call if command
@@ -45,19 +46,19 @@ top-level statements with `if __FILE__ == $PROGRAM_NAME` before re-running.
     end
 
     # Create sorbet/config file
-    SorbetRBIGeneration::CreateConfig.main
+    Sorbet::Private::CreateConfig.main
 
     # Pull in the hand-written RBIs
-    SorbetRBIGeneration::FetchRBIs.main
+    Sorbet::Private::FetchRBIs.main
 
     # Generate the RBIs from bundler
-    SorbetRBIGeneration::GemGeneratorTracepoint.main
+    Sorbet::Private::GemGeneratorTracepoint.main
 
     # Find the hidden methods
-    SorbetRBIGeneration::HiddenMethodFinder.main
+    Sorbet::Private::HiddenMethodFinder.main
 
     # Run sorbet and make constants to fix errors
-    SorbetRBIGeneration::TodoRBI.main
+    Sorbet::Private::TodoRBI.main
 
     # Run type suggestion once, and then generate the todo.rbi again.
     #
@@ -68,11 +69,11 @@ top-level statements with `if __FILE__ == $PROGRAM_NAME` before re-running.
     #
     # Regenerating after one run of sigil suggestion will put those constants
     # into the todo.rbi file.
-    SorbetRBIGeneration::SuggestTyped.suggest_typed
-    SorbetRBIGeneration::TodoRBI.main
+    Sorbet::Private::SuggestTyped.suggest_typed
+    Sorbet::Private::TodoRBI.main
 
     # Put some `typed:` sigils
-    SorbetRBIGeneration::SuggestTyped.main
+    Sorbet::Private::SuggestTyped.main
 
     puts "
 *************************************
@@ -120,18 +121,18 @@ Some possible next steps:
       puts banner
       puts commands
       exit(1)
-    when 'config', SorbetRBIGeneration::CreateConfig::SORBET_CONFIG_FILE
-      -> {SorbetRBIGeneration::CreateConfig.main}
-    when 'sorbet-typed', SorbetRBIGeneration::FetchRBIs::SORBET_RBI_SORBET_TYPED, SorbetRBIGeneration::FetchRBIs::SORBET_RBI_LIST
-      -> {SorbetRBIGeneration::FetchRBIs.main}
-    when 'gems', SorbetRBIGeneration::GemGeneratorTracepoint::OUTPUT
-      -> {SorbetRBIGeneration::GemGeneratorTracepoint.main}
-    when 'hidden-definitions', SorbetRBIGeneration::HiddenMethodFinder::PATH
-      -> {SorbetRBIGeneration::HiddenMethodFinder.main}
-    when 'todo', SorbetRBIGeneration::TodoRBI::OUTPUT
-      -> {SorbetRBIGeneration::TodoRBI.main}
+    when 'config', Sorbet::Private::CreateConfig::SORBET_CONFIG_FILE
+      -> {Sorbet::Private::CreateConfig.main}
+    when 'sorbet-typed', Sorbet::Private::FetchRBIs::SORBET_RBI_SORBET_TYPED, Sorbet::Private::FetchRBIs::SORBET_RBI_LIST
+      -> {Sorbet::Private::FetchRBIs.main}
+    when 'gems', Sorbet::Private::GemGeneratorTracepoint::OUTPUT
+      -> {Sorbet::Private::GemGeneratorTracepoint.main}
+    when 'hidden-definitions', Sorbet::Private::HiddenMethodFinder::PATH
+      -> {Sorbet::Private::HiddenMethodFinder.main}
+    when 'todo', Sorbet::Private::TodoRBI::OUTPUT
+      -> {Sorbet::Private::TodoRBI.main}
     when 'suggest-typed'
-      -> {SorbetRBIGeneration::SuggestTyped.main}
+      -> {Sorbet::Private::SuggestTyped.main}
 
     when 'update'
       nil
@@ -147,4 +148,4 @@ Some possible next steps:
   end
 end
 
-SorbetRBIGeneration::Main.main(ARGV)
+Sorbet::Private::Main.main(ARGV)

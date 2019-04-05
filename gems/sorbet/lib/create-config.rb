@@ -3,8 +3,9 @@
 
 require 'fileutils'
 
-module SorbetRBIGeneration; end
-class SorbetRBIGeneration::CreateConfig
+class Sorbet; end
+module Sorbet::Private; end
+class Sorbet::Private::CreateConfig
   SORBET_DIR = 'sorbet'
   SORBET_CONFIG_FILE = "#{SORBET_DIR}/config"
   def self.main
@@ -19,5 +20,5 @@ class SorbetRBIGeneration::CreateConfig
 end
 
 if $PROGRAM_NAME == __FILE__
-  SorbetRBIGeneration::CreateConfig.main
+  Sorbet::Private::CreateConfig.main
 end

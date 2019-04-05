@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-module SorbetRBIGeneration
+module Sorbet::Private
   module GemGeneratorTracepoint
     class ModuleUtils
       @real_is_a = Module.instance_method(:is_a?)

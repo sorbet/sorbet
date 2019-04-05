@@ -6,8 +6,9 @@ require 'bundler'
 require 'fileutils'
 require 'set'
 
-module SorbetRBIGeneration; end
-class SorbetRBIGeneration::FetchRBIs
+class Sorbet; end
+module Sorbet::Private; end
+class Sorbet::Private::FetchRBIs
   SORBET_DIR = 'sorbet'
   SORBET_CONFIG_FILE = "#{SORBET_DIR}/config"
   SORBET_RBI_LIST = "#{SORBET_DIR}/rbi_list"
@@ -18,7 +19,7 @@ class SorbetRBIGeneration::FetchRBIs
 
   SORBET_TYPED_REPO = 'git@github.com:sorbet/sorbet-typed.git'
 
-  HEADER = SorbetRBIGeneration::Serialize.header(false, 'sorbet-typed')
+  HEADER = Sorbet::Private::Serialize.header(false, 'sorbet-typed')
 
   # Ensure our cache is up-to-date
   Sorbet.sig {void}
@@ -139,5 +140,5 @@ class SorbetRBIGeneration::FetchRBIs
 end
 
 if $PROGRAM_NAME == __FILE__
-  SorbetRBIGeneration::FetchRBIs.main
+  Sorbet::Private::FetchRBIs.main
 end

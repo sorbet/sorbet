@@ -5,7 +5,7 @@
 # They will not load in this project. It's marked as `typed: ignore`, and this
 # file exists so that we can call into gem_loader from typed code.
 
-class SorbetRBIGeneration::GemLoader
+class Sorbet::Private::GemLoader
   sig {params(gem: String).void}
   def self.require_gem(gem)
   end

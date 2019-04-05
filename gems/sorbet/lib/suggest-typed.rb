@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-module SorbetRBIGeneration; end
-class SorbetRBIGeneration::SuggestTyped
+class Sorbet; end
+module Sorbet::Private; end
+class Sorbet::Private::SuggestTyped
   def self.main
     count = 0
     while count < 100
@@ -28,5 +29,5 @@ class SorbetRBIGeneration::SuggestTyped
 end
 
 if $PROGRAM_NAME == __FILE__
-  SorbetRBIGeneration::SuggestTyped.main
+  Sorbet::Private::SuggestTyped.main
 end

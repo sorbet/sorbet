@@ -6,7 +6,7 @@ require_relative './gem_loader'
 class ExitCalledError < RuntimeError
 end
 
-class SorbetRBIGeneration::RequireEverything
+class Sorbet::Private::RequireEverything
   # Goes through the most common ways to require all your userland code
   def self.require_everything
     patch_kernel
@@ -36,7 +36,7 @@ class SorbetRBIGeneration::RequireEverything
     rescue
       return
     end
-    SorbetRBIGeneration::GemLoader.require_all_gems
+    Sorbet::Private::GemLoader.require_all_gems
   end
 
   def self.require_all_files

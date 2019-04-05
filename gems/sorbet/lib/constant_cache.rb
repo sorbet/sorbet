@@ -2,7 +2,7 @@
 # typed: true
 
 
-module SorbetRBIGeneration
+module Sorbet::Private
   def self.real_is_a?(o, klass)
     @real_is_a ||= Object.instance_method(:is_a?)
     @real_is_a.bind(o).call(klass)
@@ -13,7 +13,7 @@ end
 # At the time you ask for it it, it takes a "spashot" of the world.
 # If new modules were defined after an instance of this class was created,
 # they won't be visible through a previously returned instance.
-class SorbetRBIGeneration::ConstantLookupCache
+class Sorbet::Private::ConstantLookupCache
 
   ConstantEntry = Struct.new(:const_name, :found_name, :primary_name, :aliases, :const, :owner)
 
@@ -61,7 +61,7 @@ class SorbetRBIGeneration::ConstantLookupCache
   end
 
   def all_module_names
-    ret = @all_constants.select {|_k, v| SorbetRBIGeneration.real_is_a?(v.const, Module)}.map do |_key, struct|
+    ret = @all_constants.select {|_k, v| Sorbet::Private.real_is_a?(v.const, Module)}.map do |_key, struct|
       raise "should never happen" if !struct.primary_name
       struct.primary_name
     end
@@ -69,7 +69,7 @@ class SorbetRBIGeneration::ConstantLookupCache
   end
 
   def all_named_modules
-    ret = @all_constants.select {|_k, v| SorbetRBIGeneration.real_is_a?(v.const, Module)}.map do |_key, struct|
+    ret = @all_constants.select {|_k, v| Sorbet::Private.real_is_a?(v.const, Module)}.map do |_key, struct|
       raise "should never happen" if !struct.primary_name
       struct.const
     end
@@ -80,7 +80,7 @@ class SorbetRBIGeneration::ConstantLookupCache
     ret = {}
 
     @all_constants.map do |_key, struct|
-      next if struct.nil? || !SorbetRBIGeneration.real_is_a?(struct.const, Module) || struct.aliases.size < 2
+      next if struct.nil? || !Sorbet::Private.real_is_a?(struct.const, Module) || struct.aliases.size < 2
       ret[struct.primary_name] = struct.aliases.reject {|name| name == struct.primary_name}
     end
     ret
@@ -151,7 +151,7 @@ class SorbetRBIGeneration::ConstantLookupCache
           if nested_name != maybe_seen_already.primary_name
             maybe_seen_already.aliases << nested_name
           end
-          if maybe_seen_already.primary_name.nil? && SorbetRBIGeneration.real_is_a?(nested_constant, Module)
+          if maybe_seen_already.primary_name.nil? && Sorbet::Private.real_is_a?(nested_constant, Module)
             realName = real_name(nested_constant)
             maybe_seen_already.primary_name = realName
           end
@@ -159,7 +159,7 @@ class SorbetRBIGeneration::ConstantLookupCache
           entry = ConstantEntry.new(nested, nested_name, nil, [nested_name], nested_constant, owner)
           ret[object_id] = entry
 
-          if SorbetRBIGeneration.real_is_a?(nested_constant, Module) && Object != nested_constant
+          if Sorbet::Private.real_is_a?(nested_constant, Module) && Object != nested_constant
             go_deeper << [entry, nested_constant, nested_name]
           end
         end

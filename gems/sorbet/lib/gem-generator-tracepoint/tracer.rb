@@ -8,17 +8,17 @@ require 'set'
 alias DelegateClass_without_rbi_generator DelegateClass
 def DelegateClass(superclass)
   result = DelegateClass_without_rbi_generator(superclass)
-  SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.register_delegate_class(superclass, result)
+  Sorbet::Private::GemGeneratorTracepoint::Tracer.register_delegate_class(superclass, result)
   result
 end
 
-module SorbetRBIGeneration 
+module Sorbet::Private 
   module GemGeneratorTracepoint 
     class Tracer
       module ModuleOverride
         def include(mod, *smth)
           result = super
-          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_included(mod, self)
+          Sorbet::Private::GemGeneratorTracepoint::Tracer.module_included(mod, self)
           result
         end
       end
@@ -27,7 +27,7 @@ module SorbetRBIGeneration
       module ObjectOverride
         def extend(mod, *args)
           result = super
-          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_extended(mod, self)
+          Sorbet::Private::GemGeneratorTracepoint::Tracer.module_extended(mod, self)
           result
         end
       end
@@ -36,7 +36,7 @@ module SorbetRBIGeneration
       module ClassOverride
         def new(*)
           result = super
-          SorbetRBIGeneration::GemGeneratorTracepoint::Tracer.module_created(result)
+          Sorbet::Private::GemGeneratorTracepoint::Tracer.module_created(result)
           result
         end
       end

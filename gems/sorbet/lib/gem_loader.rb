@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: ignore
 
-class SorbetRBIGeneration::GemLoader
+class Sorbet::Private::GemLoader
   NO_GEM = "_unknown"
 
   # A map defining the code to load a gem. By default any gem mentioned by

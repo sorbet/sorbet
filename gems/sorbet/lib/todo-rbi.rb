@@ -5,7 +5,7 @@ require_relative './serialize'
 
 require 'json'
 
-class SorbetRBIGeneration::SymbolEntry
+class Sorbet::Private::SymbolEntry
   attr_reader :name, :superclass_id, :parents
   attr_accessor :has_children
 
@@ -29,16 +29,16 @@ class SorbetRBIGeneration::SymbolEntry
   end
 end
 
-class SorbetRBIGeneration::TodoRBI
+class Sorbet::Private::TodoRBI
   OUTPUT = 'sorbet/rbi/todo.rbi'
-  HEADER = SorbetRBIGeneration::Serialize.header('strong', 'todo')
+  HEADER = Sorbet::Private::Serialize.header('strong', 'todo')
 
   def self.find_all(symbol_map, symbols, parents=[])
     symbols.each do |s|
       name = s['name']['name']
       superclass_id = s['superClass']
       parent_name = (name == '<root>' || name == "T.untyped") ? [] : [name]
-      symbol_map[s['id']] = SorbetRBIGeneration::SymbolEntry.new(name, superclass_id, parents)
+      symbol_map[s['id']] = Sorbet::Private::SymbolEntry.new(name, superclass_id, parents)
       if s['children']
         find_all(symbol_map, s['children'], symbol_map[s['id']].parents + parent_name)
         symbol_map[s['id']].has_children = true
@@ -83,5 +83,5 @@ class SorbetRBIGeneration::TodoRBI
 end
 
 if $PROGRAM_NAME == __FILE__
-  SorbetRBIGeneration::TodoRBI.main
+  Sorbet::Private::TodoRBI.main
 end

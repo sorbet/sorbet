@@ -7,11 +7,12 @@ require 'mocha/minitest'
 
 require 'tmpdir'
 
-module SorbetRBIGeneration; end
-module SorbetRBIGeneration::HiddenMethodFinder; end
-module SorbetRBIGeneration::HiddenMethodFinder::Test; end
+class Sorbet; end
+module Sorbet::Private; end
+module Sorbet::Private::HiddenMethodFinder; end
+module Sorbet::Private::HiddenMethodFinder::Test; end
 
-class SorbetRBIGeneration::HiddenMethodFinder::Test::Simple < MiniTest::Spec
+class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
   it 'works on a simple example' do
 
     Dir.mktmpdir do |dir|

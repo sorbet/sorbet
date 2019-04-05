@@ -8,7 +8,7 @@ require 'set'
 require 'fileutils'
 
 
-module SorbetRBIGeneration
+module Sorbet::Private
   module GemGeneratorTracepoint
     ClassDefinition = Struct.new(:id, :klass, :defs)
 
@@ -23,7 +23,7 @@ module SorbetRBIGeneration
         ['activesupport', 'Time', :initialize],
       ]
 
-      HEADER = SorbetRBIGeneration::Serialize.header('true', 'gems')
+      HEADER = Sorbet::Private::Serialize.header('true', 'gems')
 
       Sorbet.sig {params(files: T::Hash, delegate_classes: T::Hash).void}
       def initialize(files:, delegate_classes:)

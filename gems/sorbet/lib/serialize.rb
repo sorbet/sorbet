@@ -3,7 +3,7 @@
 
 require 'bigdecimal'
 
-class SorbetRBIGeneration::Serialize
+class Sorbet::Private::Serialize
   BLACKLIST_CONSTANTS = [
     ['DidYouMean', :NameErrorCheckers], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
     ['Net', :OpenSSL], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
@@ -12,7 +12,7 @@ class SorbetRBIGeneration::Serialize
   SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
   def constant_cache
-    @constant_cache ||= SorbetRBIGeneration::ConstantLookupCache.new
+    @constant_cache ||= Sorbet::Private::ConstantLookupCache.new
     @constant_cache
   end
 
@@ -94,7 +94,7 @@ class SorbetRBIGeneration::Serialize
     constants += get_constants(klass).uniq.map do |const_sym|
       # We have to not pass `false` because `klass.constants` intentionally is
       # pulling in all the ancestor constants
-      next if SorbetRBIGeneration::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
+      next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym)
       rescue LoadError, NameError, RuntimeError
@@ -108,7 +108,7 @@ class SorbetRBIGeneration::Serialize
     end
     constants += get_constants(klass, false).uniq.map do |const_sym|
       next if BLACKLIST_CONSTANTS.include?([class_name, const_sym])
-      next if SorbetRBIGeneration::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
+      next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
       rescue LoadError, NameError, RuntimeError
@@ -239,9 +239,9 @@ class SorbetRBIGeneration::Serialize
       return false if piece[0].upcase != piece[0]
     end
     return false if [
-      'SorbetRBIGeneration::RbiGenerator::ClassOverride',
-      'SorbetRBIGeneration::RbiGenerator::ModuleOverride',
-      'SorbetRBIGeneration::RbiGenerator::ObjectOverride',
+      'Sorbet::Private::RbiGenerator::ClassOverride',
+      'Sorbet::Private::RbiGenerator::ModuleOverride',
+      'Sorbet::Private::RbiGenerator::ObjectOverride',
     ].include?(name)
     true
   end
