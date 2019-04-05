@@ -27,6 +27,8 @@ This script will create a `./sorbet/` directory with:
 * `sorbet/rbi/hidden-definitions/` An encoding of all the runtime-defined definitions in your program
 * `sorbet/rbi/todo.rbi`            Constants which weren't discovered in previous phases
 
+It will also go through all your files and put the highest `typed:` level which currently passes.
+
 NOTE: To do this, it will `require` ALL of your `.rb` files. This means if
 you have any scripts which have top-level statements that aren't guarded by
 a `if __FILE__ == $PROGRAM_NAME` block, they will execute. If `srb init` takes a
