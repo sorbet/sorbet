@@ -252,6 +252,7 @@ end
 module T::Enumerable
   def self.[](type); end
 end
+T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
 class CSV::FieldInfo < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)

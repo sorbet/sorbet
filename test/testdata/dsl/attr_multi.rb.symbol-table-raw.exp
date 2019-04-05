@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
   class <C <U Test>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=3:11}
     method <C <U Test>><U a> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=7:3 end=7:19}
       argument <C <U Test>><U a><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}

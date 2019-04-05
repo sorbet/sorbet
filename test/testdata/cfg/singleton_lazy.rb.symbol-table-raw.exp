@@ -1,10 +1,10 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/cfg/singleton_lazy.rb start=2:1 end=7:5}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3324:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/cfg/singleton_lazy.rb start=2:1 end=7:5}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/cfg/singleton_lazy.rb start=2:1 end=7:5}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/cfg/singleton_lazy.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/cfg/singleton_lazy.rb start=2:1 end=2:8}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/singleton_lazy.rb start=2:7 end=2:8}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=730:1 end=730:27}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=731:1 end=731:27}
     method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/cfg/singleton_lazy.rb start=4:1 end=4:9}
       argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/cfg/singleton_lazy.rb start=??? end=???}
 
