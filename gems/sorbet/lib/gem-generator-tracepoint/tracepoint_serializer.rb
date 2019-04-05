@@ -71,6 +71,7 @@ module Sorbet::Private
                     method = item[:singleton] ? klass.method(item[:method]) : klass.instance_method(item[:method])
                     (generate_method(method, !item[:singleton])).to_s
                   rescue NameError
+                    nil
                   end
                 when :include, :extend
                   name = class_name(item[item[:type]])
@@ -201,9 +202,9 @@ module Sorbet::Private
 
       def gem_from_location(location)
         match =
-          location&.match(%r{^.*/(ruby)/([\d.]+)/}) || # ruby stdlib
-          location&.match(%r{^.*/(site_ruby)/([\d.]+)/}) || # rubygems
-          location&.match(%r{^.*/gems/[\d.]+(?:/bundler)?/gems/([^/]+)-([^-/]+)/}i) # gem
+          location&.match(%r{\A.*/(ruby)/([\d.]+)/}) || # ruby stdlib
+          location&.match(%r{\A.*/(site_ruby)/([\d.]+)/}) || # rubygems
+          location&.match(%r{\A.*/gems/[\d.]+(?:/bundler)?/gems/([^/]+)-([^-/]+)/}i) # gem
         if match.nil?
           # uncomment to generate files for methods outside of gems
           # {
@@ -233,7 +234,7 @@ module Sorbet::Private
         end
 
         # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
-        if name !~ /^[\w:]+$/ || !name.split('::').all? {|part| part =~ /^[A-Z]/}
+        if name !~ /\A[\w:]+\z/ || !name.split('::').all? {|part| part =~ /\A[A-Z]/}
           warn("Invalid class name: #{name}")
           id = @anonymous_map[Sorbet::Private::RealStdlib.real_object_id(klass)] ||= anonymous_id
           return "InvalidName_#{name.gsub(/[^\w]/, '_').gsub(/0x([0-9a-f]+)/, '0x00')}_#{id}"
@@ -245,7 +246,7 @@ module Sorbet::Private
       def valid_method_name?(symbol)
         string = symbol.to_s
         return true if SPECIAL_METHOD_NAMES.include?(string)
-        string =~ /^[[:word:]]+[?!=]?$/
+        string =~ /\A[[:word:]]+[?!=]?\z/
       end
     end
   end

@@ -89,8 +89,6 @@ module Sorbet::Private
         }
       end
 
-      private
-
       @modules = {}
       @context_stack = [[]]
       @files = {}

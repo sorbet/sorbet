@@ -149,8 +149,8 @@ class Sorbet::Private::Serialize
     methods += instance_methods.sort.uniq.map do |method_sym|
       begin
         method = klass.instance_method(method_sym)
-      rescue => e
-        ret << "# #{e}\n"
+      rescue => ex
+        ret << "# #{ex}\n"
         next
       end
       next if blacklisted_method(method)
@@ -161,8 +161,8 @@ class Sorbet::Private::Serialize
     methods += klass.singleton_methods(false).sort.uniq.map do |method_sym|
       begin
         method = klass.singleton_method(method_sym)
-      rescue => e
-        ret << "# #{e}\n"
+      rescue => ex
+        ret << "# #{ex}\n"
         next
       end
       next if blacklisted_method(method)
@@ -194,15 +194,15 @@ class Sorbet::Private::Serialize
 
   def valid_method_name(name)
     return true if SPECIAL_METHOD_NAMES.include?(name)
-    name =~ /^[[:word:]]+[?!=]?$/
+    name =~ /\A[[:word:]]+[?!=]?\z/
   end
 
   def ancestor_has_method(method, klass)
     return false if !klass.is_a?(Class)
-    ancestor = klass.ancestors.find do |ancestor|
-      next if ancestor == klass
+    ancestor = klass.ancestors.find do |klass_ancestor|
+      next if klass_ancestor == klass
       begin
-        ancestor.instance_method(method.name)
+        klass_ancestor.instance_method(method.name)
       rescue NameError
         nil
       end

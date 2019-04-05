@@ -243,8 +243,8 @@ class Sorbet::Private::HiddenMethodFinder
     end
     begin
       my_klass = klass.const_get(name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-    rescue LoadError, NameError, ArgumentError => e
-      return "# #{e.message.gsub("\n", "\n# ")}"
+    rescue LoadError, NameError, ArgumentError => ex
+      return "# #{ex.message.gsub("\n", "\n# ")}"
     end
 
     return if !Sorbet::Private::RealStdlib.real_is_a?(my_klass, Class) && !Sorbet::Private::RealStdlib.real_is_a?(my_klass, Module)
@@ -385,9 +385,6 @@ class Sorbet::Private::HiddenMethodFinder
         ret << "# #{e.message.gsub("\n", "\n# ")}"
         next
       end
-
-      super_method = method.super_method
-      # next if super_method && T::AbstractUtils.abstract_method?(method) == T::AbstractUtils.abstract_method?(super_method)
 
       errors = capture_stderr do
         ret << maker.serialize_method(method, is_singleton, with_sig: false)

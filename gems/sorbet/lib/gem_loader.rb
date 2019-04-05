@@ -523,8 +523,8 @@ class Sorbet::Private::GemLoader
     if loader
       begin
         loader.call
-      rescue NameError => e
-        puts "NameError: #{e}"
+      rescue NameError => ex
+        puts "NameError: #{ex}"
       end
     else
       require gem
@@ -539,6 +539,7 @@ class Sorbet::Private::GemLoader
       begin
         require_gem(gemspec.name)
       rescue LoadError
+        nil
       end
     end
   end

@@ -3,10 +3,10 @@
 
 require_relative './gem_loader'
 
-class ExitCalledError < RuntimeError
-end
-
 class Sorbet::Private::RequireEverything
+  class ExitCalledError < RuntimeError
+  end
+
   # Goes through the most common ways to require all your userland code
   def self.require_everything
     patch_kernel
@@ -23,7 +23,7 @@ class Sorbet::Private::RequireEverything
       return false
     end
     require './config/application'
-    rails = Object.const_get(:Rails)
+    rails = T.unsafe(Rails)
     rails.application.require_environment!
     rails.application.eager_load!
     true
@@ -64,6 +64,7 @@ class Sorbet::Private::RequireEverything
       begin
         my_require(abs_path, i+1, errors.size)
       rescue
+        nil
       end
     end
     puts
