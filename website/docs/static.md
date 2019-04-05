@@ -51,7 +51,7 @@ Each strictness level reports all errors at lower levels, plus new errors:
 
 - At `# typed: strict`, Sorbet no longer implicitly marks things as being
   [dynamically typed](untyped.md). At this level all methods, constants, and
-  instance variables must have [explicitly annotated types](annotations.md).
+  instance variables must have [explicitly annotated types](strict.md).
   This is analogous to TypeScript's `noImplicitAny` flag.
 
 - At `# typed: strong`, Sorbet no longer allows [`T.untyped`](untyped.md) as the
@@ -62,8 +62,6 @@ Each strictness level reports all errors at lower levels, plus new errors:
 To recap: adding one of these comments to the top of a Ruby file controls which
 errors `srb` reports or silences in that file. The strictness level only
 affects which errors are reported.
-
-<!-- TODO(jez) It's unclear if we want annotations.md, or just to discuss implicit T.untyped in untyped.md. -->
 
 > **Note**: Type annotations from `# typed: false` files are *still parsed and
 > used* by Sorbet if that method is called in other files. Specifically, adding
