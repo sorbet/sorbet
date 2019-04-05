@@ -5,7 +5,8 @@ title: Nilable Types
 
 Sorbet can track when a value is allowed to be `nil`, or when a value of a
 certain type must be present. In Sorbet, such a type is called a **nilable**
-type. The syntax for a nilable type looks like this:
+type. In Sorbet, types are non-nil by default. We have to explicitly opt a type
+into allowing `nil` by wrapping it in `T.nilable(...)`:
 
 ```ruby
 T.nilable(String)
