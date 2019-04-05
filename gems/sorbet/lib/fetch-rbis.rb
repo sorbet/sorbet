@@ -15,8 +15,7 @@ class SorbetRBIGeneration::FetchRBIs
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
 
-  # TODO(jez) Migrate this to stripe/sorbet-typed
-  SORBET_TYPED_REPO = 'git@github.com:coinbase/rbis.git'
+  SORBET_TYPED_REPO = 'git@github.com:sorbet/sorbet-typed.git'
 
   # Ensure our cache is up-to-date
   Sorbet.sig {void}
