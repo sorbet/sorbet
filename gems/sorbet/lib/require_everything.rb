@@ -42,7 +42,7 @@ class Sorbet::Private::RequireEverything
   def self.require_all_files
     abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
     errors = []
-    abs_paths.each do |abs_path|
+    abs_paths.each_with_index do |abs_path, i|
       # Executable files are likely not meant to be required.
       # Some things we're trying to prevent against:
       # - misbehaving require-time side effects (removing files, reading from stdin, etc.)
@@ -51,27 +51,27 @@ class Sorbet::Private::RequireEverything
       next if File.executable?(abs_path)
 
       begin
-        watcher = Thread.new do
-          sleep 5
-          puts "Requiring #{abs_path} has taken more than 5 seconds."
-        end
-        require_relative abs_path
+        my_require(abs_path, i+1, abs_paths.size)
       rescue LoadError, NoMethodError, SyntaxError
         next
       rescue
         errors << abs_path
         next
-      ensure
-        watcher&.kill
       end
     end
     # one more chance for order dependent things
-    errors.each do |abs_path|
+    errors.each_with_index do |abs_path, i|
       begin
-        require_relative abs_path
+        my_require(abs_path, i+1, errors.size)
       rescue
       end
     end
+    puts
+  end
+
+  def self.my_require(path, numerator, denominator)
+    print "\r[#{numerator}/#{denominator}] require_relative #{path}"
+    require_relative path
   end
 
   def self.patch_kernel
