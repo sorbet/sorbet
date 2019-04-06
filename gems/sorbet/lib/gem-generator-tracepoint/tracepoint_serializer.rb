@@ -43,6 +43,12 @@ module Sorbet::Private
         gem_class_defs.each do |gem, klass_ids|
           File.open("#{File.join(output_dir, gem[:gem])}.rbi", 'w') do |f|
             f.write(HEADER)
+            f.write("#
+# If you would like to make changes to this file, great! Please create the gem's shim here:
+#
+#   https://github.com/sorbet/sorbet-typed/new/master?filename=lib/#{gem[:gem]}/all/#{gem[:gem]}.rbi
+#
+")
             f.write("# #{gem[:gem]}-#{gem[:version]}\n")
             klass_ids.each do |klass_id, class_def|
               klass = class_def.klass
