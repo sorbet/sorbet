@@ -17,6 +17,16 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Don't highlight the logo in the header on hover:
+ *
+ * .fixedHeaderContainer is hard coded here:
+ * https://github.com/facebook/Docusaurus/blob/1edbeecb/packages/docusaurus-1.x/lib/static/css/main.css#L719
+ */
+.fixedHeaderContainer a:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
 /*
  * Docusaurus does not render footnotes in <sup> tags in superscript.
  * This renders them in super script.
