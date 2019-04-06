@@ -57,11 +57,9 @@ case $command in
     ;;
 
   "" | "typecheck" | "tc" | "t")
-    if [ ! -d sorbet -a "$#" -eq 0 ]; then
-        cat <<EOF
-No \`./sorbet/\` directory found. Maybe you want to run \`srb init\`?
-
-EOF
+    if [ ! -d sorbet ] && [ "$#" -eq 0 ]; then
+        echo "No sorbet/ directory found. Maybe you want to run 'srb init'?"
+        echo
         help_and_exit
     fi
     typecheck "$@"
