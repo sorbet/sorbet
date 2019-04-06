@@ -2,7 +2,9 @@
 
 module Singleton
   module SingletonClassMethods
-    sig {returns(T.self_type)}
+    # Correctly modeling this return value is blocked by this issue:
+    # https://github.com/stripe/sorbet/issues/62
+    sig {returns(T.untyped)}
     def instance; end
 
     private
