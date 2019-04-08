@@ -1,6 +1,10 @@
 #!/bin/bash
 
 set -euo pipefail
+if [ "schedule" == "${BUILDKITE_SOURCE}" ]; then
+  exit 0
+fi
+
 echo "--- setup"
 apt-get update
 apt-get install -yy curl jq
