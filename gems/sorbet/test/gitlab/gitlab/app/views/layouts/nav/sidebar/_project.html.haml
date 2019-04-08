@@ -1,0 +1,431 @@
+.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?) }
+  .nav-sidebar-inner-scroll
+    - can_edit = can?(current_user, :admin_project, @project)
+    .context-header
+      = link_to project_path(@project), title: @project.name do
+        .avatar-container.rect-avatar.s40.project-avatar
+          = project_icon(@project, alt: @project.name, class: 'avatar s40 avatar-tile', width: 40, height: 40)
+        .sidebar-context-title
+          = @project.name
+    %ul.sidebar-top-level-items
+      = nav_link(path: sidebar_projects_paths, html_options: { class: 'home' }) do
+        = link_to project_path(@project), class: 'shortcuts-project' do
+          .nav-icon-container
+            = sprite_icon('home')
+          %span.nav-item-name
+            = _('Project')
+
+        %ul.sidebar-sub-level-items
+          = nav_link(path: 'projects#show', html_options: { class: "fly-out-top-item" } ) do
+            = link_to project_path(@project) do
+              %strong.fly-out-top-item-name
+                = _('Project')
+          %li.divider.fly-out-top-item
+          = nav_link(path: 'projects#show') do
+            = link_to project_path(@project), title: _('Project details'), class: 'shortcuts-project' do
+              %span= _('Details')
+
+          = nav_link(path: 'projects#activity') do
+            = link_to activity_project_path(@project), title: _('Activity'), class: 'shortcuts-project-activity qa-activity-link' do
+              %span= _('Activity')
+
+          - if project_nav_tab?(:releases)
+            = nav_link(controller: :releases) do
+              = link_to project_releases_path(@project), title: _('Releases'), class: 'shortcuts-project-releases' do
+                %span= _('Releases')
+
+          = render_if_exists 'projects/sidebar/security_dashboard'
+
+          - if can?(current_user, :read_cycle_analytics, @project)
+            = nav_link(path: 'cycle_analytics#show') do
+              = link_to project_cycle_analytics_path(@project), title: _('Cycle Analytics'), class: 'shortcuts-project-cycle-analytics' do
+                %span= _('Cycle Analytics')
+
+          = render_if_exists 'layouts/nav/project_insights_link'
+
+      - if project_nav_tab? :files
+        = nav_link(controller: sidebar_repository_paths) do
+          = link_to project_tree_path(@project), class: 'shortcuts-tree qa-project-menu-repo' do
+            .nav-icon-container
+              = sprite_icon('doc-text')
+            %span.nav-item-name
+              = _('Repository')
+
+          %ul.sidebar-sub-level-items
+            = nav_link(controller: sidebar_repository_paths, html_options: { class: "fly-out-top-item" } ) do
+              = link_to project_tree_path(@project) do
+                %strong.fly-out-top-item-name
+                  = _('Repository')
+            %li.divider.fly-out-top-item
+            = nav_link(controller: %w(tree blob blame edit_tree new_tree find_file)) do
+              = link_to project_tree_path(@project) do
+                = _('Files')
+
+            = nav_link(controller: [:commit, :commits]) do
+              = link_to project_commits_path(@project, current_ref) do
+                = _('Commits')
+
+            = nav_link(html_options: {class: branches_tab_class}) do
+              = link_to project_branches_path(@project), class: 'qa-branches-link' do
+                = _('Branches')
+
+            = nav_link(controller: [:tags]) do
+              = link_to project_tags_path(@project) do
+                = _('Tags')
+
+            = nav_link(path: 'graphs#show') do
+              = link_to project_graph_path(@project, current_ref) do
+                = _('Contributors')
+
+            = nav_link(controller: %w(network)) do
+              = link_to project_network_path(@project, current_ref) do
+                = _('Graph')
+
+            = nav_link(controller: :compare) do
+              = link_to project_compare_index_path(@project, from: @repository.root_ref, to: current_ref) do
+                = _('Compare')
+
+            = nav_link(path: 'graphs#charts') do
+              = link_to charts_project_graph_path(@project, current_ref) do
+                = _('Charts')
+
+            = render_if_exists 'projects/sidebar/repository_locked_files'
+
+      - if project_nav_tab? :issues
+        = nav_link(controller: @project.issues_enabled? ? [:issues, :labels, :milestones, :boards] : :issues) do
+          = link_to project_issues_path(@project), class: 'shortcuts-issues qa-issues-item' do
+            .nav-icon-container
+              = sprite_icon('issues')
+            %span.nav-item-name
+              = _('Issues')
+            - if @project.issues_enabled?
+              %span.badge.badge-pill.count.issue_counter
+                = number_with_delimiter(@project.open_issues_count(current_user))
+
+          %ul.sidebar-sub-level-items
+            = nav_link(controller: :issues, action: :index, html_options: { class: "fly-out-top-item" } ) do
+              = link_to project_issues_path(@project) do
+                %strong.fly-out-top-item-name
+                  = _('Issues')
+                - if @project.issues_enabled?
+                  %span.badge.badge-pill.count.issue_counter.fly-out-badge
+                    = number_with_delimiter(@project.open_issues_count(current_user))
+            %li.divider.fly-out-top-item
+            = nav_link(controller: :issues, action: :index) do
+              = link_to project_issues_path(@project), title: _('Issues') do
+                %span
+                  = _('List')
+
+            = nav_link(controller: :boards) do
+              = link_to project_boards_path(@project), title: boards_link_text do
+                %span
+                  = boards_link_text
+
+            = nav_link(controller: :labels) do
+              = link_to project_labels_path(@project), title: _('Labels'), class: 'qa-labels-link' do
+                %span
+                  = _('Labels')
+
+            = render_if_exists 'projects/sidebar/issues_service_desk'
+
+            = nav_link(controller: :milestones) do
+              = link_to project_milestones_path(@project), title: _('Milestones'), class: 'qa-milestones-link' do
+                %span
+                  = _('Milestones')
+      - if project_nav_tab? :external_issue_tracker
+        = nav_link do
+          - issue_tracker = @project.external_issue_tracker
+          = link_to issue_tracker.issue_tracker_path, class: 'shortcuts-external_tracker' do
+            .nav-icon-container
+              = sprite_icon('issue-external')
+            %span.nav-item-name
+              = issue_tracker.title
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(html_options: { class: "fly-out-top-item" } ) do
+              = link_to issue_tracker.issue_tracker_path do
+                %strong.fly-out-top-item-name
+                  = issue_tracker.title
+
+      - if project_nav_tab? :merge_requests
+        = nav_link(controller: @project.issues_enabled? ? :merge_requests : [:merge_requests, :labels, :milestones]) do
+          = link_to project_merge_requests_path(@project), class: 'shortcuts-merge_requests qa-merge-requests-link' do
+            .nav-icon-container
+              = sprite_icon('git-merge')
+            %span.nav-item-name
+              = _('Merge Requests')
+            %span.badge.badge-pill.count.merge_counter.js-merge-counter
+              = number_with_delimiter(@project.open_merge_requests_count)
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(controller: :merge_requests, html_options: { class: "fly-out-top-item" } ) do
+              = link_to project_merge_requests_path(@project) do
+                %strong.fly-out-top-item-name
+                  = _('Merge Requests')
+                %span.badge.badge-pill.count.merge_counter.js-merge-counter.fly-out-badge
+                  = number_with_delimiter(@project.open_merge_requests_count)
+
+      - if project_nav_tab? :pipelines
+        = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts]) do
+          = link_to project_pipelines_path(@project), class: 'shortcuts-pipelines qa-link-pipelines' do
+            .nav-icon-container
+              = sprite_icon('rocket')
+            %span.nav-item-name
+              = _('CI / CD')
+
+          %ul.sidebar-sub-level-items
+            = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts], html_options: { class: "fly-out-top-item" }) do
+              = link_to project_pipelines_path(@project) do
+                %strong.fly-out-top-item-name
+                  =  _('CI / CD')
+            %li.divider.fly-out-top-item
+            - if project_nav_tab? :pipelines
+              = nav_link(path: ['pipelines#index', 'pipelines#show']) do
+                = link_to project_pipelines_path(@project), title: _('Pipelines'), class: 'shortcuts-pipelines' do
+                  %span
+                    = _('Pipelines')
+
+            - if project_nav_tab? :builds
+              = nav_link(controller: [:jobs, :artifacts]) do
+                = link_to project_jobs_path(@project), title: _('Jobs'), class: 'shortcuts-builds' do
+                  %span
+                    = _('Jobs')
+
+            - if project_nav_tab? :pipelines
+              = nav_link(controller: :pipeline_schedules) do
+                = link_to pipeline_schedules_path(@project), title: _('Schedules'), class: 'shortcuts-builds' do
+                  %span
+                    = _('Schedules')
+
+            - if @project.feature_available?(:builds, current_user) && !@project.empty_repo?
+              = nav_link(path: 'pipelines#charts') do
+                = link_to charts_project_pipelines_path(@project), title: _('Charts'), class: 'shortcuts-pipelines-charts' do
+                  %span
+                    = _('Charts')
+
+      - if project_nav_tab? :operations
+        = nav_link(controller: sidebar_operations_paths) do
+          = link_to sidebar_operations_link_path, class: 'shortcuts-operations qa-link-operations' do
+            .nav-icon-container
+              = sprite_icon('cloud-gear')
+            %span.nav-item-name
+              = _('Operations')
+
+          %ul.sidebar-sub-level-items
+            = nav_link(controller: sidebar_operations_paths, html_options: { class: "fly-out-top-item" } ) do
+              = link_to sidebar_operations_link_path do
+                %strong.fly-out-top-item-name
+                  =  _('Operations')
+            %li.divider.fly-out-top-item
+
+            - if project_nav_tab? :environments
+              = nav_link(controller: :environments, action: [:metrics, :metrics_redirect]) do
+                = link_to metrics_project_environments_path(@project), title: _('Metrics'), class: 'shortcuts-metrics' do
+                  %span
+                    = _('Metrics')
+
+              = render_if_exists "layouts/nav/sidebar/tracing_link"
+
+              = nav_link(controller: :environments, action: [:index, :folder, :show, :new, :edit, :create, :update, :stop, :terminal]) do
+                = link_to project_environments_path(@project), title: _('Environments'), class: 'shortcuts-environments qa-operations-environments-link' do
+                  %span
+                    = _('Environments')
+
+            - if project_nav_tab?(:error_tracking)
+              = nav_link(controller: :error_tracking) do
+                = link_to project_error_tracking_index_path(@project), title: _('Error Tracking'), class: 'shortcuts-tracking qa-operations-tracking-link' do
+                  %span
+                    = _('Error Tracking')
+
+            - if project_nav_tab? :serverless
+              = nav_link(controller: :functions) do
+                = link_to project_serverless_functions_path(@project), title: _('Serverless') do
+                  %span
+                    = _('Serverless')
+
+            - if project_nav_tab? :clusters
+              - show_cluster_hint = show_gke_cluster_integration_callout?(@project)
+              = nav_link(controller: [:clusters, :user, :gcp]) do
+                = link_to project_clusters_path(@project), title: _('Kubernetes'), class: 'shortcuts-kubernetes' do
+                  %span
+                    = _('Kubernetes')
+                  - if show_cluster_hint
+                    .feature-highlight.js-feature-highlight{ disabled: true,
+                      data: { trigger: 'manual',
+                        container: 'body',
+                        toggle: 'popover',
+                        placement: 'right',
+                        highlight: UserCalloutsHelper::GKE_CLUSTER_INTEGRATION,
+                        highlight_priority: UserCallout.feature_names[:GKE_CLUSTER_INTEGRATION],
+                        dismiss_endpoint: user_callouts_path } }
+                - if show_cluster_hint
+                  .feature-highlight-popover-content
+                    = image_tag 'illustrations/cluster_popover.svg', class: 'feature-highlight-illustration'
+                    .feature-highlight-popover-sub-content
+                      %p= _('Allows you to add and manage Kubernetes clusters.')
+                      %p
+                        = _('Protip:')
+                        = link_to _('Auto DevOps'), help_page_path('topics/autodevops/index.md')
+                        %span= _('uses Kubernetes clusters to deploy your code!')
+                      %hr
+                      %button.btn.btn-success.btn-sm.dismiss-feature-highlight{ type: 'button' }
+                        %span= _("Got it!")
+                        = sprite_icon('thumb-up')
+
+      - if project_nav_tab? :container_registry
+        = nav_link(controller: %w[projects/registry/repositories]) do
+          = link_to project_container_registry_index_path(@project), class: 'shortcuts-container-registry' do
+            .nav-icon-container
+              = sprite_icon('disk')
+            %span.nav-item-name
+              = _('Registry')
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(controller: %w[projects/registry/repositories], html_options: { class: "fly-out-top-item" } ) do
+              = link_to project_container_registry_index_path(@project) do
+                %strong.fly-out-top-item-name
+                  = _('Registry')
+
+      - if project_nav_tab?(:wiki)
+        - wiki_url = project_wiki_path(@project, :home)
+        = nav_link(controller: :wikis) do
+          = link_to wiki_url, class: 'shortcuts-wiki qa-wiki-link' do
+            .nav-icon-container
+              = sprite_icon('book')
+            %span.nav-item-name
+              = _('Wiki')
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(controller: :wikis, html_options: { class: "fly-out-top-item" } ) do
+              = link_to wiki_url do
+                %strong.fly-out-top-item-name
+                  = _('Wiki')
+
+      - if project_nav_tab?(:external_wiki)
+        - external_wiki_url = @project.external_wiki.external_wiki_url
+        = nav_link do
+          = link_to external_wiki_url, class: 'shortcuts-external_wiki' do
+            .nav-icon-container
+              = sprite_icon('issue-external')
+            %span.nav-item-name
+              = _('External Wiki')
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(html_options: { class: "fly-out-top-item" } ) do
+              = link_to external_wiki_url do
+                %strong.fly-out-top-item-name
+                  = _('External Wiki')
+
+      - if project_nav_tab? :snippets
+        = nav_link(controller: :snippets) do
+          = link_to project_snippets_path(@project), class: 'shortcuts-snippets' do
+            .nav-icon-container
+              = sprite_icon('snippet')
+            %span.nav-item-name
+              = _('Snippets')
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(controller: :snippets, html_options: { class: "fly-out-top-item" } ) do
+              = link_to project_snippets_path(@project) do
+                %strong.fly-out-top-item-name
+                  = _('Snippets')
+
+      - if project_nav_tab? :settings
+        = nav_link(path: sidebar_settings_paths) do
+          = link_to edit_project_path(@project), class: 'shortcuts-tree' do
+            .nav-icon-container
+              = sprite_icon('settings')
+            %span.nav-item-name.qa-settings-item
+              = _('Settings')
+
+          %ul.sidebar-sub-level-items
+            - can_edit = can?(current_user, :admin_project, @project)
+            - if can_edit
+              = nav_link(path: sidebar_settings_paths, html_options: { class: "fly-out-top-item" } ) do
+                = link_to edit_project_path(@project) do
+                  %strong.fly-out-top-item-name
+                    = _('Settings')
+              %li.divider.fly-out-top-item
+              = nav_link(path: %w[projects#edit]) do
+                = link_to edit_project_path(@project), title: _('General') do
+                  %span
+                    = _('General')
+            = nav_link(controller: :project_members) do
+              = link_to project_project_members_path(@project), title: _('Members'), class: 'qa-link-members-settings' do
+                %span
+                  = _('Members')
+            - if can_edit
+              = nav_link(controller: [:integrations, :services, :hooks, :hook_logs]) do
+                = link_to project_settings_integrations_path(@project), title: _('Integrations') do
+                  %span
+                    = _('Integrations')
+              = nav_link(controller: :repository) do
+                = link_to project_settings_repository_path(@project), title: _('Repository') do
+                  %span
+                    = _('Repository')
+              - if !@project.archived? && @project.feature_available?(:builds, current_user)
+                = nav_link(controller: :ci_cd) do
+                  = link_to project_settings_ci_cd_path(@project), title: _('CI / CD') do
+                    %span
+                      = _('CI / CD')
+              - if !@project.archived? && settings_operations_available?
+                = nav_link(controller: [:operations]) do
+                  = link_to project_settings_operations_path(@project), title: _('Operations') do
+                    = _('Operations')
+              - if @project.pages_available?
+                = nav_link(controller: :pages) do
+                  = link_to project_pages_path(@project), title: _('Pages') do
+                    %span
+                      = _('Pages')
+
+              = render_if_exists 'projects/sidebar/settings_audit_events'
+
+      - else
+        = nav_link(controller: :project_members) do
+          = link_to project_settings_members_path(@project), title: _('Members'), class: 'shortcuts-tree' do
+            .nav-icon-container
+              = sprite_icon('users')
+            %span.nav-item-name
+              = _('Members')
+          %ul.sidebar-sub-level-items.is-fly-out-only
+            = nav_link(path: %w[members#show], html_options: { class: "fly-out-top-item" } ) do
+              = link_to project_project_members_path(@project) do
+                %strong.fly-out-top-item-name
+                  = _('Members')
+
+      = render 'shared/sidebar_toggle_button'
+
+      -# Shortcut to Project > Activity
+      %li.hidden
+        = link_to activity_project_path(@project), title: _('Activity'), class: 'shortcuts-project-activity' do
+          %span
+            = _('Activity')
+
+      -# Shortcut to Repository > Graph (formerly, Network)
+      - if project_nav_tab? :network
+        %li.hidden
+          = link_to project_network_path(@project, current_ref), title: _('Network'), class: 'shortcuts-network' do
+            = _('Graph')
+
+      -# Shortcut to Repository > Charts (formerly, top-nav item "Graphs")
+      - unless @project.empty_repo?
+        %li.hidden
+          = link_to charts_project_graph_path(@project, current_ref), title: _('Charts'), class: 'shortcuts-repository-charts' do
+            = _('Charts')
+
+      -# Shortcut to Issues > New Issue
+      - if project_nav_tab?(:issues)
+        %li.hidden
+          = link_to new_project_issue_path(@project), class: 'shortcuts-new-issue' do
+            = _('Create a new issue')
+
+      -# Shortcut to Pipelines > Jobs
+      - if project_nav_tab? :builds
+        %li.hidden
+          = link_to project_jobs_path(@project), title: _('Jobs'), class: 'shortcuts-builds' do
+            = _('Jobs')
+
+      -# Shortcut to commits page
+      - if project_nav_tab? :commits
+        %li.hidden
+          = link_to project_commits_path(@project), title: _('Commits'), class: 'shortcuts-commits' do
+            = _('Commits')
+
+      -# Shortcut to issue boards
+      - if project_nav_tab?(:issues)
+        %li.hidden
+          = link_to _('Issue Boards'), project_boards_path(@project), title: _('Issue Boards'), class: 'shortcuts-issue-boards'

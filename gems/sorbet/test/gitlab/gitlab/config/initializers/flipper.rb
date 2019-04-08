@@ -1,0 +1,1 @@
+Feature.register_feature_groups

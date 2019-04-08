@@ -1,0 +1,171 @@
+html {
+  overflow-y: scroll;
+
+  &.touch .tooltip {
+    display: none !important;
+  }
+}
+
+body {
+  // Improves readability for dyslexic users; supported only in Chrome/Safari so far
+  // scss-lint:disable PropertySpelling
+  text-decoration-skip: ink;
+  // scss-lint:enable PropertySpelling
+  &.navless {
+    background-color: $white-light !important;
+  }
+
+  &.board-card-content {
+    background-color: $gray-darker;
+
+    .content-wrapper {
+      padding: 0;
+
+      .container-fluid,
+      .container-limited {
+        background-color: $gray-darker;
+      }
+    }
+  }
+}
+
+.content-wrapper {
+  margin-top: $header-height;
+  padding-bottom: 100px;
+}
+
+.container {
+  padding-top: 0;
+  z-index: 5;
+
+  .content {
+    margin: 0;
+
+    @include media-breakpoint-down(xs) { margin-top: 20px; }
+  }
+
+  @include media-breakpoint-down(xs) {
+    .container .title {
+      padding-left: 15px !important;
+    }
+  }
+}
+
+.navless-container {
+  margin-top: $header-height;
+  padding-top: $gl-padding * 2;
+}
+
+.container-limited {
+  max-width: $fixed-layout-width;
+
+  &.limit-container-width {
+    max-width: $limited-layout-width;
+  }
+}
+
+.alert-wrapper {
+  .alert {
+    margin-bottom: 0;
+
+    &:last-child {
+      margin-bottom: $gl-padding;
+    }
+  }
+
+  .alert-link-group {
+    float: right;
+  }
+
+  .flex-alert {
+    @include media-breakpoint-up(lg) {
+      display: flex;
+
+      .alert-message {
+        flex: 1;
+        padding-right: 40px;
+      }
+    }
+
+    .alert-link-group {
+      float: none;
+    }
+  }
+
+  @include media-breakpoint-down(sm) {
+    .alert-link-group {
+      float: none;
+      margin-top: $gl-padding-8;
+    }
+  }
+
+  /* Stripe the background colors so that adjacent alert-warnings are distinct from one another */
+  .alert-warning {
+    transition: background-color 0.15s, border-color 0.15s;
+    background-color: $orange-500;
+    border-color: $orange-500;
+
+    &:only-of-type {
+      background-color: $orange-500;
+      border-color: $orange-500;
+    }
+
+    + .alert-warning {
+      background-color: $orange-600;
+      border-color: $orange-600;
+
+      + .alert-warning {
+        background-color: $orange-700;
+        border-color: $orange-700;
+
+        + .alert-warning {
+          background-color: $orange-800;
+          border-color: $orange-800;
+        }
+      }
+    }
+  }
+}
+
+.with-performance-bar .layout-page {
+  margin-top: $header-height + $performance-bar-height;
+}
+
+.fullscreen-layout {
+  padding-top: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+
+  > #js-peek,
+  > .navbar-gitlab {
+    position: static;
+    top: auto;
+  }
+
+  .flash-container {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .alert-wrapper .flash-container .flash-alert:last-child,
+  .alert-wrapper .flash-container .flash-notice:last-child {
+    margin-bottom: 0;
+  }
+
+  .content-wrapper {
+    margin-top: 0;
+    padding-bottom: 0;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &.flash-shown {
+    .content-wrapper {
+      margin-top: 0;
+    }
+  }
+}

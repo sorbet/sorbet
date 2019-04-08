@@ -1,0 +1,209 @@
+# frozen_string_literal: true
+
+module API
+  class Settings < Grape::API
+    before { authenticated_as_admin! }
+
+    helpers do
+      def current_settings
+        @current_setting ||=
+          (ApplicationSetting.current_without_cache || ApplicationSetting.create_from_defaults)
+      end
+
+      def filter_attributes_using_license(attrs)
+        # This method will be redefined in EE.
+        attrs
+      end
+    end
+
+    desc 'Get the current application settings' do
+      success Entities::ApplicationSetting
+    end
+    get "application/settings" do
+      present current_settings, with: Entities::ApplicationSetting
+    end
+
+    desc 'Modify application settings' do
+      success Entities::ApplicationSetting
+    end
+    params do
+      optional :admin_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
+      optional :after_sign_up_text, type: String, desc: 'Text shown after sign up'
+      optional :after_sign_out_path, type: String, desc: 'We will redirect users to this page after they sign out'
+      optional :akismet_enabled, type: Boolean, desc: 'Helps prevent bots from creating issues'
+      given akismet_enabled: ->(val) { val } do
+        requires :akismet_api_key, type: String, desc: 'Generate API key at http://www.akismet.com'
+      end
+      optional :clientside_sentry_enabled, type: Boolean, desc: 'Sentry can also be used for reporting and logging clientside exceptions. https://sentry.io/for/javascript/'
+      given clientside_sentry_enabled: ->(val) { val } do
+        requires :clientside_sentry_dsn, type: String, desc: 'Clientside Sentry Data Source Name'
+      end
+      optional :container_registry_token_expire_delay, type: Integer, desc: 'Authorization token duration (minutes)'
+      optional :default_artifacts_expire_in, type: String, desc: "Set the default expiration time for each job's artifacts"
+      optional :default_branch_protection, type: Integer, values: Gitlab::Access.protection_values, desc: 'Determine if developers can push to master'
+      optional :default_group_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default group visibility'
+      optional :default_project_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default project visibility'
+      optional :default_projects_limit, type: Integer, desc: 'The maximum number of personal projects'
+      optional :default_snippet_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default snippet visibility'
+      optional :disabled_oauth_sign_in_sources, type: Array[String], desc: 'Disable certain OAuth sign-in sources'
+      optional :domain_blacklist_enabled, type: Boolean, desc: 'Enable domain blacklist for sign ups'
+      given domain_blacklist_enabled: ->(val) { val } do
+        requires :domain_blacklist, type: String, desc: 'Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
+      end
+      optional :domain_whitelist, type: String, desc: 'ONLY users with e-mail addresses that match these domain(s) will be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
+      optional :email_author_in_body, type: Boolean, desc: 'Some email servers do not support overriding the email sender name. Enable this option to include the name of the author of the issue, merge request or comment in the email body instead.'
+      optional :enabled_git_access_protocol, type: String, values: %w[ssh http nil], desc: 'Allow only the selected protocols to be used for Git access.'
+      optional :gitaly_timeout_default, type: Integer, desc: 'Default Gitaly timeout, in seconds. Set to 0 to disable timeouts.'
+      optional :gitaly_timeout_fast, type: Integer, desc: 'Gitaly fast operation timeout, in seconds. Set to 0 to disable timeouts.'
+      optional :gitaly_timeout_medium, type: Integer, desc: 'Medium Gitaly timeout, in seconds. Set to 0 to disable timeouts.'
+      optional :gravatar_enabled, type: Boolean, desc: 'Flag indicating if the Gravatar service is enabled'
+      optional :help_page_hide_commercial_content, type: Boolean, desc: 'Hide marketing-related entries from help'
+      optional :help_page_support_url, type: String, desc: 'Alternate support URL for help page'
+      optional :help_page_text, type: String, desc: 'Custom text displayed on the help page'
+      optional :home_page_url, type: String, desc: 'We will redirect non-logged in users to this page'
+      optional :housekeeping_enabled, type: Boolean, desc: 'Enable automatic repository housekeeping (git repack, git gc)'
+      given housekeeping_enabled: ->(val) { val } do
+        requires :housekeeping_bitmaps_enabled, type: Boolean, desc: "Creating pack file bitmaps makes housekeeping take a little longer but bitmaps should accelerate 'git clone' performance."
+        requires :housekeeping_full_repack_period, type: Integer, desc: "Number of Git pushes after which a full 'git repack' is run."
+        requires :housekeeping_gc_period, type: Integer, desc: "Number of Git pushes after which 'git gc' is run."
+        requires :housekeeping_incremental_repack_period, type: Integer, desc: "Number of Git pushes after which an incremental 'git repack' is run."
+      end
+      optional :html_emails_enabled, type: Boolean, desc: 'By default GitLab sends emails in HTML and plain text formats so mail clients can choose what format to use. Disable this option if you only want to send emails in plain text format.'
+      optional :import_sources, type: Array[String], values: %w[github bitbucket gitlab google_code fogbugz git gitlab_project manifest],
+                                desc: 'Enabled sources for code import during project creation. OmniAuth must be configured for GitHub, Bitbucket, and GitLab.com'
+      optional :max_artifacts_size, type: Integer, desc: "Set the maximum file size for each job's artifacts"
+      optional :max_attachment_size, type: Integer, desc: 'Maximum attachment size in MB'
+      optional :max_pages_size, type: Integer, desc: 'Maximum size of pages in MB'
+      optional :metrics_enabled, type: Boolean, desc: 'Enable the InfluxDB metrics'
+      given metrics_enabled: ->(val) { val } do
+        requires :metrics_host, type: String, desc: 'The InfluxDB host'
+        requires :metrics_method_call_threshold, type: Integer, desc: 'A method call is only tracked when it takes longer to complete than the given amount of milliseconds.'
+        requires :metrics_packet_size, type: Integer, desc: 'The amount of points to store in a single UDP packet'
+        requires :metrics_pool_size, type: Integer, desc: 'The amount of InfluxDB connections to open'
+        requires :metrics_port, type: Integer, desc: 'The UDP port to use for connecting to InfluxDB'
+        requires :metrics_sample_interval, type: Integer, desc: 'The sampling interval in seconds'
+        requires :metrics_timeout, type: Integer, desc: 'The amount of seconds after which an InfluxDB connection will time out'
+      end
+      optional :password_authentication_enabled, type: Boolean, desc: 'Flag indicating if password authentication is enabled for the web interface' # support legacy names, can be removed in v5
+      optional :password_authentication_enabled_for_web, type: Boolean, desc: 'Flag indicating if password authentication is enabled for the web interface'
+      mutually_exclusive :password_authentication_enabled_for_web, :password_authentication_enabled, :signin_enabled
+      optional :password_authentication_enabled_for_git, type: Boolean, desc: 'Flag indicating if password authentication is enabled for Git over HTTP(S)'
+      optional :performance_bar_allowed_group_id, type: String, desc: 'Deprecated: Use :performance_bar_allowed_group_path instead. Path of the group that is allowed to toggle the performance bar.' # support legacy names, can be removed in v6
+      optional :performance_bar_allowed_group_path, type: String, desc: 'Path of the group that is allowed to toggle the performance bar.'
+      optional :performance_bar_enabled, type: String, desc: 'Deprecated: Pass `performance_bar_allowed_group_path: nil` instead. Allow enabling the performance.' # support legacy names, can be removed in v6
+      optional :plantuml_enabled, type: Boolean, desc: 'Enable PlantUML'
+      given plantuml_enabled: ->(val) { val } do
+        requires :plantuml_url, type: String, desc: 'The PlantUML server URL'
+      end
+      optional :polling_interval_multiplier, type: BigDecimal, desc: 'Interval multiplier used by endpoints that perform polling. Set to 0 to disable polling.'
+      optional :project_export_enabled, type: Boolean, desc: 'Enable project export'
+      optional :prometheus_metrics_enabled, type: Boolean, desc: 'Enable Prometheus metrics'
+      optional :recaptcha_enabled, type: Boolean, desc: 'Helps prevent bots from creating accounts'
+      given recaptcha_enabled: ->(val) { val } do
+        requires :recaptcha_site_key, type: String, desc: 'Generate site key at http://www.google.com/recaptcha'
+        requires :recaptcha_private_key, type: String, desc: 'Generate private key at http://www.google.com/recaptcha'
+      end
+      optional :repository_checks_enabled, type: Boolean, desc: "GitLab will periodically run 'git fsck' in all project and wiki repositories to look for silent disk corruption issues."
+      optional :repository_storages, type: Array[String], desc: 'Storage paths for new projects'
+      optional :require_two_factor_authentication, type: Boolean, desc: 'Require all users to set up Two-factor authentication'
+      given require_two_factor_authentication: ->(val) { val } do
+        requires :two_factor_grace_period, type: Integer, desc: 'Amount of time (in hours) that users are allowed to skip forced configuration of two-factor authentication'
+      end
+      optional :restricted_visibility_levels, type: Array[String], desc: 'Selected levels cannot be used by non-admin users for groups, projects or snippets. If the public level is restricted, user profiles are only visible to logged in users.'
+      optional :send_user_confirmation_email, type: Boolean, desc: 'Send confirmation email on sign-up'
+      optional :sentry_enabled, type: Boolean, desc: 'Sentry is an error reporting and logging tool which is currently not shipped with GitLab, get it here: https://getsentry.com'
+      given sentry_enabled: ->(val) { val } do
+        requires :sentry_dsn, type: String, desc: 'Sentry Data Source Name'
+      end
+      optional :session_expire_delay, type: Integer, desc: 'Session duration in minutes. GitLab restart is required to apply changes.'
+      optional :shared_runners_enabled, type: Boolean, desc: 'Enable shared runners for new projects'
+      given shared_runners_enabled: ->(val) { val } do
+        requires :shared_runners_text, type: String, desc: 'Shared runners text '
+      end
+      optional :sign_in_text, type: String, desc: 'The sign in text of the GitLab application'
+      optional :signin_enabled, type: Boolean, desc: 'Flag indicating if password authentication is enabled for the web interface' # support legacy names, can be removed in v5
+      optional :signup_enabled, type: Boolean, desc: 'Flag indicating if sign up is enabled'
+      optional :terminal_max_session_time, type: Integer, desc: 'Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time.'
+      optional :usage_ping_enabled, type: Boolean, desc: 'Every week GitLab will report license usage back to GitLab, Inc.'
+      optional :instance_statistics_visibility_private, type: Boolean, desc: 'When set to `true` Instance statistics will only be available to admins'
+      optional :local_markdown_version, type: Integer, desc: "Local markdown version, increase this value when any cached markdown should be invalidated"
+
+      ApplicationSetting::SUPPORTED_KEY_TYPES.each do |type|
+        optional :"#{type}_key_restriction",
+                 type: Integer,
+                 values: KeyRestrictionValidator.supported_key_restrictions(type),
+                 desc: "Restrictions on the complexity of uploaded #{type.upcase} keys. A value of #{ApplicationSetting::FORBIDDEN_KEY_VALUE} disables all #{type.upcase} keys."
+      end
+
+      if Gitlab.ee?
+        optional :elasticsearch_aws, type: Boolean, desc: 'Enable support for AWS hosted elasticsearch'
+
+        given elasticsearch_aws: ->(val) { val } do
+          optional :elasticsearch_aws_access_key, type: String, desc: 'AWS IAM access key'
+          requires :elasticsearch_aws_region, type: String, desc: 'The AWS region the elasticsearch domain is configured'
+          optional :elasticsearch_aws_secret_access_key, type: String, desc: 'AWS IAM secret access key'
+        end
+
+        optional :elasticsearch_indexing, type: Boolean, desc: 'Enable Elasticsearch indexing'
+
+        given elasticsearch_indexing: ->(val) { val } do
+          optional :elasticsearch_search, type: Boolean, desc: 'Enable Elasticsearch search'
+          requires :elasticsearch_url, type: String, desc: 'The url to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201")'
+        end
+
+        optional :email_additional_text, type: String, desc: 'Additional text added to the bottom of every email for legal/auditing/compliance reasons'
+        optional :help_text, type: String, desc: 'GitLab server administrator information'
+        optional :repository_size_limit, type: Integer, desc: 'Size limit per repository (MB)'
+        optional :file_template_project_id, type: Integer, desc: 'ID of project where instance-level file templates are stored.'
+        optional :repository_storages, type: Array[String], desc: 'A list of names of enabled storage paths, taken from `gitlab.yml`. New projects will be created in one of these stores, chosen at random.'
+        optional :snowplow_enabled, type: Boolean, desc: 'Enable Snowplow'
+
+        given snowplow_enabled: ->(val) { val } do
+          requires :snowplow_collector_uri, type: String, desc: 'Snowplow Collector URI'
+          optional :snowplow_cookie_domain, type: String, desc: 'Snowplow cookie domain'
+          optional :snowplow_site_id, type: String, desc: 'Snowplow Site/Application ID'
+        end
+
+        optional :usage_ping_enabled, type: Boolean, desc: 'Every week GitLab will report license usage back to GitLab, Inc.'
+      end
+
+      optional_attributes = ::ApplicationSettingsHelper.visible_attributes << :performance_bar_allowed_group_id
+
+      if Gitlab.ee?
+        optional_attributes += EE::ApplicationSettingsHelper.possible_licensed_attributes
+      end
+
+      optional(*optional_attributes)
+      at_least_one_of(*optional_attributes)
+    end
+    put "application/settings" do
+      attrs = declared_params(include_missing: false)
+
+      # support legacy names, can be removed in v6
+      if attrs.has_key?(:performance_bar_allowed_group_id)
+        attrs[:performance_bar_allowed_group_path] = attrs.delete(:performance_bar_allowed_group_id)
+      end
+
+      # support legacy names, can be removed in v6
+      if attrs.has_key?(:performance_bar_enabled)
+        performance_bar_enabled = attrs.delete(:performance_bar_allowed_group_id)
+        attrs[:performance_bar_allowed_group_path] = nil unless performance_bar_enabled
+      end
+
+      # support legacy names, can be removed in v5
+      if attrs.has_key?(:signin_enabled)
+        attrs[:password_authentication_enabled_for_web] = attrs.delete(:signin_enabled)
+      elsif attrs.has_key?(:password_authentication_enabled)
+        attrs[:password_authentication_enabled_for_web] = attrs.delete(:password_authentication_enabled)
+      end
+
+      attrs = filter_attributes_using_license(attrs)
+
+      if ApplicationSettings::UpdateService.new(current_settings, current_user, attrs).execute
+        present current_settings, with: Entities::ApplicationSetting
+      else
+        render_validation_error!(current_settings)
+      end
+    end
+  end
+end

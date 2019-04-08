@@ -1,0 +1,166 @@
+---
+description: 'Learn how to install, configure, update, and maintain your GitLab instance.'
+---
+
+# Administrator documentation **[CORE ONLY]**
+
+Learn how to administer your self-managed GitLab instance.
+
+GitLab has two product distributions available through [different subscriptions](https://about.gitlab.com/pricing/):
+
+- The open source [GitLab Community Edition (CE)](https://gitlab.com/gitlab-org/gitlab-ce).
+- The open core [GitLab Enterprise Edition (EE)](https://gitlab.com/gitlab-org/gitlab-ee).
+
+You can [install either GitLab CE or GitLab EE](https://about.gitlab.com/installation/ce-or-ee/).
+However, the features you'll have access to depend on the subscription you choose
+(Core, Starter, Premium, or Ultimate).
+
+NOTE: **Note:**
+GitLab Community Edition installations only have access to Core features.
+
+GitLab.com is administered by GitLab, Inc., therefore, only GitLab team members have
+access to its admin configurations. If you're a GitLab.com user, please check the
+[user documentation](../user/index.html).
+
+NOTE: **Note:**
+Non-administrator users don’t have access to GitLab administration tools and settings.
+
+## Installing and maintaining GitLab
+
+Learn how to install, configure, update, and maintain your GitLab instance.
+
+### Installing GitLab
+
+- [Install](../install/README.md): Requirements, directory structures, and installation methods.
+- [High Availability](high_availability/README.md): Configure multiple servers for scaling or high availability.
+  - [High Availability on AWS](../university/high-availability/aws/README.md): Set up GitLab HA on Amazon AWS.
+
+### Configuring GitLab
+
+- [Adjust your instance's timezone](../workflow/timezone.md): Customize the default time zone of GitLab.
+- [System hooks](../system_hooks/system_hooks.md): Notifications when users, projects and keys are changed.
+- [Security](../security/README.md): Learn what you can do to further secure your GitLab instance.
+- [Usage statistics, version check, and usage ping](../user/admin_area/settings/usage_statistics.md): Enable or disable information about your instance to be sent to GitLab, Inc.
+- [Global user settings](user_settings.md): Configure instance-wide user permissions.
+- [Polling](polling.md): Configure how often the GitLab UI polls for updates.
+- [GitLab Pages configuration](pages/index.md): Enable and configure GitLab Pages.
+- [GitLab Pages configuration for GitLab source installations](pages/source.md): Enable and configure GitLab Pages on
+  [source installations](../install/installation.md#installation-from-source).
+- [Environment variables](environment_variables.md): Supported environment variables that can be used to override their defaults values in order to configure GitLab.
+- [Plugins](plugins.md): With custom plugins, GitLab administrators can introduce custom integrations without modifying GitLab's source code.
+- [Enforcing Terms of Service](../user/admin_area/settings/terms.md)
+- [Third party offers](../user/admin_area/settings/third_party_offers.md)
+- [Compliance](compliance.md): A collection of features from across the application that you may configure to help ensure that your GitLab instance and DevOps workflow meet compliance standards.
+- [Diff limits](../user/admin_area/diff_limits.md): Configure the diff rendering size limits of branch comparison pages.
+- [Merge request diffs storage](merge_request_diffs.md): Configure merge requests diffs external storage.
+- [Broadcast Messages](../user/admin_area/broadcast_messages.md): Send messages to GitLab users through the UI.
+- [Admin Area](../user/admin_area/index.md): for self-managed instance-wide configuration and maintenance.
+
+#### Customizing GitLab's appearance
+
+- [Header logo](../customization/branded_page_and_email_header.md): Change the logo on all pages and email headers.
+- [Favicon](../customization/favicon.md): Change the default favicon to your own logo.
+- [Branded login page](../customization/branded_login_page.md): Customize the login page with your own logo, title, and description.
+- [Welcome message](../customization/welcome_message.md): Add a custom welcome message to the sign-in page.
+- ["New Project" page](../customization/new_project_page.md): Customize the text to be displayed on the page that opens whenever your users create a new project.
+
+### Maintaining GitLab
+
+- [Raketasks](../raketasks/README.md): Perform various tasks for maintenance, backups, automatic webhooks setup, etc.
+  - [Backup and restore](../raketasks/backup_restore.md): Backup and restore your GitLab instance.
+- [Operations](operations/index.md): Keeping GitLab up and running (clean up Redis sessions, moving repositories, Sidekiq MemoryKiller, Unicorn).
+- [Restart GitLab](restart_gitlab.md): Learn how to restart GitLab and its components.
+- [Invalidate markdown cache](invalidate_markdown_cache.md): Invalidate any cached markdown.
+
+#### Updating GitLab
+
+- [GitLab versions and maintenance policy](../policy/maintenance.md): Understand GitLab versions and releases (Major, Minor, Patch, Security), as well as update recommendations.
+- [Update GitLab](../update/README.md): Update guides to upgrade your installation to a new version.
+- [Downtimeless updates](../update/README.md#upgrading-without-downtime): Upgrade to a newer major, minor, or patch version of GitLab without taking your GitLab instance offline.
+- [Migrate your GitLab CI/CD data to another version of GitLab](../migrate_ci_to_ce/README.md): If you have an old GitLab installation (older than 8.0), follow this guide to migrate your existing GitLab CI/CD data to another version of GitLab.
+
+### Upgrading or downgrading GitLab
+
+- [Upgrade from GitLab CE to GitLab EE](../update/README.md#upgrading-between-editions): learn how to upgrade GitLab Community Edition to GitLab Enterprise Editions.
+- [Downgrade from GitLab EE to GitLab CE](../downgrade_ee_to_ce/README.md): Learn how to downgrade GitLab Enterprise Editions to Community Edition.
+
+### GitLab platform integrations
+
+- [Mattermost](https://docs.gitlab.com/omnibus/gitlab-mattermost/): Integrate with [Mattermost](https://about.mattermost.com/), an open source, private cloud workplace for web messaging.
+- [PlantUML](integration/plantuml.md): Create simple diagrams in AsciiDoc and Markdown documents
+  created in snippets, wikis, and repos.
+- [Web terminals](integration/terminal.md): Provide terminal access to your applications deployed to Kubernetes from within GitLab's CI/CD [environments](../ci/environments.md#web-terminals).
+
+## User settings and permissions
+
+- [Libravatar](../customization/libravatar.md): Use Libravatar instead of Gravatar for user avatars.
+- [Sign-up restrictions](../user/admin_area/settings/sign_up_restrictions.md): block email addresses of specific domains, or whitelist only specific domains.
+- [Access restrictions](../user/admin_area/settings/visibility_and_access_controls.md#enabled-git-access-protocols): Define which Git access protocols can be used to talk to GitLab (SSH, HTTP, HTTPS).
+- [Authentication and Authorization](auth/README.md): Configure external authentication with LDAP, SAML, CAS and additional providers. See also other [authentication](../topics/authentication/index.md#gitlab-administrators) topics (for example, enforcing 2FA).
+- [Incoming email](incoming_email.md): Configure incoming emails to allow
+  users to [reply by email], create [issues by email] and
+  [merge requests by email], and to enable [Service Desk].
+  - [Postfix for incoming email](reply_by_email_postfix_setup.md): Set up a
+  basic Postfix mail server with IMAP authentication on Ubuntu for incoming
+  emails.
+- [Abuse reports](../user/admin_area/abuse_reports.md): View and resolve abuse reports from your users.
+
+[reply by email]: reply_by_email.md
+[issues by email]: ../user/project/issues/create_new_issue.md#new-issue-via-email
+[merge requests by email]: ../user/project/merge_requests/index.md#create-new-merge-requests-by-email
+
+## Project settings
+
+- [Container Registry](container_registry.md): Configure Container Registry with GitLab.
+- [Issue closing pattern](issue_closing_pattern.md): Customize how to close an issue from commit messages.
+- [Gitaly](gitaly/index.md): Configuring Gitaly, GitLab's Git repository storage service.
+- [Default labels](../user/admin_area/labels.html): Create labels that will be automatically added to every new project.
+- [Restrict the use of public or internal projects](../public_access/public_access.md#restricting-the-use-of-public-or-internal-projects): Restrict the use of visibility levels for users when they create a project or a snippet.
+- [Custom project templates](https://docs.gitlab.com/ee/user/admin_area/custom_project_templates.html): Configure a set of projects to be used as custom templates when creating a new project. **[PREMIUM ONLY]**
+
+### Repository settings
+
+- [Repository checks](repository_checks.md): Periodic Git repository checks.
+- [Repository storage paths](repository_storage_paths.md): Manage the paths used to store repositories.
+- [Repository storage rake tasks](raketasks/storage.md): A collection of rake tasks to list and migrate existing projects and attachments associated with it from Legacy storage to Hashed storage.
+
+## Continuous Integration settings
+
+- [Enable/disable GitLab CI/CD](../ci/enable_or_disable_ci.md#site-wide-admin-setting): Enable or disable GitLab CI/CD for your instance.
+- [GitLab CI/CD admin settings](../user/admin_area/settings/continuous_integration.md): Enable or disable Auto DevOps site-wide and define the artifacts' max size and expiration time.
+- [Job artifacts](job_artifacts.md): Enable, disable, and configure job artifacts (a set of files and directories which are outputted by a job when it completes successfully).
+- [Job traces](job_traces.md): Information about the job traces (logs).
+- [Register Shared and specific Runners](../ci/runners/README.md#registering-a-shared-runner): Learn how to register and configure Shared and specific Runners to your own instance.
+- [Shared Runners pipelines quota](https://docs.gitlab.com/ee/user/admin_area/settings/continuous_integration.html#shared-runners-pipeline-minutes-quota-starter-only): Limit the usage of pipeline minutes for Shared Runners. **[STARTER ONLY]**
+- [Enable/disable Auto DevOps](../topics/autodevops/index.md#enablingdisabling-auto-devops): Enable or disable Auto DevOps for your instance.
+
+## Git configuration options
+
+- [Custom Git hooks](custom_hooks.md): Custom Git hooks (on the filesystem) for when webhooks aren't enough.
+- [Git LFS configuration](../workflow/lfs/lfs_administration.md): Learn how to configure LFS for GitLab.
+- [Housekeeping](housekeeping.md): Keep your Git repositories tidy and fast.
+- [Configuring Git Protocol v2](git_protocol.md): Git protocol version 2 support.
+
+## Monitoring GitLab
+
+- [Monitoring GitLab](monitoring/index.md):
+  - [Monitoring uptime](../user/admin_area/monitoring/health_check.md): Check the server status using the health check endpoint.
+  - [IP whitelist](monitoring/ip_whitelist.md): Monitor endpoints that provide health check information when probed.
+  - [Monitoring GitHub imports](monitoring/github_imports.md): GitLab's GitHub Importer displays Prometheus metrics to monitor the health and progress of the importer.
+
+### Performance Monitoring
+
+- [GitLab Performance Monitoring](monitoring/performance/index.md):
+  - [Enable Performance Monitoring](monitoring/performance/gitlab_configuration.md): Enable GitLab Performance Monitoring.
+  - [GitLab performance monitoring with InfluxDB](monitoring/performance/influxdb_configuration.md): Configure GitLab and InfluxDB for measuring performance metrics.
+  - [InfluxDB Schema](monitoring/performance/influxdb_schema.md): Measurements stored in InfluxDB.
+  - [GitLab performance monitoring with Prometheus](monitoring/prometheus/index.md): Configure GitLab and Prometheus for measuring performance metrics.
+  - [GitLab performance monitoring with Grafana](monitoring/performance/grafana_configuration.md): Configure GitLab to visualize time series metrics through graphs and dashboards.
+  - [Request Profiling](monitoring/performance/request_profiling.md): Get a detailed profile on slow requests.
+  - [Performance Bar](monitoring/performance/performance_bar.md): Get performance information for the current page.
+
+## Troubleshooting
+
+- [Debugging tips](troubleshooting/debug.md): Tips to debug problems when things go wrong
+- [Log system](logs.md): Where to look for logs.
+- [Sidekiq Troubleshooting](troubleshooting/sidekiq.md): Debug when Sidekiq appears hung and is not processing jobs.

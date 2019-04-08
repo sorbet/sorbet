@@ -1,0 +1,8 @@
+- if defined?(token)
+  - path = oauth_authorized_application_path(0, token_id: token)
+- else
+  - path = oauth_authorized_application_path(application)
+
+= form_tag path do
+  %input{ :name => "_method", :type => "hidden", :value => "delete" }/
+  = submit_tag _('Revoke'), onclick: "return confirm('#{_('Are you sure?')}')", class: 'btn btn-remove btn-sm'

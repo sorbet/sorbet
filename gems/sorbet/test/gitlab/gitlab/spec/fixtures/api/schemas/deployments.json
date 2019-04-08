@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "deployments": {
+      "items": {
+        "$ref": "deployment.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "deployments"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,5 @@
+- page_title _('Pipelines'), "#{@commit.title} (#{@commit.short_id})", _('Commits')
+
+= render 'commit_box'
+= render 'ci_menu'
+= render 'projects/commit/pipelines_list', endpoint: pipelines_project_commit_path(@project, @commit.id)

@@ -1,0 +1,14 @@
+---
+env:
+  jest/globals: true
+plugins:
+  - jest
+settings:
+  import/resolver:
+    jest:
+      jestConfigFile: 'jest.config.js'
+globals:
+  getJSONFixture: false
+  loadFixtures: false
+  preloadFixtures: false
+  setFixtures: false

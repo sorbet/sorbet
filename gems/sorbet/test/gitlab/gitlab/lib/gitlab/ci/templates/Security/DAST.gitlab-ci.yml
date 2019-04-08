@@ -1,0 +1,26 @@
+# Read more about this feature here: https://docs.gitlab.com/ee/user/project/merge_requests/dast.html
+
+# Configure the scanning tool through the environment variables.
+# List of the variables: https://gitlab.com/gitlab-org/security-products/dast#settings
+# How to set: https://docs.gitlab.com/ee/ci/yaml/#variables
+
+include:
+  - template: Jobs/DAST.gitlab-ci.yml
+
+variables:
+  DAST_WEBSITE: http://example.com # Please edit to be your website to scan for vulnerabilities
+
+stages:
+  - build
+  - test
+  - deploy
+  - dast
+
+dast:
+  only:
+    refs:
+      - branches
+  except:
+    refs: [] # Override default from template
+    variables:
+      - $DAST_DISABLED

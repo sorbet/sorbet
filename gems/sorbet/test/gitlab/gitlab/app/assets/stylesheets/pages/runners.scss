@@ -1,0 +1,59 @@
+.runner-state {
+  padding: 6px 12px;
+  margin-right: 10px;
+  color: $white-light;
+
+  &.runner-state-shared {
+    background: $green-400;
+  }
+
+  &.runner-state-specific {
+    background: $blue-400;
+  }
+}
+
+.runner-status-online {
+  color: $green-600;
+}
+
+.runner-status-offline {
+  color: $gray-darkest;
+}
+
+.runner-status-paused {
+  color: $red-500;
+}
+
+.runner {
+  .btn {
+    padding: 1px 6px;
+  }
+
+  h4 {
+    font-weight: $gl-font-weight-normal;
+  }
+}
+
+.admin-runner-btn-group-cell {
+  min-width: 150px;
+
+  .btn-sm {
+    padding: 4px 9px;
+  }
+
+  .btn-default {
+    color: $gl-text-color-secondary;
+  }
+
+  .fa-pause,
+  .fa-play {
+    font-size: 11px;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .runners-content {
+    width: 100%;
+    overflow: auto;
+  }
+}

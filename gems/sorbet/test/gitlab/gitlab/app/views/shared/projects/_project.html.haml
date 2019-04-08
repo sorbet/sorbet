@@ -1,0 +1,92 @@
+- avatar = true unless local_assigns[:avatar] == false
+- stars = true unless local_assigns[:stars] == false
+- forks = true unless local_assigns[:forks] == false
+- merge_requests = true unless local_assigns[:merge_requests] == false
+- issues = true unless local_assigns[:issues] == false
+- pipeline_status = true unless local_assigns[:pipeline_status] == false
+- skip_namespace = false unless local_assigns[:skip_namespace] == true
+- access = max_project_member_access(project)
+- compact_mode = false unless local_assigns[:compact_mode] == true
+- show_last_commit_as_description = false unless local_assigns[:show_last_commit_as_description] == true && can_show_last_commit_in_list?(project)
+- css_class = '' unless local_assigns[:css_class]
+- css_class += " no-description" if project.description.blank? && !show_last_commit_as_description
+- cache_key = project_list_cache_key(project, pipeline_status: pipeline_status)
+- updated_tooltip = time_ago_with_tooltip(project.last_activity_date)
+- css_controls_class = compact_mode ? "" : "flex-lg-row justify-content-lg-between"
+- avatar_container_class = project.creator && use_creator_avatar ? '' : 'rect-avatar'
+
+%li.project-row.d-flex{ class: css_class }
+  = cache(cache_key) do
+    - if avatar
+      .avatar-container.s48.flex-grow-0.flex-shrink-0{ class: avatar_container_class }
+        = link_to project_path(project), class: dom_class(project) do
+          - if project.creator && use_creator_avatar
+            = image_tag avatar_icon_for_user(project.creator, 48), class: "avatar s48", alt:''
+          - else
+            = project_icon(project, alt: '', class: 'avatar project-avatar s48', width: 48, height: 48)
+    .project-details.d-sm-flex.flex-sm-fill.align-items-center
+      .flex-wrapper
+        .d-flex.align-items-center.flex-wrap.project-title
+          %h2.d-flex.prepend-top-8
+            = link_to project_path(project), class: 'text-plain' do
+              %span.project-full-name.append-right-8><
+                %span.namespace-name
+                  - if project.namespace && !skip_namespace
+                    = project.namespace.human_name
+                    \/
+                %span.project-name<
+                  = project.name
+
+          %span.metadata-info.visibility-icon.append-right-10.prepend-top-8.has-tooltip{ data: { container: 'body', placement: 'top' }, title: visibility_icon_description(project) }
+            = visibility_level_icon(project.visibility_level, fw: true)
+
+          - if explore_projects_tab? && project.repository.license
+            %span.metadata-info.d-inline-flex.align-items-center.append-right-10.prepend-top-8
+              = sprite_icon('scale', size: 14, css_class: 'append-right-4')
+              = project.repository.license.name
+
+          - if !explore_projects_tab? && access&.nonzero?
+            -# haml-lint:disable UnnecessaryStringOutput
+            = ' ' # prevent haml from eating the space between elements
+            .metadata-info.prepend-top-8
+              %span.user-access-role.d-block= Gitlab::Access.human_access(access)
+
+        - if show_last_commit_as_description
+          .description.d-none.d-sm-block.append-right-default
+            = link_to_markdown(project.commit.title, project_commit_path(project, project.commit), class: "commit-row-message")
+        - elsif project.description.present?
+          .description.d-none.d-sm-block.append-right-default
+            = markdown_field(project, :description)
+
+      .controls.d-flex.flex-sm-column.align-items-center.align-items-sm-end.flex-wrap.flex-shrink-0{ class: css_controls_class }
+        .icon-container.d-flex.align-items-center
+          - if project.archived
+            %span.d-flex.icon-wrapper.badge.badge-warning archived
+          - if stars
+            %span.d-flex.align-items-center.icon-wrapper.stars.has-tooltip{ data: { container: 'body', placement: 'top' }, title: _('Stars') }
+              = sprite_icon('star', size: 14, css_class: 'append-right-4')
+              = number_with_delimiter(project.star_count)
+          - if forks
+            = link_to project_forks_path(project),
+                class: "align-items-center icon-wrapper forks has-tooltip",
+                title: _('Forks'), data: { container: 'body', placement: 'top' } do
+              = sprite_icon('fork', size: 14, css_class: 'append-right-4')
+              = number_with_delimiter(project.forks_count)
+          - if show_merge_request_count?(disabled: !merge_requests, compact_mode: compact_mode)
+            = link_to project_merge_requests_path(project),
+                class: "d-none d-xl-flex align-items-center icon-wrapper merge-requests has-tooltip",
+                title: _('Merge Requests'), data: { container: 'body', placement: 'top' } do
+              = sprite_icon('git-merge', size: 14, css_class: 'append-right-4')
+              = number_with_delimiter(project.open_merge_requests_count)
+          - if show_issue_count?(disabled: !issues, compact_mode: compact_mode)
+            = link_to project_issues_path(project),
+                class: "d-none d-xl-flex align-items-center icon-wrapper issues has-tooltip",
+                title: _('Issues'), data: { container: 'body', placement: 'top' } do
+              = sprite_icon('issues', size: 14, css_class: 'append-right-4')
+              = number_with_delimiter(project.open_issues_count)
+          - if pipeline_status && can?(current_user, :read_cross_project) && project.pipeline_status.has_status? && can?(current_user, :read_build, project)
+            - pipeline_path = pipelines_project_commit_path(project.pipeline_status.project, project.pipeline_status.sha, ref: project.pipeline_status.ref)
+            %span.icon-wrapper.pipeline-status
+              = render 'ci/status/icon', status: project.commit.last_pipeline.detailed_status(current_user), type: 'commit', tooltip_placement: 'top', path: pipeline_path
+        .updated-note
+          %span Updated #{updated_tooltip}

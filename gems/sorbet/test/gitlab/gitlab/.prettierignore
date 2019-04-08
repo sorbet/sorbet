@@ -1,0 +1,9 @@
+/app/assets/javascripts/locale/**/app.js
+/node_modules/
+/public/
+/vendor/
+/tmp/
+
+# ignore stylesheets for now as this clashes with our linter
+*.css
+*.scss

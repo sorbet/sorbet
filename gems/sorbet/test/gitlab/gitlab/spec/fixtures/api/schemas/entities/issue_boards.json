@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "required" : [
+    "issues",
+    "size"
+  ],
+  "properties" : {
+    "issues": {
+      "type": "array",
+      "items": { "$ref": "issue_board.json" }
+    },
+    "size": { "type": "integer" }
+  }
+}

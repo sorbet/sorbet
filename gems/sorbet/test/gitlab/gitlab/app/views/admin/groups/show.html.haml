@@ -1,0 +1,125 @@
+- add_to_breadcrumbs _("Groups"), admin_groups_path
+- breadcrumb_title @group.name
+- page_title @group.name, _("Groups")
+%h3.page-title
+  = _('Group: %{group_name}') % { group_name: @group.full_name }
+
+  = link_to admin_group_edit_path(@group), class: "btn float-right" do
+    %i.fa.fa-pencil-square-o
+    = _('Edit')
+%hr
+.row
+  .col-md-6
+    .card
+      .card-header
+        = _('Group info:')
+      %ul.content-list
+        %li
+          .avatar-container.rect-avatar.s60
+            = group_icon(@group, class: "avatar s60")
+        %li
+          %span.light= _('Name:')
+          %strong= @group.name
+        %li
+          %span.light= _('Path:')
+          %strong
+            = @group.path
+
+        %li
+          %span.light= _('Description:')
+          %strong
+            = @group.description
+
+        %li
+          %span.light= _('Visibility level:')
+          %strong
+            = visibility_level_label(@group.visibility_level)
+
+        %li
+          %span.light= _('Created on:')
+          %strong
+            = @group.created_at.to_s(:medium)
+
+        = render_if_exists 'admin/namespace_plan_info', namespace: @group
+
+        %li
+          %span.light= _('Storage:')
+          - counter_storage = storage_counter(@group.storage_size)
+          - counter_repositories = storage_counter(@group.repository_size)
+          - counter_build_artifacts = storage_counter(@group.build_artifacts_size)
+          - counter_lfs_objects = storage_counter(@group.lfs_objects_size)
+          %strong
+            = _("%{counter_storage} (%{counter_repositories} repositories, %{counter_build_artifacts} build artifacts, %{counter_lfs_objects} LFS)") % { counter_storage: counter_storage, counter_repositories: counter_repositories, counter_build_artifacts: counter_build_artifacts, counter_lfs_objects: counter_lfs_objects }
+
+        %li
+          %span.light= _('Group Git LFS status:')
+          %strong
+            = group_lfs_status(@group)
+            = link_to icon('question-circle'), help_page_path('workflow/lfs/manage_large_binaries_with_git_lfs')
+
+        = render_if_exists 'namespaces/shared_runner_status', namespace: @group
+
+    = render_if_exists 'ldap_group_links/ldap_group_links_show', group: @group
+
+    .card
+      .card-header
+        = _('Projects')
+        %span.badge.badge-pill
+          #{@group.projects.count}
+      %ul.content-list
+        - @projects.each do |project|
+          %li
+            %strong
+              = link_to project.full_name, [:admin, project.namespace.becomes(Namespace), project]
+              %span.badge.badge-pill
+                = storage_counter(project.statistics.storage_size)
+            %span.float-right.light
+              %span.monospace= project.full_path + '.git'
+      .card-footer
+        = paginate @projects, param_name: 'projects_page', theme: 'gitlab'
+
+    - if @group.shared_projects.any?
+      .card
+        .card-header
+          = _('Projects shared with %{group_name}') % { group_name: @group.name }
+          %span.badge.badge-pill
+            #{@group.shared_projects.count}
+        %ul.content-list
+          - @group.shared_projects.sort_by(&:name).each do |project|
+            %li
+              %strong
+                = link_to project.full_name, [:admin, project.namespace.becomes(Namespace), project]
+                %span.badge.badge-pill
+                  = storage_counter(project.statistics.storage_size)
+              %span.float-right.light
+                %span.monospace= project.full_path + '.git'
+
+  .col-md-6
+    - if can?(current_user, :admin_group_member, @group)
+      .card
+        .card-header
+          = _('Add user(s) to the group:')
+        .card-body.form-holder
+          %p.light
+            - link_to_help = link_to(_("here"), help_page_path("user/permissions"))
+            = _('Read more about project permissions <strong>%{link_to_help}</strong>').html_safe % { link_to_help: link_to_help }
+
+          = form_tag admin_group_members_update_path(@group), id: "new_project_member", class: "bulk_import", method: :put do
+            %div
+              = users_select_tag(:user_ids, multiple: true, email_user: true, skip_ldap: @group.ldap_synced?, scope: :all)
+            .prepend-top-10
+              = select_tag :access_level, options_for_select(GroupMember.access_level_roles), class: "project-access-select select2"
+            %hr
+            = button_tag _('Add users to group'), class: "btn btn-success"
+      = render 'shared/members/requests', membership_source: @group, requesters: @requesters, force_mobile_view: true
+
+    .card
+      .card-header
+        = _("<strong>%{group_name}</strong> group members").html_safe % { group_name: @group.name }
+        %span.badge.badge-pill= @group.members.size
+        .float-right
+          = link_to icon('pencil-square-o', text: _('Manage access')), group_group_members_path(@group), class: "btn btn-sm"
+      %ul.content-list.group-users-list.content-list.members-list
+        = render partial: 'shared/members/member', collection: @members, as: :member, locals: { show_controls: false }
+      .card-footer
+        = paginate @members, param_name: 'members_page', theme: 'gitlab'

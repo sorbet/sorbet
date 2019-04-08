@@ -1,0 +1,206 @@
+inherit_gem:
+  gitlab-styles:
+    - rubocop-default.yml
+
+inherit_from: .rubocop_todo.yml
+require:
+  - ./rubocop/rubocop
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 2.5
+  TargetRailsVersion: 5.0
+  Exclude:
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'db/fixtures/**/*'
+    - 'db/schema.rb'
+    - 'ee/db/geo/schema.rb'
+    - 'tmp/**/*'
+    - 'bin/**/*'
+    - 'generator_templates/**/*'
+    - 'builds/**/*'
+    - 'plugins/**/*'
+  CacheRootDirectory: tmp
+
+# This cop checks whether some constant value isn't a
+# mutable literal (e.g. array or hash).
+Style/MutableConstant:
+  Enabled: true
+  Exclude:
+    - 'db/migrate/**/*'
+    - 'db/post_migrate/**/*'
+    - 'ee/db/migrate/**/*'
+    - 'ee/db/post_migrate/**/*'
+    - 'ee/db/geo/migrate/**/*'
+
+# TODO: Move this to gitlab-styles
+Style/SafeNavigation:
+  Enabled: false
+
+# Frozen String Literal
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  Exclude:
+    - 'config.ru'
+    - 'Dangerfile'
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'app/views/**/*'
+    - 'config/**/*'
+    - 'danger/**/*'
+    - 'db/**/*'
+    - 'ee/**/*'
+    - 'lib/tasks/**/*'
+    - 'qa/**/*'
+    - 'rubocop/**/*'
+    - 'scripts/**/*'
+    - 'spec/**/*'
+
+RSpec/FilePath:
+  Exclude:
+    - 'qa/**/*'
+    - 'spec/javascripts/fixtures/*'
+    - 'ee/spec/javascripts/fixtures/*'
+    - 'spec/requests/api/v3/*'
+
+Naming/FileName:
+  ExpectMatchingDefinition: true
+  Exclude:
+    - 'db/**/*'
+    - 'ee/db/**/*'
+    - 'spec/**/*'
+    - 'features/**/*'
+    - 'ee/spec/**/*'
+    - 'qa/spec/**/*'
+    - 'qa/qa/specs/**/*'
+    - 'qa/bin/*'
+    - 'config/**/*'
+    - 'ee/config/**/*'
+    - 'lib/generators/**/*'
+    - 'locale/unfound_translations.rb'
+    - 'ee/locale/unfound_translations.rb'
+    - 'ee/lib/generators/**/*'
+    - 'qa/qa/scenario/test/integration/ldap_no_tls.rb'
+    - 'qa/qa/scenario/test/integration/ldap_tls.rb'
+
+  IgnoreExecutableScripts: true
+  AllowedAcronyms:
+    - EE
+    - JSON
+    - LDAP
+    - SAML
+    - IO
+    - HMAC
+    - QA
+    - ENV
+    - STL
+    - PDF
+    - SVG
+    - CTE
+    - DN
+    - RSA
+    - CI
+    - CD
+    - OAuth
+    # default ones:
+    - CLI
+    - DSL
+    - ACL
+    - API
+    - ASCII
+    - CPU
+    - CSS
+    - DNS
+    - EOF
+    - GUID
+    - HTML
+    - HTTP
+    - HTTPS
+    - ID
+    - IP
+    - JSON
+    - LHS
+    - QPS
+    - RAM
+    - RHS
+    - RPC
+    - SLA
+    - SMTP
+    - SQL
+    - SSH
+    - TCP
+    - TLS
+    - TTL
+    - UDP
+    - UI
+    - UID
+    - UUID
+    - URI
+    - URL
+    - UTF8
+    - VM
+    - XML
+    - XMPP
+    - XSRF
+    - XSS
+    - GRPC
+
+Rails/ApplicationRecord:
+  Enabled: true
+  Exclude:
+    # Models in database migrations should not subclass from ApplicationRecord
+    # as they need to be as decoupled from application code as possible
+    - db/**/*.rb
+    - lib/gitlab/background_migration/**/*.rb
+    - lib/gitlab/database/**/*.rb
+    - spec/**/*.rb
+    - ee/db/**/*.rb
+    - ee/lib/gitlab/background_migration/**/*.rb
+    - ee/lib/ee/gitlab/background_migration/**/*.rb
+    - ee/spec/**/*.rb
+
+# GitLab ###################################################################
+
+Gitlab/ModuleWithInstanceVariables:
+  Enable: true
+  Exclude:
+    # We ignore Rails helpers right now because it's hard to workaround it
+    - app/helpers/**/*_helper.rb
+    - ee/app/helpers/**/*_helper.rb
+    # We ignore Rails mailers right now because it's hard to workaround it
+    - app/mailers/emails/**/*.rb
+    - ee/**/emails/**/*.rb
+    # We ignore spec helpers because it usually doesn't matter
+    - spec/support/**/*.rb
+    - features/steps/**/*.rb
+
+Gitlab/HTTParty:
+  Enabled: true
+
+GitlabSecurity/PublicSend:
+  Enabled: true
+  Exclude:
+    - 'config/**/*'
+    - 'db/**/*'
+    - 'features/**/*'
+    - 'lib/**/*.rake'
+    - 'qa/**/*'
+    - 'spec/**/*'
+    - 'ee/db/**/*'
+    - 'ee/lib/**/*.rake'
+    - 'ee/spec/**/*'
+
+Cop/InjectEnterpriseEditionModule:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+    - 'ee/spec/**/*'
+
+Style/ReturnNil:
+  Enabled: true
+
+# It isn't always safe to replace `=~` with `.match?`, especially when there are
+# nil values on the left hand side
+Performance/RegexpMatch:
+  Enabled: false

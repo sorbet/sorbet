@@ -1,0 +1,40 @@
+.shortcut-mappings {
+  font-size: 12px;
+  color: $gl-gray-700;
+
+  tbody:first-child tr:first-child {
+    padding-top: 0;
+  }
+
+  th {
+    padding-top: 15px;
+    line-height: 1.5;
+    color: $help-shortcut-header-color;
+    text-align: left;
+  }
+
+  td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    vertical-align: top;
+    line-height: 20px;
+  }
+
+  .shortcut {
+    padding-right: 10px;
+    color: $gl-gray-400;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .key {
+    @extend .badge.badge-pill;
+    background-color: $label-inverse-bg;
+    font: 11px Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    padding: 3px 5px;
+  }
+}
+
+.documentation {
+  padding: 7px;
+}

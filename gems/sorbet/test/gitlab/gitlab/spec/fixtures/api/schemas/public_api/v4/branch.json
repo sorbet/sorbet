@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "required" : [
+    "name",
+    "commit",
+    "merged",
+    "protected",
+    "default",
+    "developers_can_push",
+    "developers_can_merge"
+  ],
+  "properties" : {
+    "name": { "type": "string" },
+    "commit": { "$ref": "commit/basic.json" },
+    "merged": { "type": "boolean" },
+    "protected": { "type": "boolean" },
+    "default": { "type": "boolean" },
+    "developers_can_push": { "type": "boolean" },
+    "developers_can_merge": { "type": "boolean" },
+    "can_push": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

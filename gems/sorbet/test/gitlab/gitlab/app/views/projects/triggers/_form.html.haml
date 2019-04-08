@@ -1,0 +1,11 @@
+= form_for [@project.namespace.becomes(Namespace), @project, @trigger], html: { class: 'gl-show-field-errors' } do |f|
+  = form_errors(@trigger)
+
+  - if @trigger.token
+    .form-group
+      %label.label-bold Token
+      %p.form-control-plaintext= @trigger.token
+  .form-group
+    = f.label :key, "Description", class: "label-bold"
+    = f.text_field :description, class: "form-control", required: true, title: 'Trigger description is required.', placeholder: "Trigger description"
+  = f.submit btn_text, class: "btn btn-success"

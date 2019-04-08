@@ -1,0 +1,36 @@
+# frozen_string_literal: true
+
+module Groups
+  class DestroyService < Groups::BaseService
+    DestroyError = Class.new(StandardError)
+
+    def async_execute
+      job_id = GroupDestroyWorker.perform_async(group.id, current_user.id)
+      Rails.logger.info("User #{current_user.id} scheduled a deletion of group ID #{group.id} with job ID #{job_id}")
+    end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def execute
+      group.prepare_for_destroy
+
+      group.projects.includes(:project_feature).each do |project|
+        # Execute the destruction of the models immediately to ensure atomic cleanup.
+        success = ::Projects::DestroyService.new(project, current_user).execute
+        raise DestroyError, "Project #{project.id} can't be deleted" unless success
+      end
+
+      # reload the relation to prevent triggering destroy hooks on the projects again
+      group.projects.reload
+
+      group.children.each do |group|
+        # This needs to be synchronous since the namespace gets destroyed below
+        DestroyService.new(group, current_user).execute
+      end
+
+      group.chat_team&.remove_mattermost_team(current_user)
+
+      group.destroy
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+  end
+end

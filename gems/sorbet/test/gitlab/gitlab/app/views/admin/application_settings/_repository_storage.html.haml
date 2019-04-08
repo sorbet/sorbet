@@ -1,0 +1,23 @@
+= form_for @application_setting, url: admin_application_settings_path(anchor: 'js-repository-storage-settings'), html: { class: 'fieldset-form' } do |f|
+  = form_errors(@application_setting)
+
+  %fieldset
+    .sub-section
+      .form-group
+        .form-check
+          = f.check_box :hashed_storage_enabled, class: 'form-check-input qa-hashed-storage-checkbox'
+          = f.label :hashed_storage_enabled, class: 'form-check-label' do
+            Use hashed storage paths for newly created and renamed projects
+          .form-text.text-muted
+            Enable immutable, hash-based paths and repository names to store repositories on disk. This prevents
+            repositories from having to be moved or renamed when the Project URL changes and may improve disk I/O performance.
+      .form-group
+        = f.label :repository_storages, 'Storage paths for new projects', class: 'label-bold'
+        = f.select :repository_storages, repository_storages_options_for_select(@application_setting.repository_storages),
+          {include_hidden: false}, multiple: true, class: 'form-control'
+        .form-text.text-muted
+          Manage repository storage paths. Learn more in the
+          = succeed "." do
+            = link_to "repository storages documentation", help_page_path("administration/repository_storage_paths")
+
+  = f.submit 'Save changes', class: "btn btn-success qa-save-changes-button"

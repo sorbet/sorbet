@@ -1,0 +1,16 @@
+.popover {
+  min-width: 300px;
+
+  .popover-body .user-popover {
+    padding: $gl-padding-8;
+    font-size: $gl-font-size-small;
+    line-height: $gl-line-height;
+  }
+}
+
+.mr-popover {
+  .text-secondary {
+    font-size: 12px;
+    line-height: 1.33;
+  }
+}

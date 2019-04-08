@@ -1,0 +1,14 @@
+- page_title "Merge Requests"
+
+- if group_merge_requests_count(state: 'all').zero?
+  = render 'shared/empty_states/merge_requests', project_select_button: true
+- else
+  .top-area
+    = render 'shared/issuable/nav', type: :merge_requests
+    - if current_user
+      .nav-controls
+        = render 'shared/new_project_item_select', path: 'merge_requests/new', label: "New merge request", type: :merge_requests, with_feature_enabled: 'merge_requests', with_shared: false, include_projects_in_subgroups: true
+
+  = render 'shared/issuable/search_bar', type: :merge_requests
+
+  = render 'shared/merge_requests'

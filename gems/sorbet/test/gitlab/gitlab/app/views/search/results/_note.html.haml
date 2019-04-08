@@ -1,0 +1,25 @@
+- project = note.project
+- note_url = Gitlab::UrlBuilder.build(note)
+- noteable_identifier = note.noteable.try(:iid) || note.noteable.try(:id)
+
+.search-result-row
+  %h5.note-search-caption.str-truncated
+    %i.fa.fa-comment
+    = link_to_member(project, note.author, avatar: false)
+    - link_to_project = link_to(project.full_name, project)
+    = _("commented on %{link_to_project}").html_safe % { link_to_project: link_to_project }
+    &middot;
+
+    - if note.for_commit?
+      = link_to_if(noteable_identifier, _("Commit %{commit_id}") % { commit_id: truncate_sha(note.commit_id) }, note_url) do
+        = truncate_sha(note.commit_id)
+        %span.light= _("Commit deleted")
+
+    - else
+      %span #{note.noteable_type.titleize} ##{noteable_identifier}
+      &middot;
+      = link_to note.noteable.title, note_url
+
+  .note-search-result
+    .term
+      = search_md_sanitize(note, :note)

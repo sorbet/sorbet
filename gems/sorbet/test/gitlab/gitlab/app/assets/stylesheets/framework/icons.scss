@@ -1,0 +1,95 @@
+.ci-status-icon-success,
+.ci-status-icon-passed {
+  svg {
+    fill: $green-500;
+  }
+
+  &.add-border {
+    @include borderless-status-icon($green-500);
+  }
+}
+
+.ci-status-icon-failed {
+  svg {
+    fill: $red-500;
+  }
+
+  &.add-border {
+    @include borderless-status-icon($red-500);
+  }
+}
+
+.ci-status-icon-pending,
+.ci-status-icon-failed_with_warnings,
+.ci-status-icon-success_with_warnings {
+  svg {
+    fill: $orange-500;
+  }
+
+  &.add-border {
+    @include borderless-status-icon($orange-500);
+  }
+}
+
+.ci-status-icon-preparing,
+.ci-status-icon-running {
+  svg {
+    fill: $blue-400;
+  }
+
+  &.add-border {
+    @include borderless-status-icon($blue-400);
+  }
+}
+
+.ci-status-icon-canceled,
+.ci-status-icon-disabled {
+  svg {
+    fill: $gl-text-color;
+  }
+
+  &.add-border {
+    @include borderless-status-icon($gl-text-color);
+  }
+}
+
+.ci-status-icon-created,
+.ci-status-icon-skipped,
+.ci-status-icon-notfound {
+  svg {
+    fill: $gray-darkest;
+  }
+
+  &.add-border {
+    @include borderless-status-icon($gray-darkest);
+  }
+}
+
+.ci-status-icon-scheduled,
+.ci-status-icon-manual {
+  svg {
+    fill: $gl-text-color;
+  }
+}
+
+.icon-link {
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.user-avatar-link {
+  text-decoration: none;
+}
+
+.circle-icon-container {
+  $border-size: 1px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: $border-size solid $gray-400;
+  border-radius: 50%;
+  padding: $gl-padding-8 - $border-size;
+  color: $gray-700;
+}

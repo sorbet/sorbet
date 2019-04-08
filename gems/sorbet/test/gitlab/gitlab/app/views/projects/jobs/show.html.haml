@@ -1,0 +1,13 @@
+- @no_container = true
+- add_to_breadcrumbs _("Jobs"), project_jobs_path(@project)
+- breadcrumb_title "##{@build.id}"
+- page_title "#{@build.name} (##{@build.id})", _("Jobs")
+
+- content_for :page_specific_javascripts do
+  = stylesheet_link_tag 'page_bundles/xterm'
+
+%div{ class: container_class }
+  #js-job-vue-app{ data: { endpoint: project_job_path(@project, @build, format: :json),
+    runner_help_url: help_page_path('ci/runners/README.html', anchor: 'setting-maximum-job-timeout-for-a-runner'),
+    runner_settings_url: project_runners_path(@build.project, anchor: 'js-runners-settings'),
+    build_options: javascript_build_options } }

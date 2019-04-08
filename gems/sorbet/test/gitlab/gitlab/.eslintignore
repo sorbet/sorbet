@@ -1,0 +1,14 @@
+/app/assets/javascripts/locale/**/app.js
+/config/
+/builds/
+/coverage/
+/coverage-frontend/
+/coverage-javascript/
+/node_modules/
+/public/
+/scripts/
+/tmp/
+/vendor/
+jest.config.js
+karma.config.js
+webpack.config.js

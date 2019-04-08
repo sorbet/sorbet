@@ -1,0 +1,8 @@
+- add_to_breadcrumbs "Merge Requests", project_merge_requests_path(@project)
+- breadcrumb_title "New"
+- page_title "New Merge Request"
+
+- if @merge_request.can_be_created && !params[:change_branches]
+  = render 'new_submit'
+- else
+  = render 'new_compare'

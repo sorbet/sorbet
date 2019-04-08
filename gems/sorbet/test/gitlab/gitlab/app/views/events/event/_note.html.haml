@@ -1,0 +1,26 @@
+= icon_for_profile_event(event)
+
+= event_user_info(event)
+
+.event-title.d-flex.flex-wrap
+  = inline_event_icon(event)
+  %span.event-type.d-inline-block.append-right-4{ class: event.action_name }
+    = event.action_name
+  = event_note_title_html(event)
+  %span.event-target-title.append-right-4= "&quot;".html_safe + event.target.title + "&quot".html_safe
+
+  = render "events/event_scope", event: event
+
+.event-body
+  .event-note
+    .md
+      = first_line_in_markdown(event.target, :note, 150, project: event.project)
+    - note = event.target
+    - if note.attachment.url
+      - if note.attachment.image?
+        = link_to note.attachment.url, target: '_blank' do
+          = image_tag note.attachment.url, class: 'note-image-attach'
+      - else
+        = link_to note.attachment.url, target: '_blank', class: 'note-file-attach' do
+          %i.fa.fa-paperclip
+          = note.attachment_identifier

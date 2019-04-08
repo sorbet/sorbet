@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": [
+        "string"
+      ]
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "error_message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "collapsed": {
+      "type": [
+        "boolean"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

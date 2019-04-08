@@ -1,0 +1,27 @@
+- pipeline = local_assigns.fetch(:pipeline) { project.latest_successful_pipeline_for(ref) }
+
+- if !project.empty_repo? && can?(current_user, :download_code, project)
+  - archive_prefix = "#{project.path}-#{ref.tr('/', '-')}"
+  .project-action-button.dropdown.inline>
+    %button.btn.has-tooltip{ title: s_('DownloadSource|Download'), 'data-toggle' => 'dropdown', 'aria-label' => s_('DownloadSource|Download'), 'data-display' => 'static' }
+      = sprite_icon('download')
+      %span.sr-only=  _('Select Archive Format')
+      = sprite_icon("arrow-down")
+    %ul.dropdown-menu.dropdown-menu-right{ role: 'menu' }
+      %li.dropdown-bold-header= _('Download source code')
+      %li.dropdown-menu-content
+        = render 'projects/buttons/download_links', project: project, ref: ref, archive_prefix: archive_prefix, path: nil
+      - if directory?
+        %li.separator
+        %li.dropdown-bold-header= _('Download this directory')
+        %li.dropdown-menu-content
+          = render 'projects/buttons/download_links', project: project, ref: ref, archive_prefix: archive_prefix, path: @path
+      - if pipeline && pipeline.latest_builds_with_artifacts.any?
+        %li.separator
+        %li.dropdown-bold-header= _('Download artifacts')
+        - unless pipeline.latest?
+          %span.unclickable= ci_status_for_statuseable(project.pipeline_for(ref))
+        %li.dropdown-header= _('Previous Artifacts')
+        - pipeline.latest_builds_with_artifacts.each do |job|
+          %li
+            = link_to job.name, latest_succeeded_project_artifacts_path(project, "#{ref}/download", job: job.name), rel: 'nofollow', download: ''
