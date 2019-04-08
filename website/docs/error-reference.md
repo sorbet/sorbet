@@ -10,9 +10,11 @@ This is one of three docs aimed at helping answer common questions about Sorbet:
 1.  [Frequently Asked Questions](faq.md)
 1.  [Sorbet Error Reference](error-reference.md) (this doc)
 
-This page contains tips and tricks for common errors from `srb`. Note: this
-list is not exhaustive! Some errors are very context dependent to solve, and
-some error codes are very uncommon. Contributions to this list are welcome!
+This page contains tips and tricks for common errors from `srb`.
+
+> **Note**: This list is not exhaustive! Some errors are very context dependent
+> and other error codes are not common enough to know how to generally suggest
+> help. Contributions to this list are welcome!
 
 
 ## 1001
@@ -324,6 +326,47 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
       def foo; Kernel.puts 'hello'; end
     end
     ```
+
+## 7006
+
+In Sorbet, it is an error to have provably unreachable code. Because Sorbet is
+[sensitive to control flow](flow-sensitive.md) in a program, Sorbet can not only
+track what types each variable has within all the branches of a conditional, but
+also whether any given branch could be executed at all.
+
+Erroring for dead or unreachable code is generally a way to prevent bugs. People
+don't usually expect that some branch of code is never taken; usually dead code
+errors come from simple typos or misunderstandings about how Ruby works. In
+particular: the only two "falsy" values in Ruby are `nil` and `false`.
+
+Sometimes, dead code errors can be hard to track down. The best way to pinpoint
+the cause of a dead code error is to wrap variables or expressions in
+`T.reveal_type(...)` to validate the assumptions that a piece of code is making.
+For more troubleshooting tips, see [Troubleshooting](troubleshooting.md).
+
+If for whatever reason it's too hard to track down the cause of a dead code
+error, it's possible to silence it by making a variable or expression
+"unanalyzable," aka untyped. (When something is untyped, Sorbet will do very
+limited flow-sensitivity analysis compared to if Sorbet knows the type. To make
+something unanalyzable, we can wrap it in `T.unsafe(...)`:
+
+```ruby
+x = false
+
+if x
+  puts 'hello!' # error: This code is unreachable
+end
+
+if T.unsafe(x)
+  puts 'hello!' # ok
+end
+```
+
+In this (contrived) example, Sorbet knows statically that `x` is always `false`
+and so our `puts` within the first `if` is never reachable. On the other hand,
+Sorbet allows the second `if` because we've explicitly made `x` unanalyzable
+with `T.unsafe(...)`. T.unsafe is one of a handful of [escape
+hatches](troubleshooting.md#escape-hatches) built into Sorbet.
 
 ## 7014
 
