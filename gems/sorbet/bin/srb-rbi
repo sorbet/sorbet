@@ -39,9 +39,16 @@ top-level statements with `if __FILE__ == $PROGRAM_NAME` before re-running.
 ************************************
     "
     STDOUT.write('Proceeed [Y/n]? ')
-    input = Kernel.gets.strip
-    if input != '' && input != 'y' && input != 'Y'
-      puts "Quitting!"
+    if STDIN.isatty
+      input = Kernel.gets.strip
+      if input != '' && input != 'y' && input != 'Y'
+        puts "Quitting!"
+        Kernel.exit(1)
+      end
+    elsif ENV['SRB_YES']
+      puts 'SRB_YES set, proceeding'
+    else
+      puts "Not running interactivly. Set SRB_YES=1 environment variable to proceed"
       Kernel.exit(1)
     end
 
