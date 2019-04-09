@@ -149,8 +149,14 @@ class Sorbet::Private::HiddenMethodFinder
           'srb',
           'tc',
           '--print=symbol-table-json',
+          # Method redefined with mismatched argument is ok since sometime
+          # people monkeypatch over method
           '--error-black-list=4010',
+          # Redefining constant is needed because we serialize things both as
+          # aliases and in-class constants.
           '--error-black-list=4012',
+          # Invalid nesting is ok because we don't generate all the intermediate
+          # namespaces for aliases
           '--error-black-list=4015',
           '--stdout-hup-hack',
           '--silence-dev-message',
