@@ -109,8 +109,13 @@ class Sorbet::Private::ConstantLookupCache
     @real_name.bind(o).call
   end
 
+  private def get_ancestors(mod)
+    @real_ancestors ||= Module.instance_method(:ancestors)
+    @real_ancestors.bind(mod).call
+  end
+
   private def dfs_module(mod, prefix, ret, owner)
-    raise "error #{prefix}" if !mod.is_a?(Module)
+    raise "error #{prefix}: #{mod} is not a module" if !mod.is_a?(Module)
     begin
       constants = get_constants(mod)
     rescue TypeError
@@ -140,6 +145,7 @@ class Sorbet::Private::ConstantLookupCache
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
           # Did you mean?  YARD::Parser::Ruby::Legacy::RipperParser
         end
+
         object_id = get_object_id(nested_constant)
         maybe_seen_already = ret[object_id]
         if Object.eql?(mod) || !prefix
@@ -165,6 +171,19 @@ class Sorbet::Private::ConstantLookupCache
         end
 
       end
+    end
+
+    # Horrible horrible hack to get private constants that are `include`d.
+    # This doesn't recurse so you can't get private constants inside the private
+    # constants, but I really hope you don't need those...
+    get_ancestors(mod).each do |ancestor|
+      object_id = get_object_id(ancestor)
+      name = real_name(ancestor)
+      next unless name
+      next if ret[object_id]
+      prefix, _, const_name = name.rpartition('::')
+      entry = ConstantEntry.new(const_name.to_sym, name, name, [name], ancestor, nil)
+      ret[object_id] = entry
     end
     go_deeper.each do |entry, nested_constant, nested_name|
       dfs_module(nested_constant, nested_name, ret, entry)
