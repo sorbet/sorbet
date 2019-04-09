@@ -1,9 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative './step_interface'
+
 class Sorbet; end
 module Sorbet::Private; end
 class Sorbet::Private::SuggestTyped
+  include Sorbet::Private::StepInterface
+
   def self.main
     count = 0
     while count < 100
@@ -25,6 +29,10 @@ class Sorbet::Private::SuggestTyped
       return true if out == "No errors! Great job.\n"
     end
     false
+  end
+
+  def self.output_file
+    nil
   end
 end
 

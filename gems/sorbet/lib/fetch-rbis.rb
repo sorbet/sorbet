@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 # typed: false
 
+require_relative './step_interface'
 require_relative './sorbet'
+
 require 'bundler'
 require 'fileutils'
 require 'set'
@@ -12,7 +14,7 @@ class Sorbet::Private::FetchRBIs
   SORBET_DIR = 'sorbet'
   SORBET_CONFIG_FILE = "#{SORBET_DIR}/config"
   SORBET_RBI_LIST = "#{SORBET_DIR}/rbi_list"
-  SORBET_RBI_SORBET_TYPED = "#{SORBET_DIR}/rbi/sorbet-typed"
+  SORBET_RBI_SORBET_TYPED = "#{SORBET_DIR}/rbi/sorbet-typed/"
 
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
@@ -20,6 +22,8 @@ class Sorbet::Private::FetchRBIs
   SORBET_TYPED_REPO = 'git@github.com:sorbet/sorbet-typed.git'
 
   HEADER = Sorbet::Private::Serialize.header(false, 'sorbet-typed')
+
+  include Sorbet::Private::StepInterface
 
   # Ensure our cache is up-to-date
   Sorbet.sig {void}
@@ -143,6 +147,10 @@ class Sorbet::Private::FetchRBIs
     if vendor_paths.length > 0
       vendor_rbis_within_paths(vendor_paths)
     end
+  end
+
+  def self.output_file
+    SORBET_RBI_SORBET_TYPED
   end
 end
 

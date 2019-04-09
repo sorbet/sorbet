@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative './step_interface'
+
 require 'fileutils'
 
 class Sorbet; end
@@ -8,14 +10,19 @@ module Sorbet::Private; end
 class Sorbet::Private::CreateConfig
   SORBET_DIR = 'sorbet'
   SORBET_CONFIG_FILE = "#{SORBET_DIR}/config"
-  def self.main
-    puts "Creating #{SORBET_CONFIG_FILE}..."
 
+  include Sorbet::Private::StepInterface
+
+  def self.main
     FileUtils.mkdir_p(SORBET_DIR)
 
     File.open(SORBET_CONFIG_FILE, 'w') do |f|
       f.puts('.')
     end
+  end
+
+  def self.output_file
+    SORBET_CONFIG_FILE
   end
 end
 

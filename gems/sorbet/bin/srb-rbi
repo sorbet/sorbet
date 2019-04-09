@@ -4,6 +4,7 @@ class Sorbet; end
 module Sorbet::Private; end
 
 require_relative '../lib/sorbet'
+require_relative '../lib/step_interface'
 require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-definition-finder'
@@ -85,19 +86,19 @@ actions:
     end
 
     # Create sorbet/config file
-    Sorbet::Private::CreateConfig.main
+    make_step(Sorbet::Private::CreateConfig).call
 
     # Pull in the hand-written RBIs
-    Sorbet::Private::FetchRBIs.main
+    make_step(Sorbet::Private::FetchRBIs).call
 
     # Generate the RBIs from bundler
-    Sorbet::Private::GemGeneratorTracepoint.main
+    make_step(Sorbet::Private::GemGeneratorTracepoint).call
 
     # Find the hidden methods
-    Sorbet::Private::HiddenMethodFinder.main
+    make_step(Sorbet::Private::HiddenMethodFinder).call
 
     # Run sorbet and make constants to fix errors
-    Sorbet::Private::TodoRBI.main
+    make_step(Sorbet::Private::TodoRBI).call
 
     # Run type suggestion once, and then generate the todo.rbi again.
     #
@@ -108,11 +109,11 @@ actions:
     #
     # Regenerating after one run of sigil suggestion will put those constants
     # into the todo.rbi file.
-    Sorbet::Private::SuggestTyped.suggest_typed
-    Sorbet::Private::TodoRBI.main
+    make_step(Sorbet::Private::SuggestTyped).call
+    make_step(Sorbet::Private::TodoRBI).call
 
     # Put some `typed:` sigils
-    Sorbet::Private::SuggestTyped.main
+    make_step(Sorbet::Private::SuggestTyped).call
 
     puts "
 #{emojify("✅", "Done!")}
@@ -189,18 +190,18 @@ If instead you like to throw caution to the wind, here are some things to try:
       puts banner
       puts commands
       exit(1)
-    when 'config', Sorbet::Private::CreateConfig::SORBET_CONFIG_FILE
-      -> {Sorbet::Private::CreateConfig.main}
-    when 'sorbet-typed', Sorbet::Private::FetchRBIs::SORBET_RBI_SORBET_TYPED, Sorbet::Private::FetchRBIs::SORBET_RBI_LIST
-      -> {Sorbet::Private::FetchRBIs.main}
-    when 'gems', Sorbet::Private::GemGeneratorTracepoint::OUTPUT
-      -> {Sorbet::Private::GemGeneratorTracepoint.main}
-    when 'hidden-definitions', Sorbet::Private::HiddenMethodFinder::PATH
-      -> {Sorbet::Private::HiddenMethodFinder.main}
-    when 'todo', Sorbet::Private::TodoRBI::OUTPUT
-      -> {Sorbet::Private::TodoRBI.main}
+    when 'config', Sorbet::Private::CreateConfig.output_file
+      make_step(Sorbet::Private::CreateConfig.main)
+    when 'sorbet-typed', Sorbet::Private::FetchRBIs.output_file, Sorbet::Private::FetchRBIs::SORBET_RBI_LIST
+      make_step(Sorbet::Private::FetchRBIs.main)
+    when 'gems', Sorbet::Private::GemGeneratorTracepoint.output_file
+      make_step(Sorbet::Private::GemGeneratorTracepoint.main)
+    when 'hidden-definitions', Sorbet::Private::HiddenMethodFinder.output_file
+      make_step(Sorbet::Private::HiddenMethodFinder.main)
+    when 'todo', Sorbet::Private::TodoRBI.output_file
+      make_step(Sorbet::Private::TodoRBI.main)
     when 'suggest-typed'
-      -> {Sorbet::Private::SuggestTyped.main}
+      make_step(Sorbet::Private::SuggestTyped.main)
 
     when 'update'
       nil
@@ -213,6 +214,14 @@ If instead you like to throw caution to the wind, here are some things to try:
 
     puts "Running command: #{argv[0]}"
     command
+  end
+
+  Sorbet.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
+  def self.make_step(step)
+    -> do
+      puts "Generating: #{step.output_file}" if step.output_file
+      step.main
+    end
   end
 end
 

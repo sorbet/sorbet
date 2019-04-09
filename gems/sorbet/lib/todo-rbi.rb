@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative './serialize'
-
 require 'json'
+
+require_relative './serialize'
+require_relative './step_interface'
 
 class Sorbet::Private::SymbolEntry
   attr_reader :name, :superclass_id, :parents
@@ -32,6 +33,8 @@ end
 class Sorbet::Private::TodoRBI
   OUTPUT = 'sorbet/rbi/todo.rbi'
   HEADER = Sorbet::Private::Serialize.header('strong', 'todo')
+
+  include Sorbet::Private::StepInterface
 
   def self.find_all(symbol_map, symbols, parents=[])
     symbols.each do |s|
@@ -79,6 +82,10 @@ class Sorbet::Private::TodoRBI
       end
       File.write(OUTPUT, output)
     end
+  end
+
+  def self.output_file
+    OUTPUT
   end
 end
 
