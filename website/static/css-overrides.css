@@ -36,3 +36,28 @@ sup {
   font-size: 11px;
   font-weight: bold;
 }
+
+.homeContainer {
+  text-align: left;
+}
+
+.projectTitle {
+  line-height: 1.2em;
+}
+
+.homeContainer .homeWrapper {
+  padding: 4em 20px 2em;
+}
+
+.wrapper {
+  max-width: 1100px;
+}
+
+.homeContainer .homeWrapper .projectLogo {
+  padding: 0;
+
+}
+
+.homeContainer .homeWrapper .projectLogo img {
+  width: 200px;
+}

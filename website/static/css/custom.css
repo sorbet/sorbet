@@ -1,9 +1,24 @@
 /* your custom css */
 
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+
 }
 
 @media only screen and (min-width: 1024px) {
+  .teamsUsingSorbetColumns {
+    display: flex;
+  }
+
+  .teamsUsingSorbetColumns .columnLeft {
+    flex-basis: 0;
+    flex-grow: 1.5;
+    padding-right: 40px;
+  }
+
+  .teamsUsingSorbetColumns .columnRight {
+    flex-basis: 0;
+    flex-grow: 2;
+  }
 }
 
 @media only screen and (max-width: 1023px) {
