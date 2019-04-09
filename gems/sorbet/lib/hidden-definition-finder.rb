@@ -142,21 +142,27 @@ class Sorbet::Private::HiddenMethodFinder
     io.close
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
-    io = IO.popen(
-      [
-        'srb',
-        'tc',
-        '--print=symbol-table-json',
-        '--error-black-list=4010',
-        '--stdout-hup-hack',
-        '--silence-dev-message',
-        '--no-error-count',
-        TMP_RBI,
-      ],
-      err: '/dev/null'
-    )
+    # Change dir to deal with you having a sorbet/config in your cwd
+    Dir.chdir(TMP_PATH) do
+      io = IO.popen(
+        [
+          'srb',
+          'tc',
+          '--print=symbol-table-json',
+          '--error-black-list=4010',
+          '--error-black-list=4012',
+          '--error-black-list=4015',
+          '--stdout-hup-hack',
+          '--silence-dev-message',
+          '--no-error-count',
+          TMP_RBI,
+        ],
+        err: '/dev/null'
+      )
+    end
     File.write(RBI_CONSTANTS, io.read)
     io.close
+    raise "#{TMP_RBI} has unexpected errors" unless $?.success?
   end
 
   def read_constants

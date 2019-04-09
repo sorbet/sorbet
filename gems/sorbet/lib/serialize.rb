@@ -38,6 +38,10 @@ class Sorbet::Private::Serialize
   end
 
   def class_or_module(class_name)
+    if !valid_class_name(class_name)
+      return " # Skipping serializing #{class_name} because it is an invalid name\n"
+    end
+
     klass = constant_cache.class_by_name(class_name)
     is_nil = nil.equal?(klass)
     raise "#{class_name} is not a Class or Module. Maybe it was miscategorized?" if is_nil
@@ -98,7 +102,7 @@ class Sorbet::Private::Serialize
       begin
         value = klass.const_get(const_sym)
       rescue LoadError, NameError, RuntimeError
-        ret << "# Failed to load #{class_name}::#{const_sym}"
+        ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
       # next if !value.is_a?(T::Types::TypeVariable)
@@ -112,7 +116,7 @@ class Sorbet::Private::Serialize
       begin
         value = klass.const_get(const_sym, false)
       rescue LoadError, NameError, RuntimeError
-        ret << "# Failed to load #{class_name}::#{const_sym}"
+        ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
       next if value.is_a?(Module)
