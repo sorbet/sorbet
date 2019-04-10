@@ -564,6 +564,9 @@ private:
 class ConstantLit final : public Expression {
 public:
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
+    core::SymbolRef
+        resolutionScope; // for contats that failed resolution symbol will be set to StubClass and resolutionScope will
+                         // be set to whatever symbol we estimate the constant should have been defined in.
     std::unique_ptr<UnresolvedConstantLit> original;
 
     ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
