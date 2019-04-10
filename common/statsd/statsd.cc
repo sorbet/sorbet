@@ -9,6 +9,7 @@ extern "C" {
 #include "absl/strings/str_replace.h"
 
 #include <string>
+#include <sys/resource.h> // getrusage
 
 using namespace std;
 
@@ -93,6 +94,21 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     }
 
     return true;
+}
+
+void StatsD::addRusageStats() {
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        prodCounterAdd("run.utilization.user_time.us", usage.ru_utime.tv_sec * 1000'000 + usage.ru_utime.tv_usec);
+        prodCounterAdd("run.utilization.system_time.us", usage.ru_stime.tv_sec * 1000'000 + usage.ru_stime.tv_usec);
+        prodCounterAdd("run.utilization.max_rss", usage.ru_maxrss);
+        prodCounterAdd("run.utilization.minor_faults", usage.ru_minflt);
+        prodCounterAdd("run.utilization.major_faults", usage.ru_majflt);
+        prodCounterAdd("run.utilization.inblock", usage.ru_inblock);
+        prodCounterAdd("run.utilization.oublock", usage.ru_oublock);
+        prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
+        prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
+    }
 }
 
 } // namespace sorbet

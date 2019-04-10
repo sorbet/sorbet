@@ -4,7 +4,6 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
-#include <sys/resource.h> // getrusage
 
 using namespace std;
 
@@ -201,11 +200,8 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;
 
-        // Get max resident set size.
-        struct rusage usage;
-        if (getrusage(RUSAGE_SELF, &usage) == 0) {
-            prodCounterAdd("lsp.utilization.max_rss", usage.ru_maxrss);
-        }
+        // Record rusage-related stats.
+        StatsD::addRusageStats();
 
         auto counters = getAndClearThreadCounters();
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
