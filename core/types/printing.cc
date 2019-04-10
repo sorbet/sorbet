@@ -21,11 +21,25 @@ string buildTabs(int count) {
 } // namespace
 
 string ClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return this->symbol.data(gs)->show(gs);
+    return this->show(gs);
 }
 
 string ClassType::show(const GlobalState &gs) const {
     return this->symbol.data(gs)->show(gs);
+}
+
+string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return this->show(gs);
+}
+
+string UnresolvedClassType::show(const GlobalState &gs) const {
+    return fmt::format(
+        "{}::{} (unresolved)", this->scope.data(gs)->show(gs),
+        fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.data(gs)->show(gs); }));
+}
+
+string UnresolvedClassType::typeName() const {
+    return "UnresolvedClassType";
 }
 
 string ClassType::typeName() const {

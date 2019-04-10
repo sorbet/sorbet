@@ -561,7 +561,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    if (symbol.exists()) {
+    if (symbol.exists() && symbol != core::Symbols::StubClass()) {
         return this->symbol.dataAllowingNone(gs)->showFullName(gs);
     }
     return "Unresolved: " + this->original->toStringWithTabs(gs, tabs);
@@ -575,7 +575,12 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
+    if (resolutionScope.exists()) {
+        printTabs(buf, tabs + 1);
+        buf << "resolutionScope = " << this->resolutionScope.data(gs)->showFullName(gs) << '\n';
+    }
     printTabs(buf, tabs);
+
     buf << "}";
     return buf.str();
 }
