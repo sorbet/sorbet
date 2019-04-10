@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-require_relative './module_utils'
+require_relative '../real_stdlib'
 
 require 'set'
 
@@ -12,8 +12,8 @@ def DelegateClass(superclass)
   result
 end
 
-module Sorbet::Private 
-  module GemGeneratorTracepoint 
+module Sorbet::Private
+  module GemGeneratorTracepoint
     class Tracer
       module ModuleOverride
         def include(mod, *smth)
@@ -43,7 +43,7 @@ module Sorbet::Private
       Class.prepend(ClassOverride)
 
       def self.register_delegate_class(klass, delegate)
-        @delegate_classes[ModuleUtils.real_object_id(delegate)] = klass
+        @delegate_classes[Sorbet::Private::RealStdlib.real_object_id(delegate)] = klass
       end
 
       def self.module_created(mod)
@@ -99,7 +99,7 @@ module Sorbet::Private
       def self.pre_cache_module_methods
         ObjectSpace.each_object(Module) do |mod_|
           mod = T.cast(mod_, Module)
-          @modules[ModuleUtils.real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
+          @modules[Sorbet::Private::RealStdlib.real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
         end
       end
 
@@ -148,7 +148,7 @@ module Sorbet::Private
               singleton = tp.method_id == :singleton_method_added
               receiver = singleton ? tp.self.singleton_class : tp.self
               methods = receiver.instance_methods(false) + receiver.private_instance_methods(false)
-              set = @modules[ModuleUtils.real_object_id(receiver)] ||= Set.new
+              set = @modules[Sorbet::Private::RealStdlib.real_object_id(receiver)] ||= Set.new
               added = methods.find { |m| !set.include?(m) }
               if added.nil?
                 # warn("Warning: could not find method added to #{tp.self} at #{tp.path}:#{tp.lineno}")

@@ -1,13 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-
-module Sorbet::Private
-  def self.real_is_a?(o, klass)
-    @real_is_a ||= Object.instance_method(:is_a?)
-    @real_is_a.bind(o).call(klass)
-  end
-end
+require_relative './real_stdlib'
 
 # This class walks global namespace to find all modules and discover all of their names.
 # At the time you ask for it it, it takes a "spashot" of the world.
@@ -61,7 +55,7 @@ class Sorbet::Private::ConstantLookupCache
   end
 
   def all_module_names
-    ret = @all_constants.select {|_k, v| Sorbet::Private.real_is_a?(v.const, Module)}.map do |_key, struct|
+    ret = @all_constants.select {|_k, v| Sorbet::Private::RealStdlib.real_is_a?(v.const, Module)}.map do |_key, struct|
       raise "should never happen" if !struct.primary_name
       struct.primary_name
     end
@@ -69,7 +63,7 @@ class Sorbet::Private::ConstantLookupCache
   end
 
   def all_named_modules
-    ret = @all_constants.select {|_k, v| Sorbet::Private.real_is_a?(v.const, Module)}.map do |_key, struct|
+    ret = @all_constants.select {|_k, v| Sorbet::Private::RealStdlib.real_is_a?(v.const, Module)}.map do |_key, struct|
       raise "should never happen" if !struct.primary_name
       struct.const
     end
@@ -80,7 +74,7 @@ class Sorbet::Private::ConstantLookupCache
     ret = {}
 
     @all_constants.map do |_key, struct|
-      next if struct.nil? || !Sorbet::Private.real_is_a?(struct.const, Module) || struct.aliases.size < 2
+      next if struct.nil? || !Sorbet::Private::RealStdlib.real_is_a?(struct.const, Module) || struct.aliases.size < 2
       ret[struct.primary_name] = struct.aliases.reject {|name| name == struct.primary_name}
     end
     ret
@@ -91,33 +85,13 @@ class Sorbet::Private::ConstantLookupCache
   end
 
   def name_by_class(klass)
-    @all_constants[get_object_id(klass)]&.primary_name
-  end
-
-  private def get_constants(mod)
-    @real_constants ||= Module.instance_method(:constants)
-    @real_constants.bind(mod).call(false)
-  end
-
-  private def get_object_id(o)
-    @real_object_id ||= Object.instance_method(:object_id)
-    @real_object_id.bind(o).call
-  end
-
-  private def real_name(o)
-    @real_name ||= Module.instance_method(:name)
-    @real_name.bind(o).call
-  end
-
-  private def get_ancestors(mod)
-    @real_ancestors ||= Module.instance_method(:ancestors)
-    @real_ancestors.bind(mod).call
+    @all_constants[Sorbet::Private::RealStdlib.real_object_id(klass)]&.primary_name
   end
 
   private def dfs_module(mod, prefix, ret, owner)
     raise "error #{prefix}: #{mod} is not a module" if !mod.is_a?(Module)
     begin
-      constants = get_constants(mod)
+      constants = Sorbet::Private::RealStdlib.real_constants(mod)
     rescue TypeError
       puts "Failed to call `constants` on #{prefix}"
       return nil
@@ -146,7 +120,7 @@ class Sorbet::Private::ConstantLookupCache
           # Did you mean?  YARD::Parser::Ruby::Legacy::RipperParser
         end
 
-        object_id = get_object_id(nested_constant)
+        object_id = Sorbet::Private::RealStdlib.real_object_id(nested_constant)
         maybe_seen_already = ret[object_id]
         if Object.eql?(mod) || !prefix
           nested_name = nested.to_s
@@ -157,15 +131,15 @@ class Sorbet::Private::ConstantLookupCache
           if nested_name != maybe_seen_already.primary_name
             maybe_seen_already.aliases << nested_name
           end
-          if maybe_seen_already.primary_name.nil? && Sorbet::Private.real_is_a?(nested_constant, Module)
-            realName = real_name(nested_constant)
+          if maybe_seen_already.primary_name.nil? && Sorbet::Private::RealStdlib.real_is_a?(nested_constant, Module)
+            realName = Sorbet::Private::RealStdlib.real_name(nested_constant)
             maybe_seen_already.primary_name = realName
           end
         else
           entry = ConstantEntry.new(nested, nested_name, nil, [nested_name], nested_constant, owner)
           ret[object_id] = entry
 
-          if Sorbet::Private.real_is_a?(nested_constant, Module) && Object != nested_constant
+          if Sorbet::Private::RealStdlib.real_is_a?(nested_constant, Module) && Object != nested_constant
             go_deeper << [entry, nested_constant, nested_name]
           end
         end
@@ -176,9 +150,9 @@ class Sorbet::Private::ConstantLookupCache
     # Horrible horrible hack to get private constants that are `include`d.
     # This doesn't recurse so you can't get private constants inside the private
     # constants, but I really hope you don't need those...
-    get_ancestors(mod).each do |ancestor|
-      object_id = get_object_id(ancestor)
-      name = real_name(ancestor)
+    Sorbet::Private::RealStdlib.real_ancestors(mod).each do |ancestor|
+      object_id = Sorbet::Private::RealStdlib.real_object_id(ancestor)
+      name = Sorbet::Private::RealStdlib.real_name(ancestor)
       next unless name
       next if ret[object_id]
       prefix, _, const_name = name.rpartition('::')

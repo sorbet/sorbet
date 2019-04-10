@@ -10,6 +10,7 @@ require_relative './step_interface'
 require_relative './serialize'
 require_relative './constant_cache'
 require_relative './require_everything'
+require_relative './real_stdlib'
 
 require 'fileutils'
 require 'json'
@@ -245,7 +246,7 @@ class Sorbet::Private::HiddenMethodFinder
       return "# #{e.message.gsub("\n", "\n# ")}"
     end
 
-    return if !Sorbet::Private.real_is_a?(my_klass, Class) && !Sorbet::Private.real_is_a?(my_klass, Module)
+    return if !Sorbet::Private::RealStdlib.real_is_a?(my_klass, Class) && !Sorbet::Private::RealStdlib.real_is_a?(my_klass, Module)
 
     # We specifically don't typecheck anything in T:: since it is hardcoded
     # into sorbet
@@ -347,7 +348,7 @@ class Sorbet::Private::HiddenMethodFinder
         ret << "# #{e.message.gsub("\n", "\n# ")}"
         next
       end
-      next if Sorbet::Private.real_is_a?(my_value, Class) || Sorbet::Private.real_is_a?(my_value, Module)
+      next if Sorbet::Private::RealStdlib.real_is_a?(my_value, Class) || Sorbet::Private::RealStdlib.real_is_a?(my_value, Module)
       ret << "  #{name} = ::T.let(nil, ::T.untyped)"
     end
     ret
