@@ -71,7 +71,7 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         ::Outer2::C
-        ::Outer2::Inner1::Inner2::A
+        Unresolved: <emptyTree>::<C <U A>>
         <emptyTree>
       end
     end

@@ -200,7 +200,7 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
 
     "bb::TestRescue#multiple_rescue_classes_1" -> "bb::TestRescue#multiple_rescue_classes_1" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_3" [
-        label = "block[id=3](<U <returnMethodTemp>>$2: T.untyped)\l<U baz>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$6: T.untyped = alias <C <U Foo>>\l<U <isaCheckTemp>>$7: T.untyped = <U baz>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$6: T.untyped)\l<U <isaCheckTemp>>$7: T.untyped\l"
+        label = "block[id=3](<U <returnMethodTemp>>$2: T.untyped)\l<U baz>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$6: T.untyped = alias <C <U T.untyped>>\l<U <isaCheckTemp>>$7: T.untyped = <U baz>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$6: T.untyped)\l<U <isaCheckTemp>>$7: T.untyped\l"
     ];
 
     "bb::TestRescue#multiple_rescue_classes_3" -> "bb::TestRescue#multiple_rescue_classes_8" [style="bold"];
@@ -228,7 +228,7 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
     "bb::TestRescue#multiple_rescue_classes_8" -> "bb::TestRescue#multiple_rescue_classes_11" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_classes_9" [
-        label = "block[id=9](<U <returnMethodTemp>>$2: T.untyped, <U baz>: T.untyped)\l<U <exceptionClassTemp>>$8: T.untyped = alias <C <U Bar>>\l<U <isaCheckTemp>>$9: T.untyped = <U baz>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$8: T.untyped)\l<U <isaCheckTemp>>$9: T.untyped\l"
+        label = "block[id=9](<U <returnMethodTemp>>$2: T.untyped, <U baz>: T.untyped)\l<U <exceptionClassTemp>>$8: T.untyped = alias <C <U T.untyped>>\l<U <isaCheckTemp>>$9: T.untyped = <U baz>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$8: T.untyped)\l<U <isaCheckTemp>>$9: T.untyped\l"
     ];
 
     "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_8" [style="bold"];

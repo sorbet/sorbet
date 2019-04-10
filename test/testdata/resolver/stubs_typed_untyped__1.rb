@@ -6,5 +6,6 @@
 
 module Foo
 end
-Bar
-Foo::Bar
+Bar # error: Unable to resolve constant `Bar`
+
+Foo::Bar # error: Unable to resolve constant `Bar`

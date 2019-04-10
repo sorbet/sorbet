@@ -14,8 +14,10 @@ class NotAODM
     optional :how_many, Opus::Param::CaseParam.new(self.how_many_cases, Opus::Param::ParamSpecsParam.new(Default)) # error: Method `optional` does not exist on `T.class_of(NotAODM)`
                       # ^^^^^^^^^^^ error: Unable to resolve constant `Param`
                                                  # ^^^^^^^^^^^^^^^^^^^ error: Method `how_many_cases` does not exist on `T.class_of(NotAODM)`
+                                                                      # ^^^^^^^^^^^ error: Unable to resolve constant `Param`
                                                                                                        # ^^^^^^^ error: Unable to resolve constant `Default`
     optional :optional_param, IntegerParam.new # error: Method `optional` does not exist
+                            # ^^^^^^^^^^^^ error: Unable to resolve constant `IntegerParam`
 end
 
 class SomeODM
