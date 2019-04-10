@@ -244,7 +244,7 @@ private:
         }
 
         auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
-        if (scope != core::Symbols::StubClass() || customAutogenError) {
+        if (scope != core::Symbols::StubModule() || customAutogenError) {
             if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
 
@@ -271,11 +271,11 @@ private:
             }
         }
 
-        if (scope == core::Symbols::StubClass()) {
+        if (scope == core::Symbols::StubModule()) {
             scope = core::Symbols::noSymbol();
         }
 
-        job.out->symbol = core::Symbols::StubClass();
+        job.out->symbol = core::Symbols::StubModule();
         job.out->resolutionScope = scope;
     }
 

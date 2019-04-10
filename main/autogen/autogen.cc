@@ -238,7 +238,7 @@ public:
         ref.definitionLoc = original->loc;
         ref.name = constantName(ctx, original.get());
         auto sym = original->symbol;
-        if (!sym.data(ctx)->isClass() || sym != core::Symbols::StubClass()) {
+        if (!sym.data(ctx)->isClass() || sym != core::Symbols::StubModule()) {
             ref.resolved = symbolName(ctx, sym);
         }
         ref.is_resolved_statically = true;

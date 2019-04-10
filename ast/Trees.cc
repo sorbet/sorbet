@@ -561,7 +561,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    if (symbol.exists() && symbol != core::Symbols::StubClass()) {
+    if (symbol.exists() && symbol != core::Symbols::StubModule()) {
         return this->symbol.dataAllowingNone(gs)->showFullName(gs);
     }
     return "Unresolved: " + this->original->toStringWithTabs(gs, tabs);

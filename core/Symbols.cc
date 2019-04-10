@@ -364,7 +364,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                     member.first.data(gs)->kind == NameKind::CONSTANT &&
                     member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8) {
                     if (member.second.data(gs)->isClass() &&
-                        member.second.data(gs)->derivesFrom(gs, core::Symbols::StubClass())) {
+                        member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
                     auto thisDistance = Levenstein::distance(
@@ -887,7 +887,7 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
 
 bool Symbol::ignoreInHashing(const GlobalState &gs) const {
     if (isClass()) {
-        return superClass() == core::Symbols::StubClass();
+        return superClass() == core::Symbols::StubModule();
     } else if (isMethod()) {
         return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit();
     }

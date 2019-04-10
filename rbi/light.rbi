@@ -18,7 +18,7 @@ class RuntimeError < StandardError
 end
 class ScriptError < Exception
 end
-class RubyTyper::StubClass
+module RubyTyper::StubModule
 end
 class RubyTyper::ImplicitModuleSuperclass < BasicObject
 end

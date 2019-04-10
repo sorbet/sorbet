@@ -484,12 +484,12 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                                     maybeAliased.show(ctx));
                     }
                 }
-                if (sym == core::Symbols::StubClass()) {
+                if (sym == core::Symbols::StubModule()) {
                     vector<core::NameRef> namesFailedToResolve;
                     auto nested = i;
                     {
                         while (!nested->resolutionScope.exists()) {
-                            ENFORCE(nested->symbol == core::Symbols::StubClass());
+                            ENFORCE(nested->symbol == core::Symbols::StubModule());
                             namesFailedToResolve.emplace_back(nested->original->cnst);
                             ENFORCE(ast::cast_tree<ast::ConstantLit>(nested->original->scope.get()));
                             nested = ast::cast_tree<ast::ConstantLit>(nested->original->scope.get());

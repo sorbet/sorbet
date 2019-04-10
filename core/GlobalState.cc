@@ -144,8 +144,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::File());
     id = synthesizeClass(core::Names::Constants::RubyTyper(), 0, true);
     ENFORCE(id == Symbols::RubyTyper());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::StubClass());
-    ENFORCE(id == Symbols::StubClass());
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::StubModule());
+    ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), core::Names::Constants::StubAncestor());
     ENFORCE(id == Symbols::StubAncestor());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
@@ -307,6 +307,7 @@ void GlobalState::initEmpty() {
     arg.data(*this)->setBlockArgument();
 
     // Some of these are Modules
+    Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
     Symbols::StubAncestor().data(*this)->setIsModule(true);
 

@@ -71,7 +71,7 @@ class Sorbet::Private::TodoRBI
       output << HEADER
       symbol_by_id.each do |_, s|
         superclass = symbol_by_id[s.superclass_id]
-        next if !(superclass && superclass.name == 'StubClass')
+        next if !(superclass && superclass.name == 'StubModule')
         next if s.final_name.include?("<")
 
         if s.has_children

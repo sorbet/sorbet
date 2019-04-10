@@ -226,7 +226,7 @@ public:
 
     // Used as the superclass for symbols created to populate unresolvable ruby
     // constants
-    static SymbolRef StubClass() {
+    static SymbolRef StubModule() {
         return SymbolRef(nullptr, 39);
     }
 
