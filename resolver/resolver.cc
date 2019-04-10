@@ -328,18 +328,11 @@ private:
             return true;
         }
 
-        int depth = 0;
-        while (depth < 256) {
-            stubOneConstantNesting(ctx, job);
-            if (resolveJob(ctx, job)) {
-                return true;
-            }
-            depth++;
+        stubOneConstantNesting(ctx, job);
+        if (resolveJob(ctx, job)) {
+            return true;
         }
-
-        Exception::raise("Too many recursive calls trying to resolve constant:\n{}\n{}\n{}",
-                         job.out->original->cnst.show(ctx), job.out->original->loc.file().data(ctx).path(),
-                         job.out->original->loc.toString(ctx));
+        Exception::raise("Should never happen");
     }
 
     static bool resolveClassAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
