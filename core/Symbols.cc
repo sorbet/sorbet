@@ -328,10 +328,6 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                     if (member.first.data(gs)->kind == NameKind::CONSTANT &&
                         member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8 &&
                         member.second.exists()) {
-                        if (member.second.data(gs)->isClass() &&
-                            member.second.data(gs)->derivesFrom(gs, core::Symbols::StubClass())) {
-                            continue;
-                        }
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
                         if (thisDistance <= best.distance) {
