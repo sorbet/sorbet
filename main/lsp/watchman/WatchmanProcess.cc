@@ -114,10 +114,9 @@ void WatchmanProcess::start() {
         }
     } catch (std::exception e) {
         // Swallow error and print an informative message.
-        logger->info(fmt::format(
-            "Error running Watchman: {}\nSorbet will not be able to detect changes to files made outside of "
-            "your code editor.\nDon't need Watchman? Run Sorbet with `--disable-watchman`.",
-            e.what()));
+        logger->info("Error running Watchman: {}\nSorbet will not be able to detect changes to files made outside of "
+                     "your code editor.\nDon't need Watchman? Run Sorbet with `--disable-watchman`.",
+                     e.what());
         processExit(alloc, 1);
     }
 }

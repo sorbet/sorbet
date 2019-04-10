@@ -70,7 +70,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &
 
     // Should always run typechecking at least once for each request post-initialization.
     ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
-    if (message.isNotification() && message.method() == "initialized") {
+    if (message.isNotification() && message.method() == LSPMethod::Initialize) {
         initialized = true;
     }
 
@@ -86,7 +86,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
             if (initialized) {
                 foundPostInitializationRequest = true;
                 break;
-            } else if (message->isNotification() && message->method() == "initialized") {
+            } else if (message->isNotification() && message->method() == LSPMethod::Initialized) {
                 initialized = true;
             }
         }
@@ -102,7 +102,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &message) {
-    return getLSPResponsesFor(LSPMessage(alloc, message));
+    return getLSPResponsesFor(*LSPMessage::fromClient(alloc, message));
 }
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,

@@ -175,10 +175,6 @@ TEST(GenerateLSPMessagesTest, AnyArray) {
     ASSERT_THROW(Command::fromJSON(alloc, "{\"title\": \"\", \"command\": \"\", \"arguments\": {}}"), JSONTypeError);
 }
 
-string makeNotificationMessage(string_view params) {
-    return fmt::format("{{\"jsonrpc\": \"2.0\", \"method\": \"blah\", \"params\": {}}}", params);
-}
-
 TEST(GenerateLSPMessagesTest, AnyObject) {
     parseTest<DocumentFormattingParams>(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}",
                                         [](auto &params) -> void { ASSERT_TRUE(params->options->IsObject()); });
@@ -268,13 +264,13 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
 
 // Ensures that LSPMessage parses ResultMessage/ResultMessageWithError/RequestMessage/NotificationMessage properly.
 TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
-    auto request = make_unique<RequestMessage>("2.0", 1, "foobar");
+    auto request = make_unique<RequestMessage>("2.0", 1, LSPMethod::Initialize);
     auto response = make_unique<ResponseMessage>("2.0", 1);
     // Null result.
     response->result = make_unique<rapidjson::Value>();
     auto responseWithError = make_unique<ResponseMessage>("2.0", 1);
     responseWithError->error = make_unique<ResponseError>(20, "Bad request");
-    auto notification = make_unique<NotificationMessage>("2.0", "foobar");
+    auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage);
 
     // For each, serialize as a JSON document to force LSPMessage to re-deserialize it.
     // Checks that LSPMessage recognizes each as the correct type of message.

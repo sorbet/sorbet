@@ -16,6 +16,8 @@ public:
 
 class InvalidStringEnumError : public DeserializationError {
 public:
+    const std::string enumName;
+    const std::string value;
     InvalidStringEnumError(std::string_view enumName, std::string_view value);
 };
 

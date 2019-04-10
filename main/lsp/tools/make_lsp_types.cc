@@ -60,6 +60,36 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // Converted from https://microsoft.github.io/language-server-protocol/specification
     // Last updated on 11/14/18.
 
+    // N.B.: Only contains LSP methods that Sorbet actually cares about.
+    // All others are ignored.
+    auto LSPMethod = makeStrEnum("LSPMethod",
+                                 {
+                                     "$/cancelRequest",
+                                     "initialize",
+                                     "initialized",
+                                     "shutdown",
+                                     "exit",
+                                     "textDocument/publishDiagnostics",
+                                     "textDocument/didOpen",
+                                     "textDocument/didChange",
+                                     "textDocument/didClose",
+                                     "textDocument/documentSymbol",
+                                     "textDocument/definition",
+                                     "textDocument/hover",
+                                     "textDocument/completion",
+                                     "textDocument/references",
+                                     "textDocument/signatureHelp",
+                                     "workspace/symbol",
+                                     "window/showMessage",
+                                     "__PAUSE__",
+                                     "__RESUME__",
+                                     "sorbet/watchmanFileChange",
+                                     "sorbet/watchmanExit",
+                                     "sorbet/showOperation",
+                                     "sorbet/error",
+                                 },
+                                 enumTypes);
+
     auto ResourceOperationKind = makeStrEnum("ResourceOperationKind", {"create", "rename", "delete"}, enumTypes);
     auto MarkupKind = makeStrEnum("MarkupKind", {"plaintext", "markdown"}, enumTypes);
     auto TraceKind = makeStrEnum("TraceKind", {"off", "messages", "verbose"}, enumTypes);
@@ -71,7 +101,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto RequestMessage =
         makeObject("RequestMessage",
                    {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
-                    makeField("method", JSONString), makeField("params", makeOptional(JSONAny))},
+                    makeField("method", LSPMethod), makeField("params", makeOptional(JSONAny))},
                    classTypes);
     auto ResponseError = makeObject("ResponseError",
                                     {
@@ -86,7 +116,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
          makeField("result", makeOptional(JSONAny)), makeField("error", makeOptional(ResponseError))},
         classTypes);
     auto NotificationMessage = makeObject("NotificationMessage",
-                                          {makeField("jsonrpc", JSONRPCConstant), makeField("method", JSONString),
+                                          {makeField("jsonrpc", JSONRPCConstant), makeField("method", LSPMethod),
                                            makeField("params", makeOptional(JSONAny))},
                                           classTypes);
 
@@ -1229,6 +1259,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                     makeField("status", SorbetOperationStatus),
                                                 },
                                                 classTypes);
+    auto SorbetErrorParams = makeObject("SorbetErrorParams",
+                                        {
+                                            makeField("code", JSONInt),
+                                            makeField("message", JSONString),
+                                        },
+                                        classTypes);
 
     /* Watchman JSON response objects */
     auto WatchmanQueryResponse = makeObject("WatchmanQueryResponse",

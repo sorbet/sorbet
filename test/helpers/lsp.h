@@ -12,8 +12,12 @@ using namespace sorbet::realmain::lsp;
 std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::string rootUri);
 
 /** Creates an LSPMessage containing a request message constructed from the given items. */
-std::unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, std::string method, int id,
+std::unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method, int id,
                                                const JSONBaseType &params);
+
+/** Creates an LSPMessage containing a notification message constructed from the given items. */
+std::unique_ptr<LSPMessage> makeNotificationMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method,
+                                                    const JSONBaseType &params);
 
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
@@ -32,7 +36,7 @@ bool assertResponseError(int code, std::string_view msg, const LSPMessage &respo
 
 /** Asserts that the LSPMessage is a NotificationMessage with the given method. Returns true on
  * success, fails the test otherwise. */
-bool assertNotificationMessage(const std::string &expectedMethod, const LSPMessage &response);
+bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response);
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */

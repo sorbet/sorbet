@@ -55,7 +55,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.signatureHelp");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentSignatureHelp(), false);
+                                     LSPMethod::TextDocumentSignatureHelp, false);
     if (auto run = get_if<TypecheckRun>(&result)) {
         auto finalGs = move(run->gs);
         auto &queryResponses = run->responses;

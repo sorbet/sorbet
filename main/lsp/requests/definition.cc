@@ -21,7 +21,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<c
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentDefinition(), true);
+                                     LSPMethod::TextDocumentDefinition, true);
     if (auto run = get_if<TypecheckRun>(&result)) {
         auto finalGs = move(run->gs);
         auto &queryResponses = run->responses;

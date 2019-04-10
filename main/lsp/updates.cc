@@ -25,14 +25,14 @@ LSPLoop::ShowOperation::ShowOperation(LSPLoop &loop, string_view operationName, 
     : loop(loop), operationName(string(operationName)), description(string(description)) {
     if (loop.enableOperationNotifications) {
         SorbetShowOperationParams slowPathOp(this->operationName, this->description, SorbetOperationStatus::Start);
-        loop.sendNotification(LSPMethod::SorbetShowOperation(), slowPathOp);
+        loop.sendNotification(LSPMethod::SorbetShowOperation, slowPathOp);
     }
 }
 
 LSPLoop::ShowOperation::~ShowOperation() {
     if (loop.enableOperationNotifications) {
         SorbetShowOperationParams slowPathOp(operationName, description, SorbetOperationStatus::End);
-        loop.sendNotification(LSPMethod::SorbetShowOperation(), slowPathOp);
+        loop.sendNotification(LSPMethod::SorbetShowOperation, slowPathOp);
     }
 }
 

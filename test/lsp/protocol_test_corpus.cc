@@ -119,7 +119,7 @@ TEST_F(ProtocolTest, DefinitionError) {
     auto &respMsg = defResponses.at(0)->isResponse() ? defResponses.at(0) : defResponses.at(1);
     auto &notifMsg = defResponses.at(0)->isNotification() ? defResponses.at(0) : defResponses.at(1);
     assertResponseMessage(nextId - 1, *respMsg);
-    assertNotificationMessage("window/showMessage", *notifMsg);
+    assertNotificationMessage(LSPMethod::WindowShowMessage, *notifMsg);
     assertResponseError(-32602, "only works correctly on typed ruby files", *respMsg);
 
     auto showMessageParams = ShowMessageParams::fromJSONValue(lspWrapper->alloc, notifMsg->params(), "root.params");
@@ -204,14 +204,14 @@ TEST_F(ProtocolTest, EmptyRootUri) {
     // Manually construct an openFile with text that has a typechecking error.
     auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
         "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
-    auto didOpenNotif = make_unique<NotificationMessage>("2.0", "textDocument/didOpen");
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen);
     didOpenNotif->params = didOpenParams->toJSONValue(lspWrapper->alloc);
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
     // Check the response for the expected URI.
     EXPECT_EQ(diagnostics.size(), 1);
     auto &msg = diagnostics.at(0);
-    if (assertNotificationMessage("textDocument/publishDiagnostics", *msg)) {
+    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
         // Will fail test if this does not parse.
         if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
             EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
@@ -228,7 +228,7 @@ TEST_F(ProtocolTest, CompletionOnNonClass) {
                                                           make_unique<Position>(3, 1));
     completionParams->context = make_unique<CompletionContext>(CompletionTriggerKind::Invoked);
 
-    auto completionReq = make_unique<RequestMessage>("2.0", 100, "textDocument/completion");
+    auto completionReq = make_unique<RequestMessage>("2.0", 100, LSPMethod::TextDocumentCompletion);
     completionReq->params = completionParams->toJSONValue(lspWrapper->alloc);
     // We don't care about the result. We just care that Sorbet didn't die due to an ENFORCE failure.
     send(LSPMessage(move(completionReq)));
@@ -246,7 +246,7 @@ TEST_F(ProtocolTest, HidesSyntheticArgumentsOnHover) {
     // TODO: Make this nicer once we have good hover helpers.
     auto hoverParams = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("yolo1.rb")),
                                                                make_unique<Position>(11, 9));
-    auto hoverReq = make_unique<RequestMessage>("2.0", 100, "textDocument/hover");
+    auto hoverReq = make_unique<RequestMessage>("2.0", 100, LSPMethod::TextDocumentHover);
     hoverReq->params = hoverParams->toJSONValue(lspWrapper->alloc);
 
     auto response = send(LSPMessage(move(hoverReq)));

@@ -201,4 +201,5 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
     }
     return SymbolKind::Unknown;
 }
+
 } // namespace sorbet::realmain::lsp

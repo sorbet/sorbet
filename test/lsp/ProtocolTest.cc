@@ -77,7 +77,7 @@ unique_ptr<LSPMessage> ProtocolTest::openFile(string_view path, string_view cont
     auto uri = getUri(path);
     auto didOpenParams =
         make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(uri, "ruby", 1, string(contents)));
-    auto didOpenNotif = make_unique<NotificationMessage>("2.0", "textDocument/didOpen");
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen);
     didOpenNotif->params = didOpenParams->toJSONValue(lspWrapper->alloc);
     return make_unique<LSPMessage>(move(didOpenNotif));
 }
@@ -96,7 +96,7 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
 
     auto uri = getUri(path);
     auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(uri));
-    auto didCloseNotif = make_unique<NotificationMessage>("2.0", "textDocument/didClose");
+    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose);
     didCloseNotif->params = didCloseParams->toJSONValue(lspWrapper->alloc);
     return make_unique<LSPMessage>(move(didCloseNotif));
 }
@@ -109,14 +109,14 @@ unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view ne
     vector<unique_ptr<TextDocumentContentChangeEvent>> changeEvents;
     changeEvents.push_back(make_unique<TextDocumentContentChangeEvent>(string(newContents)));
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDocIdent), move(changeEvents));
-    auto didChangeNotif = make_unique<NotificationMessage>("2.0", "textDocument/didChange");
+    auto didChangeNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange);
     didChangeNotif->params = didChangeParams->toJSONValue(lspWrapper->alloc);
     return make_unique<LSPMessage>(move(didChangeNotif));
 }
 
 unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
     auto docSymParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(getUri(path)));
-    auto req = make_unique<RequestMessage>("2.0", nextId++, "textDocument/documentSymbol");
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol);
     req->params = docSymParams->toJSONValue(lspWrapper->alloc);
     return make_unique<LSPMessage>(move(req));
 }
@@ -126,7 +126,7 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
 }
 
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
-    auto req = make_unique<RequestMessage>("2.0", nextId++, "sorbet/watchmanFileChange");
+    auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange);
     req->params = WatchmanQueryResponse("", "", false, updatedFilePaths).toJSONValue(lspWrapper->alloc);
     return make_unique<LSPMessage>(move(req));
 }
@@ -148,7 +148,7 @@ void ProtocolTest::deleteFileFromFS(string_view filename) {
 }
 
 unique_ptr<LSPMessage> ProtocolTest::cancelRequest(int id) {
-    return makeRequestMessage(lspWrapper->alloc, "$/cancelRequest", nextId++, CancelParams(id));
+    return makeRequestMessage(lspWrapper->alloc, LSPMethod::$CancelRequest, nextId++, CancelParams(id));
 }
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
@@ -165,7 +165,7 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>>
 
 void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messages) {
     for (auto &msg : messages) {
-        if (msg->isNotification() && msg->method() == "textDocument/publishDiagnostics") {
+        if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
             if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
                 // Will explicitly overwrite older diagnostics that are irrelevant.
                 diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move((*diagnosticParams)->diagnostics);
@@ -176,7 +176,7 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
 
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
     for (auto &msg : messages) {
-        if (!assertNotificationMessage("textDocument/publishDiagnostics", *msg)) {
+        if (!assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
             // Assertion failed: Received a non-diagnostic. No need to continue.
             return;
         }

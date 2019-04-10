@@ -23,121 +23,8 @@
 // |_____|____/|_|
 //
 //
-// This is an implementation of LSP protocol(version 3.0) for Ruby typer
-// So far we only support errors but the intention is to
-// continue adding support to features already in LSP:
-// - code navigation(jump to definition, find all usages, etc)
-// - refactorings(rename classes)
-//
-// So far, we only handle changes via "textDocument/didChange" request.
-// This is the main request that is used by VSCode.
-// VI uses "textDocument/didSave" that is very similar and should be easy to support.
+// This is an implementation of LSP protocol (version 3.13) for Sorbet
 namespace sorbet::realmain::lsp {
-
-/** This structure represents a method defined by LSP.
- * It is used as an enum to indicate properties of method in common request handling code.
- */
-struct LSPMethod {
-    /* What is the name of this method as specified in the protocol */
-    const std::string name;
-    /* Is this a notification? Otherwise this is a request and it would need a response */
-    const bool isNotification;
-    /* Who initiates this request */
-    enum class Kind {
-        ServerInitiated,
-        ClientInitiated,
-        Both,
-    };
-    const Kind kind;
-    /* Do we support this method? */
-    const bool isSupported = true;
-
-    inline bool operator==(const LSPMethod &other) const {
-        return other.name == this->name;
-    }
-    inline bool operator!=(const LSPMethod &other) const {
-        return other.name != this->name;
-    }
-    static const inline LSPMethod CancelRequest() {
-        return LSPMethod{"$/cancelRequest", true, LSPMethod::Kind::Both};
-    };
-    static const inline LSPMethod Initialize() {
-        return LSPMethod{"initialize", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod Initialized() {
-        return LSPMethod{"initialized", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod Shutdown() {
-        return LSPMethod{"shutdown", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod Exit() {
-        return LSPMethod{"exit", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod RegisterCapability() {
-        return LSPMethod{"client/registerCapability", false, LSPMethod::Kind::ServerInitiated};
-    };
-    static const inline LSPMethod UnRegisterCapability() {
-        return LSPMethod{"client/unregisterCapability", false, LSPMethod::Kind::ServerInitiated};
-    };
-    static const inline LSPMethod DidChangeWatchedFiles() {
-        return LSPMethod{"workspace/didChangeWatchedFiles", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod PushDiagnostics() {
-        return LSPMethod{"textDocument/publishDiagnostics", true, LSPMethod::Kind::ServerInitiated};
-    };
-    static const inline LSPMethod TextDocumentDidOpen() {
-        return LSPMethod{"textDocument/didOpen", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentDidChange() {
-        return LSPMethod{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentDidClose() {
-        return LSPMethod{"textDocument/didClose", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentDocumentSymbol() {
-        return LSPMethod{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentDefinition() {
-        return LSPMethod{"textDocument/definition", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentHover() {
-        return LSPMethod{"textDocument/hover", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentCompletion() {
-        return LSPMethod{"textDocument/completion", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentRefernces() {
-        return LSPMethod{"textDocument/references", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod TextDocumentSignatureHelp() {
-        return LSPMethod{"textDocument/signatureHelp", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod WorkspaceSymbols() {
-        return LSPMethod{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod WindowShowMessage() {
-        return LSPMethod{"window/showMessage", true, LSPMethod::Kind::ServerInitiated};
-    };
-    static const inline LSPMethod Pause() {
-        return LSPMethod{"__PAUSE__", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod Resume() {
-        return LSPMethod{"__RESUME__", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod SorbetWatchmanFileChange() {
-        return LSPMethod{"sorbet/watchmanFileChange", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod SorbetWatchmanExit() {
-        return LSPMethod{"sorbet/watchmanExit", true, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod SorbetShowOperation() {
-        return LSPMethod{"sorbet/showOperation", true, LSPMethod::Kind::ServerInitiated};
-    };
-    static const std::vector<LSPMethod> ALL_METHODS;
-    static const LSPMethod getByName(std::string_view name);
-};
-
-/** List of all LSP Methods that we are aware of */
 
 enum class LSPErrorCodes {
     // Defined by JSON RPC
@@ -259,7 +146,7 @@ class LSPLoop {
     void sendRaw(std::string_view json);
 
     /* Send `data` as payload of notification 'meth' */
-    void sendNotification(LSPMethod meth, const JSONBaseType &data);
+    void sendNotification(const LSPMethod meth, const JSONBaseType &data);
 
     void sendNullResponse(const MessageId &id);
     void sendResponse(const MessageId &id, const JSONBaseType &result);
@@ -294,7 +181,7 @@ class LSPLoop {
     std::unique_ptr<core::GlobalState> pushDiagnostics(TypecheckRun filesTypechecked);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
-    bool ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
+    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
                            const std::unique_ptr<core::GlobalState> &currentGs);
 
     core::FileRef uri2FileRef(std::string_view uri);
@@ -311,9 +198,8 @@ class LSPLoop {
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
     std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
     setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
-                       const LSPMethod &forMethod, bool errorIfFileIsUntyped);
-    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
-                                       const LSPMethod &forMethod);
+                       const LSPMethod forMethod, bool errorIfFileIsUntyped);
+    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol);
     std::unique_ptr<core::GlobalState> handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs,
                                                                const MessageId &id,
                                                                const TextDocumentPositionParams &params);

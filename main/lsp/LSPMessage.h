@@ -41,6 +41,14 @@ private:
     RawLSPMessage msg;
 
 public:
+    /**
+     * Parses a message received from a client. Unlike the constructor, this method does not throw an exception if the
+     * JSON fails to parse. Instead, it returns a SorbetError LSPMessage. The Sorbet language server properly processes
+     * these SorbetErrors to return the error to the client (or to print it in the log), so it can be passed along as if
+     * parsing succeeded.
+     */
+    static std::unique_ptr<LSPMessage> fromClient(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
+
     LSPMessage(RawLSPMessage msg);
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d);
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
@@ -114,7 +122,7 @@ public:
      * If this is a request or a notification, returns the contents of the `method` field.
      * Raises if it is a response.
      */
-    std::string_view method() const;
+    LSPMethod method() const;
 
     /**
      * If this is a request or a notification, sets the contents of the `params` field.

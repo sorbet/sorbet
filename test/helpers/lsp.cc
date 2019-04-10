@@ -124,9 +124,16 @@ unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
     return initializeParams;
 }
 
-unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, string method, int id,
+unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method, int id,
                                           const JSONBaseType &params) {
     auto initialize = make_unique<RequestMessage>("2.0", id, method);
+    initialize->params = params.toJSONValue(alloc);
+    return make_unique<LSPMessage>(move(initialize));
+}
+
+std::unique_ptr<LSPMessage> makeNotificationMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method,
+                                                    const JSONBaseType &params) {
+    auto initialize = make_unique<NotificationMessage>("2.0", method);
     initialize->params = params.toJSONValue(alloc);
     return make_unique<LSPMessage>(move(initialize));
 }
@@ -135,7 +142,7 @@ unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &a
                                              int line, int character) {
     unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
         make_unique<TextDocumentIdentifier>(string(uri)), make_unique<Position>(line, character));
-    return makeRequestMessage(alloc, "textDocument/definition", id, *textDocumentPositionParams);
+    return makeRequestMessage(alloc, LSPMethod::TextDocumentDefinition, id, *textDocumentPositionParams);
 }
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
@@ -246,7 +253,7 @@ bool assertResponseError(int code, string_view msg, const LSPMessage &response) 
     return false;
 }
 
-bool assertNotificationMessage(const string &expectedMethod, const LSPMessage &response) {
+bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response) {
     if (!response.isNotification()) {
         failWithUnexpectedLSPResponse(response);
         return false;
@@ -274,7 +281,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     {
         unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(string(rootPath), string(rootUri));
         auto responses = lspWrapper.getLSPResponsesFor(
-            *makeRequestMessage(lspWrapper.alloc, "initialize", nextId++, *initializeParams));
+            *makeRequestMessage(lspWrapper.alloc, LSPMethod::Initialize, nextId++, *initializeParams));
 
         // Should just have an 'initialize' response.
         EXPECT_EQ(1, responses.size());
@@ -301,7 +308,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     // Complete initialization handshake with an 'initialized' message.
     {
         rapidjson::Value emptyObject(rapidjson::kObjectType);
-        auto initialized = make_unique<NotificationMessage>("2.0", "initialized");
+        auto initialized = make_unique<NotificationMessage>("2.0", LSPMethod::Initialized);
         initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
         return lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
     }

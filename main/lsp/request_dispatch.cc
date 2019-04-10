@@ -7,7 +7,8 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
-    return LSPLoop::processRequest(move(gs), LSPMessage(alloc, json));
+    unique_ptr<LSPMessage> msg = LSPMessage::fromClient(alloc, json);
+    return LSPLoop::processRequest(move(gs), *msg);
 }
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
@@ -16,6 +17,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
     try {
         return processRequestInternal(move(gs), msg);
     } catch (const DeserializationError &e) {
+        // TODO(jvilk): Can remove once all parsing happens up-front.
         if (id.has_value()) {
             sendError(*id, (int)LSPErrorCodes::InvalidParams, e.what());
         }
@@ -43,16 +45,28 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         return gs;
     }
 
-    const LSPMethod method = LSPMethod::getByName(msg.method());
+    const LSPMethod method = msg.method();
 
-    ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
+    // Errors can be notifications or requests.
+    if (method == LSPMethod::SorbetError) {
+        auto params = SorbetErrorParams::fromJSONValue(alloc, msg.params(), "root.params");
+        if (msg.isRequest()) {
+            sendError(msg.asRequest().id, params->code, params->message);
+        } else if (params->code == (int)LSPErrorCodes::MethodNotFound) {
+            // Not an error; we just don't care about this notification type.
+            logger->info(params->message);
+        } else {
+            logger->error(params->message);
+        }
+        return gs;
+    }
 
     if (!ensureInitialized(method, msg, gs)) {
         return gs;
     }
-    if (method.isNotification) {
-        logger->debug("Processing notification {} ", method.name);
-        if (method == LSPMethod::TextDocumentDidChange()) {
+    if (msg.isNotification()) {
+        logger->debug("Processing notification {} ", convertLSPMethodToString(method));
+        if (method == LSPMethod::TextDocumentDidChange) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
             Timer timeit(logger, "text_document_did_change");
             vector<shared_ptr<core::File>> files;
@@ -107,7 +121,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 return pushDiagnostics(tryFastPath(move(gs), files));
             }
         }
-        if (method == LSPMethod::TextDocumentDidOpen()) {
+        if (method == LSPMethod::TextDocumentDidOpen) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
             Timer timeit(logger, "text_document_did_open");
             auto edits = DidOpenTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
@@ -125,7 +139,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 return pushDiagnostics(tryFastPath(move(gs), files));
             }
         }
-        if (method == LSPMethod::TextDocumentDidClose()) {
+        if (method == LSPMethod::TextDocumentDidClose) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
             Timer timeit(logger, "text_document_did_close");
             auto edits = DidCloseTextDocumentParams::fromJSONValue(alloc, msg.params(), "root.params");
@@ -146,7 +160,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 return handleWatchmanUpdates(move(gs), {localPath});
             }
         }
-        if (method == LSPMethod::SorbetWatchmanFileChange()) {
+        if (method == LSPMethod::SorbetWatchmanFileChange) {
             prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
             Timer timeit(logger, "watchman_file_change");
             auto queryResponse = WatchmanQueryResponse::fromJSONValue(alloc, msg.params(), "root.params");
@@ -165,7 +179,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
             return handleWatchmanUpdates(move(gs), absoluteFilePaths);
         }
-        if (method == LSPMethod::Initialized()) {
+        if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             // initialize ourselves
             unique_ptr<core::GlobalState> newGs;
@@ -189,11 +203,11 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             deferredWatchmanUpdates.clear();
             return handleWatchmanUpdates(move(newGs), deferredUpdatesVector);
         }
-        if (method == LSPMethod::Exit()) {
+        if (method == LSPMethod::Exit) {
             return gs;
         }
     } else if (msg.isRequest()) {
-        logger->debug("Processing request {}", method.name);
+        logger->debug("Processing request {}", convertLSPMethodToString(method));
         auto &requestMessage = msg.asRequest();
         auto id = requestMessage.id;
         if (msg.canceled) {
@@ -207,7 +221,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         }
         auto &rawParams = *requestMessage.params;
 
-        if (method == LSPMethod::Initialize()) {
+        if (method == LSPMethod::Initialize) {
             prodCategoryCounterInc("lsp.messages.processed", "initialize");
             auto params = InitializeParams::fromJSONValue(alloc, *rawParams, "root.params");
             if (auto rootUriString = get_if<string>(&params->rootUri)) {
@@ -255,36 +269,37 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
 
             sendResponse(id, InitializeResult(move(serverCap)));
-        } else if (method == LSPMethod::Shutdown()) {
+        } else if (method == LSPMethod::Shutdown) {
             prodCategoryCounterInc("lsp.messages.processed", "shutdown");
             sendNullResponse(id);
-        } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
+        } else if (method == LSPMethod::TextDocumentDocumentSymbol) {
             auto params = DocumentSymbolParams::fromJSONValue(alloc, *rawParams);
             return handleTextDocumentDocumentSymbol(move(gs), id, *params);
-        } else if (method == LSPMethod::WorkspaceSymbols()) {
+        } else if (method == LSPMethod::WorkspaceSymbol) {
             auto params = WorkspaceSymbolParams::fromJSONValue(alloc, *rawParams);
             return handleWorkspaceSymbols(move(gs), id, *params);
-        } else if (method == LSPMethod::TextDocumentDefinition()) {
+        } else if (method == LSPMethod::TextDocumentDefinition) {
             auto params = TextDocumentPositionParams::fromJSONValue(alloc, *rawParams);
             return handleTextDocumentDefinition(move(gs), id, *params);
-        } else if (method == LSPMethod::TextDocumentHover()) {
+        } else if (method == LSPMethod::TextDocumentHover) {
             auto params = TextDocumentPositionParams::fromJSONValue(alloc, *rawParams);
             return handleTextDocumentHover(move(gs), id, *params);
-        } else if (method == LSPMethod::TextDocumentCompletion()) {
+        } else if (method == LSPMethod::TextDocumentCompletion) {
             auto params = CompletionParams::fromJSONValue(alloc, *rawParams);
             return handleTextDocumentCompletion(move(gs), id, *params);
-        } else if (method == LSPMethod::TextDocumentSignatureHelp()) {
+        } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto params = TextDocumentPositionParams::fromJSONValue(alloc, *rawParams);
             return handleTextSignatureHelp(move(gs), id, *params);
-        } else if (method == LSPMethod::TextDocumentRefernces()) {
+        } else if (method == LSPMethod::TextDocumentReferences) {
             auto params = ReferenceParams::fromJSONValue(alloc, *rawParams);
             return handleTextDocumentReferences(move(gs), id, *params);
         } else {
-            ENFORCE(!method.isSupported, "failing a supported method");
-            sendError(id, (int)LSPErrorCodes::MethodNotFound, fmt::format("Unknown method: {}", method.name));
+            // Method parsed, but isn't a request.
+            sendError(id, (int)LSPErrorCodes::MethodNotFound,
+                      fmt::format("Notification method sent as request: {}", convertLSPMethodToString(method)));
         }
     } else {
-        logger->debug("Unable to process request {}; LSP message is not a request.", method.name);
+        logger->debug("Unable to process request {}; LSP message is not a request.", convertLSPMethodToString(method));
     }
     return gs;
 }

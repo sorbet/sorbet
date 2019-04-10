@@ -20,7 +20,8 @@ DeserializationError::DeserializationError(string_view message)
     : runtime_error(fmt::format("Error deserializing JSON message: {}", message)) {}
 
 InvalidStringEnumError::InvalidStringEnumError(string_view enumName, string_view value)
-    : DeserializationError(fmt::format("Invalid value for enum type `{}`: {}", enumName, value)) {}
+    : DeserializationError(fmt::format("Invalid value for enum type `{}`: {}", enumName, value)),
+      enumName(string(enumName)), value(string(value)) {}
 
 MissingFieldError::MissingFieldError(string_view objectName, string_view fieldName)
     : DeserializationError(fmt::format("Missing field `{}` on object of type `{}`.", fieldName, objectName)) {}

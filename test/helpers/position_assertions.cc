@@ -411,7 +411,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
     int id = nextId++;
     auto responses = lspWrapper.getLSPResponsesFor(
-        *makeRequestMessage(lspWrapper.alloc, "textDocument/references", id, *referenceParams));
+        *makeRequestMessage(lspWrapper.alloc, LSPMethod::TextDocumentReferences, id, *referenceParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;

@@ -18,7 +18,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentCompletion(), false);
+                                     LSPMethod::TextDocumentCompletion, false);
     if (auto run1 = get_if<TypecheckRun>(&result)) {
         auto finalGs = move(run1->gs);
         auto &queryResponses = run1->responses;
@@ -28,7 +28,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
             if (auto constResp = resp->isConstant()) {
                 if (!constResp->dispatchComponents.empty()) {
                     auto symRef = constResp->dispatchComponents[0].method;
-                    auto run2 = setupLSPQueryBySymbol(move(finalGs), symRef, LSPMethod::TextDocumentRefernces());
+                    auto run2 = setupLSPQueryBySymbol(move(finalGs), symRef);
                     finalGs = move(run2.gs);
                     vector<unique_ptr<JSONBaseType>> result;
                     auto &queryResponses = run2.responses;

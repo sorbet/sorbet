@@ -44,13 +44,13 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 
 variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
-                            const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
+                            const LSPMethod forMethod, bool errorIfFileIsUntyped) {
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
-        return make_pair(
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                       fmt::format("Did not find file at uri {} in {}", uri, forMethod.name)),
-            move(gs));
+        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
+                                                    fmt::format("Did not find file at uri {} in {}", uri,
+                                                                convertLSPMethodToString(forMethod))),
+                         move(gs));
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::Typed) {
@@ -63,18 +63,17 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     }
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
-        return make_pair(
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                       fmt::format("Did not find location at uri {} in {}", uri, forMethod.name)),
-            move(gs));
+        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
+                                                    fmt::format("Did not find location at uri {} in {}", uri,
+                                                                convertLSPMethodToString(forMethod))),
+                         move(gs));
     }
 
     vector<shared_ptr<core::File>> files;
     files.emplace_back(fref.data(*gs).deepCopy(*gs));
     return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym,
-                                                     const LSPMethod &forMethod) {
+LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
     return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
@@ -84,12 +83,12 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
                                 const unique_ptr<core::GlobalState> &currentGs) {
     // Note: Watchman file updates happen independent of the client. We tolerate these before initialization by
     // deferring them.
-    if (initialized || forMethod == LSPMethod::SorbetWatchmanFileChange() || forMethod == LSPMethod::Initialize() ||
-        forMethod == LSPMethod::Initialized() || forMethod == LSPMethod::Exit() || forMethod == LSPMethod::Shutdown()) {
+    if (initialized || forMethod == LSPMethod::SorbetWatchmanFileChange || forMethod == LSPMethod::Initialize ||
+        forMethod == LSPMethod::Initialized || forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown) {
         return true;
     }
     logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
-    if (!forMethod.isNotification) {
+    if (!msg.isNotification()) {
         auto id = msg.id().value_or(0);
         sendError(id, (int)LSPErrorCodes::ServerNotInitialized,
                   "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
@@ -184,42 +183,11 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
                 }
             }
 
-            sendNotification(LSPMethod::PushDiagnostics(), PublishDiagnosticsParams(uri, move(diagnostics)));
+            sendNotification(LSPMethod::TextDocumentPublishDiagnostics,
+                             PublishDiagnosticsParams(uri, move(diagnostics)));
         }
     }
     return move(run.gs);
-}
-
-const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
-                                               Initialize(),
-                                               Shutdown(),
-                                               Exit(),
-                                               RegisterCapability(),
-                                               UnRegisterCapability(),
-                                               DidChangeWatchedFiles(),
-                                               PushDiagnostics(),
-                                               TextDocumentDidOpen(),
-                                               TextDocumentDidChange(),
-                                               TextDocumentDidClose(),
-                                               TextDocumentDocumentSymbol(),
-                                               TextDocumentDefinition(),
-                                               TextDocumentHover(),
-                                               TextDocumentCompletion(),
-                                               TextDocumentRefernces(),
-                                               TextDocumentSignatureHelp(),
-                                               WorkspaceSymbols(),
-                                               CancelRequest(),
-                                               Pause(),
-                                               Resume(),
-                                               SorbetWatchmanFileChange()};
-
-const LSPMethod LSPMethod::getByName(string_view name) {
-    for (auto &candidate : ALL_METHODS) {
-        if (candidate.name == name) {
-            return candidate;
-        }
-    }
-    return LSPMethod{string(name), true, LSPMethod::Kind::ClientInitiated, false};
 }
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);

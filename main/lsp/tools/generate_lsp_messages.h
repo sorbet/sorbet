@@ -1,6 +1,7 @@
 #ifndef GENERATE_LSP_MESSAGES_H
 #define GENERATE_LSP_MESSAGES_H
 #include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
 #include "common/common.h"
 
 #include <fstream>
@@ -522,10 +523,18 @@ class JSONStringEnumType final : public JSONClassType {
 private:
     std::vector<const std::string> enumValues;
 
-    // Capitalizes the first character of the input string (e.g., foo => Foo)
-    // and replaces periods.
+    // Capitalizes the first character of the input string (e.g., foo => Foo),
+    // strips {'.','_','/'}, and capitalizes first letter after those characters.
     static std::string toIdentifier(std::string_view val) {
-        return fmt::format("{}{}", std::string(1, toupper(val[0])), absl::StrReplaceAll(val.substr(1), {{".", "_"}}));
+        // Split string into components.
+        auto components = absl::StrSplit(val, absl::ByAnyChar("._/"));
+        // Capitalize each component.
+        return fmt::format("{}", fmt::map_join(components, "", [](auto component) -> std::string {
+                               if (component.length() == 0) {
+                                   return "";
+                               }
+                               return fmt::format("{}{}", std::string(1, toupper(component[0])), component.substr(1));
+                           }));
     }
 
     std::string enumStrVar(std::string_view value) {

@@ -433,7 +433,7 @@ TEST_P(LSPTest, All) {
             unique_ptr<JSONBaseType> params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
             auto responses = lspWrapper->getLSPResponsesFor(
-                *makeRequestMessage(lspWrapper->alloc, "textDocument/didOpen", nextId++, *params));
+                *makeNotificationMessage(lspWrapper->alloc, LSPMethod::TextDocumentDidOpen, *params));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
@@ -451,7 +451,7 @@ TEST_P(LSPTest, All) {
             textChanges.push_back(move(textDocChange));
 
             auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
-            auto didChangeNotif = make_unique<NotificationMessage>("2.0", "textDocument/didChange");
+            auto didChangeNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange);
             didChangeNotif->params = didChangeParams->toJSONValue(lspWrapper->alloc);
 
             auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(didChangeNotif)));
@@ -466,7 +466,7 @@ TEST_P(LSPTest, All) {
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         {
             for (auto &response : allResponses) {
-                if (assertNotificationMessage("textDocument/publishDiagnostics", *response)) {
+                if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
                     auto maybeDiagnosticParams =
                         getPublishDiagnosticParams(lspWrapper->alloc, response->asNotification());
                     ASSERT_TRUE(maybeDiagnosticParams.has_value());
