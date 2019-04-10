@@ -147,14 +147,14 @@ We recommend skimming these docs to get a feel for how to use Sorbet:
 - RBI Files
   (#{cyan("https://stripe.dev/sorbet/super-secret-private-beta/docs/rbi")})
 
-If instead you like to throw caution to the wind, here are some things to try:
+If instead you want to explore your files locally, here are some things to try:
 
 - Upgrade a file marked # typed: false to # typed: true.
   Then, run #{cyan("srb tc")} and try to fix any errors.
 - Add signatures to your methods with `sig`.
   For how, read: #{cyan("https://stripe.dev/sorbet/super-secret-private-beta/docs/sigs")}
 - Check whether things that show up in the TODO RBI file actually exist in your project.
-  It's possible that definitions in the TODO RBI file don't actually exist!
+  It's possible some of these constants are typos.
 - Upgrade a file marked #{cyan("# typed: ignore")} to #{cyan("# typed: false")}.
   Then, run #{cyan("srb tc")} and try to fix any errors.
 
