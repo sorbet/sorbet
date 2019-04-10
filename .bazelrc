@@ -234,3 +234,7 @@ build:webasm --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
 ##
 common:stripeci --config=ci
 common:ci --color yes
+
+
+# enables a lot of features in mac instruments profiler
+build:instruments --linkopt=-framework --linkopt=CoreFoundation
