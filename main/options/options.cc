@@ -39,6 +39,7 @@ const vector<PrintOptions> print_options({
     {"file-table-json", &Printers::FileTableJson, true},
     {"resolve-tree", &Printers::ResolveTree, true},
     {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
+    {"missing-constants", &Printers::MissingConstants, true},
     {"cfg", &Printers::CFG, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},

@@ -31,6 +31,7 @@ struct Printers {
     bool FileTableJson = false;
     bool ResolveTree = false;
     bool ResolveTreeRaw = false;
+    bool MissingConstants = false;
     bool CFG = false;
     bool TypedSource = false;
     bool Autogen = false;
