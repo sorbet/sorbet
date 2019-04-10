@@ -237,6 +237,26 @@ ConstantLit::ConstantLit(core::Loc loc, core::SymbolRef symbol, unique_ptr<Unres
     _sanityCheck();
 }
 
+optional<pair<core::SymbolRef, vector<core::NameRef>>>
+ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
+    if (this->symbol != core::Symbols::StubModule()) {
+        return nullopt;
+    }
+    vector<core::NameRef> namesFailedToResolve;
+    auto nested = this;
+    {
+        while (!nested->resolutionScope.exists()) {
+            ENFORCE(nested->symbol == core::Symbols::StubModule());
+            namesFailedToResolve.emplace_back(nested->original->cnst);
+            ENFORCE(ast::cast_tree<ast::ConstantLit>(nested->original->scope.get()));
+            nested = ast::cast_tree<ast::ConstantLit>(nested->original->scope.get());
+        }
+        namesFailedToResolve.emplace_back(nested->original->cnst);
+        std::reverse(namesFailedToResolve.begin(), namesFailedToResolve.end());
+    }
+    return make_pair(nested->resolutionScope, move(namesFailedToResolve));
+}
+
 Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> body)
     : Expression(loc), args(std::move(args)), body(std::move(body)) {
     categoryCounterInc("trees", "block");

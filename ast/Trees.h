@@ -574,6 +574,8 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>>
+    fullUnresolvedPath(const core::GlobalState &gs) const;
 
 private:
     virtual void _sanityCheck();
