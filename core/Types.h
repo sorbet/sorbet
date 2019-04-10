@@ -235,18 +235,18 @@ public:
     ClassType(SymbolRef symbol);
     virtual int kind() final;
 
-    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const override;
+    virtual std::string show(const GlobalState &gs) const override;
+    virtual std::string typeName() const override;
+    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override final;
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
     void _sanityCheck(Context ctx) final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                 const std::vector<TypePtr> &targs) override;
+                                 const std::vector<TypePtr> &targs) override final;
     virtual bool isFullyDefined() final;
-    virtual bool hasUntyped() override;
+    virtual bool hasUntyped() override final;
 };
 CheckSize(ClassType, 16, 8);
 
@@ -680,6 +680,17 @@ class BlamedUntyped final : public ClassType {
 public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
+};
+
+class UnresolvedClassType final : public ClassType {
+public:
+    const core::SymbolRef scope;
+    const std::vector<core::NameRef> names;
+    UnresolvedClassType(SymbolRef scope, std::vector<core::NameRef> names)
+        : ClassType(core::Symbols::untyped()), scope(scope), names(names){};
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
 };
 
 } // namespace sorbet::core

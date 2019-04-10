@@ -484,13 +484,26 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                                     maybeAliased.show(ctx));
                     }
                 }
-                if (sym.data(ctx)->superClass() == core::Symbols::StubClass()) {
+                if (sym == core::Symbols::StubClass()) {
+                    vector<core::NameRef> namesFailedToResolve;
+                    auto nested = i;
+                    {
+                        while (!nested->resolutionScope.exists()) {
+                            ENFORCE(nested->symbol == core::Symbols::StubClass());
+                            namesFailedToResolve.emplace_back(nested->original->cnst);
+                            ENFORCE(ast::cast_tree<ast::ConstantLit>(nested->original->scope.get()));
+                            nested = ast::cast_tree<ast::ConstantLit>(nested->original->scope.get());
+                        }
+                        namesFailedToResolve.emplace_back(nested->original->cnst);
+                        std::reverse(namesFailedToResolve.begin(), namesFailedToResolve.end());
+                    }
                     // Though for normal types _and_ stub types `infer` should use `externalType`,
                     // using `externalType` for stub types here will lead to incorrect handling of global state hashing,
                     // where we won't see difference between two different unresolved stubs(or a mistyped stub). thus,
                     // while normally we would treat stubs as untyped, in `sig`s we treat them as proper types, so that
                     // we can correctly hash them.
-                    result.type = core::make_type<core::ClassType>(sym);
+                    result.type =
+                        core::make_type<core::UnresolvedClassType>(nested->resolutionScope, move(namesFailedToResolve));
                 } else {
                     result.type = sym.data(ctx)->externalType(ctx);
                 }
