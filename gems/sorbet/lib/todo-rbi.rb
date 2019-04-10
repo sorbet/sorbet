@@ -80,7 +80,7 @@ class Sorbet::Private::TodoRBI
           output << "#{s.final_name} = T.let(#{s.final_name}, T.untyped)\n"
         end
       end
-      File.write(OUTPUT, output)
+      File.write(OUTPUT, output) if output != HEADER
     end
   end
 
