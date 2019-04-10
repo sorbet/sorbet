@@ -6574,17 +6574,6 @@ class Sorbet::Private::GemGeneratorTracepoint::ClassDefinition
   def self.members(); end
 end
 
-class Sorbet::Private::GemGeneratorTracepoint::ModuleUtils
-end
-
-class Sorbet::Private::GemGeneratorTracepoint::ModuleUtils
-  def self.real_is_a?(klass, type); end
-
-  def self.real_name(klass); end
-
-  def self.real_object_id(klass); end
-end
-
 class Sorbet::Private::GemGeneratorTracepoint::TracepointSerializer
   def initialize(files:, delegate_classes:); end
 
@@ -6746,6 +6735,21 @@ module Sorbet::Private::Main
   def self.yellow(msg); end
 end
 
+module Sorbet::Private::RealStdlib
+end
+
+module Sorbet::Private::RealStdlib
+  def self.real_ancestors(mod); end
+
+  def self.real_constants(mod); end
+
+  def self.real_is_a?(o, klass); end
+
+  def self.real_name(o); end
+
+  def self.real_object_id(o); end
+end
+
 class Sorbet::Private::RequireEverything
 end
 
@@ -6854,7 +6858,6 @@ end
 
 module Sorbet::Private
   extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
-  def self.real_is_a?(o, klass); end
 end
 
 class SortedSet

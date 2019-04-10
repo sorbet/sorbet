@@ -3624,7 +3624,6 @@
 # wrong constant name serialize_rbi_list
 # wrong constant name vendor_rbis_within_paths
 # wrong constant name <Class:ClassDefinition>
-# wrong constant name <Class:ModuleUtils>
 # wrong constant name <Class:TracepointSerializer>
 # wrong constant name <Class:Tracer>
 # uninitialized constant Sorbet::Private::GemGeneratorTracepoint::ClassDefinition::Elem
@@ -3637,10 +3636,6 @@
 # wrong constant name <static-init>
 # wrong constant name []
 # wrong constant name members
-# wrong constant name <static-init>
-# wrong constant name real_is_a?
-# wrong constant name real_name
-# wrong constant name real_object_id
 # wrong constant name initialize
 # wrong constant name serialize
 # wrong constant name <static-init>
@@ -3706,6 +3701,12 @@
 # wrong constant name parse_command
 # wrong constant name yellow
 # wrong constant name <static-init>
+# wrong constant name real_ancestors
+# wrong constant name real_constants
+# wrong constant name real_is_a?
+# wrong constant name real_name
+# wrong constant name real_object_id
+# wrong constant name <static-init>
 # wrong constant name load_bundler
 # wrong constant name load_rails
 # wrong constant name my_require
@@ -3746,8 +3747,6 @@
 # wrong constant name find_all
 # wrong constant name main
 # wrong constant name output_file
-# wrong constant name <static-init>
-# wrong constant name real_is_a?
 # uninitialized constant SortedSet::InspectKey
 # Did you mean?  SortedSet::InspectKey
 # wrong constant name initialize

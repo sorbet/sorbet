@@ -7,7 +7,7 @@
 #
 #   https://github.com/sorbet/sorbet-typed/new/master?filename=lib/sorbet/all/sorbet.rbi
 #
-# sorbet-0.4.3736
+# sorbet-0.4.3751
 class Sorbet
 end
 module T
