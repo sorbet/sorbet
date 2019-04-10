@@ -6,7 +6,7 @@ ProtocMsgClass::ProtocEnumModule = Google::Protobuf::DescriptorPool.generated_po
 
 # pay-server post-processes the protoc output from 'Google' -> '::Google'
 StripeMsgClass = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("...").msgclass # error: Unable to resolve constant `Google`
-StripeMsgClass::StripeEnumModule = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("...").enummodule
+StripeMsgClass::StripeEnumModule = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("...").enummodule # error: Unable to resolve constant `Google`
 
 # attempting to catch false positives
 Skip1 = Protobuf::DescriptorPool.generated_pool.lookup("...").msgclass # error: Unable to resolve constant `Protobuf`
