@@ -36,19 +36,6 @@ class Sorbet::Private::TodoRBI
 
   include Sorbet::Private::StepInterface
 
-  def self.find_all(symbol_map, symbols, parents=[])
-    symbols.each do |s|
-      name = s['name']['name']
-      superclass_id = s['superClass']
-      parent_name = (name == '<root>' || name == "T.untyped") ? [] : [name]
-      symbol_map[s['id']] = Sorbet::Private::SymbolEntry.new(name, superclass_id, parents)
-      if s['children']
-        find_all(symbol_map, s['children'], symbol_map[s['id']].parents + parent_name)
-        symbol_map[s['id']].has_children = true
-      end
-    end
-  end
-
   def self.main
     File.delete(OUTPUT) if File.exist?(OUTPUT)
 
@@ -56,29 +43,19 @@ class Sorbet::Private::TodoRBI
       [
         'srb',
         'tc',
-        '--print=symbol-table-json',
+        '--print=missing-constants',
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
       ],
       err: '/dev/null',
     ) do |io|
-      table = JSON.parse(io.read)
-      symbol_by_id = {}
-      find_all(symbol_by_id, [table])
+      missing_constants = io.read.split("\n")
 
       output = String.new
       output << HEADER
-      symbol_by_id.each do |_, s|
-        superclass = symbol_by_id[s.superclass_id]
-        next if !(superclass && superclass.name == 'StubModule')
-        next if s.final_name.include?("<")
-
-        if s.has_children
-          output << "module #{s.final_name}; end\n"
-        else
-          output << "#{s.final_name} = T.let(#{s.final_name}, T.untyped)\n"
-        end
+      missing_constants.each do |const|
+        output << "module #{const}; end\n"
       end
       File.write(OUTPUT, output) if output != HEADER
     end
