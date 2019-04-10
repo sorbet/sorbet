@@ -6166,8 +6166,6 @@ class Object
   ARGV = ::T.let(nil, ::T.untyped)
   CROSS_COMPILING = ::T.let(nil, ::T.untyped)
   ENV = ::T.let(nil, ::T.untyped)
-  FALSE = ::T.let(nil, ::T.untyped)
-  NIL = ::T.let(nil, ::T.untyped)
   RUBY_COPYRIGHT = ::T.let(nil, ::T.untyped)
   RUBY_DESCRIPTION = ::T.let(nil, ::T.untyped)
   RUBY_ENGINE = ::T.let(nil, ::T.untyped)
@@ -6181,7 +6179,6 @@ class Object
   STDIN = ::T.let(nil, ::T.untyped)
   STDOUT = ::T.let(nil, ::T.untyped)
   TOPLEVEL_BINDING = ::T.let(nil, ::T.untyped)
-  TRUE = ::T.let(nil, ::T.untyped)
 end
 
 class ObjectSpace::WeakMap

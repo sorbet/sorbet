@@ -45,7 +45,7 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
       expfile = expdir + '/' + item
       file = dir + '/' + item
       if File.directory?(file)
-        if ENV['RECORD']
+        if ENV['RECORD'] && !Dir.exist?(expfile)
           Dir.mkdir(expfile)
         end
         assert_dirs_equal(expfile, file)
