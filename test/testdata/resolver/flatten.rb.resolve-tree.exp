@@ -1,0 +1,39 @@
+begin
+  ::RubyTyper.<U keep_for_ide>(::A)
+  class ::A<<C <U A>>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def <U foo><<U foo>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+
+    def <U food><<U food>>(<blk>)
+      <emptyTree>
+    end
+
+    def self.<U foos><<U foos>>(<blk>)
+      <emptyTree>
+    end
+
+    def self.<U sfoo><<U sfoo>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+
+    def <U sfood><<U sfood>>(<blk>)
+      <emptyTree>
+    end
+
+    def self.<U sfoos><<U sfoos>>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

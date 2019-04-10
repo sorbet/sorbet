@@ -1,0 +1,17 @@
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=2:8}
+    method <C <U A>><U foo> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=3:3 end=3:10}
+      argument <C <U A>><U foo><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+    method <C <U A>><U food> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=4:5 end=4:13}
+      argument <C <U A>><U food><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+  class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:7 end=2:8}
+    method <S <C <U A>> $1><U foos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=6:5 end=6:18}
+      argument <S <C <U A>> $1><U foos><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+    method <S <C <U A>> $1><U sfoo> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=9:3 end=9:16}
+      argument <S <C <U A>> $1><U sfoo><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+    method <S <C <U A>> $1><U sfood> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=10:5 end=10:14}
+      argument <S <C <U A>> $1><U sfood><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+  class <S <S <C <U A>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:7 end=2:8}
+    method <S <S <C <U A>> $1> $1><U sfoos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=12:19}
+      argument <S <S <C <U A>> $1> $1><U sfoos><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+
