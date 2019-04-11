@@ -106,6 +106,23 @@ TEST_F(ProtocolTest, Cancellation) {
     ASSERT_EQ(requestIds.size(), 0);
 }
 
+// Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
+TEST_F(ProtocolTest, DefinitionError) {
+    assertDiagnostics(initializeLSP(), {});
+    assertDiagnostics(
+        send(*openFile("foobar.rb", "class Foobar\n  sig {returns(Integer)}\n  def bar\n    1\n  end\nend\n\nbar\n")),
+        {});
+    auto defResponses = send(*getDefinition("foobar.rb", 7, 1));
+    ASSERT_EQ(defResponses.size(), 1) << "Expected a single response to a definition request to an untyped document.";
+
+    assertResponseMessage(nextId - 1, *defResponses.at(0));
+
+    auto &respMsg = defResponses.at(0)->asResponse();
+    ASSERT_TRUE(respMsg.result);
+    ASSERT_TRUE((*respMsg.result)->IsArray());
+    ASSERT_EQ((*respMsg.result)->GetArray().Size(), 0);
+}
+
 // Tests that Sorbet LSP removes diagnostics from future responses when they are fixed.
 TEST_F(ProtocolTest, FixErrors) {
     assertDiagnostics(initializeLSP(), {});
