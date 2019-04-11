@@ -9,15 +9,7 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
-std::unique_ptr<JSONBaseType> makeInitializeParams(std::string rootPath, std::string rootUri);
-
-/** Creates an LSPMessage containing a request message constructed from the given items. */
-std::unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method, int id,
-                                               const JSONBaseType &params);
-
-/** Creates an LSPMessage containing a notification message constructed from the given items. */
-std::unique_ptr<LSPMessage> makeNotificationMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method,
-                                                    const JSONBaseType &params);
+std::unique_ptr<InitializeParams> makeInitializeParams(std::string rootPath, std::string rootUri);
 
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
@@ -40,8 +32,8 @@ bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage 
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
-std::optional<std::unique_ptr<PublishDiagnosticsParams>>
-getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc, const NotificationMessage &notifMsg);
+std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
+                                                                     NotificationMessage &notifMsg);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>> initializeLSP(std::string_view rootPath, std::string_view rootUri,

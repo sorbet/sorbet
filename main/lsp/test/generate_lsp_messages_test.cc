@@ -264,13 +264,12 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
 
 // Ensures that LSPMessage parses ResultMessage/ResultMessageWithError/RequestMessage/NotificationMessage properly.
 TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
-    auto request = make_unique<RequestMessage>("2.0", 1, LSPMethod::Initialize);
-    auto response = make_unique<ResponseMessage>("2.0", 1);
-    // Null result.
-    response->result = make_unique<rapidjson::Value>();
-    auto responseWithError = make_unique<ResponseMessage>("2.0", 1);
+    auto request = make_unique<RequestMessage>("2.0", 1, LSPMethod::Shutdown, make_optional<JSONNullObject>());
+    auto response = make_unique<ResponseMessage>("2.0", 1, LSPMethod::Shutdown);
+    response->result = JSONNullObject();
+    auto responseWithError = make_unique<ResponseMessage>("2.0", 1, LSPMethod::SorbetError);
     responseWithError->error = make_unique<ResponseError>(20, "Bad request");
-    auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage);
+    auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::Exit, make_optional<JSONNullObject>());
 
     // For each, serialize as a JSON document to force LSPMessage to re-deserialize it.
     // Checks that LSPMessage recognizes each as the correct type of message.
@@ -278,6 +277,53 @@ TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
     ASSERT_TRUE(LSPMessage(alloc, response->toJSON()).isResponse());
     ASSERT_TRUE(LSPMessage(alloc, responseWithError->toJSON()).isResponse());
     ASSERT_TRUE(LSPMessage(alloc, notification->toJSON()).isNotification());
+}
+
+string makeRequestMessage(LSPMethod method, optional<string_view> params) {
+    return fmt::format("{{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"{}\"{}}}", convertLSPMethodToString(method),
+                       (params ? fmt::format(", \"params\": {}", *params) : ""));
+}
+
+// Serialize and deserialize various valid discriminated union values.
+TEST(GenerateLSPMessagesTest, DiscriminatedUnionValidValues) {
+    // Shutdown supports `null` and `nullopt`, but nothing else.
+    parseTest<RequestMessage>(alloc, makeRequestMessage(LSPMethod::Shutdown, "null"), [](auto &msg) -> void {
+        ASSERT_EQ(msg->method, LSPMethod::Shutdown);
+        ASSERT_NO_THROW({
+            auto maybeNull = get<optional<JSONNullObject>>(msg->params);
+            ASSERT_TRUE(maybeNull);
+        });
+    });
+    parseTest<RequestMessage>(alloc, makeRequestMessage(LSPMethod::Shutdown, nullopt), [](auto &msg) -> void {
+        ASSERT_EQ(msg->method, LSPMethod::Shutdown);
+        ASSERT_NO_THROW({
+            auto maybeNull = get<optional<JSONNullObject>>(msg->params);
+            ASSERT_FALSE(maybeNull);
+        });
+    });
+}
+
+// Verify that serialization/deserialization code throws an exception when a discriminated union has an invalid
+// parameter for the given discriminant
+TEST(GenerateLSPMessagesTest, DiscriminatedUnionInvalidValues) {
+    // Shutdown can't have a SorbetErrorParam.
+    EXPECT_THROW(RequestMessage("2.0", 1, LSPMethod::Shutdown, make_unique<SorbetErrorParams>(1, "")).toJSON(),
+                 InvalidDiscriminatedUnionValueError);
+    // Shutdown can't have a string param.
+    EXPECT_THROW(LSPMessage(alloc, makeRequestMessage(LSPMethod::Shutdown, "{\"code\": 1, \"message\": \"\"}")),
+                 JSONTypeError);
+    // TextDocumentDocumentSymbol must have a parameter.
+    EXPECT_THROW(LSPMessage(alloc, makeRequestMessage(LSPMethod::TextDocumentDocumentSymbol, "null")), JSONTypeError);
+}
+
+// Verify that serialization/deserialization code throws an exception when a discriminated union has an invalid
+// discriminant
+TEST(GenerateLSPMessagesTest, DiscriminatedUnionInvalidDiscriminant) {
+    // DidOpen is a notification.
+    EXPECT_THROW(LSPMessage(alloc, makeRequestMessage(LSPMethod::TextDocumentDidOpen, "null")),
+                 InvalidDiscriminantValueError);
+    EXPECT_THROW(RequestMessage("2.0", 1, LSPMethod::TextDocumentDidOpen, JSONNullObject()).toJSON(),
+                 InvalidDiscriminantValueError);
 }
 
 TEST(GenerateLSPMessagesTest, RenamedFieldsWorkProperly) {

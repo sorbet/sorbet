@@ -9,9 +9,11 @@ namespace sorbet::realmain::lsp {
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const ReferenceParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::TextDocumentReferences);
     if (!opts.lspFindReferencesEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Find References` LSP feature is experimental and disabled by default.");
+        response.error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                       "The `Find References` LSP feature is experimental and disabled by default.");
         return gs;
     }
 
@@ -30,12 +32,13 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
                     auto symRef = constResp->dispatchComponents[0].method;
                     auto run2 = setupLSPQueryBySymbol(move(finalGs), symRef);
                     finalGs = move(run2.gs);
-                    vector<unique_ptr<JSONBaseType>> result;
+                    vector<unique_ptr<Location>> result;
                     auto &queryResponses = run2.responses;
                     for (auto &q : queryResponses) {
                         result.push_back(loc2Location(*finalGs, q->getLoc()));
                     }
-                    sendResponse(id, result);
+                    response.result = move(result);
+                    sendResponse(response);
                     return finalGs;
                 }
             } else if (auto identResp = resp->isIdent()) {
@@ -44,21 +47,25 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
                     runLSPQuery(move(finalGs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
                                 files, true);
                 finalGs = move(run2.gs);
-                vector<unique_ptr<JSONBaseType>> result;
+                vector<unique_ptr<Location>> result;
                 auto &queryResponses = run2.responses;
                 for (auto &q : queryResponses) {
                     result.push_back(loc2Location(*finalGs, q->getLoc()));
                 }
-                sendResponse(id, result);
+                response.result = move(result);
+                sendResponse(response);
                 return finalGs;
             }
         }
         // An explicit null indicates that we don't support this request (or that nothing was at the location).
-        sendNullResponse(id);
+        // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
+        response.result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
+        sendResponse(response);
         return finalGs;
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        sendError(id, move(error->first));
+        response.error = move(error->first);
+        sendResponse(response);
         return move(error->second);
     } else {
         // Should never happen, but satisfy the compiler.

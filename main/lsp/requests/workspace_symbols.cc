@@ -20,15 +20,18 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
 
 unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                               const WorkspaceSymbolParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::WorkspaceSymbol);
     if (!opts.lspWorkspaceSymbolsEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Workspace Symbols` LSP feature is experimental and disabled by default.");
+        response.error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                       "The `Workspace Symbols` LSP feature is experimental and disabled by default.");
+        sendResponse(response);
         return gs;
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
 
-    vector<unique_ptr<JSONBaseType>> result;
+    vector<unique_ptr<SymbolInformation>> result;
     string_view searchString = params.query;
 
     auto finalGs = move(gs);
@@ -41,7 +44,8 @@ unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::G
             }
         }
     }
-    sendResponse(id, result);
+    response.result = move(result);
+    sendResponse(response);
     return finalGs;
 }
 } // namespace sorbet::realmain::lsp

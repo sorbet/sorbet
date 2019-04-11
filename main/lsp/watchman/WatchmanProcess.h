@@ -14,7 +14,8 @@ class WatchmanProcess {
     rapidjson::MemoryPoolAllocator<> alloc;
     const std::string workSpace;
     const std::vector<std::string> extensions;
-    const std::function<void(rapidjson::MemoryPoolAllocator<> &, const sorbet::realmain::lsp::WatchmanQueryResponse &)>
+    const std::function<void(rapidjson::MemoryPoolAllocator<> &,
+                             std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
         processUpdate;
     const std::function<void(rapidjson::MemoryPoolAllocator<> &, int exitCode)> processExit;
     const std::unique_ptr<Joinable> thread;
@@ -33,7 +34,7 @@ public:
     WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view workSpace,
                     std::vector<std::string> extensions,
                     std::function<void(rapidjson::MemoryPoolAllocator<> &alloc,
-                                       const sorbet::realmain::lsp::WatchmanQueryResponse &)>
+                                       std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
                         processUpdate,
                     std::function<void(rapidjson::MemoryPoolAllocator<> &, int)> processExit);
 

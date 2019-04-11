@@ -4,60 +4,82 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-JSONNullObject tryConvertToNull(const rapidjson::Value &value, string_view name) {
-    if (!value.IsNull()) {
-        throw JSONTypeError(name, "null", value);
+JSONNullObject tryConvertToNull(optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    if (!realValue.IsNull()) {
+        throw JSONTypeError(name, "null", realValue);
     }
     return JSONNullObject();
 }
 
-bool tryConvertToBoolean(const rapidjson::Value &value, string_view name) {
-    if (!value.IsBool()) {
-        throw JSONTypeError(name, "boolean", value);
+bool tryConvertToBoolean(optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    if (!realValue.IsBool()) {
+        throw JSONTypeError(name, "boolean", realValue);
     }
-    return value.GetBool();
+    return realValue.GetBool();
 }
 
-int tryConvertToInt(const rapidjson::Value &value, string_view name) {
-    if (!value.IsInt()) {
-        throw JSONTypeError(name, "int", value);
+int tryConvertToInt(optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    if (!realValue.IsInt()) {
+        throw JSONTypeError(name, "int", realValue);
     }
-    return value.GetInt();
+    return realValue.GetInt();
 }
 
-double tryConvertToDouble(const rapidjson::Value &value, string_view name) {
-    if (!value.IsNumber()) {
-        throw JSONTypeError(name, "number", value);
+double tryConvertToDouble(optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    if (!realValue.IsNumber()) {
+        throw JSONTypeError(name, "number", realValue);
     }
-    return value.GetDouble();
+    return realValue.GetDouble();
 }
 
-string tryConvertToString(const rapidjson::Value &value, string_view name) {
-    if (!value.IsString()) {
-        throw JSONTypeError(name, "string", value);
+string tryConvertToString(optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    if (!realValue.IsString()) {
+        throw JSONTypeError(name, "string", realValue);
     }
-    return value.GetString();
+    return realValue.GetString();
 }
 
-string tryConvertToStringConstant(const rapidjson::Value &value, string_view constantValue, string_view name) {
+string tryConvertToStringConstant(optional<const rapidjson::Value *> value, string_view constantValue,
+                                  string_view name) {
     string strValue = tryConvertToString(value, name);
     if (strValue != constantValue) {
-        throw JSONConstantError(name, constantValue, value);
+        throw JSONConstantError(name, constantValue, **value);
     }
     return strValue;
 }
 
-unique_ptr<rapidjson::Value> tryConvertToAny(rapidjson::MemoryPoolAllocator<> &alloc, const rapidjson::Value &value,
-                                             string_view name) {
-    return make_unique<rapidjson::Value>(value, alloc);
+unique_ptr<rapidjson::Value> tryConvertToAny(rapidjson::MemoryPoolAllocator<> &alloc,
+                                             optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    return make_unique<rapidjson::Value>(realValue, alloc);
 }
 
 unique_ptr<rapidjson::Value> tryConvertToAnyObject(rapidjson::MemoryPoolAllocator<> &alloc,
-                                                   const rapidjson::Value &value, string_view name) {
-    if (!value.IsObject()) {
-        throw JSONTypeError(name, "object", value);
+                                                   optional<const rapidjson::Value *> value, string_view name) {
+    auto &realValue = assertJSONField(value, name);
+    if (!realValue.IsObject()) {
+        throw JSONTypeError(name, "object", realValue);
     }
-    return make_unique<rapidjson::Value>(value, alloc);
+    return make_unique<rapidjson::Value>(realValue, alloc);
+}
+
+optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, const string &name) {
+    if (value.HasMember(name)) {
+        return &value[name];
+    }
+    return nullopt;
+}
+
+const rapidjson::Value &assertJSONField(optional<const rapidjson::Value *> maybeValue, string_view name) {
+    if (!maybeValue) {
+        throw MissingFieldError(name);
+    }
+    return **maybeValue;
 }
 
 } // namespace sorbet::realmain::lsp

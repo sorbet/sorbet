@@ -125,26 +125,6 @@ public:
     LSPMethod method() const;
 
     /**
-     * If this is a request or a notification, sets the contents of the `params` field.
-     * Raises if it is a response.
-     */
-    void setParams(std::unique_ptr<rapidjson::Value> params);
-
-    /**
-     * Returns the value in the `param` field, which is present on requests and notifications.
-     * If field is missing or, in the case of a notification, is an array, returns a reference to a null rapidjson
-     * object.
-     */
-    const rapidjson::Value &params() const;
-
-    /**
-     * Returns the value in the `result` field, which is present on responses.
-     * If field is missing or, in the case of a notification, is an array, returns a reference to a null rapidjson
-     * object.
-     */
-    const rapidjson::Value &result() const;
-
-    /**
      * Returns the message in JSON form.
      */
     std::string toJSON() const;

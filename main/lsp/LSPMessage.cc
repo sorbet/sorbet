@@ -4,8 +4,6 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-const rapidjson::Value NULL_VALUE = rapidjson::Value();
-
 const std::variant<int, string, JSONNullObject> widenMessageVariant(const std::variant<int, string> id) {
     if (auto intId = get_if<int>(&id)) {
         return *intId;
@@ -48,15 +46,13 @@ string MessageId::asString() const {
 
 unique_ptr<LSPMessage> makeSorbetError(rapidjson::MemoryPoolAllocator<> &alloc, LSPErrorCodes code, string_view message,
                                        optional<rapidjson::Document> d = nullopt) {
-    auto errorParams = SorbetErrorParams((int)code, string(message)).toJSONValue(alloc);
+    auto errorParams = make_unique<SorbetErrorParams>((int)code, string(message));
     auto isRequest = d.has_value() && (*d).HasMember("id") && (*d)["id"].IsInt();
     if (isRequest) {
-        auto req = make_unique<RequestMessage>("2.0", (*d)["id"].GetInt(), LSPMethod::SorbetError);
-        req->params = move(errorParams);
+        auto req = make_unique<RequestMessage>("2.0", (*d)["id"].GetInt(), LSPMethod::SorbetError, move(errorParams));
         return make_unique<LSPMessage>(move(req));
     } else {
-        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetError);
-        notif->params = move(errorParams);
+        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetError, move(errorParams));
         return make_unique<LSPMessage>(move(notif));
     }
 }
@@ -88,11 +84,12 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(rapidjson::MemoryPoolAllocator<> &
 
 LSPMessage::RawLSPMessage fromJSONValue(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d) {
     if (d.HasMember("id")) {
-        // Method is required on requests, but responses lack it.
-        if (d.HasMember("method")) {
-            return RequestMessage::fromJSONValue(alloc, d.GetObject(), "root");
-        } else {
+        // Note: Vanilla response messages lack a 'method' field, but we lurk one on to assist with runtime
+        // JSON shape checks.
+        if (d.HasMember("result") || d.HasMember("error")) {
             return ResponseMessage::fromJSONValue(alloc, d.GetObject(), "root");
+        } else {
+            return RequestMessage::fromJSONValue(alloc, d.GetObject(), "root");
         }
     } else {
         return NotificationMessage::fromJSONValue(alloc, d.GetObject(), "root");
@@ -184,18 +181,6 @@ ResponseMessage &LSPMessage::asResponse() {
     Exception::raise("LSPMessage is not a response.");
 }
 
-void LSPMessage::setParams(unique_ptr<rapidjson::Value> params) {
-    if (isRequest()) {
-        auto &r = asRequest();
-        r.params = move(params);
-    } else if (isNotification()) {
-        auto &n = asNotification();
-        n.params = move(params);
-    } else {
-        Exception::raise("LSPMessage is neither a request nor a notification.");
-    }
-}
-
 LSPMethod LSPMessage::method() const {
     if (isRequest()) {
         return asRequest().method;
@@ -204,36 +189,6 @@ LSPMethod LSPMessage::method() const {
     } else {
         Exception::raise("LSPMessage is neither a request nor a notification.");
     }
-}
-
-const rapidjson::Value &LSPMessage::params() const {
-    if (isRequest()) {
-        if (auto &params = asRequest().params) {
-            if (params.has_value()) {
-                // optional unique_ptr => ref
-                return **params;
-            }
-        }
-    } else if (isNotification()) {
-        if (auto &params = asNotification().params) {
-            if (params.has_value()) {
-                return **params;
-            }
-        }
-    }
-    return NULL_VALUE;
-}
-
-const rapidjson::Value &LSPMessage::result() const {
-    if (isResponse()) {
-        if (auto &result = asResponse().result) {
-            if (result.has_value()) {
-                // optional unique_ptr => ref
-                return **result;
-            }
-        }
-    }
-    return NULL_VALUE;
 }
 
 string LSPMessage::toJSON() const {

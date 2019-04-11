@@ -47,9 +47,12 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                                const TextDocumentPositionParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::TextDocumentSignatureHelp);
     if (!opts.lspSignatureHelpEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Signature Help` LSP feature is experimental and disabled by default.");
+        response.error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                       "The `Signature Help` LSP feature is experimental and disabled by default.");
+        sendResponse(response);
         return gs;
     }
 
@@ -87,15 +90,17 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
                 addSignatureHelpItem(*finalGs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
             }
         }
-        auto result = SignatureHelp(move(signatures));
+        auto result = make_unique<SignatureHelp>(move(signatures));
         if (activeParameter != -1) {
-            result.activeParameter = activeParameter;
+            result->activeParameter = activeParameter;
         }
-        sendResponse(id, result);
+        response.result = move(result);
+        sendResponse(response);
         return finalGs;
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        sendError(id, move(error->first));
+        response.error = move(error->first);
+        sendResponse(response);
         return move(error->second);
     } else {
         // Should never happen, but satisfy the compiler.

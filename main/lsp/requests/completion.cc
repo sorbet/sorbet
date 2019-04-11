@@ -190,9 +190,12 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const CompletionParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::TextDocumentCompletion);
     if (!opts.lspAutocompleteEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Autocomplete` LSP feature is experimental and disabled by default.");
+        response.error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                       "The `Autocomplete` LSP feature is experimental and disabled by default.");
+        sendResponse(response);
         return gs;
     }
 
@@ -238,11 +241,13 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
                 findSimilarConstantOrIdent(*finalGs, constantResp->retType.type, items);
             }
         }
-        sendResponse(id, CompletionList(false, move(items)));
+        response.result = make_unique<CompletionList>(false, move(items));
+        sendResponse(response);
         return finalGs;
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        sendError(id, move(error->first));
+        response.error = move(error->first);
+        sendResponse(response);
         return move(error->second);
     } else {
         // Should never happen, but satisfy the compiler.

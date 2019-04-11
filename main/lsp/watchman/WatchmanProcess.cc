@@ -7,7 +7,7 @@ namespace sorbet::realmain::lsp::watchman {
 
 WatchmanProcess::WatchmanProcess(
     shared_ptr<spdlog::logger> logger, string_view workSpace, vector<string> extensions,
-    function<void(rapidjson::MemoryPoolAllocator<> &, const sorbet::realmain::lsp::WatchmanQueryResponse &)>
+    function<void(rapidjson::MemoryPoolAllocator<> &, unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
         processUpdate,
     std::function<void(rapidjson::MemoryPoolAllocator<> &, int)> processExit)
     : logger(logger), workSpace(string(workSpace)), extensions(extensions), processUpdate(processUpdate),
@@ -102,7 +102,7 @@ void WatchmanProcess::start() {
             } else if (d.HasMember("is_fresh_instance")) {
                 try {
                     auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(alloc, d);
-                    processUpdate(alloc, *queryResponse);
+                    processUpdate(alloc, move(queryResponse));
                 } catch (sorbet::realmain::lsp::DeserializationError e) {
                     // Gracefully handle deserialization errors, since they could be our fault.
                     logger->error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);

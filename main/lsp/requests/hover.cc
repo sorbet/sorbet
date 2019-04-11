@@ -6,9 +6,11 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                                const TextDocumentPositionParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::TextDocumentHover);
     if (!opts.lspHoverEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Hover` LSP feature is experimental and disabled by default.");
+        response.error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                    "The `Hover` LSP feature is experimental and disabled by default.");
+        sendResponse(response);
         return gs;
     }
 
@@ -20,15 +22,19 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
         auto finalGs = move(run->gs);
         auto &queryResponses = run->responses;
         if (queryResponses.empty()) {
-            sendNullResponse(id);
+            // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
+            response.result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
+            sendResponse(response);
             return finalGs;
         }
 
         auto resp = move(queryResponses[0]);
         if (auto sendResp = resp->isSend()) {
             if (sendResp->dispatchComponents.empty()) {
-                sendError(id, (int)LSPErrorCodes::InvalidParams,
-                          "Did not find any dispatchComponents for a SEND QueryResponse in textDocument/hover");
+                response.error = make_unique<ResponseError>(
+                    (int)LSPErrorCodes::InvalidParams,
+                    "Did not find any dispatchComponents for a SEND QueryResponse in textDocument/hover");
+                sendResponse(response);
                 return finalGs;
             }
             string contents = "";
@@ -51,21 +57,25 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
             // things like <Class:Foo> as html tags and make them clickable (but the click takes
             // you somewhere nonsensical)
             auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, contents);
-            sendResponse(id, Hover(markupContents->toJSONValue(alloc)));
+            response.result = make_unique<Hover>(markupContents->toJSONValue(alloc));
+            sendResponse(response);
         } else if (auto defResp = resp->isDefinition()) {
             // TODO: Actually send the type signature here. I'm skipping this for now
             // since it's not a very useful feature for the end user (i.e., they should
             // be able to see this right above the definition in ruby)
-            sendNullResponse(id);
+            response.result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
+            sendResponse(response);
         } else {
             auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*finalGs));
-            sendResponse(id, Hover(markupContents->toJSONValue(alloc)));
+            response.result = make_unique<Hover>(markupContents->toJSONValue(alloc));
+            sendResponse(response);
         }
 
         return finalGs;
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        sendError(id, move(error->first));
+        response.error = move(error->first);
+        sendResponse(response);
         return move(error->second);
     } else {
         // Should never happen, but satisfy the compiler.

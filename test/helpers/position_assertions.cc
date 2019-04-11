@@ -319,17 +319,10 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
     return make_shared<DefAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
 
-vector<unique_ptr<Location>> extractLocations(rapidjson::MemoryPoolAllocator<> &alloc,
-                                              const unique_ptr<rapidjson::Value> &obj) {
-    vector<unique_ptr<Location>> locations;
-    if (obj->IsArray()) {
-        for (auto &element : obj->GetArray()) {
-            locations.push_back(Location::fromJSONValue(alloc, element, "ResponseMessage.result"));
-        }
-    } else if (obj->IsObject()) {
-        locations.push_back(Location::fromJSONValue(alloc, *obj.get(), "ResponseMessage.result"));
-    }
-    return locations;
+vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
+    auto &result = *(respMsg.result);
+    auto &locationsOrNull = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(result);
+    return get<vector<unique_ptr<Location>>>(locationsOrNull);
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
@@ -354,9 +347,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         auto &respMsg = responses.at(0)->asResponse();
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
-
-        auto &result = *(respMsg.result);
-        vector<unique_ptr<Location>> locations = extractLocations(lspWrapper.alloc, result);
+        auto &locations = extractLocations(respMsg);
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -405,13 +396,13 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
     string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
 
-    unique_ptr<JSONBaseType> referenceParams =
+    auto referenceParams =
         make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(queryLoc.uri),
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
     int id = nextId++;
     auto responses = lspWrapper.getLSPResponsesFor(
-        *makeRequestMessage(lspWrapper.alloc, LSPMethod::TextDocumentReferences, id, *referenceParams));
+        LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
@@ -421,9 +412,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         auto &respMsg = responses.at(0)->asResponse();
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
-        auto &result = *(respMsg.result);
-
-        vector<unique_ptr<Location>> locations = extractLocations(lspWrapper.alloc, result);
+        auto &locations = extractLocations(respMsg);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });

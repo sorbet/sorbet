@@ -83,15 +83,19 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
     // Note: Watchman file updates happen independent of the client. We tolerate these before initialization by
     // deferring them.
     if (initialized || forMethod == LSPMethod::SorbetWatchmanFileChange || forMethod == LSPMethod::Initialize ||
-        forMethod == LSPMethod::Initialized || forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown) {
+        forMethod == LSPMethod::Initialized || forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown ||
+        forMethod == LSPMethod::SorbetError) {
         return true;
     }
     logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
     if (!msg.isNotification()) {
         auto id = msg.id().value_or(0);
-        sendError(id, (int)LSPErrorCodes::ServerNotInitialized,
-                  "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
-                  "have been completed");
+        ResponseMessage response("2.0", id, msg.method());
+        response.error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::ServerNotInitialized,
+            "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
+            "have been completed");
+        sendResponse(response);
     }
     return false;
 }
@@ -182,8 +186,8 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
                 }
             }
 
-            sendNotification(LSPMethod::TextDocumentPublishDiagnostics,
-                             PublishDiagnosticsParams(uri, move(diagnostics)));
+            sendNotification(NotificationMessage("2.0", LSPMethod::TextDocumentPublishDiagnostics,
+                                                 make_unique<PublishDiagnosticsParams>(uri, move(diagnostics))));
         }
     }
     return move(run.gs);

@@ -90,11 +90,9 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
                 logger, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
                 [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
-                                                             const WatchmanQueryResponse &response) {
-                    // TODO(jvilk): We are wastefully parsing from JSON + serializing to JSON value + parsing from JSON
-                    // value. Once we stop using JSON values internally, we can make this less wasteful.
-                    auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange);
-                    notifMsg->params = response.toJSONValue(alloc);
+                                                             std::unique_ptr<WatchmanQueryResponse> response) {
+                    auto notifMsg =
+                        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
@@ -104,8 +102,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 },
                 [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
                                                              int watchmanExitCode) {
-                    auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanExit);
-                    notifMsg->params = make_unique<rapidjson::Value>(watchmanExitCode);
+                    auto notifMsg =
+                        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanExit, watchmanExitCode);
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
@@ -201,40 +199,45 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
     UnorderedSet<string> updatedFiles;
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
-        auto method = current->method();
-        if (method == LSPMethod::TextDocumentDidChange) {
-            auto currentChanges = DidChangeTextDocumentParams::fromJSONValue(alloc, current->params(), "root.params");
-            string_view thisURI = currentChanges->textDocument->uri;
-            auto nextIt = it + 1;
-            if (nextIt != pendingRequests.end()) {
-                auto &next = *nextIt;
-                auto nextMethod = next->method();
-                if (nextMethod == LSPMethod::TextDocumentDidChange) {
-                    auto nextChanges = DidChangeTextDocumentParams::fromJSONValue(alloc, next->params(), "root.params");
-                    string_view nextURI = nextChanges->textDocument->uri;
-                    if (nextURI == thisURI) {
-                        auto &currentUpdates = currentChanges->contentChanges;
-                        auto &nextUpdates = nextChanges->contentChanges;
-                        std::move(std::begin(nextUpdates), std::end(nextUpdates), std::back_inserter(currentUpdates));
-                        nextChanges->contentChanges = move(currentUpdates);
-                        didChangeRequestsMerged += 1;
-                        next->setParams(nextChanges->toJSONValue(alloc));
-                        it = pendingRequests.erase(it);
-                        continue;
+        if (current->isNotification()) {
+            auto method = current->method();
+            auto &params = current->asNotification().params;
+            if (method == LSPMethod::TextDocumentDidChange) {
+                auto &currentChanges = get<unique_ptr<DidChangeTextDocumentParams>>(params);
+                string_view thisURI = currentChanges->textDocument->uri;
+                auto nextIt = it + 1;
+                if (nextIt != pendingRequests.end()) {
+                    auto &next = *nextIt;
+                    auto nextMethod = next->method();
+                    if (nextMethod == LSPMethod::TextDocumentDidChange && next->isNotification()) {
+                        auto &nextNotif = next->asNotification();
+                        auto &nextChanges = get<unique_ptr<DidChangeTextDocumentParams>>(nextNotif.params);
+                        string_view nextURI = nextChanges->textDocument->uri;
+                        if (nextURI == thisURI) {
+                            auto &currentUpdates = currentChanges->contentChanges;
+                            auto &nextUpdates = nextChanges->contentChanges;
+                            std::move(std::begin(nextUpdates), std::end(nextUpdates),
+                                      std::back_inserter(currentUpdates));
+                            nextChanges->contentChanges = move(currentUpdates);
+                            didChangeRequestsMerged += 1;
+                            nextNotif.params = move(nextChanges);
+                            it = pendingRequests.erase(it);
+                            continue;
+                        }
                     }
                 }
+            } else if (method == LSPMethod::SorbetWatchmanFileChange) {
+                auto &changes = get<unique_ptr<WatchmanQueryResponse>>(params);
+                updatedFiles.insert(changes->files.begin(), changes->files.end());
+                if (foundWatchmanRequests == 0) {
+                    // Use timestamp/counter from the earliest file system change.
+                    firstWatchmanTimestamp = current->timestamp;
+                    firstWatchmanCounter = current->counter;
+                }
+                foundWatchmanRequests++;
+                it = pendingRequests.erase(it);
+                continue;
             }
-        } else if (method == LSPMethod::SorbetWatchmanFileChange) {
-            auto changes = WatchmanQueryResponse::fromJSONValue(alloc, current->params(), "root.params");
-            updatedFiles.insert(changes->files.begin(), changes->files.end());
-            if (foundWatchmanRequests == 0) {
-                // Use timestamp/counter from the earliest file system change.
-                firstWatchmanTimestamp = current->timestamp;
-                firstWatchmanCounter = current->counter;
-            }
-            foundWatchmanRequests++;
-            it = pendingRequests.erase(it);
-            continue;
         }
         ++it;
     }
@@ -271,9 +274,10 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
         prodCategoryCounterAdd("lsp.messages.processed", "watchman_file_change_merged", foundWatchmanRequests - 1);
         // Enqueue the changes at *back* of the queue. Defers Sorbet from processing updates until the last
         // possible moment.
-        WatchmanQueryResponse watchmanUpdates("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()));
-        auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange);
-        notifMsg->params = watchmanUpdates.toJSONValue(alloc);
+        auto watchmanUpdates =
+            make_unique<WatchmanQueryResponse>("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()));
+        auto notifMsg =
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(watchmanUpdates));
         auto msg = make_unique<LSPMessage>(move(notifMsg));
         msg->counter = firstWatchmanCounter;
         msg->timestamp = firstWatchmanTimestamp;
@@ -291,7 +295,7 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
         if (method == LSPMethod::$CancelRequest) {
             // see if they are canceling request that we didn't yet even start processing.
             auto it = findRequestToBeCancelled(state.pendingRequests,
-                                               *CancelParams::fromJSONValue(alloc, msg->params(), "root.params"));
+                                               *get<unique_ptr<CancelParams>>(msg->asNotification().params));
             if (it != state.pendingRequests.end() && (*it)->isRequest()) {
                 auto canceledRequest = move(*it);
                 canceledRequest->canceled = true;
@@ -313,13 +317,13 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
             state.paused = false;
         } else if (method == LSPMethod::SorbetWatchmanExit) {
             state.terminate = true;
-            state.errorCode = msg->params().GetInt();
+            state.errorCode = get<int>(msg->asNotification().params);
         } else if (method == LSPMethod::SorbetError) {
             // Place errors at the *front* of the queue.
             // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.
             state.pendingRequests.insert(findFirstPositionAfterLSPInitialization(state.pendingRequests), move(msg));
         } else {
-            state.pendingRequests.emplace_back(move(msg));
+            state.pendingRequests.push_back(move(msg));
             LSPLoop::mergeFileChanges(alloc, state.pendingRequests);
         }
     } catch (DeserializationError e) {
@@ -362,41 +366,31 @@ LSPLoop::findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPM
 }
 
 void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) {
-    sendNotification(LSPMethod::WindowShowMessage, ShowMessageParams(messageType, string(message)));
+    sendNotification(NotificationMessage("2.0", LSPMethod::WindowShowMessage,
+                                         make_unique<ShowMessageParams>(messageType, string(message))));
 }
 
-void LSPLoop::sendNullResponse(const MessageId &id) {
-    auto resp = ResponseMessage("2.0", id);
-    // rapidjson values default to null.
-    resp.result = make_unique<rapidjson::Value>();
-    sendRaw(resp.toJSON());
-}
-
-void LSPLoop::sendResponse(const MessageId &id, const JSONBaseType &result) {
-    auto resp = ResponseMessage("2.0", id);
-    resp.result = result.toJSONValue(alloc);
-    sendRaw(resp.toJSON());
-}
-
-void LSPLoop::sendResponse(const MessageId &id, const vector<unique_ptr<JSONBaseType>> &result) {
-    auto finalResult = make_unique<rapidjson::Value>();
-    finalResult->SetArray();
-    for (auto &item : result) {
-        finalResult->PushBack(*item->toJSONValue(alloc), alloc);
+// Is this a notification the server should be sending?
+bool isServerNotification(const LSPMethod method) {
+    switch (method) {
+        case LSPMethod::$CancelRequest:
+        case LSPMethod::TextDocumentPublishDiagnostics:
+        case LSPMethod::WindowShowMessage:
+        case LSPMethod::SorbetShowOperation:
+            return true;
+        default:
+            return false;
     }
-    auto resp = ResponseMessage("2.0", id);
-    resp.result = move(finalResult);
-    sendRaw(resp.toJSON());
 }
 
-void LSPLoop::sendError(const MessageId &id, unique_ptr<ResponseError> error) {
-    auto resp = ResponseMessage("2.0", id);
-    resp.error = move(error);
-    sendRaw(resp.toJSON());
+void LSPLoop::sendNotification(const NotificationMessage &msg) {
+    ENFORCE(isServerNotification(msg.method));
+    sendRaw(msg.toJSON());
 }
 
-void LSPLoop::sendError(const MessageId &id, int errorCode, string_view errorMsg) {
-    sendError(id, make_unique<ResponseError>(errorCode, string(errorMsg)));
+void LSPLoop::sendResponse(const ResponseMessage &resp) {
+    ENFORCE(resp.result || resp.error, "A valid ResponseMessage must have a result or an error.");
+    sendRaw(resp.toJSON());
 }
 
 unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) {
@@ -414,16 +408,9 @@ bool LSPLoop::handleReplies(const LSPMessage &msg) {
         if (auto stringId = get_if<string>(&id)) {
             auto fnd = awaitingResponse.find(*stringId);
             if (fnd != awaitingResponse.end()) {
-                auto func = move(fnd->second.onResult);
+                auto func = move(fnd->second);
                 awaitingResponse.erase(fnd);
-
-                if (resp.error.has_value()) {
-                    auto &error = *resp.error;
-                    func(*error->toJSONValue(alloc));
-                } else if (resp.result.has_value()) {
-                    auto &result = *resp.result;
-                    func(*result);
-                }
+                func(resp);
             }
         }
         return true;
@@ -435,28 +422,6 @@ void LSPLoop::sendRaw(string_view json) {
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
     logger->debug("Write: {}\n", json);
     outputStream << outResult << flush;
-}
-
-// Is this a notification the server should be sending?
-bool isServerNotification(const LSPMethod method) {
-    switch (method) {
-        case LSPMethod::$CancelRequest:
-        case LSPMethod::TextDocumentPublishDiagnostics:
-        case LSPMethod::WindowShowMessage:
-        case LSPMethod::SorbetShowOperation:
-            return true;
-        default:
-            return false;
-    }
-}
-
-void LSPLoop::sendNotification(const LSPMethod meth, const JSONBaseType &data) {
-    ENFORCE(isServerNotification(meth));
-
-    auto notif = NotificationMessage("2.0", meth);
-    notif.params = data.toJSONValue(alloc);
-
-    sendRaw(notif.toJSON());
 }
 
 } // namespace sorbet::realmain::lsp

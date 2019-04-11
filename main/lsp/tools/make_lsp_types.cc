@@ -40,7 +40,13 @@ shared_ptr<JSONType> makeOptional(shared_ptr<JSONType> type) {
 }
 
 shared_ptr<JSONType> makeVariant(vector<shared_ptr<JSONType>> variants) {
-    return make_shared<JSONVariantType>(variants);
+    return make_shared<JSONBasicVariantType>(variants);
+}
+
+shared_ptr<JSONType>
+makeDiscriminatedUnion(shared_ptr<FieldDef> fieldDef,
+                       const vector<pair<const string, shared_ptr<JSONType>>> variantsByDiscriminant) {
+    return make_shared<JSONDiscriminatedUnionVariantType>(fieldDef, variantsByDiscriminant);
 }
 
 shared_ptr<JSONType> makeArray(shared_ptr<JSONType> type) {
@@ -60,36 +66,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // Converted from https://microsoft.github.io/language-server-protocol/specification
     // Last updated on 11/14/18.
 
-    // N.B.: Only contains LSP methods that Sorbet actually cares about.
-    // All others are ignored.
-    auto LSPMethod = makeStrEnum("LSPMethod",
-                                 {
-                                     "$/cancelRequest",
-                                     "initialize",
-                                     "initialized",
-                                     "shutdown",
-                                     "exit",
-                                     "textDocument/publishDiagnostics",
-                                     "textDocument/didOpen",
-                                     "textDocument/didChange",
-                                     "textDocument/didClose",
-                                     "textDocument/documentSymbol",
-                                     "textDocument/definition",
-                                     "textDocument/hover",
-                                     "textDocument/completion",
-                                     "textDocument/references",
-                                     "textDocument/signatureHelp",
-                                     "workspace/symbol",
-                                     "window/showMessage",
-                                     "__PAUSE__",
-                                     "__RESUME__",
-                                     "sorbet/watchmanFileChange",
-                                     "sorbet/watchmanExit",
-                                     "sorbet/showOperation",
-                                     "sorbet/error",
-                                 },
-                                 enumTypes);
-
     auto ResourceOperationKind = makeStrEnum("ResourceOperationKind", {"create", "rename", "delete"}, enumTypes);
     auto MarkupKind = makeStrEnum("MarkupKind", {"plaintext", "markdown"}, enumTypes);
     auto TraceKind = makeStrEnum("TraceKind", {"off", "messages", "verbose"}, enumTypes);
@@ -98,11 +74,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto RenameConstant = makeStringConstant("rename");
     auto DeleteConstant = makeStringConstant("delete");
 
-    auto RequestMessage =
-        makeObject("RequestMessage",
-                   {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
-                    makeField("method", LSPMethod), makeField("params", makeOptional(JSONAny))},
-                   classTypes);
     auto ResponseError = makeObject("ResponseError",
                                     {
                                         makeField("code", JSONInt),
@@ -110,15 +81,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         makeField("data", makeOptional(JSONAny)),
                                     },
                                     classTypes);
-    auto ResponseMessage = makeObject(
-        "ResponseMessage",
-        {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
-         makeField("result", makeOptional(JSONAny)), makeField("error", makeOptional(ResponseError))},
-        classTypes);
-    auto NotificationMessage = makeObject("NotificationMessage",
-                                          {makeField("jsonrpc", JSONRPCConstant), makeField("method", LSPMethod),
-                                           makeField("params", makeOptional(JSONAny))},
-                                          classTypes);
 
     auto CancelParams = makeObject("CancelParams",
                                    {
@@ -1275,4 +1237,108 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 makeField("files", makeArray(JSONString)),
                                             },
                                             classTypes);
+
+    /* Core LSPMessage objects */
+    // N.B.: Only contains LSP methods that Sorbet actually cares about.
+    // All others are ignored.
+    auto LSPMethod = makeStrEnum("LSPMethod",
+                                 {
+                                     "$/cancelRequest",
+                                     "initialize",
+                                     "initialized",
+                                     "shutdown",
+                                     "exit",
+                                     "textDocument/publishDiagnostics",
+                                     "textDocument/didOpen",
+                                     "textDocument/didChange",
+                                     "textDocument/didClose",
+                                     "textDocument/documentSymbol",
+                                     "textDocument/definition",
+                                     "textDocument/hover",
+                                     "textDocument/completion",
+                                     "textDocument/references",
+                                     "textDocument/signatureHelp",
+                                     "workspace/symbol",
+                                     "window/showMessage",
+                                     "__PAUSE__",
+                                     "__RESUME__",
+                                     "sorbet/watchmanFileChange",
+                                     "sorbet/watchmanExit",
+                                     "sorbet/showOperation",
+                                     "sorbet/error",
+                                 },
+                                 enumTypes);
+
+    auto methodField = makeField("method", LSPMethod);
+    auto RequestMessageParamsType =
+        makeDiscriminatedUnion(methodField, {
+                                                {"initialize", InitializeParams},
+                                                {"shutdown", makeOptional(JSONNull)},
+                                                {"textDocument/documentSymbol", DocumentSymbolParams},
+                                                {"textDocument/definition", TextDocumentPositionParams},
+                                                {"textDocument/hover", TextDocumentPositionParams},
+                                                {"textDocument/completion", CompletionParams},
+                                                {"textDocument/references", ReferenceParams},
+                                                {"textDocument/signatureHelp", TextDocumentPositionParams},
+                                                {"workspace/symbol", WorkspaceSymbolParams},
+                                                {"sorbet/error", SorbetErrorParams},
+                                            });
+    auto RequestMessage =
+        makeObject("RequestMessage",
+                   {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
+                    methodField, makeField("params", RequestMessageParamsType)},
+                   classTypes);
+
+    auto requestMethodField = makeField("requestMethod", LSPMethod);
+    auto ResponseMessageResultType = makeDiscriminatedUnion(
+        requestMethodField, {
+                                {"initialize", InitializeResult},
+                                {"shutdown", JSONNull},
+                                // DocumentSymbol[] | SymbolInformation[] | null
+                                // Sorbet only uses DocumentSymbol[].
+                                {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},
+                                // Location | Location[] | LocationLink[] | null
+                                // Sorbet only uses Location[].
+                                {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
+                                {"textDocument/hover", makeVariant({JSONNull, Hover})},
+                                // CompletionItem[] | CompletionList | null
+                                // Sorbet only sends CompletionList.
+                                {"textDocument/completion", CompletionList},
+                                {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
+                                {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
+                                {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
+                                {"sorbet/error", SorbetErrorParams},
+                            });
+    // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
+    // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
+    // Also note that we cannot name this field 'method', as it tricks clients into thinking it's a request rather than
+    // a response.
+    auto ResponseMessage = makeObject("ResponseMessage",
+                                      {makeField("jsonrpc", JSONRPCConstant),
+                                       makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
+                                       requestMethodField, makeField("result", makeOptional(ResponseMessageResultType)),
+                                       makeField("error", makeOptional(ResponseError))},
+                                      classTypes);
+
+    auto NotificationMessageParamsType =
+        makeDiscriminatedUnion(methodField, {
+                                                {"$/cancelRequest", CancelParams},
+                                                {"initialized", JSONAny},
+                                                {"exit", makeOptional(JSONNull)},
+                                                {"textDocument/publishDiagnostics", PublishDiagnosticsParams},
+                                                {"textDocument/didOpen", DidOpenTextDocumentParams},
+                                                {"textDocument/didChange", DidChangeTextDocumentParams},
+                                                {"textDocument/didClose", DidCloseTextDocumentParams},
+                                                {"window/showMessage", ShowMessageParams},
+                                                {"__PAUSE__", makeOptional(JSONNull)},
+                                                {"__RESUME__", makeOptional(JSONNull)},
+                                                {"sorbet/watchmanFileChange", WatchmanQueryResponse},
+                                                {"sorbet/watchmanExit", JSONInt},
+                                                {"sorbet/showOperation", SorbetShowOperationParams},
+                                                {"sorbet/error", SorbetErrorParams},
+                                            });
+    auto NotificationMessage = makeObject("NotificationMessage",
+                                          {makeField("jsonrpc", JSONRPCConstant), makeField("method", LSPMethod),
+                                           makeField("params", NotificationMessageParamsType)},
+                                          classTypes);
 }

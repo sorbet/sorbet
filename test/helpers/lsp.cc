@@ -110,7 +110,7 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
     return capabilities;
 }
 
-unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
+unique_ptr<InitializeParams> makeInitializeParams(string rootPath, string rootUri) {
     auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities();
@@ -124,25 +124,12 @@ unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
     return initializeParams;
 }
 
-unique_ptr<LSPMessage> makeRequestMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method, int id,
-                                          const JSONBaseType &params) {
-    auto initialize = make_unique<RequestMessage>("2.0", id, method);
-    initialize->params = params.toJSONValue(alloc);
-    return make_unique<LSPMessage>(move(initialize));
-}
-
-std::unique_ptr<LSPMessage> makeNotificationMessage(rapidjson::MemoryPoolAllocator<> &alloc, const LSPMethod method,
-                                                    const JSONBaseType &params) {
-    auto initialize = make_unique<NotificationMessage>("2.0", method);
-    initialize->params = params.toJSONValue(alloc);
-    return make_unique<LSPMessage>(move(initialize));
-}
-
 unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
                                              int line, int character) {
-    unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
-        make_unique<TextDocumentIdentifier>(string(uri)), make_unique<Position>(line, character));
-    return makeRequestMessage(alloc, LSPMethod::TextDocumentDefinition, id, *textDocumentPositionParams);
+    return make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentDefinition,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                make_unique<Position>(line, character))));
 }
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
@@ -150,11 +137,8 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // Properties checked in the same order they are described in the LSP spec.
     EXPECT_TRUE(capabilities.textDocumentSync.has_value());
     auto &textDocumentSync = *(capabilities.textDocumentSync);
-    auto textDocumentSyncValue = get_if<TextDocumentSyncKind>(&textDocumentSync);
-    EXPECT_NE(nullptr, textDocumentSyncValue);
-    if (textDocumentSyncValue != nullptr) {
-        EXPECT_EQ(TextDocumentSyncKind::Full, *(textDocumentSyncValue));
-    }
+    auto textDocumentSyncValue = get<TextDocumentSyncKind>(textDocumentSync);
+    EXPECT_EQ(TextDocumentSyncKind::Full, textDocumentSyncValue);
 
     EXPECT_TRUE(capabilities.hoverProvider.value_or(false));
 
@@ -262,14 +246,14 @@ bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage 
     return expectedMethod == response.method();
 }
 
-optional<unique_ptr<PublishDiagnosticsParams>> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
-                                                                          const NotificationMessage &notifMsg) {
-    if (!notifMsg.params.has_value()) {
+optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
+                                                                NotificationMessage &notifMsg) {
+    auto publishDiagnosticParams = get_if<unique_ptr<PublishDiagnosticsParams>>(&notifMsg.params);
+    if (!publishDiagnosticParams || !*publishDiagnosticParams) {
         ADD_FAILURE() << "textDocument/publishDiagnostics message is missing parameters.";
         return nullopt;
     }
-    auto &params = *notifMsg.params;
-    return PublishDiagnosticsParams::fromJSONValue(alloc, *params.get(), "NotificationMessage.params");
+    return (*publishDiagnosticParams).get();
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
@@ -279,9 +263,9 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
 
     // Send 'initialize' message.
     {
-        unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(string(rootPath), string(rootUri));
+        auto initializeParams = makeInitializeParams(string(rootPath), string(rootUri));
         auto responses = lspWrapper.getLSPResponsesFor(
-            *makeRequestMessage(lspWrapper.alloc, LSPMethod::Initialize, nextId++, *initializeParams));
+            LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams))));
 
         // Should just have an 'initialize' response.
         EXPECT_EQ(1, responses.size());
@@ -296,8 +280,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
 
             if (respMsg.result.has_value()) {
                 auto &result = *respMsg.result;
-                auto initializeResult =
-                    InitializeResult::fromJSONValue(lspWrapper.alloc, *result.get(), "ResponseMessage.result");
+                auto &initializeResult = get<unique_ptr<InitializeResult>>(result);
                 checkServerCapabilities(*initializeResult->capabilities);
             } else {
                 return {};
@@ -308,8 +291,8 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     // Complete initialization handshake with an 'initialized' message.
     {
         rapidjson::Value emptyObject(rapidjson::kObjectType);
-        auto initialized = make_unique<NotificationMessage>("2.0", LSPMethod::Initialized);
-        initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
+        auto initialized = make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
+                                                            make_unique<rapidjson::Value>(rapidjson::kObjectType));
         return lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
     }
 }

@@ -430,10 +430,10 @@ TEST_P(LSPTest, All) {
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {
         for (auto &filename : filenames) {
-            unique_ptr<JSONBaseType> params = make_unique<DidOpenTextDocumentParams>(
+            auto params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
             auto responses = lspWrapper->getLSPResponsesFor(
-                *makeNotificationMessage(lspWrapper->alloc, LSPMethod::TextDocumentDidOpen, *params));
+                LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
@@ -451,8 +451,8 @@ TEST_P(LSPTest, All) {
             textChanges.push_back(move(textDocChange));
 
             auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
-            auto didChangeNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange);
-            didChangeNotif->params = didChangeParams->toJSONValue(lspWrapper->alloc);
+            auto didChangeNotif =
+                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
 
             auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(didChangeNotif)));
             allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
