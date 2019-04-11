@@ -120,10 +120,15 @@ string levelToSigil(core::StrictLevel level) {
 }
 
 core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
+    auto source = file.data(*gs).source();
+
     if (file.data(*gs).originalSigil == core::StrictLevel::None) {
+        if (source.length() >= 2 && source[0] == '#' && source[1] == '!') {
+            int newline = source.find("\n", 0);
+            return core::Loc(file, newline + 1, newline + 1);
+        }
         return core::Loc(file, 0, 0);
     }
-    auto source = file.data(*gs).source();
     size_t start = 0;
     start = source.find("typed:", start);
     if (start == string_view::npos) {
@@ -134,6 +139,9 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     }
     auto end = start;
     while (end < source.size() && source[end] != '\n') {
+        ++end;
+    }
+    if (source[end] == '\n') {
         ++end;
     }
     return core::Loc(file, start, end);
@@ -365,9 +373,7 @@ int realmain(int argc, char *argv[]) {
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
-                    e.addAutocorrect(core::AutocorrectSuggestion(
-                        loc,
-                        fmt::format("# typed: {}{}", sigil, loc.beginPos() == 0 && loc.endPos() == 0 ? "\n" : "")));
+                    e.addAutocorrect(core::AutocorrectSuggestion(loc, fmt::format("# typed: {}\n", sigil)));
                 }
             }
         }
