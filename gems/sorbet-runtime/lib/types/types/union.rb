@@ -30,6 +30,8 @@ module T::Types
         else
           "T.nilable(T.any(#{pretty_names(remaining_types)}))"
         end
+      elsif @types.size == 2 && @types.include?(T::Utils.coerce(TrueClass)) && @types.include?(T::Utils.coerce(FalseClass))
+        "T::Boolean"
       else
         "T.any(#{pretty_names(@types)})"
       end
