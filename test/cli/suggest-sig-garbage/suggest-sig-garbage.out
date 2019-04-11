@@ -183,7 +183,7 @@ suggest-sig-garbage.rb:125: This function does not have a `sig` http://go/e/7017
      125 |def fooCondGeneratedCurly(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
@@ -192,7 +192,7 @@ suggest-sig-garbage.rb:139: This function does not have a `sig` http://go/e/7017
      139 |def fooCondGeneratedDo(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      134 |sig do
      135 |  params(a: T.untyped, cond: T::Boolean).
@@ -205,7 +205,7 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
      148 |def updatesUntypedToProfiled(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:147: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:147: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      148 |def updatesUntypedToProfiled(a, cond)
@@ -422,7 +422,7 @@ def cantRun(a)
   1
 end
 
-sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -432,7 +432,7 @@ def fooCondGeneratedCurly(a, cond)
 end
 
 
-sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedDo(a, cond)
   if cond
     takesInt(a)
@@ -441,7 +441,7 @@ def fooCondGeneratedDo(a, cond)
   end
 end
 
-sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 def updatesUntypedToProfiled(a, cond)
   a.baz
 end

@@ -30,7 +30,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_3" -> "bb::Object#main_12" [style="tapered"];
 
     "bb::Object#main_4" [
-        label = "block[id=4](<U <returnMethodTemp>>$2: NilClass, <U <self>>: Object, <U try>: Integer(0))\l<U <statTemp>>$7: Integer(3) = 3\l<U <ifTemp>>$5: T::Boolean = <U try>: Integer(0).<U <>(<U <statTemp>>$7: Integer(3))\l<U <ifTemp>>$5: T::Boolean\l"
+        label = "block[id=4](<U <returnMethodTemp>>$2: NilClass, <U <self>>: Object, <U try>: Integer(0))\l<U <statTemp>>$7: Integer(3) = 3\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass) = <U try>: Integer(0).<U <>(<U <statTemp>>$7: Integer(3))\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];

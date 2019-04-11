@@ -108,7 +108,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_8" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];
     "bb::<Class:<root>>#<static-init>_9" [
-        label = "block[id=9](<U <self>>: T.class_of(<root>), <U <selfRestore>>$33: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T.class_of(<root>) = loadSelf\l<U <blk>>$34: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<U <blk>>$35: Integer(0) = 0\l<U x>$2: Integer = <U <blk>>$34: [Integer].<U []>(<U <blk>>$35: Integer(0))\l<U <statTemp>>$40: Integer(5) = 5\l<U <ifTemp>>$38: T::Boolean = <U x>$2: Integer.<U >>(<U <statTemp>>$40: Integer(5))\l<U <ifTemp>>$38: T::Boolean\l"
+        label = "block[id=9](<U <self>>: T.class_of(<root>), <U <selfRestore>>$33: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T.class_of(<root>) = loadSelf\l<U <blk>>$34: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<U <blk>>$35: Integer(0) = 0\l<U x>$2: Integer = <U <blk>>$34: [Integer].<U []>(<U <blk>>$35: Integer(0))\l<U <statTemp>>$40: Integer(5) = 5\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass) = <U x>$2: Integer.<U >>(<U <statTemp>>$40: Integer(5))\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_9" -> "bb::<Class:<root>>#<static-init>_10" [style="bold"];
@@ -142,7 +142,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_14" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];
     "bb::<Class:<root>>#<static-init>_15" [
-        label = "block[id=15](<U <self>>: T.class_of(<root>), <U <selfRestore>>$50: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T.class_of(<root>) = loadSelf\l<U <blk>>$51: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<U <blk>>$52: Integer(0) = 0\l<U x>$3: Integer = <U <blk>>$51: [Integer].<U []>(<U <blk>>$52: Integer(0))\l<U <statTemp>>$57: Integer(5) = 5\l<U <ifTemp>>$55: T::Boolean = <U x>$3: Integer.<U >>(<U <statTemp>>$57: Integer(5))\l<U <ifTemp>>$55: T::Boolean\l"
+        label = "block[id=15](<U <self>>: T.class_of(<root>), <U <selfRestore>>$50: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T.class_of(<root>) = loadSelf\l<U <blk>>$51: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<U <blk>>$52: Integer(0) = 0\l<U x>$3: Integer = <U <blk>>$51: [Integer].<U []>(<U <blk>>$52: Integer(0))\l<U <statTemp>>$57: Integer(5) = 5\l<U <ifTemp>>$55: T.any(TrueClass, FalseClass) = <U x>$3: Integer.<U >>(<U <statTemp>>$57: Integer(5))\l<U <ifTemp>>$55: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_15" -> "bb::<Class:<root>>#<static-init>_16" [style="bold"];
@@ -159,7 +159,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_17" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" [
-        label = "block[id=18]()\louterLoops: 1\l<U <statTemp>>$67: Integer(1) = 1\l<U <statTemp>>$66: String = <U <statTemp>>$67: Integer(1).<U to_s>()\l<U <statTemp>>$68: String(\"\") = \"\"\l<U <whileTemp>>$65: T::Boolean = <U <statTemp>>$66: String.<U ==>(<U <statTemp>>$68: String(\"\"))\l<U <whileTemp>>$65: T::Boolean\l"
+        label = "block[id=18]()\louterLoops: 1\l<U <statTemp>>$67: Integer(1) = 1\l<U <statTemp>>$66: String = <U <statTemp>>$67: Integer(1).<U to_s>()\l<U <statTemp>>$68: String(\"\") = \"\"\l<U <whileTemp>>$65: T.any(TrueClass, FalseClass) = <U <statTemp>>$66: String.<U ==>(<U <statTemp>>$68: String(\"\"))\l<U <whileTemp>>$65: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_21" [style="bold"];
@@ -176,7 +176,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" [
-        label = "block[id=21]()\louterLoops: 1\l<U <statTemp>>$72: Integer(1) = 1\l<U <statTemp>>$71: String = <U <statTemp>>$72: Integer(1).<U to_s>()\l<U <statTemp>>$73: String(\"\") = \"\"\l<U <ifTemp>>$70: T::Boolean = <U <statTemp>>$71: String.<U ==>(<U <statTemp>>$73: String(\"\"))\l<U <ifTemp>>$70: T::Boolean\l"
+        label = "block[id=21]()\louterLoops: 1\l<U <statTemp>>$72: Integer(1) = 1\l<U <statTemp>>$71: String = <U <statTemp>>$72: Integer(1).<U to_s>()\l<U <statTemp>>$73: String(\"\") = \"\"\l<U <ifTemp>>$70: T.any(TrueClass, FalseClass) = <U <statTemp>>$71: String.<U ==>(<U <statTemp>>$73: String(\"\"))\l<U <ifTemp>>$70: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_21" -> "bb::<Class:<root>>#<static-init>_22" [style="bold"];

@@ -5,7 +5,7 @@ suggest-t-let.rb:5: Changing the type of a variable in a loop is not permitted h
   Attempting to change type to: `TrueClass`
 
   Autocorrect: Done
-    suggest-t-let.rb:3: Replaced with `T.let(false, T::Boolean)`
+    suggest-t-let.rb:3: Replaced with `T.let(false, T.any(TrueClass, FalseClass))`
      3 |x = false
             ^^^^^
 
@@ -25,7 +25,7 @@ Errors: 2
 
 # typed: strict
 
-x = T.let(false, T::Boolean)
+x = T.let(false, T.any(TrueClass, FalseClass))
 [].each do
   x = true
 end

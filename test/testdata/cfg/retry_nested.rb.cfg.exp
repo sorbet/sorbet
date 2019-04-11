@@ -49,7 +49,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_6" -> "bb::Object#main_18" [style="tapered"];
 
     "bb::Object#main_7" [
-        label = "block[id=7](<U <returnMethodTemp>>$2: NilClass, <U <self>>: Object, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$11: Integer(3) = 3\l<U <ifTemp>>$9: T::Boolean = <U try>: Integer(0).<U <>(<U <statTemp>>$11: Integer(3))\l<U <ifTemp>>$9: T::Boolean\l"
+        label = "block[id=7](<U <returnMethodTemp>>$2: NilClass, <U <self>>: Object, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$11: Integer(3) = 3\l<U <ifTemp>>$9: T.any(TrueClass, FalseClass) = <U try>: Integer(0).<U <>(<U <statTemp>>$11: Integer(3))\l<U <ifTemp>>$9: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_8" [style="bold"];
@@ -61,7 +61,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_8" -> "bb::Object#main_16" [style="bold"];
     "bb::Object#main_9" [
-        label = "block[id=9](<U <returnMethodTemp>>$2: NilClass, <U <self>>: Object, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$20: Integer(6) = 6\l<U <ifTemp>>$18: T::Boolean = <U try>: Integer(0).<U <>(<U <statTemp>>$20: Integer(6))\l<U <ifTemp>>$18: T::Boolean\l"
+        label = "block[id=9](<U <returnMethodTemp>>$2: NilClass, <U <self>>: Object, <U <gotoDeadTemp>>$34: NilClass, <U try>: Integer(0))\l<U <statTemp>>$20: Integer(6) = 6\l<U <ifTemp>>$18: T.any(TrueClass, FalseClass) = <U try>: Integer(0).<U <>(<U <statTemp>>$20: Integer(6))\l<U <ifTemp>>$18: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::Object#main_9" -> "bb::Object#main_10" [style="bold"];
