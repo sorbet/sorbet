@@ -38,7 +38,7 @@ project:
 | &nbsp;                                                             | &nbsp;                       |
 | Fetch pre-written RBIs (either from gem sources or `sorbet-typed`) | `srb rbi sorbet-typed`       |
 | (Re)generate RBIs for all gems using runtime reflection            | `srb rbi gems`               |
-| (Re)generate an RBI for all "hidden definitions" in a projectc     | `srb rbi hidden-definitions` |
+| (Re)generate an RBI for all "hidden definitions" in a project      | `srb rbi hidden-definitions` |
 | (Re)generate a the TODO RBI file (for missing constants)           | `srb rbi todo`               |
 
 For more information about `srb init`, see [Adopting Sorbet](adopting.md).
@@ -200,14 +200,14 @@ definitions RBI file:
 srb rbi hidden-definitions
 ```
 
-On a philosophical level, we believe that while heavily metaprogrammed APIs make
+On a philosophical level, we believe that while heavily metaprogrammed APIs 
 can make it easy for a code author, they're frequently harder for consumers of
 the API to understand where things are being defined. By making metaprogramming
 explicit in one file, it's easy to track whether the amount of metaprogramming
 in a codebase is going up or down over time.
 
-Sorbet offers a number of powerful type-level features to enforce create and
-enforce ergonomic abstractions. When writing new code or refactoring old code,
+Sorbet offers a number of powerful type-level features to enforce
+ergonomic abstractions. When writing new code or refactoring old code,
 be sure to read up on [Abstract methods and interfaces](abstract.md) and [Union
 types](union-types.md), both of which allow code authors to write code that
 Sorbet can understand and analyze more effectively.
@@ -241,7 +241,7 @@ hand-written RBI file.
 
 ## A note about vendoring RBIs
 
-You might have noticed that we **vendor** all gem's RBI files into the current
+You might have noticed that we **vendor** all gems' RBI files into the current
 directory, and commit them to version control. Why? When developing RBI files
 for Sorbet, we referenced the prior art that [Flow](https://flow.org) developed.
 Our reasoning is [the same as theirs]:

@@ -140,7 +140,7 @@ accomplish the same thing as or something similar to `T.must`.
 
 ### `Array#fetch` & `Hash#fetch`
 
-The Ruby standard library has a couple built in methods for raising an exeption
+The Ruby standard library has a couple built-in methods for raising an exception
 if an element is missing from a collection: `x.fetch(...)`:
 
 ```ruby

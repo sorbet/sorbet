@@ -24,7 +24,7 @@ When run at the command line, `srb` roughly works like this:
 2.  Generate a list of errors within the project.
 3.  Display all errors to the user.
 
-However in step (3), most kinds of errors are *silenced* by default, instead of
+However, in step (3), most kinds of errors are *silenced* by default, instead of
 being reported. To opt into *more* checks, we use `# typed:` **sigils**[^sigil]. A
 `# typed:` sigil is a comment placed at the top of a Ruby file, indicating to
 `srb` which errors to report and which to silence. These are the available
@@ -125,7 +125,7 @@ T::Hash[Symbol, Integer]
 
 For example, it's possible that we don't care about what's stored in the `env`,
 only that we access things in the `env` with `Symbol` keys. Right now though,
-and `env` of `{user: 'jez'}` is a type error. In this case, we may wan to *opt
+an `env` of `{user: 'jez'}` is a type error. In this case, we may want to *opt
 out* of some static checks on this speficic argument, without opting out the
 method entirely. In this case, we can use [`T.untyped`](untyped.md):
 
@@ -154,7 +154,7 @@ not all) errors relating to that argument.
 
 ## Call-site granularity: `T.unsafe`
 
-Using sigils and methog signatures are the primary ways we opt *into* static
+Using sigils and method signatures are the primary ways we opt *into* static
 checks, and using `T.untyped` we can opt a specific argument *out of* static
 checks.
 
@@ -177,7 +177,7 @@ T.unsafe(a).foo   # ok
 ```
 
 The call to `T.unsafe` marks `a` as `T.untyped`, which causes Sorbet to silence
-the error about the method `foo` being missing. Note: sometimes what looks like
+the error about the method `foo` as missing. Note: sometimes what looks like
 a local variable is actually a method call on `self` in Ruby:
 
 ```ruby

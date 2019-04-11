@@ -10,11 +10,11 @@ Sorbet is a gradual type checker, which is a blessing and a curse.
 
 In large codebases, complete rewrites are expensive and dangerous. A complete
 halt on new features to pay down technical debt? Oof. "Ah, but if we just
-rewrite in _\<my favorite language\>_, we'll be fine!" Maybe... this risk pays off
+rewrite in _\<my favorite language\>_, we'll be fine!" Maybe... This risk pays off
 only in extreme circumstances.
 
-**Gradual type systems** solve this. Types can be adopted incrementally—team
-by team or file by file—according to the velocity of individual teams. In the
+**Gradual type systems** solve this. Types can be adopted incrementally, team-by-team
+or file-by-file, according to the velocity of individual teams. In the
 face of large user asks, quarterly planning, and re-orgs, migrations to gradual
 type systems are resilient to shifting priorities.
 
@@ -41,7 +41,7 @@ found in say, Go or Java. `T.untyped` has two special properties:
 1.  Every value can be asserted to have type `T.untyped`.
 2.  Every value of type `T.untyped` can be asserted to be _any other type_!
 
-If this sounds counter intuitive, that's because it is. Let's see why with an
+If this sounds counterintuitive, that's because it is. Let's see why with an
 example:
 
 ```ruby
@@ -95,7 +95,7 @@ that it has a method `#name`, but implicitly assumes this method's return type
 is `T.untyped`. Why? This is what Sorbet assumes for any methods that don't have
 a corresponding `sig` annotation.
 
-Since `T.untyped` _could be_ any type, when `name.length` runs Sorbet
+Since `T.untyped` _could be_ any type, when `name.length` runs, Sorbet
 optimistically assumes that `name` _will_ have some type which has a `#length`
 method. Then it also optimistically assumes that the thing `#length` returns
 (in this case, `len`) could be an `Integer`. Thus, Sorbet declares that this
@@ -159,8 +159,8 @@ valuable because **most** things are going to be `T.untyped`!
 
 By now we have a pretty good understanding of `T.untyped`:
 
-- It's useful for spurring short term adoption.
-- It harms our long term ability to statically analyze our code.
+- It's useful for spurring short-term adoption.
+- It harms our long-term ability to statically analyze our code.
 
 When a codebase is adopting a gradual type checker we see an adoption curve
 where `T.untyped` shows up everywhere then slowly gets phased out. There are

@@ -48,7 +48,7 @@ In every signature, there is an optional `params` section, and a required
 ## `params`: Annotating parameter types
 
 In the `sig` we refer to all parameters **by their name**, regardless of whether
-a it's a positional, keyword, block, or rest parameter. Once we've annotated the
+it's a positional, keyword, block, or rest parameter. Once we've annotated the
 method, Sorbet will automatically infer the types of any local variables we use
 in the method body.
 
@@ -199,7 +199,7 @@ seen all three of these things have a positive effect on development.
 
 ## Why are signatures Ruby syntax?
 
-For example, Sorbet could have re-used Yard annotations, or extended Ruby with
+For example, Sorbet could have re-used YARD annotations, or extended Ruby with
 new syntax.
 
 There are a number of reasons why we have type annotations as valid Ruby method
@@ -212,7 +212,7 @@ calls:
 
 - No runtime changes required.
 
-  If Sorbet introduced new syntax, type annotated code would no longer be
+  If Sorbet introduced new syntax, type-annotated code would no longer be
   directly runnable simply with `ruby` at the command line. This means no build
   step is required, and no special changes to the core language.
 
@@ -226,7 +226,7 @@ calls:
 - Type assertions in code would be inevitable.
 
   Having constructs like [`T.let` and `T.cast`](type-assertions.md) work in line
-  require that type annotations already be syntactically valid Ruby (having
+  requires that type annotations already be syntactically valid Ruby (having
   `T.let` and `T.cast` to do type refinements and assertions are central to
   Sorbet being a gradual type system). Since types must already be valid Ruby,
   it makes sense to have `sig`s be valid Ruby too.

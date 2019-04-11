@@ -8,7 +8,7 @@ turned on and off at will. This means the predications `srb` makes statically
 can be wrong.
 
 That's why Sorbet also uses **runtime checks**: even if a static prediction was
-wrong, it will get checked in the runtime, making things fail loudly and
+wrong, it will get checked during runtime, making things fail loudly and
 immediately, rather than silently and asynchronously.
 
 In this doc we'll answer:
@@ -67,7 +67,7 @@ sorbet-runtime raises an exception because the signature was violated.
 
 Runtime checks have been invaluable when developing Sorbet and rolling it out in
 Stripe's large Ruby codebase. Type annotations in a codebase are near useless if
-developers don't trust them (consider how often Yard annotations fall out of
+developers don't trust them (consider how often YARD annotations fall out of
 sync with the code... 😰).
 
 Adding a `sig` to a method is only as good as the predictions it lets `srb` make

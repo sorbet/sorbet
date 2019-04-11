@@ -12,8 +12,8 @@ particular, Sorbet does not assume a method called twice returns the same thing
 each time!
 
 See [Limitations of
-flow-sensitivity](flow-sensitive.md#limitations-of-flow-sensitivity) for a full
-worked example.
+flow-sensitivity](flow-sensitive.md#limitations-of-flow-sensitivity) for a fully
+working example.
 
 ## What's the difference between `T.let`, `T.cast`, and `T.unsafe`?
 

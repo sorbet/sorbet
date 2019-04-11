@@ -7,7 +7,7 @@ title: Class Types
 > class—these are the most commonly used types. To instead learn about types for
 > class objects themselves, see [T.class_of](class-of.md).
 
-Every Ruby class and module doubles as a type in Sorbet. Class types supercede
+Every Ruby class and module doubles as a type in Sorbet. Class types supersede
 the notion some other languages have of "primitive" types. For example, `"abc"`
 is an instance of the `String` class, and so `"abc"` has type `String`. The same
 goes for many other values in Ruby:
@@ -63,7 +63,7 @@ set_flag(false)
 
 Note that the class (and type) of `nil` is `NilClass`.
 
-There's a lot to say about `nil`, so it gets [it's own doc](nilable-types.md).
+There's a lot to say about `nil`, so it gets [its own doc](nilable-types.md).
 
 ## User-defined class types
 

@@ -18,8 +18,8 @@ newline-separated list of arguments to pass to `srb tc`, the same as if they'd
 been passed at the command line.
 
 Every line in this file acts as if it's prepended to the argument list of `srb
-tc`. So arguments in the config file are always passed first (if it exists), and
-then arguments provided on the command line.
+tc`. So arguments in the config file are always passed first (if it exists), followed
+by arguments provided on the command line.
 
 For a full description of the config file format, see the output of `srb tc
 --help`.
@@ -46,10 +46,11 @@ srb tc . --ignore=/vendor
 
 `srb tc` can be given a list of paths (either folder or files) to Ruby files
 that it should read. By default, `sorbet/config` is created to contain `.`, so
-`srb tc` will type check every file in the current directory[^gems]. Note:
-Sorbet only checks files that end in `*.rb` or `*.rbi`. To check other files,
-they must be explicitly named on the command line (or in the config file), or be
-given an appropriate file extension.
+`srb tc` will type check every file in the current directory[^gems].
+
+> **Note**: Sorbet only checks files that end in `*.rb` or `*.rbi`. To check other files,
+> they must be explicitly named on the command line (or in the config file), or 
+> given an appropriate file extension.
 
 [^gems]: This is incidentally why Sorbet does not type check gems: the paths to
 gems' source directories are never given to Sorbet.
@@ -63,13 +64,13 @@ list of files Sorbet reads with the `--ignore` flag. The syntax is:
 
 This will ignore input files that contain the given pattern in their paths
 (relative to the input path passed to Sorbet). Patterns beginning with / match
-against the prefix of these relative paths; others are substring matchs.
+against the prefix of these relative paths; others are substring matches.
 Matches must be against whole component parts, so `foo` matches `/foo/bar.rb`
 and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.
 
 ## Overriding strictness levels
 
-By default, Sorbet reads each file to determine it's [strictness
+By default, Sorbet reads each file to determine its [strictness
 level](static.md#file-level-granularity-strictness-levels), defaulting to
 `# typed: false` if none is provided.
 

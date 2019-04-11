@@ -11,7 +11,7 @@ Using [Flow-Sensitive Typing](flow-sensitive.md), [Union Types](union-types.md),
 and [Type Assertions](type-assertions.md) we can approximate exhaustiveness
 checking. **Exhaustiveness checking** is a feature of a language where the type
 checker guarantees that the programmer has covered all cases. It can be super
-useful at catching pesky edge cases before them become bugs!
+useful at catching pesky edge cases before they become bugs!
 
 ## tl;dr
 
@@ -143,7 +143,7 @@ def foo(x)
   when A
     do_a(x)
   else
-    T.let(x, B) # error: Argument does not have accerted type: `B`
+    T.let(x, B) # error: Argument does not have accepted type: `B`
                 #        Got: `T.any(B, C)`
     do_b(x)
   end

@@ -51,7 +51,7 @@ For small projects, Sorbet can run on a single file with no additional
 information. But for projects that have multiple files and depend on other gems,
 Sorbet needs to know more information to work.
 
-To initialize Sorbet in an existing project run:
+To initialize Sorbet in an existing project, run:
 
 ```plaintext
 ❯ srb init
@@ -78,7 +78,7 @@ sorbet/
 
 - `sorbet/rbi/` is a folder containing [RBI files](rbi.md). RBI files (or "Ruby
   Interface" files) declare classes, modules, constants, and methods to Sorbet
-  that it can't see on it's own.
+  that it can't see on its own.
 
   `srb init` creates many kinds of RBI files. For more information, see [RBI
   files](rbi.md).
@@ -162,7 +162,7 @@ enforces that...
 - every class, module, and constant in a codebase is known. These can be 100%
   accurately shown in auto-complete suggestions and used in type annotations.
 
-- all gems have explicit interfaces. More than yard documentation, RBI files
+- all gems have explicit interfaces. More than YARD documentation, RBI files
   are machine-checked documentation about the libraries we're using.
 
 Importantly, Sorbet does **not** yet report **type errors** (the errors we've

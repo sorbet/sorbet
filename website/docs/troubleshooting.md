@@ -20,7 +20,7 @@ This doc covers two main topics:
 ## Validating our assumptions
 
 When faced with a type error, checking our assumptions is step number one. The
-first questiont to ask is:
+first question to ask is:
 
 > Are my files `# typed: false` or `# typed: true`?
 
@@ -52,7 +52,7 @@ end
 
 With this example we see that `xs.first` returns `T.nilable(Integer)`.
 
-Frequently when troubleshooting type errors, either something is `nil` when or
+Frequently when troubleshooting type errors, either something is `nil` or 
 `T.untyped` unexpectedly. We can use `T.reveal_type` to track down where the
 type originated.
 
@@ -106,7 +106,7 @@ exist." Ruby is a very dynamic language, and methods can be defined in ways
 Sorbet cannot see statically. It's possible that even though a method exists at
 runtime, Sorbet cannot see it.
 
-However, we can use `*.rbi` files to declare methods to Sorbet so that **can**
+However, we can use `*.rbi` files to declare methods to Sorbet so that it **can**
 see them statically. At Stripe, we even have a way to auto-generate these files:
 
 [→ RBI files](rbi.md)
@@ -141,8 +141,8 @@ always be **escape hatches** to silence the problem.
 By wrapping an expression like `x` in `T.unsafe(...)` we can ask Sorbet to
 forget the result type of something.
 
-One case when this is useful when we know for sure that a method exists, but
-Sorbet don't know about that method exists statically:
+One case when this is useful is when we know for sure that a method exists, but
+Sorbet doesn't know that method exists statically:
 
 ```
 TODO(jez) missing method example
@@ -180,7 +180,7 @@ monitoring) that every time this method is called with `label = 'a'`, `a_or_b`
 is an instance of `A`, and same for `'b'` / `B`.
 
 Ideally we'd refactor our code to express this invariant in the types. To
-re-iterate: the **preferred** solution is to refactor this code. The time spent
+reiterate: the **preferred** solution is to refactor this code. The time spent
 adjusting this code now will make it easier and safer to refactor the code in
 the future. Even still, we don't always have the time *right now*, so let's see
 how we can work around the issue.

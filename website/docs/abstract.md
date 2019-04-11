@@ -19,9 +19,9 @@ anywhere your class / module is inherited, included, or extended.
 ## Creating an abstract method
 
 1.  Add `extend T::Helpers` to your class or module.
-1.  Add `abstract!` or `interface!` to the top of your class or module
-    - (`interface!` requires that *all* methods be abstract)
-1.  Add a `sig` with `abstract` to any methods that should be abstract
+1.  Add `abstract!` or `interface!` to the top of your class or module.
+    - (`interface!` requires that *all* methods are abstract)
+1.  Add a `sig` with `abstract` to any methods that should be abstract.
 1.  Define the method on a single line with an empty body.
 
 Example:
@@ -38,7 +38,7 @@ end
 
 ## Implementing an abstract method
 
-Define the method like normal in the implementing class or module. The parent
+Define the method as normal in the implementing class or module. The parent
 `sig` must be copied to the child, or the types will not be checked on the
 child, neither statically nor at runtime.
 
