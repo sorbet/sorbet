@@ -148,7 +148,11 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         }
     }
 
-    return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
+    if (typeAndArgNames.size() == 0) {
+        return fmt::format("sig {{{}}}", methodReturnType);
+    } else {
+        return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
+    }
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
