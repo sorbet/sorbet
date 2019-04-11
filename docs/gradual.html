@@ -1,0 +1,252 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Gradual Type Checking &amp; Sorbet · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Sorbet is a gradual type checker, which is a blessing and a curse.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Gradual Type Checking &amp; Sorbet · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Sorbet is a gradual type checker, which is a blessing and a curse.&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Static &amp; Runtime</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/gradual.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Gradual Type Checking &amp; Sorbet</h1></header><article><div><span><p>Sorbet is a gradual type checker, which is a blessing and a curse.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-is-a-gradual-type-system"></a><a href="#what-is-a-gradual-type-system" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What is a gradual type system?</h2>
+<p>In large codebases, complete rewrites are expensive and dangerous. A complete
+halt on new features to pay down technical debt? Oof. &quot;Ah, but if we just
+rewrite in <em>&lt;my favorite language&gt;</em>, we'll be fine!&quot; Maybe... This risk pays off
+only in extreme circumstances.</p>
+<p><strong>Gradual type systems</strong> solve this. Types can be adopted incrementally, team-by-team
+or file-by-file, according to the velocity of individual teams. In the
+face of large user asks, quarterly planning, and re-orgs, migrations to gradual
+type systems are resilient to shifting priorities.</p>
+<p>To deliver on this promise, gradual type systems make a compromise: type checks
+can be &quot;turned off&quot; at any time and at any level of granularity. In Sorbet, we
+can opt out of type checking at a call site, a method definition, a class, or
+even an entire file.</p>
+<p>This is the fundamental tension in a gradual type system: when a program
+typechecks, it's not clear how confident we can be in the typechecker's
+assessment of our code. But it's precisely this feature that lets us plow
+forward adding types while simultaneously adding features.</p>
+<h2><a class="anchor" aria-hidden="true" id="tuntyped-a-double-edged-sword"></a><a href="#tuntyped-a-double-edged-sword" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>T.untyped: A double-edged sword</h2>
+<p>The defining characteristic of a gradual type system is to be able to turn it
+off at any granularity. So what <em>specifically</em> makes Sorbet gradual? The answer:
+<a href="/docs/untyped"><code>T.untyped</code></a>.</p>
+<p><code>T.untyped</code> is a <strong>type</strong> in Sorbet's type system, but it's unlike any type
+found in say, Go or Java. <code>T.untyped</code> has two special properties:</p>
+<ol>
+<li>Every value can be asserted to have type <code>T.untyped</code>.</li>
+<li>Every value of type <code>T.untyped</code> can be asserted to be <em>any other type</em>!</li>
+</ol>
+<p>If this sounds counterintuitive, that's because it is. Let's see why with an
+example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># T.let asserts that an expression has a type:</span>
+x = T.let(<span class="hljs-number">0</span>, Integer)
+
+<span class="hljs-comment"># Anything can be T.untyped:</span>
+y = T.let(x, T.untyped)
+
+<span class="hljs-comment"># and T.untyped can be anything!</span>
+z = T.let(y, String)
+
+T.reveal_type(x) <span class="hljs-comment"># =&gt; Integer</span>
+T.reveal_type(y) <span class="hljs-comment"># =&gt; T.untyped</span>
+T.reveal_type(z) <span class="hljs-comment"># =&gt; String</span>
+
+<span class="hljs-comment"># ... z = 0, but its type is String!</span>
+</code></pre>
+<p>Follow what this example is doing: we start with <code>x = 0</code>, then set <code>y = x</code>,
+then <code>z = y</code>, so in the end <code>z = 0</code>. But at the same time, Sorbet thinks that
+<code>z</code> has type String!</p>
+<p>At first blush, it looks like we <strong>do not</strong> want this property in our type
+system. It lets us make wildly inaccurate claims! But let's withhold judgement
+for a second, and see what this property enables:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># --- File we haven't typed yet ---</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>
+  <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:name</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># --- File we're currently typing ---</span>
+
+sig {params(<span class="hljs-symbol">person:</span> Person).returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">name_length</span><span class="hljs-params">(person)</span></span>
+  name = person.name <span class="hljs-comment"># (*)</span>
+  T.reveal_type(name) <span class="hljs-comment"># =&gt; T.untyped</span>
+
+  len = name.length
+  T.reveal_type(len) <span class="hljs-comment"># =&gt; T.untyped</span>
+
+  len
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Look at the line marked <code>(*)</code>. Sorbet knows about the <code>Person</code> class, and knows
+that it has a method <code>#name</code>, but implicitly assumes this method's return type
+is <code>T.untyped</code>. Why? This is what Sorbet assumes for any methods that don't have
+a corresponding <code>sig</code> annotation.</p>
+<p>Since <code>T.untyped</code> <em>could be</em> any type, when <code>name.length</code> runs, Sorbet
+optimistically assumes that <code>name</code> <em>will</em> have some type which has a <code>#length</code>
+method. Then it also optimistically assumes that the thing <code>#length</code> returns
+(in this case, <code>len</code>) could be an <code>Integer</code>. Thus, Sorbet declares that this
+method type checks.</p>
+<p>In a sense, &quot;being optimistic&quot; is really just a way of the programmer telling
+Sorbet, &quot;I believe this code is correct.&quot; And realistically, we might be
+convinced of our code's correctness for a number of reasons:</p>
+<ul>
+<li>because this code is well tested,</li>
+<li>because this code has been running in production just fine, or</li>
+<li>because we've carefully reviewed the code for correctness.</li>
+</ul>
+<p>But as many of us have experienced, our faith is frequently misplaced when it
+comes to believing that some code is correct. As we add type annotations, Sorbet
+helps uncover and check hidden assumptions, providing even more evidence in
+favor of our code's correctness. The next question becomes: what if our
+annotations are wrong?</p>
+<h2><a class="anchor" aria-hidden="true" id="checking-our-assertions-at-runtime"></a><a href="#checking-our-assertions-at-runtime" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Checking our assertions at runtime</h2>
+<p>In our <code>name_length</code> example above, we added a type annotation to a previously
+untyped method. What if our annotation was wrong? For example, what if we
+accidentally typed the return as a String:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>
+  <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:name</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># The annotation for .returns is wrong!</span>
+sig {params(<span class="hljs-symbol">person:</span> Person).returns(String)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">name_length</span><span class="hljs-params">(person)</span></span>
+  person.name.length
+<span class="hljs-keyword">end</span>
+
+person = Person.new
+person.name = <span class="hljs-string">'Jenny Rosen'</span>
+name_length(person)
+</code></pre>
+<p>Because <code>Person#name</code> returns <code>T.untyped</code>, Sorbet does not have enough
+information statically to check that <code>#length</code> returns an Integer. But if we
+were to run this code, we'd know at the moment our method returns that our
+result didn't match our declaration.</p>
+<p>Enter the <a href="/docs/runtime">runtime system</a>. At runtime, the <code>sig</code> above a method def
+wraps our method into a new method which does three things:</p>
+<ul>
+<li>checks that it was called with arguments matching the <code>sig</code>'s declared params</li>
+<li>calls our method and gets the result</li>
+<li>checks that our result matches the <code>sig</code>'s declared return</li>
+</ul>
+<p>This means we can leverage our existing test coverage and our production
+assertion monitoring to build confidence that our type annotations are correct.
+In the early days of <a href="/docs/adopting">adopting Sorbet</a> in a codebase this is super
+valuable because <strong>most</strong> things are going to be <code>T.untyped</code>!</p>
+<h2><a class="anchor" aria-hidden="true" id="the-lifecycle-of-tuntyped"></a><a href="#the-lifecycle-of-tuntyped" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The lifecycle of T.untyped</h2>
+<p>By now we have a pretty good understanding of <code>T.untyped</code>:</p>
+<ul>
+<li>It's useful for spurring short-term adoption.</li>
+<li>It harms our long-term ability to statically analyze our code.</li>
+</ul>
+<p>When a codebase is adopting a gradual type checker we see an adoption curve
+where <code>T.untyped</code> shows up everywhere then slowly gets phased out. There are
+three main phases of <code>T.untyped</code> in a codebase:</p>
+<ol>
+<li>The initial ramp up, where only early adopters are using types.</li>
+<li>The transitional period, where a codebase's core abstractions gain types.</li>
+<li>The long tail, where typed code becomes the majority.</li>
+</ol>
+<p>For context, at Stripe we're somewhere about halfway between (2) and (3). We've
+already enabled <code>typed: true</code> in the vast majority of files in our main
+codebase, but most methods and even a few core abstractions are not typed yet.</p>
+<p>There are a number of tools for managing <code>T.untyped</code> in a codebase:</p>
+<ul>
+<li><a href="/docs/static">Strictness levels</a> (<code>typed: true</code>, <code>typed: strict</code>, and <code>typed: strong</code>).
+<ul>
+<li>These levels control when <code>T.untyped</code> is allowed.</li>
+</ul></li>
+<li><a href="/docs/sigs"><code>sig</code></a> and <a href="/docs/strict"><code>T.let</code> annotations</a>.
+<ul>
+<li>Adding annotations opts code into static type checking.</li>
+</ul></li>
+<li><a href="/docs/troubleshooting#escape-hatches"><code>T.unsafe</code> and <code>T.cast</code></a>.
+<ul>
+<li>These helpers opt code out of static checks.</li>
+</ul></li>
+<li><a href="/docs/troubleshooting"><code>T.reveal_type</code></a> and our editors.
+<ul>
+<li>Knowing which things are <code>T.untyped</code> is half the battle.</li>
+</ul></li>
+</ul>
+<p>These tools are the bread and butter for rolling out types in a gradual type
+system. Mostly that means they're tools that the Developer Productivity team
+uses, but understanding that they're there can help give context when
+troubleshooting. See <a href="/docs/troubleshooting">Troubleshooting</a> for more information.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What's next?</h2>
+<p>Gradual type systems make it tractable to mix feature development with adopting
+a typed language. The guarantees they provide are necessarily weaker than
+languages without a type like <code>T.untyped</code>, because <code>T.untyped</code> allows us to
+&quot;opt out&quot; of type checking. But it's precisely this property which enables
+incremental adoption through a large codebase.</p>
+<p>Armed with this knowledge, here are some resources to check out next:</p>
+<ul>
+<li><p><a href="/docs/static">Enabling Static Checks</a></p>
+<p>How to opt into higher strictness levels and add type annotations so that
+Sorbet can report more errors.</p></li>
+<li><p><a href="/docs/runtime">Enabling Runtime Checks</a></p>
+<p>Learn more about what benefits the runtime system provides, and how to work
+with it.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/quickref"><span class="arrow-prev">← </span><span>Quick Reference</span></a><a class="docs-next button" href="/docs/static"><span>Enabling Static Checks</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#what-is-a-gradual-type-system">What is a gradual type system?</a></li><li><a href="#tuntyped-a-double-edged-sword">T.untyped: A double-edged sword</a></li><li><a href="#checking-our-assertions-at-runtime">Checking our assertions at runtime</a></li><li><a href="#the-lifecycle-of-tuntyped">The lifecycle of T.untyped</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>

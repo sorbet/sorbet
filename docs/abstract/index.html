@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Abstract Classes and Interfaces · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
+&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
+&lt;/blockquote&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Abstract Classes and Interfaces · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
+&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
+&lt;/blockquote&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/abstract.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Abstract Classes and Interfaces</h1></header><article><div><span><blockquote>
+<p>TODO: This page is still a fragment. Contributions welcome!</p>
+</blockquote>
+<p>Sorbet has some support for abstract classes, abstract methods, and interfaces.</p>
+<blockquote>
+<p><strong>Note</strong>: Much of the support for abstract classes, methods, and interfaces is
+only implemented using the runtime system. At Stripe, these checks are
+enforced with a &quot;wholesome test&quot; that loads up all Stripe's code and checks
+that these invariants hold. Support for these checks in the static system is
+planned for the future.</p>
+</blockquote>
+<p>Abstract methods let you ensure that a particular method gets implemented
+anywhere your class / module is inherited, included, or extended.</p>
+<h2><a class="anchor" aria-hidden="true" id="creating-an-abstract-method"></a><a href="#creating-an-abstract-method" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating an abstract method</h2>
+<ol>
+<li>Add <code>extend T::Helpers</code> to your class or module.</li>
+<li>Add <code>abstract!</code> or <code>interface!</code> to the top of your class or module.
+<ul>
+<li>(<code>interface!</code> requires that <em>all</em> methods are abstract)</li>
+</ul></li>
+<li>Add a <code>sig</code> with <code>abstract</code> to any methods that should be abstract.</li>
+<li>Define the method on a single line with an empty body.</li>
+</ol>
+<p>Example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Runnable</span></span>
+  extend T::Helpers                                    <span class="hljs-comment"># (1)</span>
+  interface!                                           <span class="hljs-comment"># (2)</span>
+
+  sig {abstract.params(<span class="hljs-symbol">args:</span> T::Array[String]).void}   <span class="hljs-comment"># (3)</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">(args)</span></span>; <span class="hljs-keyword">end</span>                                  <span class="hljs-comment"># (4)</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="implementing-an-abstract-method"></a><a href="#implementing-an-abstract-method" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Implementing an abstract method</h2>
+<p>Define the method as normal in the implementing class or module. The parent
+<code>sig</code> must be copied to the child, or the types will not be checked on the
+child, neither statically nor at runtime.</p>
+<p>Example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HelloWorld</span></span>
+  <span class="hljs-keyword">include</span> Runnable
+
+  sig {implementation.params(<span class="hljs-symbol">args:</span> T::Array[String]).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">(args)</span></span>
+    puts <span class="hljs-string">'Hello, world!'</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<hr>
+<p>This is a dump of some other notes, and is somewhat redundant with the above guide.</p>
+<!-- TODO(jez) This doc violates our style-guide.md w.r.t. usage of "you". -->
+<ul>
+<li>You can <code>extend T::Helpers</code> to get access to <code>abstract!</code> and <code>interface!</code></li>
+<li>You can use <code>abstract!</code> to prevent a class from being instantiated.</li>
+<li>You can use either <code>abstract!</code> or <code>interface!</code> to allow the class or module to
+have <code>abstract</code> methods.</li>
+<li>You can mixin a module (<code>include</code> / <code>extend</code>) to declare that a class
+implements an interface.</li>
+</ul>
+<!-- TODO(jez) It's possible that some of these points about overrides belong in a different doc instead of here. -->
+<p>This is somewhat unrelated to abstract methods specifically, but Sorbet also has
+method override checking. These checks are implemented as builder methods you
+can attach to a <code>sig</code>:</p>
+<ul>
+<li><code>overridable</code>: children can override this method</li>
+<li><code>override</code>: this class overrides a method on its parent (or ancestor)</li>
+<li><code>abstract</code>: this method is &quot;abstract&quot; (has no implementation) and must be
+implemented by being overridden in all concrete subclasses.</li>
+<li><code>implementation</code>: this method implements an abstract method</li>
+</ul>
+<p>Note that you can chain these, so you can have <code>.implementation.overridable</code> to
+let a grand child class override a concrete implementation of the parent.</p>
+<p>It can be confusing when some of these builders are required and when they
+aren't. The error messages are the canonical source of truth, but at a glance
+here's a table. ✅ means &quot;this pairing is allowed&quot; while ❌ means &quot;this is an
+error&quot; (remember, most of these are runtime-only errors currently).</p>
+<blockquote>
+<p>Below, <code>standard</code> means &quot;has a sig, but has none of the special modifiers.&quot;</p>
+</blockquote>
+<table>
+<thead>
+<tr><th>↓Child \ Parent →</th><th>no sig</th><th><code>standard</code></th><th><code>overridable</code></th><th><code>override</code></th><th><code>implementation</code></th><th><code>abstract</code></th></tr>
+</thead>
+<tbody>
+<tr><td>no sig</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td><code>standard</code></td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td><code>override</code></td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td><code>implementation</code></td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: if the implementation methods come from inheritance (either class or
+mixin) they don't need <code>implementation</code>.</p>
+</blockquote>
+<p>Other checks:</p>
+<ul>
+<li>all methods in <code>interface!</code> need <code>sig</code></li>
+<li><code>interface!</code> → all method are <code>abstract</code>
+<ul>
+<li>both if all methods are defined in current module</li>
+<li>and also if some methods were defined in an <code>included</code> module</li>
+</ul></li>
+<li>an <code>interface!</code> can't have <code>private</code> or <code>protected</code> methods.</li>
+<li>the type must match when overriding / implementing a parent method</li>
+<li><code>abstract</code> +  <code>self.</code> methods on a module are not allowed (there's no way to
+implement these methods)</li>
+<li><code>abstract</code> methods will raise when called in the runtime</li>
+<li>classes without <code>absract!</code> or <code>interface!</code> must implement all <code>abstract</code>
+methods from their parents</li>
+<li><code>extend MyAbstractModule</code> works just like <code>include MyAbstractModule</code>, but for <code>self.</code> methods</li>
+<li><code>abstract!</code> cannot be instantiated</li>
+</ul>
+<hr>
+<!-- TODO(jez) It's possible that mixes_in_class_methods belongs a different doc instead of here. -->
+<p>A somewhat common pattern in Ruby is to use an <code>included</code> hook to mix class
+methods from the module onto the including class:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">included</span><span class="hljs-params">(other)</span></span>
+  other.extend(<span class="hljs-keyword">self</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Instead of attempting understand this specific pattern, exposes a new construct:
+<code>mixes_in_class_methods</code>. At runtime, it behaves just like the above, but
+statically <code>srb</code> will know what class methods are being defined.</p>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span></span>
+  extend T::Helpers
+  interface!
+
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ClassMethods</span></span>
+    extend T::Helpers
+    abstract!
+
+    sig {abstract.returns(Integer)}
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  mixes_in_class_methods(ClassMethods)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span> <span class="hljs-comment"># error: Missing definition for abstract method</span></span>
+  <span class="hljs-keyword">include</span> A
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># Sorbet knows that `foo` is a class method on `B`</span>
+B.foo
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/self-type"><span class="arrow-prev">← </span><span>T.self_type</span></a><a class="docs-next button" href="/docs/strict"><span>Strict Mode</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-an-abstract-method">Creating an abstract method</a></li><li><a href="#implementing-an-abstract-method">Implementing an abstract method</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
