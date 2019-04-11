@@ -150,7 +150,7 @@ class Sorbet::Private::Serialize
       begin
         method = klass.instance_method(method_sym)
       rescue => e
-        ret << "# #{e}"
+        ret << "# #{e}\n"
         next
       end
       next if blacklisted_method(method)
@@ -162,7 +162,7 @@ class Sorbet::Private::Serialize
       begin
         method = klass.singleton_method(method_sym)
       rescue => e
-        ret << "# #{e}"
+        ret << "# #{e}\n"
         next
       end
       next if blacklisted_method(method)
