@@ -47,7 +47,6 @@ popd
 
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
-git branch -D gh-pages || true
 current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
 tar -xjf _out_/website/website.tar.bz2 .
@@ -73,7 +72,6 @@ rm -rf sorbet-repo
 git clone git@github.com:stripe/sorbet-repo.git
 pushd sorbet-repo
 git fetch origin gh-pages
-git branch -D gh-pages || true
 git checkout gh-pages
 mkdir -p super-secret-private-beta/gems/
 cp -R ../_out_/gems/*.gem super-secret-private-beta/gems/
