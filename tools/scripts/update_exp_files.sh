@@ -5,7 +5,7 @@ COMMAND_FILE=$(mktemp)
 
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg autogen)
 
-bazel build //main:sorbet-light -c opt "$@"
+bazel build test/cli:update test/lsp:update //main:sorbet-light -c opt "$@"
 
 # shellcheck disable=SC2207
 rb_src=(
