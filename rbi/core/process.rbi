@@ -345,13 +345,13 @@ module Process::GID
   sig {returns(Integer)}
   def self.re_exchange(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.re_exchangeable?(); end
 
   sig {returns(Integer)}
   def self.rid(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.sid_available?(); end
 
   sig {returns(Integer)}
@@ -385,7 +385,7 @@ class Process::Status < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
 
@@ -397,10 +397,10 @@ class Process::Status < Object
   end
   def >>(num); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def coredump?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def exited?(); end
 
   sig {returns(T.nilable(Integer))}
@@ -412,16 +412,16 @@ class Process::Status < Object
   sig {returns(Integer)}
   def pid(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def signaled?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def stopped?(); end
 
   sig {returns(T.nilable(Integer))}
   def stopsig(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def success?(); end
 
   sig {returns(T.nilable(Integer))}
@@ -444,7 +444,7 @@ module Process::Sys
   sig {returns(Integer)}
   def self.getuid(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.issetugid(); end
 
   sig do
@@ -565,13 +565,13 @@ module Process::UID
   sig {returns(Integer)}
   def self.re_exchange(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.re_exchangeable?(); end
 
   sig {returns(Integer)}
   def self.rid(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.sid_available?(); end
 
   sig {returns(Integer)}

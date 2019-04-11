@@ -265,7 +265,7 @@ class Array < Object
   sig {returns(Enumerator[Elem])}
   def each_index(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
 
   sig do
@@ -351,7 +351,7 @@ class Array < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
 
@@ -448,7 +448,7 @@ class Array < Object
     params(
         arg0: Elem,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def member?(arg0); end
 

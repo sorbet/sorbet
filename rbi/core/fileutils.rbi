@@ -8,7 +8,7 @@ module FileUtils
     params(
         src: T.any(String, Pathname),
         dest: T.any(String, Pathname),
-        preserve: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
+        preserve: T::Hash[Symbol, T::Boolean],
     )
     .returns(T::Array[String])
   end
@@ -17,10 +17,10 @@ module FileUtils
   sig do
     params(
         list: T.any(String, T::Array[String]),
-        force: T.nilable(T.any(TrueClass, FalseClass)),
-        noop: T.nilable(T.any(TrueClass, FalseClass)),
-        verbose: T.nilable(T.any(TrueClass, FalseClass)),
-        secure: T.nilable(T.any(TrueClass, FalseClass)),
+        force: T.nilable(T::Boolean),
+        noop: T.nilable(T::Boolean),
+        verbose: T.nilable(T::Boolean),
+        secure: T.nilable(T::Boolean),
     )
     .returns(T::Array[String])
   end
@@ -29,7 +29,7 @@ module FileUtils
   sig do
     params(
         list: T.any(String, Pathname),
-        mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
+        mode: T::Hash[Symbol, T::Boolean],
     )
     .returns(T::Array[String])
   end
@@ -38,10 +38,10 @@ module FileUtils
   sig do
     params(
       list: T.any(String, T::Array[String]),
-      noop: T.nilable(T.any(TrueClass, FalseClass)),
-      verbose: T.nilable(T.any(TrueClass, FalseClass)),
+      noop: T.nilable(T::Boolean),
+      verbose: T.nilable(T::Boolean),
       mtime: T.nilable(Time),
-      nocreate: T.nilable(T.any(TrueClass, FalseClass)),
+      nocreate: T.nilable(T::Boolean),
     )
     .void
   end

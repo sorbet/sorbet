@@ -49,7 +49,7 @@ class Dir < Object
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.exist?(file); end
 

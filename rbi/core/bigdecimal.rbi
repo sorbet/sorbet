@@ -204,25 +204,25 @@ class BigDecimal < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
 
@@ -230,25 +230,25 @@ class BigDecimal < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <=(arg0); end
 
@@ -282,7 +282,7 @@ class BigDecimal < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 
@@ -290,7 +290,7 @@ class BigDecimal < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
 
@@ -298,25 +298,25 @@ class BigDecimal < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
 
@@ -324,25 +324,25 @@ class BigDecimal < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >=(arg0); end
 
@@ -434,7 +434,7 @@ class BigDecimal < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
@@ -442,7 +442,7 @@ class BigDecimal < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def equal?(arg0); end
 
@@ -481,7 +481,7 @@ class BigDecimal < Numeric
   end
   def fdiv(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def finite?(); end
 
   sig {returns(BigDecimal)}
@@ -534,7 +534,7 @@ class BigDecimal < Numeric
   end
   def mult(arg0, arg1); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nan?(); end
 
   sig {returns(Object)}
@@ -681,6 +681,6 @@ class BigDecimal < Numeric
   end
   def truncate(arg0=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 end

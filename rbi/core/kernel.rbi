@@ -79,7 +79,7 @@ module Kernel
   end
   def eval(arg0, arg1=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def iterator?(); end
 
   sig {returns(T::Array[Symbol])}
@@ -97,7 +97,7 @@ module Kernel
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def !~(other); end
 
@@ -113,7 +113,7 @@ module Kernel
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(other); end
 
@@ -160,7 +160,7 @@ module Kernel
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(other); end
 
@@ -175,7 +175,7 @@ module Kernel
   sig {returns(T.self_type)}
   def freeze(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def frozen?(); end
 
   sig {returns(Integer)}
@@ -191,7 +191,7 @@ module Kernel
     params(
         arg0: Class,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def instance_of?(arg0); end
 
@@ -199,7 +199,7 @@ module Kernel
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def instance_variable_defined?(arg0); end
 
@@ -227,7 +227,7 @@ module Kernel
     params(
         arg0: T.any(Class, Module),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def is_a?(arg0); end
 
@@ -235,7 +235,7 @@ module Kernel
     params(
         arg0: Class,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def kind_of?(arg0); end
 
@@ -249,18 +249,18 @@ module Kernel
 
   sig do
     params(
-        regular: T.any(TrueClass, FalseClass),
+        regular: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
   def methods(regular=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nil?(); end
 
   sig do
     params(
-        all: T.any(TrueClass, FalseClass),
+        all: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -268,7 +268,7 @@ module Kernel
 
   sig do
     params(
-        all: T.any(TrueClass, FalseClass),
+        all: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -284,7 +284,7 @@ module Kernel
 
   sig do
     params(
-        all: T.any(TrueClass, FalseClass),
+        all: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -337,7 +337,7 @@ module Kernel
 
   sig do
     params(
-        all: T.any(TrueClass, FalseClass),
+        all: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -346,7 +346,7 @@ module Kernel
   sig {returns(T.self_type)}
   def taint(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def tainted?(); end
 
   sig do
@@ -378,7 +378,7 @@ module Kernel
   sig {returns(T.self_type)}
   def untrust(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def untrusted?(); end
 
   sig do
@@ -514,7 +514,7 @@ module Kernel
   sig {returns(Binding)}
   def binding(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def block_given?(); end
 
   sig {returns(T.noreturn)}
@@ -582,9 +582,9 @@ module Kernel
   sig do
     params(
         filename: String,
-        arg0: T.any(TrueClass, FalseClass),
+        arg0: T::Boolean,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def load(filename, arg0=T.unsafe(nil)); end
 
@@ -690,7 +690,7 @@ module Kernel
     params(
         path: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def require(path); end
 
@@ -698,7 +698,7 @@ module Kernel
     params(
         feature: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def require_relative(feature); end
 

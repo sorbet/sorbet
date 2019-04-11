@@ -62,19 +62,19 @@ class IO < Object
 
   sig do
     params(
-        arg0: T.any(TrueClass, FalseClass),
+        arg0: T::Boolean,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def autoclose=(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def autoclose?(); end
 
   sig {returns(T.self_type)}
   def binmode(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def binmode?(); end
 
   sig {returns(NilClass)}
@@ -82,13 +82,13 @@ class IO < Object
 
   sig do
     params(
-        arg0: T.any(TrueClass, FalseClass),
+        arg0: T::Boolean,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def close_on_exec=(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def close_on_exec?(); end
 
   sig {returns(NilClass)}
@@ -97,7 +97,7 @@ class IO < Object
   sig {returns(NilClass)}
   def close_write(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def closed?(); end
 
   sig do
@@ -144,7 +144,7 @@ class IO < Object
   sig {returns(Enumerator[Integer])}
   def each_codepoint(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def eof(); end
 
   sig do
@@ -208,7 +208,7 @@ class IO < Object
   end
   def ioctl(integer_cmd, arg); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def isatty(); end
 
   sig {returns(Integer)}
@@ -377,14 +377,14 @@ class IO < Object
   sig {returns(File::Stat)}
   def stat(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def sync(); end
 
   sig do
     params(
-        arg0: T.any(TrueClass, FalseClass),
+        arg0: T::Boolean,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def sync=(arg0); end
 
@@ -420,7 +420,7 @@ class IO < Object
   sig {returns(T.self_type)}
   def to_io(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def tty?(); end
 
   sig do
@@ -636,7 +636,7 @@ class IO < Object
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def eof?(); end
 
   sig do

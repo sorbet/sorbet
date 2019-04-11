@@ -172,7 +172,7 @@ class Complex < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 
@@ -209,7 +209,7 @@ class Complex < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
@@ -217,7 +217,7 @@ class Complex < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def equal?(arg0); end
 
@@ -321,6 +321,6 @@ class Complex < Numeric
   sig {returns(String)}
   def to_s(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 end

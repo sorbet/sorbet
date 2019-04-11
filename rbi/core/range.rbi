@@ -9,7 +9,7 @@ class Range < Object
     type_parameters(:U).params(
       from: T.type_parameter(:U),
       to: T.type_parameter(:U),
-      exclude_end: T.any(TrueClass, FalseClass)
+      exclude_end: T::Boolean
     ).returns(T::Range[T.type_parameter(:U)])
   end
   def self.new(from, to, exclude_end=false); end
@@ -18,7 +18,7 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(obj); end
 
@@ -26,7 +26,7 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(obj); end
 
@@ -35,7 +35,7 @@ class Range < Object
 
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+        blk: T.proc.params(arg0: Elem).returns(T::Boolean),
     )
     .returns(T.nilable(T.type_parameter(:U)))
   end
@@ -45,7 +45,7 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def cover?(obj); end
 
@@ -61,7 +61,7 @@ class Range < Object
   sig {returns(Elem)}
   def end(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def exclude_end?(); end
 
   sig {returns(Elem)}
@@ -80,7 +80,7 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(obj); end
 
@@ -88,7 +88,7 @@ class Range < Object
     params(
         _begin: Elem,
         _end: Elem,
-        exclude_end: T.any(TrueClass, FalseClass),
+        exclude_end: T::Boolean,
     )
     .void
   end
@@ -175,7 +175,7 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(obj); end
 
@@ -183,7 +183,7 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def member?(obj); end
 end

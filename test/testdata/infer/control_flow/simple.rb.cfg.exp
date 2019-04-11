@@ -66,7 +66,7 @@ subgraph "cluster_::ControlFlow#orZero0n" {
     "bb::ControlFlow#orZero0n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0n_0" [
-        label = "block[id=0]()\l<U <self>>: ControlFlow = cast(<U <self>>: NilClass, ControlFlow);\l<U a>: T.nilable(Integer) = load_arg(ControlFlow#orZero0n#a)\l<U b>: T.any(TrueClass, FalseClass) = <U a>: T.nilable(Integer).<U !>()\l<U b>: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<U <self>>: ControlFlow = cast(<U <self>>: NilClass, ControlFlow);\l<U a>: T.nilable(Integer) = load_arg(ControlFlow#orZero0n#a)\l<U b>: T::Boolean = <U a>: T.nilable(Integer).<U !>()\l<U b>: T::Boolean\l"
     ];
 
     "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_2" [style="bold"];
@@ -96,7 +96,7 @@ subgraph "cluster_::ControlFlow#orZero1n" {
     "bb::ControlFlow#orZero1n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero1n_0" [
-        label = "block[id=0]()\l<U <self>>: ControlFlow = cast(<U <self>>: NilClass, ControlFlow);\l<U a>: T.nilable(Integer) = load_arg(ControlFlow#orZero1n#a)\l<U <statTemp>>$6: T.class_of(Integer) = alias <C <U Integer>>\l<U <statTemp>>$4: T.any(TrueClass, FalseClass) = <U a>: T.nilable(Integer).<U is_a?>(<U <statTemp>>$6: T.class_of(Integer))\l<U b>: T.any(TrueClass, FalseClass) = <U <statTemp>>$4: T.any(TrueClass, FalseClass).<U !>()\l<U b>: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<U <self>>: ControlFlow = cast(<U <self>>: NilClass, ControlFlow);\l<U a>: T.nilable(Integer) = load_arg(ControlFlow#orZero1n#a)\l<U <statTemp>>$6: T.class_of(Integer) = alias <C <U Integer>>\l<U <statTemp>>$4: T::Boolean = <U a>: T.nilable(Integer).<U is_a?>(<U <statTemp>>$6: T.class_of(Integer))\l<U b>: T::Boolean = <U <statTemp>>$4: T::Boolean.<U !>()\l<U b>: T::Boolean\l"
     ];
 
     "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_2" [style="bold"];
@@ -168,7 +168,7 @@ subgraph "cluster_::ControlFlow#orZero3" {
 
     "bb::ControlFlow#orZero3_1" -> "bb::ControlFlow#orZero3_1" [style="bold"];
     "bb::ControlFlow#orZero3_2" [
-        label = "block[id=2]()\l<U <statTemp>>$5: Integer(1) = 1\l<U <statTemp>>$6: Integer(2) = 2\l<U <ifTemp>>$3: T.any(TrueClass, FalseClass) = <U <statTemp>>$5: Integer(1).<U ==>(<U <statTemp>>$6: Integer(2))\l<U <ifTemp>>$3: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=2]()\l<U <statTemp>>$5: Integer(1) = 1\l<U <statTemp>>$6: Integer(2) = 2\l<U <ifTemp>>$3: T::Boolean = <U <statTemp>>$5: Integer(1).<U ==>(<U <statTemp>>$6: Integer(2))\l<U <ifTemp>>$3: T::Boolean\l"
     ];
 
     "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_5" [style="bold"];
@@ -212,7 +212,7 @@ subgraph "cluster_::ControlFlow#orZero3n" {
 
     "bb::ControlFlow#orZero3n_1" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
     "bb::ControlFlow#orZero3n_2" [
-        label = "block[id=2]()\l<U <statTemp>>$6: Integer(1) = 1\l<U <statTemp>>$7: Integer(2) = 2\l<U <statTemp>>$4: T.any(TrueClass, FalseClass) = <U <statTemp>>$6: Integer(1).<U ==>(<U <statTemp>>$7: Integer(2))\l<unconditional>\l"
+        label = "block[id=2]()\l<U <statTemp>>$6: Integer(1) = 1\l<U <statTemp>>$7: Integer(2) = 2\l<U <statTemp>>$4: T::Boolean = <U <statTemp>>$6: Integer(1).<U ==>(<U <statTemp>>$7: Integer(2))\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3n_2" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
@@ -222,7 +222,7 @@ subgraph "cluster_::ControlFlow#orZero3n" {
 
     "bb::ControlFlow#orZero3n_3" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
     "bb::ControlFlow#orZero3n_4" [
-        label = "block[id=4](<U <statTemp>>$4: T.nilable(T.any(TrueClass, FalseClass)))\l<U b>: T.any(TrueClass, FalseClass) = <U <statTemp>>$4: T.nilable(T.any(TrueClass, FalseClass)).<U !>()\l<U b>: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=4](<U <statTemp>>$4: T.nilable(T::Boolean))\l<U b>: T::Boolean = <U <statTemp>>$4: T.nilable(T::Boolean).<U !>()\l<U b>: T::Boolean\l"
     ];
 
     "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_5" [style="bold"];

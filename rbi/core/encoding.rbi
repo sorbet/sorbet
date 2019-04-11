@@ -269,10 +269,10 @@ class Encoding < Object
   sig {returns(T::Array[String])}
   def self.name_list(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def ascii_compatible?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def dummy?(); end
 
   sig {returns(String)}

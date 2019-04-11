@@ -52,7 +52,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
 
@@ -60,7 +60,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <=(arg0); end
 
@@ -76,7 +76,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
 
@@ -84,7 +84,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >=(arg0); end
 
@@ -146,7 +146,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
@@ -176,7 +176,7 @@ class Numeric < Object
   sig {returns(Numeric)}
   def imaginary(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def integer?(); end
 
   sig {returns(Numeric)}
@@ -291,6 +291,6 @@ class Numeric < Object
   sig {returns(Integer)}
   def truncate(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 end

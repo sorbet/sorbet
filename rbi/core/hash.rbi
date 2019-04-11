@@ -46,7 +46,7 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def compare_by_identity(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def compare_by_identity?(); end
 
   sig do
@@ -132,7 +132,7 @@ class Hash < Object
   sig {returns(Enumerator[[K, V]])}
   def each_value(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
 
   sig do
@@ -161,7 +161,7 @@ class Hash < Object
     params(
         arg0: K,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def has_key?(arg0); end
 
@@ -169,7 +169,7 @@ class Hash < Object
     params(
         arg0: V,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def has_value?(arg0); end
 
@@ -215,7 +215,7 @@ class Hash < Object
     params(
         arg0: K,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def key?(arg0); end
 
@@ -229,7 +229,7 @@ class Hash < Object
     params(
         arg0: K,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def member?(arg0); end
 
@@ -320,7 +320,7 @@ class Hash < Object
     params(
         arg0: V,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def value?(arg0); end
 

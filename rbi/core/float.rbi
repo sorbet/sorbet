@@ -210,25 +210,25 @@ class Float < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
 
@@ -236,25 +236,25 @@ class Float < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <=(arg0); end
 
@@ -288,7 +288,7 @@ class Float < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 
@@ -296,7 +296,7 @@ class Float < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
 
@@ -304,25 +304,25 @@ class Float < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
 
@@ -330,25 +330,25 @@ class Float < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >=(arg0); end
 
@@ -434,7 +434,7 @@ class Float < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
@@ -442,7 +442,7 @@ class Float < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def equal?(arg0); end
 
@@ -478,7 +478,7 @@ class Float < Numeric
   end
   def fdiv(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def finite?(); end
 
   sig {returns(Integer)}
@@ -534,7 +534,7 @@ class Float < Numeric
   end
   def modulo(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nan?(); end
 
   sig {returns(Float)}
@@ -626,6 +626,6 @@ class Float < Numeric
   sig {returns(Integer)}
   def truncate(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 end

@@ -103,7 +103,7 @@ class File < IO
     params(
         file: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.blockdev?(file); end
 
@@ -111,7 +111,7 @@ class File < IO
     params(
         file: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.chardev?(file); end
 
@@ -154,7 +154,7 @@ class File < IO
     params(
         file: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.directory?(file); end
 
@@ -170,7 +170,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.executable?(file); end
 
@@ -178,7 +178,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.executable_real?(file); end
 
@@ -186,7 +186,7 @@ class File < IO
     params(
         file: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.exist?(file); end
 
@@ -211,7 +211,7 @@ class File < IO
     params(
         file: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.file?(file); end
 
@@ -221,7 +221,7 @@ class File < IO
         path: String,
         flags: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.fnmatch(pattern, path, flags=T.unsafe(nil)); end
 
@@ -237,7 +237,7 @@ class File < IO
     params(
         file: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.grpowned?(file); end
 
@@ -246,7 +246,7 @@ class File < IO
         file_1: T.any(String, IO),
         file_2: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.identical?(file_1, file_2); end
 
@@ -306,7 +306,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.owned?(file); end
 
@@ -322,7 +322,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.pipe?(file); end
 
@@ -330,7 +330,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.readable?(file); end
 
@@ -338,7 +338,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.readable_real?(file); end
 
@@ -381,7 +381,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.setgid?(file); end
 
@@ -389,7 +389,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.setuid?(file); end
 
@@ -413,7 +413,7 @@ class File < IO
     params(
         file: T.any(String, IO),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.socket?(file); end
 
@@ -437,7 +437,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.sticky?(file); end
 
@@ -454,7 +454,7 @@ class File < IO
     params(
         file: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.symlink?(file); end
 
@@ -596,7 +596,7 @@ class File < IO
         path: String,
         flags: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def self.fnmatch?(pattern, path, flags=T.unsafe(nil)); end
 
@@ -665,13 +665,13 @@ class File::Stat < Object
   sig {returns(T.nilable(Integer))}
   def blksize(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def blockdev?(); end
 
   sig {returns(T.nilable(Integer))}
   def blocks(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def chardev?(); end
 
   sig {returns(Time)}
@@ -686,16 +686,16 @@ class File::Stat < Object
   sig {returns(Integer)}
   def dev_minor(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def directory?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def executable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def executable_real?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def file?(); end
 
   sig {returns(String)}
@@ -704,7 +704,7 @@ class File::Stat < Object
   sig {returns(Integer)}
   def gid(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def grpowned?(); end
 
   sig do
@@ -730,10 +730,10 @@ class File::Stat < Object
   sig {returns(Integer)}
   def nlink(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def owned?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def pipe?(); end
 
   sig {returns(T.nilable(Integer))}
@@ -754,28 +754,28 @@ class File::Stat < Object
   end
   def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def readable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def readable_real?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def setgid?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def setuid?(); end
 
   sig {returns(Integer)}
   def size(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def socket?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def sticky?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def symlink?(); end
 
   sig {returns(Integer)}
@@ -787,12 +787,12 @@ class File::Stat < Object
   sig {returns(T.nilable(Integer))}
   def world_writable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def writable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def writable_real?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 end

@@ -43,7 +43,7 @@ module Base64
   sig do
     params(
         bin: String,
-        padding: T.any(TrueClass, FalseClass),
+        padding: T::Boolean,
     )
     .returns(String)
   end

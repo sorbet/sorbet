@@ -8,7 +8,7 @@ class Random < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 

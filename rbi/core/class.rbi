@@ -16,7 +16,7 @@ class Class < Module
 
   sig do
     params(
-        arg0: T.any(TrueClass, FalseClass),
+        arg0: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end

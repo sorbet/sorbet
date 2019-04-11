@@ -30,7 +30,7 @@ class Module < Object
     params(
         other: Module,
     )
-    .returns(T.nilable(T.any(TrueClass, FalseClass)))
+    .returns(T.nilable(T::Boolean))
   end
   def <(other); end
 
@@ -38,7 +38,7 @@ class Module < Object
     params(
         other: Module,
     )
-    .returns(T.nilable(T.any(TrueClass, FalseClass)))
+    .returns(T.nilable(T::Boolean))
   end
   def <=(other); end
 
@@ -54,7 +54,7 @@ class Module < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
 
@@ -62,7 +62,7 @@ class Module < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(other); end
 
@@ -70,7 +70,7 @@ class Module < Object
     params(
         other: Module,
     )
-    .returns(T.nilable(T.any(TrueClass, FalseClass)))
+    .returns(T.nilable(T::Boolean))
   end
   def >(other); end
 
@@ -78,7 +78,7 @@ class Module < Object
     params(
         other: Module,
     )
-    .returns(T.nilable(T.any(TrueClass, FalseClass)))
+    .returns(T.nilable(T::Boolean))
   end
   def >=(other); end
 
@@ -166,7 +166,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def class_variable_defined?(arg0); end
 
@@ -189,7 +189,7 @@ class Module < Object
 
   sig do
     params(
-        inherit: T.any(TrueClass, FalseClass),
+        inherit: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -198,16 +198,16 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
-        inherit: T.any(TrueClass, FalseClass),
+        inherit: T::Boolean,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def const_defined?(arg0, inherit=T.unsafe(nil)); end
 
   sig do
     params(
         arg0: T.any(Symbol, String),
-        inherit: T.any(TrueClass, FalseClass),
+        inherit: T::Boolean,
     )
     .returns(T.untyped)
   end
@@ -232,7 +232,7 @@ class Module < Object
 
   sig do
     params(
-        inherit: T.any(TrueClass, FalseClass),
+        inherit: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -258,7 +258,7 @@ class Module < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(other); end
 
@@ -266,7 +266,7 @@ class Module < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def equal?(other); end
 
@@ -301,7 +301,7 @@ class Module < Object
     params(
         arg0: Module,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
 
@@ -335,7 +335,7 @@ class Module < Object
 
   sig do
     params(
-        include_super: T.any(TrueClass, FalseClass),
+        include_super: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -353,7 +353,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def method_defined?(arg0); end
 
@@ -445,7 +445,7 @@ class Module < Object
 
   sig do
     params(
-        include_super: T.any(TrueClass, FalseClass),
+        include_super: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -455,7 +455,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def private_method_defined?(arg0); end
 
@@ -469,7 +469,7 @@ class Module < Object
 
   sig do
     params(
-        include_super: T.any(TrueClass, FalseClass),
+        include_super: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -479,7 +479,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def protected_method_defined?(arg0); end
 
@@ -517,7 +517,7 @@ class Module < Object
 
   sig do
     params(
-        include_super: T.any(TrueClass, FalseClass),
+        include_super: T::Boolean,
     )
     .returns(T::Array[Symbol])
   end
@@ -527,7 +527,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def public_method_defined?(arg0); end
 
@@ -564,7 +564,7 @@ class Module < Object
   end
   def remove_method(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def singleton_class?(); end
 
   sig {returns(String)}

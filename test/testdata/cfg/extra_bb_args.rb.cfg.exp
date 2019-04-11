@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$7: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$8: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$6: <Type: T.nilable(String)> = <U <statTemp>>$7: T.class_of(T).<U nilable>(<U <statTemp>>$8: T.class_of(String))\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$6: <Type: T.nilable(String)>)\l<U <castTemp>>$9: NilClass = nil\l<U name>: T.nilable(String) = cast(<U <castTemp>>$9: NilClass, String | NilClass);\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass) = <U name>: T.nilable(String).<U nil?>()\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$7: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$8: T.class_of(String) = alias <C <U String>>\l<U <statTemp>>$6: <Type: T.nilable(String)> = <U <statTemp>>$7: T.class_of(T).<U nilable>(<U <statTemp>>$8: T.class_of(String))\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$6: <Type: T.nilable(String)>)\l<U <castTemp>>$9: NilClass = nil\l<U name>: T.nilable(String) = cast(<U <castTemp>>$9: NilClass, String | NilClass);\l<U <ifTemp>>$11: T::Boolean = <U name>: T.nilable(String).<U nil?>()\l<U <ifTemp>>$11: T::Boolean\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
@@ -23,7 +23,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_2" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3](<U name>: String)\l<U <statTemp>>$15: String(\"foo\") = \"foo\"\l<U <returnMethodTemp>>$2: T.any(TrueClass, FalseClass) = <U name>: String.<U include?>(<U <statTemp>>$15: String(\"foo\"))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.any(TrueClass, FalseClass)\l<unconditional>\l"
+        label = "block[id=3](<U name>: String)\l<U <statTemp>>$15: String(\"foo\") = \"foo\"\l<U <returnMethodTemp>>$2: T::Boolean = <U name>: String.<U include?>(<U <statTemp>>$15: String(\"foo\"))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T::Boolean\l<unconditional>\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_1" [style="bold"];

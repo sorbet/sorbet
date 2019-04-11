@@ -13,7 +13,7 @@ class Thread < Object
   sig {params(key: T.any(String, Symbol), value: T.untyped).returns(T.untyped)}
   def []=(key, value); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def alive?; end
 
   sig {returns(T.nilable(Thread))}

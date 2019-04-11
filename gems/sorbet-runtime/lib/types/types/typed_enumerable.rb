@@ -103,7 +103,7 @@ module T::Types
 
     private def type_from_instance(obj)
       if [true, false].include?(obj)
-        return T.any(TrueClass, FalseClass)
+        return T::Boolean
       elsif !obj.is_a?(Enumerable)
         return obj.class
       end

@@ -31,15 +31,15 @@ class TracePoint < Object
   sig {returns(Module)}
   def defined_class; end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   sig {params(blk: T.proc.void).void}
   def disable(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   sig {params(blk: T.proc.void).void}
   def enable(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def enabled?; end
 
   sig {returns(String)}

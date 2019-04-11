@@ -170,7 +170,7 @@ class RubyTyper::ENVClass
     params(
         key: String
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def key?(key); end
 

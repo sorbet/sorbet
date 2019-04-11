@@ -35,7 +35,7 @@ class Regexp < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
 
@@ -43,7 +43,7 @@ class Regexp < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(other); end
 
@@ -55,13 +55,13 @@ class Regexp < Object
   end
   def =~(str); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def casefold?(); end
 
   sig {returns(Encoding)}
   def encoding(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def fixed_encoding?(); end
 
   sig {returns(Integer)}
@@ -141,7 +141,7 @@ class Regexp < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(other); end
 end

@@ -15,21 +15,21 @@ module Enumerable
   sig {returns(T.self_type)}
   def each(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def all?(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def any?(&blk); end
 
@@ -200,7 +200,7 @@ module Enumerable
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
 
@@ -338,21 +338,21 @@ module Enumerable
   end
   def minmax_by(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def none?(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def one?(&blk); end
 
@@ -487,7 +487,7 @@ module Enumerable
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def member?(arg0); end
 

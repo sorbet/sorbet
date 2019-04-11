@@ -4,7 +4,7 @@ class MatchData < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 
@@ -58,7 +58,7 @@ class MatchData < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(other); end
 

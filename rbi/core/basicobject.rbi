@@ -1,13 +1,13 @@
 # typed: true
 class BasicObject
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def !(); end
 
   sig do
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def !=(other); end
 
@@ -15,7 +15,7 @@ class BasicObject
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
 
@@ -32,7 +32,7 @@ class BasicObject
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def equal?(other); end
 

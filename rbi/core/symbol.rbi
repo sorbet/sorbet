@@ -17,7 +17,7 @@ class Symbol < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(obj); end
 
@@ -64,7 +64,7 @@ class Symbol < Object
   sig {returns(Symbol)}
   def downcase(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
 
   sig {returns(Encoding)}

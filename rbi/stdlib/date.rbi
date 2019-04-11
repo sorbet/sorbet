@@ -18,19 +18,19 @@ class Date::Infinity
   sig {returns(Date::Infinity)}
   def abs(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def finite?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def infinite?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nan?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def d(); end
 end
 
@@ -325,7 +325,7 @@ class Date
   sig do
     params(
       arg0: String,
-      comp: T.any(TrueClass, FalseClass)
+      comp: T::Boolean
     )
     .returns(Hash)
   end
