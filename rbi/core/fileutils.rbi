@@ -34,6 +34,18 @@ module FileUtils
     .returns(T::Array[String])
   end
   def self.mkdir_p(list, mode=T.unsafe(nil)); end
+
+  sig do
+    params(
+      list: T.any(String, T::Array[String]),
+      noop: T.nilable(T.any(TrueClass, FalseClass)),
+      verbose: T.nilable(T.any(TrueClass, FalseClass)),
+      mtime: T.nilable(Time),
+      nocreate: T.nilable(T.any(TrueClass, FalseClass)),
+    )
+    .void
+  end
+  def self.touch(list, noop: nil, verbose: nil, mtime: nil, nocreate: nil); end
 end
 
 module FileUtils::DryRun
