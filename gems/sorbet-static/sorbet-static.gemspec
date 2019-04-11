@@ -4,6 +4,7 @@ Gem::Specification.new do |s|
   s.summary     = 'A Typechecker for Ruby'
   s.description = 'The Sorbet typechecker binary'
   s.authors     = ['Stripe']
+  s.email       = 'sorbet@stripe.com'
   s.files       = ['libexec/sorbet']
   s.executables = []
   s.homepage    = 'https://sorbet.run'

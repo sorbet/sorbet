@@ -2,8 +2,9 @@ Gem::Specification.new do |s|
   s.name        = 'sorbet'
   s.version     = '0.0.0'
   s.summary     = 'A Typechecker for Ruby'
-  s.description = 'The main entrypoint for using Sorbet.'
+  s.description = 'The main entrypoint for using Sorbet'
   s.authors     = ['Stripe']
+  s.email       = 'sorbet@stripe.com'
   s.files       = Dir.glob('lib/**/*')
   s.executables = Dir.glob('bin/**/*').map {|path| path.gsub('bin/', '')}
   s.homepage    = 'https://sorbet.run'
