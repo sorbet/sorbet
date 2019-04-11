@@ -1,9 +1,9 @@
 # typed: strict
 class TrueClass
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def &(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def ^(obj)
   end
   sig {params(obj: BasicObject).returns(TrueClass)}

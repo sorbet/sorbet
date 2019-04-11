@@ -55,19 +55,19 @@ class Logger
   sig { params(severity: T.untyped).void }
   def sev_threshold=(severity); end
 
-  sig { returns(T.any(FalseClass, TrueClass)) }
+  sig { returns(T::Boolean) }
   def debug?; end
 
-  sig { returns(T.any(FalseClass, TrueClass)) }
+  sig { returns(T::Boolean) }
   def info?; end
 
-  sig { returns(T.any(FalseClass, TrueClass)) }
+  sig { returns(T::Boolean) }
   def warn?; end
 
-  sig { returns(T.any(FalseClass, TrueClass)) }
+  sig { returns(T::Boolean) }
   def error?; end
 
-  sig { returns(T.any(FalseClass, TrueClass)) }
+  sig { returns(T::Boolean) }
   def fatal?; end
 
   sig do

@@ -203,11 +203,11 @@ module T
     ).returns(T.untyped)
   end
   def self.dynamic_cast(obj, type); end
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.let(value, type, checked: true); end
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.assert_type!(value, type, checked: true); end
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.cast(value, type, checked: true); end
   sig {params(type: T.untyped).returns(BasicObject)}
   def self.nilable(type); end
@@ -1571,10 +1571,10 @@ class FalseClass
   sig {params(obj: BasicObject).returns(FalseClass)}
   def &(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def ^(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def |(obj)
   end
 end
@@ -3309,10 +3309,10 @@ class Time < Object
   def to_s(); end
 end
 class TrueClass
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def &(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def ^(obj)
   end
   sig {params(obj: BasicObject).returns(TrueClass)}

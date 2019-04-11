@@ -171,7 +171,7 @@ module Random::Formatter
   sig do
     params(
       n: T.nilable(Integer),
-      padding: T.any(FalseClass, TrueClass)
+      padding: T::Boolean
     )
     .returns(String)
   end
