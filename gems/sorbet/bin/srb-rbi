@@ -140,19 +140,16 @@ Up to you! First things first, you'll probably want to typecheck your project:
 Other than that, it's up to you!
 We recommend skimming these docs to get a feel for how to use Sorbet:
 
-- Gradual Type Checking
-  (#{cyan("https://stripe.dev/sorbet/super-secret-private-beta/docs/gradual")})
-- Enabling Static Checks
-  (#{cyan("https://stripe.dev/sorbet/super-secret-private-beta/docs/static")})
-- RBI Files
-  (#{cyan("https://stripe.dev/sorbet/super-secret-private-beta/docs/rbi")})
+- Gradual Type Checking (#{cyan("https://sorbet.org/docs/gradual")})
+- Enabling Static Checks (#{cyan("https://sorbet.org/docs/static")})
+- RBI Files (#{cyan("https://sorbet.org/docs/rbi")})
 
 If instead you want to explore your files locally, here are some things to try:
 
 - Upgrade a file marked # typed: false to # typed: true.
   Then, run #{cyan("srb tc")} and try to fix any errors.
 - Add signatures to your methods with `sig`.
-  For how, read: #{cyan("https://stripe.dev/sorbet/super-secret-private-beta/docs/sigs")}
+  For how, read: #{cyan("https://sorbet.org/docs/sigs")}
 - Check whether things that show up in the TODO RBI file actually exist in your project.
   It's possible some of these constants are typos.
 - Upgrade a file marked #{cyan("# typed: ignore")} to #{cyan("# typed: false")}.

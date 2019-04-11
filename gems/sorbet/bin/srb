@@ -20,7 +20,7 @@ Options:
   -h, --help     View help for this subcommand.
 
 For full help:
-  https://stripe.dev/sorbet/super-secret-private-beta/
+  https://sorbet.org
 EOF
   exit 0
 }

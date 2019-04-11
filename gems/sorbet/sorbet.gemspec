@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
 
     srb tc
 
-  For more docs see: https://stripe.dev/sorbet/super-secret-private-beta
+  For more docs see: https://sorbet.org/docs/adopting
   }
 
   # TODO this is temporary, to prevent leaking publicly.
