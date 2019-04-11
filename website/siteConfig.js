@@ -9,8 +9,8 @@ const users = [];
 const siteConfig = {
   title: 'Sorbet',
   tagline: 'A static type checker for Ruby',
-  url: 'https://stripe.github.io',
-  baseUrl: '/sorbet/super-secret-private-beta/',
+  url: 'https://sorbet.org',
+  baseUrl: '/',
   editUrl: 'https://github.com/stripe/sorbet/edit/master/website/docs/',
 
   // Used for publishing and more

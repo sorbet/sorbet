@@ -50,13 +50,13 @@ git fetch origin gh-pages
 git branch -D gh-pages || true
 current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
-tar -xjf _out_/website/website.tar.bz2 -C super-secret-private-beta .
-git add super-secret-private-beta
+tar -xjf _out_/website/website.tar.bz2 .
+git add .
 dirty=
 git diff-index --quiet HEAD -- || dirty=1
 if [ -n "$dirty" ]; then
-  echo "$BUILDKITE_COMMIT" > super-secret-private-beta/sha.html
-  git add super-secret-private-beta/sha.html
+  echo "$BUILDKITE_COMMIT" > sha.html
+  git add sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
   if [ -z "$dryrun" ]; then
       git push origin gh-pages

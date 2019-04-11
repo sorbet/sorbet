@@ -41,8 +41,8 @@ All commands must be run from within Sorbet's top-level `website/` folder.
     # Publish
     ❯ git remote add github.com git@github.com:stripe/sorbet.git
     ❯ git checkout gh-pages
-    ❯ cp -r website/build/sorbet/* super-secret-private-beta/
-    ❯ git add super-secret-private-beta
+    ❯ cp -r website/build/sorbet/* .
+    ❯ git add .
     ❯ git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
     ❯ git push github.com gh-pages
     ```
