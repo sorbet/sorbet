@@ -206,7 +206,7 @@ module Opus::Types::Test
         value = [true]
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Array[Integer], " \
-                         "got T::Array[T::Boolean]"
+                         "got T::Array[T.any(TrueClass, FalseClass)]"
         assert_equal(expected_error, msg)
       end
 
@@ -410,7 +410,7 @@ module Opus::Types::Test
         value = [true]
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerable[Integer], " \
-                         "got T::Array[T::Boolean]"
+                         "got T::Array[T.any(TrueClass, FalseClass)]"
         assert_equal(expected_error, msg)
       end
 
