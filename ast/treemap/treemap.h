@@ -62,6 +62,8 @@ public:
     unique_ptr<Array> preTransformArray(core::MutableContext ctx, unique_ptr<Array> original);
     unique_ptr<Expression> postransformArray(core::MutableContext ctx, unique_ptr<Array> original);
 
+    unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original);
+
     unique_ptr<Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                               unique_ptr<UnresolvedConstantLit> original);
 
