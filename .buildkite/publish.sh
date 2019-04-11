@@ -52,6 +52,7 @@ current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
 tar -xjf _out_/website/website.tar.bz2 .
 git add .
+git reset HEAD _out_
 dirty=
 git diff-index --quiet HEAD -- || dirty=1
 if [ -n "$dirty" ]; then
