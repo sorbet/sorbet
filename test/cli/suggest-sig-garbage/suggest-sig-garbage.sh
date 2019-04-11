@@ -1,12 +1,11 @@
 #!/bin/bash
 
-tmp="$(mktemp)"
+tmp="$(mktemp -d)"
 infile="test/cli/suggest-sig-garbage/suggest-sig-garbage.rb"
 cp "$infile" "$tmp"
 
 cwd="$(pwd)"
-cd "$(dirname "$tmp")" || exit 1
-cp "$tmp" suggest-sig-garbage.rb
+cd "$tmp" || exit 1
 
 "$cwd/main/sorbet" --silence-dev-message -a --suggest-runtime-profiled suggest-sig-garbage.rb 2>&1
 
