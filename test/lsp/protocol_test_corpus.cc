@@ -106,26 +106,6 @@ TEST_F(ProtocolTest, Cancellation) {
     ASSERT_EQ(requestIds.size(), 0);
 }
 
-// Asserts that Sorbet forbids requesting definitions on untyped Ruby files, and displays a helpful messages in VS Code.
-TEST_F(ProtocolTest, DefinitionError) {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(
-        send(*openFile("foobar.rb", "class Foobar\n  sig {returns(Integer)}\n  def bar\n    1\n  end\nend\n\nbar\n")),
-        {});
-    auto defResponses = send(*getDefinition("foobar.rb", 7, 1));
-    ASSERT_EQ(defResponses.size(), 2) << "Expected two responses to request: An error, and a showMessage notification.";
-
-    // Order doesn't matter; one should be a notification, the other should be a response
-    auto &respMsg = defResponses.at(0)->isResponse() ? defResponses.at(0) : defResponses.at(1);
-    auto &notifMsg = defResponses.at(0)->isNotification() ? defResponses.at(0) : defResponses.at(1);
-    assertResponseMessage(nextId - 1, *respMsg);
-    assertNotificationMessage(LSPMethod::WindowShowMessage, *notifMsg);
-    assertResponseError(-32602, "only works correctly on typed ruby files", *respMsg);
-
-    auto &showMessageParams = get<unique_ptr<ShowMessageParams>>(notifMsg->asNotification().params);
-    ASSERT_NE(showMessageParams->message.find("only works correctly on typed ruby files"), string::npos);
-}
-
 // Tests that Sorbet LSP removes diagnostics from future responses when they are fixed.
 TEST_F(ProtocolTest, FixErrors) {
     assertDiagnostics(initializeLSP(), {});
