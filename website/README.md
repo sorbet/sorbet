@@ -39,7 +39,6 @@ All commands must be run from within Sorbet's top-level `website/` folder.
     ❯ yarn build
 
     # Publish
-    ❯ git remote add github.com git@github.com:stripe/sorbet.git
     ❯ git checkout gh-pages
     ❯ cp -r website/build/sorbet/* .
     ❯ git add .
