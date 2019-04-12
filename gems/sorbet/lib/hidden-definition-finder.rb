@@ -147,6 +147,7 @@ class Sorbet::Private::HiddenMethodFinder
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     # Change dir to deal with you having a sorbet/config in your cwd
+    read, write = IO.pipe
     Dir.chdir(TMP_PATH) do
       io = IO.popen(
         [
@@ -167,12 +168,12 @@ class Sorbet::Private::HiddenMethodFinder
           '--no-error-count',
           TMP_RBI,
         ],
-        err: '/dev/null'
+        err: write
       )
     end
     File.write(RBI_CONSTANTS, io.read)
     io.close
-    raise "#{TMP_RBI} has unexpected errors" unless $?.success?
+    raise "#{TMP_RBI} has unexpected errors:\n#{read.gets}" unless $?.success?
   end
 
   def read_constants
