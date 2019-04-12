@@ -257,8 +257,60 @@ TEST_F(ProtocolTest, HidesSyntheticArgumentsOnHover) {
         auto &hoverOrNull = get<std::variant<JSONNullObject, std::unique_ptr<Hover>>>(*response.result);
         auto &hover = get<std::unique_ptr<Hover>>(hoverOrNull);
         auto content = MarkupContent::fromJSONValue(lspWrapper->alloc, *hover->contents);
-        // wtf EXPECT_EQ(content->value, "sig {params(x: Integer).returns(String)}");
+        EXPECT_EQ(content->value, "sig {params(x: Integer).returns(String)}");
     }
+}
+
+// Ensures that unrecognized notifications are ignored.
+TEST_F(ProtocolTest, IgnoresUnrecognizedNotifications) {
+    assertDiagnostics(initializeLSP(), {});
+    assertDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
+                              "didChangeConfiguration\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}"),
+                      {});
+}
+
+// Ensures that notifications that have an improper params shape are handled gracefully / not responded to.
+TEST_F(ProtocolTest, IgnoresNotificationsThatDontTypecheck) {
+    assertDiagnostics(initializeLSP(), {});
+    assertDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/didChange\",\"params\":{}}"), {});
+}
+
+// Ensures that unrecognized requests are responded to.
+TEST_F(ProtocolTest, RejectsUnrecognizedRequests) {
+    assertDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
+                             "didChangeConfiguration\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    ASSERT_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    ASSERT_TRUE(response->isResponse());
+    auto &r = response->asResponse();
+    ASSERT_FALSE(r.result);
+    ASSERT_TRUE(r.error);
+    auto &error = *r.error;
+    ASSERT_NE(error->message.find("Unsupported LSP method"), std::string::npos);
+    ASSERT_EQ(error->code, (int)LSPErrorCodes::MethodNotFound);
+}
+
+// Ensures that requests that have an improper params shape are responded to with an error.
+TEST_F(ProtocolTest, RejectsRequestsThatDontTypecheck) {
+    assertDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
+                             "hover\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    ASSERT_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    ASSERT_TRUE(response->isResponse());
+    auto &r = response->asResponse();
+    ASSERT_FALSE(r.result);
+    ASSERT_TRUE(r.error);
+    auto &error = *r.error;
+    ASSERT_NE(error->message.find("Unable to deserialize LSP request"), std::string::npos);
+    ASSERT_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+}
+
+// Ensures that the server ignores invalid JSON.
+TEST_F(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
+    assertDiagnostics(initializeLSP(), {});
+    assertDiagnostics(sendRaw("{"), {});
 }
 
 } // namespace sorbet::test::lsp

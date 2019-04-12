@@ -45,11 +45,10 @@ string MessageId::asString() const {
 }
 
 unique_ptr<LSPMessage> makeSorbetError(rapidjson::MemoryPoolAllocator<> &alloc, LSPErrorCodes code, string_view message,
-                                       optional<rapidjson::Document> d = nullopt) {
+                                       optional<int> id = nullopt) {
     auto errorParams = make_unique<SorbetErrorParams>((int)code, string(message));
-    auto isRequest = d.has_value() && (*d).HasMember("id") && (*d)["id"].IsInt();
-    if (isRequest) {
-        auto req = make_unique<RequestMessage>("2.0", (*d)["id"].GetInt(), LSPMethod::SorbetError, move(errorParams));
+    if (id) {
+        auto req = make_unique<RequestMessage>("2.0", *id, LSPMethod::SorbetError, move(errorParams));
         return make_unique<LSPMessage>(move(req));
     } else {
         auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetError, move(errorParams));
@@ -64,21 +63,27 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(rapidjson::MemoryPoolAllocator<> &
                                fmt::format("Last LSP request: `{}` is not a valid json object", json));
     }
 
+    // Grab ID before parsing, as the value may get moved out.
+    optional<int> id;
+    if (d.HasMember("id") && d["id"].IsInt()) {
+        id = d["id"].GetInt();
+    }
+
     try {
         return make_unique<LSPMessage>(alloc, d);
     } catch (InvalidStringEnumError e) {
         if (e.enumName == "LSPMethod") {
             // We don't support whatever method the client is sending.
             return makeSorbetError(alloc, LSPErrorCodes::MethodNotFound,
-                                   fmt::format("Unsupported LSP method: {}", e.value), move(d));
+                                   fmt::format("Unsupported LSP method: {}", e.value), id);
         } else {
             return makeSorbetError(alloc, LSPErrorCodes::InvalidParams,
-                                   fmt::format("Unable to deserialize LSP request: {}", e.what()), move(d));
+                                   fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
         }
     } catch (DeserializationError e) {
         // The client request was valid JSON, but was invalid in some way.
         return makeSorbetError(alloc, LSPErrorCodes::InvalidParams,
-                               fmt::format("Unable to deserialize LSP request: {}", e.what()), move(d));
+                               fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
     }
 }
 
