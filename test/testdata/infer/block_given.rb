@@ -9,7 +9,7 @@ def f(&blk)
     blk.call
   end
 
-  T.assert_type!(block_given?, T.any(TrueClass, FalseClass))
+  T.assert_type!(block_given?, T::Boolean)
 end
 
 

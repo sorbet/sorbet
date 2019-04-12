@@ -121,7 +121,7 @@ def cantRun(a)
   1
 end
 
-sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -132,7 +132,7 @@ end
 
 
 sig do
-  params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).
+  params(a: T.untyped, cond: T::Boolean).
   returns(T.untyped).
   generated
 end
@@ -144,7 +144,7 @@ def fooCondGeneratedDo(a, cond)
   end
 end
 
-sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
 def updatesUntypedToProfiled(a, cond)
   a.baz
 end

@@ -92,7 +92,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def disjoint?(set); end
 
@@ -105,7 +105,7 @@ class Set < Object
   sig {returns(Enumerator[Elem])}
   def each(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
 
   sig {returns(Set)}
@@ -126,7 +126,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def intersect?(set); end
 
@@ -158,7 +158,7 @@ class Set < Object
     params(
         o: Elem,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def member?(o); end
 
@@ -174,7 +174,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def proper_subset?(set); end
 
@@ -182,7 +182,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def proper_superset?(set); end
 
@@ -217,7 +217,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def subset?(set); end
 
@@ -233,7 +233,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def superset?(set); end
 
@@ -260,7 +260,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(set); end
 
@@ -276,7 +276,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <=(set); end
 
@@ -284,7 +284,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(set); end
 
@@ -292,7 +292,7 @@ class Set < Object
     params(
         set: T::Set[Elem],
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >=(set); end
 
@@ -308,7 +308,7 @@ class Set < Object
     params(
         o: Elem,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(o); end
 

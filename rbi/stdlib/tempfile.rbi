@@ -60,13 +60,13 @@ class Tempfile < File
   end
   def initialize(basename='', tmpdir=nil, mode='o', options={}); end
 
-  sig {params(unlink_now: T.any(TrueClass, FalseClass)).void}
+  sig {params(unlink_now: T::Boolean).void}
   def close(unlink_now=false); end
 
   sig {void}
   def close!; end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def delete; end
 
   sig {returns(Integer)}
@@ -82,6 +82,6 @@ class Tempfile < File
   sig {returns(Integer)}
   def size; end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def unlink; end
 end

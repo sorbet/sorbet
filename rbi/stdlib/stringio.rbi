@@ -41,13 +41,13 @@ class StringIO
   sig {returns(NilClass)}
   def close_write(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def closed?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def closed_read?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def closed_write?(); end
 
   sig do
@@ -94,7 +94,7 @@ class StringIO
   sig {returns(Enumerator[Integer])}
   def each_codepoint(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def eof(); end
 
   sig do
@@ -136,7 +136,7 @@ class StringIO
   sig {returns(Encoding)}
   def external_encoding(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def isatty(); end
 
   sig {returns(Integer)}
@@ -311,14 +311,14 @@ class StringIO
   sig {returns(Integer)}
   def size(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def sync(); end
 
   sig do
     params(
-        arg0: T.any(TrueClass, FalseClass),
+        arg0: T::Boolean,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def sync=(arg0); end
 
@@ -342,7 +342,7 @@ class StringIO
   sig {returns(Integer)}
   def tell(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def tty?(); end
 
   sig do
@@ -413,7 +413,7 @@ class StringIO
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def eof?(); end
 
   sig do

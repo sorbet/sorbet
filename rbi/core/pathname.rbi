@@ -39,7 +39,7 @@ class Pathname < Object
     params(
         p1: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(p1); end
 
@@ -47,11 +47,11 @@ class Pathname < Object
     params(
         p1: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(p1); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def absolute?(); end
 
   sig do
@@ -94,15 +94,15 @@ class Pathname < Object
   sig {returns(Time)}
   def birthtime(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def blockdev?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def chardev?(); end
 
   sig do
     params(
-        with_directory: T.any(TrueClass, FalseClass),
+        with_directory: T::Boolean,
     )
     .returns(T::Array[Pathname])
   end
@@ -127,7 +127,7 @@ class Pathname < Object
 
   sig do
     params(
-        consider_symlink: T.any(TrueClass, FalseClass),
+        consider_symlink: T::Boolean,
     )
     .returns(T.untyped)
   end
@@ -147,7 +147,7 @@ class Pathname < Object
   end
   def descend(&blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def directory?(); end
 
   sig {returns(Pathname)}
@@ -155,7 +155,7 @@ class Pathname < Object
 
   sig do
     params(
-        with_directory: T.any(TrueClass, FalseClass),
+        with_directory: T::Boolean,
         blk: T.proc.params(arg0: Pathname).returns(BasicObject),
     )
     .returns(T.untyped)
@@ -203,17 +203,17 @@ class Pathname < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def executable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def executable_real?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def exist?(); end
 
   sig do
@@ -227,19 +227,19 @@ class Pathname < Object
   sig {returns(String)}
   def extname(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def file?(); end
 
   sig do
     params(
-        ignore_error: T.any(TrueClass, FalseClass),
+        ignore_error: T::Boolean,
         blk: T.proc.params(arg0: Pathname).returns(BasicObject),
     )
     .returns(T.untyped)
   end
   sig do
     params(
-        ignore_error: T.any(TrueClass, FalseClass),
+        ignore_error: T::Boolean,
     )
     .returns(Enumerator[Pathname])
   end
@@ -250,7 +250,7 @@ class Pathname < Object
         pattern: String,
         flags: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def fnmatch(pattern, flags=T.unsafe(nil)); end
 
@@ -260,7 +260,7 @@ class Pathname < Object
   sig {returns(String)}
   def ftype(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def grpowned?(); end
 
   sig do
@@ -310,7 +310,7 @@ class Pathname < Object
   sig {returns(T.untyped)}
   def mkpath(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def mountpoint?(); end
 
   sig {returns(Time)}
@@ -350,13 +350,13 @@ class Pathname < Object
   end
   def opendir(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def owned?(); end
 
   sig {returns(Pathname)}
   def parent(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def pipe?(); end
 
   sig do
@@ -369,10 +369,10 @@ class Pathname < Object
   end
   def read(length=T.unsafe(nil), offset=T.unsafe(nil), open_args=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def readable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def readable_real?(); end
 
   sig do
@@ -404,7 +404,7 @@ class Pathname < Object
   end
   def realpath(p1=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def relative?(); end
 
   sig do
@@ -429,22 +429,22 @@ class Pathname < Object
   sig {returns(Integer)}
   def rmtree(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def root?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def setgid?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def setuid?(); end
 
   sig {returns(Integer)}
   def size(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def size?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def socket?(); end
 
   sig {returns([Pathname, Pathname])}
@@ -453,7 +453,7 @@ class Pathname < Object
   sig {returns(File::Stat)}
   def stat(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def sticky?(); end
 
   sig do
@@ -478,7 +478,7 @@ class Pathname < Object
     )
     .returns(Integer)
   end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def symlink?(old=T.unsafe(nil)); end
 
   sig do
@@ -519,16 +519,16 @@ class Pathname < Object
   end
   def utime(atime, mtime); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def world_readable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def world_writable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def writable?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def writable_real?(); end
 
   sig do
@@ -541,7 +541,7 @@ class Pathname < Object
   end
   def write(arg0, offset=T.unsafe(nil), open_args=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def zero?(); end
 
   sig {returns(Pathname)}

@@ -46,7 +46,7 @@ class String < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 
@@ -54,7 +54,7 @@ class String < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
 
@@ -101,7 +101,7 @@ class String < Object
   end
   def [](arg0, arg1=T.unsafe(nil)); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def ascii_only?(); end
 
   sig {returns(String)}
@@ -285,7 +285,7 @@ class String < Object
   end
   def each_line(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
 
   sig {returns(Encoding)}
@@ -295,7 +295,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def end_with?(*arg0); end
 
@@ -303,7 +303,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
@@ -390,7 +390,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
 
@@ -665,7 +665,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def start_with?(*arg0); end
 
@@ -817,7 +817,7 @@ class String < Object
   end
   def upto(arg0, arg1=T.unsafe(nil), &blk); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def valid_encoding?(); end
 
   sig do

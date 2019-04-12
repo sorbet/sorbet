@@ -6,16 +6,16 @@ module GC
   sig {returns(Integer)}
   def self.count(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.disable(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.enable(); end
 
   sig do
     params(
-        full_mark: T.any(TrueClass, FalseClass),
-        immediate_sweep: T.any(TrueClass, FalseClass),
+        full_mark: T::Boolean,
+        immediate_sweep: T::Boolean,
     )
     .returns(NilClass)
   end
@@ -39,7 +39,7 @@ module GC::Profiler
   sig {void}
   def self.enable(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def self.enabled?(); end
 
   sig {returns(T::Array[T::Hash[Symbol, T.untyped]])}

@@ -8,7 +8,7 @@ class Random < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
 
@@ -171,7 +171,7 @@ module Random::Formatter
   sig do
     params(
       n: T.nilable(Integer),
-      padding: T.any(FalseClass, TrueClass)
+      padding: T::Boolean
     )
     .returns(String)
   end

@@ -58,12 +58,12 @@ class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Documen
 end
 class Configatron
   class Store < BasicObject
-    sig {params(name: T.any(Symbol, String)).returns(T.any(TrueClass, FalseClass))}
+    sig {params(name: T.any(Symbol, String)).returns(T::Boolean)}
     def key?(name)
     end
   end
   class RootStore < BasicObject
-    sig {params(name: T.any(Symbol, String)).returns(T.any(TrueClass, FalseClass))}
+    sig {params(name: T.any(Symbol, String)).returns(T::Boolean)}
     def key?(name)
     end
   end
@@ -203,11 +203,11 @@ module T
     ).returns(T.untyped)
   end
   def self.dynamic_cast(obj, type); end
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.let(value, type, checked: true); end
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.assert_type!(value, type, checked: true); end
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.cast(value, type, checked: true); end
   sig {params(type: T.untyped).returns(BasicObject)}
   def self.nilable(type); end
@@ -897,7 +897,7 @@ class Array < Object
     .returns(T::Array[Elem])
   end
   def each(&blk); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
   sig do
     params(
@@ -934,7 +934,7 @@ class Array < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
   sig {returns(Object)}
@@ -1036,20 +1036,20 @@ class Array < Object
   def to_s(); end
 end
 class BasicObject
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def !(); end
   sig do
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def !=(other); end
   sig do
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
 end
@@ -1152,64 +1152,64 @@ class BigDecimal < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
   sig do
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
   sig do
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
   sig do
@@ -1219,7 +1219,7 @@ class BigDecimal < Numeric
     .returns([BigDecimal, BigDecimal])
   end
   def coerce(arg0); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nan?(); end
   sig {returns(Integer)}
   sig do
@@ -1341,7 +1341,7 @@ class Complex < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
@@ -1383,7 +1383,7 @@ module Enumerable
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
   sig {returns(Enumerator[Elem])}
@@ -1554,7 +1554,7 @@ class Exception < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
@@ -1571,10 +1571,10 @@ class FalseClass
   sig {params(obj: BasicObject).returns(FalseClass)}
   def &(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def ^(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def |(obj)
   end
 end
@@ -1754,64 +1754,64 @@ class Float < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
   sig do
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
   sig do
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
   sig do
@@ -1827,7 +1827,7 @@ class Float < Numeric
     .returns([Float, Float])
   end
   def coerce(arg0); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nan?(); end
   sig {returns(Integer)}
   sig do
@@ -1880,7 +1880,7 @@ class Hash < Object
   end
   sig {returns(Enumerator[[K, V]])}
   def each(&blk); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
   sig do
     params(
@@ -1921,7 +1921,7 @@ class Hash < Object
     params(
         arg0: K,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def key?(arg0); end
   sig {returns(Integer)}
@@ -2014,25 +2014,25 @@ class Integer < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
   sig do
@@ -2046,39 +2046,39 @@ class Integer < Numeric
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
   sig do
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
   sig do
@@ -2288,7 +2288,7 @@ module Kernel
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(other); end
   sig {returns(T.self_type)}
@@ -2299,10 +2299,10 @@ module Kernel
     params(
         arg0: T.any(Class, Module),
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def is_a?(arg0); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def nil?(); end
   sig {returns(String)}
   def to_s(); end
@@ -2357,7 +2357,7 @@ module Kernel
     .returns(String)
   end
   def `(arg0); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def block_given?(); end
   sig {params(blk: T.proc.params.returns(T.untyped)).returns(T.untyped)}
   sig {returns(Enumerator[T.untyped])}
@@ -2416,7 +2416,7 @@ module Kernel
     params(
         feature: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def require_relative(feature); end
   sig do
@@ -2467,7 +2467,7 @@ class MatchData < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
@@ -2535,28 +2535,28 @@ class Module < Object
     params(
         other: Module,
     )
-    .returns(T.nilable(T.any(TrueClass, FalseClass)))
+    .returns(T.nilable(T::Boolean))
   end
   def <(other); end
   sig do
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
   sig do
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(other); end
   sig do
     params(
         other: Module,
     )
-    .returns(T.nilable(T.any(TrueClass, FalseClass)))
+    .returns(T.nilable(T::Boolean))
   end
   def >(other); end
   sig do
@@ -2580,7 +2580,7 @@ class Module < Object
     params(
         arg0: Module,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
   sig {returns(Object)}
@@ -2615,7 +2615,7 @@ class NilClass < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ^(obj); end
   sig {returns([])}
@@ -2628,7 +2628,7 @@ class NilClass < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def |(obj); end
 end
@@ -2654,14 +2654,14 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
   sig do
     params(
         arg0: Numeric,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
   sig do
@@ -2691,7 +2691,7 @@ class Proc < Object
     .returns(T.untyped)
   end
   def call(*arg0); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def lambda(); end
   sig {returns(T.self_type)}
   def to_proc(); end
@@ -2706,7 +2706,7 @@ class Range < Object
     type_parameters(:U).params(
       from: T.type_parameter(:U),
       to: T.type_parameter(:U),
-      exclude_end: T.any(TrueClass, FalseClass)
+      exclude_end: T::Boolean
     ).returns(T::Range[T.type_parameter(:U)])
   end
   def self.new(from, to, exclude_end=false); end
@@ -2714,14 +2714,14 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(obj); end
   sig do
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(obj); end
   sig do
@@ -2744,14 +2744,14 @@ class Range < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(obj); end
   sig do
     params(
         _begin: Elem,
         _end: Elem,
-        exclude_end: T.any(TrueClass, FalseClass),
+        exclude_end: T::Boolean,
     )
     .void
   end
@@ -2857,57 +2857,57 @@ class Rational < Numeric
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
   sig do
     params(
         arg0: Object,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
     params(
         arg0: Integer,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Float,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: Rational,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   sig do
     params(
         arg0: BigDecimal,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
   sig do
@@ -2960,14 +2960,14 @@ class Regexp < Object
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(other); end
   sig do
     params(
         other: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(other); end
   sig do
@@ -3008,14 +3008,14 @@ class String < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(arg0); end
   sig do
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ===(arg0); end
   sig do
@@ -3059,7 +3059,7 @@ class String < Object
     .returns(String)
   end
   def concat(arg0); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
   sig do
     params(
@@ -3072,7 +3072,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def include?(arg0); end
   sig do
@@ -3161,7 +3161,7 @@ class Symbol < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ==(obj); end
   sig do
@@ -3184,7 +3184,7 @@ class Symbol < Object
     .returns(String)
   end
   def [](idx_or_range, n=T.unsafe(nil)); end
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def empty?(); end
   sig {returns(T.self_type)}
   def intern(); end
@@ -3267,14 +3267,14 @@ class Time < Object
     params(
         arg0: Time,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
   sig do
     params(
         arg0: Time,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
   sig do
@@ -3299,7 +3299,7 @@ class Time < Object
     .returns(Time)
   end
   def round(arg0); end
-  sig {returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])}
+  sig {returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T::Boolean, String])}
   def to_a(); end
   sig {returns(Float)}
   def to_f(); end
@@ -3309,10 +3309,10 @@ class Time < Object
   def to_s(); end
 end
 class TrueClass
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def &(obj)
   end
-  sig {params(obj: BasicObject).returns(T.any(FalseClass, TrueClass))}
+  sig {params(obj: BasicObject).returns(T::Boolean)}
   def ^(obj)
   end
   sig {params(obj: BasicObject).returns(TrueClass)}

@@ -25,7 +25,7 @@ class Proc < Object
   sig {returns(Integer)}
   def hash(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def lambda(); end
 
   sig {returns(T::Array[[Symbol, Symbol]])}

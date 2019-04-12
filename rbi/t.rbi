@@ -29,13 +29,13 @@ module T
   # here still applies, but additional checking and/or analysis is
   # performed in C++ for that method.
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.let(value, type, checked: true); end
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.assert_type!(value, type, checked: true); end
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T.any(FalseClass, TrueClass)).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.cast(value, type, checked: true); end
 
   sig {params(type: T.untyped).returns(BasicObject)}

@@ -4,6 +4,6 @@ class Fiber < Object
   sig {returns(Fiber)}
   def current; end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def alive?; end
 end

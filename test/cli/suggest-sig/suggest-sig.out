@@ -180,7 +180,7 @@ suggest-sig.rb:125: This function does not have a `sig` http://go/e/7017
   Autocorrect: Done
     suggest-sig.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped)}
 `
-     124 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
 
 suggest-sig.rb:139: This function does not have a `sig` http://go/e/7017
@@ -190,7 +190,7 @@ suggest-sig.rb:139: This function does not have a `sig` http://go/e/7017
     suggest-sig.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped)}
 `
      134 |sig do
-     135 |  params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).
+     135 |  params(a: T.untyped, cond: T::Boolean).
      136 |  returns(T.untyped).
      137 |  generated
      138 |end

@@ -91,7 +91,7 @@ class Time < Object
     params(
         arg0: Time,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <(arg0); end
 
@@ -99,7 +99,7 @@ class Time < Object
     params(
         arg0: Time,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def <=(arg0); end
 
@@ -115,7 +115,7 @@ class Time < Object
     params(
         arg0: Time,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >(arg0); end
 
@@ -123,7 +123,7 @@ class Time < Object
     params(
         arg0: Time,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def >=(arg0); end
 
@@ -136,18 +136,18 @@ class Time < Object
   sig {returns(Integer)}
   def day(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def dst?(); end
 
   sig do
     params(
         arg0: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def eql?(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def friday?(); end
 
   sig {returns(Time)}
@@ -164,7 +164,7 @@ class Time < Object
   sig {returns(Time)}
   def getutc(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def gmt?(); end
 
   sig {returns(Integer)}
@@ -196,7 +196,7 @@ class Time < Object
   sig {returns(String)}
   def inspect(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def isdst(); end
 
   sig do
@@ -216,7 +216,7 @@ class Time < Object
   sig {returns(Integer)}
   def mon(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def monday?(); end
 
   sig {returns(Integer)}
@@ -230,7 +230,7 @@ class Time < Object
   end
   def round(arg0); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def saturday?(); end
 
   sig {returns(Integer)}
@@ -250,13 +250,13 @@ class Time < Object
   sig {returns(Time)}
   def succ(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def sunday?(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def thursday?(); end
 
-  sig {returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])}
+  sig {returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T::Boolean, String])}
   def to_a(); end
 
   sig {returns(Float)}
@@ -271,7 +271,7 @@ class Time < Object
   sig {returns(String)}
   def to_s(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def tuesday?(); end
 
   sig {returns(Numeric)}
@@ -289,7 +289,7 @@ class Time < Object
   sig {returns(Time)}
   def utc(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def utc?(); end
 
   sig {returns(Integer)}
@@ -298,7 +298,7 @@ class Time < Object
   sig {returns(Integer)}
   def wday(); end
 
-  sig {returns(T.any(TrueClass, FalseClass))}
+  sig {returns(T::Boolean)}
   def wednesday?(); end
 
   sig {returns(Integer)}

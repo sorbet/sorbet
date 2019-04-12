@@ -12,7 +12,7 @@ class NilClass < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def ^(obj); end
 
@@ -38,7 +38,7 @@ class NilClass < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.any(TrueClass, FalseClass))
+    .returns(T::Boolean)
   end
   def |(obj); end
 end
