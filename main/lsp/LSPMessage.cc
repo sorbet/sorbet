@@ -84,12 +84,11 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(rapidjson::MemoryPoolAllocator<> &
 
 LSPMessage::RawLSPMessage fromJSONValue(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d) {
     if (d.HasMember("id")) {
-        // Note: Vanilla response messages lack a 'method' field, but we lurk one on to assist with runtime
-        // JSON shape checks.
-        if (d.HasMember("result") || d.HasMember("error")) {
-            return ResponseMessage::fromJSONValue(alloc, d.GetObject(), "root");
-        } else {
+        // Method is required on requests, but responses lack it.
+        if (d.HasMember("method")) {
             return RequestMessage::fromJSONValue(alloc, d.GetObject(), "root");
+        } else {
+            return ResponseMessage::fromJSONValue(alloc, d.GetObject(), "root");
         }
     } else {
         return NotificationMessage::fromJSONValue(alloc, d.GetObject(), "root");

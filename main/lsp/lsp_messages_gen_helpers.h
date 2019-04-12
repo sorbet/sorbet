@@ -28,7 +28,7 @@ std::unique_ptr<rapidjson::Value> tryConvertToAnyObject(rapidjson::MemoryPoolAll
                                                         std::optional<const rapidjson::Value *> value,
                                                         std::string_view name);
 
-// N.B.: Uses a string reference since rapidjson APIs assume a C string.
+// N.B.: Uses a string reference since rapidjson APIs require a C string.
 std::optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, const std::string &name);
 
 const rapidjson::Value &assertJSONField(std::optional<const rapidjson::Value *> maybeValue, std::string_view name);

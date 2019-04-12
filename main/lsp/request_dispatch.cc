@@ -113,7 +113,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         if (method == LSPMethod::TextDocumentDidOpen) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
             Timer timeit(logger, "text_document_did_open");
-
             auto &edits = get<unique_ptr<DidOpenTextDocumentParams>>(params);
             string_view uri = edits->textDocument->uri;
             if (absl::StartsWith(uri, rootUri)) {
@@ -301,7 +300,8 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             response.error = make_unique<ResponseError>(params->code, params->message);
             sendResponse(response);
         } else {
-            // Method parsed, but isn't a request. Use a method that is valid for a response before responding.
+            // Method parsed, but isn't a request. Use SorbetError for `requestMethod`, as `method` isn't valid for a
+            // response.
             response.requestMethod = LSPMethod::SorbetError;
             response.error = make_unique<ResponseError>(
                 (int)LSPErrorCodes::MethodNotFound,

@@ -895,9 +895,7 @@ public:
 
     std::string getCPPType() const {
         // Variants cannot contain duplicate types, so dedupe the CPP types.
-        // Note: Order needs to match order in `variants`.
-        // Our MessageID wrapper relies on variant<int, string> being castable to variant<int, string, JSONNullObject>.
-        // (It's not castable to variant<JSONNullObject, int, string>.)
+        // Have order match order in `variants` (which matches declaration order) to avoid surprises.
         UnorderedSet<std::string> uniqueTypes;
         std::vector<std::string> emitOrder;
         for (auto &variant : variants) {
@@ -1026,7 +1024,6 @@ public:
                            std::string_view fieldName) {
         fmt::format_to(out, "{{\n");
         fmt::format_to(out, "auto &unwrappedValue = assertJSONField({}, \"{}\");", from, fieldName);
-        // NOTE: Optionality affects how it's accessed.
         bool first = true;
         for (std::shared_ptr<JSONType> variant : variants) {
             std::string checkMethod;
