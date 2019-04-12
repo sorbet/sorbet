@@ -8,7 +8,7 @@ if [[ "$BUILDKITE_PULL_REQUEST" == "false" ]]; then
   # whitelist commits that are triggered in branch builds of github.com/stripe/sorbet
   whitelisted=1
 else
-  .buildkite/assign-reviewers.sh
+  .buildkite/assign-reviewers.sh # this means that this script will have to also be checksum-ed
 fi
 
 if [[ "$BUILDKITE_PULL_REQUEST_REPO" == "git://github.com/stripe/sorbet.git" ]]; then
