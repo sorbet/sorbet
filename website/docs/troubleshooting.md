@@ -3,8 +3,6 @@ id: troubleshooting
 title: Troubleshooting
 ---
 
-<!-- TODO(jez) This doc references a lot of Stripe internals still -->
-
 This is one of three docs aimed at helping answer common questions about Sorbet:
 
 1.  [Troubleshooting](troubleshooting.md) (this doc)
@@ -33,8 +31,6 @@ us what type it thinks that variable has. This is a super powerful debugging
 technique! `T.reveal_type` should be **one of the first tools** to reach for
 when debugging a confusing error.
 
-<!-- TODO(jez) Shorten this example and make it more of a story. -->
-
 Try making a hypothesis of what the problem is ("I think the problem is...") and
 then create small examples in <https://sorbet.run> to test the hypothesis with
 `T.reveal_type`. For example:
@@ -52,7 +48,7 @@ end
 
 With this example we see that `xs.first` returns `T.nilable(Integer)`.
 
-Frequently when troubleshooting type errors, either something is `nil` or 
+Frequently when troubleshooting type errors, either something is `nil` or
 `T.untyped` unexpectedly. We can use `T.reveal_type` to track down where the
 type originated.
 
@@ -80,11 +76,9 @@ conjunction with the code in a specific project locally.
 
 ### Run the code
 
-<!-- TODO(jez) Document offline sorbet runtime. -->
-
-Types predict values. Is Sorbet's prediction accurate? Use `irb`, `pay console`,
-or `pay test` to run the code. Does it actually work? If it doesn't actually
-work, Sorbet caught a bug!
+Types predict values. Is Sorbet's prediction accurate? Try using a Ruby REPL
+(like `irb` or `binding.pry`) to run code. Does it actually work? If it doesn't
+actually work, Sorbet caught a bug!
 
 Otherwise, there are a handful of reasons why Sorbet predicts code will not work
 even when it does:
@@ -107,7 +101,7 @@ Sorbet cannot see statically. It's possible that even though a method exists at
 runtime, Sorbet cannot see it.
 
 However, we can use `*.rbi` files to declare methods to Sorbet so that it **can**
-see them statically. At Stripe, we even have a way to auto-generate these files:
+see them statically. For more information about RBI files:
 
 [→ RBI files](rbi.md)
 
@@ -130,8 +124,6 @@ gotchas when using Sorbet, here are two more specific resources:
 
 ## Escape Hatches
 
-<!-- TODO(jez) Note about how you should always prefer the refactor. -->
-
 Regardless of whether we can figure out the root cause of the error at hand,
 Sorbet is designed as a [gradual type system](gradual.md). This means there will
 always be **escape hatches** to silence the problem.
@@ -144,12 +136,77 @@ forget the result type of something.
 One case when this is useful is when we know for sure that a method exists, but
 Sorbet doesn't know that method exists statically:
 
-```
-TODO(jez) missing method example
+```ruby
+# typed: true
+class A
+  def method_missing(method)
+    puts "Called #{method}"
+  end
+end
 
-TODO(jez) T.unsafe(self) example
+A.new.foo # error: Method `foo` does not exist on `A`
 ```
 
+In cases like this, we have a couple options. The first one is just: rewrite the
+code. Code that's hard for Sorbet to understand is frequently hard for
+developers to understand. By rewriting confusing code, we benefit all future
+readers.
+
+However, in the case when we're **sure** that we don't want to refactor the
+code, we have an escape hatch: `T.unsafe`. It looks like this:
+
+```ruby
+# typed: true
+class A
+  def method_missing(method)
+    puts "Called #{method}"
+  end
+end
+
+T.unsafe(A.new).foo # => ok
+```
+
+The `T.unsafe` call effectively says to Sorbet, "trust me, I know what I'm
+doing." At this point, the burden of correctness shifts from Sorbet to the
+programmer.
+
+### `T.unsafe(self)`
+
+Note that the call to `T.unsafe` must wrap the [receiver] of the method call. In
+this example:
+
+[receiver]: https://stackoverflow.com/questions/916572/in-ruby-what-does-the-receiver-refer-to
+
+```ruby
+# typed: true
+class A
+  def method_missing(method)
+    puts "Called #{method}"
+  end
+
+  def initialize
+    foo # error: Method `foo` does not exist on `A`
+  end
+end
+```
+
+`foo` is a method that's being called without on the implicit receiver of
+`self`. Another way of saying that is that `foo` is the same as `self.foo` in
+Ruby. So to use unsafe to silence this error, we have to make the `self.foo`
+explicit:
+
+```ruby
+# typed: true
+class A
+  def method_missing(method)
+    puts "Called #{method}"
+  end
+
+  def initialize
+    T.unsafe(self).foo # ok
+  end
+end
+```
 
 ### `T.cast`
 
