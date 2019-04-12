@@ -101,7 +101,7 @@ your browser.
 
 Consider this file:
 
-```
+```ruby
 # -- foo.rb --
 # typed: true
 require 'sorbet-runtime'
@@ -120,7 +120,7 @@ Main.main
 
 To check it statically:
 
-```
+```plaintext
 ❯ srb tc foo.rb
 ```
 
@@ -130,7 +130,7 @@ To check it statically:
 
 To test out how the runtime checks work:
 
-```
+```plaintext
 ❯ bundle exec ruby foo.rb
 ```
 
@@ -143,7 +143,7 @@ Each Sorbet project should have a `sorbet/config` file at the root of the
 project, which describes how to typecheck the project. If we are at the root of
 our project, we can check the whole project with:
 
-```
+```plaintext
 ❯ srb
 ```
 

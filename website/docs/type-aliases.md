@@ -5,7 +5,7 @@ title: Type Aliases
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 MyTypeAlias = T.type_alias(...)
 
 # e.g.:

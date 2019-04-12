@@ -109,7 +109,7 @@ This is a Sorbet method signature---it declares the parameter and return types
 of a method. By adding the `sig` to `log_env`, we opted this method into
 additional checks. Now `srb` reports this:
 
-```
+```plaintext
 `String("timeout_len")` doesn't match `Symbol` for argument `key`
 ```
 

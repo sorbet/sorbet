@@ -5,14 +5,14 @@ title: T.class_of
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 T.class_of(Integer)
 ```
 
 It can be confusing whether you want `MyClass` or `T.class_of(MyClass)`. For
 reference, these assertions are true:
 
-```
+```ruby
 T.let(5, Integer)
 
 T.let(5.class, T.class_of(Integer))

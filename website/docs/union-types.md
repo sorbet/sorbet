@@ -5,7 +5,7 @@ title: Union Types
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 class A; end
 class B; end
 class C; end

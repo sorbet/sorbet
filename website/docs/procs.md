@@ -5,7 +5,7 @@ title: Proc Types
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 T.proc.params(arg0: Arg0Type, arg1: Arg2Type, ...).returns(ReturnType)
 ```
 

@@ -8,7 +8,7 @@ title: T.untyped
 <!-- TODO(jez) T.untyped probably warrants being prioritized. There's a lot of stuff. -->
 
 
-```
+```ruby
 T.untyped
 ```
 
