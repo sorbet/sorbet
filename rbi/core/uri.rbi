@@ -68,7 +68,7 @@ module URI
 
   sig do
     params(
-        str: String,
+        str: T.any(URI::Generic, String),
     )
     .returns(URI::HTTP)
   end
