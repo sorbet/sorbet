@@ -22,7 +22,15 @@ class Sorbet::Private::SuggestTyped
 
   def self.suggest_typed
     IO.popen(
-      ['srb', 'tc', '--suggest-typed', '--error-white-list=7022', '--typed=strict', '--silence-dev-message', '-a'],
+      [
+        __dir__ + '/../bin/srb',
+        'tc',
+        '--suggest-typed',
+        '--error-white-list=7022',
+        '--typed=strict',
+        '--silence-dev-message',
+        '-a',
+      ],
       err: [:child, :out],
     ) do |io|
       out = io.read

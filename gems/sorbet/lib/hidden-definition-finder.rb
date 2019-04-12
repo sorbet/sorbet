@@ -133,7 +133,7 @@ class Sorbet::Private::HiddenMethodFinder
     puts "Printing your code's symbol table into #{SOURCE_CONSTANTS}"
     io = IO.popen(
       [
-        'srb',
+        __dir__ + '/../bin/srb',
         'tc',
         '--print=symbol-table-json',
         '--stdout-hup-hack',
@@ -151,7 +151,7 @@ class Sorbet::Private::HiddenMethodFinder
     Dir.chdir(TMP_PATH) do
       io = IO.popen(
         [
-          'srb',
+          __dir__ + '/../bin/srb',
           'tc',
           '--print=symbol-table-json',
           # Method redefined with mismatched argument is ok since sometime

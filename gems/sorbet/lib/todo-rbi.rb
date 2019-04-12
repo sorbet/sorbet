@@ -54,7 +54,7 @@ class Sorbet::Private::TodoRBI
 
     IO.popen(
       [
-        'srb',
+        __dir__ + '/../bin/srb',
         'tc',
         '--print=symbol-table-json',
         '--stdout-hup-hack',
