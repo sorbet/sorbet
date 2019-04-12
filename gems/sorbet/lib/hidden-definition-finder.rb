@@ -342,6 +342,7 @@ class Sorbet::Private::HiddenMethodFinder
         is_stub = source_entry['superClass'] && source_symbols[source_entry['superClass']] == 'RubyTyper::StubClass'
         next unless is_stub
       end
+      next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{klass.name}::#{name}")
       begin
         my_value = klass.const_get(name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
       rescue StandardError, LoadError => e
