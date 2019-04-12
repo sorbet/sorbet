@@ -56,11 +56,6 @@ class LSPLoop {
         CounterState counters;
     };
 
-    struct ResponseHandler {
-        std::function<void(rapidjson::Value &)> onResult;
-        std::function<void(rapidjson::Value &)> onError;
-    };
-
     /**
      * Object that uses the RAII pattern to notify the client when a *slow* operation
      * starts and ends. Is used to provide user feedback in the status line of VS Code.
@@ -76,7 +71,7 @@ class LSPLoop {
         ~ShowOperation();
     };
 
-    UnorderedMap<std::string, ResponseHandler> awaitingResponse;
+    UnorderedMap<std::string, std::function<void(const ResponseMessage &)>> awaitingResponse;
     /** LSP loop reuses a single arena for all json allocations. We never free memory used for JSON */
     rapidjson::MemoryPoolAllocator<> alloc;
     /** Trees that have been indexed and can be reused between different runs */
@@ -145,17 +140,11 @@ class LSPLoop {
     /* Send the following document to client */
     void sendRaw(std::string_view json);
 
-    /* Send `data` as payload of notification 'meth' */
-    void sendNotification(const LSPMethod meth, const JSONBaseType &data);
-
-    void sendNullResponse(const MessageId &id);
-    void sendResponse(const MessageId &id, const JSONBaseType &result);
-    void sendResponse(const MessageId &id, const std::vector<std::unique_ptr<JSONBaseType>> &result);
-    void sendError(const MessageId &id, std::unique_ptr<ResponseError> error);
-    void sendError(const MessageId &id, int errorCode, std::string_view errorMsg);
+    void sendNotification(const NotificationMessage &notif);
+    void sendResponse(const ResponseMessage &response);
 
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
-    void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<JSONBaseType>> &locs, core::Loc loc);
+    void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc);
 
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/

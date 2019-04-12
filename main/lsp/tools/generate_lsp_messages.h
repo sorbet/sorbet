@@ -20,7 +20,7 @@ const std::string ALLOCATOR_VAR = "alloc";
 // How this type appears in raw JSON or C++.
 // Primarily used to determine which types we can automatically discriminate in variant types.
 enum class BaseKind {
-    NullKind, // Note: Only valid for JSON. In C++, it's a singleton object.
+    NullKind, // Note: In C++, it's not nullptr -- it's a JSONNullObject.
     BooleanKind,
     IntKind,
     DoubleKind,
@@ -65,12 +65,13 @@ public:
 
     /**
      * Writes the C++ statements needed to sanity check and retrieve a value
-     * of this type from a rapidjson::Value object stored in `from` into
+     * of this type from an `optional<const rapidjson::Value *>` object stored in `from` into
      * the struct. Call `assign` with the C++ code that returns the
      * deserialized value, and it'll return the C++ code for assigning
      * it to the struct.
      *
      * `fieldName` should be used to generate error messages.
+     * If field is required and from is nullopt, code should throw a MissingFieldError.
      */
     virtual void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                                    std::string_view fieldName) = 0;
@@ -125,7 +126,7 @@ public:
 class JSONNullType final : public JSONType {
 public:
     BaseKind getCPPBaseKind() const {
-        return BaseKind::ObjectKind;
+        return BaseKind::NullKind;
     }
 
     BaseKind getJSONBaseKind() const {
@@ -429,15 +430,20 @@ public:
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
-        fmt::format_to(out, "if (!{}.IsArray()) {{\n", from);
-        fmt::format_to(out, "throw JSONTypeError(\"{}\", \"array\", {});\n", fieldName, from);
+        fmt::format_to(out, "{{\n");
+        fmt::format_to(out, "auto &unwrappedVal = assertJSONField({}, \"{}\");", from, fieldName);
+        fmt::format_to(out, "if (!unwrappedVal.IsArray()) {{\n");
+        fmt::format_to(out, "throw JSONTypeError(\"{}\", \"array\", unwrappedVal);\n", fieldName, from);
         // Use else branch so we operate in new scope to avoid ArrayVar conflicts.
         fmt::format_to(out, "}} else {{\n");
         fmt::format_to(out, "{} {};\n", getCPPType(), arrayVar, componentType->getCPPType());
-        fmt::format_to(out, "for (auto &element : {}.GetArray()) {{\n", from);
-        componentType->emitFromJSONValue(out, "element", AssignDeserializedElementValue, fieldName);
+        fmt::format_to(out, "for (auto &element : unwrappedVal.GetArray()) {{\n", from);
+        // Note: All of these 'emitFromJSONValue' functions expect an optional<> type.
+        fmt::format_to(out, "auto maybeElement = std::make_optional<const rapidjson::Value *>(&element);\n");
+        componentType->emitFromJSONValue(out, "maybeElement", AssignDeserializedElementValue, fieldName);
         fmt::format_to(out, "}}\n");
         assign(out, fmt::format("std::move({})", arrayVar));
+        fmt::format_to(out, "}}\n");
         fmt::format_to(out, "}}\n");
     }
 
@@ -465,7 +471,7 @@ private:
 
 public:
     JSONIntEnumType(std::string_view typeName, std::vector<std::pair<const std::string, int>> enumValues)
-        : JSONClassType(std::string(typeName)), enumValues(enumValues) {}
+        : JSONClassType(typeName), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::IntKind;
@@ -547,7 +553,7 @@ private:
 
 public:
     JSONStringEnumType(std::string_view typeName, std::vector<const std::string> enumValues)
-        : JSONClassType(std::string(typeName)), enumValues(enumValues) {}
+        : JSONClassType(typeName), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::IntKind;
@@ -563,6 +569,17 @@ public:
 
     std::string getJSONType() const {
         return fmt::format("{}", fmt::join(enumValues, " | "));
+    }
+
+    /**
+     * Retrieve the enum value for the given raw string. Performs sanity checking.
+     */
+    std::string getEnumValue(std::string_view rawString) {
+        auto it = std::find(enumValues.begin(), enumValues.end(), rawString);
+        if (it == enumValues.end()) {
+            throw std::invalid_argument(fmt::format("Enum {} does not contain string `{}`", getCPPType(), rawString));
+        }
+        return enumVar(rawString);
     }
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
@@ -615,7 +632,7 @@ public:
     }
 };
 
-class FieldDef {
+class FieldDef final {
 public:
     const std::string jsonName;
     const std::string cppName;
@@ -660,12 +677,18 @@ public:
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
+        // Check for presence of field.
+        fmt::format_to(out, "if ({}) {{\n", from);
         const std::string innerCPPType = innerType->getCPPType();
         AssignLambda assignOptional = [innerCPPType, assign](fmt::memory_buffer &out, std::string_view from) -> void {
-            assign(out, fmt::format("std::make_optional<{}>({});", innerCPPType, from));
+            assign(out, fmt::format("std::make_optional<{}>({})", innerCPPType, from));
         };
-        // Caller has checked for presence of field.
         innerType->emitFromJSONValue(out, from, assignOptional, fieldName);
+        fmt::format_to(out, "}} else {{\n");
+        // Ensures that optional is assigned to correct variant slot on variant types, since optional<Foo> !=
+        // optional<Bar>.
+        assign(out, fmt::format("std::optional<{}>(std::nullopt)", innerCPPType));
+        fmt::format_to(out, "}}\n");
     }
 
     void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
@@ -693,7 +716,7 @@ private:
 
 public:
     JSONObjectType(std::string_view typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs)
-        : JSONClassType(std::string(typeName)), fieldDefs(fieldDefs) {}
+        : JSONClassType(typeName), fieldDefs(fieldDefs) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::ObjectKind;
@@ -717,7 +740,8 @@ public:
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
-        assign(out, fmt::format("{}::fromJSONValue({}, {}, \"{}\")", typeName, ALLOCATOR_VAR, from, fieldName));
+        assign(out, fmt::format("{0}::fromJSONValue({1}, assertJSONField({2}, \"{3}\"), \"{3}\")", typeName,
+                                ALLOCATOR_VAR, from, fieldName));
     }
 
     void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
@@ -793,14 +817,13 @@ public:
         // Process required fields first.
         for (std::shared_ptr<FieldDef> &fieldDef : reqFields) {
             std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->cppName);
-            fmt::format_to(out, "if (!val.HasMember(\"{}\")) {{\n", fieldDef->jsonName);
-            fmt::format_to(out, "throw MissingFieldError(\"{}\", \"{}\");\n", typeName, fieldDef->jsonName);
-            fmt::format_to(out, "}}\n");
+            fmt::format_to(out, "auto rapidjson{} = maybeGetJSONField(val, \"{}\");\n", fieldDef->cppName,
+                           fieldDef->jsonName);
             fmt::format_to(out, "{} {};\n", fieldDef->type->getCPPType(), fieldDef->cppName);
             AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
                 fmt::format_to(out, "{} = {};\n", fieldDef->cppName, from);
             };
-            fieldDef->type->emitFromJSONValue(out, fmt::format("val[\"{}\"]", fieldDef->jsonName), assign, fieldName);
+            fieldDef->type->emitFromJSONValue(out, fmt::format("rapidjson{}", fieldDef->cppName), assign, fieldName);
         }
         fmt::format_to(out, "{} rv = std::make_unique<{}>({});\n", getCPPType(), typeName,
                        fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
@@ -815,13 +838,13 @@ public:
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             if (dynamic_cast<JSONOptionalType *>(fieldDef->type.get())) {
                 std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->cppName);
-                fmt::format_to(out, "if (val.HasMember(\"{}\")) {{\n", fieldDef->jsonName);
-                fmt::format_to(out, "const rapidjson::Value &fieldVal = val[\"{}\"];\n", fieldDef->jsonName);
+                fmt::format_to(out, "auto rapidjson{} = maybeGetJSONField(val, \"{}\");\n", fieldDef->cppName,
+                               fieldDef->jsonName);
                 AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, std::string_view from) -> void {
                     fmt::format_to(out, "rv->{} = {};\n", fieldDef->cppName, from);
                 };
-                fieldDef->type->emitFromJSONValue(out, "fieldVal", assign, fieldName);
-                fmt::format_to(out, "}}\n");
+                fieldDef->type->emitFromJSONValue(out, fmt::format("rapidjson{}", fieldDef->cppName), assign,
+                                                  fieldName);
             }
         }
         fmt::format_to(out, "return rv;\n");
@@ -852,12 +875,130 @@ public:
     }
 };
 
-class JSONVariantType final : public JSONType {
-private:
+/**
+ * Abstract class. Implements basic functionality for any field that can contain one or more different types of data.
+ */
+class JSONVariantType : public JSONType {
+protected:
     std::vector<std::shared_ptr<JSONType>> variants;
 
 public:
-    JSONVariantType(std::vector<std::shared_ptr<JSONType>> variants) : variants(variants) {
+    JSONVariantType(std::vector<std::shared_ptr<JSONType>> variants) : variants(variants) {}
+
+    BaseKind getCPPBaseKind() const {
+        return BaseKind::ComplexKind;
+    }
+
+    BaseKind getJSONBaseKind() const {
+        return BaseKind::ComplexKind;
+    }
+
+    std::string getCPPType() const {
+        // Variants cannot contain duplicate types, so dedupe the CPP types.
+        // Have order match order in `variants` (which matches declaration order) to avoid surprises.
+        UnorderedSet<std::string> uniqueTypes;
+        std::vector<std::string> emitOrder;
+        for (auto &variant : variants) {
+            auto cppType = variant->getCPPType();
+            if (uniqueTypes.find(cppType) == uniqueTypes.end()) {
+                uniqueTypes.insert(cppType);
+                emitOrder.push_back(cppType);
+            }
+        }
+        return fmt::format("std::variant<{}>", fmt::join(emitOrder, ","));
+    }
+
+    std::string getJSONType() const {
+        return fmt::format(
+            "{}", fmt::map_join(variants, " | ", [](auto variant) -> std::string { return variant->getJSONType(); }));
+    }
+
+    bool cannotBeCopied() const {
+        for (auto &variant : variants) {
+            if (variant->cannotBeCopied()) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+/**
+ * A 'discriminated union' type is a variant type where some other field on the object
+ * determines its true type.
+ */
+class JSONDiscriminatedUnionVariantType final : public JSONVariantType {
+private:
+    std::shared_ptr<FieldDef> fieldDef;
+    const std::vector<std::pair<const std::string, std::shared_ptr<JSONType>>> variantsByDiscriminant;
+
+    static std::vector<std::shared_ptr<JSONType>>
+    getVariantTypes(const std::vector<std::pair<const std::string, std::shared_ptr<JSONType>>> &variants) {
+        std::vector<std::shared_ptr<JSONType>> rv;
+        rv.reserve(variants.size());
+        for (auto &variant : variants) {
+            rv.push_back(variant.second);
+        }
+        return rv;
+    }
+
+    JSONStringEnumType *getDiscriminantType() {
+        auto enumType = dynamic_cast<JSONStringEnumType *>(fieldDef->type.get());
+        if (!enumType) {
+            throw std::invalid_argument("The discriminant for a discriminated union must be a string enum.");
+        }
+        return enumType;
+    }
+
+public:
+    JSONDiscriminatedUnionVariantType(
+        std::shared_ptr<FieldDef> fieldDef,
+        const std::vector<std::pair<const std::string, std::shared_ptr<JSONType>>> variantsByDiscriminant)
+        : JSONVariantType(getVariantTypes(variantsByDiscriminant)), fieldDef(fieldDef),
+          variantsByDiscriminant(variantsByDiscriminant) {}
+
+    void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                           std::string_view fieldName) {
+        auto enumType = getDiscriminantType();
+        fmt::format_to(out, "switch ({}) {{\n", fieldDef->cppName);
+        for (auto &variant : variantsByDiscriminant) {
+            // getEnumValue will throw if the discriminant value is not in the enum.
+            fmt::format_to(out, "case {}:\n", enumType->getEnumValue(variant.first));
+            variant.second->emitFromJSONValue(out, from, assign, fieldName);
+            fmt::format_to(out, "break;\n");
+        }
+        fmt::format_to(out, "default:\n");
+        fmt::format_to(out, "throw InvalidDiscriminantValueError(\"{0}\", \"{1}\", convert{2}ToString({1}));\n",
+                       fieldName, fieldDef->cppName, enumType->getCPPType());
+        fmt::format_to(out, "}}\n");
+    }
+
+    void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
+                         std::string_view fieldName) {
+        auto enumType = getDiscriminantType();
+        fmt::format_to(out, "switch ({}) {{\n", fieldDef->cppName);
+        for (auto &variant : variantsByDiscriminant) {
+            // getEnumValue will throw if the discriminant value is not in the enum.
+            fmt::format_to(out, "case {}:\n", enumType->getEnumValue(variant.first));
+            fmt::format_to(out, "if (auto discVal = std::get_if<{}>(&{})) {{\n", variant.second->getCPPType(), from);
+            variant.second->emitToJSONValue(out, "(*discVal)", assign, fieldName);
+            fmt::format_to(out, "}} else {{\n");
+            fmt::format_to(
+                out, "throw InvalidDiscriminatedUnionValueError(\"{0}\", \"{1}\", convert{2}ToString({1}), \"{3}\");\n",
+                fieldName, fieldDef->cppName, enumType->getCPPType(), variant.second->getCPPType());
+            fmt::format_to(out, "}}\n");
+            fmt::format_to(out, "break;\n");
+        }
+        fmt::format_to(out, "default:\n");
+        fmt::format_to(out, "throw InvalidDiscriminantValueError(\"{0}\", \"{1}\", convert{2}ToString({1}));\n",
+                       fieldName, fieldDef->cppName, enumType->getCPPType());
+        fmt::format_to(out, "}}\n");
+    }
+};
+
+class JSONBasicVariantType final : public JSONVariantType {
+public:
+    JSONBasicVariantType(std::vector<std::shared_ptr<JSONType>> variants) : JSONVariantType(variants) {
         // Check that we have at most one of every kind & do not have any complex types.
         UnorderedSet<BaseKind> cppKindSeen;
         UnorderedSet<BaseKind> jsonKindSeen;
@@ -879,36 +1020,10 @@ public:
         }
     }
 
-    BaseKind getCPPBaseKind() const {
-        return BaseKind::ComplexKind;
-    }
-
-    BaseKind getJSONBaseKind() const {
-        return BaseKind::ComplexKind;
-    }
-
-    std::string getCPPType() const {
-        return fmt::format("std::variant<{}>", fmt::map_join(variants, ",", [](auto variant) -> std::string {
-                               return variant->getCPPType();
-                           }));
-    }
-
-    std::string getJSONType() const {
-        return fmt::format(
-            "{}", fmt::map_join(variants, " | ", [](auto variant) -> std::string { return variant->getJSONType(); }));
-    }
-
-    bool cannotBeCopied() const {
-        for (auto &variant : variants) {
-            if (variant->cannotBeCopied()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
+        fmt::format_to(out, "{{\n");
+        fmt::format_to(out, "auto &unwrappedValue = assertJSONField({}, \"{}\");", from, fieldName);
         bool first = true;
         for (std::shared_ptr<JSONType> variant : variants) {
             std::string checkMethod;
@@ -939,7 +1054,7 @@ public:
                 default:
                     throw std::invalid_argument("Invalid kind for variant type.");
             }
-            auto condition = fmt::format("{}.{}()", from, checkMethod);
+            auto condition = fmt::format("unwrappedValue.{}()", checkMethod);
             if (first) {
                 first = false;
                 fmt::format_to(out, "if ({}) {{\n", condition);
@@ -949,8 +1064,9 @@ public:
             variant->emitFromJSONValue(out, from, assign, fieldName);
         }
         fmt::format_to(out, "}} else {{\n");
-        fmt::format_to(out, "throw JSONTypeError(\"{}\", \"{}\", {});\n", fieldName,
-                       sorbet::core::JSON::escape(getJSONType()), from);
+        fmt::format_to(out, "throw JSONTypeError(\"{}\", \"{}\", unwrappedValue);\n", fieldName,
+                       sorbet::core::JSON::escape(getJSONType()));
+        fmt::format_to(out, "}}\n");
         fmt::format_to(out, "}}\n");
     }
 

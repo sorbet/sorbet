@@ -78,6 +78,8 @@ protected:
 
     std::unique_ptr<LSPMessage> watchmanFileUpdate(std::vector<std::string> updatedFilePaths);
 
+    std::vector<std::unique_ptr<LSPMessage>> sendRaw(const std::string &json);
+
     std::vector<std::unique_ptr<LSPMessage>> send(const LSPMessage &message);
 
     std::vector<std::unique_ptr<LSPMessage>> send(std::vector<std::unique_ptr<LSPMessage>> messages);

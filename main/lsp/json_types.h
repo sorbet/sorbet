@@ -14,25 +14,25 @@ public:
     DeserializationError(std::string_view message);
 };
 
-class InvalidStringEnumError : public DeserializationError {
+class InvalidStringEnumError final : public DeserializationError {
 public:
     const std::string enumName;
     const std::string value;
     InvalidStringEnumError(std::string_view enumName, std::string_view value);
 };
 
-class MissingFieldError : public DeserializationError {
+class MissingFieldError final : public DeserializationError {
 public:
-    MissingFieldError(std::string_view objectName, std::string_view fieldName);
+    MissingFieldError(std::string_view fieldName);
 };
 
-class JSONTypeError : public DeserializationError {
+class JSONTypeError final : public DeserializationError {
 public:
     JSONTypeError(std::string_view fieldName, std::string_view expectedType);
     JSONTypeError(std::string_view fieldName, std::string_view expectedType, const rapidjson::Value &found);
 };
 
-class JSONConstantError : public DeserializationError {
+class JSONConstantError final : public DeserializationError {
 public:
     JSONConstantError(std::string_view fieldName, std::string_view expectedValue, const rapidjson::Value &actualValue);
 };
@@ -42,33 +42,49 @@ public:
     SerializationError(std::string_view message);
 };
 
-class MissingVariantValueError : public SerializationError {
+class MissingVariantValueError final : public SerializationError {
 public:
     MissingVariantValueError(std::string_view fieldName);
 };
 
-class NullPtrError : public SerializationError {
+class InvalidDiscriminantValueError final : public SerializationError {
+public:
+    const std::string fieldName;
+    const std::string discriminantFieldName;
+    const std::string discriminantValue;
+    InvalidDiscriminantValueError(std::string_view fieldName, std::string_view discriminantFieldname,
+                                  std::string_view discriminantValue);
+};
+
+class InvalidDiscriminatedUnionValueError final : public SerializationError {
+public:
+    const std::string fieldName;
+    InvalidDiscriminatedUnionValueError(std::string_view fieldName, std::string_view discriminantFieldName,
+                                        std::string_view discriminantValue, std::string_view expectedType);
+};
+
+class NullPtrError final : public SerializationError {
 public:
     NullPtrError(std::string_view fieldName);
 };
 
-class InvalidEnumValueError : public SerializationError {
+class InvalidEnumValueError final : public SerializationError {
 public:
     InvalidEnumValueError(std::string_view typeName, int value);
 };
 
-class InvalidConstantValueError : public SerializationError {
+class InvalidConstantValueError final : public SerializationError {
 public:
     InvalidConstantValueError(std::string_view fieldName, std::string_view expectedValue, std::string_view actualValue);
 };
 
-class InvalidTypeError : public SerializationError {
+class InvalidTypeError final : public SerializationError {
 public:
     InvalidTypeError(std::string_view fieldName, std::string_view expectedType,
                      const std::unique_ptr<rapidjson::Value> &found);
 };
 
-class JSONNullObject {};
+class JSONNullObject final {};
 
 class JSONBaseType {
 public:

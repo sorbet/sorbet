@@ -77,8 +77,7 @@ unique_ptr<LSPMessage> ProtocolTest::openFile(string_view path, string_view cont
     auto uri = getUri(path);
     auto didOpenParams =
         make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(uri, "ruby", 1, string(contents)));
-    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen);
-    didOpenNotif->params = didOpenParams->toJSONValue(lspWrapper->alloc);
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     return make_unique<LSPMessage>(move(didOpenNotif));
 }
 
@@ -96,8 +95,7 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
 
     auto uri = getUri(path);
     auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(uri));
-    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose);
-    didCloseNotif->params = didCloseParams->toJSONValue(lspWrapper->alloc);
+    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose, move(didCloseParams));
     return make_unique<LSPMessage>(move(didCloseNotif));
 }
 
@@ -109,15 +107,14 @@ unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view ne
     vector<unique_ptr<TextDocumentContentChangeEvent>> changeEvents;
     changeEvents.push_back(make_unique<TextDocumentContentChangeEvent>(string(newContents)));
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDocIdent), move(changeEvents));
-    auto didChangeNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange);
-    didChangeNotif->params = didChangeParams->toJSONValue(lspWrapper->alloc);
+    auto didChangeNotif =
+        make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));
 }
 
 unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
     auto docSymParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(getUri(path)));
-    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol);
-    req->params = docSymParams->toJSONValue(lspWrapper->alloc);
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymParams));
     return make_unique<LSPMessage>(move(req));
 }
 
@@ -126,8 +123,8 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
 }
 
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
-    auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange);
-    req->params = WatchmanQueryResponse("", "", false, updatedFilePaths).toJSONValue(lspWrapper->alloc);
+    auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange,
+                                                make_unique<WatchmanQueryResponse>("", "", false, updatedFilePaths));
     return make_unique<LSPMessage>(move(req));
 }
 
@@ -148,17 +145,28 @@ void ProtocolTest::deleteFileFromFS(string_view filename) {
 }
 
 unique_ptr<LSPMessage> ProtocolTest::cancelRequest(int id) {
-    return makeRequestMessage(lspWrapper->alloc, LSPMethod::$CancelRequest, nextId++, CancelParams(id));
+    return make_unique<LSPMessage>(
+        make_unique<NotificationMessage>("2.0", LSPMethod::$CancelRequest, make_unique<CancelParams>(id)));
 }
 
-vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
-    auto responses = lspWrapper->getLSPResponsesFor(message);
+std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string &json) {
+    auto responses = lspWrapper->getLSPResponsesFor(json);
     updateDiagnostics(responses);
     return responses;
 }
 
+vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
+    // Verify that message is sound (contains proper JSON shape for method type) by serializing and re-parsing it.
+    return sendRaw(message.toJSON());
+}
+
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>> messages) {
-    auto responses = lspWrapper->getLSPResponsesFor(messages);
+    // Verify that messages are sound (contains proper JSON shape for method type) by serializing and re-parsing them.
+    vector<unique_ptr<LSPMessage>> reparsedMessages;
+    for (auto &m : messages) {
+        reparsedMessages.push_back(LSPMessage::fromClient(lspWrapper->alloc, m->toJSON()));
+    }
+    auto responses = lspWrapper->getLSPResponsesFor(reparsedMessages);
     updateDiagnostics(responses);
     return responses;
 }
@@ -168,7 +176,9 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
         if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
             if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
                 // Will explicitly overwrite older diagnostics that are irrelevant.
-                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move((*diagnosticParams)->diagnostics);
+                // TODO: Have a better way of copying.
+                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move(
+                    PublishDiagnosticsParams::fromJSON(lspWrapper->alloc, (*diagnosticParams)->toJSON())->diagnostics);
             }
         }
     }

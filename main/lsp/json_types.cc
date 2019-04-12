@@ -23,8 +23,8 @@ InvalidStringEnumError::InvalidStringEnumError(string_view enumName, string_view
     : DeserializationError(fmt::format("Invalid value for enum type `{}`: {}", enumName, value)),
       enumName(string(enumName)), value(string(value)) {}
 
-MissingFieldError::MissingFieldError(string_view objectName, string_view fieldName)
-    : DeserializationError(fmt::format("Missing field `{}` on object of type `{}`.", fieldName, objectName)) {}
+MissingFieldError::MissingFieldError(string_view fieldName)
+    : DeserializationError(fmt::format("Missing field `{}`.", fieldName)) {}
 
 JSONTypeError::JSONTypeError(string_view fieldName, string_view expectedType)
     : DeserializationError(fmt::format("Expected field `{}` to have value of type `{}`.", fieldName, expectedType)) {}
@@ -43,6 +43,23 @@ SerializationError::SerializationError(string_view message)
 
 MissingVariantValueError::MissingVariantValueError(string_view fieldName)
     : SerializationError(fmt::format("Variant field `{}` does not have a value", fieldName)) {}
+
+InvalidDiscriminantValueError::InvalidDiscriminantValueError(string_view fieldName, string_view discriminantFieldName,
+                                                             string_view discriminantValue)
+    : SerializationError(
+          fmt::format("Invalid discriminant value for variant field `{}`: `{}` (from `{}`) is not a valid discriminant",
+                      fieldName, discriminantValue, discriminantFieldName)),
+      fieldName(string(fieldName)), discriminantFieldName(string(discriminantFieldName)),
+      discriminantValue(string(discriminantValue)) {}
+
+InvalidDiscriminatedUnionValueError::InvalidDiscriminatedUnionValueError(string_view fieldName,
+                                                                         string_view discriminantFieldName,
+                                                                         string_view discriminantValue,
+                                                                         string_view expectedType)
+    : SerializationError(fmt::format("Invalid value in discriminated union field `{}`: given discriminant `{}` "
+                                     "(from `{}`), expected value of type `{}`",
+                                     fieldName, discriminantValue, discriminantFieldName, expectedType)),
+      fieldName(string(fieldName)) {}
 
 NullPtrError::NullPtrError(string_view fieldName)
     : SerializationError(fmt::format("Field `{}` does not have a value, and contains a null pointer", fieldName)) {}

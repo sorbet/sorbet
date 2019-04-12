@@ -4,7 +4,7 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<JSONBaseType>> &locs, core::Loc loc) {
+void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) {
     if (loc.file().exists()) {
         locs.push_back(loc2Location(gs, loc));
     }
@@ -13,9 +13,12 @@ void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<JSON
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs,
                                                                     const MessageId &id,
                                                                     const TextDocumentPositionParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::TextDocumentDefinition);
     if (!opts.lspGoToDefinitionEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Go To Definition` LSP feature is experimental and disabled by default.");
+        response.error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                       "The `Go To Definition` LSP feature is experimental and disabled by default.");
+        sendResponse(response);
         return gs;
     }
 
@@ -25,7 +28,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<c
     if (auto run = get_if<TypecheckRun>(&result)) {
         auto finalGs = move(run->gs);
         auto &queryResponses = run->responses;
-        vector<unique_ptr<JSONBaseType>> result;
+        vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
 
@@ -44,11 +47,13 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<c
             }
         }
 
-        sendResponse(id, result);
+        response.result = move(result);
+        sendResponse(response);
         return finalGs;
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        sendError(id, move(error->first));
+        response.error = move(error->first);
+        sendResponse(response);
         return move(error->second);
     } else {
         // Should never happen, but satisfy the compiler.

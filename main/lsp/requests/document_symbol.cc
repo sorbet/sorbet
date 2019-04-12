@@ -67,14 +67,17 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs,
                                                                         const MessageId &id,
                                                                         const DocumentSymbolParams &params) {
+    ResponseMessage response("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!opts.lspDocumentSymbolEnabled) {
-        sendError(id, (int)LSPErrorCodes::InvalidRequest,
-                  "The `Document Symbol` LSP feature is experimental and disabled by default.");
+        response.error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                       "The `Document Symbol` LSP feature is experimental and disabled by default.");
+        sendResponse(response);
         return gs;
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentSymbol");
-    vector<unique_ptr<JSONBaseType>> result;
+    vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params.textDocument->uri;
     auto fref = uri2FileRef(uri);
     auto finalGs = move(gs);
@@ -93,7 +96,8 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_p
             }
         }
     }
-    sendResponse(id, result);
+    response.result = move(result);
+    sendResponse(response);
     return finalGs;
 }
 

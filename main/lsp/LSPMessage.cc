@@ -4,8 +4,6 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-const rapidjson::Value NULL_VALUE = rapidjson::Value();
-
 const std::variant<int, string, JSONNullObject> widenMessageVariant(const std::variant<int, string> id) {
     if (auto intId = get_if<int>(&id)) {
         return *intId;
@@ -47,16 +45,13 @@ string MessageId::asString() const {
 }
 
 unique_ptr<LSPMessage> makeSorbetError(rapidjson::MemoryPoolAllocator<> &alloc, LSPErrorCodes code, string_view message,
-                                       optional<rapidjson::Document> d = nullopt) {
-    auto errorParams = SorbetErrorParams((int)code, string(message)).toJSONValue(alloc);
-    auto isRequest = d.has_value() && (*d).HasMember("id") && (*d)["id"].IsInt();
-    if (isRequest) {
-        auto req = make_unique<RequestMessage>("2.0", (*d)["id"].GetInt(), LSPMethod::SorbetError);
-        req->params = move(errorParams);
+                                       optional<int> id = nullopt) {
+    auto errorParams = make_unique<SorbetErrorParams>((int)code, string(message));
+    if (id) {
+        auto req = make_unique<RequestMessage>("2.0", *id, LSPMethod::SorbetError, move(errorParams));
         return make_unique<LSPMessage>(move(req));
     } else {
-        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetError);
-        notif->params = move(errorParams);
+        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetError, move(errorParams));
         return make_unique<LSPMessage>(move(notif));
     }
 }
@@ -68,21 +63,27 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(rapidjson::MemoryPoolAllocator<> &
                                fmt::format("Last LSP request: `{}` is not a valid json object", json));
     }
 
+    // Grab ID before parsing, as the value may get moved out.
+    optional<int> id;
+    if (d.HasMember("id") && d["id"].IsInt()) {
+        id = d["id"].GetInt();
+    }
+
     try {
         return make_unique<LSPMessage>(alloc, d);
     } catch (InvalidStringEnumError e) {
         if (e.enumName == "LSPMethod") {
             // We don't support whatever method the client is sending.
             return makeSorbetError(alloc, LSPErrorCodes::MethodNotFound,
-                                   fmt::format("Unsupported LSP method: {}", e.value), move(d));
+                                   fmt::format("Unsupported LSP method: {}", e.value), id);
         } else {
             return makeSorbetError(alloc, LSPErrorCodes::InvalidParams,
-                                   fmt::format("Unable to deserialize LSP request: {}", e.what()), move(d));
+                                   fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
         }
     } catch (DeserializationError e) {
         // The client request was valid JSON, but was invalid in some way.
         return makeSorbetError(alloc, LSPErrorCodes::InvalidParams,
-                               fmt::format("Unable to deserialize LSP request: {}", e.what()), move(d));
+                               fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
     }
 }
 
@@ -184,18 +185,6 @@ ResponseMessage &LSPMessage::asResponse() {
     Exception::raise("LSPMessage is not a response.");
 }
 
-void LSPMessage::setParams(unique_ptr<rapidjson::Value> params) {
-    if (isRequest()) {
-        auto &r = asRequest();
-        r.params = move(params);
-    } else if (isNotification()) {
-        auto &n = asNotification();
-        n.params = move(params);
-    } else {
-        Exception::raise("LSPMessage is neither a request nor a notification.");
-    }
-}
-
 LSPMethod LSPMessage::method() const {
     if (isRequest()) {
         return asRequest().method;
@@ -204,36 +193,6 @@ LSPMethod LSPMessage::method() const {
     } else {
         Exception::raise("LSPMessage is neither a request nor a notification.");
     }
-}
-
-const rapidjson::Value &LSPMessage::params() const {
-    if (isRequest()) {
-        if (auto &params = asRequest().params) {
-            if (params.has_value()) {
-                // optional unique_ptr => ref
-                return **params;
-            }
-        }
-    } else if (isNotification()) {
-        if (auto &params = asNotification().params) {
-            if (params.has_value()) {
-                return **params;
-            }
-        }
-    }
-    return NULL_VALUE;
-}
-
-const rapidjson::Value &LSPMessage::result() const {
-    if (isResponse()) {
-        if (auto &result = asResponse().result) {
-            if (result.has_value()) {
-                // optional unique_ptr => ref
-                return **result;
-            }
-        }
-    }
-    return NULL_VALUE;
 }
 
 string LSPMessage::toJSON() const {
