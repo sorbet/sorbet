@@ -93,12 +93,10 @@ Sometimes runtime checks don't make sense. For example, for particularly hot
 method calls, we might not have the performance budget to `sig` a method. In
 cases like these, it's possible to opt a single method out of runtime checks.
 
-TODO(jez) Document how to opt out of runtime checks.
+<!-- TODO(jez) Document how to opt out of runtime checks. -->
 
-This section is likely to change a lot before open source, and is currently
-Stripe-only. For Stripe-only instructions, see the
-[Troubleshooting](troubleshooting.md) guide.
-
+> The API for opting out of runtime errors is currently in flux, and is likely
+> to change a lot before open source. Hang tight!
 
 ## What's next?
 
