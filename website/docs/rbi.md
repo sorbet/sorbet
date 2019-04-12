@@ -171,7 +171,7 @@ a file (`sorbet/rbi_list`) and mention this file in the `sorbet/config` file.
 
 When typechecking an existing Ruby project with Sorbet, usually type annotations
 for all the gems are not enough to statically understand everything that's going
-on. Ruby as a language is well-known for encouraging "metaprogramming," or
+on. Ruby as a language is well-known for encouraging _metaprogramming_, or
 defining things at runtime. In Sorbet, we call anything that can't be seen
 statically but which is defined at runtime a **hidden definition**. This
 includes constants defined with `const_set`, methods defined with
