@@ -66,9 +66,9 @@ sorbet-runtime raises an exception because the signature was violated.
 ## Why have runtime checks?
 
 Runtime checks have been invaluable when developing Sorbet and rolling it out in
-Stripe's large Ruby codebase. Type annotations in a codebase are near useless if
-developers don't trust them (consider how often YARD annotations fall out of
-sync with the code... 😰).
+large Ruby codebases like Stripe's. Type annotations in a codebase are near
+useless if developers don't trust them (consider how often YARD annotations fall
+out of sync with the code... 😰).
 
 Adding a `sig` to a method is only as good as the predictions it lets `srb` make
 about a codebase. Wrong sigs are actively harmful.
