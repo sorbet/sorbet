@@ -38,18 +38,6 @@ string UnresolvedClassType::show(const GlobalState &gs) const {
         fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.data(gs)->show(gs); }));
 }
 
-string UnresolvedClassType::typeName() const {
-    return "UnresolvedClassType";
-}
-
-string ClassType::typeName() const {
-    return "ClassType";
-}
-
-string LiteralType::typeName() const {
-    return "LiteralType";
-}
-
 string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("{}({})", this->underlying()->toStringWithTabs(gs, tabs), showValue(gs));
 }
@@ -75,26 +63,6 @@ string LiteralType::showValue(const GlobalState &gs) const {
     } else {
         Exception::raise("should not be reachable");
     }
-}
-
-string TupleType::typeName() const {
-    return "TupleType";
-}
-
-string ShapeType::typeName() const {
-    return "ShapeType";
-}
-
-string AliasType::typeName() const {
-    return "AliasType";
-}
-
-string AndType::typeName() const {
-    return "AndType";
-}
-
-string OrType::typeName() const {
-    return "OrType";
 }
 
 string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -220,10 +188,6 @@ string TypeVar::show(const GlobalState &gs) const {
     return sym.data(gs)->name.show(gs);
 }
 
-string TypeVar::typeName() const {
-    return "TypeVar";
-}
-
 string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto thisTabs = buildTabs(tabs);
     auto nestedTabs = buildTabs(tabs + 1);
@@ -315,10 +279,6 @@ string AppliedType::show(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string AppliedType::typeName() const {
-    return "AppliedType";
-}
-
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("LambdaParam({})", this->definition.data(gs)->toStringFullName(gs));
 }
@@ -335,14 +295,6 @@ string SelfTypeParam::show(const GlobalState &gs) const {
     return this->definition.data(gs)->show(gs);
 }
 
-string LambdaParam::typeName() const {
-    return "LambdaParam";
-}
-
-string SelfTypeParam::typeName() const {
-    return "SelfTypeParam";
-}
-
 string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return show(gs);
 }
@@ -355,4 +307,51 @@ string SelfType::showValue(const GlobalState &gs) const {
     return show(gs);
 }
 
+string TypeVar::typeName() const {
+    return "TypeVar";
+}
+
+string UnresolvedClassType::typeName() const {
+    return "UnresolvedClassType";
+}
+
+string ClassType::typeName() const {
+    return "ClassType";
+}
+
+string LiteralType::typeName() const {
+    return "LiteralType";
+}
+
+string TupleType::typeName() const {
+    return "TupleType";
+}
+
+string ShapeType::typeName() const {
+    return "ShapeType";
+}
+
+string AliasType::typeName() const {
+    return "AliasType";
+}
+
+string AndType::typeName() const {
+    return "AndType";
+}
+
+string OrType::typeName() const {
+    return "OrType";
+}
+
+string AppliedType::typeName() const {
+    return "AppliedType";
+}
+
+string LambdaParam::typeName() const {
+    return "LambdaParam";
+}
+
+string SelfTypeParam::typeName() const {
+    return "SelfTypeParam";
+}
 } // namespace sorbet::core
