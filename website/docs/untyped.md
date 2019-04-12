@@ -4,8 +4,8 @@ title: T.untyped
 ---
 
 > TODO: This page is still a fragment. Contributions welcome!
->
-> TODO(jez) T.untyped probably warrants being prioritized. There's a lot of stuff.
+
+<!-- TODO(jez) T.untyped probably warrants being prioritized. There's a lot of stuff. -->
 
 
 ```
