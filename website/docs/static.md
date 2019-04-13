@@ -33,11 +33,17 @@ sigils, each defining a **strictness level**:
 [^sigil]: Google defines sigil as, "an inscribed or painted symbol considered to
 have magical power," and we like to think of types as pretty magical 🙂
 
-| Most errors silenced |                 |                   | All errors reported |
-| ---                  | ---             | ---               | ---                 |
-| `# typed: false`     | `# typed: true` | `# typed: strict` | `# typed: strong`   |
+| All errors silenced |                |               |                 | All errors reported |
+| ---                 | ---            | ---           | ---             | ---                 |
+| `typed: ignore`     | `typed: false` | `typed: true` | `typed: strict` | `typed: strong`     |
 
 Each strictness level reports all errors at lower levels, plus new errors:
+
+- At `# typed: ignore`, the file is not even read by Sorbet, and so no errors at
+  all are reported in that file. **Note**: ignoring a file can cause errors to
+  appear in *other* files, because that other file references something defined
+  in an ignored file. We recommend pushing the entire project to out of `ignore`
+  (at Stripe, 100% of non-test files are not ignored.)
 
 - At `# typed: false`, only errors related to things like syntax and constant
   resolution are reported. Fixing these errors is the baseline for adopting
@@ -63,10 +69,10 @@ To recap: adding one of these comments to the top of a Ruby file controls which
 errors `srb` reports or silences in that file. The strictness level only
 affects which errors are reported.
 
-> **Note**: Type annotations from `# typed: false` files are *still parsed and
+> **Note**: Method signatures in `# typed: false` files are *still parsed and
 > used* by Sorbet if that method is called in other files. Specifically, adding
-> a signature might introduce new type errors when called from a `# typed: true`
-> file.
+> a signature in a `# typed: false` file might introduce new type errors if it's
+> called from a `# typed: true` file.
 
 
 ## Method-level granularity: `sig`
