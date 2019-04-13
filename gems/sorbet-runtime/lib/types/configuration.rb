@@ -61,11 +61,11 @@ module T::Configuration
     @sig_decl_error_handler
   end
 
-  # Set a handler to handle sig build errors.
+  # Set a handler to handle method signature validation errors.
   #
-  # By default, sig build errors cause either an Opus::Log message or a
+  # By default, sig validation errors cause either an Opus::Log message or a
   # StandardError (or subclass) to be raised, depending on the sig's
-  # configuration (e.g. generated). Setting sig_build_error_handler to an
+  # configuration (e.g. generated). Setting sig_validation_error_handler to an
   # object that implements :call (e.g. proc or lambda) allows users to
   # customize the behavior when a method signature's build fails.
   #
@@ -86,18 +86,18 @@ module T::Configuration
   #   does not have a method signature)
   #
   # @example
-  #   T::Configuration.sig_build_error_handler = lambda do |error, opts|
+  #   T::Configuration.sig_validation_error_handler = lambda do |error, opts|
   #     puts error.message
   #   end
-  def self.sig_build_error_handler=(value)
+  def self.sig_validation_error_handler=(value)
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
-    @sig_build_error_handler = value
+    @sig_validation_error_handler = value
   end
 
-  def self.sig_build_error_handler
-    @sig_build_error_handler
+  def self.sig_validation_error_handler
+    @sig_validation_error_handler
   end
 
   # Set a handler to handle sig error reports.

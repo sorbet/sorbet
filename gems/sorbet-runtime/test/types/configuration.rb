@@ -99,7 +99,7 @@ module Opus::Types::Test
       end
     end
 
-    describe 'sig_build_error_handler' do
+    describe 'sig_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
           @mod.sig {override.returns(Symbol)}
@@ -118,13 +118,13 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.sig_build_error_handler = lambda do |*args|
+          T::Configuration.sig_validation_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.sig_build_error_handler = nil
+          T::Configuration.sig_validation_error_handler = nil
         end
 
         it 'handles a sig build error' do

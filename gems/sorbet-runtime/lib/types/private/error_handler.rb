@@ -28,13 +28,13 @@ module T::Private::ErrorHandler
   end
 
   # Handle a sig build validation failure. This allows users to override the
-  # behavior when a sig build fails. If T::Configuration.sig_build_error_handler
-  # is unset, this method will call handle_sig_build_error_default.
-  def self.handle_sig_build_error(error, opts={})
-    if T::Configuration.sig_build_error_handler
-      T::Configuration.sig_build_error_handler.call(error, opts)
+  # behavior when a sig build fails. If T::Configuration.sig_validation_error_handler
+  # is unset, this method will call handle_sig_validation_error_default.
+  def self.handle_sig_validation_error(error, opts={})
+    if T::Configuration.sig_validation_error_handler
+      T::Configuration.sig_validation_error_handler.call(error, opts)
     else
-      handle_sig_build_error_default(error, opts)
+      handle_sig_validation_error_default(error, opts)
     end
     nil
   end
@@ -61,7 +61,7 @@ module T::Private::ErrorHandler
     T::Private::Methods.sig_error(location, error.message)
   end
 
-  private_class_method def self.handle_sig_build_error_default(error, opts)
+  private_class_method def self.handle_sig_validation_error_default(error, opts)
     # if this method overrides a generated signature, report that one instead
     bad_method = opts[:method]
     if !opts[:declaration].generated

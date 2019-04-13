@@ -34,9 +34,9 @@ T::Configuration.sig_decl_error_handler = lambda do |error, location|
 end
 ```
 
-- `T::Configuration.sig_build_error_handler` can be set to catch sig build errors. Example:
+- `T::Configuration.sig_validation_error_handler` can be set to catch sig build errors. Example:
 ```ruby
-T::Configuration.sig_build_error_handler = lambda do |error, opts|
+T::Configuration.sig_validation_error_handler = lambda do |error, opts|
   puts error.message
 end
 ```
