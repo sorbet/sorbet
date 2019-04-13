@@ -119,8 +119,9 @@ TEST_F(ProtocolTest, DefinitionError) {
 
     auto &respMsg = defResponses.at(0)->asResponse();
     ASSERT_TRUE(respMsg.result);
-    ASSERT_TRUE((*respMsg.result)->IsArray());
-    ASSERT_EQ((*respMsg.result)->GetArray().Size(), 0);
+    auto &result = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*(respMsg.result));
+    auto &array = get<vector<unique_ptr<Location>>>(result);
+    ASSERT_EQ(array.size(), 0);
 }
 
 // Tests that Sorbet LSP removes diagnostics from future responses when they are fixed.
