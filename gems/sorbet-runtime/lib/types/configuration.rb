@@ -5,7 +5,7 @@ module T::Configuration
   # Set a handler to handle `TypeError`s raised by the runtime type system.
   #
   # By default, any `TypeError`s detected by this gem will be raised. Setting
-  # type_error_handler to an object that implements :call (e.g. proc or
+  # inline_type_error_handler to an object that implements :call (e.g. proc or
   # lambda) allows users to customize the behavior when a `TypeError` is
   # raised.
   #
@@ -17,18 +17,18 @@ module T::Configuration
   # @param [TypeError] error TypeError that was raised
   #
   # @example
-  #   T::Configuration.type_error_handler = lambda do |error|
+  #   T::Configuration.inline_type_error_handler = lambda do |error|
   #     puts error.message
   #   end
-  def self.type_error_handler=(value)
+  def self.inline_type_error_handler=(value)
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
-    @type_error_handler = value
+    @inline_type_error_handler = value
   end
 
-  def self.type_error_handler
-    @type_error_handler
+  def self.inline_type_error_handler
+    @inline_type_error_handler
   end
 
   # Set a handler to handle sig declaration errors.

@@ -20,9 +20,9 @@ By default, `sig`s and the `T.cast` method family will raise a `TypeError` if me
 
 To override this functionality with custom error handling, you can configure the runtime type system as follows:
 
-- `T::Configuration.type_error_handler` can be set to catch `TypeError`s raised from `cast`s, `T.must`, and sig errors. Example:
+- `T::Configuration.inline_type_error_handler` can be set to catch `TypeError`s raised from `cast`s, `T.must`, and sig errors. Example:
 ```ruby
-T::Configuration.type_error_handler = lambda do |error|
+T::Configuration.inline_type_error_handler = lambda do |error|
   puts error.message
 end
 ```

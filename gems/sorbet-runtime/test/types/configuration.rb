@@ -14,7 +14,7 @@ module Opus::Types::Test
       def self.receive(*); end
     end
 
-    describe 'type_error_handler' do
+    describe 'inline_type_error_handler' do
       describe 'when in default state' do
         it 'T.must raises an error' do
           assert_raises(TypeError) do
@@ -31,13 +31,13 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.type_error_handler = lambda do |*args|
+          T::Configuration.inline_type_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.type_error_handler = nil
+          T::Configuration.inline_type_error_handler = nil
         end
 
         it 'handles a T.must error' do

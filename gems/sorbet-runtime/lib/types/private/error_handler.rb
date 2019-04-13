@@ -3,14 +3,14 @@
 
 module T::Private::ErrorHandler
   # Handle a rescued TypeError. This will pass the TypeError to the
-  # T::Configuration.type_error_handler so that the user can override error
-  # handling if they wish. If no type_error_handler is set, this method will
-  # call handle_type_error_default, which raises the error.
-  def self.handle_type_error(type_error)
-    if T::Configuration.type_error_handler
-      T::Configuration.type_error_handler.call(type_error)
+  # T::Configuration.inline_type_error_handler so that the user can override
+  # error handling if they wish. If no inline_type_error_handler is set, this
+  # method will call handle_inline_type_error_default, which raises the error.
+  def self.handle_inline_type_error(type_error)
+    if T::Configuration.inline_type_error_handler
+      T::Configuration.inline_type_error_handler.call(type_error)
     else
-      handle_type_error_default(type_error)
+      handle_inline_type_error_default(type_error)
     end
     nil
   end
@@ -53,7 +53,7 @@ module T::Private::ErrorHandler
 
   ### Default error handlers ###
 
-  private_class_method def self.handle_type_error_default(type_error)
+  private_class_method def self.handle_inline_type_error_default(type_error)
     raise type_error
   end
 
@@ -122,7 +122,7 @@ module T::Private::ErrorHandler
       begin
         raise TypeError.new(error_message)
       rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Private::ErrorHandler.handle_type_error(e)
+        T::Private::ErrorHandler.handle_inline_type_error(e)
       end
     end
   end
