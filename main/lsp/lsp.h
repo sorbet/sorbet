@@ -105,8 +105,8 @@ class LSPLoop {
      * optional.
      */
     bool clientCompletionItemSnippetSupport = false;
-    /** Input stream; used by runLSP to receive LSP messages */
-    std::istream &inputStream;
+    /** Input file descriptor; used by runLSP to receive LSP messages */
+    int inputFd;
     /** Output stream; used by LSP to output messages */
     std::ostream &outputStream;
     /** If true, LSPLoop will skip configatron during type checking */
@@ -247,7 +247,7 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
-            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, std::istream &input, std::ostream &output,
+            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &output,
             bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);

@@ -51,11 +51,9 @@ do
     then
        payload=${line#$READ_PREFIX}
        bytelen=${#payload}
-
-        text="Content-Length: ${bytelen}
-
-$payload"
-        echo -n "$text">&"$IN_FD"
+        echo -e -n "Content-Length: ${bytelen}\r\n\r\n">&"$IN_FD"
+        # Don't interpret escape characters in payload.
+        echo -n "$payload">&"$IN_FD"
         if [ "$IS_REGENERATING_REC_FILE" == true ]; then
             echo "$line"
         fi

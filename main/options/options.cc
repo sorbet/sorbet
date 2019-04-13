@@ -203,6 +203,9 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("disable-watchman",
                                     "When in language-server-protocol mode, disable file watching via Watchman");
+    options.add_options("advanced")("watchman-path",
+                                    "Path to watchman executable. Defaults to using `watchman` on your PATH.",
+                                    cxxopts::value<string>()->default_value("watchman"));
     options.add_options("advanced")("enable-lsp-hover", "Enable experimental LSP feature: Hover");
     options.add_options("advanced")("enable-lsp-go-to-definition", "Enable experimental LSP feature: Go-to-definition");
     options.add_options("advanced")("enable-lsp-find-references", "Enable experimental LSP feature: Find References");
@@ -416,6 +419,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             throw EarlyReturnWithCode(1);
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
+        opts.watchmanPath = raw["watchman-path"].as<string>();
         if ((opts.print.Autogen || opts.print.AutogenMsgPack) && (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
                           opts.print.AutogenMsgPack ? "-msgpack" : "");

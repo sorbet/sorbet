@@ -193,6 +193,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             return handleWatchmanUpdates(move(newGs), deferredUpdatesVector);
         }
         if (method == LSPMethod::Exit) {
+            prodCategoryCounterInc("lsp.messages.processed", "exit");
             return gs;
         }
         if (method == LSPMethod::SorbetError) {

@@ -66,6 +66,8 @@ Usage:
       --lsp                     Start in language-server-protocol mode
       --disable-watchman        When in language-server-protocol mode,
                                 disable file watching via Watchman
+      --watchman-path arg       Path to watchman executable. Defaults to
+                                using `watchman` on your PATH. (default: watchman)
       --enable-lsp-hover        Enable experimental LSP feature: Hover
       --enable-lsp-go-to-definition
                                 Enable experimental LSP feature:

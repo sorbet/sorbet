@@ -9,61 +9,69 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-bool safeGetline(istream &is, string &t) {
-    t.clear();
-
-    // The characters in the stream are read one-by-one using a streambuf.
-    // That is faster than reading them one-by-one using the istream.
-    // Code that uses streambuf this way must be guarded by a sentry object.
-    // The sentry object performs various tasks,
-    // such as thread synchronization and updating the stream state.
-
-    istream::sentry se(is, true);
-    streambuf *sb = is.rdbuf();
-
-    for (;;) {
-        int c = sb->sbumpc();
-        switch (c) {
-            case '\n':
-                return true;
-            case '\r':
-                if (sb->sgetc() == '\n')
-                    sb->sbumpc();
-                return true;
-            case streambuf::traits_type::eof():
-                // Also handle the case when the last line has no line ending
-                if (t.empty())
-                    is.setstate(ios::eofbit);
-                return false;
-            default:
-                t += (char)c;
-        }
-    }
-}
-
-unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
-                                     istream &inputStream) {
+/**
+ * Attempts to read an LSP message from the file descriptor. Stores message into readMessage.
+ *
+ * Extra bits read are stored into `buffer`.
+ *
+ * Returns:
+ * - 1 if a message was read successfully. `readMessage` contains the message.
+ * - 0 if a timeout occurred before a message was completely read.
+ * - -1 if an error or EOF occurs.
+ */
+int getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger, int inputFd,
+                  string &buffer, unique_ptr<LSPMessage> &readMessage) {
     int length = -1;
+    string allRead;
     {
         string line;
-        while (safeGetline(inputStream, line)) {
-            logger->trace("raw read: {}", line);
-            if (line == "") {
+        // Break and return if a timeout occurs.
+        for (;;) {
+            int result = FileOps::readLineFromFd(inputFd, line, buffer);
+            if (result != 1) {
+                // Line not read. Abort. Store what was read thus far back into buffer
+                // for use in next call to function.
+                buffer = absl::StrCat(allRead, buffer);
+                return result;
+            }
+            absl::StrAppend(&allRead, line, "\n");
+            if (line == "\r") {
+                // End of headers.
                 break;
             }
-            sscanf(line.c_str(), "Content-Length: %i", &length);
+            sscanf(line.c_str(), "Content-Length: %i\r", &length);
         }
-        logger->trace("final raw read: {}, length: {}", line, length);
-    }
-    if (length < 0) {
-        logger->debug("eof or no \"Content-Length: %i\" header found.");
-        return nullptr;
+        logger->trace("final raw read: {}, length: {}", allRead, length);
     }
 
-    string json(length, '\0');
-    inputStream.read(&json[0], length);
-    logger->debug("Read: {}", json);
-    return LSPMessage::fromClient(alloc, json);
+    if (length < 0) {
+        logger->debug("No \"Content-Length: %i\" header found.");
+        // Throw away what we've read and start over.
+        return 0;
+    }
+
+    if (buffer.length() < length) {
+        // Need to read more.
+        int moreNeeded = length - buffer.length();
+        vector<char> buf(moreNeeded);
+        int result = FileOps::readFd(inputFd, buf);
+        if (result > 0) {
+            buffer.append(buf.begin(), buf.begin() + result);
+        }
+        if (result != moreNeeded) {
+            // Didn't get enough or an error occurred.
+            // Return read data to `buffer`.
+            buffer = absl::StrCat(allRead, buffer);
+            return result > 0 ? 0 : result;
+        }
+    }
+
+    ENFORCE(buffer.length() >= length);
+
+    string json = buffer.substr(0, length);
+    buffer.erase(0, length);
+    readMessage = LSPMessage::fromClient(alloc, json);
+    return 1;
 }
 
 class NotifyOnDestruction {
@@ -88,7 +96,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         if (opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.size() == 0) {
             // The lambda below intentionally does not capture `this`.
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
-                logger, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
+                logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
                 [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
                                                              std::unique_ptr<WatchmanQueryResponse> response) {
                     auto notifMsg =
@@ -100,14 +108,13 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                         enqueueRequest(alloc, logger, guardedState, move(msg), true);
                     }
                 },
-                [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
-                                                             int watchmanExitCode) {
-                    auto notifMsg =
-                        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanExit, watchmanExitCode);
-                    auto msg = make_unique<LSPMessage>(move(notifMsg));
+                [&guardedState, &mtx](int watchmanExitCode) {
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
-                        enqueueRequest(alloc, logger, guardedState, move(msg), true);
+                        if (!guardedState.terminate) {
+                            guardedState.terminate = true;
+                            guardedState.errorCode = watchmanExitCode;
+                        }
                     }
                 });
         } else {
@@ -123,16 +130,31 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // TODO(jvilk): This (+ Watchman's alloc) leak memory. If we stop using JSON values internally, then we can clear
     // them after every request and only use them for intermediate objects generated during parsing.
     rapidjson::MemoryPoolAllocator<> readerAlloc;
-    auto readerThread = runInAThread(
-        "lspReader", [&guardedState, &mtx, logger = this->logger, &readerAlloc, &inputStream = this->inputStream] {
+    auto readerThread =
+        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, &readerAlloc, inputFd = this->inputFd] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
+            string buffer;
             while (true) {
-                auto msg = getNewRequest(readerAlloc, logger, inputStream);
-                if (msg) {
+                unique_ptr<LSPMessage> msg;
+                int result = getNewRequest(readerAlloc, logger, inputFd, buffer, msg);
+                {
                     absl::MutexLock lck(&mtx); // guards guardedState.
-                    enqueueRequest(readerAlloc, logger, guardedState, move(msg), true);
+                    if (result == 1) {
+                        ENFORCE(msg);
+                        enqueueRequest(readerAlloc, logger, guardedState, move(msg), true);
+                    }
+                    // Check if it's time to exit.
+                    if (guardedState.terminate) {
+                        // Another thread exited.
+                        break;
+                    } else if (result == -1) {
+                        // An error or EOF occurred. Tell main thread to exit.
+                        guardedState.terminate = true;
+                        guardedState.errorCode = 0;
+                        break;
+                    }
                 }
             }
         });
@@ -151,11 +173,13 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 &guardedState));
             ENFORCE(!guardedState.paused);
             if (guardedState.terminate) {
-                if (guardedState.errorCode > 0) {
+                if (guardedState.errorCode != 0) {
                     // Abnormal termination.
                     throw options::EarlyReturnWithCode(guardedState.errorCode);
+                } else if (guardedState.pendingRequests.empty()) {
+                    // Normal termination. Wait until all pending requests finish.
+                    break;
                 }
-                break;
             }
             msg = move(guardedState.pendingRequests.front());
             guardedState.pendingRequests.pop_front();
@@ -315,9 +339,12 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
             logger->error("Resuming");
             ENFORCE(state.paused);
             state.paused = false;
-        } else if (method == LSPMethod::SorbetWatchmanExit) {
-            state.terminate = true;
-            state.errorCode = get<int>(msg->asNotification().params);
+        } else if (method == LSPMethod::Exit) {
+            // Don't override previous error code if already terminated.
+            if (!state.terminate) {
+                state.terminate = true;
+                state.errorCode = 0;
+            }
         } else if (method == LSPMethod::SorbetError) {
             // Place errors at the *front* of the queue.
             // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.

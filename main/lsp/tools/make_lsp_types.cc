@@ -1263,7 +1263,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "__PAUSE__",
                                      "__RESUME__",
                                      "sorbet/watchmanFileChange",
-                                     "sorbet/watchmanExit",
                                      "sorbet/showOperation",
                                      "sorbet/error",
                                  },
@@ -1333,7 +1332,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"__PAUSE__", makeOptional(JSONNull)},
                                                 {"__RESUME__", makeOptional(JSONNull)},
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
-                                                {"sorbet/watchmanExit", JSONInt},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                             });
