@@ -119,11 +119,7 @@ module T::Private::ErrorHandler
         puts "TypeError: #{error_message}, notify: #{signature.soft_notify}" # rubocop:disable PrisonGuard/NoBarePuts
       end
     else
-      begin
-        raise TypeError.new(error_message)
-      rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Private::ErrorHandler.handle_inline_type_error(e)
-      end
+      raise TypeError.new(error_message)
     end
   end
 end
