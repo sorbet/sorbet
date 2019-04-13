@@ -10,7 +10,8 @@
       "static",
       "runtime",
       "rbi",
-      "cli"
+      "cli",
+      "tconfiguration"
     ],
     "Troubleshooting": [
       "troubleshooting",
