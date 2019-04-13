@@ -27,6 +27,7 @@
       "exhaustiveness",
       "tuples",
       "shapes",
+      "tstruct",
       "untyped",
       "noreturn",
       "type-aliases",
