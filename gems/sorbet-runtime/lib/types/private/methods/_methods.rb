@@ -179,7 +179,7 @@ module T::Private::Methods
       begin
         run_builder(declaration_block)
       rescue DeclBuilder::BuilderError => e
-        T::Private::ErrorHandler.handle_sig_decl_error(e, declaration_block.loc)
+        T::Private::ErrorHandler.handle_sig_builder_error(e, declaration_block.loc)
         nil
       end
 

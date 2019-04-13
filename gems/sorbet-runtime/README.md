@@ -27,9 +27,9 @@ T::Configuration.inline_type_error_handler = lambda do |error|
 end
 ```
 
-- `T::Configuration.sig_decl_error_handler` can be set to catch sig declaration errors. Example:
+- `T::Configuration.sig_builder_error_handler` can be set to catch sig builder errors. Example:
 ```ruby
-T::Configuration.sig_decl_error_handler = lambda do |error, location|
+T::Configuration.sig_builder_error_handler = lambda do |error, location|
   puts error.message
 end
 ```

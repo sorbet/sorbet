@@ -38,7 +38,7 @@ module T::Configuration
   # called.
   #
   # By default, improper use of the builder methods within the body of a sig
-  # cause an ArgumentError to be raised. Setting sig_decl_error_handler to an
+  # cause an ArgumentError to be raised. Setting sig_builder_error_handler to an
   # object that implements :call (e.g. proc or lambda) allows users to
   # customize the behavior when a sig can't be built for some reason.
   #
@@ -51,18 +51,18 @@ module T::Configuration
   # @param [Thread::Backtrace::Location] location Location of the error
   #
   # @example
-  #   T::Configuration.sig_decl_error_handler = lambda do |error, location|
+  #   T::Configuration.sig_builder_error_handler = lambda do |error, location|
   #     puts error.message
   #   end
-  def self.sig_decl_error_handler=(value)
+  def self.sig_builder_error_handler=(value)
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
-    @sig_decl_error_handler = value
+    @sig_builder_error_handler = value
   end
 
-  def self.sig_decl_error_handler
-    @sig_decl_error_handler
+  def self.sig_builder_error_handler
+    @sig_builder_error_handler
   end
 
   # Set a handler to handle sig validation errors.

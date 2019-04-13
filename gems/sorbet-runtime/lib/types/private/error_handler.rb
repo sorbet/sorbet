@@ -16,13 +16,13 @@ module T::Private::ErrorHandler
   end
 
   # Handle a sig declaration failure. This allows users to override the behavior
-  # when a sig decl fails. If T::Configuration.sig_decl_error_handler
-  # is unset, this method will call handle_sig_decl_error_default.
-  def self.handle_sig_decl_error(error, location)
-    if T::Configuration.sig_decl_error_handler
-      T::Configuration.sig_decl_error_handler.call(error, location)
+  # when a sig decl fails. If T::Configuration.sig_builder_error_handler
+  # is unset, this method will call handle_sig_builder_error_default.
+  def self.handle_sig_builder_error(error, location)
+    if T::Configuration.sig_builder_error_handler
+      T::Configuration.sig_builder_error_handler.call(error, location)
     else
-      handle_sig_decl_error_default(error, location)
+      handle_sig_builder_error_default(error, location)
     end
     nil
   end
@@ -57,7 +57,7 @@ module T::Private::ErrorHandler
     raise type_error
   end
 
-  private_class_method def self.handle_sig_decl_error_default(error, location)
+  private_class_method def self.handle_sig_builder_error_default(error, location)
     T::Private::Methods.sig_error(location, error.message)
   end
 

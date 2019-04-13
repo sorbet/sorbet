@@ -56,7 +56,7 @@ module Opus::Types::Test
       end
     end
 
-    describe 'sig_decl_error_handler' do
+    describe 'sig_builder_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
           @mod.sig {generated.returns(Symbol).checked(:always)}
@@ -75,16 +75,16 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.sig_decl_error_handler = lambda do |*args|
+          T::Configuration.sig_builder_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.sig_decl_error_handler = nil
+          T::Configuration.sig_builder_error_handler = nil
         end
 
-        it 'handles a sig declaration error' do
+        it 'handles a sig builder error' do
           CustomReceiver.expects(:receive).once.with do |error, location|
             error.message == "You can't use .checked with .generated." &&
               error.is_a?(T::Private::Methods::DeclBuilder::BuilderError) &&
