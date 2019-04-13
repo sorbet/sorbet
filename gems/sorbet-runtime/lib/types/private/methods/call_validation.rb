@@ -1151,7 +1151,7 @@ module T::Private::Methods::CallValidation
     method_sig.mark_failed
     caller_loc = T.must(caller_locations(3 + caller_offset, 1))[0]
 
-    T::Private::ErrorHandler.handle_sig_error(
+    T::Private::ErrorHandler.handle_call_validation_error(
       method_sig,
       message: error_message,
       kind: kind,

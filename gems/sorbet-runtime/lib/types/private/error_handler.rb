@@ -40,13 +40,13 @@ module T::Private::ErrorHandler
   end
 
   # Handle a sig call validation failure. This allows users to override the
-  # behavior when a sig call fails. If T::Configuration.sig_error_handler
-  # is unset, this method will call handle_sig_error_default.
-  def self.handle_sig_error(signature, opts={})
-    if T::Configuration.sig_error_handler
-      T::Configuration.sig_error_handler.call(signature, opts)
+  # behavior when a sig call fails. If T::Configuration.call_validation_error_handler
+  # is unset, this method will call handle_call_validation_error_default.
+  def self.handle_call_validation_error(signature, opts={})
+    if T::Configuration.call_validation_error_handler
+      T::Configuration.call_validation_error_handler.call(signature, opts)
     else
-      handle_sig_error_default(signature, opts)
+      handle_call_validation_error_default(signature, opts)
     end
     nil
   end
@@ -85,7 +85,7 @@ module T::Private::ErrorHandler
     end
   end
 
-  private_class_method def self.handle_sig_error_default(signature, opts)
+  private_class_method def self.handle_call_validation_error_default(signature, opts)
     method_file, method_line = signature.method.source_location
     location = opts[:location]
     suffix = "Caller: #{location.path}:#{location.lineno}\n" \

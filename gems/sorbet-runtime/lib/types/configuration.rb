@@ -104,8 +104,8 @@ module T::Configuration
   #
   # By default, sig errors cause either an Opus::Log message or a TypeError
   # to be raised, depending on the sig's configuration (e.g. generated or
-  # soft). Setting sig_error_handler to an object that implements :call
-  # (e.g. proc or lambda) allows users to customize the behavior when a
+  # soft). Setting call_validation_error_handler to an object that implements
+  # :call (e.g. proc or lambda) allows users to customize the behavior when a
   # method is called with invalid parameters, or returns an invalid value.
   #
   # @param [Lambda, Proc, Object, nil] value Proc that handles the error
@@ -126,17 +126,17 @@ module T::Configuration
   #   caller
   #
   # @example
-  #   T::Configuration.sig_error_handler = lambda do |signature, opts|
+  #   T::Configuration.call_validation_error_handler = lambda do |signature, opts|
   #     puts opts[:message]
   #   end
-  def self.sig_error_handler=(value)
+  def self.call_validation_error_handler=(value)
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
-    @sig_error_handler = value
+    @call_validation_error_handler = value
   end
 
-  def self.sig_error_handler
-    @sig_error_handler
+  def self.call_validation_error_handler
+    @call_validation_error_handler
   end
 end
