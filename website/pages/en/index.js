@@ -95,9 +95,27 @@ class Index extends React.Component {
                     "Sorbet works with editors like VS Code, with features like autocomplete and jump to definition. It's easy to add to your CI setup."
                 },
                 {
-                  title: "Incremental by design",
+                  title: "Gradual by design",
                   content:
-                    "Sorbet works with standard Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time."
+                    "Sorbet works with normal Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time."
+                }
+              ]}
+            />
+            <GridBlock
+              align="center"
+              layout="threeColumn"
+              contents={[
+                {
+                  content:
+                    "[Get started with Sorbet →](docs/adopting)"
+                },
+                {
+                  content:
+                    "[Try sorbet online →](https://sorbet.run)"
+                },
+                {
+                  content:
+                    "[Learn what makes Sorbet gradual →](docs/gradual)"
                 }
               ]}
             />
