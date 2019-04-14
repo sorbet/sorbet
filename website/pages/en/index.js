@@ -54,7 +54,7 @@ class Index extends React.Component {
             <div className="wrapper homeWrapper">
               <div className="projectLogo">
                 <img
-                  src={`${baseUrl}img/sorbet-logo-purple-sparkles.svg`}
+                  src={`${baseUrl}img/sorbet-logo-white-sparkles.svg`}
                   alt="Project Logo"
                 />
               </div>
