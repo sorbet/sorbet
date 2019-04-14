@@ -53,12 +53,9 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::Typed) {
-        sendShowMessageNotification(
-            MessageType::Error,
-            "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
-        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                                    "This feature only works correctly on typed ruby files."),
-                         move(gs));
+        logger->info("Ignoring request on untyped file `{}`", uri);
+        // Act as if the query returned no results.
+        return TypecheckRun{{}, {}, {}, move(gs)};
     }
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
