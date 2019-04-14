@@ -61,3 +61,14 @@ sup {
 .homeContainer .homeWrapper .projectLogo img {
   width: 200px;
 }
+
+.container .wrapper .threeByGridBlock {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+
+.container .wrapper .threeByGridBlock h2 {
+  margin-top: 0;
+  text-align: left;
+}
