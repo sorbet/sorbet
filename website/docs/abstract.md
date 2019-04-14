@@ -149,6 +149,7 @@ module A
 
   module ClassMethods
     extend T::Sig
+    extend T::Helpers
     abstract!
 
     sig {abstract.returns(Integer)}
