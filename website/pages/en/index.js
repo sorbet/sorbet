@@ -19,7 +19,7 @@ const sorbetRunExample =
 const PageSection = props => (
   <div
     style={{
-      backgroundColor: props.gray ? "#eee" : "white",
+      backgroundColor: props.gray ? "#f5f5f5" : "white",
       padding: "2em 0",
       paddingBottom: props.short ? "2em" : "5em"
     }}
