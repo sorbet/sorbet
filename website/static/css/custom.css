@@ -31,8 +31,7 @@
 }
 
 /* Full bleed overrides */
-.homeContainer,
-.mainContainer {
+.homeContainer {
   background: #4F4397;
   color: #ffffff;
 }
@@ -41,13 +40,11 @@
   color: #ffffff;
 }
 
-.homeContainer .button,
-.mainContainer .button {
+.homeContainer .button {
   border-color: #ffffff;
   color: #ffffff;
 }
 
-.homeContainer a,
-.mainContainer a {
+.homeContainer a {
   color: #B4A8FF;
 }

@@ -75,9 +75,6 @@ class Index extends React.Component {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mainContainer">
           <Container align="center">
             <GridBlock
               align="center"
