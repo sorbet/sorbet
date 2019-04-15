@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Troubleshooting · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!-- TODO(jez) This doc references a lot of Stripe internals still --&gt;"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Troubleshooting · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;!-- TODO(jez) This doc references a lot of Stripe internals still --&gt;"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Troubleshooting</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Troubleshooting · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;This is one of three docs aimed at helping answer common questions about Sorbet:&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Troubleshooting · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;This is one of three docs aimed at helping answer common questions about Sorbet:&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Troubleshooting</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">Typed Structs</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -48,8 +50,7 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/troubleshooting.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Troubleshooting</h1></header><article><div><span><!-- TODO(jez) This doc references a lot of Stripe internals still -->
-<p>This is one of three docs aimed at helping answer common questions about Sorbet:</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/troubleshooting.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Troubleshooting</h1></header><article><div><span><p>This is one of three docs aimed at helping answer common questions about Sorbet:</p>
 <ol>
 <li><a href="/docs/troubleshooting">Troubleshooting</a> (this doc)</li>
 <li><a href="/docs/faq">Frequently Asked Questions</a></li>
@@ -72,7 +73,6 @@ first question to ask is:</p>
 us what type it thinks that variable has. This is a super powerful debugging
 technique! <code>T.reveal_type</code> should be <strong>one of the first tools</strong> to reach for
 when debugging a confusing error.</p>
-<!-- TODO(jez) Shorten this example and make it more of a story. -->
 <p>Try making a hypothesis of what the problem is (&quot;I think the problem is...&quot;) and
 then create small examples in <a href="https://sorbet.run">https://sorbet.run</a> to test the hypothesis with
 <code>T.reveal_type</code>. For example:</p>
@@ -110,10 +110,9 @@ conjunction with the code in a specific project locally.</p>
 test the runtime component, see the <a href="/docs/quickref">Quick Reference</a>.</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="run-the-code"></a><a href="#run-the-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Run the code</h3>
-<!-- TODO(jez) Document offline sorbet runtime. -->
-<p>Types predict values. Is Sorbet's prediction accurate? Use <code>irb</code>, <code>pay console</code>,
-or <code>pay test</code> to run the code. Does it actually work? If it doesn't actually
-work, Sorbet caught a bug!</p>
+<p>Types predict values. Is Sorbet's prediction accurate? Try using a Ruby REPL
+(like <code>irb</code> or <code>binding.pry</code>) to run code. Does it actually work? If it doesn't
+actually work, Sorbet caught a bug!</p>
 <p>Otherwise, there are a handful of reasons why Sorbet predicts code will not work
 even when it does:</p>
 <ul>
@@ -131,7 +130,7 @@ exist.&quot; Ruby is a very dynamic language, and methods can be defined in ways
 Sorbet cannot see statically. It's possible that even though a method exists at
 runtime, Sorbet cannot see it.</p>
 <p>However, we can use <code>*.rbi</code> files to declare methods to Sorbet so that it <strong>can</strong>
-see them statically. At Stripe, we even have a way to auto-generate these files:</p>
+see them statically. For more information about RBI files:</p>
 <p><a href="/docs/rbi">→ RBI files</a></p>
 <h3><a class="anchor" aria-hidden="true" id="help-with-common-errors"></a><a href="#help-with-common-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Help with common errors</h3>
 <p>The tips above are very generic and apply to lots of cases. For some common
@@ -146,7 +145,6 @@ error output.</p></li>
 the runtime type system. Skim it to see if it says anything useful!</p></li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="escape-hatches"></a><a href="#escape-hatches" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Escape Hatches</h2>
-<!-- TODO(jez) Note about how you should always prefer the refactor. -->
 <p>Regardless of whether we can figure out the root cause of the error at hand,
 Sorbet is designed as a <a href="/docs/gradual">gradual type system</a>. This means there will
 always be <strong>escape hatches</strong> to silence the problem.</p>
@@ -155,10 +153,62 @@ always be <strong>escape hatches</strong> to silence the problem.</p>
 forget the result type of something.</p>
 <p>One case when this is useful is when we know for sure that a method exists, but
 Sorbet doesn't know that method exists statically:</p>
-<pre><code class="hljs">TODO(jez) missing <span class="hljs-function"><span class="hljs-keyword">method</span> <span class="hljs-title">example</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
+    puts <span class="hljs-string">"Called <span class="hljs-subst">#{method}</span>"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
 
-<span class="hljs-title">TODO</span><span class="hljs-params">(jez)</span> <span class="hljs-title">T</span>.<span class="hljs-title">unsafe</span><span class="hljs-params">(<span class="hljs-keyword">self</span>)</span> <span class="hljs-title">example</span>
-</span></code></pre>
+A.new.foo <span class="hljs-comment"># error: Method `foo` does not exist on `A`</span>
+</code></pre>
+<p>In cases like this, we have a couple options. The first one is just: rewrite the
+code. Code that's hard for Sorbet to understand is frequently hard for
+developers to understand. By rewriting confusing code, we benefit all future
+readers.</p>
+<p>However, in the case when we're <strong>sure</strong> that we don't want to refactor the
+code, we have an escape hatch: <code>T.unsafe</code>. It looks like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
+    puts <span class="hljs-string">"Called <span class="hljs-subst">#{method}</span>"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+T.unsafe(A.new).foo <span class="hljs-comment"># =&gt; ok</span>
+</code></pre>
+<p>The <code>T.unsafe</code> call effectively says to Sorbet, &quot;trust me, I know what I'm
+doing.&quot; At this point, the burden of correctness shifts from Sorbet to the
+programmer.</p>
+<h3><a class="anchor" aria-hidden="true" id="tunsafeself"></a><a href="#tunsafeself" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.unsafe(self)</code></h3>
+<p>Note that the call to <code>T.unsafe</code> must wrap the <a href="https://stackoverflow.com/questions/916572/in-ruby-what-does-the-receiver-refer-to">receiver</a> of the method call. In
+this example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
+    puts <span class="hljs-string">"Called <span class="hljs-subst">#{method}</span>"</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    foo <span class="hljs-comment"># error: Method `foo` does not exist on `A`</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><code>foo</code> is a method that's being called without on the implicit receiver of
+<code>self</code>. Another way of saying that is that <code>foo</code> is the same as <code>self.foo</code> in
+Ruby. So to use unsafe to silence this error, we have to make the <code>self.foo</code>
+explicit:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
+    puts <span class="hljs-string">"Called <span class="hljs-subst">#{method}</span>"</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    T.unsafe(<span class="hljs-keyword">self</span>).foo <span class="hljs-comment"># ok</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tcast"></a><a href="#tcast" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.cast</code></h3>
 <p><code>T.unsafe</code> is maximally unsafe. It forces Sorbet to forget all type information
 statically—sometimes this is more power than we need. For example, sometimes
@@ -246,7 +296,7 @@ perspective, but will still be checked in tests.</p></li>
 production. Use this with caution!! Without <strong>any</strong> runtime validation, Sorbet
 cannot warn when interoperating with untyped code.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/cli"><span class="arrow-prev">← </span><span>Command Line Reference</span></a><a class="docs-next button" href="/docs/faq"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#validating-our-assumptions">Validating our assumptions</a><ul class="toc-headings"><li><a href="#treveal_type"><code>T.reveal_type</code></a></li><li><a href="#sorbetrun">sorbet.run</a></li><li><a href="#run-the-code">Run the code</a></li><li><a href="#rbi-files-missing-methods"><code>*.rbi</code> files &amp; missing methods</a></li><li><a href="#help-with-common-errors">Help with common errors</a></li></ul></li><li><a href="#escape-hatches">Escape Hatches</a><ul class="toc-headings"><li><a href="#tunsafe"><code>T.unsafe</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#soft-checked"><code>.soft()</code> &amp; <code>.checked()</code></a></li></ul></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/cli"><span class="arrow-prev">← </span><span>Command Line Reference</span></a><a class="docs-next button" href="/docs/faq"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#validating-our-assumptions">Validating our assumptions</a><ul class="toc-headings"><li><a href="#treveal_type"><code>T.reveal_type</code></a></li><li><a href="#sorbetrun">sorbet.run</a></li><li><a href="#run-the-code">Run the code</a></li><li><a href="#rbi-files-missing-methods"><code>*.rbi</code> files &amp; missing methods</a></li><li><a href="#help-with-common-errors">Help with common errors</a></li></ul></li><li><a href="#escape-hatches">Escape Hatches</a><ul class="toc-headings"><li><a href="#tunsafe"><code>T.unsafe</code></a></li><li><a href="#tunsafeself"><code>T.unsafe(self)</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#soft-checked"><code>.soft()</code> &amp; <code>.checked()</code></a></li></ul></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
