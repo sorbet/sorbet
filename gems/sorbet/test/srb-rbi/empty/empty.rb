@@ -19,15 +19,16 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
       end
 
       olddir = __dir__
-      Dir.chdir dir
 
       out = Bundler.with_clean_env do
-        IO.popen(
-          {'SRB_YES' => '1'},
-          [olddir + '/../../../bin/srb-rbi'],
-          'r+',
-          &:read
-        )
+        Dir.chdir dir do
+          IO.popen(
+            {'SRB_YES' => '1'},
+            ['bundle', 'exec', olddir + '/../../../bin/srb-rbi'],
+            'r+',
+            &:read
+          )
+        end
       end
 
       if ENV['RECORD']

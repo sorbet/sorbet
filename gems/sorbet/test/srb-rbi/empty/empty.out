@@ -32,7 +32,7 @@ Generating: sorbet/rbi/hidden-definitions/
 Requiring all of your code
 
 Naming all Modules
-Generating /tmp/sorbet-hidden-definitions/reflection.rbi with %d modules and %d aliases
+Generating /tmp/sorbet-hidden-definitions/reflection.rbi with 616 modules and 31 aliases
 Printing your code's symbol table into /tmp/sorbet-hidden-definitions/from-source.json
 Printing /tmp/sorbet-hidden-definitions/reflection.rbi's symbol table into /tmp/sorbet-hidden-definitions/reflection.json
 Reading /tmp/sorbet-hidden-definitions/from-source.json
