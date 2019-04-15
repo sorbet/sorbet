@@ -98,7 +98,7 @@ actions:
     make_step(Sorbet::Private::HiddenMethodFinder).call
 
     # Run sorbet and make constants to fix errors
-    make_step(Sorbet::Private::TodoRBI).call
+    Sorbet::Private::TodoRBI.main
 
     # Run type suggestion once, and then generate the todo.rbi again.
     #
@@ -109,7 +109,7 @@ actions:
     #
     # Regenerating after one run of sigil suggestion will put those constants
     # into the todo.rbi file.
-    make_step(Sorbet::Private::SuggestTyped).call
+    Sorbet::Private::SuggestTyped.suggest_typed
     make_step(Sorbet::Private::TodoRBI).call
 
     # Put some `typed:` sigils
