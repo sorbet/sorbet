@@ -53,10 +53,7 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
         if ENV['RECORD']
           File.write(expfile, File.read(file))
         end
-        puts "#{expfile} != #{file}"
-        puts File.read(expfile) if File.exist?(expfile)
-        puts File.read(file) if File.exist?(file)
-        # assert_equal(File.read(expfile), File.read(file), "#{expfile} != #{file}")
+        assert_equal(File.read(expfile), File.read(file), "#{expfile} != #{file}\n#{File.read(expfile)}\n#{File.read(file)}")
       end
     end
     Dir.foreach(expdir) do |item|
