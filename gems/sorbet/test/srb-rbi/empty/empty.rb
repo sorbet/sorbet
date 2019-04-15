@@ -19,10 +19,11 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
       end
 
       olddir = __dir__
+      out = ''
 
-      out = Bundler.with_clean_env do
-        Dir.chdir dir do
-          IO.popen(
+      Dir.chdir dir do
+        Bundler.with_clean_env do
+          out = IO.popen(
             {'SRB_YES' => '1'},
             ['bundle', 'exec', olddir + '/../../../bin/srb-rbi'],
             'r+',
