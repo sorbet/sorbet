@@ -68,7 +68,7 @@ gem build sorbet.gemspec
 if [[ "mac" == "$platform" ]]; then
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
   rbenv exec bundle
-  rbenv exec bundle exec rake test | buildkite-agent annotate --context rake-test-gems-sorbet --style error --append
+  rbenv exec bundle exec rake test
 fi
 popd
 
