@@ -68,9 +68,9 @@ module URI
 
   sig do
     params(
-        str: String,
+        str: T.any(URI::Generic, String),
     )
-    .returns(URI::HTTP)
+    .returns(URI::Generic)
   end
   def self.join(*str); end
 
