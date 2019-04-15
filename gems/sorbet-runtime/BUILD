@@ -34,3 +34,14 @@ sh_test(
         "//main:sorbet",
     ],
 )
+
+filegroup(
+    name = "rbi",
+    srcs = glob(
+        [
+            "**/*.rb",
+            "**/*.rbi",
+        ],
+    ),
+    visibility = ["//visibility:public"],
+)

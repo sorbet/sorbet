@@ -68,11 +68,14 @@ cc_library(
 
 genrule(
     name = "generate_text_payload_cc",
-    srcs = ["//rbi"],
+    srcs = [
+        "//rbi",
+        "//gems/sorbet-runtime:rbi",
+    ],
     outs = [
         "text.cc",
     ],
-    cmd = "$(location :generate_payload) $(location text.cc) $(locations //rbi)",
+    cmd = "$(location :generate_payload) $(location text.cc) $(locations //rbi) $(locations //gems/sorbet-runtime:rbi)",
     tools = [
         ":generate_payload",
     ],
