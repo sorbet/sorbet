@@ -188,17 +188,17 @@ If instead you want to explore your files locally, here are some things to try:
       puts commands
       exit(1)
     when 'config', Sorbet::Private::CreateConfig.output_file
-      make_step(Sorbet::Private::CreateConfig.main)
+      make_step(Sorbet::Private::CreateConfig)
     when 'sorbet-typed', Sorbet::Private::FetchRBIs.output_file, Sorbet::Private::FetchRBIs::SORBET_RBI_LIST
-      make_step(Sorbet::Private::FetchRBIs.main)
+      make_step(Sorbet::Private::FetchRBIs)
     when 'gems', Sorbet::Private::GemGeneratorTracepoint.output_file
-      make_step(Sorbet::Private::GemGeneratorTracepoint.main)
+      make_step(Sorbet::Private::GemGeneratorTracepoint)
     when 'hidden-definitions', Sorbet::Private::HiddenMethodFinder.output_file
-      make_step(Sorbet::Private::HiddenMethodFinder.main)
+      make_step(Sorbet::Private::HiddenMethodFinder)
     when 'todo', Sorbet::Private::TodoRBI.output_file
-      make_step(Sorbet::Private::TodoRBI.main)
+      make_step(Sorbet::Private::TodoRBI)
     when 'suggest-typed'
-      make_step(Sorbet::Private::SuggestTyped.main)
+      make_step(Sorbet::Private::SuggestTyped)
 
     when 'update'
       nil
