@@ -58,9 +58,9 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
         assert_dirs_equal(expfile, file)
       else
         if ENV['RECORD']
-          File.write(expfile, File.read(file))
+          File.write(expfile, read_file(file))
         end
-        assert_equal(File.read(expfile), File.read(file), "#{expfile} != #{file}\n#{File.read(expfile)}\n#{File.read(file)}")
+        assert_equal(read_file(expfile), read_file(file), "#{expfile} != #{file}\n#{read_file(expfile)}\n#{read_file(file)}")
       end
     end
     Dir.foreach(expdir) do |item|
@@ -68,5 +68,10 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
       expfile = expdir + '/' + item
       flunk("#{expfile} is missing in output")
     end
+  end
+
+  def read_file(fname)
+    File.read(fname)
+      .gsub(/sorbet-\d+[.]\d+[.]\d+/, 'sorbet-%d.%d.%d')
   end
 end
