@@ -27,6 +27,7 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
+  - wait: ~
   - label: "Release build: static on Mac"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
