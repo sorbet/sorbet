@@ -46,7 +46,7 @@ sup {
 }
 
 .homeContainer .homeWrapper {
-  padding: 4em 20px 2em;
+  padding: 4em 20px;
 }
 
 .wrapper {
@@ -71,4 +71,10 @@ sup {
 .container .wrapper .threeByGridBlock h2 {
   margin-top: 0;
   text-align: left;
+}
+
+.container .wrapper .threeByGridBlock h2 p {
+  margin-top: 0;
+  text-align: left;
+  margin-bottom: 0;
 }
