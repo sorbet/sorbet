@@ -67,6 +67,7 @@ sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
 gem build sorbet.gemspec
 if [[ "mac" == "$platform" ]]; then
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
+  rbenv exec gem install sorbet-*.gem
   rbenv exec bundle
   rbenv exec bundle exec rake test
 fi
