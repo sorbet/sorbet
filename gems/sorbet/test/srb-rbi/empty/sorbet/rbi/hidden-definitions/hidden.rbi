@@ -8701,9 +8701,9 @@ module Warning
   def warn(_); end
 end
 
-YAML = Psych
-
 module Warning
   extend ::Warning
   extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
 end
+
+YAML = Psych
