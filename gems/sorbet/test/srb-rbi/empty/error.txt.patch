@@ -1,0 +1,973 @@
+@@ -185,7 +185,6 @@
+ # wrong constant name <Class:UI>
+ # wrong constant name <Class:VersionConflict>
+ # wrong constant name <Class:VirtualProtocolError>
+-# wrong constant name <Class:YAMLSerializer>
+ # wrong constant name <Class:YamlSyntaxError>
+ # wrong constant name status_code
+ # wrong constant name <static-init>
+@@ -527,14 +526,14 @@
+ #                DateTime
+ # uninitialized constant Bundler::EndpointSpecification::DateTimeFormat
+ # Did you mean?  Bundler::EndpointSpecification::DateTimeFormat
++# uninitialized constant Bundler::EndpointSpecification::Dupable
++# Did you mean?  Bundler::EndpointSpecification::Dupable
+ # uninitialized constant Bundler::EndpointSpecification::EMPTY
+ # Did you mean?  Bundler::EndpointSpecification::EMPTY
+ # uninitialized constant Bundler::EndpointSpecification::GENERICS
+ # Did you mean?  Bundler::EndpointSpecification::GENERICS
+ # uninitialized constant Bundler::EndpointSpecification::GENERIC_CACHE
+ # Did you mean?  Bundler::EndpointSpecification::GENERIC_CACHE
+-# uninitialized constant Bundler::EndpointSpecification::INITIALIZE_CODE_FOR_DEFAULTS
+-# Did you mean?  Bundler::EndpointSpecification::INITIALIZE_CODE_FOR_DEFAULTS
+ # uninitialized constant Bundler::EndpointSpecification::MARSHAL_FIELDS
+ # Did you mean?  Bundler::EndpointSpecification::MARSHAL_FIELDS
+ # uninitialized constant Bundler::EndpointSpecification::NONEXISTENT_SPECIFICATION_VERSION
+@@ -738,6 +737,21 @@
+ # wrong constant name issues_url
+ # wrong constant name log_error
+ # wrong constant name request_issue_report_for
++# wrong constant name <Class:PlatformMatch>
++# wrong constant name <=>
++# uninitialized constant Bundler::GemHelpers::PlatformMatch::Elem
++# wrong constant name cpu_match
++# wrong constant name cpu_match=
++# wrong constant name os_match
++# wrong constant name os_match=
++# wrong constant name platform_version_match
++# wrong constant name platform_version_match=
++# wrong constant name <static-init>
++# wrong constant name []
++# wrong constant name cpu_match
++# wrong constant name members
++# wrong constant name os_match
++# wrong constant name platform_version_match
+ # wrong constant name <static-init>
+ # wrong constant name generic
+ # wrong constant name generic_local_platform
+@@ -1931,14 +1945,10 @@
+ # wrong constant name <static-init>
+ # wrong constant name status_code
+ # wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name dump
+-# wrong constant name load
+ # wrong constant name initialize
+ # wrong constant name orig_exception
+ # wrong constant name status_code
+ # wrong constant name <static-init>
+-# wrong constant name <static-init>
+ # wrong constant name app_cache
+ # wrong constant name app_config_path
+ # wrong constant name bin_path
+@@ -1961,7 +1971,6 @@
+ # wrong constant name git_present?
+ # wrong constant name home
+ # wrong constant name install_path
+-# wrong constant name load
+ # wrong constant name load_gemspec
+ # wrong constant name load_gemspec_uncached
+ # wrong constant name load_marshal
+@@ -2497,7 +2506,6 @@
+ # wrong constant name rmtree
+ # wrong constant name safe_unlink
+ # wrong constant name symlink
+-# wrong constant name touch
+ # wrong constant name uptodate?
+ # undefined method `rationalize$2' for class `Float'
+ # Did you mean?  Rational
+@@ -2514,16 +2522,10 @@
+ # wrong constant name stat$2
+ # wrong constant name stress=
+ # wrong constant name verify_internal_consistency
+-# wrong constant name <Class:BundlerVersionFinder>
+ # wrong constant name <Class:ConfigFile>
+ # wrong constant name <Class:ConsoleUI>
+ # wrong constant name <Class:DefaultUserInteraction>
+-# wrong constant name DependencyResolver$1
+-# wrong constant name <Class:DependencyResolver>
+ # wrong constant name <Class:Ext>
+-# wrong constant name <Class:RequestSet>
+-# wrong constant name <Class:Resolver>
+-# wrong constant name <Class:RuntimeRequirementNotMetError>
+ # wrong constant name <Class:SilentUI>
+ # wrong constant name <Class:Source>
+ # wrong constant name <Class:StreamUI>
+@@ -2563,13 +2565,6 @@
+ # wrong constant name version
+ # wrong constant name <static-init>
+ # wrong constant name default_specifications_dir
+-# wrong constant name <static-init>
+-# wrong constant name bundler_version
+-# wrong constant name bundler_version_with_reason
+-# wrong constant name compatible?
+-# wrong constant name filter!
+-# wrong constant name missing_version_message
+-# wrong constant name without_filtering
+ # wrong constant name ==
+ # wrong constant name []
+ # wrong constant name []=
+@@ -2604,7 +2599,6 @@
+ # wrong constant name ssl_client_cert
+ # wrong constant name ssl_verify_mode
+ # wrong constant name to_yaml
+-# wrong constant name unset_api_key!
+ # wrong constant name update_sources
+ # wrong constant name update_sources=
+ # wrong constant name verbose
+@@ -2658,17 +2652,13 @@
+ # wrong constant name conflict
+ # wrong constant name conflicting_dependencies
+ # wrong constant name initialize
+-# wrong constant name <Class:Molinillo>
+-# wrong constant name <Class:Delegates>
+ # wrong constant name <static-init>
+ # wrong constant name deprecate
+ # wrong constant name skip
+ # wrong constant name skip=
+ # wrong constant name skip_during
+-# wrong constant name _deprecated_source_exception
+ # wrong constant name source_exception
+ # wrong constant name source_exception=
+-# wrong constant name <static-init>
+ # wrong constant name <Class:Builder>
+ # wrong constant name build_args
+ # wrong constant name build_args=
+@@ -2737,123 +2727,6 @@
+ # wrong constant name platforms
+ # wrong constant name version
+ # wrong constant name wordy
+-# wrong constant name <Class:GemDependencyAPI>
+-# wrong constant name <Class:Lockfile>
+-# wrong constant name always_install
+-# wrong constant name always_install=
+-# wrong constant name dependencies
+-# wrong constant name development
+-# wrong constant name development=
+-# wrong constant name development_shallow
+-# wrong constant name development_shallow=
+-# wrong constant name errors
+-# wrong constant name gem
+-# wrong constant name git_set
+-# wrong constant name ignore_dependencies
+-# wrong constant name ignore_dependencies=
+-# wrong constant name import
+-# wrong constant name initialize
+-# wrong constant name install
+-# wrong constant name install_dir
+-# wrong constant name install_from_gemdeps
+-# wrong constant name install_into
+-# wrong constant name load_gemdeps
+-# wrong constant name prerelease
+-# wrong constant name prerelease=
+-# wrong constant name pretty_print
+-# wrong constant name remote
+-# wrong constant name remote=
+-# wrong constant name resolve
+-# wrong constant name resolve_current
+-# wrong constant name resolver
+-# wrong constant name sets
+-# wrong constant name soft_missing
+-# wrong constant name soft_missing=
+-# wrong constant name sorted_requests
+-# wrong constant name source_set
+-# wrong constant name specs
+-# wrong constant name specs_in
+-# wrong constant name tsort_each_node
+-# wrong constant name vendor_set
+-# wrong constant name dependencies
+-# wrong constant name find_gemspec
+-# wrong constant name gem
+-# wrong constant name gem_deps_file
+-# wrong constant name gem_git_reference
+-# wrong constant name gemspec
+-# wrong constant name git
+-# wrong constant name git_set
+-# wrong constant name git_source
+-# wrong constant name group
+-# wrong constant name initialize
+-# wrong constant name installing=
+-# wrong constant name load
+-# wrong constant name platform
+-# wrong constant name platforms
+-# wrong constant name requires
+-# wrong constant name ruby
+-# wrong constant name source
+-# wrong constant name vendor_set
+-# wrong constant name without_groups
+-# wrong constant name without_groups=
+-# wrong constant name <static-init>
+-# wrong constant name <Class:ParseError>
+-# wrong constant name <Class:Parser>
+-# wrong constant name <Class:Tokenizer>
+-# wrong constant name add_DEPENDENCIES
+-# wrong constant name add_GEM
+-# wrong constant name add_GIT
+-# wrong constant name add_PATH
+-# wrong constant name add_PLATFORMS
+-# wrong constant name initialize
+-# wrong constant name platforms
+-# wrong constant name relative_path_from
+-# wrong constant name spec_groups
+-# wrong constant name write
+-# wrong constant name column
+-# wrong constant name initialize
+-# wrong constant name line
+-# wrong constant name path
+-# wrong constant name <static-init>
+-# wrong constant name get
+-# wrong constant name initialize
+-# wrong constant name parse
+-# wrong constant name parse_DEPENDENCIES
+-# wrong constant name parse_GEM
+-# wrong constant name parse_GIT
+-# wrong constant name parse_PATH
+-# wrong constant name parse_PLATFORMS
+-# wrong constant name parse_dependency
+-# wrong constant name <static-init>
+-# wrong constant name <Class:Token>
+-# wrong constant name empty?
+-# wrong constant name initialize
+-# wrong constant name make_parser
+-# wrong constant name next_token
+-# wrong constant name peek
+-# wrong constant name shift
+-# wrong constant name skip
+-# wrong constant name to_a
+-# wrong constant name token_pos
+-# wrong constant name unshift
+-# uninitialized constant Gem::RequestSet::Lockfile::Tokenizer::Token::Elem
+-# wrong constant name column
+-# wrong constant name column=
+-# wrong constant name line
+-# wrong constant name line=
+-# wrong constant name type
+-# wrong constant name type=
+-# wrong constant name value
+-# wrong constant name value=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name members
+-# wrong constant name <static-init>
+-# wrong constant name from_file
+-# wrong constant name <static-init>
+-# wrong constant name build
+-# wrong constant name requests_to_deps
+-# wrong constant name <static-init>
+ # wrong constant name ==
+ # wrong constant name ===
+ # wrong constant name =~
+@@ -2878,457 +2751,6 @@
+ # wrong constant name default
+ # wrong constant name parse
+ # wrong constant name source_set
+-# wrong constant name <Class:APISet>
+-# wrong constant name <Class:APISpecification>
+-# wrong constant name <Class:ActivationRequest>
+-# wrong constant name <Class:BestSet>
+-# wrong constant name <Class:ComposedSet>
+-# wrong constant name <Class:Conflict>
+-# wrong constant name <Class:CurrentSet>
+-# wrong constant name <Class:DependencyRequest>
+-# wrong constant name <Class:GitSet>
+-# wrong constant name <Class:GitSpecification>
+-# wrong constant name <Class:IndexSet>
+-# wrong constant name <Class:IndexSpecification>
+-# wrong constant name <Class:InstalledSpecification>
+-# wrong constant name <Class:InstallerSet>
+-# wrong constant name <Class:LocalSpecification>
+-# wrong constant name <Class:LockSet>
+-# wrong constant name <Class:LockSpecification>
+-# wrong constant name <Class:Molinillo>
+-# wrong constant name <Class:RequirementList>
+-# wrong constant name <Class:Set>
+-# wrong constant name <Class:SourceSet>
+-# wrong constant name <Class:SpecSpecification>
+-# wrong constant name <Class:Specification>
+-# wrong constant name <Class:Stats>
+-# wrong constant name <Class:VendorSet>
+-# wrong constant name <Class:VendorSpecification>
+-# wrong constant name activation_request
+-# wrong constant name development
+-# wrong constant name development=
+-# wrong constant name development_shallow
+-# wrong constant name development_shallow=
+-# wrong constant name explain
+-# wrong constant name explain_list
+-# wrong constant name find_possible
+-# wrong constant name ignore_dependencies
+-# wrong constant name ignore_dependencies=
+-# wrong constant name initialize
+-# wrong constant name missing
+-# wrong constant name requests
+-# wrong constant name resolve
+-# wrong constant name select_local_platforms
+-# wrong constant name skip_gems
+-# wrong constant name skip_gems=
+-# wrong constant name soft_missing
+-# wrong constant name soft_missing=
+-# wrong constant name stats
+-# wrong constant name dep_uri
+-# wrong constant name initialize
+-# wrong constant name prefetch_now
+-# wrong constant name pretty_print
+-# wrong constant name source
+-# wrong constant name uri
+-# wrong constant name versions
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name development?
+-# wrong constant name download
+-# wrong constant name full_name
+-# wrong constant name full_spec
+-# wrong constant name initialize
+-# wrong constant name installed?
+-# wrong constant name name
+-# wrong constant name others_possible?
+-# wrong constant name parent
+-# wrong constant name pretty_print
+-# wrong constant name request
+-# wrong constant name spec
+-# wrong constant name version
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name pick_sets
+-# wrong constant name pretty_print
+-# wrong constant name replace_failed_api_set
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name prerelease=
+-# wrong constant name remote=
+-# wrong constant name sets
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name activated
+-# wrong constant name conflicting_dependencies
+-# wrong constant name dependency
+-# wrong constant name explain
+-# wrong constant name explanation
+-# wrong constant name failed_dep
+-# wrong constant name for_spec?
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name request_path
+-# wrong constant name requester
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name dependency
+-# wrong constant name development?
+-# wrong constant name explicit?
+-# wrong constant name implicit?
+-# wrong constant name initialize
+-# wrong constant name match?
+-# wrong constant name matches_spec?
+-# wrong constant name name
+-# wrong constant name pretty_print
+-# wrong constant name request_context
+-# wrong constant name requester
+-# wrong constant name requirement
+-# wrong constant name type
+-# wrong constant name <static-init>
+-# wrong constant name add_git_gem
+-# wrong constant name add_git_spec
+-# wrong constant name need_submodules
+-# wrong constant name pretty_print
+-# wrong constant name repositories
+-# wrong constant name root_dir
+-# wrong constant name root_dir=
+-# wrong constant name specs
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name add_dependency
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name add_always_install
+-# wrong constant name add_local
+-# wrong constant name always_install
+-# wrong constant name consider_local?
+-# wrong constant name consider_remote?
+-# wrong constant name ignore_dependencies
+-# wrong constant name ignore_dependencies=
+-# wrong constant name ignore_installed
+-# wrong constant name ignore_installed=
+-# wrong constant name initialize
+-# wrong constant name load_spec
+-# wrong constant name local?
+-# wrong constant name prerelease=
+-# wrong constant name pretty_print
+-# wrong constant name remote=
+-# wrong constant name remote_set
+-# wrong constant name <static-init>
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name add
+-# wrong constant name initialize
+-# wrong constant name load_spec
+-# wrong constant name pretty_print
+-# wrong constant name specs
+-# wrong constant name <static-init>
+-# wrong constant name add_dependency
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name sources
+-# wrong constant name <static-init>
+-# wrong constant name <Class:CircularDependencyError>
+-# wrong constant name <Class:Delegates>
+-# wrong constant name <Class:DependencyGraph>
+-# wrong constant name <Class:DependencyState>
+-# wrong constant name <Class:NoSuchDependencyError>
+-# wrong constant name <Class:PossibilityState>
+-# wrong constant name <Class:ResolutionState>
+-# wrong constant name <Class:Resolver>
+-# wrong constant name <Class:ResolverError>
+-# wrong constant name <Class:SpecificationProvider>
+-# wrong constant name <Class:UI>
+-# wrong constant name <Class:VersionConflict>
+-# wrong constant name dependencies
+-# wrong constant name initialize
+-# wrong constant name <static-init>
+-# wrong constant name <Class:ResolutionState>
+-# wrong constant name <Class:SpecificationProvider>
+-# wrong constant name activated
+-# wrong constant name conflicts
+-# wrong constant name depth
+-# wrong constant name name
+-# wrong constant name possibilities
+-# wrong constant name requirement
+-# wrong constant name requirements
+-# wrong constant name <static-init>
+-# wrong constant name allow_missing?
+-# wrong constant name dependencies_for
+-# wrong constant name name_for
+-# wrong constant name name_for_explicit_dependency_source
+-# wrong constant name name_for_locking_dependency_source
+-# wrong constant name requirement_satisfied_by?
+-# wrong constant name search_for
+-# wrong constant name sort_dependencies
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name <Class:Action>
+-# wrong constant name <Class:AddEdgeNoCircular>
+-# wrong constant name <Class:AddVertex>
+-# wrong constant name <Class:DeleteEdge>
+-# wrong constant name <Class:DetachVertexNamed>
+-# wrong constant name <Class:Edge>
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyGraph::Elem
+-# wrong constant name <Class:Log>
+-# wrong constant name <Class:SetPayload>
+-# wrong constant name <Class:Tag>
+-# wrong constant name <Class:Vertex>
+-# wrong constant name add_child_vertex
+-# wrong constant name add_edge
+-# wrong constant name add_vertex
+-# wrong constant name delete_edge
+-# wrong constant name detach_vertex_named
+-# wrong constant name each
+-# wrong constant name log
+-# wrong constant name rewind_to
+-# wrong constant name root_vertex_named
+-# wrong constant name set_payload
+-# wrong constant name tag
+-# wrong constant name to_dot
+-# wrong constant name tsort_each_child
+-# wrong constant name vertex_named
+-# wrong constant name vertices
+-# wrong constant name down
+-# wrong constant name next
+-# wrong constant name next=
+-# wrong constant name previous
+-# wrong constant name previous=
+-# wrong constant name up
+-# wrong constant name <static-init>
+-# wrong constant name action_name
+-# wrong constant name destination
+-# wrong constant name initialize
+-# wrong constant name make_edge
+-# wrong constant name origin
+-# wrong constant name requirement
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name name
+-# wrong constant name payload
+-# wrong constant name root
+-# wrong constant name <static-init>
+-# wrong constant name destination_name
+-# wrong constant name initialize
+-# wrong constant name make_edge
+-# wrong constant name origin_name
+-# wrong constant name requirement
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name name
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyGraph::Edge::Elem
+-# wrong constant name destination
+-# wrong constant name destination=
+-# wrong constant name origin
+-# wrong constant name origin=
+-# wrong constant name requirement
+-# wrong constant name requirement=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name members
+-# wrong constant name add_edge_no_circular
+-# wrong constant name add_vertex
+-# wrong constant name delete_edge
+-# wrong constant name detach_vertex_named
+-# wrong constant name each
+-# wrong constant name pop!
+-# wrong constant name reverse_each
+-# wrong constant name rewind_to
+-# wrong constant name set_payload
+-# wrong constant name tag
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyGraph::Log::Elem
+-# wrong constant name initialize
+-# wrong constant name name
+-# wrong constant name payload
+-# wrong constant name <static-init>
+-# wrong constant name down
+-# wrong constant name initialize
+-# wrong constant name tag
+-# wrong constant name up
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name ancestor?
+-# wrong constant name descendent?
+-# wrong constant name eql?
+-# wrong constant name explicit_requirements
+-# wrong constant name incoming_edges
+-# wrong constant name incoming_edges=
+-# wrong constant name initialize
+-# wrong constant name is_reachable_from?
+-# wrong constant name name
+-# wrong constant name name=
+-# wrong constant name outgoing_edges
+-# wrong constant name outgoing_edges=
+-# wrong constant name path_to?
+-# wrong constant name payload
+-# wrong constant name payload=
+-# wrong constant name predecessors
+-# wrong constant name recursive_predecessors
+-# wrong constant name recursive_successors
+-# wrong constant name requirements
+-# wrong constant name root
+-# wrong constant name root=
+-# wrong constant name root?
+-# wrong constant name shallow_eql?
+-# wrong constant name successors
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name tsort
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyState::Elem
+-# wrong constant name pop_possibility_state
+-# wrong constant name <static-init>
+-# wrong constant name dependency
+-# wrong constant name dependency=
+-# wrong constant name initialize
+-# wrong constant name required_by
+-# wrong constant name required_by=
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::Molinillo::PossibilityState::Elem
+-# uninitialized constant Gem::Resolver::Molinillo::ResolutionState::Elem
+-# wrong constant name activated
+-# wrong constant name activated=
+-# wrong constant name conflicts
+-# wrong constant name conflicts=
+-# wrong constant name depth
+-# wrong constant name depth=
+-# wrong constant name name
+-# wrong constant name name=
+-# wrong constant name possibilities
+-# wrong constant name possibilities=
+-# wrong constant name requirement
+-# wrong constant name requirement=
+-# wrong constant name requirements
+-# wrong constant name requirements=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name empty
+-# wrong constant name members
+-# wrong constant name <Class:Resolution>
+-# wrong constant name initialize
+-# wrong constant name resolve
+-# wrong constant name resolver_ui
+-# wrong constant name specification_provider
+-# wrong constant name <Class:Conflict>
+-# wrong constant name base
+-# wrong constant name initialize
+-# wrong constant name iteration_rate=
+-# wrong constant name original_requested
+-# wrong constant name resolve
+-# wrong constant name resolver_ui
+-# wrong constant name specification_provider
+-# wrong constant name started_at=
+-# wrong constant name states=
+-# uninitialized constant Gem::Resolver::Molinillo::Resolver::Resolution::Conflict::Elem
+-# wrong constant name activated_by_name
+-# wrong constant name activated_by_name=
+-# wrong constant name existing
+-# wrong constant name existing=
+-# wrong constant name locked_requirement
+-# wrong constant name locked_requirement=
+-# wrong constant name possibility
+-# wrong constant name possibility=
+-# wrong constant name requirement
+-# wrong constant name requirement=
+-# wrong constant name requirement_trees
+-# wrong constant name requirement_trees=
+-# wrong constant name requirements
+-# wrong constant name requirements=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name members
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name allow_missing?
+-# wrong constant name dependencies_for
+-# wrong constant name name_for
+-# wrong constant name name_for_explicit_dependency_source
+-# wrong constant name name_for_locking_dependency_source
+-# wrong constant name requirement_satisfied_by?
+-# wrong constant name search_for
+-# wrong constant name sort_dependencies
+-# wrong constant name <static-init>
+-# wrong constant name after_resolution
+-# wrong constant name before_resolution
+-# wrong constant name debug
+-# wrong constant name debug?
+-# wrong constant name indicate_progress
+-# wrong constant name output
+-# wrong constant name progress_rate
+-# wrong constant name <static-init>
+-# wrong constant name conflicts
+-# wrong constant name initialize
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::RequirementList::Elem
+-# wrong constant name add
+-# wrong constant name each
+-# wrong constant name empty?
+-# wrong constant name next5
+-# wrong constant name remove
+-# wrong constant name size
+-# wrong constant name <static-init>
+-# wrong constant name errors
+-# wrong constant name errors=
+-# wrong constant name find_all
+-# wrong constant name prefetch
+-# wrong constant name prerelease
+-# wrong constant name prerelease=
+-# wrong constant name remote
+-# wrong constant name remote=
+-# wrong constant name remote?
+-# wrong constant name <static-init>
+-# wrong constant name add_source_gem
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name <static-init>
+-# wrong constant name dependencies
+-# wrong constant name fetch_development_dependencies
+-# wrong constant name full_name
+-# wrong constant name install
+-# wrong constant name installable_platform?
+-# wrong constant name local?
+-# wrong constant name name
+-# wrong constant name platform
+-# wrong constant name set
+-# wrong constant name source
+-# wrong constant name spec
+-# wrong constant name version
+-# wrong constant name <static-init>
+-# wrong constant name backtracking!
+-# wrong constant name display
+-# wrong constant name iteration!
+-# wrong constant name record_depth
+-# wrong constant name record_requirements
+-# wrong constant name requirement!
+-# wrong constant name <static-init>
+-# wrong constant name add_vendor_gem
+-# wrong constant name load_spec
+-# wrong constant name pretty_print
+-# wrong constant name specs
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name compose_sets
+-# wrong constant name for_current_gems
+-# wrong constant name suggestion
+-# wrong constant name suggestion=
+-# wrong constant name <static-init>
+ # wrong constant name initialize
+ # wrong constant name <static-init>
+ # wrong constant name <=>
+@@ -3429,11 +2851,6 @@
+ # Did you mean?  Gem::Specification::GENERICS
+ # uninitialized constant Gem::Specification::GENERIC_CACHE
+ # Did you mean?  Gem::Specification::GENERIC_CACHE
+-# wrong constant name _deprecated_default_executable
+-# wrong constant name _deprecated_default_executable=
+-# wrong constant name _deprecated_has_rdoc
+-# wrong constant name _deprecated_has_rdoc=
+-# wrong constant name _deprecated_has_rdoc?
+ # wrong constant name _dump
+ # wrong constant name abbreviate
+ # wrong constant name activate
+@@ -3584,7 +3001,6 @@
+ # wrong constant name traverse
+ # wrong constant name validate
+ # wrong constant name validate_dependencies
+-# wrong constant name validate_metadata
+ # wrong constant name validate_permissions
+ # wrong constant name version=
+ # wrong constant name warning
+@@ -3608,7 +3024,6 @@
+ # wrong constant name each_gemspec
+ # wrong constant name each_spec
+ # wrong constant name find_active_stub_by_path
+-# wrong constant name find_all_by_full_name
+ # wrong constant name find_all_by_name
+ # wrong constant name find_by_name
+ # wrong constant name find_by_path
+@@ -3630,12 +3045,6 @@
+ # wrong constant name stubs
+ # wrong constant name stubs_for
+ # wrong constant name unresolved_deps
+-# wrong constant name <Class:SilentDownloadReporter>
+-# wrong constant name <Class:SilentProgressReporter>
+-# wrong constant name <Class:SimpleProgressReporter>
+-# wrong constant name <Class:VerboseDownloadReporter>
+-# wrong constant name <Class:VerboseProgressReporter>
+-# wrong constant name _deprecated_debug
+ # wrong constant name _gets_noecho
+ # wrong constant name alert
+ # wrong constant name alert_error
+@@ -3653,38 +3062,9 @@
+ # wrong constant name ins
+ # wrong constant name outs
+ # wrong constant name progress_reporter
+-# wrong constant name require_io_console
+ # wrong constant name say
+ # wrong constant name terminate_interaction
+ # wrong constant name tty?
+-# wrong constant name done
+-# wrong constant name fetch
+-# wrong constant name initialize
+-# wrong constant name update
+-# wrong constant name <static-init>
+-# wrong constant name count
+-# wrong constant name done
+-# wrong constant name initialize
+-# wrong constant name updated
+-# wrong constant name <static-init>
+-# wrong constant name count
+-# wrong constant name done
+-# wrong constant name initialize
+-# wrong constant name updated
+-# wrong constant name <static-init>
+-# wrong constant name done
+-# wrong constant name fetch
+-# wrong constant name file_name
+-# wrong constant name initialize
+-# wrong constant name progress
+-# wrong constant name total_bytes
+-# wrong constant name update
+-# wrong constant name <static-init>
+-# wrong constant name count
+-# wrong constant name done
+-# wrong constant name initialize
+-# wrong constant name updated
+-# wrong constant name <static-init>
+ # wrong constant name <static-init>
+ # wrong constant name build_extensions
+ # wrong constant name extensions
+@@ -3729,11 +3109,9 @@
+ # wrong constant name traverse_parents
+ # wrong constant name <=>
+ # wrong constant name _segments
+-# wrong constant name _split_segments
+ # wrong constant name _version
+ # wrong constant name approximate_recommendation
+ # wrong constant name bump
+-# wrong constant name canonical_segments
+ # wrong constant name encode_with
+ # wrong constant name eql?
+ # wrong constant name init_with
+@@ -3751,15 +3129,8 @@
+ # wrong constant name create
+ # wrong constant name new
+ # undefined singleton method `bin_path$1' for `Gem'
+-# undefined singleton method `datadir$1' for `Gem'
+-# wrong constant name _deprecated_datadir
+-# wrong constant name _deprecated_detect_gemdeps
+-# wrong constant name _deprecated_gunzip
+-# wrong constant name _deprecated_gzip
+-# wrong constant name _deprecated_inflate
+ # wrong constant name activate_bin_path
+ # wrong constant name bin_path$1
+-# wrong constant name datadir$1
+ # wrong constant name default_ext_dir_for
+ # wrong constant name default_gems_use_full_paths?
+ # wrong constant name default_spec_cache_dir
+@@ -3889,18 +3260,35 @@
+ # undefined method `sysread$1' for class `IO'
+ # undefined method `sysseek$1' for class `IO'
+ # wrong constant name advise$1
++# wrong constant name beep
++# wrong constant name cooked
++# wrong constant name cooked!
++# wrong constant name cursor
++# wrong constant name cursor=
+ # wrong constant name each$2
+ # wrong constant name each_line$2
++# wrong constant name echo=
++# wrong constant name echo?
+ # wrong constant name external_encoding
+ # wrong constant name fcntl$1
++# wrong constant name getch
++# wrong constant name getpass
++# wrong constant name goto
++# wrong constant name iflush
+ # wrong constant name initialize$1
+ # wrong constant name ioctl$1
++# wrong constant name ioflush
+ # wrong constant name lines$2
++# wrong constant name noecho
+ # wrong constant name nonblock
+ # wrong constant name nonblock=
+ # wrong constant name nonblock?
+ # wrong constant name nread
++# wrong constant name oflush
+ # wrong constant name pathconf
++# wrong constant name pressed?
++# wrong constant name raw
++# wrong constant name raw!
+ # wrong constant name read$1
+ # wrong constant name read_nonblock$2
+ # wrong constant name readpartial$2
+@@ -3913,6 +3301,8 @@
+ # wrong constant name wait
+ # wrong constant name wait_readable
+ # wrong constant name wait_writable
++# wrong constant name winsize
++# wrong constant name winsize=
+ # wrong constant name write_nonblock
+ # undefined singleton method `binread$1' for `IO'
+ # undefined singleton method `binwrite$1' for `IO'
+@@ -3923,6 +3313,7 @@
+ # undefined singleton method `write$1' for `IO'
+ # wrong constant name binread$1
+ # wrong constant name binwrite$1
++# wrong constant name console
+ # wrong constant name copy_stream$1
+ # wrong constant name for_fd$1
+ # wrong constant name foreach
+@@ -3943,14 +3334,6 @@
+ # wrong constant name rationalize$2
+ # wrong constant name to_bn
+ # wrong constant name to_s$1
+-# wrong constant name <Class:CircularDatastructure>
+-# wrong constant name <Class:Ext>
+-# wrong constant name <Class:GeneratorError>
+-# wrong constant name <Class:GenericObject>
+-# wrong constant name <Class:JSONError>
+-# wrong constant name <Class:MissingUnicodeSupport>
+-# wrong constant name <Class:NestingError>
+-# wrong constant name <Class:ParserError>
+ # wrong constant name <Class:Generator>
+ # wrong constant name <Class:Parser>
+ # wrong constant name <Class:GeneratorMethods>
+@@ -4017,49 +3400,12 @@
+ # wrong constant name parse
+ # wrong constant name source
+ # wrong constant name <static-init>
+-# uninitialized constant JSON::GenericObject::InspectKey
+-# Did you mean?  JSON::GenericObject::InspectKey
+-# wrong constant name as_json
+-# wrong constant name to_hash
+-# wrong constant name to_json
+-# wrong constant name |
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name dump
+-# wrong constant name from_hash
+-# wrong constant name json_creatable=
+-# wrong constant name json_create
+-# wrong constant name load
+-# wrong constant name <static-init>
+-# wrong constant name wrap
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name create_id
+-# wrong constant name create_id=
+-# wrong constant name deep_const_get
+-# wrong constant name dump
+-# wrong constant name dump_default_options
+-# wrong constant name dump_default_options=
+-# wrong constant name fast_generate
+-# wrong constant name fast_unparse
+-# wrong constant name generate
+-# wrong constant name generator
+-# wrong constant name generator=
+-# wrong constant name iconv
+-# wrong constant name load
+-# wrong constant name load_default_options
+-# wrong constant name load_default_options=
+-# wrong constant name parse
+-# wrong constant name parse!
+-# wrong constant name parser
+-# wrong constant name parser=
+-# wrong constant name pretty_generate
+-# wrong constant name pretty_unparse
+-# wrong constant name recurse_proc
+-# wrong constant name restore
+-# wrong constant name state
+-# wrong constant name state=
+-# wrong constant name unparse
++# undefined singleton method `dump$1' for `JSON'
++# undefined singleton method `generate$1' for `JSON'
++# undefined singleton method `pretty_generate$1' for `JSON'
++# wrong constant name dump$1
++# wrong constant name generate$1
++# wrong constant name pretty_generate$1
+ # undefined method `clone$1' for module `Kernel'
+ # Did you mean?  clone
+ # undefined method `define_singleton_method$2' for module `Kernel'
+@@ -4297,23 +3643,6 @@
+ # wrong constant name each_object$2
+ # wrong constant name garbage_collect
+ # wrong constant name undefine_finalizer
+-# wrong constant name ==
+-# wrong constant name []
+-# wrong constant name []=
+-# wrong constant name delete_field
+-# wrong constant name dig
+-# wrong constant name each_pair
+-# wrong constant name eql?
+-# wrong constant name initialize
+-# wrong constant name marshal_dump
+-# wrong constant name marshal_load
+-# wrong constant name method_missing
+-# wrong constant name modifiable
+-# wrong constant name new_ostruct_member
+-# wrong constant name table
+-# wrong constant name table!
+-# wrong constant name to_h
+-# wrong constant name <static-init>
+ # uninitialized constant Opus
+ # uninitialized constant Opus
+ # uninitialized constant PP
