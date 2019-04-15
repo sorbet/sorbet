@@ -14,22 +14,22 @@ module Sorbet::Private::Test; end
 class Sorbet::Private::Test::Empty < MiniTest::Spec
   it 'works on an empty example' do
     Dir.mktmpdir do |dir|
-      Dir.foreach(__dir__ + '/empty/') do |item|
-        FileUtils.cp_r(__dir__ + '/empty/' + item, dir)
-      end
+      Dir.chdir(dir)
 
       olddir = __dir__
+      Dir.foreach(olddir + '/empty/') do |item|
+        FileUtils.cp_r(olddir + '/empty/' + item, dir)
+      end
+
       out = ''
 
-      Dir.chdir dir do
-        Bundler.with_clean_env do
-          out = IO.popen(
-            {'SRB_YES' => '1'},
-            ['bundle', 'exec', olddir + '/../../../bin/srb-rbi'],
-            'r+',
-            &:read
-          )
-        end
+      Bundler.with_clean_env do
+        out = IO.popen(
+          {'SRB_YES' => '1'},
+          ['bundle', 'exec', olddir + '/../../../bin/srb-rbi'],
+          'r+',
+          &:read
+        )
       end
 
       if ENV['RECORD']
