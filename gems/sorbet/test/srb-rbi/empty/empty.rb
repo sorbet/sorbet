@@ -32,6 +32,8 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
         )
       end
 
+      out = out.gsub(/with [0-9]+ modules and [0-9]+ aliases/, 'with %d modules and %d aliases')
+
       if ENV['RECORD']
         File.write(olddir + '/empty.out', out)
       end
