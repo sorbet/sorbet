@@ -21,16 +21,14 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
       olddir = __dir__
       Dir.chdir dir
 
-      out = ''
-      Bundler.with_clean_env do
-        out = IO.popen(
+      out = Bundler.with_clean_env do
+        IO.popen(
           {'SRB_YES' => '1'},
           ['bundle', 'exec', olddir + '/../../../bin/srb-rbi'],
           'r+',
           &:read
         )
       end
-      out = out.gsub(/with [0-9]+ modules and [0-9]+ aliases/, 'with %d modules and %d aliases')
 
       if ENV['RECORD']
         File.write(olddir + '/empty.out', out)
