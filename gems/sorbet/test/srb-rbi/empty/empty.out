@@ -44,7 +44,6 @@ Building source id to symbol map
 Writing /tmp/sorbet-hidden-definitions/hidden.rbi.tmp
 Generating split RBIs into sorbet/rbi/hidden-definitions/
 Generating: sorbet/rbi/todo.rbi
-Generating: sorbet/rbi/todo.rbi
 
 Done!
 
