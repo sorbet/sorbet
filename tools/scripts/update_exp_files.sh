@@ -42,3 +42,6 @@ done
 parallel --joblog - < "$COMMAND_FILE"
 
 bazel test test/cli:update test/lsp:update -c opt "$@"
+
+RECORD=1 ruby gems/sorbet/test/srb-rbi/empty/empty.rb
+patch -p1 < gems/sorbet/test/srb-rbi/empty/0001-Revert-laptop-patch.patch
