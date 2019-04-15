@@ -3,8 +3,6 @@ id: rbi
 title: RBI Files
 ---
 
-<!-- TODO(jez) Linkify all `sorbet-typed` references in this document -->
-
 RBI files are "Ruby Interface" files. Sorbet uses RBI files to learn about
 constants, ancestors, and methods defined in ways it doesn't understand
 natively. By default, Sorbet does **not** know about:
@@ -31,15 +29,15 @@ We'll cover these questions in order.
 These are the many commands to create or update RBI files within a Sorbet
 project:
 
-| I want to:                                                         | so I'll run:                 |
-| ---                                                                | ---                          |
-| Initialize a new Sorbet project, including all RBI files           | `srb init`                   |
-| Update every kind of RBI in an existing project                    | `srb rbi update`             |
-| &nbsp;                                                             | &nbsp;                       |
-| Fetch pre-written RBIs (either from gem sources or `sorbet-typed`) | `srb rbi sorbet-typed`       |
-| (Re)generate RBIs for all gems using runtime reflection            | `srb rbi gems`               |
-| (Re)generate an RBI for all "hidden definitions" in a project      | `srb rbi hidden-definitions` |
-| (Re)generate a the TODO RBI file (for missing constants)           | `srb rbi todo`               |
+| I want to:                                                           | so I'll run:                 |
+| ---                                                                  | ---                          |
+| Initialize a new Sorbet project, including all RBI files             | `srb init`                   |
+| Update every kind of RBI in an existing project                      | `srb rbi update`             |
+| &nbsp;                                                               | &nbsp;                       |
+| Fetch pre-written RBIs (either from gem sources or [`sorbet-typed`]) | `srb rbi sorbet-typed`       |
+| (Re)generate RBIs for all gems using runtime reflection              | `srb rbi gems`               |
+| (Re)generate an RBI for all "hidden definitions" in a project        | `srb rbi hidden-definitions` |
+| (Re)generate a the TODO RBI file (for missing constants)             | `srb rbi todo`               |
 
 For more information about `srb init`, see [Adopting Sorbet](adopting.md).
 
@@ -136,7 +134,7 @@ a method's arity, they can also declare a method's input and output types.
 
 Hand-written RBIs for gems can come from either:
 
-- `sorbet-typed`, a central repository for sharing hand-written RBI files with
+- [`sorbet-typed`], a central repository for sharing hand-written RBI files with
   the Sorbet community, or
 - you!
 
@@ -200,7 +198,7 @@ definitions RBI file:
 srb rbi hidden-definitions
 ```
 
-On a philosophical level, we believe that while heavily metaprogrammed APIs 
+On a philosophical level, we believe that while heavily metaprogrammed APIs
 can make it easy for a code author, they're frequently harder for consumers of
 the API to understand where things are being defined. By making metaprogramming
 explicit in one file, it's easy to track whether the amount of metaprogramming
@@ -255,3 +253,4 @@ So if/when we wish to upgrade an RBI that we've already checked in to our
 project's version control, we can do so explicitly with the `srb rbi` command.
 
 [the same as theirs]: https://github.com/flow-typed/flow-typed/wiki/FAQs#why-do-i-need-to-commit-the-libdefs-that-flow-typed-installs-for-my-project
+[`sorbet-typed`]: https://github.com/sorbet/sorbet-typed

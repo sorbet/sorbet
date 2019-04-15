@@ -66,9 +66,9 @@ sorbet-runtime raises an exception because the signature was violated.
 ## Why have runtime checks?
 
 Runtime checks have been invaluable when developing Sorbet and rolling it out in
-Stripe's large Ruby codebase. Type annotations in a codebase are near useless if
-developers don't trust them (consider how often YARD annotations fall out of
-sync with the code... 😰).
+large Ruby codebases like Stripe's. Type annotations in a codebase are near
+useless if developers don't trust them (consider how often YARD annotations fall
+out of sync with the code... 😰).
 
 Adding a `sig` to a method is only as good as the predictions it lets `srb` make
 about a codebase. Wrong sigs are actively harmful.
@@ -93,12 +93,10 @@ Sometimes runtime checks don't make sense. For example, for particularly hot
 method calls, we might not have the performance budget to `sig` a method. In
 cases like these, it's possible to opt a single method out of runtime checks.
 
-TODO(jez) Document how to opt out of runtime checks.
+<!-- TODO(jez) Document how to opt out of runtime checks. -->
 
-This section is likely to change a lot before open source, and is currently
-Stripe-only. For Stripe-only instructions, see the
-[Troubleshooting](troubleshooting.md) guide.
-
+> The API for opting out of runtime errors is currently in flux, and is likely
+> to change a lot before open source. Hang tight!
 
 ## What's next?
 

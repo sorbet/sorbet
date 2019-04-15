@@ -5,7 +5,7 @@ title: T.noreturn
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 T.noreturn
 ```
 

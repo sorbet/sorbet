@@ -5,7 +5,7 @@ title: T.self_type
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 T.self_type
 ```
 

@@ -39,7 +39,6 @@ All commands must be run from within Sorbet's top-level `website/` folder.
     ❯ yarn build
 
     # Publish
-    ❯ git remote add github.com git@github.com:stripe/sorbet.git
     ❯ git checkout gh-pages
     ❯ cp -r website/build/sorbet/* .
     ❯ git add .
@@ -67,7 +66,7 @@ For more information about docs, click
 
 1.  Initialize the doc with a header, and start writing!
 
-    ```
+    ```markdown
     ---
     id: my-new-doc
     title: My New Doc
@@ -111,6 +110,6 @@ top-level of the repo). Logos in the website's `static/img/` folder are derived
 If you make changes to the logo and want to re-generate the `.ico` file, install
 ImageMagick and then run:
 
-```
+```shell
 convert ../docs/logo/sorbet-logo.svg -transparent white -define icon:auto-resize static/img/favicon.ico
 ```

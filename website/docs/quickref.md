@@ -46,10 +46,10 @@ class Main
 end
 ```
 
-Now `sorbet` **and** `sorbet-runtime` will check that our `Main.main` method is
+Now `srb` **and** `sorbet-runtime` will check that our `Main.main` method is
 given only `String`s and returns only `Integer`s:
 
-- `sorbet` will do this with [static checks](static.md).
+- `srb` will do this with [static checks](static.md).
 - `sorbet-runtime` will do this by wrapping `Main.main` with [dynamic
   checks](runtime.md) that run every time the method is called.
 
@@ -101,7 +101,7 @@ your browser.
 
 Consider this file:
 
-```
+```ruby
 # -- foo.rb --
 # typed: true
 require 'sorbet-runtime'
@@ -118,15 +118,19 @@ end
 Main.main
 ```
 
-To run `sorbet` on it:
+To check it statically:
 
-```
-❯ sorbet foo.rb
+```plaintext
+❯ srb tc foo.rb
 ```
 
-To test out how `sorbet-runtime` works:
+> **Note**: If there's a `sorbet/config` file in the current directory, this
+> command will potentially run on more than just this single file. Run `srb tc`
+> from a different folder to check a single file in isolation.
 
-```
+To test out how the runtime checks work:
+
+```plaintext
 ❯ bundle exec ruby foo.rb
 ```
 
@@ -135,15 +139,12 @@ To test out how `sorbet-runtime` works:
 
 ### Run Sorbet on a whole project?
 
-Each Sorbet project should have a [file list](adopting.md). If this file is
-named `FILE_LIST`, we can run:
+Each Sorbet project should have a `sorbet/config` file at the root of the
+project, which describes how to typecheck the project. If we are at the root of
+our project, we can check the whole project with:
 
-```
-❯ sorbet @FILE_LIST
+```plaintext
+❯ srb
 ```
 
-To generate a rudimentary file list:
-
-```
-❯ find . -name '*.rb' -o -name '*.rbi' > FILE_LIST
-```
+For more information, see [Adopting Sorbet](adopting.md).

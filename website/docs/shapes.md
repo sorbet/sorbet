@@ -19,7 +19,8 @@ For example: `{foo: 'hello', bar: 3.14}`.
 
 > **Warning**: Shape types have many known limitations, and should be considered
 > an experimental feature. They may not work as expected or change without
-> notice.
+> notice. For an alternative that plays better with static type checking, see
+> [Typed Structs](tstruct.md).
 
 ```ruby
 ##

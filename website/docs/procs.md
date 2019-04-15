@@ -5,7 +5,7 @@ title: Proc Types
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-```
+```ruby
 T.proc.params(arg0: Arg0Type, arg1: Arg2Type, ...).returns(ReturnType)
 ```
 
@@ -25,3 +25,10 @@ Question: what do I put in my `params` if I'm using `yield` instead of
 
 Answer: just add a new block parameter to your method definition. Ruby will
 automatically `yield` to the thing named by the `blk` parameter.
+
+```ruby
+T.proc.bind(BindType).params(...).returns(...)
+```
+
+Use this when the block of the signature will be `instance_exec`'d or
+`instance_eval`'d in a context other than the method definition's `self`.
