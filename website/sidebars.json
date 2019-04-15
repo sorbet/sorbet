@@ -42,9 +42,9 @@
   "talks": {
     "Talks": [
       "talks",
-      "ruby-kaigi-2018",
-      "strange-loop-2018",
-      "ruby-kaigi-2019"
+      "talks/ruby-kaigi-2018",
+      "talks/strange-loop-2018",
+      "talks/ruby-kaigi-2019"
     ]
   }
 }
