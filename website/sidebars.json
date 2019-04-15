@@ -38,5 +38,13 @@
       "strict",
       "intersection-types"
     ]
+  },
+  "talks": {
+    "Talks": [
+      "talks",
+      "ruby-kaigi-2018",
+      "strange-loop-2018",
+      "ruby-kaigi-2019"
+    ]
   }
 }
