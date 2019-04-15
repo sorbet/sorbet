@@ -111,7 +111,7 @@ class Index extends React.Component {
                 },
                 {
                   content:
-                    "[Try sorbet online →](https://sorbet.run)"
+                    "[Try Sorbet online →](https://sorbet.run)"
                 },
                 {
                   content:
