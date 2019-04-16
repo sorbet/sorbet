@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Runtime Configuration · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Recall from &lt;a href=&quot;/docs/runtime&quot;&gt;Enabling runtime checks&lt;/a&gt; that &lt;code&gt;sorbet-runtime&lt;/code&gt; raises&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Runtime Configuration · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Recall from &lt;a href=&quot;/docs/runtime&quot;&gt;Enabling runtime checks&lt;/a&gt; that &lt;code&gt;sorbet-runtime&lt;/code&gt; raises&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class=""><a href="/docs/talks" target="_self">Talks</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Static &amp; Runtime</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">Typed Structs</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Builtin Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/tconfiguration.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Runtime Configuration</h1></header><article><div><span><p>Recall from <a href="/docs/runtime">Enabling runtime checks</a> that <code>sorbet-runtime</code> raises
+exceptions for type errors that happen at runtime. This is to ensure that even
+code that is not covered by types statically can still benefit from type
+information, and that authors don't have to defend against their typed methods
+being called incorrectly.</p>
+<p>The behavior of the <code>sorbet-runtime</code> package can be configured by registering
+callbacks before a program is run. While it's possible to use these callbacks to
+silence all runtime exceptions raised by <code>sorbet-runtime</code>, we <strong>strongly</strong>
+recommend not doing so. Runtime exceptions have proven to be invaluable in
+gaining confidence in the correctness of type signatures as we rolled out types
+to Stripe's Ruby codebase.</p>
+<blockquote>
+<p><strong>Note</strong>: Think carefully before disabling runtime checks!</p>
+</blockquote>
+<p>There are four configuration hooks that can be set in the runtime.</p>
+<blockquote>
+<p><strong>Note</strong>: These docs are incomplete. For complete usage information, refer to
+the YARD documentation for the <code>sorbet-runtime</code> gem.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="errors-from-inline-type-assertions"></a><a href="#errors-from-inline-type-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Errors from inline type assertions</h2>
+<p>There are four kinds of <a href="/docs/type-assertions">inline type assertions</a>:</p>
+<ul>
+<li><code>T.let(expr, Type)</code></li>
+<li><code>T.cast(expr, Type)</code></li>
+<li><code>T.must(expr)</code></li>
+<li><code>T.assert_type!(expr, Type)</code></li>
+</ul>
+<p>To customize the behavior when one of these assertions fails:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.inline_type_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|error|</span>
+  puts error.message
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>The default error handler is to raise (a <code>TypeError</code>).</p>
+<p>Note that setting this callback will <strong>not</strong> handle type errors raised when a
+method with a signature is called incorrectly. For those, see the next section.</p>
+<h2><a class="anchor" aria-hidden="true" id="errors-from-invalid-method-calls"></a><a href="#errors-from-invalid-method-calls" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Errors from invalid method calls</h2>
+<p>To customize the behvaior when a method with a sig is called and the argument
+types or return types don't match the actual value present at runtime, use this:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
+  puts opts[<span class="hljs-symbol">:message</span>]
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>The default error handler is to raise an error, but it respects the <code>.soft</code> and
+<code>.checked</code> builder methods, discussed in <a href="/docs/troubleshooting#escape-hatches">Escape
+Hatches</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="errors-from-invalid-sig-procs"></a><a href="#errors-from-invalid-sig-procs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Errors from invalid sig procs</h2>
+<p>We <a href="/docs/sigs">write sigs</a> using valid Ruby syntax. The body of the proc passed to
+a sig is executed (lazily, on first method call) to compute an in-memory data
+structure representing that sig's types. The execution of this proc can be
+invalid (for example, if <code>returns</code> or <code>void</code> is never called).</p>
+<p>The default behavior when building a sig is invalid is to raise an
+<code>ArgumentError</code>. To customize this behavior, use this:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.sig_builder_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|error, location|</span>
+  puts error.message
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="errors-from-invalid-sigs"></a><a href="#errors-from-invalid-sigs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Errors from invalid sigs</h2>
+<p>Method signatures that build correctly can still be invalid. For exmaple, a sig
+marked <code>override</code> must actually override a method. Same for <code>abstract</code> methods.
+When overriding a parent sig, the variance must match on the input and output
+types. If a sig that built correctly is invalid in anyway, this error handler
+will be called:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.sig_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|error, opts|</span>
+  puts error.message
+<span class="hljs-keyword">end</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/cli"><span class="arrow-prev">← </span><span>Command Line Reference</span></a><a class="docs-next button" href="/docs/troubleshooting"><span>Troubleshooting</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#errors-from-inline-type-assertions">Errors from inline type assertions</a></li><li><a href="#errors-from-invalid-method-calls">Errors from invalid method calls</a></li><li><a href="#errors-from-invalid-sig-procs">Errors from invalid sig procs</a></li><li><a href="#errors-from-invalid-sigs">Errors from invalid sigs</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
