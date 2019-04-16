@@ -65,6 +65,7 @@ class Sorbet::Private::Serialize
       break if ancestor == superclass
       ancestor_name = constant_cache.name_by_class(ancestor)
       next unless ancestor_name
+      next if ancestor_name == class_name
       if ancestor.is_a?(Class)
         ret << "  # Skipping `include #{ancestor_name}` because it is a Class\n"
         next
