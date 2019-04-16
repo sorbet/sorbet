@@ -69,7 +69,7 @@ class RubyTyper::DynamicStruct < Struct
   def self.new(*args); end
 end
 
-class RubyTyper::StubClass
+module RubyTyper::StubModule
 end
 
 class RubyTyper::ImplicitModuleSuperclass < BasicObject

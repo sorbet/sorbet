@@ -1,48 +1,48 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb start=2:1 end=144:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb start=2:1 end=146:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=144:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=146:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U AdvancedODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=35:1 end=35:18}
-    class <C <U AdvancedODM>><C <U Mutator>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=50:5 end=50:68}
+  class <C <U AdvancedODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=37:1 end=37:18}
+    class <C <U AdvancedODM>><C <U Mutator>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
       method <C <U AdvancedODM>><C <U Mutator>><U array> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:23}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
         argument <C <U AdvancedODM>><C <U Mutator>><U array><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U array=> (array, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:23}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
         argument <C <U AdvancedODM>><C <U Mutator>><U array=>array<> -> AppliedType {
           klass = <C <U Array>>
           targs = [
             <C <U Elem>> = T.untyped
           ]
-        } @ Loc {file=test/testdata/dsl/prop.rb start=41:11 end=41:16}
+        } @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:16}
         argument <C <U AdvancedODM>><C <U Mutator>><U array=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:50}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
         argument <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit=> (array_of_explicit, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:50}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
         argument <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit=>array_of_explicit<> -> AppliedType {
           klass = <C <U Array>>
           targs = [
             <C <U Elem>> = T.untyped
           ]
-        } @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:28}
+        } @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:28}
         argument <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U hash_of> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U HashMutator>>
@@ -50,7 +50,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
           <C <U K>> = Symbol
           <C <U V>> = String
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:43}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=47:5 end=47:43}
         argument <C <U AdvancedODM>><C <U Mutator>><U hash_of><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U hash_of=> (hash_of, <blk>) -> AppliedType {
         klass = <C <U Hash>>
@@ -62,7 +62,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
               1 = String
             }
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:43}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=47:5 end=47:43}
         argument <C <U AdvancedODM>><C <U Mutator>><U hash_of=>hash_of<> -> AppliedType {
           klass = <C <U Hash>>
           targs = [
@@ -73,153 +73,153 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
                 1 = String
               }
           ]
-        } @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:18}
+        } @ Loc {file=test/testdata/dsl/prop.rb start=47:11 end=47:18}
         argument <C <U AdvancedODM>><C <U Mutator>><U hash_of=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U no_class_arg> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=50:5 end=50:68}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
         argument <C <U AdvancedODM>><C <U Mutator>><U no_class_arg><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U no_class_arg=> (no_class_arg, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=50:5 end=50:68}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
         argument <C <U AdvancedODM>><C <U Mutator>><U no_class_arg=>no_class_arg<> -> AppliedType {
           klass = <C <U Array>>
           targs = [
             <C <U Elem>> = T.untyped
           ]
-        } @ Loc {file=test/testdata/dsl/prop.rb start=50:11 end=50:23}
+        } @ Loc {file=test/testdata/dsl/prop.rb start=52:11 end=52:23}
         argument <C <U AdvancedODM>><C <U Mutator>><U no_class_arg=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U t_array> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>
         targs = [
           <C <U Elem>> = String
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=44:5 end=44:36}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=46:5 end=46:36}
         argument <C <U AdvancedODM>><C <U Mutator>><U t_array><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U t_array=> (t_array, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = String
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=44:5 end=44:36}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=46:5 end=46:36}
         argument <C <U AdvancedODM>><C <U Mutator>><U t_array=>t_array<> -> AppliedType {
           klass = <C <U Array>>
           targs = [
             <C <U Elem>> = String
           ]
-        } @ Loc {file=test/testdata/dsl/prop.rb start=44:11 end=44:18}
+        } @ Loc {file=test/testdata/dsl/prop.rb start=46:11 end=46:18}
         argument <C <U AdvancedODM>><C <U Mutator>><U t_array=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    class <C <U AdvancedODM>><S <C <U Mutator>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:23}
-      method <C <U AdvancedODM>><S <C <U Mutator>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:23}
+    class <C <U AdvancedODM>><S <C <U Mutator>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
+      method <C <U AdvancedODM>><S <C <U Mutator>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
         argument <C <U AdvancedODM>><S <C <U Mutator>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = T.untyped
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:23}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
       argument <C <U AdvancedODM>><U array><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array=> (array, <blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = T.untyped
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:23}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
       argument <C <U AdvancedODM>><U array=>array<> -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=41:11 end=41:16}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:16}
       argument <C <U AdvancedODM>><U array=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array_of> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = String
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=42:5 end=42:34}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=44:5 end=44:34}
       argument <C <U AdvancedODM>><U array_of><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array_of=> (array_of, <blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = String
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=42:5 end=42:34}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=44:5 end=44:34}
       argument <C <U AdvancedODM>><U array_of=>array_of<> -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = String
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=42:11 end=42:19}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=44:11 end=44:19}
       argument <C <U AdvancedODM>><U array_of=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array_of_explicit> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = T.untyped
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:50}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
       argument <C <U AdvancedODM>><U array_of_explicit><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array_of_explicit=> (array_of_explicit, <blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = T.untyped
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:50}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
       argument <C <U AdvancedODM>><U array_of_explicit=>array_of_explicit<> -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = T.untyped
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:28}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:28}
       argument <C <U AdvancedODM>><U array_of_explicit=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U const> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=48:5 end=48:25}
+    method <C <U AdvancedODM>><U const> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=50:5 end=50:25}
       argument <C <U AdvancedODM>><U const><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U const_explicit> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=47:5 end=47:50}
+    method <C <U AdvancedODM>><U const_explicit> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=49:5 end=49:50}
       argument <C <U AdvancedODM>><U const_explicit><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U default> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=36:5 end=36:39}
+    method <C <U AdvancedODM>><U default> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=38:5 end=38:39}
       argument <C <U AdvancedODM>><U default><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U default=> (default, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=36:5 end=36:39}
-      argument <C <U AdvancedODM>><U default=>default<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=36:11 end=36:18}
+    method <C <U AdvancedODM>><U default=> (default, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=38:5 end=38:39}
+      argument <C <U AdvancedODM>><U default=>default<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=38:11 end=38:18}
       argument <C <U AdvancedODM>><U default=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U enum_prop> (<blk>) -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:48}
+    method <C <U AdvancedODM>><U enum_prop> (<blk>) -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=54:5 end=54:48}
       argument <C <U AdvancedODM>><U enum_prop><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=54:5 end=54:49}
+    method <C <U AdvancedODM>><U foreign> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=56:5 end=56:49}
       argument <C <U AdvancedODM>><U foreign><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign=> (foreign, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=54:5 end=54:49}
-      argument <C <U AdvancedODM>><U foreign=>foreign<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=54:11 end=54:18}
+    method <C <U AdvancedODM>><U foreign=> (foreign, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=56:5 end=56:49}
+      argument <C <U AdvancedODM>><U foreign=>foreign<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=56:11 end=56:18}
       argument <C <U AdvancedODM>><U foreign=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=54:5 end=54:49}
-      argument <C <U AdvancedODM>><U foreign_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=54:11 end=54:18}
+    method <C <U AdvancedODM>><U foreign_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=56:5 end=56:49}
+      argument <C <U AdvancedODM>><U foreign_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=56:11 end=56:18}
       argument <C <U AdvancedODM>><U foreign_><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_invalid> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=57:5 end=57:65}
+    method <C <U AdvancedODM>><U foreign_invalid> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=59:5 end=59:65}
       argument <C <U AdvancedODM>><U foreign_invalid><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_invalid=> (foreign_invalid, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=57:5 end=57:65}
-      argument <C <U AdvancedODM>><U foreign_invalid=>foreign_invalid<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=57:11 end=57:26}
+    method <C <U AdvancedODM>><U foreign_invalid=> (foreign_invalid, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=59:5 end=59:65}
+      argument <C <U AdvancedODM>><U foreign_invalid=>foreign_invalid<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=59:11 end=59:26}
       argument <C <U AdvancedODM>><U foreign_invalid=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_invalid_> (opts, <blk>) -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=57:5 end=57:65}
-      argument <C <U AdvancedODM>><U foreign_invalid_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=57:11 end=57:26}
+    method <C <U AdvancedODM>><U foreign_invalid_> (opts, <blk>) -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=59:5 end=59:65}
+      argument <C <U AdvancedODM>><U foreign_invalid_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=59:11 end=59:26}
       argument <C <U AdvancedODM>><U foreign_invalid_><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_lazy> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=55:5 end=55:59}
+    method <C <U AdvancedODM>><U foreign_lazy> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=57:5 end=57:59}
       argument <C <U AdvancedODM>><U foreign_lazy><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_lazy=> (foreign_lazy, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=55:5 end=55:59}
-      argument <C <U AdvancedODM>><U foreign_lazy=>foreign_lazy<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=55:11 end=55:23}
+    method <C <U AdvancedODM>><U foreign_lazy=> (foreign_lazy, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=57:5 end=57:59}
+      argument <C <U AdvancedODM>><U foreign_lazy=>foreign_lazy<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=57:11 end=57:23}
       argument <C <U AdvancedODM>><U foreign_lazy=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_lazy_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=55:5 end=55:59}
-      argument <C <U AdvancedODM>><U foreign_lazy_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=55:11 end=55:23}
+    method <C <U AdvancedODM>><U foreign_lazy_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=57:5 end=57:59}
+      argument <C <U AdvancedODM>><U foreign_lazy_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=57:11 end=57:23}
       argument <C <U AdvancedODM>><U foreign_lazy_><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_proc> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=56:5 end=56:61}
+    method <C <U AdvancedODM>><U foreign_proc> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=58:5 end=58:61}
       argument <C <U AdvancedODM>><U foreign_proc><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_proc=> (foreign_proc, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=56:5 end=56:61}
-      argument <C <U AdvancedODM>><U foreign_proc=>foreign_proc<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=56:11 end=56:23}
+    method <C <U AdvancedODM>><U foreign_proc=> (foreign_proc, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=58:5 end=58:61}
+      argument <C <U AdvancedODM>><U foreign_proc=>foreign_proc<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=58:11 end=58:23}
       argument <C <U AdvancedODM>><U foreign_proc=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_proc_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=56:5 end=56:61}
-      argument <C <U AdvancedODM>><U foreign_proc_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=56:11 end=56:23}
+    method <C <U AdvancedODM>><U foreign_proc_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=58:5 end=58:61}
+      argument <C <U AdvancedODM>><U foreign_proc_>opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=58:11 end=58:23}
       argument <C <U AdvancedODM>><U foreign_proc_><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U hash_of> (<blk>) -> AppliedType {
       klass = <C <U Hash>>
@@ -231,7 +231,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
             1 = String
           }
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:43}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=47:5 end=47:43}
       argument <C <U AdvancedODM>><U hash_of><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U hash_of=> (hash_of, <blk>) -> AppliedType {
       klass = <C <U Hash>>
@@ -243,7 +243,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
             1 = String
           }
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:43}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=47:5 end=47:43}
       argument <C <U AdvancedODM>><U hash_of=>hash_of<> -> AppliedType {
         klass = <C <U Hash>>
         targs = [
@@ -254,90 +254,84 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
               1 = String
             }
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:18}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=47:11 end=47:18}
       argument <C <U AdvancedODM>><U hash_of=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U ifunset> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=59:5 end=59:39}
+    method <C <U AdvancedODM>><U ifunset> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=61:5 end=61:39}
       argument <C <U AdvancedODM>><U ifunset><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U ifunset=> (ifunset, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=59:5 end=59:39}
-      argument <C <U AdvancedODM>><U ifunset=>ifunset<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=59:11 end=59:18}
+    method <C <U AdvancedODM>><U ifunset=> (ifunset, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=61:5 end=61:39}
+      argument <C <U AdvancedODM>><U ifunset=>ifunset<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=61:11 end=61:18}
       argument <C <U AdvancedODM>><U ifunset=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U ifunset_nilable> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=60:5 end=60:58}
+    method <C <U AdvancedODM>><U ifunset_nilable> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=62:5 end=62:58}
       argument <C <U AdvancedODM>><U ifunset_nilable><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U ifunset_nilable=> (ifunset_nilable, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=60:5 end=60:58}
-      argument <C <U AdvancedODM>><U ifunset_nilable=>ifunset_nilable<> -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=60:11 end=60:26}
+    method <C <U AdvancedODM>><U ifunset_nilable=> (ifunset_nilable, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=62:5 end=62:58}
+      argument <C <U AdvancedODM>><U ifunset_nilable=>ifunset_nilable<> -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=62:11 end=62:26}
       argument <C <U AdvancedODM>><U ifunset_nilable=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U no_class_arg> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = T.untyped
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=50:5 end=50:68}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
       argument <C <U AdvancedODM>><U no_class_arg><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U object> (<blk>) -> Object @ Loc {file=test/testdata/dsl/prop.rb start=40:5 end=40:17}
+    method <C <U AdvancedODM>><U object> (<blk>) -> Object @ Loc {file=test/testdata/dsl/prop.rb start=42:5 end=42:17}
       argument <C <U AdvancedODM>><U object><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U object=> (object, <blk>) -> Object @ Loc {file=test/testdata/dsl/prop.rb start=40:5 end=40:17}
-      argument <C <U AdvancedODM>><U object=>object<> -> Object @ Loc {file=test/testdata/dsl/prop.rb start=40:11 end=40:17}
+    method <C <U AdvancedODM>><U object=> (object, <blk>) -> Object @ Loc {file=test/testdata/dsl/prop.rb start=42:5 end=42:17}
+      argument <C <U AdvancedODM>><U object=>object<> -> Object @ Loc {file=test/testdata/dsl/prop.rb start=42:11 end=42:17}
       argument <C <U AdvancedODM>><U object=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U t_array> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = String
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=44:5 end=44:36}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=46:5 end=46:36}
       argument <C <U AdvancedODM>><U t_array><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U t_array=> (t_array, <blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
         <C <U Elem>> = String
       ]
-    } @ Loc {file=test/testdata/dsl/prop.rb start=44:5 end=44:36}
+    } @ Loc {file=test/testdata/dsl/prop.rb start=46:5 end=46:36}
       argument <C <U AdvancedODM>><U t_array=>t_array<> -> AppliedType {
         klass = <C <U Array>>
         targs = [
           <C <U Elem>> = String
         ]
-      } @ Loc {file=test/testdata/dsl/prop.rb start=44:11 end=44:18}
+      } @ Loc {file=test/testdata/dsl/prop.rb start=46:11 end=46:18}
       argument <C <U AdvancedODM>><U t_array=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U t_nilable> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=37:5 end=37:39}
+    method <C <U AdvancedODM>><U t_nilable> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=39:5 end=39:39}
       argument <C <U AdvancedODM>><U t_nilable><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U t_nilable=> (t_nilable, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=37:5 end=37:39}
-      argument <C <U AdvancedODM>><U t_nilable=>t_nilable<> -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=37:11 end=37:20}
+    method <C <U AdvancedODM>><U t_nilable=> (t_nilable, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=39:5 end=39:39}
+      argument <C <U AdvancedODM>><U t_nilable=>t_nilable<> -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=39:11 end=39:20}
       argument <C <U AdvancedODM>><U t_nilable=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U type> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=39:5 end=39:29}
+    method <C <U AdvancedODM>><U type> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:29}
       argument <C <U AdvancedODM>><U type><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U type=> (type, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=39:5 end=39:29}
-      argument <C <U AdvancedODM>><U type=>type<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=39:11 end=39:15}
+    method <C <U AdvancedODM>><U type=> (type, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=41:5 end=41:29}
+      argument <C <U AdvancedODM>><U type=>type<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=41:11 end=41:15}
       argument <C <U AdvancedODM>><U type=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <S <C <U AdvancedODM>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=35:7 end=35:18}
-    method <S <C <U AdvancedODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=36:5 end=36:39}
+  class <S <C <U AdvancedODM>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=37:7 end=37:18}
+    method <S <C <U AdvancedODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=38:5 end=38:39}
       argument <S <C <U AdvancedODM>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U EncryptedProp>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=77:1 end=77:20}
-    method <C <U EncryptedProp>><U bar> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=79:3 end=79:56}
+  class <C <U EncryptedProp>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=79:1 end=79:20}
+    method <C <U EncryptedProp>><U bar> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=81:3 end=81:56}
       argument <C <U EncryptedProp>><U bar><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U encrypted_bar> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=79:3 end=79:56}
+    method <C <U EncryptedProp>><U encrypted_bar> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=81:3 end=81:56}
       argument <C <U EncryptedProp>><U encrypted_bar><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U encrypted_foo> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=78:3 end=78:22}
+    method <C <U EncryptedProp>><U encrypted_foo> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=80:3 end=80:22}
       argument <C <U EncryptedProp>><U encrypted_foo><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U encrypted_foo=> (foo, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=78:3 end=78:22}
-      argument <C <U EncryptedProp>><U encrypted_foo=>foo<> -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=78:19 end=78:22}
+    method <C <U EncryptedProp>><U encrypted_foo=> (foo, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=80:3 end=80:22}
+      argument <C <U EncryptedProp>><U encrypted_foo=>foo<> -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=80:19 end=80:22}
       argument <C <U EncryptedProp>><U encrypted_foo=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U foo> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=78:3 end=78:22}
+    method <C <U EncryptedProp>><U foo> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=80:3 end=80:22}
       argument <C <U EncryptedProp>><U foo><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U foo=> (foo, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=78:3 end=78:22}
-      argument <C <U EncryptedProp>><U foo=>foo<> -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=78:19 end=78:22}
+    method <C <U EncryptedProp>><U foo=> (foo, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=80:3 end=80:22}
+      argument <C <U EncryptedProp>><U foo=>foo<> -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=80:19 end=80:22}
       argument <C <U EncryptedProp>><U foo=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <S <C <U EncryptedProp>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=77:7 end=77:20}
-    method <S <C <U EncryptedProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=78:3 end=78:22}
+  class <S <C <U EncryptedProp>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=79:7 end=79:20}
+    method <S <C <U EncryptedProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=80:3 end=80:22}
       argument <S <C <U EncryptedProp>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U ForeignClass>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=32:1 end=32:19}
-  class <S <C <U ForeignClass>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=32:7 end=32:19}
+  class <C <U ForeignClass>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=34:1 end=34:19}
+  class <S <C <U ForeignClass>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=34:7 end=34:19}
   class <C <U NotAODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=2:14}
-    class <C <U NotAODM>><C <U Default>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:106 end=14:113}
-    class <C <U NotAODM>><S <C <U Default>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:106 end=14:113}
-    class <C <U NotAODM>><C <U IntegerParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=10:20 end=10:32}
-    class <C <U NotAODM>><S <C <U IntegerParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=10:20 end=10:32}
-    class <C <U NotAODM>><C <U StringParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=12:21 end=12:32}
-    class <C <U NotAODM>><S <C <U StringParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=12:21 end=12:32}
   class <S <C <U NotAODM>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=2:7 end=2:14}
     method <S <C <U NotAODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=2:14}
       argument <S <C <U NotAODM>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
@@ -345,58 +339,51 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
       argument <S <C <U NotAODM>> $1><U prop>args<repeated> @ Loc {file=test/testdata/dsl/prop.rb start=3:20 end=3:24}
       argument <S <C <U NotAODM>> $1><U prop><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=731:1 end=731:27}
-    method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=82:1 end=82:9}
+    method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=84:1 end=84:9}
       argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U Opus>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> ()
-    class <C <U Opus>><C <U Param>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:36}
-      class <C <U Opus>><C <U Param>><C <U CaseParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:47}
-      class <C <U Opus>><C <U Param>><S <C <U CaseParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:47}
-      class <C <U Opus>><C <U Param>><C <U ParamSpecsParam>> < <C <U RubyTyper>><C <U StubClass>> () @ Loc {file=test/testdata/dsl/prop.rb start=14:73 end=14:101}
-      class <C <U Opus>><C <U Param>><S <C <U ParamSpecsParam>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:73 end=14:101}
-    class <C <U Opus>><S <C <U Param>> $1> < <C <U RubyTyper>><S <C <U StubClass>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=14:25 end=14:36}
-  class <C <U PropHelpers>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=63:1 end=63:18}
-    method <C <U PropHelpers>><U created> (<blk>) -> Float @ Loc {file=test/testdata/dsl/prop.rb start=65:3 end=65:15}
+  class <C <U PropHelpers>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=65:1 end=65:18}
+    method <C <U PropHelpers>><U created> (<blk>) -> Float @ Loc {file=test/testdata/dsl/prop.rb start=67:3 end=67:15}
       argument <C <U PropHelpers>><U created><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U PropHelpers>><U created=> (created, <blk>) -> Float @ Loc {file=test/testdata/dsl/prop.rb start=65:3 end=65:15}
-      argument <C <U PropHelpers>><U created=>created<> -> Float @ Loc {file=test/testdata/dsl/prop.rb start=65:3 end=65:10}
+    method <C <U PropHelpers>><U created=> (created, <blk>) -> Float @ Loc {file=test/testdata/dsl/prop.rb start=67:3 end=67:15}
+      argument <C <U PropHelpers>><U created=>created<> -> Float @ Loc {file=test/testdata/dsl/prop.rb start=67:3 end=67:10}
       argument <C <U PropHelpers>><U created=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U PropHelpers>><U token> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=64:3 end=64:13}
+    method <C <U PropHelpers>><U token> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=66:3 end=66:13}
       argument <C <U PropHelpers>><U token><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U PropHelpers>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=64:3 end=64:13}
-      argument <C <U PropHelpers>><U token=>token<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=64:3 end=64:8}
+    method <C <U PropHelpers>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=66:3 end=66:13}
+      argument <C <U PropHelpers>><U token=>token<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=66:3 end=66:8}
       argument <C <U PropHelpers>><U token=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <S <C <U PropHelpers>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=63:7 end=63:18}
-    method <S <C <U PropHelpers>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=64:3 end=64:13}
+  class <S <C <U PropHelpers>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=65:7 end=65:18}
+    method <S <C <U PropHelpers>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=66:3 end=66:13}
       argument <S <C <U PropHelpers>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U PropHelpers2>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=68:1 end=68:19}
-    method <C <U PropHelpers2>><U created> (<blk>) -> Float @ Loc {file=test/testdata/dsl/prop.rb start=70:3 end=70:32}
+  class <C <U PropHelpers2>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=70:1 end=70:19}
+    method <C <U PropHelpers2>><U created> (<blk>) -> Float @ Loc {file=test/testdata/dsl/prop.rb start=72:3 end=72:32}
       argument <C <U PropHelpers2>><U created><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U PropHelpers2>><U token> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=69:3 end=69:25}
+    method <C <U PropHelpers2>><U token> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=71:3 end=71:25}
       argument <C <U PropHelpers2>><U token><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U PropHelpers2>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=69:3 end=69:25}
-      argument <C <U PropHelpers2>><U token=>token<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=69:15 end=69:20}
+    method <C <U PropHelpers2>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=71:3 end=71:25}
+      argument <C <U PropHelpers2>><U token=>token<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=71:15 end=71:20}
       argument <C <U PropHelpers2>><U token=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <S <C <U PropHelpers2>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=68:7 end=68:19}
-    method <S <C <U PropHelpers2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=69:3 end=69:25}
+  class <S <C <U PropHelpers2>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=70:7 end=70:19}
+    method <S <C <U PropHelpers2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=71:3 end=71:25}
       argument <S <C <U PropHelpers2>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U ShardingProp>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=73:1 end=73:19}
-    method <C <U ShardingProp>><U merchant> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=74:3 end=74:16}
+  class <C <U ShardingProp>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=75:1 end=75:19}
+    method <C <U ShardingProp>><U merchant> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=76:3 end=76:16}
       argument <C <U ShardingProp>><U merchant><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <S <C <U ShardingProp>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=73:7 end=73:19}
-    method <S <C <U ShardingProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=74:3 end=74:16}
+  class <S <C <U ShardingProp>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=75:7 end=75:19}
+    method <S <C <U ShardingProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=76:3 end=76:16}
       argument <S <C <U ShardingProp>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U SomeODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=21:1 end=21:14}
-    method <C <U SomeODM>><U foo> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=24:5 end=24:22}
+  class <C <U SomeODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=23:1 end=23:14}
+    method <C <U SomeODM>><U foo> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=26:5 end=26:22}
       argument <C <U SomeODM>><U foo><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U SomeODM>><U foo2> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=27:5 end=27:13}
+    method <C <U SomeODM>><U foo2> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/prop.rb start=29:5 end=29:13}
       argument <C <U SomeODM>><U foo2><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U SomeODM>><U foo2=> (arg0, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=29:5 end=29:20}
-      argument <C <U SomeODM>><U foo2=>arg0<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=28:17 end=28:21}
+    method <C <U SomeODM>><U foo2=> (arg0, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=31:5 end=31:20}
+      argument <C <U SomeODM>><U foo2=>arg0<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=30:17 end=30:21}
       argument <C <U SomeODM>><U foo2=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-    method <C <U SomeODM>><U foo=> (foo, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=24:5 end=24:22}
-      argument <C <U SomeODM>><U foo=>foo<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=24:11 end=24:14}
+    method <C <U SomeODM>><U foo=> (foo, <blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=26:5 end=26:22}
+      argument <C <U SomeODM>><U foo=>foo<> -> String @ Loc {file=test/testdata/dsl/prop.rb start=26:11 end=26:14}
       argument <C <U SomeODM>><U foo=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <S <C <U SomeODM>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/prop.rb start=21:7 end=21:14}
-    method <S <C <U SomeODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=24:5 end=24:22}
+  class <S <C <U SomeODM>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/prop.rb start=23:7 end=23:14}
+    method <S <C <U SomeODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=26:5 end=26:22}
       argument <S <C <U SomeODM>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
 

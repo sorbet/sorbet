@@ -5,12 +5,12 @@ begin
       <U <self>>.<U each>() do ||
         begin
           if <U <self>>.<U rand>()
-            next(::Test::Foo)
+            next(Unresolved: <emptyTree>::<C <U Foo>>)
           else
             <emptyTree>
           end
           if <U <self>>.<U rand>()
-            break(::Test::Bar)
+            break(Unresolved: <emptyTree>::<C <U Bar>>)
           else
             <emptyTree>
           end

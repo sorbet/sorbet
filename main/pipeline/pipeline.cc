@@ -687,6 +687,32 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
 
     return what;
 }
+class GatherUnresolvedConstantsWalk {
+public:
+    vector<string> unresolvedConstants;
+    unique_ptr<ast::Expression> postTransformConstantLit(core::MutableContext ctx,
+                                                         unique_ptr<ast::ConstantLit> original) {
+        auto unresolvedPath = original->fullUnresolvedPath(ctx);
+        if (unresolvedPath.has_value()) {
+            unresolvedConstants.emplace_back(fmt::format(
+                "{}::{}",
+                unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.data(ctx)->show(ctx) : "",
+                fmt::map_join(unresolvedPath->second,
+                              "::", [&](const auto &el) -> string { return el.data(ctx)->show(ctx); })));
+        }
+        return original;
+    }
+};
+
+vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast::ParsedFile> what) {
+    core::MutableContext ctx(gs, core::Symbols::root());
+    GatherUnresolvedConstantsWalk walk;
+    for (auto &resolved : what) {
+        resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
+    }
+    fmt::print("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
+    return what;
+}
 
 vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                 shared_ptr<spdlog::logger> logger, bool skipConfigatron) {
@@ -727,14 +753,18 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
         }
     }
     gs.errorQueue->flushErrors();
-
-    for (auto &resolved : what) {
-        if (opts.print.ResolveTree) {
-            fmt::print("{}\n", resolved.tree->toString(gs));
+    if (opts.print.ResolveTree || opts.print.ResolveTreeRaw) {
+        for (auto &resolved : what) {
+            if (opts.print.ResolveTree) {
+                fmt::print("{}\n", resolved.tree->toString(gs));
+            }
+            if (opts.print.ResolveTreeRaw) {
+                fmt::print("{}\n", resolved.tree->showRaw(gs));
+            }
         }
-        if (opts.print.ResolveTreeRaw) {
-            fmt::print("{}\n", resolved.tree->showRaw(gs));
-        }
+    }
+    if (opts.print.MissingConstants) {
+        what = printMissingConstants(gs, move(what));
     }
     return what;
 }

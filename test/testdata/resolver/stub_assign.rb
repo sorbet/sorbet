@@ -7,7 +7,7 @@
 # Replicate this a few times just to make the bug more likely to
 # manifest; Sanitized mode should catch it with one.
 A = B # error: Unable to resolve constant
-C = B
-D = B
-E = B
-F = B
+C = B # error: Unable to resolve constant
+D = B # error: Unable to resolve constant
+E = B # error: Unable to resolve constant
+F = B # error: Unable to resolve constant

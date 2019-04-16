@@ -5,7 +5,7 @@ class <constant:<root>> < ::<constant:Object> () @ test/testdata/first/resolver.
     class <constant:Inner1> < ::<constant:Object> () @ test/testdata/first/resolver.rb:9
       class <constant:A> < ::<constant:Object> () @ test/testdata/first/resolver.rb:10
       class <constant:Inner2> < ::<constant:Object> () @ test/testdata/first/resolver.rb:21
-        class <constant:A> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped @ test/testdata/first/resolver.rb:23
+        class <constant:A> < ::<constant:RubyTyper>::<constant:StubModule> () -> untyped @ test/testdata/first/resolver.rb:23
         method <static-init> () @ test/testdata/first/resolver.rb:13
       class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:10
       class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:13

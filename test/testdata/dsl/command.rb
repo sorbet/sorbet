@@ -26,7 +26,7 @@ class NotACommand < Llamas::Opus::Command # error: Unable to resolve constant
 
   sig {params(x: String).returns(Integer)}
   def call(x)
-    Integer(x)
+    Integer(x) # error: Method `Integer` does not exist on `NotACommand`
   end
 end
 

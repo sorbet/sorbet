@@ -221,7 +221,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                 }
 
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
+                if (a->symbol == core::Symbols::StubModule()) {
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
+                } else {
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
+                }
                 ret = current;
             },
             [&](ast::Local *a) {

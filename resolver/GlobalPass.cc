@@ -474,7 +474,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                 continue;
             }
             if (mixin.data(gs)->superClass() == core::Symbols::StubAncestor() ||
-                mixin.data(gs)->superClass() == core::Symbols::StubClass()) {
+                mixin.data(gs)->superClass() == core::Symbols::StubModule()) {
                 newMixins.emplace_back(mixin);
                 continue;
             }
