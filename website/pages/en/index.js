@@ -19,10 +19,12 @@ const sorbetRunExample =
 const PageSection = props => (
   <div
     style={{
-      backgroundColor: props.gray ? "#f5f5f5" : "white",
-      padding: "2em 0",
-      paddingBottom: props.short ? "2em" : "5em"
+      backgroundColor: (props.gray ? "#f5f5f5" :
+        (props.lightPurple ? "#6255b0": "white")),
+      color: props.lightPurple ? "white" : "inherit",
+      padding: props.short ? "2em 0" : "3em 0"
     }}
+    className="pageSection"
   >
     <div className="wrapper">{props.children}</div>
   </div>
@@ -55,7 +57,7 @@ class Index extends React.Component {
               <div className="projectLogo">
                 <img
                   src={`${baseUrl}img/sorbet-logo-white-sparkles.svg`}
-                  alt="Project Logo"
+                  alt="Sorbet Logo"
                 />
               </div>
               <div className="inner">
@@ -65,21 +67,20 @@ class Index extends React.Component {
                 >
                   Sorbet is a fast, powerful type checker designed for Ruby.
                 </h2>
-                <div style={{ paddingTop: "10px" }}>
+                <p style={{ paddingTop: "1em" }}>
+                  <strong>Available in summer 2019.</strong> Built by the team at <a href="https://stripe.com">Stripe</a>.
+                </p>
+                <div style={{ paddingTop: "1.2em" }}>
                   <Button href={docUrl("overview")}>Read the docs</Button>
                   <Button href="http://sorbet.run">Try it online</Button>
-                </div>
-                <div style={{ paddingTop: "18px" }}>
-                  Built by the team at Stripe.
                 </div>
               </div>
             </div>
           </div>
-          <Container align="center">
+          <Container align="center" className="featuresContainer">
             <GridBlock
               align="center"
               layout="threeColumn"
-              className="myCustomClass"
               contents={[
                 {
                   title: "Fast and scalable",
@@ -93,7 +94,7 @@ class Index extends React.Component {
                   content:
                     `Sorbet works with editors like VS Code, with features like autocomplete and jump to definition. It's easy to add to your CI setup.
 
-[Try sorbet online →](https://sorbet.run)`
+[Try Sorbet online →](https://sorbet.run)`
                 },
                 {
                   title: "Gradual by design",
@@ -108,9 +109,9 @@ class Index extends React.Component {
         </div>
         <PageSection gray short>
           <div style={{ fontSize: "1.2em", textAlign: "center" }}>
-            We’re looking for early feedback to make Sorbet great.{" "}
+            <strong>Available in summer 2019.</strong> We’re looking for early feedback to make Sorbet great:{" "}
             <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
-              Join the mailing list
+              join the mailing list
             </a>{" "}
             to get involved.
           </div>
@@ -118,7 +119,7 @@ class Index extends React.Component {
         <PageSection>
           <h2>Try Sorbet in your browser</h2>
           <p>
-            You can use the Sorbet playground to try features like autocomplete.
+            You can use the Sorbet playground to try features like type annotations and autocomplete.
             Go to <a href="http://sorbet.run">sorbet.run</a> to see more
             examples.
           </p>
@@ -134,56 +135,56 @@ class Index extends React.Component {
             including autocomplete, in-editor documentation, and go to
             definition.
           </p>
-          <p>
-            <a href={docUrl("overview")}>
-              Learn how to get started in the docs.
-            </a>
-          </p>
           <img
-            style={{ width: "100%" }}
+            style={{ width: "100%", marginTop: "0.5em" }}
             src={`${baseUrl}img/autocompleteAndDocs1.gif`}
             alt="GIF of autocomplete in editor"
           />
         </PageSection>
-        <PageSection>
-          <h2>Teams using Sorbet</h2>
-          <div className="teamsUsingSorbetColumns">
-            <div className="columnLeft">
-              <p>
-                Sorbet is currently used by the teams at Stripe and Coinbase. If
-                you'd like to try it at your company,{" "}
-                <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
-                  sign up for our mailing list
-                </a>{" "}
-                and we'll reach out when we have more to share!
-              </p>
-              <p>
-                <img
-                  src={`${baseUrl}img/stripe-logo.svg`}
-                  alt="Stripe Logo"
-                  style={{ height: "50px" }}
-                />
-                <img
-                  src={`${baseUrl}img/coinbase.png`}
-                  alt="Coinbase Logo"
-                  style={{ height: "50px", position: "relative", top: "-4px" }}
-                />
-              </p>
-            </div>
-            <div className="columnRight">
-              <p>
-                Hear about Sorbet from the folks that work on it at Stripe in
-                this video from Strangeloop 2018:
-              </p>
-              <a href="https://www.youtube.com/watch?v=uFFJyp8vXQI">
-                <img
-                  src={`${baseUrl}img/talk-thumb.png`}
-                  alt="Link to Sorbet talk video"
-                  style={{ width: "100%" }}
-                />
-              </a>
-            </div>
+        <PageSection short>
+          <div className="pageSectionColumns">
+            <p style={{display: "flex", flexDirection: "row", paddingRight: "50px", margin: 0}}>
+              <img
+                src={`${baseUrl}img/stripe-logo.svg`}
+                alt="Stripe Logo"
+                style={{ height: "50px", marginLeft: "-10px", marginRight: "30px" }}
+              />
+              <img
+                src={`${baseUrl}img/coinbase.png`}
+                alt="Coinbase Logo"
+                style={{ height: "50px", marginLeft: "-5px", position: "relative", top: "-4px"}}
+              />
+            </p>
+            <p style={{flex: 1, margin: 0}}>
+              Sorbet is currently used by the teams at Stripe and Coinbase. If
+              you'd like to try it at your company,{" "}
+              <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
+                sign up for our mailing list
+              </a>{" "}
+              and we'll reach out when we have more to share.
+            </p>
           </div>
+        </PageSection>
+        <PageSection gray>
+          <h2>Learn more about Sorbet</h2>
+          <p>
+            Watch a talk from <a href="https://www.thestrangeloop.com/2018/sessions.html">Strangeloop 2018</a>, or see <a href={docUrl('talks')}>more talks</a> by the Stripe team.
+          </p>
+          <iframe
+            style={{marginTop: "0.5em"}}
+            width="853"
+            height="480"
+            src="https://www.youtube.com/embed/uFFJyp8vXQI"
+            frameBorder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </PageSection>
+        <PageSection short lightPurple>
+          <p className="footer" style={{margin: 0}}>
+            <strong>Interested in getting involved?</strong>{" "}
+            Join <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
+            our mailing list</a>, and read more about Sorbet in our <a href={docUrl('overview')}>documentation</a>.</p>
         </PageSection>
       </div>
     );

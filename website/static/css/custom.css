@@ -1,40 +1,9 @@
-/* your custom css */
 
-@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
-
-}
-
-@media only screen and (min-width: 1024px) {
-  .teamsUsingSorbetColumns {
-    display: flex;
-  }
-
-  .teamsUsingSorbetColumns .columnLeft {
-    flex-basis: 0;
-    flex-grow: 1.5;
-    padding-right: 40px;
-  }
-
-  .teamsUsingSorbetColumns .columnRight {
-    flex-basis: 0;
-    flex-grow: 2;
-  }
-}
-
-@media only screen and (max-width: 1023px) {
-}
-
-@media only screen and (min-width: 1400px) {
-}
-
-@media only screen and (min-width: 1500px) {
-}
-
+/* Custom CSS styles */
 /* Full bleed overrides */
 .homeContainer {
   background: #4F4397;
   color: #ffffff;
-  padding-bottom: 2em;
 }
 
 .homeContainer .projectTitle {
@@ -46,6 +15,67 @@
   color: #ffffff;
 }
 
-.homeContainer a {
+.homeContainer .button:hover {
+  color: #4F4397;
+  background: #ffffff;
+}
+
+.homeContainer a, .footer a {
   color: #B4A8FF;
+}
+
+/* Features container */
+.featuresContainer {
+  margin-top: 0.5em;
+  padding: 2.5em 0;
+  background: #6255b0;
+}
+
+.featuresContainer .wrapper .threeByGridBlock {
+  margin-bottom: 0;
+}
+
+/* Page sections */
+.pageSection h2 {
+  margin-bottom: 0.7em;
+  margin-top: 0;
+}
+
+.pageSectionColumns {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Responsive styles*/
+@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+}
+
+@media only screen and (min-width: 1024px) {
+}
+
+@media only screen and (max-width: 1023px) {
+  /* Navbar color override in responsive mode */
+  .fixedHeaderContainer {
+    min-height: 55px;
+  }
+  .navigationSlider .slidingNav ul {
+    background: #4F4397;
+    border-top: 1px solid #7d76a9;
+    margin-top: 50px;
+  }
+  /* Masthead */
+  h2.projectTitle {
+    margin-top: 0;
+  }
+}
+@media only screen and (max-width: 700px) {
+  .pageSectionColumns {
+    flex-direction: column;
+}
+}
+@media only screen and (min-width: 1400px) {
+}
+
+@media only screen and (min-width: 1500px) {
 }
