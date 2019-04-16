@@ -34,6 +34,7 @@
 .homeContainer {
   background: #4F4397;
   color: #ffffff;
+  padding-bottom: 2em;
 }
 
 .homeContainer .projectTitle {

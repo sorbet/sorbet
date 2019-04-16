@@ -84,35 +84,23 @@ class Index extends React.Component {
                 {
                   title: "Fast and scalable",
                   content:
-                    "Sorbet is multithreaded, scaling linearly across cores on your CPU. It checks your types in seconds, giving you feedback as you code."
+                    `Sorbet is multithreaded, scaling linearly across cores on your CPU. It checks your types in seconds, giving you feedback as you code.
+
+[Get started with Sorbet →](docs/adopting)`
                 },
                 {
                   title: "Integrates with your tools",
                   content:
-                    "Sorbet works with editors like VS Code, with features like autocomplete and jump to definition. It's easy to add to your CI setup."
+                    `Sorbet works with editors like VS Code, with features like autocomplete and jump to definition. It's easy to add to your CI setup.
+
+[Try sorbet online →](https://sorbet.run)`
                 },
                 {
                   title: "Gradual by design",
                   content:
-                    "Sorbet works with normal Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time."
-                }
-              ]}
-            />
-            <GridBlock
-              align="center"
-              layout="threeColumn"
-              contents={[
-                {
-                  content:
-                    "[Get started with Sorbet →](docs/adopting)"
-                },
-                {
-                  content:
-                    "[Try Sorbet online →](https://sorbet.run)"
-                },
-                {
-                  content:
-                    "[Learn what makes Sorbet gradual →](docs/gradual)"
+                    `Sorbet works with normal Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time.
+
+[Learn what makes Sorbet gradual →](docs/gradual)`
                 }
               ]}
             />
