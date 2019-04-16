@@ -19,7 +19,10 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {label: 'Get started', doc: 'adopting'},
+    // 'adopting' and 'overview' are in the same top-level entry in sidebars.json,
+    // so both tabs on mobile would get highlighted.  Using the 'href:' attribute
+    // for "Get started" means that only the "Docs" tab will ever be active.
+    {label: 'Get started', href: '/docs/adopting'},
     {label: 'Docs', doc: 'overview'},
     {label: 'Try it online', href: 'https://sorbet.run'},
     {label: 'Talks', doc: 'talks'},
