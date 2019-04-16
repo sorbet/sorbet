@@ -10,7 +10,7 @@ module T::Props::Utils
       true
     when false
       false
-    when Symbol, NilClass, Numeric, Opus::Enum
+    when Symbol, NilClass, Numeric
       what
     when Array
       what.map {|v| deep_clone_object(v, freeze: freeze)}

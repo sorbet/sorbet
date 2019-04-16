@@ -305,45 +305,6 @@ class T::Props::Decorator
     .void
   end
   def prop_defined(name, cls, rules={})
-    # TODO(jerry): Create similar soft assertions against false
-    if rules[:optional] == true
-      optional_setter = rules.delete(:optional_setter)
-      if optional_setter != :t_nilable
-        Opus::Error.soft(
-          'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
-          notify: 'wei',
-          storytime: {
-            name: name,
-            cls_or_args: cls.to_s,
-            args: rules,
-            klass: decorated_class.name,
-          },
-        )
-      end
-    elsif rules[:optional] == :on_load
-      Opus::Error.soft(
-        'Use of `optional: :on_load` is deprecated. You probably want `T.nilable(...)` with :raise_on_nil_write instead.',
-        notify: 'jerry',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == :existing
-      Opus::Error.soft(
-        'Use of `optional: :existing` is not allowed: you should use use T.nilable (http://go/optional)',
-        notify: 'wei',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    end
-
     # Finally, if `optional` was not specified, then we set it to its default
     # value of `false`.
     if rules[:optional].nil?
@@ -372,9 +333,6 @@ class T::Props::Decorator
     hash_value_subdoc_type = hash_value_subdoc_type(type_object)
 
     sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
-    if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::Utils)
-      sensitivity_and_pii = Opus::Sensitivity::Utils.normalize_sensitivity_and_pii_annotation(sensitivity_and_pii)
-    end
     # We check for Class so this is only applied on concrete
     # documents/models; We allow mixins containing props to not
     # specify their PII nature, as long as every class into which they
@@ -414,8 +372,6 @@ class T::Props::Decorator
       extra: rules[:extra]&.freeze,
     )
 
-    validate_not_missing_sensitivity(name, rules)
-
     # for backcompat
     if type.is_a?(T::Types::TypedArray) && type.type.is_a?(T::Types::Simple)
       rules[:array] = type.type.raw_type
@@ -442,7 +398,6 @@ class T::Props::Decorator
 
     handle_foreign_option(name, cls, rules, rules[:foreign]) if rules[:foreign]
     handle_foreign_hint_only_option(cls, rules[:foreign_hint_only]) if rules[:foreign_hint_only]
-    handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
   sig {params(name: Symbol, rules: Rules).void}
@@ -490,9 +445,6 @@ class T::Props::Decorator
 
   # From T::Props::Utils.deep_clone_object, plus String
   TYPES_NOT_NEEDING_CLONE = [TrueClass, FalseClass, NilClass, Symbol, String, Numeric]
-  if defined?(Opus) && defined?(Opus::Enum)
-    TYPES_NOT_NEEDING_CLONE << Opus::Enum
-  end
 
   sig {params(type: PropType).returns(T::Boolean)}
   private def shallow_clone_ok(type)
@@ -528,48 +480,6 @@ class T::Props::Decorator
       T.enum(enum)
     else
       T::Utils.coerce(type)
-    end
-  end
-
-  sig {params(prop_name: Symbol, rules: Hash).void}
-  private def validate_not_missing_sensitivity(prop_name, rules)
-    if rules[:sensitivity].nil?
-      if rules[:redaction]
-        Opus::Error.hard("#{@class}##{prop_name} has a 'redaction:' annotation but no " \
-          "'sensitivity:' annotation. This is probably wrong, because if a " \
-          "prop needs redaction then it is probably sensitive. Add a " \
-          "sensitivity annotation like 'sensitivity: Opus::Sensitivity::PII." \
-          "whatever', or explicitly override this check with 'sensitivity: []'.")
-      end
-      # TODO(PRIVACYENG-982) Ideally we'd also check for 'password' and possibly
-      # other terms, but this interacts badly with ProtoDefinedDocument because
-      # the proto syntax currently can't declare "sensitivity: []"
-      if prop_name =~ /\bsecret\b/
-        Opus::Error.hard("#{@class}##{prop_name} has the word 'secret' in its name, but no " \
-          "'sensitivity:' annotation. This is probably wrong, because if a " \
-          "prop is named 'secret' then it is probably sensitive. Add a " \
-          "sensitivity annotation like 'sensitivity: Opus::Sensitivity::NonPII." \
-          "security_token', or explicitly override this check with " \
-          "'sensitivity: []'.")
-      end
-    end
-  end
-
-  # Create "#{prop_name}_redacted" method
-  sig do
-    params(
-      prop_name: Symbol,
-      redaction: Chalk::Tools::RedactionUtils::RedactionDirectiveSpec,
-    )
-    .void
-  end
-  private def handle_redaction_option(prop_name, redaction)
-    redacted_method = "#{prop_name}_redacted"
-
-    @class.send(:define_method, redacted_method) do
-      value = self.public_send(prop_name)
-      Chalk::Tools::RedactionUtils.redact_with_directive(
-        value, redaction)
     end
   end
 
@@ -649,12 +559,6 @@ class T::Props::Decorator
       end
 
       self.class.decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
-    end
-
-    @class.send(:define_method, "#{prop_name}_record") do |allow_direct_mutation: nil|
-      Opus::Error.soft("Using deprecated 'model.#{prop_name}_record' foreign key syntax. You should replace this with 'model.#{prop_name}_'",
-        notify: 'vasi')
-      send(fk_method, allow_direct_mutation: allow_direct_mutation)
     end
   end
 

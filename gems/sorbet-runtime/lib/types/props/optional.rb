@@ -80,35 +80,3 @@ module T::Props::Optional::DecoratorMethods
     end
   end
 end
-
-
-##############################################
-
-
-# NB: This must stay in the same file where T::Props::Optional is defined due to
-# T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
-module T::Props::Optional::ClassMethods
-  extend T::Sig
-
-  # Shorthand helper to define a `prop` with `optional => true`
-  # @return [void]
-  sig {params(name: T.any(Symbol, String), cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
-  def optional(name, cls_or_args, args={})
-    Opus::Error.soft(
-      'Use of `optional` is deprecated, please use `T.nilable(...)` instead.',
-      notify: 'wei',
-      storytime: {
-        name: name,
-        cls_or_args: cls_or_args.to_s,
-        args: args,
-        klass: self.to_s,
-      },
-    )
-
-    if (cls_or_args.is_a?(Hash) && cls_or_args.key?(:optional)) || args.key?(:optional)
-      raise ArgumentError.new("Cannot pass 'optional' argument when using 'optional' keyword to define a prop")
-    end
-
-    self.prop(name, cls_or_args, args.merge(optional: true))
-  end
-end

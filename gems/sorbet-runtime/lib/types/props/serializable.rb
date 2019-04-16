@@ -26,31 +26,7 @@ module T::Props::Serializable
       val = decorator.get(self, prop)
 
       if strict && val.nil? && T::Props::Utils.need_nil_write_check?(rules)
-        # If the prop was already missing during deserialization, that means the application
-        # code already had to deal with a nil value, which means we wouldn't be accomplishing
-        # much by raising here (other than causing an unnecessary breakage).
-        if self.required_prop_missing_from_deserialize?(prop)
-          Opus::Log.info("chalk-odm: missing required property in serialize",
-            prop: prop, class: self.class.name, id: decorator.get_id(self))
-        elsif rules[:notify_on_nil_write]
-          to_notify =
-            if rules[:notify_on_nil_write].is_a?(String)
-              Opus::Project::Instance.fetch(rules[:notify_on_nil_write].to_sym)
-            else
-              rules[:notify_on_nil_write]
-            end
-          Opus::Error.soft(
-            'nil value written to prop with :notify_on_nil_write set',
-            notify: to_notify,
-            storytime: {
-              klass: self.class.name,
-              prop: prop,
-              type: rules[:type],
-            },
-          )
-        else
-          raise T::Props::InvalidValueError.new("#{self.class.name}.#{prop} not set for non-optional prop")
-        end
+        raise T::Props::InvalidValueError.new("#{self.class.name}.#{prop} not set for non-optional prop")
       end
 
       # Don't serialize values that are nil to save space (both the
@@ -107,23 +83,13 @@ module T::Props::Serializable
         if rules[:optional] == false || rules[:optional] == :migrate
           val = decorator.get_default(rules, self.class)
           if val.nil?
-            # TODO(jerry): hard assert unconditionally after verifying this
-            # doesn't fire in production
             msg = "Tried to deserialize a required prop from a nil value. It's "\
               "possible that a nil value exists in the database, so you should "\
               "provide a `default: or factory:` for this prop (see go/optional "\
               "for more details). If this is already the case, you probably "\
               "omitted a required prop from the `fields:` option when doing a "\
               "partial load."
-            storytime = {
-              prop: hkey,
-              klass: self.class.name,
-            }
-            if hkey == '_id' || hkey == 'merchant'
-              Opus::Error.soft(msg, notify: 'jerry', storytime: storytime)
-            else
-              Opus::Error.hard(msg, storytime: storytime)
-            end
+            raise msg
           end
         elsif T::Props::Utils.need_nil_read_check?(rules)
           self.required_prop_missing_from_deserialize(p)
@@ -263,12 +229,6 @@ module T::Props::Serializable::DecoratorMethods
 
     if !rules[:raise_on_nil_write].nil? && rules[:raise_on_nil_write] != true
         raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
-    end
-
-    if (to_notify = rules[:notify_on_nil_write])
-      if !(to_notify.is_a?(String) || to_notify.is_a?(Opus::Project::Instance))
-        raise ArgumentError.new("The value of `notify_on_nil_write` must be a string or project (given: #{to_notify.class}).")
-      end
     end
 
     if rules[:raise_on_nil_write] && rules[:notify_on_nil_write]

@@ -70,19 +70,13 @@ module T::Private::ErrorHandler
       bad_method = super_signature.method
     end
 
-    if defined?(Opus) && defined?(Opus::Log)
-      method_file, method_line = bad_method.source_location
-      Opus::Log.info(
-        "SIG-DECLARE-FAILED",
-        definition_file: method_file,
-        definition_line: method_line,
-        kind: "Delete",
-        message: error.message,
-        clevel: Chalk::Log::CLevels::Sheddable,
-        )
-    else
-      puts "SIG-DECLARE-FAILED-WITHOUT-LOG Opus::Log is not included at this point. Please fix this sig: #{error.message}" # rubocop:disable PrisonGuard/NoBarePuts
-    end
+    puts(
+      "SIG-DECLARE-FAILED",
+      definition_file: method_file,
+      definition_line: method_line,
+      kind: "Delete",
+      message: error.message,
+    )
   end
 
   private_class_method def self.handle_call_validation_error_default(signature, opts)
@@ -94,30 +88,21 @@ module T::Private::ErrorHandler
     error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n#{suffix}"
 
     if signature.generated
-      if defined?(Opus) && defined?(Opus::Log)
-        got = opts[:value].class
-        got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
-        Opus::Log.info(
-          "SIG-CHECK-FAILED",
-          caller_file: location.path,
-          caller_line: location.lineno,
-          definition_file: method_file,
-          definition_line: method_line,
-          kind: opts[:kind],
-          name: opts[:name],
-          expected: opts[:type].name,
-          got: got,
-          clevel: Chalk::Log::CLevels::Sheddable,
-          )
-      else
-        puts "SIG-CHECK-FAILED-WITHOUT-LOG Opus::Log is not included at this point. Please fix this sig: #{error_message}" # rubocop:disable PrisonGuard/NoBarePuts
-      end
+      got = opts[:value].class
+      got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
+      puts(
+        "SIG-CHECK-FAILED",
+        caller_file: location.path,
+        caller_line: location.lineno,
+        definition_file: method_file,
+        definition_line: method_line,
+        kind: opts[:kind],
+        name: opts[:name],
+        expected: opts[:type].name,
+        got: got,
+      )
     elsif signature.soft_notify
-      if defined?(Opus) && defined?(Opus::Error)
-        Opus::Error.soft("TypeError: #{error_message}", {notify: signature.soft_notify})
-      else
-        puts "TypeError: #{error_message}, notify: #{signature.soft_notify}" # rubocop:disable PrisonGuard/NoBarePuts
-      end
+      puts "TypeError: #{error_message}, notify: #{signature.soft_notify}" # rubocop:disable PrisonGuard/NoBarePuts
     else
       raise TypeError.new(error_message)
     end
