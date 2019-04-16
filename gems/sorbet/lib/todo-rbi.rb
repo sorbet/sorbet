@@ -6,30 +6,6 @@ require 'json'
 require_relative './serialize'
 require_relative './step_interface'
 
-class Sorbet::Private::SymbolEntry
-  attr_reader :name, :superclass_id, :parents
-  attr_accessor :has_children
-
-  def initialize(name, superclass_id, parents=[])
-    @name = name
-    @superclass_id = superclass_id
-    @parents = parents
-    @has_children = false
-  end
-
-  def final_name
-    @final_name ||= begin
-      parent_name = parents.join('::')
-      entry_name = name
-      if parent_name.empty?
-        entry_name
-      else
-        "#{parent_name}::#{entry_name}"
-      end
-    end
-  end
-end
-
 class Sorbet::Private::TodoRBI
   OUTPUT = 'sorbet/rbi/todo.rbi'
   HEADER = Sorbet::Private::Serialize.header('strong', 'todo')
@@ -55,7 +31,8 @@ class Sorbet::Private::TodoRBI
       output = String.new
       output << HEADER
       missing_constants.each do |const|
-        output << "module #{const}; end\n"
+        next if const.include?("<") || const.include?("class_of")
+        output << "module #{const.gsub('T.untyped::', '')}; end\n"
       end
       File.write(OUTPUT, output) if output != HEADER
     end
