@@ -175,14 +175,13 @@ class Index extends React.Component {
                 Hear about Sorbet from the folks that work on it at Stripe in
                 this video from Strangeloop 2018:
               </p>
-              <iframe
-                width="560"
-                height="315"
-                src="https://www.youtube.com/embed/uFFJyp8vXQI"
-                frameborder="0"
-                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              />
+              <a href="https://www.youtube.com/watch?v=uFFJyp8vXQI">
+                <img
+                  src={`${baseUrl}img/talk-thumb.png`}
+                  alt="Link to Sorbet talk video"
+                  style={{ width: "100%" }}
+                />
+              </a>
             </div>
           </div>
         </PageSection>
