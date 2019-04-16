@@ -42,6 +42,7 @@ filegroup(
             "**/*.rb",
             "**/*.rbi",
         ],
+        exclude = ["test/**/*"],
     ),
     visibility = ["//visibility:public"],
 )
