@@ -26,4 +26,14 @@ module Sorbet::Private::RealStdlib
     @real_ancestors ||= Module.instance_method(:ancestors)
     @real_ancestors.bind(mod).call
   end
+
+  def self.real_instance_methods(mod, arg)
+    @real_ancestors ||= Module.instance_method(:instance_methods)
+    @real_ancestors.bind(mod).call(arg)
+  end
+
+  def self.real_private_instance_methods(mod, arg)
+    @real_ancestors ||= Module.instance_method(:private_instance_methods)
+    @real_ancestors.bind(mod).call(arg)
+  end
 end
