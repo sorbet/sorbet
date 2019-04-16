@@ -10,6 +10,8 @@
 
 using namespace std;
 
+extern char **environ;
+
 namespace {
 class FileCloser {
 public:
@@ -94,7 +96,7 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
         }
         argv.push_back(nullptr);
 
-        ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
+        ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), environ);
         if (ret) {
             return nullopt;
         }
