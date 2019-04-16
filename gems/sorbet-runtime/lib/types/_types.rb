@@ -197,7 +197,7 @@ module T
       raise TypeError.new(msg) if arg.nil?
       arg
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-      T::Private::ErrorHandler.handle_type_error(e)
+      T::Private::ErrorHandler.handle_inline_type_error(e)
       arg
     end
   end
