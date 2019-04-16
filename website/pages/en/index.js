@@ -168,17 +168,13 @@ class Index extends React.Component {
         <PageSection gray>
           <h2>Learn more about Sorbet</h2>
           <p>
-            Watch a talk from <a href="https://www.thestrangeloop.com/2018/sessions.html">Strangeloop 2018</a>, or see <a href={docUrl('talks')}>more talks</a> by the Stripe team.
+            Watch an introductory talk from <a href="https://www.thestrangeloop.com/2018/sessions.html">Strangeloop 2018</a>, or see <a href={docUrl('talks')}>more talks</a> by the Sorbet team.
           </p>
-          <iframe
-            style={{marginTop: "0.5em"}}
-            width="853"
-            height="480"
-            src="https://www.youtube.com/embed/uFFJyp8vXQI"
-            frameBorder="0"
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          <a href="https://www.youtube.com/watch?v=uFFJyp8vXQI">
+              <img src={`${baseUrl}img/talk-thumb.png`}
+              alt="Link to Sorbet talk video"
+              style={{ width: "100%", maxWidth: "850px", marginTop: "0.5em"}} />
+          </a>
         </PageSection>
         <PageSection short lightPurple>
           <p className="footer" style={{margin: 0}}>
