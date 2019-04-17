@@ -208,8 +208,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 logger->trace("Running plugins: {}", file.data(gs).path());
                 core::MutableContext ctx(gs, core::Symbols::root());
                 core::ErrorRegion errs(gs, file);
-                auto [pluginTree, pluginFiles] =
-                    plugin::SubprocessTextPlugin::run(ctx, move(tree), opts.dslPluginExtraArgs);
+                auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
                 tree = move(pluginTree);
                 resultPluginFiles = move(pluginFiles);
             }

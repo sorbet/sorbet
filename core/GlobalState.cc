@@ -1035,6 +1035,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
     result->dslPlugins = this->dslPlugins;
+    result->dslRubyExtraArgs = this->dslRubyExtraArgs;
     result->names.reserve(this->names.capacity());
     if (keepId) {
         result->names.resize(this->names.size());

@@ -141,8 +141,12 @@ static vector<string> extractExtraSubprocessOptions(const YAML::Node &config, co
     }
 }
 
-pair<UnorderedMap<string, string>, vector<string>> extractDslPlugins(string filePath,
-                                                                     shared_ptr<spdlog::logger> logger) {
+struct DslConfiguration {
+    UnorderedMap<string, string> triggers;
+    vector<string> rubyExtraArgs;
+};
+
+DslConfiguration extractDslPlugins(string filePath, shared_ptr<spdlog::logger> logger) {
     bool good = true;
     YAML::Node config;
     try {
@@ -576,9 +580,9 @@ void readOptions(Options &opts, int argc, char *argv[],
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
         }
         if (!raw["dsl-plugins"].as<string>().empty()) {
-            auto [triggers, extraArgs] = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
-            opts.dslPluginTriggers = std::move(triggers);
-            opts.dslPluginExtraArgs = std::move(extraArgs);
+            auto dslConfig = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
+            opts.dslPluginTriggers = std::move(dslConfig.triggers);
+            opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
