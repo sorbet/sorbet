@@ -341,6 +341,7 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
                 state.terminate = true;
                 state.errorCode = 0;
             }
+            state.pendingRequests.push_back(move(msg));
         } else if (method == LSPMethod::SorbetError) {
             // Place errors at the *front* of the queue.
             // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.
