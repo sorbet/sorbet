@@ -160,7 +160,8 @@ public:
      * Returns:
      * - Length of data read if > 0.
      * - 0 if timeout occurs.
-     * - -1 if an error or EOF occurs.
+     *
+     * Throws FileReadException on EOF or error.
      */
     static int readFd(int fd, std::vector<char> &output, int timeoutMs = 100);
     /**
@@ -170,11 +171,12 @@ public:
      * Stores any extra bits read into `buffer`.
      *
      * Returns:
-     * - 0 if timeout occurs or read() did not yield a newline.
-     * - 1 if a line was found. `line` contains the contents of the line, without the ending newline character.
-     * - -1 if an error or EOF occurs.
+     * - nullopt if timeout occurs or read() did not yield a newline.
+     * - string if a line was found. The string does not contain the ending newline character.
+     *
+     * Throws FileReadException on EOF or error.
      */
-    static int readLineFromFd(int fd, std::string &line, std::string &buffer, int timeoutMs = 100);
+    static std::optional<std::string> readLineFromFd(int fd, std::string &buffer, int timeoutMs = 100);
 };
 
 } // namespace sorbet

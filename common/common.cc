@@ -95,38 +95,38 @@ int sorbet::FileOps::readFd(int fd, std::vector<char> &output, int timeoutMs) {
 
     auto rv = select(fd + 1, &set, NULL, NULL, &timeout);
     if (rv == -1) {
-        // An error occurred.
-        return -1;
+        throw sorbet::FileReadException(fmt::format("Error during select(): {}", errno));
     } else if (rv == 0) {
         // A timeout occurred.
         return 0;
     } else {
         auto read = ::read(fd, output.data(), output.size());
         if (read == 0) {
-            // EOF.
-            return -1;
+            throw sorbet::FileReadException("EOF");
+        } else if (read < 0) {
+            throw sorbet::FileReadException(fmt::format("Error during read(): {}", errno));
         }
-        // Negative if error, otherwise is size read.
+        // `read` is size read.
         return read;
     }
 }
 
-int sorbet::FileOps::readLineFromFd(int fd, string &line, string &buffer, int timeoutMs) {
+optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int timeoutMs) {
     auto bufferFnd = buffer.find('\n');
     if (bufferFnd != string::npos) {
         // Edge case: Last time this was called, we read multiple lines.
-        line = buffer.substr(0, bufferFnd);
+        string line = buffer.substr(0, bufferFnd);
         buffer.erase(0, bufferFnd + 1);
-        return 1;
+        return line;
     }
 
     constexpr int BUFF_SIZE = 1024 * 8;
     vector<char> buf(BUFF_SIZE);
 
     int result = FileOps::readFd(fd, buf, timeoutMs);
-    if (result <= 0) {
-        // Timeout or error.
-        return result;
+    if (result == 0) {
+        // Timeout.
+        return nullopt;
     }
 
     // Store whatever we read into buffer, and see if we received a full line.
@@ -134,17 +134,17 @@ int sorbet::FileOps::readLineFromFd(int fd, string &line, string &buffer, int ti
     const auto fnd = std::find(buf.begin(), end, '\n');
     if (fnd != end) {
         buffer.append(buf.begin(), fnd);
-        line = buffer;
+        string line = buffer;
         buffer.clear();
         if (fnd + 1 != end) {
             // If we read beyond the line, store extra stuff we read into the string buffer.
             // Skip over the newline.
             buffer.append(fnd + 1, end);
         }
-        return 1;
+        return line;
     } else {
         buffer.append(buf.begin(), end);
-        return 0;
+        return nullopt;
     }
 }
 

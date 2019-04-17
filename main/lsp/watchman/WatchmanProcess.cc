@@ -53,21 +53,16 @@ void WatchmanProcess::start() {
         auto file = p.output();
         auto fd = fileno(file);
 
-        string line;
         string buffer;
 
         while (!isStopped()) {
-            auto rv = FileOps::readLineFromFd(fd, line, buffer);
-            if (rv == 0) {
+            auto maybeLine = FileOps::readLineFromFd(fd, buffer);
+            if (!maybeLine) {
                 // Timeout occurred. See if we should abort before reading further.
                 continue;
             }
-            if (rv == -1) {
-                // Unable to read from file descriptor. Watchman may have exited abnormally.
-                exitWithCode(-1);
-                break;
-            }
 
+            const string &line = *maybeLine;
             // Line found!
             rapidjson::Document d(&alloc);
             logger->debug(line);

@@ -10,30 +10,27 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 /**
- * Attempts to read an LSP message from the file descriptor. Stores message into readMessage.
+ * Attempts to read an LSP message from the file descriptor. Returns a nullptr if it fails.
  *
  * Extra bits read are stored into `buffer`.
  *
- * Returns:
- * - 1 if a message was read successfully. `readMessage` contains the message.
- * - 0 if a timeout occurred before a message was completely read.
- * - -1 if an error or EOF occurs.
+ * Throws an exception on read error or EOF.
  */
-int getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger, int inputFd,
-                  string &buffer, unique_ptr<LSPMessage> &readMessage) {
+unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger, int inputFd,
+                  string &buffer) {
     int length = -1;
     string allRead;
     {
-        string line;
-        // Break and return if a timeout occurs.
-        for (;;) {
-            int result = FileOps::readLineFromFd(inputFd, line, buffer);
-            if (result != 1) {
+        // Break and return if a timeout occurs. Bound loop to prevent infinite looping here. There's typically only two lines in a header.
+        for (int i = 0; i < 10; i += 1) {
+            auto maybeLine = FileOps::readLineFromFd(inputFd, buffer);
+            if (!maybeLine) {
                 // Line not read. Abort. Store what was read thus far back into buffer
                 // for use in next call to function.
                 buffer = absl::StrCat(allRead, buffer);
-                return result;
+                return nullptr;
             }
+            const string& line = *maybeLine;
             absl::StrAppend(&allRead, line, "\n");
             if (line == "\r") {
                 // End of headers.
@@ -47,7 +44,7 @@ int getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd:
     if (length < 0) {
         logger->debug("No \"Content-Length: %i\" header found.");
         // Throw away what we've read and start over.
-        return 0;
+        return nullptr;
     }
 
     if (buffer.length() < length) {
@@ -58,11 +55,13 @@ int getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd:
         if (result > 0) {
             buffer.append(buf.begin(), buf.begin() + result);
         }
+        if (result == -1) {
+            Exception::raise("Error reading file or EOF.");
+        }
         if (result != moreNeeded) {
-            // Didn't get enough or an error occurred.
-            // Return read data to `buffer`.
+            // Didn't get enough data. Return read data to `buffer`.
             buffer = absl::StrCat(allRead, buffer);
-            return result > 0 ? 0 : result;
+            return nullptr;
         }
     }
 
@@ -70,8 +69,7 @@ int getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd:
 
     string json = buffer.substr(0, length);
     buffer.erase(0, length);
-    readMessage = LSPMessage::fromClient(alloc, json);
-    return 1;
+    return LSPMessage::fromClient(alloc, json);
 }
 
 class NotifyOnDestruction {
@@ -136,26 +134,23 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
             string buffer;
-            while (true) {
-                unique_ptr<LSPMessage> msg;
-                int result = getNewRequest(readerAlloc, logger, inputFd, buffer, msg);
-                {
-                    absl::MutexLock lck(&mtx); // guards guardedState.
-                    if (result == 1) {
-                        ENFORCE(msg);
-                        enqueueRequest(readerAlloc, logger, guardedState, move(msg), true);
-                    }
-                    // Check if it's time to exit.
-                    if (guardedState.terminate) {
-                        // Another thread exited.
-                        break;
-                    } else if (result == -1) {
-                        // An error or EOF occurred. Tell main thread to exit.
-                        guardedState.terminate = true;
-                        guardedState.errorCode = 0;
-                        break;
+            try {
+                while (true) {
+                    auto msg = getNewRequest(readerAlloc, logger, inputFd, buffer);
+                    {
+                        absl::MutexLock lck(&mtx); // guards guardedState.
+                        if (msg) {
+                            enqueueRequest(readerAlloc, logger, guardedState, move(msg), true);
+                        }
+                        // Check if it's time to exit.
+                        if (guardedState.terminate) {
+                            // Another thread exited.
+                            break;
+                        }
                     }
                 }
+            } catch (FileReadException e) {
+                // Failed to read from input stream. Ignore. NotifyOnDestruction will take care of exiting cleanly.
             }
         });
 
