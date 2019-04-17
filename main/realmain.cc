@@ -17,7 +17,7 @@
 #include "main/realmain.h"
 #include "payload/payload.h"
 #include "resolver/resolver.h"
-#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
 
@@ -167,7 +167,11 @@ int realmain(int argc, char *argv[]) {
         startHUPMonitor();
     }
     if (!opts.debugLogFile.empty()) {
-        auto fileSink = make_shared<spdlog::sinks::basic_file_sink_mt>(opts.debugLogFile);
+        // LSP could run for a long time. Rotate log files, and trim at 1 GiB. Keep around 3 log files.
+        // Cast first number to size_t to prevent integer multiplication.
+        // TODO(jvilk): Reduce size once LSP logging is less chunderous.
+        auto fileSink =
+            make_shared<spdlog::sinks::rotating_file_sink_mt>(opts.debugLogFile, ((size_t)1) * 1024 * 1024 * 1024, 3);
         fileSink->set_level(spd::level::debug);
         { // replace console & fatal loggers
             vector<spd::sink_ptr> sinks{stderrColorSink, fileSink};

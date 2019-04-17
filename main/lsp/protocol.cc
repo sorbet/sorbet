@@ -43,7 +43,7 @@ unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, co
     }
 
     if (length < 0) {
-        logger->debug("No \"Content-Length: %i\" header found.");
+        logger->trace("No \"Content-Length: %i\" header found.");
         // Throw away what we've read and start over.
         return nullptr;
     }
