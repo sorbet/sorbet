@@ -16,12 +16,13 @@ namespace sorbet::realmain::lsp {
  *
  * Throws an exception on read error or EOF.
  */
-unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger, int inputFd,
-                  string &buffer) {
+unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
+                                     int inputFd, string &buffer) {
     int length = -1;
     string allRead;
     {
-        // Break and return if a timeout occurs. Bound loop to prevent infinite looping here. There's typically only two lines in a header.
+        // Break and return if a timeout occurs. Bound loop to prevent infinite looping here. There's typically only two
+        // lines in a header.
         for (int i = 0; i < 10; i += 1) {
             auto maybeLine = FileOps::readLineFromFd(inputFd, buffer);
             if (!maybeLine) {
@@ -30,7 +31,7 @@ unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, co
                 buffer = absl::StrCat(allRead, buffer);
                 return nullptr;
             }
-            const string& line = *maybeLine;
+            const string &line = *maybeLine;
             absl::StrAppend(&allRead, line, "\n");
             if (line == "\r") {
                 // End of headers.
