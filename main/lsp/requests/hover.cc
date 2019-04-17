@@ -57,7 +57,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
             // things like <Class:Foo> as html tags and make them clickable (but the click takes
             // you somewhere nonsensical)
             auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, contents);
-            response.result = make_unique<Hover>(markupContents->toJSONValue(alloc));
+            response.result = make_unique<Hover>(move(markupContents));
             sendResponse(response);
         } else if (auto defResp = resp->isDefinition()) {
             // TODO: Actually send the type signature here. I'm skipping this for now
@@ -67,7 +67,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
             sendResponse(response);
         } else {
             auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*finalGs));
-            response.result = make_unique<Hover>(markupContents->toJSONValue(alloc));
+            response.result = make_unique<Hover>(move(markupContents));
             sendResponse(response);
         }
 

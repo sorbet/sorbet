@@ -178,8 +178,6 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
     EXPECT_FALSE(capabilities.renameProvider.has_value());
     EXPECT_FALSE(capabilities.documentLinkProvider.has_value());
-    EXPECT_FALSE(capabilities.colorProvider.has_value());
-    EXPECT_FALSE(capabilities.foldingRangeProvider.has_value());
     EXPECT_FALSE(capabilities.executeCommandProvider.has_value());
     EXPECT_FALSE(capabilities.workspace.has_value());
 }
@@ -291,8 +289,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     // Complete initialization handshake with an 'initialized' message.
     {
         rapidjson::Value emptyObject(rapidjson::kObjectType);
-        auto initialized = make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
-                                                            make_unique<rapidjson::Value>(rapidjson::kObjectType));
+        auto initialized = make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
         return lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
     }
 }

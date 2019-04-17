@@ -254,7 +254,7 @@ TEST_F(ProtocolTest, HidesSyntheticArgumentsOnHover) {
         EXPECT_TRUE(response.result);
         auto &hoverOrNull = get<std::variant<JSONNullObject, std::unique_ptr<Hover>>>(*response.result);
         auto &hover = get<std::unique_ptr<Hover>>(hoverOrNull);
-        auto content = MarkupContent::fromJSONValue(lspWrapper->alloc, *hover->contents);
+        auto &content = hover->contents;
         EXPECT_EQ(content->value, "sig {params(x: Integer).returns(String)}");
     }
 }

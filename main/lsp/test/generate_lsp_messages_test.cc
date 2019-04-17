@@ -159,49 +159,6 @@ TEST(GenerateLSPMessagesTest, VariantField) {
     ASSERT_THROW(cancelParams->toJSON(), MissingVariantValueError);
 }
 
-TEST(GenerateLSPMessagesTest, AnyArray) {
-    parseTest<Command>(alloc, "{\"title\": \"\", \"command\": \"\", \"arguments\": [0, true, \"foo\"]}",
-                       [](auto &msg) -> void {
-                           auto &argsOptional = msg->arguments;
-                           ASSERT_TRUE(argsOptional.has_value());
-                           auto &args = *argsOptional;
-                           ASSERT_EQ(args.size(), 3);
-                           ASSERT_TRUE(args.at(0)->IsNumber());
-                           ASSERT_TRUE(args.at(1)->IsBool());
-                           ASSERT_TRUE(args.at(2)->IsString());
-                       });
-
-    // Must be an array.
-    ASSERT_THROW(Command::fromJSON(alloc, "{\"title\": \"\", \"command\": \"\", \"arguments\": {}}"), JSONTypeError);
-}
-
-TEST(GenerateLSPMessagesTest, AnyObject) {
-    parseTest<DocumentFormattingParams>(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}",
-                                        [](auto &params) -> void { ASSERT_TRUE(params->options->IsObject()); });
-
-    // Deserialization: Must be an object.
-    ASSERT_THROW(DocumentFormattingParams::fromJSON(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": true}"),
-                 JSONTypeError);
-
-    // Serialization: Must be an object.
-    // Null pointer case
-    auto formattingParams =
-        DocumentFormattingParams::fromJSON(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}");
-    formattingParams->options = nullptr;
-    ASSERT_THROW(formattingParams->toJSON(), NullPtrError);
-
-    // Non-object case
-    formattingParams->options = make_unique<rapidjson::Value>(rapidjson::kNullType);
-    ASSERT_THROW(formattingParams->toJSON(), InvalidTypeError);
-
-    // New object case -- doesn't throw and stresses supported APIs for making values.
-    auto formattingParams2 =
-        DocumentFormattingParams::fromJSON(alloc, "{\"textDocument\": {\"uri\": \"\"}, \"options\": {}}");
-    auto range = make_unique<Position>(0, 0);
-    formattingParams2->options = range->toJSONValue(alloc);
-    ASSERT_NO_THROW(formattingParams2->toJSON());
-}
-
 TEST(GenerateLSPMessagesTest, StringConstant) {
     parseTest<CreateFile>(alloc, "{\"kind\": \"create\", \"uri\": \"file://foo\"}",
                           [](auto &createFile) -> void { ASSERT_EQ(createFile->kind, "create"); });
