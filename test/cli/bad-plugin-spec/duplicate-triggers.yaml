@@ -1,5 +1,6 @@
-attribute: ar_attribute.rb
-attribute: dry_types_attribute.rb
-attribute: my_very_own_attribute.rb
-food: good_for_health.rb
-food: bad_for_health.rb
+triggers:
+  attribute: ar_attribute.rb
+  attribute: dry_types_attribute.rb
+  attribute: my_very_own_attribute.rb
+  food: good_for_health.rb
+  food: bad_for_health.rb

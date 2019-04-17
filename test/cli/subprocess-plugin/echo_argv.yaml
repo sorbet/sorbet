@@ -1,1 +1,2 @@
-hook: test/cli/subprocess-plugin/echo_argv.rb
+triggers:
+  hook: test/cli/subprocess-plugin/echo_argv.rb

@@ -44,8 +44,9 @@ private:
 struct SpawningWalker {
     vector<shared_ptr<core::File>> subprocessResults;
     InlinedVector<Namespace, 5> nesting;
+    const vector<string> &rubyExtraArgs;
 
-    SpawningWalker() : nesting() {}
+    SpawningWalker(const vector<string> &rubyExtraArgs) : rubyExtraArgs(rubyExtraArgs) {}
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
         if (klass->symbol == core::Symbols::root()) {
@@ -68,8 +69,15 @@ struct SpawningWalker {
                 string_view shortName = send->fun.data(ctx)->shortName(ctx);
                 string sendSource = send->loc.source(ctx);
 
-                vector<string> args{string(*command),  string("--class"),  move(className), string("--method"),
-                                    string(shortName), string("--source"), move(sendSource)};
+                vector<string> args(rubyExtraArgs);
+                args.emplace_back(*command);
+                args.emplace_back("--class");
+                args.emplace_back(move(className));
+                args.emplace_back("--method");
+                args.emplace_back(shortName);
+                args.emplace_back("--source");
+                args.emplace_back(move(sendSource));
+
                 output = Subprocess::spawn("ruby", move(args));
             }
 
@@ -121,12 +129,12 @@ struct SpawningWalker {
 };
 
 pair<unique_ptr<ast::Expression>, vector<shared_ptr<core::File>>>
-SubprocessTextPlugin::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
+SubprocessTextPlugin::run(core::Context ctx, unique_ptr<ast::Expression> tree, const vector<string> &rubyExtraArgs) {
     if (!ctx.state.hasAnyDslPlugin()) {
         vector<shared_ptr<core::File>> empty;
         return {move(tree), empty};
     }
-    SpawningWalker walker;
+    SpawningWalker walker(rubyExtraArgs);
     return {ast::TreeMap::apply(ctx, walker, move(tree)), move(walker.subprocessResults)};
 }
 

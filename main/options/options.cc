@@ -118,41 +118,67 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
     return result;
 }
 
-UnorderedMap<string, string> extractDslPlugins(string filePath, shared_ptr<spdlog::logger> logger) {
-    UnorderedMap<string, string> result;
-    bool good = true;
-    try {
-        YAML::Node config = YAML::LoadFile(filePath);
-        switch (config.Type()) {
-            case YAML::NodeType::Map:
-                for (const auto &child : config) {
-                    auto key = child.first.as<string>();
-                    if (child.second.Type() == YAML::NodeType::Scalar) {
-                        auto value = child.second.as<string>();
-                        auto [_, inserted] = result.emplace(move(key), move(value));
-                        if (!inserted) {
-                            logger->error("{}: Duplicate plugin trigger \"{}\"", filePath, key);
-                            good = false;
-                        }
-                    } else {
-                        logger->error("{}: Plugin trigger \"{}\" must map to a command that is a string", filePath,
-                                      key);
-                        good = false;
-                    }
-                }
-                break;
-            default:
-                logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", filePath);
-                good = false;
+static vector<string> extractExtraSubprocessOptions(const YAML::Node &config, const string &filePath,
+                                                    shared_ptr<spdlog::logger> logger) {
+    auto extraArgNode = config["ruby_extra_args"];
+    vector<string> extraArgs;
+    if (!extraArgNode) {
+        return extraArgs;
+    }
+    if (extraArgNode.IsSequence()) {
+        for (const auto &arg : extraArgNode) {
+            if (arg.IsScalar()) {
+                extraArgs.emplace_back(arg.as<string>());
+            } else {
+                logger->error("{}: An element of `ruby_extra_args` is not a string", filePath);
+                throw EarlyReturnWithCode(1);
+            }
         }
+        return extraArgs;
+    } else {
+        logger->error("{}: `ruby_extra_args` must be an array of strings", filePath);
+        throw EarlyReturnWithCode(1);
+    }
+}
+
+pair<UnorderedMap<string, string>, vector<string>> extractDslPlugins(string filePath,
+                                                                     shared_ptr<spdlog::logger> logger) {
+    bool good = true;
+    YAML::Node config;
+    try {
+        config = YAML::LoadFile(filePath);
     } catch (YAML::BadFile) {
         logger->error("Failed to open DSL specification file \"{}\"", filePath);
+        throw EarlyReturnWithCode(1);
+    }
+    if (!config.IsMap()) {
+        logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", filePath);
+        throw EarlyReturnWithCode(1);
+    }
+    UnorderedMap<string, string> triggers;
+    if (auto triggersNode = config["triggers"]; triggersNode.IsMap()) {
+        for (const auto &child : triggersNode) {
+            auto key = child.first.as<string>();
+            if (child.second.Type() == YAML::NodeType::Scalar) {
+                auto value = child.second.as<string>();
+                auto [_, inserted] = triggers.emplace(move(key), move(value));
+                if (!inserted) {
+                    logger->error("{}: Duplicate plugin trigger \"{}\"", filePath, key);
+                    good = false;
+                }
+            } else {
+                logger->error("{}: Plugin trigger \"{}\" must map to a command that is a string", filePath, key);
+                good = false;
+            }
+        }
+    } else {
+        logger->error("{}: Required key `triggers` must be a map", filePath);
         good = false;
     }
     if (!good) {
         throw EarlyReturnWithCode(1);
     }
-    return result;
+    return {triggers, extractExtraSubprocessOptions(config, filePath, logger)};
 }
 
 cxxopts::Options buildOptions() {
@@ -550,7 +576,9 @@ void readOptions(Options &opts, int argc, char *argv[],
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
         }
         if (!raw["dsl-plugins"].as<string>().empty()) {
-            opts.dslPlugins = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
+            auto [triggers, extraArgs] = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
+            opts.dslPluginTriggers = std::move(triggers);
+            opts.dslPluginExtraArgs = std::move(extraArgs);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
