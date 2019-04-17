@@ -2,6 +2,47 @@
 /* Custom CSS styles */
 /* Full bleed overrides */
 .homeContainer {
+  text-align: left;
+}
+
+.projectTitle {
+  line-height: 1.2em;
+}
+
+.homeContainer .homeWrapper {
+  padding: 4em 20px;
+}
+
+.wrapper {
+  max-width: 1100px;
+}
+
+.homeContainer .homeWrapper .projectLogo {
+  padding: 0;
+
+}
+
+.homeContainer .homeWrapper .projectLogo img {
+  width: 200px;
+}
+
+.container .wrapper .threeByGridBlock {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+
+.container .wrapper .threeByGridBlock h2 {
+  margin-top: 0;
+  text-align: left;
+}
+
+.container .wrapper .threeByGridBlock h2 p {
+  margin-top: 0;
+  text-align: left;
+  margin-bottom: 0;
+}
+.homeContainer {
   background: #4F4397;
   color: #ffffff;
 }

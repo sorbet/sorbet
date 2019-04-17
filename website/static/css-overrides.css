@@ -1,6 +1,6 @@
 /*
  * Custom Docusaurus overrides.
- * See here for mor information:
+ * See here for more information:
  * https://docusaurus.io/docs/en/api-pages#styles
  */
 
@@ -37,44 +37,10 @@ sup {
   font-weight: bold;
 }
 
-.homeContainer {
-  text-align: left;
-}
-
-.projectTitle {
-  line-height: 1.2em;
-}
-
-.homeContainer .homeWrapper {
-  padding: 4em 20px;
-}
-
-.wrapper {
-  max-width: 1100px;
-}
-
-.homeContainer .homeWrapper .projectLogo {
-  padding: 0;
-
-}
-
-.homeContainer .homeWrapper .projectLogo img {
-  width: 200px;
-}
-
-.container .wrapper .threeByGridBlock {
-  text-align: left;
-  margin-bottom: 20px;
-}
-
-
-.container .wrapper .threeByGridBlock h2 {
-  margin-top: 0;
-  text-align: left;
-}
-
-.container .wrapper .threeByGridBlock h2 p {
-  margin-top: 0;
-  text-align: left;
-  margin-bottom: 0;
-}
+/*
+ * NOTE: This file is for overrides.
+ *
+ * Before adding to this file, consider whether this is an override of an
+ * existing Docusaurus style, or a new style for a new thing we're building for
+ * the first time.
+ */
