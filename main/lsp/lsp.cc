@@ -10,9 +10,9 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, const shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool skipConfigatron,
+                 WorkerPool &workers, int inputFd, std::ostream &outputStream, bool skipConfigatron,
                  bool disableFastPath)
-    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputStream(inputStream),
+    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputFd(inputFd),
       outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath),
       lastMetricUpdateTime(chrono::steady_clock::now()) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);

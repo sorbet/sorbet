@@ -6,67 +6,29 @@ using namespace std;
 namespace sorbet::realmain::lsp::watchman {
 
 WatchmanProcess::WatchmanProcess(
-    shared_ptr<spdlog::logger> logger, string_view workSpace, vector<string> extensions,
+    shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace, vector<string> extensions,
     function<void(rapidjson::MemoryPoolAllocator<> &, unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
         processUpdate,
-    std::function<void(rapidjson::MemoryPoolAllocator<> &, int)> processExit)
-    : logger(logger), workSpace(string(workSpace)), extensions(extensions), processUpdate(processUpdate),
-      processExit(processExit), thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
+    std::function<void(int)> processExit)
+    : logger(logger), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)), extensions(extensions),
+      processUpdate(processUpdate), processExit(processExit),
+      thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
 
 WatchmanProcess::~WatchmanProcess() {
-    logger->debug("Ending watchman process.");
+    exitWithCode(0);
+    // Destructor of Joinable ensures Watchman thread exits before this destructor finishes.
 };
 
-string getLineFromFd(int fd, FILE *file, string &buffer) {
-    auto bufferFnd = buffer.find('\n');
-    if (bufferFnd != string::npos) {
-        // Edge case: Last time this was called, we read multiple messages off the line.
-        string rv = buffer.substr(0, bufferFnd);
-        buffer = buffer.substr(bufferFnd + 1);
-        return rv;
-    }
-
-    constexpr int BUFF_SIZE = 1024 * 8;
-    vector<char> buf(BUFF_SIZE);
-
-    fcntl(fd, F_SETFL, (fcntl(fd, F_GETFL) | O_NONBLOCK));
-
-    while (true) {
-        auto bytesRead = read(fd, buf.data(), BUFF_SIZE);
-        if (bytesRead <= 0) {
-            if (errno == EAGAIN) {
-                fcntl(fd, F_SETFL, (fcntl(fd, F_GETFL) & ~O_NONBLOCK));
-                bytesRead = fread(buf.data(), 1, 1, file);
-
-                fcntl(fd, F_SETFL, (fcntl(fd, F_GETFL) | O_NONBLOCK));
-            }
-        }
-        if (bytesRead > 0) {
-            auto fnd = std::find(buf.begin(), buf.begin() + bytesRead, '\n');
-            if (fnd != buf.begin() + bytesRead) {
-                buffer.append(buf.begin(), fnd);
-                string rv = buffer;
-                buffer.clear();
-                // If we read beyond the line, store extra stuff we read into the string buffer.
-                // Skip over the newline.
-                buffer.append(fnd + 1, buf.begin() + bytesRead);
-                return rv;
-            } else {
-                buffer.append(buf.begin(), buf.begin() + bytesRead);
-            }
-        }
-    }
-}
-
 void WatchmanProcess::start() {
+    auto mainPid = getpid();
     try {
         string subscriptionName = fmt::format("ruby-typer-{}", getpid());
 
         logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
                       workSpace, fmt::join(extensions, ","), subscriptionName);
 
-        auto p = subprocess::Popen({"watchman", "-j", "-p", "--no-pretty"}, subprocess::output{subprocess::PIPE},
-                                   subprocess::input{subprocess::PIPE});
+        auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
+                                   subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
 
         // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]], but Stripe
         // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
@@ -93,8 +55,15 @@ void WatchmanProcess::start() {
 
         string buffer;
 
-        while (true) {
-            string line = getLineFromFd(fd, file, buffer);
+        while (!isStopped()) {
+            auto maybeLine = FileOps::readLineFromFd(fd, buffer);
+            if (!maybeLine) {
+                // Timeout occurred. See if we should abort before reading further.
+                continue;
+            }
+
+            const string &line = *maybeLine;
+            // Line found!
             rapidjson::Document d(&alloc);
             logger->debug(line);
             if (d.Parse(line.c_str()).HasParseError()) {
@@ -112,12 +81,31 @@ void WatchmanProcess::start() {
                 logger->debug("Unknown Watchman response:\n{}", line);
             }
         }
-    } catch (std::exception e) {
-        // Swallow error and print an informative message.
-        logger->info("Error running Watchman: {}\nSorbet will not be able to detect changes to files made outside of "
-                     "your code editor.\nDon't need Watchman? Run Sorbet with `--disable-watchman`.",
-                     e.what());
-        processExit(alloc, 1);
+    } catch (exception e) {
+        // Ignore exceptions thrown on forked process.
+        if (getpid() == mainPid) {
+            logger->info("Error running Watchman (with `{} -j -p--no-pretty`).\nWatchman is required for Sorbet to "
+                         "detect changes to files made outside of your code editor.\nDon't need Watchman? Run Sorbet "
+                         "with `--disable-watchman`.",
+                         watchmanPath);
+            exitWithCode(1);
+        } else {
+            // The forked process failed to start, likely because Watchman wasn't found. Exit the process.
+            exit(1);
+        }
+    }
+}
+
+bool WatchmanProcess::isStopped() {
+    absl::MutexLock lck(&mutex);
+    return stopped;
+}
+
+void WatchmanProcess::exitWithCode(int code) {
+    absl::MutexLock lck(&mutex);
+    if (!stopped) {
+        stopped = true;
+        processExit(code);
     }
 }
 

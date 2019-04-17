@@ -70,6 +70,7 @@ struct Options {
     bool supressNonCriticalErrors = false;
     bool runLSP = false;
     bool disableWatchman = false;
+    std::string watchmanPath;
     bool stressIncrementalResolver = false;
     bool noErrorCount = false;
     bool autocorrect = false;

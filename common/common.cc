@@ -81,6 +81,73 @@ string_view sorbet::FileOps::getExtension(string_view path) {
     return path.substr(found + 1);
 }
 
+int sorbet::FileOps::readFd(int fd, std::vector<char> &output, int timeoutMs) {
+    // Prepare to use select()
+    fd_set set;
+    FD_ZERO(&set);
+    FD_SET(fd, &set);
+
+    struct timeval timeout;
+    // ms => seconds part
+    timeout.tv_sec = timeoutMs / 1000;
+    // ms => left over ms => converted to microseconds
+    timeout.tv_usec = (timeoutMs % 1000) * 1000;
+
+    auto rv = select(fd + 1, &set, NULL, NULL, &timeout);
+    if (rv == -1) {
+        throw sorbet::FileReadException(fmt::format("Error during select(): {}", errno));
+    } else if (rv == 0) {
+        // A timeout occurred.
+        return 0;
+    } else {
+        auto read = ::read(fd, output.data(), output.size());
+        if (read == 0) {
+            throw sorbet::FileReadException("EOF");
+        } else if (read < 0) {
+            throw sorbet::FileReadException(fmt::format("Error during read(): {}", errno));
+        }
+        // `read` is size read.
+        return read;
+    }
+}
+
+optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int timeoutMs) {
+    auto bufferFnd = buffer.find('\n');
+    if (bufferFnd != string::npos) {
+        // Edge case: Last time this was called, we read multiple lines.
+        string line = buffer.substr(0, bufferFnd);
+        buffer.erase(0, bufferFnd + 1);
+        return line;
+    }
+
+    constexpr int BUFF_SIZE = 1024 * 8;
+    vector<char> buf(BUFF_SIZE);
+
+    int result = FileOps::readFd(fd, buf, timeoutMs);
+    if (result == 0) {
+        // Timeout.
+        return nullopt;
+    }
+
+    // Store whatever we read into buffer, and see if we received a full line.
+    const auto end = buf.begin() + result;
+    const auto fnd = std::find(buf.begin(), end, '\n');
+    if (fnd != end) {
+        buffer.append(buf.begin(), fnd);
+        string line = buffer;
+        buffer.clear();
+        if (fnd + 1 != end) {
+            // If we read beyond the line, store extra stuff we read into the string buffer.
+            // Skip over the newline.
+            buffer.append(fnd + 1, end);
+        }
+        return line;
+    } else {
+        buffer.append(buf.begin(), end);
+        return nullopt;
+    }
+}
+
 // Verifies that next character after the match is '/' (indicating a folder match) or end of string (indicating a file
 // match).
 bool matchIsFolderOrFile(string_view path, string_view ignorePattern, const int pos) {

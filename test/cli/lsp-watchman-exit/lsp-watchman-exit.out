@@ -1,0 +1,3 @@
+Error running Watchman (with `/fake/watchman/path -j -p--no-pretty`).
+Watchman is required for Sorbet to detect changes to files made outside of your code editor.
+Don't need Watchman? Run Sorbet with `--disable-watchman`.

@@ -154,6 +154,29 @@ public:
                               const std::vector<std::string> &relativeIgnorePatterns);
     static std::string_view getFileName(std::string_view path);
     static std::string_view getExtension(std::string_view path);
+    /**
+     * Reads data from the given file descriptor, and stores it into the output buffer.
+     * Reads up to `output.size()` bytes. Timeout is specified in milliseconds.
+     * Returns:
+     * - Length of data read if > 0.
+     * - 0 if timeout occurs.
+     *
+     * Throws FileReadException on EOF or error.
+     */
+    static int readFd(int fd, std::vector<char> &output, int timeoutMs = 100);
+    /**
+     * Attempts to read data up to a newline (\n) from the given file descriptor.
+     * Timeout is specified in milliseconds.
+     *
+     * Stores any extra bits read into `buffer`.
+     *
+     * Returns:
+     * - nullopt if timeout occurs or read() did not yield a newline.
+     * - string if a line was found. The string does not contain the ending newline character.
+     *
+     * Throws FileReadException on EOF or error.
+     */
+    static std::optional<std::string> readLineFromFd(int fd, std::string &buffer, int timeoutMs = 100);
 };
 
 } // namespace sorbet

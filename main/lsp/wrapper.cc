@@ -109,9 +109,10 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
                              bool disableFastPath) {
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = make_unique<WorkerPool>(0, logger);
-    // N.B.: cin will not actually be used the way we are driving LSP.
+    // N.B.: stdin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to disable configatron.
-    lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), cin, lspOstream, true, disableFastPath);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), STDIN_FILENO, lspOstream, true,
+                                   disableFastPath);
 }
 
 LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
