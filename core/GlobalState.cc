@@ -142,7 +142,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Struct());
     id = synthesizeClass(core::Names::Constants::File());
     ENFORCE(id == Symbols::File());
-    id = synthesizeClass(core::Names::Constants::Sorbet_Private_Static(), 0, true);
+    id = synthesizeClass(core::Names::Constants::Static(), 0, true);
     ENFORCE(id == Symbols::Sorbet_Private_Static());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
