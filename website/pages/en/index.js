@@ -16,6 +16,9 @@ const GridBlock = CompLibrary.GridBlock;
 const sorbetRunExample =
   "https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20This%20code%20is%20editable!%0A%23%20You%20can%20also%20hover%20to%20see%20error%20messages%20and%20types!%0A%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(name%3A%20String).returns(Integer)%7D%0Adef%20main(name)%0A%20%20puts%20%22Hello%2C%20%23%7Bname%7D!%22%0A%20%20name.length%0Aend%0A%0Amain(%22Sorbet%22)%20%23%20ok!%0Amain()%20%20%20%23%20error%3A%20Not%20enough%20arguments%20provided%20for%20method%20%60main%60%0Aman(%22%22)%20%20%23%20error%3A%20Method%20%60man%60%20does%20not%20exist";
 
+const signUpLink =
+  "https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform";
+
 const PageSection = props => (
   <div
     style={{
@@ -108,13 +111,12 @@ class Index extends React.Component {
           </Container>
         </div>
         <PageSection gray short>
-          <div style={{ fontSize: "1.2em", textAlign: "center" }}>
-            <strong>Available in summer 2019.</strong> We’re looking for early feedback to make Sorbet great:{" "}
-            <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
-              join the mailing list
-            </a>{" "}
-            to get involved.
-          </div>
+          <p style={{ fontSize: "1.2em", textAlign: "center" }}>
+            Sorbet is not quite ready because we're still gathering early feedback.
+          </p>
+          <p style={{ fontSize: "1.2em", textAlign: "center", marginBottom: 0 }}>
+            <a href={signUpLink}>Be the first to know</a> when Sorbet is ready!
+          </p>
         </PageSection>
         <PageSection>
           <h2>Try Sorbet in your browser</h2>
@@ -158,7 +160,7 @@ class Index extends React.Component {
             <p style={{flex: 1, margin: 0}}>
               Sorbet is currently used by the teams at Stripe and Coinbase. If
               you'd like to try it at your company,{" "}
-              <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
+              <a href={signUpLink}>
                 sign up for our mailing list
               </a>{" "}
               and we'll reach out when we have more to share.
@@ -179,7 +181,7 @@ class Index extends React.Component {
         <PageSection short lightPurple>
           <p className="footer" style={{margin: 0}}>
             <strong>Interested in getting involved?</strong>{" "}
-            Join <a href="https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform?edit_requested=true">
+            Join <a href={signUpLink}>
             our mailing list</a>, and read more about Sorbet in our <a href={docUrl('overview')}>documentation</a>.</p>
         </PageSection>
       </div>
