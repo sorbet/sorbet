@@ -142,7 +142,11 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Struct());
     id = synthesizeClass(core::Names::Constants::File());
     ENFORCE(id == Symbols::File());
-    id = synthesizeClass(core::Names::Constants::Static(), 0, true);
+    id = synthesizeClass(core::Names::Constants::Sorbet());
+    ENFORCE(id == Symbols::Sorbet());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
+    ENFORCE(id == Symbols::Sorbet_Private());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE(id == Symbols::Sorbet_Private_Static());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
@@ -182,8 +186,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Shape());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
     ENFORCE(id == Symbols::Subclasses());
-    id = synthesizeClass(core::Names::Constants::Sorbet());
-    ENFORCE(id == Symbols::Sorbet());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ImplicitModuleSuperclass());
     ENFORCE(id == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
@@ -202,8 +204,6 @@ void GlobalState::initEmpty() {
         core::Variance::CoVariant);
     id.data(*this)->resultType = make_type<core::TypeVar>(id);
     ENFORCE(id == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
-    ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Builder());
     ENFORCE(id == Symbols::Sorbet_Private_Builder());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
