@@ -4,6 +4,7 @@ require_relative '../test_helper'
 module Opus::Types::Test
   class ReturnsTest < Critic::Unit::UnitTest
     class TestReturns
+      extend T::Sig
       extend T::Generic
 
       sig {returns(T.noreturn)}

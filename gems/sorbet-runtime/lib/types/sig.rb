@@ -13,8 +13,4 @@ module T::Sig
   end
 end
 
-class Module
-  include T::Sig
-end
-
 # rubocop:enable PrisonGuard/NoTopLevelDeclarations, PrisonGuard/PackageMatchesDirectory

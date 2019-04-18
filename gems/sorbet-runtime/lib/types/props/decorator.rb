@@ -8,6 +8,7 @@
 # replace decorator overrides in plugins with class methods that expose the necessary
 # functionality).
 class T::Props::Decorator
+  extend T::Sig
 
   Rules = T.type_alias(T::Hash[Symbol, T.untyped])
   DecoratedClass = T.type_alias(T.untyped) # T.class_of(T::Props), but that produces circular reference errors in some circumstances
