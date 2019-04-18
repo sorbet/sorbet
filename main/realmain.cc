@@ -5,6 +5,7 @@
 #include "absl/strings/str_cat.h"
 #include "common/Timer.h"
 #include "common/statsd/statsd.h"
+#include "common/web_tracer_framework/tracing.h"
 #include "core/Error.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
@@ -434,6 +435,9 @@ int realmain(int argc, char *argv[]) {
             prefix += ".lsp";
         }
         StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters");
+    }
+    if (!opts.webTraceFile.empty()) {
+        web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
     }
 
     if (!opts.metricsFile.empty()) {

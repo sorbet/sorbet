@@ -213,6 +213,8 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
                                     cxxopts::value<vector<string>>(), "path");
+    options.add_options("advanced")("web-trace-file", "Web trace file. To be use with chrome about://tracing",
+                                    cxxopts::value<string>()->default_value(""), "file");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(""), "file");
     options.add_options("advanced")("reserve-mem-kb",
@@ -518,6 +520,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
+        opts.webTraceFile = raw["web-trace-file"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack) {
