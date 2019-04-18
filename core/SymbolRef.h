@@ -220,7 +220,7 @@ public:
         return SymbolRef(nullptr, 37);
     }
 
-    static SymbolRef Sorbet::Private::Static() {
+    static SymbolRef Sorbet_Private_Static() {
         return SymbolRef(nullptr, 38);
     }
 

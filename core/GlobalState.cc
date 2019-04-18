@@ -142,11 +142,11 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Struct());
     id = synthesizeClass(core::Names::Constants::File());
     ENFORCE(id == Symbols::File());
-    id = synthesizeClass(core::Names::Constants::Sorbet::Private::Static(), 0, true);
-    ENFORCE(id == Symbols::Sorbet::Private::Static());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::StubModule());
+    id = synthesizeClass(core::Names::Constants::Sorbet_Private_Static(), 0, true);
+    ENFORCE(id == Symbols::Sorbet_Private_Static());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::StubAncestor());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubAncestor());
     ENFORCE(id == Symbols::StubAncestor());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
     ENFORCE(id == Symbols::T_Enumerable());
@@ -164,7 +164,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sinatra());
     id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), core::Names::Constants::Base());
     ENFORCE(id == Symbols::SinatraBase());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::Void());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     ENFORCE(id == Symbols::void_());
     id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE(id == Symbols::typeAliasTemp());
@@ -176,19 +176,19 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Chalk_Tools_Accessible());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE(id == Symbols::T_Generic());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::Tuple());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
     ENFORCE(id == Symbols::Tuple());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::Shape());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
     ENFORCE(id == Symbols::Shape());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::Subclasses());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
     ENFORCE(id == Symbols::Subclasses());
     id = synthesizeClass(core::Names::Constants::Sorbet());
     ENFORCE(id == Symbols::Sorbet());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::ImplicitModuleSuperclass());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ImplicitModuleSuperclass());
     ENFORCE(id == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::Constants::ReturnTypeInference());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
     ENFORCE(id == Symbols::Sorbet_Private_Static_ReturnTypeInference());
-    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::guessedTypeTypeParameterHolder());
+    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder());
     ENFORCE(id == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
     id = enterTypeArgument(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
@@ -217,7 +217,7 @@ void GlobalState::initEmpty() {
     id.data(*this)->setBlockArgument();
 
     // Sorbet::Private::Static#badAliasMethodStub(*arg0 : T.untyped) => T.untyped
-    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet::Private::Static(), core::Names::badAliasMethodStub());
+    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::badAliasMethodStub());
     ENFORCE(id == Symbols::Sorbet_Private_Static_badAliasMethodStub());
     id.data(*this)->resultType = Types::untyped(*this, id);
     id = enterMethodArgumentSymbol(Loc::none(), Symbols::Sorbet_Private_Static_badAliasMethodStub(), core::Names::arg0());
