@@ -10,7 +10,7 @@ class Sorbet
 
   # At runtime, does nothing, but statically it is treated exactly the same
   # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
-  Sorbet.sig {params(blk: T.proc.bind(T::Private::Methods::Builder).void).void}
+  Sorbet.sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
   def self.sig(&blk)
   end
 end
