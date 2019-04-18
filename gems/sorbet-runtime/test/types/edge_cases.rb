@@ -4,6 +4,7 @@ require_relative '../test_helper'
 class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it 'can type ==' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig {override.params(other: T.self_type).returns(Boolean)}
       def ==(other)
@@ -15,6 +16,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'handles aliased methods' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig {returns(Symbol)}
       def foo
@@ -28,6 +30,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'works for any_instance' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       def foo
         raise "bad"
@@ -48,6 +51,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'works for calls_original' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig {returns(Symbol)}
       def self.foo
@@ -61,6 +65,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'works for stubbed superclasses with type' do
     parent = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig {overridable.returns(Symbol)}
       def self.foo
@@ -68,6 +73,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       end
     end
     child = Class.new(parent) do
+      extend T::Sig
       extend T::Helpers
       sig {override.returns(Symbol)}
       def self.foo
@@ -86,6 +92,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       end
     end
     child = Class.new(parent) do
+      extend T::Sig
       extend T::Helpers
       sig {override.returns(Symbol)}
       def self.foo
@@ -99,6 +106,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'allows private abstract methods' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       abstract!
 
@@ -110,6 +118,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'handles class scope change when already hooked' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig {returns(Symbol)}
       def foo
@@ -117,6 +126,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       end
 
       class << self
+        extend T::Sig
         extend T::Helpers
         sig {returns(Symbol)}
         def foo
@@ -132,6 +142,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       T::Hooks.install(self)
       class << self
+        extend T::Sig
         extend T::Helpers
         sig {returns(Symbol)}
         def foo
@@ -144,6 +155,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
   it 'keeps raising for bad sigs' do
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig {raise "foo"}
       def foo; end
@@ -159,6 +171,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it 'fails for sigs that fail then pass' do
     counter = 0
     klass = Class.new do
+      extend T::Sig
       extend T::Helpers
       sig do
         counter += 1

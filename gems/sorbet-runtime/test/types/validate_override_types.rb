@@ -11,18 +11,20 @@ module Opus::Types::Test
     class SubFoo3 < BaseFoo3; end
 
     class SuccessBase
-
+      extend T::Sig
       sig {overridable.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3)}
       def foo(pos, kw:); end
     end
 
     class FailureBase
+      extend T::Sig
       sig {overridable.params(pos: BaseFoo1, kw: BaseFoo2).returns(SubFoo3)}
       def foo(pos, kw:); end
     end
 
     it "succeeds if the override types match" do
       klass = Class.new(SuccessBase) do
+        extend T::Sig
         sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3)}
         def foo(pos, kw:); BaseFoo3.new; end
       end
@@ -31,6 +33,7 @@ module Opus::Types::Test
 
     it "succeeds if a positional param type is contravariant" do
       klass = Class.new(SuccessBase) do
+        extend T::Sig
         sig {override.params(pos: BaseFoo1, kw: SubFoo2).returns(BaseFoo3)}
         def foo(pos, kw:); BaseFoo3.new; end
       end
@@ -39,6 +42,7 @@ module Opus::Types::Test
 
     it "succeeds if a keyword param type is contravariant" do
       klass = Class.new(SuccessBase) do
+        extend T::Sig
         sig {override.params(pos: SubFoo1, kw: BaseFoo2).returns(BaseFoo3)}
         def foo(pos, kw:); BaseFoo3.new; end
       end
@@ -47,6 +51,7 @@ module Opus::Types::Test
 
     it "succeeds if the return type is covariant" do
       klass = Class.new(SuccessBase) do
+        extend T::Sig
         sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(SubFoo3)}
         def foo(pos, kw:); SubFoo3.new; end
       end
@@ -55,6 +60,7 @@ module Opus::Types::Test
 
     it "raises if a positional param type is covariant" do
       klass = Class.new(FailureBase) do
+        extend T::Sig
         sig {override.params(pos: SubFoo1, kw: BaseFoo2).returns(SubFoo3)}
         def foo(pos, kw:); end
       end
@@ -68,6 +74,7 @@ module Opus::Types::Test
 
     it "raises if a keyword param type is covariant" do
       klass = Class.new(FailureBase) do
+        extend T::Sig
         sig {override.params(pos: BaseFoo1, kw: SubFoo2).returns(SubFoo3)}
         def foo(pos, kw:); end
       end
@@ -81,6 +88,7 @@ module Opus::Types::Test
 
     it "raises if the return type is contravariant" do
       klass = Class.new(FailureBase) do
+        extend T::Sig
         sig {override.params(pos: BaseFoo1, kw: BaseFoo2).returns(BaseFoo3)}
         def foo(pos, kw:); end
       end

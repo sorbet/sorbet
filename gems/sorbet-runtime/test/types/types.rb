@@ -489,6 +489,7 @@ module Opus::Types::Test
     end
 
     module TestInterface1
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -496,6 +497,7 @@ module Opus::Types::Test
     end
 
     module TestInterface2
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -900,6 +902,7 @@ module Opus::Types::Test
     end
 
     module TestGeneric1
+      extend T::Sig
       extend T::Generic
 
       Elem = type_member
@@ -910,6 +913,7 @@ module Opus::Types::Test
     end
 
     class TestGeneric2
+      extend T::Sig
       extend T::Generic
 
       Elem1 = type_member
@@ -921,6 +925,7 @@ module Opus::Types::Test
     end
 
     class GenericSingleton
+      extend T::Sig
       extend T::Generic
 
       SingletonTP = type_template

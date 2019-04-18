@@ -7,6 +7,7 @@
 #
 # Once we ship static type checking, we should get rid of this entirely.
 class T::InterfaceWrapper
+  extend T::Sig
 
   module Helpers
     def wrap_instance(obj)

@@ -7,6 +7,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
   end
 
   module AbstractMixin
+  extend T::Sig
     extend T::Helpers
     abstract!
 
@@ -23,6 +24,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
   end
 
   class AbstractClass
+  extend T::Sig
     extend T::Helpers
     abstract!
 
@@ -35,6 +37,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
   it "raises an error when defining an abstract class method on a module" do
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       abstract!
       sig {abstract.returns(Object)}
@@ -69,6 +72,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
   it "succeeds when overriding an abstract method with a sig via a mixin" do
     mixin = Module.new do
+      extend T::Sig
       extend T::Helpers
 
       sig {returns(Object)}
@@ -103,6 +107,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
   it "succeeds if a concrete module implements all abstract methods" do
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       include AbstractMixin
 
@@ -138,6 +143,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
   describe "class methods" do
     it "succeeds if a concrete module implements all abstract methods" do
       mod = Module.new do
+        extend T::Sig
         extend T::Helpers
         extend AbstractMixin
 
@@ -205,6 +211,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it "succeeds when the interface comes second" do
       mixin = Module.new do
+        extend T::Sig
         extend T::Helpers
         abstract!
         sig {abstract.params(arg: T.untyped).returns(T.untyped)}
@@ -229,6 +236,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it "succeeds when two abstract modules declare the same method and two mixins implement it" do
       mixin1 = Module.new do
+        extend T::Sig
         extend T::Helpers
         abstract!
         sig {abstract.returns(T.untyped)}
@@ -236,6 +244,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       end
 
       mixin2 = Module.new do
+        extend T::Sig
         extend T::Helpers
         abstract!
         sig {abstract.returns(T.untyped)}
@@ -296,6 +305,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
   describe "classes with abstract class and instance methods" do
     it "succeeds when everything is implemented" do
       klass = Class.new(AbstractClass) do
+        extend T::Sig
         extend T::Helpers
         sig {implementation.returns(Object)}
         def self.foo; end
@@ -309,6 +319,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it "fails if a class method is unimplemented" do
       klass = Class.new(AbstractClass) do
+        extend T::Sig
         extend T::Helpers
         sig {implementation.returns(Object)}
         def bar; end
@@ -327,6 +338,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it "fails if an instance method is unimplemented" do
       klass = Class.new(AbstractClass) do
+        extend T::Sig
         extend T::Helpers
         sig {implementation.returns(Object)}
         def self.foo; end
@@ -356,6 +368,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it "succeeds when instantiating a concrete subclass" do
       klass = Class.new(AbstractClass) do
+        extend T::Sig
         extend T::Helpers
         sig {implementation.returns(Object)}
         def self.foo; end
@@ -371,6 +384,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         def foo; end
       end
       mod = Module.new do
+        extend T::Sig
         extend T::Helpers
         interface!
         sig {abstract.void}
@@ -385,6 +399,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it 'can override methods using type members' do
       parent = Class.new do
+        extend T::Sig
         extend T::Generic
 
         tpl = type_template
@@ -394,6 +409,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       end
 
       child = Class.new(parent) do
+        extend T::Sig
         tpl = type_template(fixed: Integer)
 
         sig {implementation.returns(tpl)}
@@ -407,6 +423,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     it 'can override methods using type parameters' do
       parent = Class.new do
+        extend T::Sig
         extend T::Generic
 
         sig do
@@ -419,6 +436,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       end
 
       child = Class.new(parent) do
+        extend T::Sig
         sig do
           type_parameters(:T)
           .implementation
@@ -436,6 +454,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
   it "handles splats and kwargs" do
     parent = Class.new do
+      extend T::Sig
       extend T::Helpers
       abstract!
 
