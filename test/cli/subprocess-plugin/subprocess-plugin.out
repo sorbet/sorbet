@@ -653,5 +653,9 @@ class ::<root> < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:3, https://
       argument ::<Class:Something>#<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi3.rb
 
 ------ Bad plugin output on single file
-test/cli/subprocess-plugin/bad_plugin.yaml: Required key `triggers` must be a map
+test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0:2: Parse Error: unexpected token: syntax error http://go/e/2001
+     2 |end end end end
+            ^^^
+Errors: 1
 ------ Bad plugin output on many files
+test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0:2: Parse Error: unexpected token: syntax error http://go/e/2001
