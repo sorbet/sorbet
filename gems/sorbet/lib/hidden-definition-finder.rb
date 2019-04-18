@@ -286,7 +286,7 @@ class Sorbet::Private::HiddenMethodFinder
       fqn = real_name(my_klass)
       if fqn
         klass_str = String.new
-        klass_str << (my_klass.is_a?(Class) ? "class #{fqn}\n" : "module #{fqn}\n")
+        klass_str << (Sorbet::Private::RealStdlib.real_is_a?(my_klass, Class) ? "class #{fqn}\n" : "module #{fqn}\n")
         klass_str << includes.join("\n")
         klass_str << "\n" unless klass_str.end_with?("\n")
         klass_str << methods.join("\n")
