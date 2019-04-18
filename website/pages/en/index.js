@@ -171,9 +171,10 @@ class Index extends React.Component {
               <p>
                 In the time we've spent adopting Sorbet at Stripe, countless
                 people have told us that adding types to existing code or
-                writing new code feels almost like an interactive,
-                pair-programming session. People ask Sorbet questions, and it
-                responds in seconds, or faster.
+                writing new code feels interactive, like{" "}
+                <a href="https://sorbet.run/talks/RubyKaigi2019/#/28">pair-programming with the type checker</a>.
+                People ask Sorbet questions, and it responds in seconds—or
+                faster.
               </p>
             </div>
           </div>
