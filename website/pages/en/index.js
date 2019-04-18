@@ -19,7 +19,25 @@ const sorbetRunExample =
 const signUpLink =
   "https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform";
 
-const PageSection = props => (
+const mainExample = `
+\`\`\`ruby
+# typed: true
+extend T::Sig
+
+sig {params(name: String).returns(Integer)}
+def main(name)
+  puts "Hello, #{name}!"
+  name.length
+end
+
+main("Sorbet") # ok!
+main()   # error: Not enough arguments provided for method \`main\`
+man("")  # error: Method \`man\` does not exist
+\`\`\`
+`
+
+// TODO(jez) No inline styles
+const PageSection = (props) => (
   <div
     style={{
       backgroundColor: (props.gray ? "#f5f5f5" :
@@ -33,7 +51,8 @@ const PageSection = props => (
   </div>
 );
 
-const Button = props => (
+// TODO(jez) No inline style
+const Button = (props) => (
   <a
     className="button"
     style={{ marginRight: "10px" }}
@@ -71,7 +90,7 @@ class Index extends React.Component {
                   Sorbet is a fast, powerful type checker designed for Ruby.
                 </h2>
                 <p style={{ paddingTop: "1em" }}>
-                  <strong>Available in summer 2019.</strong> Built by the team at <a href="https://stripe.com">Stripe</a>.
+                  <strong>Coming Summer 2019.</strong> Built with 💜at <a href="https://stripe.com">Stripe</a>.
                 </p>
                 <div style={{ paddingTop: "1.2em" }}>
                   <Button href={docUrl("overview")}>Read the docs</Button>
@@ -88,55 +107,76 @@ class Index extends React.Component {
                 {
                   title: "Fast and scalable",
                   content:
-                    `Sorbet is multithreaded, scaling linearly across cores on your CPU. It checks your types in seconds, giving you feedback as you code.
-
-[Get started with Sorbet →](docs/adopting)`
+                    "Sorbet is multithreaded, scaling linearly across cores on your CPU. It checks your types in seconds, giving you feedback as you code.\n\n[Get started with Sorbet →](docs/adopting)"
                 },
                 {
-                  title: "Integrates with your tools",
+                  title: "IDE Ready",
                   content:
-                    `Sorbet works with editors like VS Code, with features like autocomplete and jump to definition. It's easy to add to your CI setup.
-
-[Try Sorbet online →](https://sorbet.run)`
+                    "Sorbet works with your favorite editor to provide IDE features like autocomplete and jump to definition. It's easy to add to your CI setup.\n\n[Try Sorbet online →](https://sorbet.run)"
                 },
                 {
                   title: "Gradual by design",
                   content:
-                    `Sorbet works with normal Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time.
-
-[Learn what makes Sorbet gradual →](docs/gradual)`
+                    "Sorbet works with normal Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time.\n\n[Learn what makes Sorbet gradual →](docs/gradual)"
                 }
               ]}
             />
           </Container>
         </div>
         <PageSection gray short>
-          <p style={{ fontSize: "1.2em", textAlign: "center" }}>
-            Sorbet is not quite ready because we're still gathering early feedback.
-          </p>
-          <p style={{ fontSize: "1.2em", textAlign: "center", marginBottom: 0 }}>
-            <a href={signUpLink}>Be the first to know</a> when Sorbet is ready!
-          </p>
+          <div style={{ fontSize: "1.2em", textAlign: "center" }}>
+            <strong>Coming Summer 2019</strong>. We're looking for early
+            feedback to make Sorbet great:{" "}
+            <a href={signUpLink}>sign up here</a> to get involved!
+          </div>
         </PageSection>
         <PageSection>
-          <h2>Try Sorbet in your browser</h2>
-          <p>
-            You can use the Sorbet playground to try features like type annotations and autocomplete.
-            Go to <a href="http://sorbet.run">sorbet.run</a> to see more
-            examples.
-          </p>
-          <iframe
-            style={{ width: "100%", height: "400px" }}
-            src={sorbetRunExample}
-          />
+          <h2>A Taste of Sorbet</h2>
+          <div className="row">
+            <div className="column">
+              <p>
+                Sorbet is 100% compatible with Ruby. It type checks normal
+                method definitions, andintroduces backwards-compatible syntax
+                for method signatures.
+              </p>
+              <p>
+                Explicit method signatures make Sorbet useful for anyone
+                reading the code too (not just the author). Type annotations
+                serve as a tool for understanding long after they're written.
+              </p>
+              <p>
+                Sorbet is designed to be useful, not burdensome. Explicit
+                annotations are repaid with clear error messages, increased
+                safety, and increased productivity.
+              </p>
+            </div>
+            <div className="column">
+              <MarkdownBlock>{mainExample}</MarkdownBlock>
+            </div>
+          </div>
         </PageSection>
         <PageSection gray>
-          <h2>Powerful features to streamline your editing</h2>
-          <p>
-            Sorbet gives your Ruby development environment IDE-like features,
-            including autocomplete, in-editor documentation, and go to
-            definition.
-          </p>
+          <h2>Designed to be interactive</h2>
+          <div className="row">
+            <div className="column">
+              <p>
+                Sorbet gives your Ruby development environment IDE-like features,
+                including autocomplete, in-editor documentation, and go to
+                definition. The implementation leverages the{" "}
+                <a href="https://langserver.org/">Language Server Protocol</a>{" "}
+                to be compatible with your favorite editor.
+              </p>
+            </div>
+            <div className="column">
+              <p>
+                In the time we've spent adopting Sorbet at Stripe, countless
+                people have told us that adding types to existing code or
+                writing new code feels almost like an interactive,
+                pair-programming session. People ask Sorbet questions, and it
+                responds in seconds, or faster.
+              </p>
+            </div>
+          </div>
           <img
             style={{ width: "100%", marginTop: "0.5em" }}
             src={`${baseUrl}img/autocompleteAndDocs1.gif`}
@@ -163,26 +203,75 @@ class Index extends React.Component {
               <a href={signUpLink}>
                 sign up for our mailing list
               </a>{" "}
-              and we'll reach out when we have more to share.
+              and we'll reach out when we have more to share!
             </p>
           </div>
         </PageSection>
         <PageSection gray>
-          <h2>Learn more about Sorbet</h2>
-          <p>
-            Watch an introductory talk from <a href="https://www.thestrangeloop.com/2018/sessions.html">Strangeloop 2018</a>, or see <a href={docUrl('talks')}>more talks</a> by the Sorbet team.
-          </p>
-          <a href="https://www.youtube.com/watch?v=uFFJyp8vXQI">
-              <img src={`${baseUrl}img/talk-thumb.png`}
-              alt="Link to Sorbet talk video"
-              style={{ width: "100%", maxWidth: "850px", marginTop: "0.5em"}} />
-          </a>
+          <h2>Gradual Typing of Ruby at Scale</h2>
+          <div className="row">
+            <div className="column">
+              <a href="https://www.youtube.com/watch?v=uFFJyp8vXQI">
+                  <img src={`${baseUrl}img/talk-thumb.png`}
+                  alt="Link to Sorbet talk video"
+                  style={{ width: "100%", maxWidth: "850px", marginTop: "0.5em"}} />
+              </a>
+            </div>
+            <div className="column">
+              <p>
+                Much has already been said about Sorbet. Here's a talk we gave at{" "}
+                <a href="docs/talks/strange-loop-2018">Strange Loop 2018</a>.
+                The description:
+              </p>
+              <blockquote className="monotone">
+                <p>
+                  Stripe maintains an extremely large and growing Ruby code
+                  base with hundreds of developers and millions of lines of
+                  code. Continuing to scale development is one of the most
+                  critical tasks to maintaining product velocity and the
+                  productivity of Stripe engineering.
+                </p>
+                <p>
+                  This talk shares our experience building a type checker, and
+                  adopting it in our massive codebase. We start with a
+                  discussion of core design decisions we made in early days of
+                  the project, and evaluate how they withstood reality of
+                  production use.
+                </p>
+              </blockquote>
+            </div>
+          </div>
+        </PageSection>
+        <PageSection>
+          <GridBlock
+            layout="threeColumn"
+            contents={[
+              {
+                title: "Gradual Type Checking",
+                content:
+                  "Sorbet is a **gradual** type checker, which enables incremental adoption. On the other hand, it'll be unfamiliar to those expecting a tradional statically typed language.\n\n[Learn why gradual is different →](docs/gradual)"
+              },
+              {
+                title: "Enabling Static Checks",
+                content:
+                  "Sorbet works with 100% of Ruby, but it does not work the same for all Ruby. Developers can opt into more static checks to get even more safety and productivity.\n\n[How to enable static static checks →](docs/static)"
+              },
+              {
+                title: "Flow-sensitive Typing",
+                content:
+                  "One way Sorbet works to be useful without getting in the way is with control-flow-sensitive typing. Sorbet tracks the effect of control on types, instead of asking for type annotations.\n\n[See the power of flow-sensitivity →](docs/flow-sensitive)"
+              }
+            ]}
+          />
         </PageSection>
         <PageSection short lightPurple>
-          <p className="footer" style={{margin: 0}}>
-            <strong>Interested in getting involved?</strong>{" "}
-            Join <a href={signUpLink}>
-            our mailing list</a>, and read more about Sorbet in our <a href={docUrl('overview')}>documentation</a>.</p>
+          <p class="footer">
+            © 2019 Stripe{" · "}
+            <a href="docs/adopting">Get started</a>{" · "}
+            <a href="docs/">Docs</a>{" · "}
+            <a href="https://sorbet.run">Try it online</a>{" · "}
+            <a href="talks/">Talks</a>
+          </p>
         </PageSection>
       </div>
     );

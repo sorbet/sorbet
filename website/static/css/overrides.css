@@ -5,6 +5,17 @@
  */
 
 /*
+ * Docusaurus uses blockquote to show warnings / yellow callouts.
+ * Sometimes, we don't want this.
+ */
+blockquote.monotone {
+  background-color: initial;
+  border-color: rgba(0, 0, 0, 0.15);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/*
  * By default, the link color is the same as the primaryColor.
  * For us, this color is too dark, and links don't pop enough.
  * Thus, we override the link color to be more vibrant.
@@ -39,19 +50,23 @@ sup {
 
 /*
  * We have primary and secondary color the same, so use a drop shadow to make
- * the navigation buttons stand out on mobile
+ * the navigation buttons stand out on mobile, and then change the active
+ * item's color directly.
  */
 @media only screen and (max-width: 1023px) {
   .navigationSlider .slidingNav ul {
     box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.5);
   }
+
+  .navigationSlider .slidingNav ul li > a:focus,
+  .navigationSlider .slidingNav ul li > a:hover,
+  .navigationSlider .slidingNav ul li.siteNavItemActive > a,
+  .navigationSlider .slidingNav ul li.siteNavGroupActive > a {
+    background-color: var(--sorbet-purple-3);
+  }
 }
 
-.navigationSlider .slidingNav ul li > a:focus,
-.navigationSlider .slidingNav ul li > a:hover,
-.navigationSlider .slidingNav ul li.siteNavItemActive > a,
-.navigationSlider .slidingNav ul li.siteNavGroupActive > a {
-  background-color: var(--sorbet-purple-3);
+@media only screen and (max-width: 1023px) {
 }
 
 /*
