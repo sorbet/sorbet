@@ -221,8 +221,7 @@ class Index extends React.Component {
             <div className="column">
               <p>
                 Much has already been said about Sorbet. Here's a talk we gave at{" "}
-                <a href="docs/talks/strange-loop-2018">Strange Loop 2018</a>.
-                The description:
+                <a href="docs/talks/strange-loop-2018">Strange Loop 2018</a>:
               </p>
               <blockquote className="monotone">
                 <p>
@@ -250,7 +249,7 @@ class Index extends React.Component {
               {
                 title: "Gradual Type Checking",
                 content:
-                  "Sorbet is a **gradual** type checker, which enables incremental adoption. On the other hand, it'll be unfamiliar to those expecting a tradional statically typed language.\n\n[Learn why gradual is different →](docs/gradual)"
+                  "Sorbet is a **gradual** type checker, which enables incremental adoption. On the other hand, it'll be unfamiliar to those expecting a traditional statically typed language.\n\n[Learn why gradual is different →](docs/gradual)"
               },
               {
                 title: "Enabling Static Checks",
