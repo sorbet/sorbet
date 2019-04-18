@@ -68,8 +68,15 @@ struct SpawningWalker {
                 string_view shortName = send->fun.data(ctx)->shortName(ctx);
                 string sendSource = send->loc.source(ctx);
 
-                vector<string> args{string(*command),  string("--class"),  move(className), string("--method"),
-                                    string(shortName), string("--source"), move(sendSource)};
+                vector<string> args(ctx.state.dslRubyExtraArgs);
+                args.emplace_back(*command);
+                args.emplace_back("--class");
+                args.emplace_back(move(className));
+                args.emplace_back("--method");
+                args.emplace_back(shortName);
+                args.emplace_back("--source");
+                args.emplace_back(move(sendSource));
+
                 output = Subprocess::spawn("ruby", move(args));
             }
 

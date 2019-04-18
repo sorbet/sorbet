@@ -1,2 +1,3 @@
-string-key1: fine
-bad-trigger: [3, 2, 1]
+triggers:
+  string-key1: fine
+  bad-trigger: [3, 2, 1]

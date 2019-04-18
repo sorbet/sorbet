@@ -1,4 +1,5 @@
-gen: test/cli/subprocess-plugin/gen.rb
-foo_gen: test/cli/subprocess-plugin/foo_gen.rb
-bar_gen: test/cli/subprocess-plugin/bar_gen.rb
-baz_gen: test/cli/subprocess-plugin/baz_gen.rb
+triggers:
+  gen: test/cli/subprocess-plugin/gen.rb
+  foo_gen: test/cli/subprocess-plugin/foo_gen.rb
+  bar_gen: test/cli/subprocess-plugin/bar_gen.rb
+  baz_gen: test/cli/subprocess-plugin/baz_gen.rb

@@ -2,6 +2,14 @@ Failed to open DSL specification file "a_yaml_file_that_doesnt_exist"
 ---
 test/cli/bad-plugin-spec/not-map.yaml: Cannot parse DSL plugin format. Map is expected at top level
 ---
+test/cli/bad-plugin-spec/missing-triggers.yaml: Required key `triggers` must be a map
+---
+test/cli/bad-plugin-spec/triggers-not-map.yaml: Required key `triggers` must be a map
+---
+test/cli/bad-plugin-spec/ruby-extra-args-not-array.yaml: `ruby_extra_args` must be an array of strings
+---
+test/cli/bad-plugin-spec/non-string-in-ruby-extra-args.yaml: An element of `ruby_extra_args` is not a string
+---
 test/cli/bad-plugin-spec/values-not-scalar.yaml: Plugin trigger "bad-trigger" must map to a command that is a string
 ---
 test/cli/bad-plugin-spec/duplicate-triggers.yaml: Duplicate plugin trigger "attribute"

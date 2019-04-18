@@ -258,10 +258,11 @@ int realmain(int argc, char *argv[]) {
     for (auto code : opts.errorCodeBlackList) {
         gs->suppressErrorClass(code);
     }
-    for (auto &plugin : opts.dslPlugins) {
+    for (auto &plugin : opts.dslPluginTriggers) {
         core::UnfreezeNameTable nameTableAccess(*gs);
         gs->addDslPlugin(plugin.first, plugin.second);
     }
+    gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
 
     logger->trace("done building initial global state");
 

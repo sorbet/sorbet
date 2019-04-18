@@ -1,0 +1,8 @@
+ruby_extra_args:
+  - a string
+  - not: a string
+  -
+    - go
+    - deeper
+triggers:
+  a: a.rb
