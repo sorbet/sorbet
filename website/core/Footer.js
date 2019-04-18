@@ -2,14 +2,21 @@ const React = require('react');
 
 class Footer extends React.Component {
   render() {
-    // TODO(jez) Consider putting the sitemap / GitHub buttons back.
-    return [];
-    // (
-    //   <footer className="nav-footer" id="footer">
-    //     <section className="copyright">{this.props.config.copyright}</section>
-    //   </footer>
-    // );
+      return <>
+          <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119877071-2"></script>
+          <script>{injectGA()}</script>
+      </>;
   }
+}
+const injectGA = () => {
+    if (typeof window == 'undefined') {
+        return;
+    }
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-119877071-2');
 }
 
 module.exports = Footer;
