@@ -1,3 +1,5 @@
+#ifndef SORBET_TIMER_H
+#define SORBET_TIMER_H
 #include "common/Counters.h"
 #include <chrono>
 #include <memory>
@@ -17,3 +19,5 @@ private:
     const std::chrono::time_point<std::chrono::steady_clock> begin;
 };
 } // namespace sorbet
+
+#endif
