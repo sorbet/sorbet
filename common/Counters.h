@@ -29,7 +29,7 @@ constexpr bool enable_counters = debug_mode;
 
 struct ConstExprStr {
     char const *str;
-    const std::size_t size;
+    std::size_t size;
 
     // can only construct from a char[] literal
     template <std::size_t N>
@@ -48,7 +48,9 @@ class StatsD;
 namespace core {
 class Proto;
 }
-
+namespace web_tracer_framework {
+class Tracing;
+}
 struct CounterState {
     CounterState();
     ~CounterState();
@@ -65,6 +67,7 @@ private:
     friend void counterConsume(CounterState cs);
     friend class core::Proto;
     friend class StatsD;
+    friend class sorbet::web_tracer_framework::Tracing;
 
     CounterState(std::unique_ptr<CounterImpl> counters);
     std::unique_ptr<CounterImpl> counters;
@@ -91,7 +94,14 @@ void prodHistogramInc(ConstExprStr histogram, int key);
 void prodHistogramAdd(ConstExprStr histogram, int key, unsigned long value);
 /* Does not aggregate over measures, instead, reports them separately.
  * Use with care, as it can make us report a LOT of data. */
-void timingAdd(ConstExprStr measure, unsigned long nanos);
+void timingAdd(std::string_view measure, unsigned long start, unsigned long end);
+void timingAddAsync(std::string_view measure, unsigned long start, unsigned long end);
+struct FlowId {
+    std::string name;
+    int id;
+};
+FlowId timingAddFlowStart(std::string_view measure, unsigned long start);
+void timingAddFlowEnd(FlowId flowId, unsigned long end);
 UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);
 
