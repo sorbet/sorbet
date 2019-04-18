@@ -1692,7 +1692,7 @@ class enumerable_to_h : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        auto hash = make_type<ClassType>(core::Symbols::Sorbet::Private::Static().data(ctx)->lookupSingletonClass(ctx));
+        auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(ctx)->lookupSingletonClass(ctx));
         InlinedVector<Loc, 2> argLocs{args.locs.receiver};
         CallLocs locs{
             args.locs.call,

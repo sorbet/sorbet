@@ -390,9 +390,9 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (ref.data(gs)->superClass().exists() && ref.data(gs)->superClass() != core::Symbols::todo()) {
             continue;
         }
-        if (ref == core::Symbols::Sorbet::Private::Static_ImplicitModuleSuperClass()) {
+        if (ref == core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass()) {
             // only happens if we run without stdlib
-            ENFORCE(!core::Symbols::Sorbet::Private::Static_ImplicitModuleSuperClass().data(gs)->loc().exists());
+            ENFORCE(!core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass().data(gs)->loc().exists());
             ref.data(gs)->setSuperClass(core::Symbols::BasicObject());
             continue;
         }
@@ -402,7 +402,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (isSingleton) {
             if (attached == core::Symbols::BasicObject()) {
                 ref.data(gs)->setSuperClass(core::Symbols::Class());
-            } else if (attached.data(gs)->superClass() == core::Symbols::Sorbet::Private::Static_ImplicitModuleSuperClass()) {
+            } else if (attached.data(gs)->superClass() == core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass()) {
                 // Note: this depends on attached classes having lower indexes in name table than their singletons
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
@@ -417,7 +417,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             } else {
                 if (!core::Symbols::BasicObject().data(gs)->derivesFrom(gs, ref) &&
                     core::Symbols::BasicObject() != ref) {
-                    ref.data(gs)->setSuperClass(core::Symbols::Sorbet::Private::Static_ImplicitModuleSuperClass());
+                    ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
                 }
             }
         }
