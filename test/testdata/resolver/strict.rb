@@ -1,5 +1,5 @@
 # typed: strict
-
+# disable-fast-path: true
 A = String.new # error: Constants must have type annotations with T.let() when specifying '# typed: strict'
 
 B = T.let(T.unsafe(nil), T.untyped)

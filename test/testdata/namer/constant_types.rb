@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 module Constants
   A = 1
   B = "hi"

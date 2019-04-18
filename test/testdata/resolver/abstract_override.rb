@@ -1,5 +1,5 @@
 # typed: true
-
+# disable-fast-path: true
 module Interface
   extend T::Sig
 

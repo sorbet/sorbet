@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 class Parent
   extend T::Generic
   TParent = type_member

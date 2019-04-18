@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 # MutableContext::permitOverloadDefinitions is aware of this file name. Don't rename this file.
 class HasOverloads
   extend T::Sig

@@ -11,7 +11,7 @@ using namespace std;
 namespace sorbet::test {
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
-const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z]+):[ ]+(.*)$");
+const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+):[ ]+(.*)$");
 
 const regex whitespaceRegex("^[ ]*$");
 
@@ -21,10 +21,11 @@ const UnorderedMap<string, function<shared_ptr<RangeAssertion>(string_view, uniq
         {"error", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
         {"def", DefAssertion::make},
+        {"disable-fast-path", DisableFastPath::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
-const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization"};
+const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error"};
 
 // Compares the two positions. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are
 // equivalent.
@@ -159,13 +160,16 @@ string ErrorAssertion::toString() const {
     return fmt::format("error: {}", message);
 }
 
-void ErrorAssertion::check(const Diagnostic &diagnostic, const string_view sourceLine) {
+bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
     // The error message must contain `message`.
     if (diagnostic.message.find(message) == string::npos) {
         ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
-            "Expected error of form:\n{}\nFound error:\n{}", prettyPrintRangeComment(sourceLine, *range, toString()),
+            "{}Expected error of form:\n{}\nFound error:\n{}", errorPrefix,
+            prettyPrintRangeComment(sourceLine, *range, toString()),
             prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
+        return false;
     }
+    return true;
 }
 
 unique_ptr<Range> RangeAssertion::makeRange(int sourceLine, int startChar, int endChar) {
@@ -512,15 +516,17 @@ string UsageAssertion::toString() const {
     return fmt::format("usage: {}", symbol);
 }
 
-void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine) {
+void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,
+                        string_view errorPrefix) {
     ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
-        << fmt::format("Did not find expected error:\n{}",
+        << fmt::format("{}Did not find expected error:\n{}", errorPrefix,
                        prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()));
 }
 
-void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine) {
+void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
+                           string_view errorPrefix) {
     ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
-        "Found unexpected error:\n{}",
+        "{}Found unexpected error:\n{}", errorPrefix,
         prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
 }
 
@@ -529,15 +535,37 @@ bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
     return a != b && rangeComparison(*a->range, *b->range) == 0 && a->message == b->message;
 }
 
-void ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
+                     int line) {
+    auto it = sourceFileContents.find(filename);
+    if (it == sourceFileContents.end()) {
+        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+        return "";
+    }
+
+    auto &file = it->second;
+    if (line >= file->lineCount()) {
+        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
+        return "";
+    } else {
+        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
+        auto lineView = file->getLine(line + 1);
+        return string(lineView.begin(), lineView.end());
+    }
+}
+
+bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
                               vector<shared_ptr<ErrorAssertion>> errorAssertions,
-                              map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics) {
+                              map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                              string errorPrefix) {
     // Sort input error assertions so they are in (filename, line, column) order.
     fast_sort(errorAssertions, [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool {
         return errorComparison(a->filename, *a->range, a->message, b->filename, *b->range, b->message) == -1;
     });
 
     auto assertionsIt = errorAssertions.begin();
+
+    bool success = true;
 
     // Due to map's default sort order, this loop iterates over diagnostics in filename order.
     for (auto &filenameAndDiagnostics : filenamesAndDiagnostics) {
@@ -572,24 +600,29 @@ void ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                     // Diagnostic comes *before* this assertion, so we don't
                     // have an assertion that matches the diagnostic.
                     reportUnexpectedError(filename, *diagnostic,
-                                          getSourceLine(files, filename, diagnostic->range->start->line));
+                                          getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
                     // We've 'consumed' the diagnostic -- nothing matches it.
                     diagnosticsIt++;
+                    success = false;
                     break;
                 }
                 case -1: {
                     // Diagnostic comes *after* this assertion
                     // We don't have a diagnostic that matches the assertion.
                     reportMissingError(assertion->filename, *assertion,
-                                       getSourceLine(files, assertion->filename, assertion->range->start->line));
+                                       getSourceLine(files, assertion->filename, assertion->range->start->line),
+                                       errorPrefix);
                     // We've 'consumed' this error assertion -- nothing matches it.
                     assertionsIt++;
+                    success = false;
                     break;
                 }
                 default: {
                     // Ranges match, so check the assertion.
-                    assertion->check(*diagnostic,
-                                     getSourceLine(files, assertion->filename, assertion->range->start->line));
+                    success = assertion->check(*diagnostic,
+                                               getSourceLine(files, assertion->filename, assertion->range->start->line),
+                                               errorPrefix) &&
+                              success;
                     // We've 'consumed' the diagnostic and assertion.
                     diagnosticsIt++;
                     assertionsIt++;
@@ -605,7 +638,8 @@ void ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
             if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
                 auto &diagnostic = *diagnosticsIt;
                 reportUnexpectedError(filename, *diagnostic,
-                                      getSourceLine(files, filename, diagnostic->range->start->line));
+                                      getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
+                success = false;
             }
             lastDiagnostic = (*diagnosticsIt).get();
             diagnosticsIt++;
@@ -615,28 +649,33 @@ void ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
     while (assertionsIt != errorAssertions.end()) {
         // Had more error assertions than diagnostics
         reportMissingError((*assertionsIt)->filename, **assertionsIt,
-                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line));
+                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line),
+                           errorPrefix);
+        success = false;
         assertionsIt++;
     }
+    return success;
 }
 
-string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
-                     int line) {
-    auto it = sourceFileContents.find(filename);
-    if (it == sourceFileContents.end()) {
-        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
-        return "";
-    }
+shared_ptr<DisableFastPath> DisableFastPath::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                  string_view assertionContents) {
+    return make_shared<DisableFastPath>(filename, range, assertionLine, assertionContents == "true");
+}
 
-    auto &file = it->second;
-    if (line >= file->lineCount()) {
-        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
-        return "";
-    } else {
-        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
-        auto lineView = file->getLine(line + 1);
-        return string(lineView.begin(), lineView.end());
+bool DisableFastPath::getValue(const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+    for (auto &assertion : assertions) {
+        if (auto disableFastPath = dynamic_pointer_cast<DisableFastPath>(assertion)) {
+            return disableFastPath->value;
+        }
     }
+    return false;
+}
+
+DisableFastPath::DisableFastPath(string_view filename, unique_ptr<Range> &range, int assertionLine, bool value)
+    : RangeAssertion(filename, range, assertionLine), value(value){};
+
+string DisableFastPath::toString() const {
+    return fmt::format("disable-fast-path: {}", value);
 }
 
 } // namespace sorbet::test

@@ -1,5 +1,5 @@
 # typed: true
-
+# disable-fast-path: true
 class Sup
 end
 class A < Sup

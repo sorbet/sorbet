@@ -32,18 +32,6 @@ std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
 
 class ErrorAssertion;
 
-/** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
-void reportMissingError(const std::string &filename, const ErrorAssertion &assertion, std::string_view sourceLine);
-
-/** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
-void reportUnexpectedError(const std::string &filename, const Diagnostic &diagnostic, std::string_view sourceLine);
-
-/**
- * Given a filename, a 0-indexed line number, and the contents of all test files, returns the source line.
- */
-std::string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                          const std::string &filename, int line);
-
 /**
  * An assertion that is relevant to a specific set of characters on a line.
  * If Range is set such that the start character is 0 and end character is END_OF_LINE_POS, then the assertion
@@ -99,9 +87,10 @@ public:
     /**
      * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
      */
-    static void checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                          std::vector<std::shared_ptr<ErrorAssertion>> errorAssertions,
-                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics);
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                         std::string errorPrefix = "");
 
     const std::string message;
 
@@ -110,7 +99,7 @@ public:
 
     std::string toString() const override;
 
-    void check(const Diagnostic &diagnostic, std::string_view sourceLine);
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
 };
 
 // # ^^^ def: symbol
@@ -147,6 +136,21 @@ public:
 
     UsageAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
                    int version);
+
+    std::string toString() const override;
+};
+
+// # disable-fast-path: true
+class DisableFastPath final : public RangeAssertion {
+public:
+    static std::shared_ptr<DisableFastPath> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                 int assertionLine, std::string_view assertionContents);
+
+    static bool getValue(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
+    const bool value;
+
+    DisableFastPath(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, bool value);
 
     std::string toString() const override;
 };
