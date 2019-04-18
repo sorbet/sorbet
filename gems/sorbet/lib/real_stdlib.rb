@@ -28,12 +28,12 @@ module Sorbet::Private::RealStdlib
   end
 
   def self.real_instance_methods(mod, arg)
-    @real_ancestors ||= Module.instance_method(:instance_methods)
-    @real_ancestors.bind(mod).call(arg)
+    @real_instance_methods ||= Module.instance_method(:instance_methods)
+    @real_instance_methods.bind(mod).call(arg)
   end
 
   def self.real_private_instance_methods(mod, arg)
-    @real_ancestors ||= Module.instance_method(:private_instance_methods)
-    @real_ancestors.bind(mod).call(arg)
+    @real_private_instance_methods ||= Module.instance_method(:private_instance_methods)
+    @real_private_instance_methods.bind(mod).call(arg)
   end
 end
