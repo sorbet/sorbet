@@ -13,12 +13,12 @@ namespace sorbet::payload {
 
 constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
 
-void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd::logger> &logger,
-                              const realmain::options::Options &options, unique_ptr<KeyValueStore> &kvstore) {
+void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
+                              unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
-            Timer timeit(logger, "read_global_state.kvstore");
+            Timer timeit(gs->tracer(), "read_global_state.kvstore");
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
@@ -37,7 +37,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
     const u1 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         gs->initEmpty();
-        Timer timeit(logger, "read_global_state.source");
+        Timer timeit(gs->tracer(), "read_global_state.source");
 
         vector<core::FileRef> payloadFiles;
         {
@@ -49,28 +49,28 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd:
             }
         }
         realmain::options::Options emptyOpts;
-        WorkerPool workers(emptyOpts.threads, logger);
-        auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, workers, kvstore, logger);
-        realmain::pipeline::resolve(*gs, move(indexed), emptyOpts, logger); // result is thrown away
+        WorkerPool workers(emptyOpts.threads, gs->tracer());
+        auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, workers, kvstore);
+        realmain::pipeline::resolve(*gs, move(indexed), emptyOpts); // result is thrown away
     } else {
-        Timer timeit(logger, "read_global_state.binary");
+        Timer timeit(gs->tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
 }
 
-void retainGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd::logger> &logger,
-                       const realmain::options::Options &options, unique_ptr<KeyValueStore> &kvstore) {
+void retainGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
+                       unique_ptr<KeyValueStore> &kvstore) {
     if (!options.storeState.empty()) {
         auto files = gs->getFiles();
         for (const auto &f : files) {
             if (f && f->sourceType != core::File::Type::TombStone && !f->getDefinitionHash().has_value()) {
-                f->setDefinitionHash(realmain::pipeline::computeFileHash(f, logger));
+                f->setDefinitionHash(realmain::pipeline::computeFileHash(f, gs->tracer()));
             }
         }
     }
 
     if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
-        Timer timeit(logger, "write_global_state.kvstore");
+        Timer timeit(gs->tracer(), "write_global_state.kvstore");
         kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
         KeyValueStore::commit(move(kvstore));
     }

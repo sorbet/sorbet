@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_LSPMESSAGE_H
 #define RUBY_TYPER_LSP_LSPMESSAGE_H
 
+#include "common/Counters.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
 #include <chrono>
@@ -53,8 +54,8 @@ public:
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d);
     LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
 
-    /** Time at which this LSP message was received. */
-    std::chrono::time_point<std::chrono::steady_clock> timestamp;
+    /** A tracer for following LSP message in time traces */
+    std::optional<FlowId> startTracer;
 
     /** Request counter. */
     int counter;

@@ -90,7 +90,7 @@ public:
     FileRef findFileByPath(std::string_view path);
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
-
+    spdlog::logger &tracer() const;
     unsigned int namesUsed() const;
 
     unsigned int symbolsUsed() const;

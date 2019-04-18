@@ -236,7 +236,7 @@ int realmain(int argc, char *argv[]) {
     if (!opts.cacheDir.empty()) {
         kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir);
     }
-    payload::createInitialGlobalState(gs, logger, opts, kvstore);
+    payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
@@ -281,10 +281,7 @@ int realmain(int argc, char *argv[]) {
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
-        {
-            Timer timeit(logger, "reserveFiles");
-            inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames, logger);
-        }
+        { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
 
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
@@ -302,12 +299,9 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        {
-            Timer timeit(logger, "index");
-            indexed = pipeline::index(gs, inputFiles, opts, workers, kvstore, logger);
-        }
+        { indexed = pipeline::index(gs, inputFiles, opts, workers, kvstore); }
 
-        payload::retainGlobalState(gs, logger, opts, kvstore);
+        payload::retainGlobalState(gs, opts, kvstore);
 
         if (gs->runningUnderAutogen) {
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
@@ -317,7 +311,7 @@ int realmain(int argc, char *argv[]) {
 
             core::MutableContext ctx(*gs, core::Symbols::root());
 
-            indexed = pipeline::name(*gs, move(indexed), opts, logger);
+            indexed = pipeline::name(*gs, move(indexed), opts);
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
@@ -346,18 +340,18 @@ int realmain(int argc, char *argv[]) {
                 }
             }
         } else {
-            indexed = pipeline::resolve(*gs, move(indexed), opts, logger);
+            indexed = pipeline::resolve(*gs, move(indexed), opts);
             if (opts.stressIncrementalResolver) {
                 for (auto &f : indexed) {
-                    auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore, logger);
+                    auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore);
                     vector<ast::ParsedFile> toBeReResolved;
                     toBeReResolved.emplace_back(move(reIndexed));
-                    auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts, logger);
+                    auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
                     ENFORCE(reresolved.size() == 1);
                     f = move(reresolved[0]);
                 }
             }
-            indexed = pipeline::typecheck(gs, move(indexed), opts, workers, logger);
+            indexed = pipeline::typecheck(gs, move(indexed), opts, workers);
         }
 
         if (opts.suggestTyped) {

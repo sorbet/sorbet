@@ -49,7 +49,7 @@ core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     }
 
     vector<string> emptyInputNames;
-    auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, logger);
+    auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore);
     int id = t.file.id();
     if (id >= indexed.size()) {
         indexed.resize(id + 1);
@@ -90,7 +90,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     }
                     auto hash = files[job]->getDefinitionHash();
                     if (!hash.has_value()) {
-                        hash = pipeline::computeFileHash(files[job], logger);
+                        hash = pipeline::computeFileHash(files[job], *logger);
                     }
                     threadResult.emplace_back(make_pair(job, *hash));
                 }
@@ -119,8 +119,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 void LSPLoop::reIndexFromFileSystem() {
     ShowOperation op(*this, "Indexing", "Sorbet: Indexing files...");
     indexed.clear();
-    vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames, logger);
-    for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore, logger)) {
+    vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames);
+    for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore)) {
         int id = t.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
@@ -172,7 +172,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     }
 
     auto finalGs = initialGS->deepCopy(true);
-    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger, skipConfigatron);
+    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, skipConfigatron);
     tryApplyDefLocSaver(*finalGs, resolved);
     tryApplyLocalVarSaver(*finalGs, resolved);
     vector<core::FileRef> affectedFiles;
@@ -180,7 +180,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
         ENFORCE(tree.file.exists());
         affectedFiles.push_back(tree.file);
     }
-    pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
+    pipeline::typecheck(finalGs, move(resolved), opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     finalGs->lspTypecheckCount++;
     return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs)};
@@ -249,16 +249,16 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         ENFORCE(initialGS->errorQueue->isEmpty());
         vector<ast::ParsedFile> updatedIndexed;
         for (auto &f : subset) {
-            auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
+            auto t = pipeline::indexOne(opts, *finalGs, f, kvstore);
             int id = t.file.id();
             indexed[id] = move(t);
             updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), t.file});
         }
 
-        auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
+        auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
         tryApplyDefLocSaver(*finalGs, resolved);
         tryApplyLocalVarSaver(*finalGs, resolved);
-        pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
+        pipeline::typecheck(finalGs, move(resolved), opts, workers);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
         finalGs->lspTypecheckCount++;
         return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs)};

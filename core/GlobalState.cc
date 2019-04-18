@@ -1259,5 +1259,7 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     }
     return sym;
 }
-
+spdlog::logger &GlobalState::tracer() const {
+    return errorQueue->tracer;
+}
 } // namespace sorbet::core
