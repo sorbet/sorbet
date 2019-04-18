@@ -49,7 +49,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_good.rb start=8:3 end=30:6}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
   static-field <C <U A1>> -> AliasType { symbol = <C <U T1>> } @ Loc {file=test/testdata/resolver/sig_good.rb start=5:1 end=5:3}
-  class <C <U M1>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:1 end=4:10}
+  class <C <U M1>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:1 end=4:10}
   class <S <C <U M1>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:8 end=4:10}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=2:1 end=2:9}
   class <S <C <U T1>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=2:7 end=2:9}

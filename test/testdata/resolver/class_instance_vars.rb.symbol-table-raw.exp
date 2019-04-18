@@ -13,7 +13,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/cla
   class <S <C <U Child1>> $1> < <S <C <U Parent>> $1> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=36:7 end=36:13}
     method <S <C <U Child1>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=37:3 end=37:14}
       argument <S <C <U Child1>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
-  class <C <U Mixin>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}
+  class <C <U Mixin>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}
     static-field <C <U Mixin>><U @@mixin_cvar> -> Integer @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=16:3 end=16:15}
   class <S <C <U Mixin>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:8 end=15:13}
     method <S <C <U Mixin>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}

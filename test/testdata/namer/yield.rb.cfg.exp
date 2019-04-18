@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$6: T.class_of(Main) = alias <C <U Main>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Main))\l<U <statTemp>>$9: T.class_of(Main) = alias <C <U Main>>\l<U <statTemp>>$8: Main = <U <statTemp>>$9: T.class_of(Main).<U new>()\l<U <statTemp>>$7: T.untyped = <U <statTemp>>$8: Main.<U main>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Main) = alias <C <U Main>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Main))\l<U <statTemp>>$9: T.class_of(Main) = alias <C <U Main>>\l<U <statTemp>>$8: Main = <U <statTemp>>$9: T.class_of(Main).<U new>()\l<U <statTemp>>$7: T.untyped = <U <statTemp>>$8: Main.<U main>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];

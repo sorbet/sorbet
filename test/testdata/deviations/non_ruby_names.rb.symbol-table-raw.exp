@@ -2,14 +2,14 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/deviations/n
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=9:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=??? end=???}
-  class <C <U A>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:1 end=5:9}
-    class <C <U A>><C <U B>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
+  class <C <U A>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:1 end=5:9}
+    class <C <U A>><C <U B>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
       class <C <U A>><C <U B>><C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:3 end=7:13}
       class <C <U A>><C <U B>><S <C <U C>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:13}
     class <C <U A>><S <C <U B>> $1> < <C <U Module>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
   class <S <C <U A>> $1> < <C <U Module>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:8 end=5:9}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:3 end=7:13}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=??? end=???}
-  class <C <U B>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=2:9}
+  class <C <U B>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:1 end=2:9}
   class <S <C <U B>> $1> < <C <U Module>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=2:8 end=2:9}
 

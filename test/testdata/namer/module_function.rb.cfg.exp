@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$6: T.class_of(Funcs) = alias <C <U Funcs>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Funcs))\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$10: T.class_of(C) = alias <C <U C>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(C))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Funcs) = alias <C <U Funcs>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Funcs))\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$10: T.class_of(C) = alias <C <U C>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(C))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -165,7 +165,7 @@ subgraph "cluster_::<Class:C>#<static-init>" {
     "bb::<Class:C>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(C) = cast(<U <self>>: NilClass, T.class_of(C));\l<U <statTemp>>$3: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$4: T.class_of(Funcs) = alias <C <U Funcs>>\l<U <returnMethodTemp>>$2: Sorbet::Private::Static::Void = <U <statTemp>>$3: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$4: T.class_of(Funcs))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(C) = cast(<U <self>>: NilClass, T.class_of(C));\l<U <statTemp>>$3: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$4: T.class_of(Funcs) = alias <C <U Funcs>>\l<U <returnMethodTemp>>$2: Sorbet::Private::Static::Void = <U <statTemp>>$3: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$4: T.class_of(Funcs))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:C>#<static-init>_0" -> "bb::<Class:C>#<static-init>_1" [style="bold"];
