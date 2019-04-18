@@ -1,8 +1,54 @@
+:root {
+  --sorbet-purple-1: #330066; /* currently unused */
+  --sorbet-purple-2: #4f4397;
+  --sorbet-purple-3: #6255b0;
 
-/* Custom CSS styles */
-/* Full bleed overrides */
+  --sorbet-purple-4: #8673FF;
+  --sorbet-purple-5: #997AFC; /* currently unused */
+  --sorbet-purple-6: #B4A8FF;
+}
+
 .homeContainer {
-  background: #4F4397;
+  text-align: left;
+}
+
+.projectTitle {
+  line-height: 1.2em;
+}
+
+.homeContainer .homeWrapper {
+  padding: 4em 20px;
+}
+
+.wrapper {
+  max-width: 1100px;
+}
+
+.homeContainer .homeWrapper .projectLogo {
+  padding: 0;
+}
+
+.homeContainer .homeWrapper .projectLogo img {
+  width: 200px;
+}
+
+.container .wrapper .threeByGridBlock {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.container .wrapper .threeByGridBlock h2 {
+  margin-top: 0;
+  text-align: left;
+}
+
+.container .wrapper .threeByGridBlock h2 p {
+  margin-top: 0;
+  text-align: left;
+  margin-bottom: 0;
+}
+.homeContainer {
+  background: var(--sorbet-purple-2);
   color: #ffffff;
 }
 
@@ -16,19 +62,19 @@
 }
 
 .homeContainer .button:hover {
-  color: #4F4397;
+  color: var(--sorbet-purple-2);
   background: #ffffff;
 }
 
 .homeContainer a, .footer a {
-  color: #B4A8FF;
+  color: var(--sorbet-purple-6);
 }
 
 /* Features container */
 .featuresContainer {
   margin-top: 0.5em;
   padding: 2.5em 0;
-  background: #6255b0;
+  background: var(--sorbet-purple-3);
 }
 
 .featuresContainer .wrapper .threeByGridBlock {
@@ -47,6 +93,25 @@
   align-items: center;
 }
 
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.row:not(:first-child) {
+  margin-bottom: 20px;
+}
+
+.column {
+  float: left;
+  width: 50%;
+}
+
+.column:not(:last-child) {
+  padding-right: 20px;
+}
+
 /* Responsive styles*/
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
@@ -55,15 +120,6 @@
 }
 
 @media only screen and (max-width: 1023px) {
-  /* Navbar color override in responsive mode */
-  .fixedHeaderContainer {
-    min-height: 55px;
-  }
-  .navigationSlider .slidingNav ul {
-    background: #4F4397;
-    border-top: 1px solid #7d76a9;
-    margin-top: 50px;
-  }
   /* Masthead */
   h2.projectTitle {
     margin-top: 0;
@@ -72,7 +128,14 @@
 @media only screen and (max-width: 700px) {
   .pageSectionColumns {
     flex-direction: column;
-}
+  }
+
+  .column {
+    width: 100%;
+  }
+  .column:not(:last-child) {
+    padding-right: 0;
+  }
 }
 @media only screen and (min-width: 1400px) {
 }

@@ -40,10 +40,8 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    // primaryColor: '#6856f0',
-    // secondaryColor: '#9280f4',
-    primaryColor: '#4f4397',
-    secondaryColor: '#330066',
+    primaryColor:   '#4f4397', // --sorbet-purple-2
+    secondaryColor: '#4f4397', // --sorbet-purple-2
   },
 
   // Custom fonts for website
