@@ -307,23 +307,23 @@ public:
         return SymbolRef(nullptr, 58);
     }
 
-    static SymbolRef Sorbet::Private::Static_ImplicitModuleSuperClass() {
+    static SymbolRef Sorbet_Private_Static_ImplicitModuleSuperClass() {
         return SymbolRef(nullptr, 59);
     }
 
-    static SymbolRef Sorbet::Private::Static_ReturnTypeInference() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference() {
         return SymbolRef(nullptr, 60);
     }
 
-    static SymbolRef Sorbet::Private::Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return SymbolRef(nullptr, 61);
     }
 
-    static SymbolRef Sorbet::Private::Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
         return SymbolRef(nullptr, 62);
     }
 
-    static SymbolRef Sorbet::Private::Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 63);
     }
 
@@ -347,15 +347,15 @@ public:
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef Sorbet::Private::Static_badAliasMethodStub() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef Sorbet::Private::Static_badAliasMethodStub_arg0() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_arg0() {
         return SymbolRef(nullptr, 70);
     }
 
-    static SymbolRef Sorbet::Private::Static_badAliasMethodStub_blk() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_blk() {
         return SymbolRef(nullptr, 71);
     }
 
