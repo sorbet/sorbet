@@ -431,7 +431,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         p.putU4(s._id);
     }
     p.putU4(what.members.size());
-    for (auto member : what.members) {
+    for (const auto &member : what.members) {
         p.putU4(member.first.id());
         p.putU4(member.second._id);
     }
