@@ -418,8 +418,8 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
     IndexResult ret;
-    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer()); !result.done();
+         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer())) {
         if (result.gotItem()) {
             counterConsume(move(threadResult.counters));
             if (ret.gs == nullptr) {
@@ -490,17 +490,15 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         }
     });
 
-    auto ret = mergeIndexResults(baseGs, opts, resultq, kvstore);
-
-    return ret;
+    return mergeIndexResults(baseGs, opts, resultq, kvstore);
 }
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
                              unique_ptr<KeyValueStore> &kvstore) {
-    Timer timeit(firstPass.gs->tracer(), "indexPluginFiles");
     if (firstPass.pluginGeneratedFiles.empty()) {
         return firstPass;
     }
+    Timer timeit(firstPass.gs->tracer(), "indexPluginFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(firstPass.pluginGeneratedFiles.size());
     auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(firstPass.pluginGeneratedFiles.size());
     {
@@ -588,14 +586,23 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
         auto firstPass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore);
+
+        Timer timeit(firstPass.gs->tracer(), "index-rem");
         auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore);
+        {
+        Timer timeit(pluginPass.gs->tracer(), "moving gs?");
         gs = move(pluginPass.gs);
+        }
+        {
+        Timer timeit(gs->tracer(), "moving trees?");
         ret = move(pluginPass.trees);
+        }
     }
 
-    auto by_file = [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; };
-    fast_sort(ret, by_file);
-
+    {
+    Timer timeit(gs->tracer(), "sortingFiles");
+    fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+    }
     return ret;
 }
 
@@ -638,6 +645,7 @@ struct typecheck_thread_result {
 
 vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                              bool skipConfigatron) {
+    Timer timeit(gs.tracer(), "name");
     if (!skipConfigatron) {
         core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
         core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
@@ -724,7 +732,6 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(gs.tracer(), "resolving");
-            gs.tracer().trace("Resolving (global pass)...");
             vector<core::ErrorRegion> errs;
             for (auto &tree : what) {
                 auto file = tree.file;
@@ -807,8 +814,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
             typecheck_thread_result threadResult;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer()); !result.done();
+                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer())) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
                         typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
