@@ -7,6 +7,7 @@
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include <utility>
+#include "common/Timer.h"
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
@@ -952,6 +953,8 @@ void GlobalState::sanityCheck() const {
         // it's very slow to check this and it didn't find bugs
         return;
     }
+
+    Timer timeit(tracer(), "GlobalState::sanityCheck");
     ENFORCE(!names.empty(), "empty name table size");
     ENFORCE(!strings.empty(), "empty string table size");
     ENFORCE(!namesByHash.empty(), "empty name hash table size");
@@ -1021,6 +1024,7 @@ bool GlobalState::unfreezeSymbolTable() {
 }
 
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
+    Timer timeit(tracer(), "GlobalState::deepCopy");
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
     result->silenceErrors = this->silenceErrors;
