@@ -229,7 +229,7 @@ TEST(GenerateLSPMessagesTest, JSONArray) {
     });
 
     // Throws when not an array.
-    ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": null}"), JSONTypeError);
+    ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": {}}"), JSONTypeError);
 
     // Throws when a member of array has an invalid type.
     ASSERT_THROW(SymbolKindOptions::fromJSON(alloc, "{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
@@ -291,7 +291,8 @@ TEST(GenerateLSPMessagesTest, DiscriminatedUnionValidValues) {
         ASSERT_EQ(msg->method, LSPMethod::Shutdown);
         ASSERT_NO_THROW({
             auto maybeNull = get<optional<JSONNullObject>>(msg->params);
-            ASSERT_TRUE(maybeNull);
+            // Null in an optional field is actually treated as a missing field for emacs compatibility.
+            ASSERT_FALSE(maybeNull);
         });
     });
     parseTest<RequestMessage>(alloc, makeRequestMessage(LSPMethod::Shutdown, nullopt), [](auto &msg) -> void {
@@ -337,6 +338,11 @@ TEST(GenerateLSPMessagesTest, RenamedFieldsWorkProperly) {
                                          ASSERT_EQ(watchmanQueryResponse->files.size(), 1);
                                          ASSERT_EQ(watchmanQueryResponse->files.at(0), "foo.rb");
                                      });
+}
+
+TEST(GenerateLSPMessagesTest, AcceptsNullOnOptionalFields) {
+    parseTest<ConfigurationItem>(alloc, "{\"scopeUri\": null}",
+                                 [](auto &item) -> void { ASSERT_FALSE(item->scopeUri); });
 }
 
 } // namespace sorbet::realmain::lsp::test
