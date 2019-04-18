@@ -136,6 +136,7 @@ public:
     static bool exists(std::string_view filename);
     static std::string read(std::string_view filename);
     static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
+    static void append(std::string_view filename, std::string_view text);
     static void write(std::string_view filename, std::string_view text);
     /**
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.

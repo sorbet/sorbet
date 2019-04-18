@@ -68,6 +68,16 @@ void sorbet::FileOps::write(string_view filename, string_view text) {
     throw sorbet::FileNotFoundException();
 }
 
+void sorbet::FileOps::append(string_view filename, string_view text) {
+    FILE *fp = std::fopen(string(filename).c_str(), "a");
+    if (fp) {
+        fwrite(text.data(), sizeof(char), text.size(), fp);
+        fclose(fp);
+        return;
+    }
+    throw sorbet::FileNotFoundException();
+}
+
 string_view sorbet::FileOps::getFileName(string_view path) {
     size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
