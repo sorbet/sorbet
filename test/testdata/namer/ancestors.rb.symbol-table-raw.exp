@@ -6,9 +6,9 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/ancest
   class <S <C <U Child>> $1> < <S <C <U Parent>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=9:7 end=9:12}
     method <S <C <U Child>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
       argument <S <C <U Child>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
-  class <C <U Mixin1>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/ancestors.rb start=2:1 end=2:14}
+  class <C <U Mixin1>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/ancestors.rb start=2:1 end=2:14}
   class <S <C <U Mixin1>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/ancestors.rb start=2:8 end=2:14}
-  class <C <U Mixin2>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/ancestors.rb start=3:1 end=3:14}
+  class <C <U Mixin2>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/ancestors.rb start=3:1 end=3:14}
   class <S <C <U Mixin2>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/ancestors.rb start=3:8 end=3:14}
   class <C <U MultipleInclude>> < <C <U Object>> (<C <U Mixin1>>, <C <U Mixin2>>) @ Loc {file=test/testdata/namer/ancestors.rb start=13:1 end=13:22}
   class <S <C <U MultipleInclude>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=13:7 end=13:22}

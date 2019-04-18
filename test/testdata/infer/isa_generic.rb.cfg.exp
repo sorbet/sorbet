@@ -18,7 +18,7 @@ subgraph "cluster_::Object#f" {
 
     "bb::Object#f_1" -> "bb::Object#f_1" [style="bold"];
     "bb::Object#f_2" [
-        label = "block[id=2](<U x>: Concrete)\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$10: T.class_of(Concrete))\l<U <castTemp>>$11: Concrete = <U x>\l<U <statTemp>>$3: Concrete = cast(<U <castTemp>>$11: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=2](<U x>: Concrete)\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$10: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$10: T.class_of(Concrete))\l<U <castTemp>>$11: Concrete = <U x>\l<U <statTemp>>$3: Concrete = cast(<U <castTemp>>$11: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_2" -> "bb::Object#f_7" [style="bold"];
@@ -30,7 +30,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_3" -> "bb::Object#f_7" [style="tapered"];
 
     "bb::Object#f_4" [
-        label = "block[id=4](<U x>: Other)\l<U <statTemp>>$16: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$17: T.class_of(Other) = alias <C <U Other>>\l<U <statTemp>>$15: RubyTyper::Void = <U <statTemp>>$16: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$17: T.class_of(Other))\l<U <castTemp>>$18: Other = <U x>\l<U <statTemp>>$3: Other = cast(<U <castTemp>>$18: Other, Other);\l<unconditional>\l"
+        label = "block[id=4](<U x>: Other)\l<U <statTemp>>$16: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$17: T.class_of(Other) = alias <C <U Other>>\l<U <statTemp>>$15: Sorbet::Private::Static::Void = <U <statTemp>>$16: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$17: T.class_of(Other))\l<U <castTemp>>$18: Other = <U x>\l<U <statTemp>>$3: Other = cast(<U <castTemp>>$18: Other, Other);\l<unconditional>\l"
     ];
 
     "bb::Object#f_4" -> "bb::Object#f_7" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_7" -> "bb::Object#f_10" [style="tapered"];
 
     "bb::Object#f_8" [
-        label = "block[id=8](<U x>: Concrete)\l<U <statTemp>>$24: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$25: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$23: RubyTyper::Void = <U <statTemp>>$24: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$25: T.class_of(Concrete))\l<U <castTemp>>$26: Concrete = <U x>\l<U <statTemp>>$19: Concrete = cast(<U <castTemp>>$26: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=8](<U x>: Concrete)\l<U <statTemp>>$24: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$25: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$23: Sorbet::Private::Static::Void = <U <statTemp>>$24: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$25: T.class_of(Concrete))\l<U <castTemp>>$26: Concrete = <U x>\l<U <statTemp>>$19: Concrete = cast(<U <castTemp>>$26: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_8" -> "bb::Object#f_10" [style="bold"];
@@ -54,7 +54,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_10" -> "bb::Object#f_12" [style="tapered"];
 
     "bb::Object#f_12" [
-        label = "block[id=12](<U x>: Concrete)\l<U <statTemp>>$31: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$32: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$30: RubyTyper::Void = <U <statTemp>>$31: T.class_of(RubyTyper).<U keep_for_typechecking>(<U <statTemp>>$32: T.class_of(Concrete))\l<U <castTemp>>$33: Concrete = <U x>\l<U <returnMethodTemp>>$2: Concrete = cast(<U <castTemp>>$33: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=12](<U x>: Concrete)\l<U <statTemp>>$31: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$32: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$30: Sorbet::Private::Static::Void = <U <statTemp>>$31: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$32: T.class_of(Concrete))\l<U <castTemp>>$33: Concrete = <U x>\l<U <returnMethodTemp>>$2: Concrete = cast(<U <castTemp>>$33: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_12" -> "bb::Object#f_13" [style="bold"];
@@ -72,7 +72,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(Base)[T.untyped] = alias <C <U Base>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Base)[T.untyped])\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Concrete))\l<U <statTemp>>$12: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$13: T.class_of(Base)[T.untyped] = alias <C <U Base>>\l<U <statTemp>>$11: RubyTyper::Void = <U <statTemp>>$12: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(Base)[T.untyped])\l<U <statTemp>>$16: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$17: T.class_of(Other) = alias <C <U Other>>\l<U <statTemp>>$15: RubyTyper::Void = <U <statTemp>>$16: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$17: T.class_of(Other))\l<U <block-pre-call-temp>>$20: RubyTyper::Void = <U <self>>: T.class_of(<root>).<U sig>()\l<U <selfRestore>>$21: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$6: T.class_of(Base)[T.untyped] = alias <C <U Base>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Base)[T.untyped])\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$10: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Concrete))\l<U <statTemp>>$12: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$13: T.class_of(Base)[T.untyped] = alias <C <U Base>>\l<U <statTemp>>$11: Sorbet::Private::Static::Void = <U <statTemp>>$12: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(Base)[T.untyped])\l<U <statTemp>>$16: T.class_of(Sorbet::Private::Static) = alias <C <U Sorbet::Private::Static>>\l<U <statTemp>>$17: T.class_of(Other) = alias <C <U Other>>\l<U <statTemp>>$15: Sorbet::Private::Static::Void = <U <statTemp>>$16: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$17: T.class_of(Other))\l<U <block-pre-call-temp>>$20: Sorbet::Private::Static::Void = <U <self>>: T.class_of(<root>).<U sig>()\l<U <selfRestore>>$21: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -89,7 +89,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$21: T.class_of(<root>))\l<U <statTemp>>$18: RubyTyper::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$21\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$21: T.class_of(<root>))\l<U <statTemp>>$18: Sorbet::Private::Static::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$21\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];

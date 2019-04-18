@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::Test)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::Test)
   class ::Test<<C <U Test>>> < (::<todo sym>)
     def <U test_next_break><<U test_next_break>>(<blk>)
       <U <self>>.<U each>() do ||

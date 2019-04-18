@@ -1259,7 +1259,7 @@ public:
                     e.setHeader("Can't make method alias from `{}` to non existing method `{}`", fromName.show(ctx),
                                 toName.show(ctx));
                 }
-                toMethod = core::Symbols::RubyTyper_badAliasMethodStub();
+                toMethod = core::Symbols::Sorbet::Private::Static_badAliasMethodStub();
             }
 
             core::SymbolRef fromMethod = owner.data(ctx)->findMemberNoDealias(ctx, fromName);

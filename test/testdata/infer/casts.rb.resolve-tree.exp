@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::TestCasts)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::TestCasts)
   class ::TestCasts<<C <U TestCasts>>> < (::<todo sym>)
     <emptyTree>
 
@@ -12,36 +12,36 @@ begin
     def <U test_casts><<U test_casts>>(<blk>)
       begin
         <U t> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::Integer)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
           T.<U assert_type!>(<U <self>>.<U untyped>(), Integer)
         end
         <U t>.<U +>(4)
         <U t1> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::Integer)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
           T.<U assert_type!>("hi", Integer)
         end
         <U t1>.<U +>(1)
         <U s> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::String)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
           T.<U cast>(<U <self>>.<U untyped>(), String)
         end
         <U s>.<U +>("hi")
         <U s> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::String)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
           T.<U cast>(6, String)
         end
         <U s>.<U +>("hi")
         <U s>.<U +>(3)
         <U s> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::Integer)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
           T.<U cast>(6, Integer)
         end
         <U s> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::T.<U untyped>())
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U untyped>())
           T.<U cast>(6, T.untyped)
         end
         <U s> = begin
-          ::RubyTyper.<U keep_for_typechecking>(7)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(7)
           T.<U cast>(6, T.untyped)
         end
         <U s>.<U +>("hi")

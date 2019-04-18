@@ -10,7 +10,7 @@ class CSV < Object
 
   sig do
     type_parameters(:U).params(
-        path: T.any(String, ::RubyTyper::IOLike),
+        path: T.any(String, ::Sorbet::Private::Static::IOLike),
         options: T::Hash[Symbol, T.type_parameter(:U)],
         blk: T.proc.params(arg0: T::Array[T.nilable(String)]).void,
     )
@@ -20,7 +20,7 @@ class CSV < Object
 
   sig do
     params(
-        io: T.any(::RubyTyper::IOLike, String),
+        io: T.any(::Sorbet::Private::Static::IOLike, String),
         options: T::Hash[Symbol, T.untyped],
     )
     .void
@@ -64,7 +64,7 @@ end
 
 sig do
   params(
-      io: T.any(::RubyTyper::IOLike, String),
+      io: T.any(::Sorbet::Private::Static::IOLike, String),
       options: T::Hash[Symbol, T.untyped],
   )
   .returns(CSV)

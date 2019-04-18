@@ -31,10 +31,10 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig
       argument <C <U A>><U test_abstract><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U test_abstract_untyped> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=98:3 end=98:28}
       argument <C <U A>><U test_abstract_untyped><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_implementation> (x, <blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=79:3 end=79:29}
+    method <C <U A>><U test_implementation> (x, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=79:3 end=79:29}
       argument <C <U A>><U test_implementation>x<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=79:27 end=79:28}
       argument <C <U A>><U test_implementation><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U test_junk_inside> (<blk>) -> RubyTyper::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=103:19 end=103:39}
+    method <C <U A>><U test_junk_inside> (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=103:19 end=103:39}
       argument <C <U A>><U test_junk_inside><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U test_kwargs> (returns, <blk>) -> T2 @ Loc {file=test/testdata/resolver/sig_misc.rb start=21:3 end=21:27}
       argument <C <U A>><U test_kwargs>returns<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=18:12 end=18:19}

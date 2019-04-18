@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::Destructure)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::Destructure)
   class ::Destructure<<C <U Destructure>>> < (::<todo sym>)
     def <U f><<U f>>((x,y), z, <blk>)
       begin

@@ -64,7 +64,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.untyped = <U <self>>: T.class_of(<root>).<U foo>()\l<U <statTemp>>$3: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$5: T.untyped)\l<U <block-pre-call-temp>>$9: RubyTyper::Void = <U <self>>: T.class_of(<root>).<U sig>()\l<U <selfRestore>>$10: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.untyped = <U <self>>: T.class_of(<root>).<U foo>()\l<U <statTemp>>$3: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$5: T.untyped)\l<U <block-pre-call-temp>>$9: Sorbet::Private::Static::Void = <U <self>>: T.class_of(<root>).<U sig>()\l<U <selfRestore>>$10: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$10: T.class_of(<root>))\l<U <statTemp>>$7: RubyTyper::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$10\l<U <block-pre-call-temp>>$32: String = <U <self>>: T.class_of(<root>).<U bar>()\l<U <selfRestore>>$33: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$10: T.class_of(<root>))\l<U <statTemp>>$7: Sorbet::Private::Static::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$10\l<U <block-pre-call-temp>>$32: String = <U <self>>: T.class_of(<root>).<U bar>()\l<U <selfRestore>>$33: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];

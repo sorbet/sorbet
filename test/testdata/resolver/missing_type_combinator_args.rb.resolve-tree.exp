@@ -2,25 +2,25 @@ class <emptyTree><<C <U <root>>>> < ()
   def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
     begin
       begin
-        ::RubyTyper.<U keep_for_typechecking>(::T.<U nilable>())
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U nilable>())
         T.<U cast>(nil, T.untyped)
       end
       begin
-        ::RubyTyper.<U keep_for_typechecking>(::T.<U nilable>(::Integer, ::Integer))
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U nilable>(::Integer, ::Integer))
         T.<U cast>(nil, T.untyped)
       end
       begin
-        ::RubyTyper.<U keep_for_typechecking>(::T.<U any>())
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U any>())
         T.<U cast>(nil, T.untyped)
       end
       begin
-        ::RubyTyper.<U keep_for_typechecking>(::T.<U all>())
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U all>())
         T.<U cast>(nil, T.untyped)
       end
       ::T.<U must>()
       ::T.<U let>(1)
       begin
-        ::RubyTyper.<U keep_for_typechecking>(2)
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(2)
         T.<U let>(1, T.untyped)
       end
       ::T.<U reveal_type>()

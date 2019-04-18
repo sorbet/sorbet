@@ -3,22 +3,22 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Mixin)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Child)
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Child)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         ::Alias = ::Parent
         begin
-          ::RubyTyper.<U keep_for_ide>(::Child1)
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Child1)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         <emptyTree>
@@ -35,11 +35,11 @@ begin
     def <U initialize><<U initialize>>(<blk>)
       begin
         <U @ivar> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::Integer)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
           T.<U let>(1, Integer)
         end
         <U @ivar2> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::Integer)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
           T.<U let>(2, Integer)
         end
       end
@@ -54,7 +54,7 @@ begin
 
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       <U @@class_var> = begin
-        ::RubyTyper.<U keep_for_typechecking>(::String)
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
         T.<U let>("hi", String)
       end
     end
@@ -63,7 +63,7 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         <U @@mixin_cvar> = begin
-          ::RubyTyper.<U keep_for_typechecking>(::Integer)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
           T.<U let>(3, Integer)
         end
         <U @@mixin_cvar>
@@ -90,7 +90,7 @@ begin
         <U @@class_var>
         <U @@mixin_cvar>
         <U @@undefined_cvar>
-        ::RubyTyper.<U keep_for_ide>(::Mixin)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
         <emptyTree>
       end
     end

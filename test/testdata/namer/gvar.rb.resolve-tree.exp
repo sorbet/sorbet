@@ -4,7 +4,7 @@ begin
       begin
         #$a = 1
         begin
-          ::RubyTyper.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
           <emptyTree>
         end
         <emptyTree>

@@ -8,13 +8,13 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/lin
   class <S <C <U B>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=8:7 end=8:8}
     method <S <C <U B>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}
       argument <S <C <U B>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}
-  class <C <U C>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> (<C <U A>>, <C <U Sup>>, <C <U Object>>, <C <U Kernel>>, <C <U BasicObject>>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=12:1 end=12:9}
+  class <C <U C>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> (<C <U A>>, <C <U Sup>>, <C <U Object>>, <C <U Kernel>>, <C <U BasicObject>>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=12:1 end=12:9}
     method <C <U C>><U bla> (<blk>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=14:3 end=14:10}
       argument <C <U C>><U bla><blk><block> @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}
   class <S <C <U C>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=12:8 end=12:9}
     method <S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}
       argument <S <C <U C>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}
-  class <C <U IncludesBO>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> (<C <U BasicObject>>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=19:1 end=19:18}
+  class <C <U IncludesBO>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> (<C <U BasicObject>>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=19:1 end=19:18}
   class <S <C <U IncludesBO>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=19:8 end=19:18}
     method <S <C <U IncludesBO>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}
       argument <S <C <U IncludesBO>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/linearization/includes_class.rb start=??? end=???}

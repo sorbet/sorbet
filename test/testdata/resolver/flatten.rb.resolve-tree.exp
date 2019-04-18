@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::A)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::A)
   class ::A<<C <U A>>> < (::<todo sym>)
     <emptyTree>
 

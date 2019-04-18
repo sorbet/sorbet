@@ -2,7 +2,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/lin
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=2:1 end=18:14}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}
-  class <C <U Base>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=2:1 end=2:12}
+  class <C <U Base>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=2:1 end=2:12}
     method <C <U Base>><U f> (x, <blk>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=3:3 end=3:11}
       argument <C <U Base>><U f>x<> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=3:9 end=3:10}
       argument <C <U Base>><U f><blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}
@@ -11,7 +11,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/lin
   class <S <C <U C>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=13:7 end=13:8}
     method <S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=13:1 end=13:8}
       argument <S <C <U C>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}
-  class <C <U M1>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> (<C <U Base>>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=5:1 end=5:10}
+  class <C <U M1>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> (<C <U Base>>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=5:1 end=5:10}
     method <C <U M1>><U f> (x, y, <blk>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=7:3 end=7:14}
       argument <C <U M1>><U f>x<> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=7:9 end=7:10}
       argument <C <U M1>><U f>y<> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=7:12 end=7:13}
@@ -19,7 +19,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/lin
   class <S <C <U M1>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=5:8 end=5:10}
     method <S <C <U M1>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}
       argument <S <C <U M1>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}
-  class <C <U M2>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> (<C <U Base>>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=9:1 end=9:10}
+  class <C <U M2>> < <C <U Sorbet::Private::Static>><C <U ImplicitModuleSuperclass>> (<C <U Base>>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=9:1 end=9:10}
   class <S <C <U M2>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=9:8 end=9:10}
     method <S <C <U M2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}
       argument <S <C <U M2>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization2.rb start=??? end=???}

@@ -1,9 +1,9 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::C)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::C)
   class ::C<<C <U C>>> < (::<todo sym>)
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       ::C::L = begin
-        ::RubyTyper.<U keep_for_typechecking>(::T.<U proc>().<U params>({:"x" => ::Integer}).<U returns>(::Integer))
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U proc>().<U params>({:"x" => ::Integer}).<U returns>(::Integer))
         T.<U let>(<U <self>>.<U lambda>() do |x|
           <U x>$1.<U *>(<U x>$1)
         end, AppliedType {

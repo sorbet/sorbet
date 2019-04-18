@@ -3,24 +3,24 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Mixin1)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin1)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Mixin2)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin2)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Child)
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Child)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::MultipleInclude)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::MultipleInclude)
           <emptyTree>
         end
         <emptyTree>
@@ -31,19 +31,19 @@ begin
   module ::Mixin2<<C <U Mixin2>>> < ()  end
   class ::Parent<<C <U Parent>>> < (::<todo sym>, ::Mixin1)
     def self.<U <static-init>><<U <static-init>>>(<blk>)
-      ::RubyTyper.<U keep_for_ide>(::Mixin1)
+      ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin1)
     end
   end
   class ::Child<<C <U Child>>> < (::Parent, ::Mixin2)
     def self.<U <static-init>><<U <static-init>>>(<blk>)
-      ::RubyTyper.<U keep_for_ide>(::Mixin2)
+      ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin2)
     end
   end
   class ::MultipleInclude<<C <U MultipleInclude>>> < (::<todo sym>, ::Mixin2, ::Mixin1)
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.<U keep_for_ide>(::Mixin2)
-        ::RubyTyper.<U keep_for_ide>(::Mixin1)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin2)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin1)
         <emptyTree>
       end
     end
