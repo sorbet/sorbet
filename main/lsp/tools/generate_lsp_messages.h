@@ -678,7 +678,8 @@ public:
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
         // Check for presence of field.
-        fmt::format_to(out, "if ({}) {{\n", from);
+        // N.B.: Treat null fields as missing. Emacs fills in optional fields with `null` values.
+        fmt::format_to(out, "if ({0} && !(*{0})->IsNull()) {{\n", from);
         const std::string innerCPPType = innerType->getCPPType();
         AssignLambda assignOptional = [innerCPPType, assign](fmt::memory_buffer &out, std::string_view from) -> void {
             assign(out, fmt::format("std::make_optional<{}>({})", innerCPPType, from));
