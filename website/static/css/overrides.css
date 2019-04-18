@@ -5,15 +5,15 @@
  */
 
 /*
- * By default, the link color is the same as the top nav color.
+ * By default, the link color is the same as the primaryColor.
  * For us, this color is too dark, and links don't pop enough.
  * Thus, we override the link color to be more vibrant.
  */
 a {
-  color: #8673FF;
+  color: var(--sorbet-purple-4);
 }
 a:hover {
-  color: #8673FF;
+  color: var(--sorbet-purple-4);
   text-decoration: underline;
 }
 
@@ -23,7 +23,7 @@ a:hover {
  * https://github.com/facebook/Docusaurus/blob/1edbeecb/packages/docusaurus-1.x/lib/static/css/main.css#L719
  */
 .fixedHeaderContainer a:hover {
-  color: #fff;
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -35,6 +35,23 @@ sup {
   vertical-align: super;
   font-size: 11px;
   font-weight: bold;
+}
+
+/*
+ * We have primary and secondary color the same, so use a drop shadow to make
+ * the navigation buttons stand out on mobile
+ */
+@media only screen and (max-width: 1023px) {
+  .navigationSlider .slidingNav ul {
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.navigationSlider .slidingNav ul li > a:focus,
+.navigationSlider .slidingNav ul li > a:hover,
+.navigationSlider .slidingNav ul li.siteNavItemActive > a,
+.navigationSlider .slidingNav ul li.siteNavGroupActive > a {
+  background-color: var(--sorbet-purple-3);
 }
 
 /*
