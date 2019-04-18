@@ -90,6 +90,8 @@ const siteConfig = {
     indexName: 'stripe_sorbet',
     algoliaOptions: {} // Optional, if provided by Algolia
   },
+
+  gaTrackingId: 'UA-119877071-2',
 };
 
 module.exports = siteConfig;
