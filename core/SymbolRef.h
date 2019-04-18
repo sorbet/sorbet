@@ -323,7 +323,8 @@ public:
         return SymbolRef(nullptr, 62);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
+    static SymbolRef
+    Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
         return SymbolRef(nullptr, 63);
     }
 

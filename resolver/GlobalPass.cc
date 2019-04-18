@@ -402,7 +402,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (isSingleton) {
             if (attached == core::Symbols::BasicObject()) {
                 ref.data(gs)->setSuperClass(core::Symbols::Class());
-            } else if (attached.data(gs)->superClass() == core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass()) {
+            } else if (attached.data(gs)->superClass() ==
+                       core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass()) {
                 // Note: this depends on attached classes having lower indexes in name table than their singletons
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
