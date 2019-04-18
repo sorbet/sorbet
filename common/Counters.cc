@@ -162,10 +162,6 @@ int getGlobalTimingId() {
     static atomic<int> counter = 0;
     return ++counter;
 }
-int getPerThreadTimingId() {
-    thread_local static int counter = 0;
-    return ++counter;
-}
 
 int genThreadId() {
     static atomic<int> counter{0};
@@ -178,7 +174,7 @@ int getThreadId() {
 }
 
 void timingAdd(string_view measure, unsigned long start, unsigned long end) {
-    CounterImpl::Timing tim{getPerThreadTimingId(),       (string)measure, start, end - start, getThreadId(),
+    CounterImpl::Timing tim{0,       (string)measure, start, end - start, getThreadId(),
                             CounterImpl::Timing::Duration};
     counterState.timingAdd(tim);
 }

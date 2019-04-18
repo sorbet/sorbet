@@ -61,9 +61,9 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     for (const auto &e : counters.counters->timings) {
         if (e.kind == CounterImpl::Timing::Duration) {
             fmt::format_to(result,
-                           "{{\"name\": \"{}-{}\", \"cat\": \"timing,duration\", \"ph\": \"X\", \"ts\": {}, \"dur\": "
+                           "{{\"name\": \"{}\", \"cat\": \"timing,duration\", \"ph\": \"X\", \"ts\": {}, \"dur\": "
                            "{}, \"pid\": {}, \"tid\": {}}},\n",
-                           e.namePrefix, e.id, e.ts, e.duration.value(), pid, e.threadId.value());
+                           e.namePrefix, e.ts, e.duration.value(), pid, e.threadId.value());
         } else if (e.kind == CounterImpl::Timing::Async) {
             fmt::format_to(result,
                            "{{\"name\": \"{}\", \"cat\": \"timing,async\", \"ph\": \"b\", \"ts\": {}, \"pid\": {}, "
