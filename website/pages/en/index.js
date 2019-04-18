@@ -265,7 +265,7 @@ class Index extends React.Component {
           />
         </PageSection>
         <PageSection short lightPurple>
-          <p class="footer">
+          <p className="footer">
             © 2019 Stripe{" · "}
             <a href="docs/adopting">Get started</a>{" · "}
             <a href="docs/">Docs</a>{" · "}
