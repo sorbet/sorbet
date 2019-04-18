@@ -326,183 +326,183 @@ end;end;end;
 ------ Extra arguments for Ruby
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|0":
 class CMS;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|1":
 class CMS;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|10":
 module MCS;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|11":
 module MCS;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|12":
 module MCS;class C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|13":
 module MCS;class C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|14":
 module MCS;class C;class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|15":
 module MSC;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|16":
 module MSC;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|17":
 module MSC;class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|18":
 module MSC;class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|19":
 module MSC;class << self;class C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|2":
 class CMS;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|20":
 class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|21":
 class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|22":
 class << self;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|23":
 class << self;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|24":
 class << self;module M;class C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|25":
 class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|26":
 class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|27":
 class << self;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|28":
 class << self;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|29":
 class << self;module M;class C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|3":
 class CMS;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|30":
 class NestedReopen;class MCS::C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|31":
 class NestedReopen;class ::MCS::C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|32":
 module CMS::M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|33":
 module CMS::M;class ::MCS::C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|34":
 module ::CMS::M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|35":
 module ::CMS::M;class C;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|4":
 class CMS;module M;class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|5":
 class CSM;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|6":
 class CSM;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|7":
 class CSM;class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|8":
 class CSM;class << self;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;
 # Path: "test/cli/subprocess-plugin/permute.rb//plugin-generated|9":
 class CSM;class << self;module M;
-Gem is not defined
-DidYouMean is not defined
+'Gem is not defined'
+'DidYouMean is not defined'
 end;end;end;
 ------ Multi file generated code
 # Path: "test/cli/subprocess-plugin/multi1.rb//plugin-generated|0":
@@ -653,9 +653,5 @@ class ::<root> < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:3, https://
       argument ::<Class:Something>#<static-init>#<blk><block> @ test/cli/subprocess-plugin/multi3.rb
 
 ------ Bad plugin output on single file
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0:2: Parse Error: unexpected token: syntax error http://go/e/2001
-     2 |end end end end
-            ^^^
-Errors: 1
+test/cli/subprocess-plugin/bad_plugin.yaml: Required key `triggers` must be a map
 ------ Bad plugin output on many files
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0:2: Parse Error: unexpected token: syntax error http://go/e/2001
