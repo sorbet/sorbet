@@ -243,6 +243,7 @@ class Index extends React.Component {
           </div>
         </PageSection>
         <PageSection>
+          <h1>Dive into the docs</h1>
           <GridBlock
             layout="threeColumn"
             contents={[
