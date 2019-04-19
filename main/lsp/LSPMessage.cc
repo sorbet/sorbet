@@ -44,8 +44,7 @@ string MessageId::asString() const {
     Exception::raise("MessageId is not a string.");
 }
 
-unique_ptr<LSPMessage> makeSorbetError(rapidjson::MemoryPoolAllocator<> &alloc, LSPErrorCodes code, string_view message,
-                                       optional<int> id = nullopt) {
+unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message, optional<int> id = nullopt) {
     auto errorParams = make_unique<SorbetErrorParams>((int)code, string(message));
     if (id) {
         auto req = make_unique<RequestMessage>("2.0", *id, LSPMethod::SorbetError, move(errorParams));
@@ -56,10 +55,11 @@ unique_ptr<LSPMessage> makeSorbetError(rapidjson::MemoryPoolAllocator<> &alloc, 
     }
 }
 
-unique_ptr<LSPMessage> LSPMessage::fromClient(rapidjson::MemoryPoolAllocator<> &alloc, const string &json) {
+unique_ptr<LSPMessage> LSPMessage::fromClient(const string &json) {
+    rapidjson::MemoryPoolAllocator<> alloc;
     rapidjson::Document d(&alloc);
     if (d.Parse(json.c_str()).HasParseError()) {
-        return makeSorbetError(alloc, LSPErrorCodes::ParseError,
+        return makeSorbetError(LSPErrorCodes::ParseError,
                                fmt::format("Last LSP request: `{}` is not a valid json object", json));
     }
 
@@ -70,48 +70,48 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(rapidjson::MemoryPoolAllocator<> &
     }
 
     try {
-        return make_unique<LSPMessage>(alloc, d);
+        return make_unique<LSPMessage>(d);
     } catch (InvalidStringEnumError e) {
         if (e.enumName == "LSPMethod") {
             // We don't support whatever method the client is sending.
-            return makeSorbetError(alloc, LSPErrorCodes::MethodNotFound,
-                                   fmt::format("Unsupported LSP method: {}", e.value), id);
+            return makeSorbetError(LSPErrorCodes::MethodNotFound, fmt::format("Unsupported LSP method: {}", e.value),
+                                   id);
         } else {
-            return makeSorbetError(alloc, LSPErrorCodes::InvalidParams,
+            return makeSorbetError(LSPErrorCodes::InvalidParams,
                                    fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
         }
     } catch (DeserializationError e) {
         // The client request was valid JSON, but was invalid in some way.
-        return makeSorbetError(alloc, LSPErrorCodes::InvalidParams,
+        return makeSorbetError(LSPErrorCodes::InvalidParams,
                                fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
     }
 }
 
-LSPMessage::RawLSPMessage fromJSONValue(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d) {
+LSPMessage::RawLSPMessage fromJSONValue(rapidjson::Document &d) {
     if (d.HasMember("id")) {
         // Method is required on requests, but responses lack it.
         if (d.HasMember("method")) {
-            return RequestMessage::fromJSONValue(alloc, d.GetObject(), "root");
+            return RequestMessage::fromJSONValue(d.GetObject(), "root");
         } else {
-            return ResponseMessage::fromJSONValue(alloc, d.GetObject(), "root");
+            return ResponseMessage::fromJSONValue(d.GetObject(), "root");
         }
     } else {
-        return NotificationMessage::fromJSONValue(alloc, d.GetObject(), "root");
+        return NotificationMessage::fromJSONValue(d.GetObject(), "root");
     }
 }
 
-LSPMessage::RawLSPMessage fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json) {
+LSPMessage::RawLSPMessage fromJSON(const std::string &json) {
+    rapidjson::MemoryPoolAllocator<> alloc;
     rapidjson::Document d(&alloc);
     d.Parse(json.c_str());
-    return fromJSONValue(alloc, d);
+    return fromJSONValue(d);
 }
 
 LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)) {}
 
-LSPMessage::LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d)
-    : msg(fromJSONValue(alloc, d)) {}
+LSPMessage::LSPMessage(rapidjson::Document &d) : msg(fromJSONValue(d)) {}
 
-LSPMessage::LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json) : msg(fromJSON(alloc, json)) {}
+LSPMessage::LSPMessage(const std::string &json) : msg(fromJSON(json)) {}
 
 optional<MessageId> LSPMessage::id() const {
     if (isRequest()) {

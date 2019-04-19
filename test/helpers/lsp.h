@@ -12,8 +12,7 @@ using namespace sorbet::realmain::lsp;
 std::unique_ptr<InitializeParams> makeInitializeParams(std::string rootPath, std::string rootUri);
 
 /** Create an LSPMessage containing a textDocument/definition request. */
-std::unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
-                                                  int line, int character);
+std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
@@ -32,8 +31,7 @@ bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage 
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
-std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
-                                                                     NotificationMessage &notifMsg);
+std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>> initializeLSP(std::string_view rootPath, std::string_view rootUri,

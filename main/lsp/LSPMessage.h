@@ -48,11 +48,11 @@ public:
      * these SorbetErrors to return the error to the client (or to print it in the log), so it can be passed along as if
      * parsing succeeded.
      */
-    static std::unique_ptr<LSPMessage> fromClient(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
+    static std::unique_ptr<LSPMessage> fromClient(const std::string &json);
 
     LSPMessage(RawLSPMessage msg);
-    LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Document &d);
-    LSPMessage(rapidjson::MemoryPoolAllocator<> &alloc, const std::string &json);
+    LSPMessage(rapidjson::Document &d);
+    LSPMessage(const std::string &json);
 
     /** A tracer for following LSP message in time traces */
     std::optional<FlowId> startTracer;

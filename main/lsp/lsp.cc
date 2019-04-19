@@ -1,6 +1,7 @@
 #include "main/lsp/lsp.h"
 #include "common/Timer.h"
 #include "common/statsd/statsd.h"
+#include "common/web_tracer_framework/tracing.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
