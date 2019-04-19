@@ -4,7 +4,7 @@
 module T::Private::Methods
   Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :soft_notify, :override_allow_incompatible, :type_parameters, :generated)
 
-  class DeclBuilder
+  class Builder
     attr_reader :decl
 
     class BuilderError < StandardError; end
