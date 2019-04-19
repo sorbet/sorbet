@@ -480,8 +480,7 @@ TEST_P(LSPTest, All) {
             {
                 for (auto &response : allResponses) {
                     if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
-                        auto maybeDiagnosticParams =
-                            getPublishDiagnosticParams(lspWrapper->alloc, response->asNotification());
+                        auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
                         ASSERT_TRUE(maybeDiagnosticParams.has_value());
                         auto &diagnosticParams = *maybeDiagnosticParams;
                         auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
