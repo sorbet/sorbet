@@ -1,5 +1,5 @@
 # typed: false
-
+# disable-fast-path: true
 class A
   B = T.unsafe(nil)
   class B::C; end # error: Can't nest `C` under `A::B` because `A::B` is not a class or module

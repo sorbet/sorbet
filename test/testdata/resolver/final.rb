@@ -1,4 +1,5 @@
 # typed: false
+# disable-fast-path: true
 class A
   sig {void.final}
   def foo

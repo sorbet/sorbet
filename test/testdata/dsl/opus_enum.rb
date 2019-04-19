@@ -1,5 +1,5 @@
 # typed: strict
-
+# disable-fast-path: true
 module Opus
   class Enum
     extend T::Sig

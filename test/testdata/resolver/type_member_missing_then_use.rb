@@ -1,5 +1,5 @@
 # typed: true
-
+# disable-fast-path: true
 class Child < Parent; end # error: Type `X` declared by parent `Parent` must be declared again
 class Parent < Grandparent; end # error: Type `X` declared by parent `Grandparent` must be declared again
 class Grandparent

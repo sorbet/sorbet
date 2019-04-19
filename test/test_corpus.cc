@@ -441,45 +441,63 @@ TEST_P(LSPTest, All) {
     // Tell LSP that the new files now have the contents from the test files on disk.
     {
         vector<unique_ptr<LSPMessage>> allResponses;
-        for (auto &filename : filenames) {
-            auto textDoc = make_unique<VersionedTextDocumentIdentifier>(testFileUris[filename], 2);
-            auto textDocContents = test.sourceFileContents[filename]->source();
-            auto text = string(textDocContents.begin(), textDocContents.end());
+        bool slowPathPassed = true;
+        bool skipFastPath = DisableFastPath::getValue(assertions);
+        // Run changes through LSP twice: The first time is a slow path, the second time is a fast path.
+        // Surfaces errors that occur due to differences in how slow and fast paths run.
+        // Skip the second iteration if slow path fails to avoid printing out duplicate errors.
+        for (int i = 0; i < 2 && slowPathPassed; i++) {
+            std::string errorPrefix = "";
+            if (i == 1) {
+                if (skipFastPath) {
+                    break;
+                }
+                errorPrefix = "[After running fast path] ";
+            }
 
-            auto textDocChange = make_unique<TextDocumentContentChangeEvent>(text);
-            vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
-            textChanges.push_back(move(textDocChange));
+            for (auto &filename : filenames) {
+                auto textDoc = make_unique<VersionedTextDocumentIdentifier>(testFileUris[filename], 2);
+                auto textDocContents = test.sourceFileContents[filename]->source();
+                auto text = string(textDocContents.begin(), textDocContents.end());
 
-            auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
-            auto didChangeNotif =
-                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
+                auto textDocChange = make_unique<TextDocumentContentChangeEvent>(text);
+                vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
+                textChanges.push_back(move(textDocChange));
 
-            auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(didChangeNotif)));
-            allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
-                                make_move_iterator(responses.end()));
-        }
+                auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
+                auto didChangeNotif =
+                    make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
 
-        // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens on
-        // the client side."
-        // Prune irrelevant diagnostics, and only keep the newest diagnostics for a file.
-        // filename => diagnostics for file
-        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
-        {
-            for (auto &response : allResponses) {
-                if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
-                    auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
-                    ASSERT_TRUE(maybeDiagnosticParams.has_value());
-                    auto &diagnosticParams = *maybeDiagnosticParams;
-                    auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
-                    EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
-                        << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+                auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(didChangeNotif)));
+                allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
+                                    make_move_iterator(responses.end()));
+            }
 
-                    // Will explicitly overwrite older diagnostics that are irrelevant.
-                    diagnostics[filename] = move(diagnosticParams->diagnostics);
+            // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens
+            // on the client side." Prune irrelevant diagnostics, and only keep the newest diagnostics for a file.
+            // filename => diagnostics for file
+            map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+            {
+                for (auto &response : allResponses) {
+                    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
+                        auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
+                        ASSERT_TRUE(maybeDiagnosticParams.has_value());
+                        auto &diagnosticParams = *maybeDiagnosticParams;
+                        auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+                        EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+                            << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+
+                        // Will explicitly overwrite older diagnostics that are irrelevant.
+                        diagnostics[filename] = move(diagnosticParams->diagnostics);
+                    }
                 }
             }
+            slowPathPassed = ErrorAssertion::checkAll(
+                test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+            if (!slowPathPassed && i == 1) {
+                ADD_FAILURE() << "Note: To disable fast path tests, add `# disable-fast-path: true` to the file.";
+            }
         }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 
     // Usage and def assertions

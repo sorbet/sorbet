@@ -16,12 +16,12 @@ requires: []
  name=[A]
  nesting=[]
  resolved=[A]
- loc=test/testdata/autogen/no_dsls.rb:2
+ loc=test/testdata/autogen/no_dsls.rb:3
  is_defining_ref=1
 [ref id=1]
  scope=[]
  name=[Struct]
  nesting=[]
  resolved=[Struct]
- loc=test/testdata/autogen/no_dsls.rb:2
+ loc=test/testdata/autogen/no_dsls.rb:3
  is_defining_ref=0

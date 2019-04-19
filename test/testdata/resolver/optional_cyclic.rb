@@ -1,5 +1,5 @@
 # typed: true
-
+# disable-fast-path: true
 class Test
   extend T::Sig
 

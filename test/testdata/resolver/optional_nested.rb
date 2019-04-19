@@ -1,5 +1,5 @@
 # typed: true
-
+# disable-fast-path: true
 module M
   class C
     extend T::Sig
