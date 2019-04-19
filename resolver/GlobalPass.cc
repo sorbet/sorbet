@@ -596,6 +596,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
 }
 
 void Resolver::validateSymbols(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "Resolver::validateSymbols");
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
