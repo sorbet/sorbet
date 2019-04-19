@@ -136,26 +136,14 @@ test_corpus_tests = pipeline_tests(
     filter = "PosTests",
 )
 
-test_corpus_lsp_tests_fastpath = pipeline_tests(
+test_corpus_lsp_tests = pipeline_tests(
     glob([
         "testdata/**/*.rb",
         "testdata/**/*.exp",
         "testdata/**/*.exp.svg",
     ]),
-    "LSPFastPathTests",
+    "LSPTests",
     filter = "LSPTests",
-)
-
-test_corpus_lsp_tests_slowpath = pipeline_tests(
-    glob([
-        "testdata/**/*.rb",
-        "testdata/**/*.exp",
-        "testdata/**/*.exp.svg",
-    ]),
-    "LSPSlowPathTests",
-    extra_args = ["--lsp-disable-fastpath"],
-    filter = "LSPTests",
-    tags = ["manual"],
 )
 
 test_suite(
@@ -164,14 +152,8 @@ test_suite(
 )
 
 test_suite(
-    name = "test_corpus_lsp_fastpath",
-    tests = test_corpus_lsp_tests_fastpath,
-)
-
-test_suite(
-    name = "test_corpus_lsp_slowpath",
-    tags = ["manual"],
-    tests = test_corpus_lsp_tests_slowpath,
+    name = "test_corpus_lsp",
+    tests = test_corpus_lsp_tests,
 )
 
 test_suite(
