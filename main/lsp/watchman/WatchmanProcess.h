@@ -5,20 +5,16 @@
 #include "common/common.h"
 #include "core/core.h"
 #include "main/lsp/json_types.h"
-#include "rapidjson/document.h"
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::lsp::watchman {
 class WatchmanProcess {
 private:
     std::shared_ptr<spdlog::logger> logger;
-    rapidjson::MemoryPoolAllocator<> alloc;
     const std::string watchmanPath;
     const std::string workSpace;
     const std::vector<std::string> extensions;
-    const std::function<void(rapidjson::MemoryPoolAllocator<> &,
-                             std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
-        processUpdate;
+    const std::function<void(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate;
     const std::function<void(int)> processExit;
     const std::unique_ptr<Joinable> thread;
     // Mutex that must be held before reading or writing stopped.
@@ -42,9 +38,7 @@ public:
      */
     WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath, std::string_view workSpace,
                     std::vector<std::string> extensions,
-                    std::function<void(rapidjson::MemoryPoolAllocator<> &,
-                                       std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
-                        processUpdate,
+                    std::function<void(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate,
                     std::function<void(int)> processExit);
 
     ~WatchmanProcess();

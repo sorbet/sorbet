@@ -58,7 +58,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::drainLSPResponses() {
         }
 
         string messageLine = responses.substr(pos, contentLength);
-        rv.push_back(make_unique<LSPMessage>(alloc, messageLine));
+        rv.push_back(make_unique<LSPMessage>(messageLine));
         pos += contentLength;
     }
 
@@ -102,7 +102,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &message) {
-    return getLSPResponsesFor(*LSPMessage::fromClient(alloc, message));
+    return getLSPResponsesFor(*LSPMessage::fromClient(message));
 }
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
@@ -179,11 +179,6 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             opts.lspSignatureHelpEnabled = true;
             break;
     }
-}
-
-void LSPWrapper::freeJSONObjects() {
-    alloc.Clear();
-    lspLoop->alloc.Clear();
 }
 
 } // namespace sorbet::realmain::lsp

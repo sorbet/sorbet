@@ -1,15 +1,15 @@
 #include "WatchmanProcess.h"
+#include "rapidjson/document.h"
 #include "subprocess.hpp"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp::watchman {
 
-WatchmanProcess::WatchmanProcess(
-    shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace, vector<string> extensions,
-    function<void(rapidjson::MemoryPoolAllocator<> &, unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)>
-        processUpdate,
-    std::function<void(int)> processExit)
+WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
+                                 vector<string> extensions,
+                                 function<void(unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate,
+                                 std::function<void(int)> processExit)
     : logger(logger), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)), extensions(extensions),
       processUpdate(processUpdate), processExit(processExit),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
@@ -64,14 +64,15 @@ void WatchmanProcess::start() {
 
             const string &line = *maybeLine;
             // Line found!
+            rapidjson::MemoryPoolAllocator<> alloc;
             rapidjson::Document d(&alloc);
             logger->debug(line);
             if (d.Parse(line.c_str()).HasParseError()) {
                 logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
             } else if (d.HasMember("is_fresh_instance")) {
                 try {
-                    auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(alloc, d);
-                    processUpdate(alloc, move(queryResponse));
+                    auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
+                    processUpdate(move(queryResponse));
                 } catch (sorbet::realmain::lsp::DeserializationError e) {
                     // Gracefully handle deserialization errors, since they could be our fault.
                     logger->error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);

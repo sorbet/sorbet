@@ -210,7 +210,7 @@ TEST_F(ProtocolTest, EmptyRootUri) {
     auto &msg = diagnostics.at(0);
     if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
         // Will fail test if this does not parse.
-        if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
+        if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
             EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
         }
     }
@@ -254,7 +254,7 @@ TEST_F(ProtocolTest, HidesSyntheticArgumentsOnHover) {
         EXPECT_TRUE(response.result);
         auto &hoverOrNull = get<std::variant<JSONNullObject, std::unique_ptr<Hover>>>(*response.result);
         auto &hover = get<std::unique_ptr<Hover>>(hoverOrNull);
-        auto content = MarkupContent::fromJSONValue(lspWrapper->alloc, *hover->contents);
+        auto &content = hover->contents;
         EXPECT_EQ(content->value, "sig {params(x: Integer).returns(String)}");
     }
 }

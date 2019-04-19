@@ -55,8 +55,6 @@ shared_ptr<JSONType> makeArray(shared_ptr<JSONType> type) {
 
 void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_ptr<JSONObjectType>> &classTypes) {
     // Singletons
-    shared_ptr<JSONType> JSONAny = make_shared<JSONAnyType>();
-    shared_ptr<JSONType> JSONAnyObject = make_shared<JSONAnyObjectType>();
     shared_ptr<JSONType> JSONNull = make_shared<JSONNullType>();
     shared_ptr<JSONType> JSONBool = make_shared<JSONBooleanType>();
     shared_ptr<JSONType> JSONInt = make_shared<JSONIntType>();
@@ -76,9 +74,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto ResponseError = makeObject("ResponseError",
                                     {
-                                        makeField("code", JSONInt),
-                                        makeField("message", JSONString),
-                                        makeField("data", makeOptional(JSONAny)),
+                                        makeField("code", JSONInt), makeField("message", JSONString),
+                                        // Unused in Sorbet.
+                                        // makeField("data", makeOptional(JSONAny)),
                                     },
                                     classTypes);
 
@@ -133,9 +131,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto Command = makeObject("Command",
                               {
-                                  makeField("title", JSONString),
-                                  makeField("command", JSONString),
-                                  makeField("arguments", makeOptional(makeArray(JSONAny))),
+                                  makeField("title", JSONString), makeField("command", JSONString),
+                                  // Unused in Sorbet.
+                                  // makeField("arguments", makeOptional(makeArray(JSONAny))),
                               },
                               classTypes);
 
@@ -199,14 +197,16 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
-    auto WorkspaceEdit = makeObject("WorkspaceEdit",
-                                    {
-                                        // TODO(jvilk): Map type.
-                                        makeField("changes", makeArray(JSONAny)),
-                                        // TODO(jvilk): Variant that discriminates on string constant + missing fields.
-                                        makeField("documentChanges", makeOptional(makeArray(JSONAny))),
-                                    },
-                                    classTypes);
+    auto WorkspaceEdit =
+        makeObject("WorkspaceEdit",
+                   {
+                       // Map type (string => TextEdit[]). Unused by sorbet currently.
+                       // makeField("changes", makeArray(JSONAny)),
+                       // Unused in Sorbet currently. Need a variant that can discriminate based on a `kind` field and
+                       // the presence of that field. (TextDocumentEdit[] | (TextDocumentEdit | CreateFile | RenameFile
+                       // | DeleteFile)[]) makeField("documentChanges", makeOptional(makeArray(JSONAny))),
+                   },
+                   classTypes);
 
     auto TextDocumentIdentifier = makeObject("TextDocumentIdentifier",
                                              {
@@ -459,7 +459,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                          {
                                              makeField("workspace", makeOptional(WorkspaceClientCapabilities)),
                                              makeField("textDocument", makeOptional(TextDocumentClientCapabilities)),
-                                             makeField("experimental", makeOptional(JSONAny)),
+                                             // Unused in Sorbet.
+                                             // makeField("experimental", makeOptional(JSONAny)),
                                          },
                                          classTypes);
 
@@ -584,11 +585,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("documentOnTypeFormattingProvider", makeOptional(DocumentOnTypeFormattingOptions)),
             makeField("renameProvider", makeOptional(makeVariant({JSONBool, RenameOptions}))),
             makeField("documentLinkProvider", makeOptional(DocumentLinkOptions)),
-            makeField("colorProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
-            makeField("foldingRangeProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
+            // Unused in Sorbet.
+            // makeField("colorProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
+            // makeField("foldingRangeProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
             makeField("executeCommandProvider", makeOptional(ExecuteCommandOptions)),
             makeField("workspace", makeOptional(WorkspaceOptions)),
-            makeField("experimental", makeOptional(JSONAny)),
+            // Unused in Sorbet.
+            // makeField("experimental", makeOptional(JSONAny)),
         },
         classTypes);
 
@@ -631,9 +634,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto Registration = makeObject("Registration",
                                    {
-                                       makeField("id", JSONString),
-                                       makeField("method", JSONString),
-                                       makeField("registerOptions", makeOptional(JSONAny)),
+                                       makeField("id", JSONString), makeField("method", JSONString),
+                                       // Unused in Sorbet.
+                                       // makeField("registerOptions", makeOptional(JSONAny)),
                                    },
                                    classTypes);
 
@@ -685,7 +688,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto DidChangeConfigurationParams = makeObject("DidChangeConfigurationParams",
                                                    {
-                                                       makeField("settings", JSONAny),
+                                                       // Unused in Sorbet.
+                                                       // makeField("settings", JSONAny),
                                                    },
                                                    classTypes);
 
@@ -756,7 +760,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto ExecuteCommandParams = makeObject("ExecuteCommandParams",
                                            {
                                                makeField("command", JSONString),
-                                               makeField("arguments", makeOptional(makeArray(JSONAny))),
+                                               // Unused in Sorbet.
+                                               // makeField("arguments", makeOptional(makeArray(JSONAny))),
                                            },
                                            classTypes);
 
@@ -882,26 +887,24 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         },
                                         enumTypes);
 
-    auto CompletionItem =
-        makeObject("CompletionItem",
-                   {
-                       makeField("label", JSONString),
-                       makeField("kind", makeOptional(CompletionItemKind)),
-                       makeField("detail", makeOptional(JSONString)),
-                       makeField("documentation", makeOptional(makeVariant({JSONString, MarkupContent}))),
-                       makeField("deprecated", makeOptional(JSONBool)),
-                       makeField("preselect", makeOptional(JSONBool)),
-                       makeField("sortText", makeOptional(JSONString)),
-                       makeField("filterText", makeOptional(JSONString)),
-                       makeField("insertText", makeOptional(JSONString)),
-                       makeField("insertTextFormat", makeOptional(InsertTextFormat)),
-                       makeField("textEdit", makeOptional(TextEdit)),
-                       makeField("additionalTextEdits", makeOptional(makeArray(TextEdit))),
-                       makeField("commitCharacters", makeOptional(makeArray(JSONString))),
-                       makeField("command", makeOptional(Command)),
-                       makeField("data", makeOptional(JSONAny)),
-                   },
-                   classTypes);
+    auto CompletionItem = makeObject(
+        "CompletionItem",
+        {
+            makeField("label", JSONString), makeField("kind", makeOptional(CompletionItemKind)),
+            makeField("detail", makeOptional(JSONString)),
+            makeField("documentation", makeOptional(makeVariant({JSONString, MarkupContent}))),
+            makeField("deprecated", makeOptional(JSONBool)), makeField("preselect", makeOptional(JSONBool)),
+            makeField("sortText", makeOptional(JSONString)), makeField("filterText", makeOptional(JSONString)),
+            makeField("insertText", makeOptional(JSONString)),
+            makeField("insertTextFormat", makeOptional(InsertTextFormat)),
+            makeField("textEdit", makeOptional(TextEdit)),
+            makeField("additionalTextEdits", makeOptional(makeArray(TextEdit))),
+            makeField("commitCharacters", makeOptional(makeArray(JSONString))),
+            makeField("command", makeOptional(Command)),
+            // Unused in Sorbet.
+            // makeField("data", makeOptional(JSONAny)),
+        },
+        classTypes);
 
     auto CompletionRegistrationOptions =
         makeObject("CompletionRegistrationOptions",
@@ -919,15 +922,14 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      },
                                      classTypes);
 
-    auto Hover = makeObject(
-        "Hover",
-        {
-            // Note: Can make this not a variant if we don't support deprecated version.
-            // string | { language: string, value: string} | { language: string, value: string}[] | MarkupContent
-            makeField("contents", JSONAny),
-            makeField("range", makeOptional(Range)),
-        },
-        classTypes);
+    auto Hover = makeObject("Hover",
+                            {
+                                // Is `string | { language: string, value: string} | { language: string, value:
+                                // string}[] | MarkupContent` in spec, but we only use the last form in Sorbet.
+                                makeField("contents", MarkupContent),
+                                makeField("range", makeOptional(Range)),
+                            },
+                            classTypes);
 
     auto ParameterInformation =
         makeObject("ParameterInformation",
@@ -1052,9 +1054,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto CodeLens = makeObject("CodeLens",
                                {
-                                   makeField("range", Range),
-                                   makeField("command", makeOptional(Command)),
-                                   makeField("data", makeOptional(JSONAny)),
+                                   makeField("range", Range), makeField("command", makeOptional(Command)),
+                                   // Unused in Sorbet.
+                                   // makeField("data", makeOptional(JSONAny)),
                                },
                                classTypes);
 
@@ -1077,7 +1079,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                        makeField("range", Range),
                                        // URI
                                        makeField("target", makeOptional(JSONString)),
-                                       makeField("data", makeOptional(JSONAny)),
+                                       // Unused in Sorbet.
+                                       // makeField("data", makeOptional(JSONAny)),
                                    },
                                    classTypes);
 
@@ -1119,10 +1122,17 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         },
                                         classTypes);
 
+    auto FormattingOptions = makeObject("FormattingOptions",
+                                        {
+                                            makeField("tabSize", JSONInt),
+                                            makeField("insertSpaces", JSONBool),
+                                        },
+                                        classTypes);
+
     auto DocumentFormattingParams = makeObject("DocumentFormattingParams",
                                                {
                                                    makeField("textDocument", TextDocumentIdentifier),
-                                                   makeField("options", JSONAnyObject),
+                                                   makeField("options", FormattingOptions),
                                                },
                                                classTypes);
 
@@ -1130,7 +1140,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                     {
                                                         makeField("textDocument", TextDocumentIdentifier),
                                                         makeField("range", Range),
-                                                        makeField("options", JSONAnyObject),
+                                                        makeField("options", FormattingOptions),
                                                     },
                                                     classTypes);
 
@@ -1139,7 +1149,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                          makeField("textDocument", TextDocumentIdentifier),
                                                          makeField("position", Position),
                                                          makeField("ch", JSONString),
-                                                         makeField("options", JSONAnyObject),
+                                                         makeField("options", FormattingOptions),
                                                      },
                                                      classTypes);
 
@@ -1194,25 +1204,28 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto InitializeError = makeObject("InitializeError", {makeField("retry", JSONBool)}, classTypes);
 
-    auto InitializeParams =
-        makeObject("InitializeParams",
-                   {
-                       makeField("processId", makeOptional(makeVariant({JSONDouble, JSONNull}))),
-                       makeField("rootPath", makeVariant({JSONString, JSONNull})),
-                       makeField("rootUri", makeVariant({JSONString, JSONNull})),
-                       makeField("initializationOptions", makeOptional(JSONAny)),
-                       makeField("capabilities", ClientCapabilities),
-                       makeField("trace", makeOptional(TraceKind)),
-                       makeField("workspaceFolders", makeOptional(makeVariant({JSONNull, makeArray(WorkspaceFolder)}))),
-                   },
-                   classTypes);
-
     auto SorbetInitializationOptions =
         makeObject("SorbetInitializationOptions",
                    {
                        makeField("supportsOperationNotifications", makeOptional(JSONBool)),
                    },
                    classTypes);
+    auto InitializeParams =
+        makeObject("InitializeParams",
+                   {
+                       makeField("processId", makeOptional(makeVariant({JSONDouble, JSONNull}))),
+                       makeField("rootPath", makeVariant({JSONString, JSONNull})),
+                       makeField("rootUri", makeVariant({JSONString, JSONNull})),
+                       makeField("initializationOptions", makeOptional(SorbetInitializationOptions)),
+                       makeField("capabilities", ClientCapabilities),
+                       makeField("trace", makeOptional(TraceKind)),
+                       makeField("workspaceFolders", makeOptional(makeVariant({JSONNull, makeArray(WorkspaceFolder)}))),
+                   },
+                   classTypes);
+
+    // Empty object.
+    auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
+
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
     auto SorbetShowOperationParams = makeObject("SorbetShowOperationParams",
                                                 {
@@ -1322,7 +1335,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto NotificationMessageParamsType =
         makeDiscriminatedUnion(methodField, {
                                                 {"$/cancelRequest", CancelParams},
-                                                {"initialized", JSONAny},
+                                                {"initialized", InitializedParams},
                                                 {"exit", makeOptional(JSONNull)},
                                                 {"textDocument/publishDiagnostics", PublishDiagnosticsParams},
                                                 {"textDocument/didOpen", DidOpenTextDocumentParams},

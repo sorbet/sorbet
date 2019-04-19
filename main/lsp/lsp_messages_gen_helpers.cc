@@ -53,21 +53,6 @@ string tryConvertToStringConstant(optional<const rapidjson::Value *> value, stri
     return strValue;
 }
 
-unique_ptr<rapidjson::Value> tryConvertToAny(rapidjson::MemoryPoolAllocator<> &alloc,
-                                             optional<const rapidjson::Value *> value, string_view name) {
-    auto &realValue = assertJSONField(value, name);
-    return make_unique<rapidjson::Value>(realValue, alloc);
-}
-
-unique_ptr<rapidjson::Value> tryConvertToAnyObject(rapidjson::MemoryPoolAllocator<> &alloc,
-                                                   optional<const rapidjson::Value *> value, string_view name) {
-    auto &realValue = assertJSONField(value, name);
-    if (!realValue.IsObject()) {
-        throw JSONTypeError(name, "object", realValue);
-    }
-    return make_unique<rapidjson::Value>(realValue, alloc);
-}
-
 optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, const string &name) {
     if (value.HasMember(name)) {
         return &value[name];

@@ -16,8 +16,7 @@ namespace sorbet::realmain::lsp {
  *
  * Throws an exception on read error or EOF.
  */
-unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
-                                     int inputFd, string &buffer) {
+unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spd::logger> &logger, int inputFd, string &buffer) {
     int length = -1;
     string allRead;
     {
@@ -70,7 +69,7 @@ unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, co
 
     string json = buffer.substr(0, length);
     buffer.erase(0, length);
-    return LSPMessage::fromClient(alloc, json);
+    return LSPMessage::fromClient(json);
 }
 
 class NotifyOnDestruction {
@@ -96,15 +95,14 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             // The lambda below intentionally does not capture `this`.
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
                 logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-                [&guardedState, &mtx, logger = this->logger](rapidjson::MemoryPoolAllocator<> &alloc,
-                                                             std::unique_ptr<WatchmanQueryResponse> response) {
+                [&guardedState, &mtx, logger = this->logger](std::unique_ptr<WatchmanQueryResponse> response) {
                     auto notifMsg =
                         make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
                         // Merge with any existing pending watchman file updates.
-                        enqueueRequest(alloc, logger, guardedState, move(msg), true);
+                        enqueueRequest(logger, guardedState, move(msg), true);
                     }
                 },
                 [&guardedState, &mtx](int watchmanExitCode) {
@@ -123,25 +121,19 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         }
     }
 
-    // !!DO NOT USE OUTSIDE OF READER THREAD!!
-    // We need objects created by the reader thread to outlive the thread itself. At the same time, MemoryPoolAllocator
-    // is not thread-safe.
-    // TODO(jvilk): This (+ Watchman's alloc) leak memory. If we stop using JSON values internally, then we can clear
-    // them after every request and only use them for intermediate objects generated during parsing.
-    rapidjson::MemoryPoolAllocator<> readerAlloc;
     auto readerThread =
-        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, &readerAlloc, inputFd = this->inputFd] {
+        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, inputFd = this->inputFd] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
             string buffer;
             try {
                 while (true) {
-                    auto msg = getNewRequest(readerAlloc, logger, inputFd, buffer);
+                    auto msg = getNewRequest(logger, inputFd, buffer);
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState.
                         if (msg) {
-                            enqueueRequest(readerAlloc, logger, guardedState, move(msg), true);
+                            enqueueRequest(logger, guardedState, move(msg), true);
                         }
                         // Check if it's time to exit.
                         if (guardedState.terminate) {
@@ -206,8 +198,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     }
 }
 
-void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
-                               deque<unique_ptr<LSPMessage>> &pendingRequests) {
+void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     // Squish any consecutive didChanges that are for the same file together, and combine all Watchman file system
     // updates into a single update.
     // TODO: if we ever support diffs, this would need to be extended
@@ -305,8 +296,8 @@ void LSPLoop::mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
     }
 }
 
-void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
-                             LSPLoop::QueueState &state, std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
+void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
+                             std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     try {
         msg->counter = state.requestCounter++;
         msg->timestamp = chrono::steady_clock::now();
@@ -323,7 +314,7 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
                 // move the canceled request to the front
                 auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
                 state.pendingRequests.insert(itFront, move(canceledRequest));
-                LSPLoop::mergeFileChanges(alloc, state.pendingRequests);
+                LSPLoop::mergeFileChanges(state.pendingRequests);
             }
             // if we started processing it already, well... swallow the cancellation request and
             // continue computing.
@@ -348,7 +339,7 @@ void LSPLoop::enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shar
             state.pendingRequests.insert(findFirstPositionAfterLSPInitialization(state.pendingRequests), move(msg));
         } else {
             state.pendingRequests.push_back(move(msg));
-            LSPLoop::mergeFileChanges(alloc, state.pendingRequests);
+            LSPLoop::mergeFileChanges(state.pendingRequests);
         }
     } catch (DeserializationError e) {
         logger->error("Unable to deserialize LSP request: {}", e.what());

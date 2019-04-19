@@ -9,9 +9,6 @@
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 #include "main/options/options.h"
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -72,8 +69,6 @@ class LSPLoop {
     };
 
     UnorderedMap<std::string, std::function<void(const ResponseMessage &)>> awaitingResponse;
-    /** LSP loop reuses a single arena for all json allocations. We never free memory used for JSON */
-    rapidjson::MemoryPoolAllocator<> alloc;
     /** Trees that have been indexed and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
@@ -218,16 +213,14 @@ class LSPLoop {
      * Merges all pending Watchman updates into a single update, and merges any consecutive textDocumentDidChange events
      * into a single update.
      */
-    static void mergeFileChanges(rapidjson::MemoryPoolAllocator<> &alloc,
-                                 std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
+    static void mergeFileChanges(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
      * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.
      * If `collectThreadCounters` is `true`, it also merges in thread-local counters into the QueueState counters.
      */
-    static void enqueueRequest(rapidjson::MemoryPoolAllocator<> &alloc, const std::shared_ptr<spd::logger> &logger,
-                               LSPLoop::QueueState &queue, std::unique_ptr<LSPMessage> msg,
-                               bool collectThreadCounters = false);
+    static void enqueueRequest(const std::shared_ptr<spd::logger> &logger, LSPLoop::QueueState &queue,
+                               std::unique_ptr<LSPMessage> msg, bool collectThreadCounters = false);
 
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
