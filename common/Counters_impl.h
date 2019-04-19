@@ -25,16 +25,25 @@ struct CounterImpl {
 
     void counterAdd(const char *counter, unsigned long value);
     void prodCounterAdd(const char *counter, unsigned long value);
-    void timingAdd(const char *metring, unsigned long nanos);
 
     // std::string_view isn't hashable, so we use an unordered map. We could
     // implement hash ourselves, but this is the slowpath anyways.
     UnorderedMap<std::string_view, const char *> strings_by_value;
     UnorderedMap<const char *, const char *> stringsByPtr;
-
+    struct Timing {
+        // see https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit
+        int id;
+        std::string namePrefix;
+        CounterType ts;
+        std::optional<CounterType> duration;
+        std::optional<int> threadId;
+        enum Kind { Duration, Async, FlowStart, FlowEnd };
+        Kind kind;
+    };
+    void timingAdd(Timing timing);
     UnorderedMap<const char *, UnorderedMap<int, CounterType>> histograms;
     UnorderedMap<const char *, CounterType> counters;
-    UnorderedMap<const char *, std::vector<CounterType>> timings;
+    std::vector<Timing> timings;
     UnorderedMap<const char *, UnorderedMap<const char *, CounterType>> countersByCategory;
 };
 } // namespace sorbet

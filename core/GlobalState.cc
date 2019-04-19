@@ -1,5 +1,6 @@
 #include "GlobalState.h"
 
+#include "common/Timer.h"
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
@@ -950,6 +951,8 @@ void GlobalState::sanityCheck() const {
         // it's very slow to check this and it didn't find bugs
         return;
     }
+
+    Timer timeit(tracer(), "GlobalState::sanityCheck");
     ENFORCE(!names.empty(), "empty name table size");
     ENFORCE(!strings.empty(), "empty string table size");
     ENFORCE(!namesByHash.empty(), "empty name hash table size");
@@ -1019,6 +1022,7 @@ bool GlobalState::unfreezeSymbolTable() {
 }
 
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
+    Timer timeit(tracer(), "GlobalState::deepCopy");
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
     result->silenceErrors = this->silenceErrors;
@@ -1257,5 +1261,7 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     }
     return sym;
 }
-
+spdlog::logger &GlobalState::tracer() const {
+    return errorQueue->tracer;
+}
 } // namespace sorbet::core

@@ -62,13 +62,11 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
 }
 
 unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
-                                               const unique_ptr<KeyValueStore> &kvstore,
-                                               shared_ptr<spdlog::logger> &logger) {
+                                               const unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore && file.id() < gs.filesUsed()) {
         string fileHashKey = fileKey(gs, file);
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached) {
-            logger->trace("Reading from cache: {}", file.data(gs).path());
             prodCounterInc("types.input.files.kvstore.hit");
             auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
             file.data(gs).cachedParseTree = true;
@@ -81,11 +79,10 @@ unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::File
     return nullptr;
 }
 
-unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   shared_ptr<spdlog::logger> &logger) {
+unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
+    Timer timeit(gs.tracer(), fmt::format("runParser: {}", file.data(gs).path()));
     unique_ptr<parser::Node> nodes;
     {
-        logger->trace("Parsing: {}", file.data(gs).path());
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         nodes = parser::Parser::run(gs, file);
     }
@@ -99,11 +96,11 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 }
 
 unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                                       const options::Printers &print, shared_ptr<spdlog::logger> &logger) {
+                                       const options::Printers &print) {
+    Timer timeit(gs.tracer(), fmt::format("runDesugar: {}", file.data(gs).path()));
     unique_ptr<ast::Expression> ast;
     core::MutableContext ctx(gs, core::Symbols::root());
     {
-        logger->trace("Desugaring: {}", file.data(gs).path());
         core::ErrorRegion errs(gs, file);
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
@@ -117,10 +114,9 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
     return ast;
 }
 
-unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast,
-                                   shared_ptr<spdlog::logger> &logger) {
+unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
     core::MutableContext ctx(gs, core::Symbols::root());
-    logger->trace("Inlining DSLs: {}", file.data(gs).path());
+    Timer timeit(gs.tracer(), fmt::format("runDSL: {}", file.data(gs).path()));
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
     return dsl::DSL::run(ctx, move(ast));
@@ -131,28 +127,29 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
+                         unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
 
+    Timer timeit(lgs.tracer(), "indexOne");
     try {
-        unique_ptr<ast::Expression> tree = fetchTreeFromCache(lgs, file, kvstore, logger);
+        unique_ptr<ast::Expression> tree = fetchTreeFromCache(lgs, file, kvstore);
 
         if (!tree) {
             // tree isn't cached. Need to start from parser
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
             }
-            auto parseTree = runParser(lgs, file, print, logger);
+            auto parseTree = runParser(lgs, file, print);
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
-            tree = runDesugar(lgs, file, move(parseTree), print, logger);
+            tree = runDesugar(lgs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
             if (!opts.skipDSLPasses) {
-                tree = runDSL(lgs, file, move(tree), logger);
+                tree = runDSL(lgs, file, move(tree));
             }
         }
         if (print.DSLTree) {
@@ -182,30 +179,30 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::File
 
 pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const options::Options &opts,
                                                                           core::GlobalState &gs, core::FileRef file,
-                                                                          unique_ptr<KeyValueStore> &kvstore,
-                                                                          shared_ptr<spdlog::logger> logger) {
+                                                                          unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
 
+    Timer timeit(gs.tracer(), fmt::format("indexOneWithPlugins {}", file.data(gs).path()));
     try {
-        unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore, logger);
+        unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore);
 
         if (!tree) {
             // tree isn't cached. Need to start from parser
             if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyPluginFile(file);
             }
-            auto parseTree = runParser(gs, file, print, logger);
+            auto parseTree = runParser(gs, file, print);
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyPluginFile(file);
             }
-            tree = runDesugar(gs, file, move(parseTree), print, logger);
+            tree = runDesugar(gs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyPluginFile(file);
             }
             {
-                logger->trace("Running plugins: {}", file.data(gs).path());
+                Timer timeit(gs.tracer(), "plugins_text");
                 core::MutableContext ctx(gs, core::Symbols::root());
                 core::ErrorRegion errs(gs, file);
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
@@ -213,7 +210,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 resultPluginFiles = move(pluginFiles);
             }
             if (!opts.skipDSLPasses) {
-                tree = runDSL(gs, file, move(tree), logger);
+                tree = runDSL(gs, file, move(tree));
             }
         }
         if (print.DSLTree) {
@@ -238,15 +235,16 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 }
 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                           const options::Options &opts, shared_ptr<spdlog::logger> logger) {
+                                           const options::Options &opts) {
     try {
         int i = 0;
+        Timer timeit(gs.tracer(), "incremental_naming");
         for (auto &tree : what) {
             auto file = tree.file;
             try {
                 unique_ptr<ast::Expression> ast;
                 core::MutableContext ctx(gs, core::Symbols::root());
-                logger->trace("Naming: {}", file.data(gs).path());
+                gs.tracer().trace("Naming: {}", file.data(gs).path());
                 core::ErrorRegion errs(gs, file);
                 core::UnfreezeSymbolTable symbolTable(gs);
                 core::UnfreezeNameTable nameTable(gs);
@@ -261,8 +259,8 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 
         core::MutableContext ctx(gs, core::Symbols::root());
         {
-            Timer timeit(logger, "incremental_resolve");
-            logger->trace("Resolving (incremental pass)...");
+            Timer timeit(gs.tracer(), "incremental_resolve");
+            gs.tracer().trace("Resolving (incremental pass)...");
             core::ErrorRegion errs(gs, sorbet::core::FileRef());
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
@@ -278,12 +276,11 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
     return what;
 }
 
-vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files,
-                                   shared_ptr<spdlog::logger> logger) {
+vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
+    Timer timeit(gs->tracer(), "reserveFiles");
     vector<core::FileRef> ret;
     core::UnfreezeFileTable unfreezeFiles(*gs);
     for (auto f : files) {
-        logger->trace("enqueue: {}", f);
         auto fileRef = gs->findFileByPath(f);
         if (!fileRef.exists()) {
             fileRef = gs->reserveFileRef(f);
@@ -360,12 +357,12 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 }
 
 void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
-                                     const options::Options &opts, shared_ptr<spdlog::logger> logger) {
+                                     const options::Options &opts) {
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::NotYetRead) {
         return;
     }
     auto fileName = file.dataAllowingUnsafe(*gs).path();
-    logger->trace("Reading: {}", fileName);
+    Timer timeit(gs->tracer(), fmt::format("readFileWithStrictnessOverrides {}", fileName));
     string src;
     bool fileFound = true;
     try {
@@ -416,15 +413,14 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
+                              unique_ptr<KeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
-    logger->trace("Collecting results from indexing threads");
+    Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
     IndexResult ret;
-    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer()); !result.done();
+         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer())) {
         if (result.gotItem()) {
-            logger->trace("Consuming counters");
             counterConsume(move(threadResult.counters));
             if (ret.gs == nullptr) {
                 ret.gs = move(threadResult.res.gs);
@@ -432,10 +428,9 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
             } else {
-                logger->trace("Building global substitution");
+                Timer timeit(cgs->tracer(), "substitute");
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
-                logger->trace("Running tree substitution");
                 for (auto &tree : threadResult.res.trees) {
                     auto file = tree.file;
                     core::ErrorRegion errs(*ret.gs, file);
@@ -452,30 +447,25 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
-
-                logger->trace("Tree substitution done");
             }
             progress.reportProgress(input->doneEstimate());
             ret.gs->errorQueue->flushErrors();
         }
     }
-    logger->trace("Done collecting results from indexing threads");
     return ret;
 }
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                               const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
-                               shared_ptr<spdlog::logger> &logger) {
+                               const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+    Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
         fileq->push(move(file), 1);
     }
 
-    workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore, logger]() {
-        logger->trace("worker deep copying global state");
-        auto localGs = baseGs->deepCopy();
-        logger->trace("worker done deep copying global state");
+    workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore]() {
+        unique_ptr<core::GlobalState> localGs = baseGs->deepCopy();
         IndexThreadResultPack threadResult;
 
         {
@@ -483,8 +473,8 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
-                    readFileWithStrictnessOverrides(localGs, file, opts, logger);
-                    auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, kvstore, logger);
+                    readFileWithStrictnessOverrides(localGs, file, opts);
+                    auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, kvstore);
                     threadResult.res.pluginGeneratedFiles.insert(threadResult.res.pluginGeneratedFiles.end(),
                                                                  make_move_iterator(pluginFiles.begin()),
                                                                  make_move_iterator(pluginFiles.end()));
@@ -500,33 +490,27 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         }
     });
 
-    logger->trace("Tallying plugin generated files from threads");
-    auto ret = mergeIndexResults(baseGs, opts, resultq, kvstore, logger);
-    logger->trace("Done tallying plugin generated files from threads");
-
-    return ret;
+    return mergeIndexResults(baseGs, opts, resultq, kvstore);
 }
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
-                             unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> &logger) {
+                             unique_ptr<KeyValueStore> &kvstore) {
     if (firstPass.pluginGeneratedFiles.empty()) {
         return firstPass;
     }
+    Timer timeit(firstPass.gs->tracer(), "indexPluginFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(firstPass.pluginGeneratedFiles.size());
     auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(firstPass.pluginGeneratedFiles.size());
     {
         core::UnfreezeFileTable unfreezeFiles(*firstPass.gs);
         for (const auto &file : firstPass.pluginGeneratedFiles) {
-            logger->trace("enqueue (plugin): {}", file->path());
             auto generatedFile = firstPass.gs->enterFile(file);
             pluginFileq->push(move(generatedFile), 1);
         }
     }
     const shared_ptr<core::GlobalState> protoGs = move(firstPass.gs);
-    workers.multiplexJob("indexPluginFiles", [protoGs, &opts, pluginFileq, resultq, &kvstore, logger]() {
-        logger->trace("worker deep copying global state");
+    workers.multiplexJob("indexPluginFiles", [protoGs, &opts, pluginFileq, resultq, &kvstore]() {
         auto localGs = protoGs->deepCopy();
-        logger->trace("worker done deep copying global state");
         IndexThreadResultPack threadResult;
         core::FileRef job;
 
@@ -534,7 +518,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
             if (result.gotItem()) {
                 core::FileRef file = job;
                 file.data(*localGs).strictLevel = decideStrictLevel(*localGs, file, opts);
-                threadResult.res.trees.emplace_back(indexOne(opts, *localGs, file, kvstore, logger));
+                threadResult.res.trees.emplace_back(indexOne(opts, *localGs, file, kvstore));
             }
         }
 
@@ -545,19 +529,22 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
             resultq->push(move(threadResult), sizeIncrement);
         }
     });
-    auto indexedPluginFiles = mergeIndexResults(protoGs, opts, resultq, kvstore, logger);
+    auto indexedPluginFiles = mergeIndexResults(protoGs, opts, resultq, kvstore);
     IndexResult suppliedFilesAndPluginFiles;
     if (indexedPluginFiles.trees.empty()) {
         return firstPass;
     }
     suppliedFilesAndPluginFiles.gs = move(indexedPluginFiles.gs);
-    core::GlobalSubstitution substitution(*protoGs, *suppliedFilesAndPluginFiles.gs, protoGs.get());
-    core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root());
-    logger->trace("Running tree substitution");
-    for (auto &tree : firstPass.trees) {
-        auto file = tree.file;
-        core::ErrorRegion errs(*suppliedFilesAndPluginFiles.gs, file);
-        tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+
+    {
+        Timer timeit(suppliedFilesAndPluginFiles.gs->tracer(), "incremental_resolve");
+        core::GlobalSubstitution substitution(*protoGs, *suppliedFilesAndPluginFiles.gs, protoGs.get());
+        core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root());
+        for (auto &tree : firstPass.trees) {
+            auto file = tree.file;
+            core::ErrorRegion errs(*suppliedFilesAndPluginFiles.gs, file);
+            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+        }
     }
     suppliedFilesAndPluginFiles.trees = move(firstPass.trees);
     suppliedFilesAndPluginFiles.trees.insert(suppliedFilesAndPluginFiles.trees.end(),
@@ -567,8 +554,8 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
-                              shared_ptr<spdlog::logger> logger) {
+                              const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+    Timer timeit(gs->tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
 
@@ -582,8 +569,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         // Run singlethreaded if only using 2 files
         size_t pluginFileCount = 0;
         for (auto file : files) {
-            readFileWithStrictnessOverrides(gs, file, opts, logger);
-            auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *gs, file, kvstore, logger);
+            readFileWithStrictnessOverrides(gs, file, opts);
+            auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *gs, file, kvstore);
             ret.emplace_back(move(parsedFile));
             pluginFileCount += pluginFiles.size();
             for (auto &pluginFile : pluginFiles) {
@@ -593,25 +580,33 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                     pluginFileRef = gs->enterFile(pluginFile);
                     pluginFileRef.data(*gs).strictLevel = decideStrictLevel(*gs, pluginFileRef, opts);
                 }
-                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore, logger));
+                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore));
             }
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
-        auto firstPass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, logger);
-        auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore, logger);
-        gs = move(pluginPass.gs);
-        ret = move(pluginPass.trees);
+        auto firstPass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore);
+
+        Timer timeit(firstPass.gs->tracer(), "index-rem");
+        auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore);
+        {
+            Timer timeit(pluginPass.gs->tracer(), "moving gs?");
+            gs = move(pluginPass.gs);
+        }
+        {
+            Timer timeit(gs->tracer(), "moving trees?");
+            ret = move(pluginPass.trees);
+        }
     }
 
-    auto by_file = [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; };
-    fast_sort(ret, by_file);
-
+    {
+        Timer timeit(gs->tracer(), "sortingFiles");
+        fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+    }
     return ret;
 }
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
-                             shared_ptr<spdlog::logger> logger) {
+ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
@@ -621,13 +616,13 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         return result;
     }
 
+    Timer timeit(ctx.state.tracer(), fmt::format("typecheckOne {}", f.data(ctx).path()));
     try {
         if (opts.print.CFG) {
             fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
         CFGCollectorAndTyper collector(opts);
         {
-            logger->trace("CFG+Infer: {}", f.data(ctx).path());
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
         }
@@ -649,7 +644,8 @@ struct typecheck_thread_result {
 };
 
 vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                             shared_ptr<spdlog::logger> logger, bool skipConfigatron) {
+                             bool skipConfigatron) {
+    Timer timeit(gs.tracer(), "name");
     if (!skipConfigatron) {
         core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
         core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
@@ -659,7 +655,6 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     {
         ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
 
-        Timer timeit(logger, "naming");
         int i = 0;
         for (auto &tree : what) {
             auto file = tree.file;
@@ -667,7 +662,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                 ast::ParsedFile ast;
                 {
                     core::MutableContext ctx(gs, core::Symbols::root());
-                    logger->trace("Naming: {}", file.data(gs).path());
+                    Timer timeit(gs.tracer(), fmt::format("naming {}", file.data(gs).path()));
                     core::ErrorRegion errs(gs, file);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
@@ -705,6 +700,7 @@ public:
 };
 
 vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast::ParsedFile> what) {
+    Timer timeit(gs.tracer(), "printMissingConstants");
     core::MutableContext ctx(gs, core::Symbols::root());
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
@@ -715,9 +711,9 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast:
 }
 
 vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                shared_ptr<spdlog::logger> logger, bool skipConfigatron) {
+                                bool skipConfigatron) {
     try {
-        what = name(gs, move(what), opts, logger, skipConfigatron);
+        what = name(gs, move(what), opts, skipConfigatron);
 
         for (auto &named : what) {
             if (opts.print.NameTree) {
@@ -735,8 +731,7 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
         core::MutableContext ctx(gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
-            Timer timeit(logger, "resolving");
-            logger->trace("Resolving (global pass)...");
+            Timer timeit(gs.tracer(), "resolving");
             vector<core::ErrorRegion> errs;
             for (auto &tree : what) {
                 auto file = tree.file;
@@ -770,12 +765,11 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
 }
 
 vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                  const options::Options &opts, WorkerPool &workers,
-                                  shared_ptr<spdlog::logger> logger) {
+                                  const options::Options &opts, WorkerPool &workers) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
-        Timer timeit(logger, "infer_and_cfg");
+        Timer timeit(gs->tracer(), "typecheck");
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
         shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
@@ -787,13 +781,12 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
         core::Context ctx(*gs, core::Symbols::root());
         for (auto &resolved : what) {
-            logger->trace("enqueue-typer {}", resolved.file.data(*gs).path());
             fileq->push(move(resolved), 1);
         }
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq, logger]() {
+            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq]() {
                 typecheck_thread_result threadResult;
                 ast::ParsedFile job;
                 int processedByThread = 0;
@@ -804,10 +797,11 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                             processedByThread++;
                             core::FileRef file = job.file;
                             try {
-                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, logger));
+                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
                             } catch (SorbetException &) {
                                 Exception::failInFuzzer();
-                                logger->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
+                                ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                         file.data(ctx).path());
                             }
                         }
                     }
@@ -820,8 +814,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
             typecheck_thread_result threadResult;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer());
+                     !result.done();
+                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer())) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
                         typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
@@ -861,10 +856,10 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
     }
 }
 
-unsigned int computeFileHash(shared_ptr<core::File> forWhat, shared_ptr<spdlog::logger> logger) {
+unsigned int computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+    Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
-    shared_ptr<core::GlobalState> lgs =
-        make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
+    shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
     lgs->initEmpty();
     lgs->errorQueue->ignoreFlushes = true;
     lgs->silenceErrors = true;
@@ -876,14 +871,14 @@ unsigned int computeFileHash(shared_ptr<core::File> forWhat, shared_ptr<spdlog::
     vector<ast::ParsedFile> single;
     unique_ptr<KeyValueStore> kvstore;
 
-    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
+    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
     auto errs = lgs->errorQueue->drainAllErrors();
     for (auto &e : errs) {
         if (e->what == core::errors::Parser::ParserError) {
             return core::GlobalState::HASH_STATE_INVALID;
         }
     }
-    pipeline::resolve(*lgs, move(single), emptyOpts, logger, true);
+    pipeline::resolve(*lgs, move(single), emptyOpts, true);
 
     return lgs->hash();
 }

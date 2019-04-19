@@ -1,5 +1,6 @@
 #include "core/ErrorQueue.h"
 #include "common/FileSystem.h"
+#include "common/Timer.h"
 #include "core/Error.h"
 
 namespace sorbet::core {
@@ -55,6 +56,8 @@ void ErrorQueue::flushErrors(bool all) {
     if (ignoreFlushes) {
         return;
     }
+
+    Timer timeit(tracer, "ErrorQueue::flushErrors");
     vector<unique_ptr<ErrorQueueMessage>> errors;
     if (all) {
         errors = drainAll();

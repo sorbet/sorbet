@@ -82,11 +82,12 @@ class WorkerPool {
     // ORDER IS IMPORTANT. threads must be killed before Queues.
     std::vector<std::unique_ptr<Queue>> threadQueues;
     std::vector<std::unique_ptr<Joinable>> threads;
-    std::shared_ptr<spd::logger> logger;
+    spd::logger &logger;
 
     void multiplexJob_(Task_ t);
 
 public:
+    WorkerPool(int size, spd::logger &logger);
     WorkerPool(int size, const std::shared_ptr<spd::logger> &logger);
     ~WorkerPool();
 

@@ -1,5 +1,6 @@
 #include "absl/synchronization/mutex.h"
 #include "common/Timer.h"
+#include "common/web_tracer_framework/tracing.h"
 #include "lsp.h"
 #include "main/lsp/watchman/WatchmanProcess.h"
 #include "main/options/options.h" // For EarlyReturnWithCode.
@@ -17,6 +18,7 @@ namespace sorbet::realmain::lsp {
  * Throws an exception on read error or EOF.
  */
 unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spd::logger> &logger, int inputFd, string &buffer) {
+    Timer timeit(logger, "getNewRequest");
     int length = -1;
     string allRead;
     {
@@ -173,12 +175,13 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.messages.received");
-        auto requestReceiveTime = msg->timestamp;
+        auto startTracer = msg->startTracer;
         gs = processRequest(move(gs), *msg);
         auto currentTime = chrono::steady_clock::now();
-        auto processingTime = currentTime - requestReceiveTime;
-        auto processingTime_ns = chrono::duration_cast<chrono::nanoseconds>(processingTime);
-        timingAdd("processing_time", processingTime_ns.count());
+        if (startTracer) {
+            auto processingFinish = chrono::duration_cast<chrono::microseconds>(currentTime.time_since_epoch()).count();
+            timingAddFlowEnd(startTracer.value(), processingFinish);
+        }
         if (shouldSendCountersToStatsd(currentTime)) {
             {
                 // Merge counters from worker threads.
@@ -204,7 +207,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     // TODO: if we ever support diffs, this would need to be extended
     int didChangeRequestsMerged = 0;
     int foundWatchmanRequests = 0;
-    chrono::time_point<chrono::steady_clock> firstWatchmanTimestamp;
+    optional<FlowId> firstWatchmanTimestamp;
     int firstWatchmanCounter;
     int originalSize = pendingRequests.size();
     UnorderedSet<string> updatedFiles;
@@ -242,7 +245,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
                 updatedFiles.insert(changes->files.begin(), changes->files.end());
                 if (foundWatchmanRequests == 0) {
                     // Use timestamp/counter from the earliest file system change.
-                    firstWatchmanTimestamp = current->timestamp;
+                    firstWatchmanTimestamp = current->startTracer;
                     firstWatchmanCounter = current->counter;
                 }
                 foundWatchmanRequests++;
@@ -291,7 +294,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
             make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(watchmanUpdates));
         auto msg = make_unique<LSPMessage>(move(notifMsg));
         msg->counter = firstWatchmanCounter;
-        msg->timestamp = firstWatchmanTimestamp;
+        msg->startTracer = firstWatchmanTimestamp;
         pendingRequests.push_back(move(msg));
     }
 }
@@ -300,7 +303,9 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
                              std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     try {
         msg->counter = state.requestCounter++;
-        msg->timestamp = chrono::steady_clock::now();
+        msg->startTracer = timingAddFlowStart(
+            "processing_time",
+            chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch()).count());
 
         const LSPMethod method = msg->method();
         if (method == LSPMethod::$CancelRequest) {

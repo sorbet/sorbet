@@ -1,6 +1,7 @@
 #include "main/lsp/lsp.h"
 #include "common/Timer.h"
 #include "common/statsd/statsd.h"
+#include "common/web_tracer_framework/tracing.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
@@ -44,6 +45,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                             const LSPMethod forMethod, bool errorIfFileIsUntyped) {
+    Timer timeit(logger, "setupLSPQueryByLoc");
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
         return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
@@ -70,6 +72,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
+    Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
     return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
@@ -198,15 +201,17 @@ bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
+    // Record rusage-related stats.
+    StatsD::addRusageStats();
+    auto counters = getAndClearThreadCounters();
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;
 
-        // Record rusage-related stats.
-        StatsD::addRusageStats();
-
-        auto counters = getAndClearThreadCounters();
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
         StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix);
+    }
+    if (!opts.webTraceFile.empty()) {
+        web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
     }
 }
 

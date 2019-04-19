@@ -70,6 +70,7 @@ compilation_database(
         "//proto:proto",
         "//core:generate_names",
         "//core:core_test",
+        "//common/web_tracer_framework:tracing",
         "//common/statsd:statsd",
         "//common/kvstore:kvstore",
         "//common/crypto_hashing:crypto_hashing",

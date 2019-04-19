@@ -128,6 +128,7 @@ struct Options {
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
+    std::string webTraceFile;
 
     std::shared_ptr<FileSystem> fs = std::make_shared<OSFileSystem>();
 

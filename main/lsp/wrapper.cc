@@ -125,7 +125,7 @@ LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
     typeErrorsConsole->set_pattern("%v");
     auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     unique_ptr<KeyValueStore> kvstore;
-    payload::createInitialGlobalState(gs, logger, opts, kvstore);
+    payload::createInitialGlobalState(gs, opts, kvstore);
 
     // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
     gs->errorQueue->ignoreFlushes = true;

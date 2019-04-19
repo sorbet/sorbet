@@ -53,11 +53,10 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         return gs;
     }
     if (msg.isNotification()) {
-        logger->debug("Processing notification {} ", convertLSPMethodToString(method));
+        Timer timeit(logger, fmt::format("notification {}", convertLSPMethodToString(method)));
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::TextDocumentDidChange) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
-            Timer timeit(logger, "text_document_did_change");
             vector<shared_ptr<core::File>> files;
 
             auto &edits = get<unique_ptr<DidChangeTextDocumentParams>>(params);
@@ -112,7 +111,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         }
         if (method == LSPMethod::TextDocumentDidOpen) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
-            Timer timeit(logger, "text_document_did_open");
             auto &edits = get<unique_ptr<DidOpenTextDocumentParams>>(params);
             string_view uri = edits->textDocument->uri;
             if (absl::StartsWith(uri, rootUri)) {
@@ -130,7 +128,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         }
         if (method == LSPMethod::TextDocumentDidClose) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
-            Timer timeit(logger, "text_document_did_close");
             auto &edits = get<unique_ptr<DidCloseTextDocumentParams>>(params);
             string_view uri = edits->textDocument->uri;
             if (absl::StartsWith(uri, rootUri)) {
@@ -151,7 +148,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         }
         if (method == LSPMethod::SorbetWatchmanFileChange) {
             prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
-            Timer timeit(logger, "watchman_file_change");
             auto &queryResponse = get<unique_ptr<WatchmanQueryResponse>>(params);
             // Watchman returns file paths that are relative to the rootPath. Turn them into absolute paths
             // before they propagate further through the codebase.
@@ -207,7 +203,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             return gs;
         }
     } else if (msg.isRequest()) {
-        logger->debug("Processing request {}", convertLSPMethodToString(method));
+        Timer timeit(logger, fmt::format("request {}", convertLSPMethodToString(method)));
         auto &requestMessage = msg.asRequest();
         // asRequest() should guarantee the presence of an ID.
         ENFORCE(msg.id());

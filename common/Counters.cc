@@ -74,8 +74,8 @@ void CounterImpl::prodCounterAdd(const char *counter, unsigned long value) {
     this->counters[counter] += value;
 }
 
-void CounterImpl::timingAdd(const char *metric, unsigned long nanos) {
-    this->timings[metric].emplace_back(nanos);
+void CounterImpl::timingAdd(CounterImpl::Timing timing) {
+    this->timings.emplace_back(timing);
 }
 
 thread_local CounterImpl counterState;
@@ -125,6 +125,9 @@ void counterConsume(CounterState cs) {
     for (auto &e : cs.counters->counters) {
         counterState.prodCounterAdd(e.first, e.second);
     }
+    for (auto &e : cs.counters->timings) {
+        counterState.timingAdd(e);
+    }
 }
 
 void counterAdd(ConstExprStr counter, unsigned long value) {
@@ -155,8 +158,43 @@ void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned lo
     counterState.categoryCounterAdd(category.str, counter.str, value);
 }
 
-void timingAdd(ConstExprStr measure, unsigned long nanos) {
-    counterState.timingAdd(measure.str, nanos);
+int getGlobalTimingId() {
+    static atomic<int> counter = 0;
+    return ++counter;
+}
+
+int genThreadId() {
+    static atomic<int> counter{0};
+    return ++counter;
+}
+
+int getThreadId() {
+    thread_local static int counter = genThreadId();
+    return counter;
+}
+
+void timingAdd(string_view measure, unsigned long start, unsigned long end) {
+    CounterImpl::Timing tim{0, (string)measure, start, end - start, getThreadId(), CounterImpl::Timing::Duration};
+    counterState.timingAdd(tim);
+}
+
+void timingAddAsync(string_view measure, unsigned long start, unsigned long end) {
+    CounterImpl::Timing tim{getGlobalTimingId(), (string)measure, start,
+                            end - start,         std::nullopt,    CounterImpl::Timing::Async};
+    counterState.timingAdd(tim);
+}
+
+FlowId timingAddFlowStart(string_view measure, unsigned long start) {
+    int id = getGlobalTimingId();
+    CounterImpl::Timing tim{id, (string)measure, start, nullopt, getThreadId(), CounterImpl::Timing::FlowStart};
+    counterState.timingAdd(tim);
+    FlowId ret{(string)measure, id};
+    return ret;
+}
+
+void timingAddFlowEnd(FlowId flowId, unsigned long end) {
+    CounterImpl::Timing tim{flowId.id, flowId.name, end, nullopt, getThreadId(), CounterImpl::Timing::FlowEnd};
+    counterState.timingAdd(tim);
 }
 
 void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value) {
@@ -204,9 +242,7 @@ void CounterImpl::canonicalize() {
     }
 
     for (auto &e : this->timings) {
-        for (auto v : e.second) {
-            out.timingAdd(internKey(e.first), v);
-        }
+        out.timingAdd(e);
     }
 
     this->countersByCategory = std::move(out.countersByCategory);
@@ -223,7 +259,7 @@ bool shouldShow(vector<string> &wantNames, string_view name) {
     return absl::c_linear_search(wantNames, name);
 }
 
-constexpr double TIMING_TO_MSEC_MULTIPLIER = 0.000001;
+constexpr double TIMING_TO_MSEC_MULTIPLIER = 0.001;
 
 string getCounterStatistics(vector<string> names) {
     counterState.canonicalize();
@@ -305,7 +341,13 @@ string getCounterStatistics(vector<string> names) {
     {
         fmt::format_to(buf, "Timings: \n");
         vector<pair<string, string>> sortedTimings;
-        for (auto &e : counterState.timings) {
+        UnorderedMap<string, vector<CounterImpl::CounterType>> timings;
+        for (const auto &e : counterState.timings) {
+            if (e.duration) {
+                timings[e.namePrefix].emplace_back(e.duration.value());
+            }
+        }
+        for (const auto &e : timings) {
             if (!shouldShow(names, e.first)) {
                 continue;
             }
