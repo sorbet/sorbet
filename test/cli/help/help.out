@@ -46,6 +46,8 @@ Usage:
  advanced options:
       --configatron-dir path    Path to configatron yaml folders
       --configatron-file path   Path to configatron yaml files
+      --web-trace-file file     Web trace file. For use with chrome
+                                about://tracing (default: )
       --debug-log-file file     Path to debug log file (default: )
       --reserve-mem-kb arg      Preallocate the specified amount of memory
                                 for symbol+name tables (default: 0)

@@ -213,7 +213,7 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
                                     cxxopts::value<vector<string>>(), "path");
-    options.add_options("advanced")("web-trace-file", "Web trace file. To be use with chrome about://tracing",
+    options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
                                     cxxopts::value<string>()->default_value(""), "file");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(""), "file");
