@@ -90,7 +90,7 @@ class Index extends React.Component {
                   Sorbet is a fast, powerful type checker designed for Ruby.
                 </h2>
                 <p style={{ paddingTop: "1em" }}>
-                  <strong>Coming Summer 2019.</strong> Built with 💜at <a href="https://stripe.com">Stripe</a>.
+                  <strong>Coming Summer 2019.</strong> Built with 💜 at <a href="https://stripe.com">Stripe</a>.
                 </p>
                 <div style={{ paddingTop: "1.2em" }}>
                   <Button href={docUrl("overview")}>Read the docs</Button>
