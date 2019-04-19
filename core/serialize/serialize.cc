@@ -2,6 +2,7 @@
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
+#include "common/Timer.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
@@ -486,6 +487,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
 }
 
 Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
+    Timer timeit(gs.tracer(), "pickleGlobalState");
     Pickler result;
     result.putU4(Serializer::VERSION);
 
@@ -637,12 +639,12 @@ vector<u1> Serializer::store(GlobalState &gs) {
 }
 
 vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
+    Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
 }
 
 void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
-    gs.trace("Starting global state deserialization");
     ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
     UnPickler p(data);
     gs.trace("Decompression done");
