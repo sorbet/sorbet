@@ -3,9 +3,6 @@
 
 # typed: true
 
-module Net
-end
-
 class Net::BufferedIO
   BUFSIZE = ::T.let(nil, ::T.untyped)
 

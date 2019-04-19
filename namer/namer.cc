@@ -385,6 +385,10 @@ public:
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
 
+        if (klass->symbol == core::Symbols::Net_IMAP()) {
+            klass->symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
+        }
+
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
