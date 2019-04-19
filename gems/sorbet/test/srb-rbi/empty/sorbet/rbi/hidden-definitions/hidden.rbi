@@ -7318,11 +7318,15 @@ module Sorbet::Private::RealStdlib
 
   def self.real_constants(mod); end
 
+  def self.real_instance_methods(mod, arg); end
+
   def self.real_is_a?(o, klass); end
 
   def self.real_name(o); end
 
   def self.real_object_id(o); end
+
+  def self.real_private_instance_methods(mod, arg); end
 end
 
 class Sorbet::Private::RequireEverything
@@ -7398,25 +7402,6 @@ class Sorbet::Private::SuggestTyped
   def self.suggest_typed(); end
 end
 
-class Sorbet::Private::SymbolEntry
-  def final_name(); end
-
-  def has_children(); end
-
-  def has_children=(has_children); end
-
-  def initialize(name, superclass_id, parents=T.unsafe(nil)); end
-
-  def name(); end
-
-  def parents(); end
-
-  def superclass_id(); end
-end
-
-class Sorbet::Private::SymbolEntry
-end
-
 class Sorbet::Private::TodoRBI
   include ::Sorbet::Private::StepInterface
   HEADER = ::T.let(nil, ::T.untyped)
@@ -7424,8 +7409,6 @@ class Sorbet::Private::TodoRBI
 end
 
 class Sorbet::Private::TodoRBI
-  def self.find_all(symbol_map, symbols, parents=T.unsafe(nil)); end
-
   def self.main(); end
 
   def self.output_file(); end
