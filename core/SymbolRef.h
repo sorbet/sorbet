@@ -220,114 +220,115 @@ public:
         return SymbolRef(nullptr, 37);
     }
 
-    static SymbolRef RubyTyper() {
+    static SymbolRef Sorbet() {
         return SymbolRef(nullptr, 38);
+    }
+
+    static SymbolRef Sorbet_Private() {
+        return SymbolRef(nullptr, 39);
+    }
+
+    static SymbolRef Sorbet_Private_Static() {
+        return SymbolRef(nullptr, 40);
     }
 
     // Used as the superclass for symbols created to populate unresolvable ruby
     // constants
     static SymbolRef StubModule() {
-        return SymbolRef(nullptr, 39);
+        return SymbolRef(nullptr, 41);
     }
 
     // Used to mark the presence of an ancestor that we were unable to
     // statically resolve to a class or module
     static SymbolRef StubAncestor() {
-        return SymbolRef(nullptr, 40);
-    }
-
-    static SymbolRef T_Enumerable() {
-        return SymbolRef(nullptr, 41);
-    }
-
-    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 42);
     }
 
-    static SymbolRef T_Set() {
+    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 43);
     }
 
-    static SymbolRef Configatron() {
+    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 44);
     }
 
-    static SymbolRef Configatron_Store() {
+    static SymbolRef T_Set() {
         return SymbolRef(nullptr, 45);
     }
 
-    static SymbolRef Configatron_RootStore() {
+    static SymbolRef Configatron() {
         return SymbolRef(nullptr, 46);
     }
 
-    static SymbolRef Sinatra() {
+    static SymbolRef Configatron_Store() {
         return SymbolRef(nullptr, 47);
     }
 
-    static SymbolRef SinatraBase() {
+    static SymbolRef Configatron_RootStore() {
         return SymbolRef(nullptr, 48);
     }
 
-    static SymbolRef void_() {
+    static SymbolRef Sinatra() {
         return SymbolRef(nullptr, 49);
+    }
+
+    static SymbolRef SinatraBase() {
+        return SymbolRef(nullptr, 50);
+    }
+
+    static SymbolRef void_() {
+        return SymbolRef(nullptr, 51);
     }
 
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 50);
+        return SymbolRef(nullptr, 52);
     }
 
     static SymbolRef Chalk() {
-        return SymbolRef(nullptr, 51);
-    }
-    static SymbolRef Chalk_Tools() {
-        return SymbolRef(nullptr, 52);
-    }
-    static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 53);
     }
-
-    static SymbolRef T_Generic() {
+    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 54);
     }
-
-    static SymbolRef Tuple() {
+    static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 55);
     }
 
-    static SymbolRef Shape() {
+    static SymbolRef T_Generic() {
         return SymbolRef(nullptr, 56);
     }
 
-    static SymbolRef Subclasses() {
+    static SymbolRef Tuple() {
         return SymbolRef(nullptr, 57);
     }
 
-    static SymbolRef Sorbet() {
+    static SymbolRef Shape() {
         return SymbolRef(nullptr, 58);
     }
 
-    static SymbolRef RubyTyper_ImplicitModuleSuperClass() {
+    static SymbolRef Subclasses() {
         return SymbolRef(nullptr, 59);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference() {
+    static SymbolRef Sorbet_Private_Static_ImplicitModuleSuperClass() {
         return SymbolRef(nullptr, 60);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference() {
         return SymbolRef(nullptr, 61);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return SymbolRef(nullptr, 62);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
+    static SymbolRef
+    Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
         return SymbolRef(nullptr, 63);
     }
 
-    static SymbolRef Sorbet_Private() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 64);
     }
 
@@ -347,15 +348,15 @@ public:
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef RubyTyper_badAliasMethodStub() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef RubyTyper_badAliasMethodStub_arg0() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_arg0() {
         return SymbolRef(nullptr, 70);
     }
 
-    static SymbolRef RubyTyper_badAliasMethodStub_blk() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_blk() {
         return SymbolRef(nullptr, 71);
     }
 

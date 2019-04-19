@@ -3,11 +3,11 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer1)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer1)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2)
           <emptyTree>
         end
         <emptyTree>
@@ -19,20 +19,20 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2::C)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::C)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2::Inner1)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2::Inner1::Inner2)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2::Other)
-          ::RubyTyper.<U keep_for_ide>(::Outer2::Inner1::Inner2)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Other)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         <emptyTree>
@@ -44,11 +44,11 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2::Inner1::A)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::A)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Outer2::Inner1::Inner2)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         <emptyTree>

@@ -3,11 +3,11 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::C)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::C)
           <emptyTree>
         end
         <emptyTree>
@@ -17,7 +17,7 @@ begin
   module ::A<<C <U A>>> < ()
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.<U keep_for_ide>(::A::B)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::A::B)
         <emptyTree>
       end
     end

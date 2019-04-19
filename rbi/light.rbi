@@ -18,9 +18,9 @@ class RuntimeError < StandardError
 end
 class ScriptError < Exception
 end
-module RubyTyper::StubModule
+module Sorbet::Private::Static::StubModule
 end
-class RubyTyper::ImplicitModuleSuperclass < BasicObject
+class Sorbet::Private::Static::ImplicitModuleSuperclass < BasicObject
 end
 module Kernel
   sig do
@@ -76,7 +76,7 @@ class Struct
         arg0: T.any(Symbol, String),
         arg1: T.any(Symbol, String),
     )
-    .returns(T.class_of(RubyTyper::DynamicStruct))
+    .returns(T.class_of(Sorbet::Private::Static::DynamicStruct))
   end
   def self.new(arg0, *arg1); end
   sig do
@@ -88,7 +88,7 @@ class Struct
   sig {returns(T.self_type)}
   def each(&blk); end
 end
-module RubyTyper
+module Sorbet::Private::Static
   sig do
     params(
         expr: T.untyped,
@@ -113,17 +113,17 @@ module RubyTyper
   end
   def self.enumerable_to_h(*arg0); end
 end
-class RubyTyper::DynamicStruct < Struct
+class Sorbet::Private::Static::DynamicStruct < Struct
   Elem = type_member(:out, fixed: T.untyped)
   sig do
     params(
         args: BasicObject,
     )
-    .returns(RubyTyper::DynamicStruct)
+    .returns(Sorbet::Private::Static::DynamicStruct)
   end
   def self.new(*args); end
 end
-class RubyTyper::Tuple < Array
+class Sorbet::Private::Static::Tuple < Array
   extend T::Generic
   Elem = type_member(:out)
   def [](*args); end
@@ -133,15 +133,15 @@ class RubyTyper::Tuple < Array
   def to_a; end
   def concat(*arrays); end
 end
-class RubyTyper::Shape < Hash
+class Sorbet::Private::Static::Shape < Hash
   extend T::Generic
   K = type_member(:out)
   V = type_member(:out)
   Elem = type_member(:out)
 end
-module RubyTyper::Void
+module Sorbet::Private::Static::Void
 end
-class RubyTyper::ReturnTypeInference
+class Sorbet::Private::Static::ReturnTypeInference
     extend T::Sig
 end
 class Tempfile < File
@@ -149,7 +149,7 @@ class Tempfile < File
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 end
-::RubyTyper::IOLike = T.type_alias(
+::Sorbet::Private::Static::IOLike = T.type_alias(
   T.any(
     File,
     IO,

@@ -52,7 +52,7 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(RubyTyper::StubModule)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -76,11 +76,11 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(RubyTyper::StubModule)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(RubyTyper::StubModule)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -99,7 +99,7 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(RubyTyper)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
 
 test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
@@ -118,20 +118,20 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(RubyTyper)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
 
 test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(RubyTyper)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
 
 test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(RubyTyper)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
 
 test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
      4 |  const :foo, T::Array[Foo::Baz]

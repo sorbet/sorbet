@@ -2,8 +2,8 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/consta
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/constants.rb start=2:1 end=14:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/constants.rb start=??? end=???}
-  class <C <U A>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/constants.rb start=2:1 end=2:9}
-    class <C <U A>><C <U B>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/constants.rb start=5:3 end=5:11}
+  class <C <U A>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/constants.rb start=2:1 end=2:9}
+    class <C <U A>><C <U B>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/constants.rb start=5:3 end=5:11}
       static-field <C <U A>><C <U B>><C <U C>> -> Integer(1) @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:7}
       static-field <C <U A>><C <U B>><C <U D>> -> Integer(1) @ Loc {file=test/testdata/namer/constants.rb start=8:5 end=8:6}
     class <C <U A>><S <C <U B>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:4}

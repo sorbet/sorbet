@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::TestLocals)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::TestLocals)
   class ::TestLocals<<C <U TestLocals>>> < (::<todo sym>)
     def <U method><<U method>>(<blk>)
       begin

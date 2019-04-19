@@ -45,8 +45,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             ENFORCE(constr->isSolved() && constr->isEmpty());
             _constr = make_unique<core::TypeConstraint>();
             constr = _constr.get();
-            auto returnTypeVar =
-                core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant();
+            auto returnTypeVar = core::Symbols::
+                Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant();
             InlinedVector<core::SymbolRef, 4> domainTemp;
             domainTemp.emplace_back(returnTypeVar);
             methodReturnType = returnTypeVar.data(ctx)->resultType;

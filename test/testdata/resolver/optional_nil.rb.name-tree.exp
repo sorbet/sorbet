@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::Test)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::Test)
   class ::Test<<C <U Test>>> < (::<todo sym>)
     <U <self>>.<U sig>() do ||
       <U <self>>.<U params>({:"x" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)

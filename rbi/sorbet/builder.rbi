@@ -1,15 +1,3 @@
-# This file contains constants and methods that are available for users to use
-# in RBI files, so aren't present at runtime.
-
-class Sorbet
-  # Identical to `T::Sig`'s `sig` in semantics, but couldn't work at
-  # runtime since it doesn't know `self`. Used in `rbi`s that don't `extend
-  # T::Sig`.
-  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
-  def self.sig(&blk)
-  end
-end
-
 class Sorbet::Private::Builder
   Sorbet.sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def type_parameters(*params); end

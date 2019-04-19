@@ -329,7 +329,7 @@ NameDef names[] = {
     {"Set", "Set", true},
     {"Struct", "Struct", true},
     {"File", "File", true},
-    {"RubyTyper", "RubyTyper", true},
+    {"Static", "Static", true},
     {"StubModule", "StubModule", true},
     {"StubAncestor", "StubAncestor", true},
     {"Configatron", "Configatron", true},

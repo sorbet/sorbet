@@ -20,32 +20,32 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::B)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::B)
           <emptyTree>
         end
         #$c = ::Object.<U new>()
         begin
-          ::RubyTyper.<U keep_for_ide>(::D)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::D)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::E)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::E)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::F)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::F)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::G)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::G)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::H)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::H)
           <emptyTree>
         end
         <U <self>>.<U main>()
@@ -105,7 +105,7 @@ begin
 
     def <U initialize><<U initialize>>(<blk>)
       <U @f> = begin
-        ::RubyTyper.<U keep_for_typechecking>(::Integer)
+        ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
         T.<U let>(0, Integer)
       end
     end
@@ -147,7 +147,7 @@ begin
   class <U <singleton class>><<S <C <U H>> $1>> < ()
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.<U keep_for_ide>(::<Class:H>::H2)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::<Class:H>::H2)
         <emptyTree>
       end
     end

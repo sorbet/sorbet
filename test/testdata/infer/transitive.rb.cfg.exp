@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$6: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$4: RubyTyper::Void = <U <statTemp>>$5: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(A))\l<U <statTemp>>$9: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: RubyTyper::Void = <U <statTemp>>$9: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <statTemp>>$12: T.class_of(RubyTyper) = alias <C <U RubyTyper>>\l<U <statTemp>>$13: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$11: RubyTyper::Void = <U <statTemp>>$12: T.class_of(RubyTyper).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(A))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(A))\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <statTemp>>$12: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$13: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$11: Sorbet::Private::Static::Void = <U <statTemp>>$12: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(A))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:A>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(A) = cast(<U <self>>: NilClass, T.class_of(A));\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <self>>: T.class_of(A).<U sig>()\l<U <selfRestore>>$5: T.class_of(A) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(A) = cast(<U <self>>: NilClass, T.class_of(A));\l<U <block-pre-call-temp>>$4: Sorbet::Private::Static::Void = <U <self>>: T.class_of(A).<U sig>()\l<U <selfRestore>>$5: T.class_of(A) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_2" [style="bold"];
@@ -59,7 +59,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:A>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$5: T.class_of(A))\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:A>#<static-init>#<block>>\l<U <self>>: T.class_of(A) = <U <selfRestore>>$5\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$5: T.class_of(A))\l<U <returnMethodTemp>>$2: Sorbet::Private::Static::Void = Solve<::<Class:A>#<static-init>#<block>>\l<U <self>>: T.class_of(A) = <U <selfRestore>>$5\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_3" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
@@ -95,7 +95,7 @@ subgraph "cluster_::<Class:Bar>#<static-init>" {
     "bb::<Class:Bar>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Bar>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(Bar) = cast(<U <self>>: NilClass, T.class_of(Bar));\l<U <block-pre-call-temp>>$4: RubyTyper::Void = <U <self>>: T.class_of(Bar).<U sig>()\l<U <selfRestore>>$5: T.class_of(Bar) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(Bar) = cast(<U <self>>: NilClass, T.class_of(Bar));\l<U <block-pre-call-temp>>$4: Sorbet::Private::Static::Void = <U <self>>: T.class_of(Bar).<U sig>()\l<U <selfRestore>>$5: T.class_of(Bar) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:Bar>#<static-init>_0" -> "bb::<Class:Bar>#<static-init>_2" [style="bold"];
@@ -112,7 +112,7 @@ subgraph "cluster_::<Class:Bar>#<static-init>" {
     "bb::<Class:Bar>#<static-init>_2" -> "bb::<Class:Bar>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Bar>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$5: T.class_of(Bar))\l<U <returnMethodTemp>>$2: RubyTyper::Void = Solve<::<Class:Bar>#<static-init>#<block>>\l<U <self>>: T.class_of(Bar) = <U <selfRestore>>$5\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: RubyTyper::Void\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$5: T.class_of(Bar))\l<U <returnMethodTemp>>$2: Sorbet::Private::Static::Void = Solve<::<Class:Bar>#<static-init>#<block>>\l<U <self>>: T.class_of(Bar) = <U <selfRestore>>$5\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Bar>#<static-init>_3" -> "bb::<Class:Bar>#<static-init>_1" [style="bold"];

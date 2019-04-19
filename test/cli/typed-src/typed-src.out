@@ -4,9 +4,9 @@ class A
   sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
   # <U <statTemp>>$3: T.class_of(A)
   #
-  # <U <block-pre-call-temp>>$4: RubyTyper::Void
+  # <U <block-pre-call-temp>>$4: Sorbet::Private::Static::Void
   # dead=1
-  # <U <returnMethodTemp>>$2: RubyTyper::Void
+  # <U <returnMethodTemp>>$2: Sorbet::Private::Static::Void
   #
   # <U <finalReturn>>: T.noreturn
   # dead=1

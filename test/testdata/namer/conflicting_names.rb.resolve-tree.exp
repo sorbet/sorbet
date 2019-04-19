@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::A)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::A)
   module ::A<<C <U A>>> < ()
     <emptyTree>
 
@@ -11,7 +11,7 @@ begin
 
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.<U keep_for_ide>(::A::Foo)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::A::Foo)
         <emptyTree>
       end
     end

@@ -304,12 +304,13 @@ public:
 
     static std::unique_ptr<Expression> KeepForIDE(std::unique_ptr<Expression> arg) {
         auto loc = core::Loc::none(arg->loc.file());
-        return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForIde(), std::move(arg));
+        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForIde(),
+                     std::move(arg));
     }
 
     static std::unique_ptr<Expression> KeepForTypechecking(std::unique_ptr<Expression> arg) {
         auto loc = core::Loc::none(arg->loc.file());
-        return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForTypechecking(),
+        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForTypechecking(),
                      std::move(arg));
     }
 

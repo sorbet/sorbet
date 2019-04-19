@@ -1,30 +1,4 @@
-# These are extensions to the Ruby language that we added to make the type systems easier
-# typed: strict
-
-class Struct
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-        arg1: T.any(Symbol, String),
-    )
-    .returns(T.class_of(RubyTyper::DynamicStruct))
-  end
-  def self.new(arg0, *arg1); end
-
-  sig do
-    params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
-    )
-    .returns(T.untyped)
-  end
-  sig {returns(T.self_type)}
-  def each(&blk); end
-
-  sig {returns(T::Array[Symbol])}
-  def self.members; end
-end
-
-module RubyTyper
+module Sorbet::Private::Static
   sig do
     params(
         expr: T.untyped,
@@ -57,29 +31,29 @@ module RubyTyper
   def self.enumerable_to_h(*arg0); end
 end
 
-class RubyTyper::DynamicStruct < Struct
+class Sorbet::Private::Static::DynamicStruct < Struct
   Elem = type_member(:out, fixed: T.untyped)
 
   sig do
     params(
         args: BasicObject,
     )
-    .returns(RubyTyper::DynamicStruct)
+    .returns(Sorbet::Private::Static::DynamicStruct)
   end
   def self.new(*args); end
 end
 
-module RubyTyper::StubModule
+module Sorbet::Private::Static::StubModule
 end
 
-class RubyTyper::ImplicitModuleSuperclass < BasicObject
+class Sorbet::Private::Static::ImplicitModuleSuperclass < BasicObject
 end
 
 # C++ code delegates the implementation of many methods on tuples and
 # shapes (arrays and hashes, respectively, of known shape) to these
 # two classes. All the actual methods on this class are implemented in
 # C++.
-class RubyTyper::Tuple < Array
+class Sorbet::Private::Static::Tuple < Array
   extend T::Generic
   Elem = type_member(:out)
 
@@ -93,7 +67,7 @@ class RubyTyper::Tuple < Array
   def concat(*arrays); end
 end
 
-class RubyTyper::Shape < Hash
+class Sorbet::Private::Static::Shape < Hash
   extend T::Generic
   K = type_member(:out)
   V = type_member(:out)
@@ -102,7 +76,7 @@ class RubyTyper::Shape < Hash
   def merge(other); end
 end
 
-class RubyTyper::ENVClass
+class Sorbet::Private::Static::ENVClass
   extend T::Generic
   include Enumerable
   Elem = type_member(:out, fixed: [String, T.nilable(String)])
@@ -124,7 +98,7 @@ class RubyTyper::ENVClass
   end
   def []=(key, value); end
 
-  sig {returns(RubyTyper::ENVClass)}
+  sig {returns(Sorbet::Private::Static::ENVClass)}
   def clear(); end
 
   sig do
@@ -178,7 +152,7 @@ class RubyTyper::ENVClass
     params(
         key: T::Hash[String, T.nilable(String)],
     )
-    .returns(RubyTyper::ENVClass)
+    .returns(Sorbet::Private::Static::ENVClass)
   end
   sig do
     params(
@@ -189,13 +163,13 @@ class RubyTyper::ENVClass
   end
   def update(key, &blk); end
 end
-::ENV = T.let(T.unsafe(nil), RubyTyper::ENVClass)
+::ENV = T.let(T.unsafe(nil), Sorbet::Private::Static::ENVClass)
 
 # The magic type that sig {void} returns
-module RubyTyper::Void
+module Sorbet::Private::Static::Void
 end
 
-class RubyTyper::ReturnTypeInference
+class Sorbet::Private::Static::ReturnTypeInference
     extend T::Sig
 
     sig do
@@ -208,16 +182,3 @@ class RubyTyper::ReturnTypeInference
     # it's used in infer for return type inference.
     end
 end
-
-# Type alias for file-like objects. Many, but not all, file-like
-# types in the Ruby stdlib are descendants of IO. These include
-# pipes and sockets. These descendants are intentionally omitted
-# here.
-::RubyTyper::IOLike = T.type_alias(
-  T.any(
-    File,
-    IO,
-    StringIO,
-    Tempfile
-  )
-)

@@ -4,11 +4,11 @@ begin
       begin
         ::A$1 = 91
         begin
-          ::RubyTyper.<U keep_for_ide>(::A$1)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::A$1)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::B$1)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::B$1)
           <emptyTree>
         end
         ::B = 91

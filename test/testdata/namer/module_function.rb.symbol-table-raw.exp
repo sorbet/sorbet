@@ -8,7 +8,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/module
   class <S <C <U C>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/module_function.rb start=19:7 end=19:8}
     method <S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
       argument <S <C <U C>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
-  class <C <U Funcs>> < <C <U RubyTyper>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
+  class <C <U Funcs>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     method <C <U Funcs>><U f> (x, <blk>) -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=6:3 end=6:11}
       argument <C <U Funcs>><U f>x<> -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=5:15 end=5:16}
       argument <C <U Funcs>><U f><blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}

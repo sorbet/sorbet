@@ -3,32 +3,32 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::NormalClass)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::NormalClass)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::ANamespace)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::ANamespace)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::ANamespace::ClassInNamespace)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::ANamespace::ClassInNamespace)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Mixin)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::OtherMixin)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::OtherMixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Child)
-          ::RubyTyper.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Child)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
           <emptyTree>
         end
         <emptyTree>
@@ -53,11 +53,11 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::NormalClass::InnerClass)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::NormalClass::InnerClass)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::NormalClass::InnerModule)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::NormalClass::InnerModule)
           <emptyTree>
         end
         <emptyTree>
@@ -69,7 +69,7 @@ begin
   module ::ANamespace<<C <U ANamespace>>> < ()
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
-        ::RubyTyper.<U keep_for_ide>(::ANamespace::ObviousChild)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::ANamespace::ObviousChild)
         <emptyTree>
       end
     end
@@ -86,7 +86,7 @@ begin
           <emptyTree>
         end
         <U <self>>.<U whatever>().<U include>(::OtherMixin)
-        ::RubyTyper.<U keep_for_ide>(::Mixin)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
         <emptyTree>
       end
     end

@@ -1,5 +1,5 @@
 begin
-  ::RubyTyper.<U keep_for_ide>(::OpEq)
+  ::Sorbet::Private::Static.<U keep_for_ide>(::OpEq)
   class ::OpEq<<C <U OpEq>>> < (::<todo sym>)
     <emptyTree>
 

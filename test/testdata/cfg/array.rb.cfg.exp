@@ -60,7 +60,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:TestArray>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(TestArray) = cast(<U <self>>: NilClass, T.class_of(TestArray));\l<U <block-pre-call-temp>>$5: RubyTyper::Void = <U <self>>: T.class_of(TestArray).<U sig>()\l<U <selfRestore>>$6: T.class_of(TestArray) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(TestArray) = cast(<U <self>>: NilClass, T.class_of(TestArray));\l<U <block-pre-call-temp>>$5: Sorbet::Private::Static::Void = <U <self>>: T.class_of(TestArray).<U sig>()\l<U <selfRestore>>$6: T.class_of(TestArray) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_0" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
@@ -77,7 +77,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$6: T.class_of(TestArray))\l<U <statTemp>>$3: RubyTyper::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<U <self>>: T.class_of(TestArray) = <U <selfRestore>>$6\l<U <block-pre-call-temp>>$15: RubyTyper::Void = <U <self>>: T.class_of(TestArray).<U sig>()\l<U <selfRestore>>$16: T.class_of(TestArray) = <U <self>>\l<unconditional>\l"
+        label = "block[id=3](<U <selfRestore>>$6: T.class_of(TestArray))\l<U <statTemp>>$3: Sorbet::Private::Static::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<U <self>>: T.class_of(TestArray) = <U <selfRestore>>$6\l<U <block-pre-call-temp>>$15: Sorbet::Private::Static::Void = <U <self>>: T.class_of(TestArray).<U sig>()\l<U <selfRestore>>$16: T.class_of(TestArray) = <U <self>>\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
@@ -94,7 +94,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_7" [
-        label = "block[id=7](<U <selfRestore>>$16: T.class_of(TestArray))\l<U <statTemp>>$13: RubyTyper::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<U <self>>: T.class_of(TestArray) = <U <selfRestore>>$16\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7](<U <selfRestore>>$16: T.class_of(TestArray))\l<U <statTemp>>$13: Sorbet::Private::Static::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<U <self>>: T.class_of(TestArray) = <U <selfRestore>>$16\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];

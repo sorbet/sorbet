@@ -3,24 +3,24 @@ begin
     def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Other)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Other)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Test)
-          ::RubyTyper.<U keep_for_ide>(::Other)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Test)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Other)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_typechecking>(::Test::Mixin)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Test::Mixin)
           T.<U assert_type!>(::Test.<U new>(), Test::Mixin)
         end
         begin
-          ::RubyTyper.<U keep_for_typechecking>(::Test::Other)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Test::Other)
           T.<U assert_type!>(::Test.<U new>(), Test::Other)
         end
         begin
-          ::RubyTyper.<U keep_for_typechecking>(::Other)
+          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Other)
           T.<U assert_type!>(::Test.<U new>(), Other)
         end
         <emptyTree>
@@ -32,15 +32,15 @@ begin
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         begin
-          ::RubyTyper.<U keep_for_ide>(::Test::Mixin)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Mixin)
           <emptyTree>
         end
         begin
-          ::RubyTyper.<U keep_for_ide>(::Test::Other)
+          ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Other)
           <emptyTree>
         end
-        ::RubyTyper.<U keep_for_ide>(::Test::Mixin)
-        ::RubyTyper.<U keep_for_ide>(::Test::Other)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Mixin)
+        ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Other)
         <emptyTree>
       end
     end

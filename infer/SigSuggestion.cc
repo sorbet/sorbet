@@ -139,7 +139,7 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
                               : make_shared<core::SendAndBlockLink>(core::Symbols::noSymbol(), send.fun, std::nullopt);
 
     auto probeTypeSym =
-        core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant();
+        core::Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant();
     InlinedVector<core::SymbolRef, 4> domainTemp;
     InlinedVector<pair<core::SymbolRef, core::TypePtr>, 4> solutions;
     domainTemp.emplace_back(probeTypeSym);

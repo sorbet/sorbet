@@ -3,7 +3,7 @@ InsSeq{
     Send{
       recv = ConstantLit{
         orig = nullptr
-        symbol = ::RubyTyper
+        symbol = ::Sorbet::Private::Static
       }
       fun = <U keep_for_ide>
       block = nullptr
