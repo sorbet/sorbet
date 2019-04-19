@@ -8,7 +8,7 @@ class Generics
    T.assert_type!(arr[0], T.nilable(String))
  end
 
- sig {params().returns(T::Array[String])}
+ sig {returns(T::Array[String])}
  def create()
    T.assert_type!(T::Array[String].new(), T::Array[String])
  end

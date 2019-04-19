@@ -12,8 +12,7 @@ class TestSelf
   end
 
   sig do
-    params()
-      .returns(self)
+    returns(self)
   end
   def pass()
     good1(self)
@@ -35,8 +34,7 @@ class TestSelfGeneric
   end
 
   sig do
-    params()
-      .returns(self)
+    returns(self)
   end
   def pass()
     good1(self)

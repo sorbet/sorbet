@@ -28,7 +28,8 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
         ]
       } @ Loc {file=test/testdata/resolver/proc.rb start=27:7 end=27:8}
       argument <C <U TestProc>><U bad><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
-    method <C <U TestProc>><U foo> (<blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=34:3 end=34:10}
+    method <C <U TestProc>><U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=34:3 end=34:13}
+      argument <C <U TestProc>><U foo>x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=33:15 end=33:16}
       argument <C <U TestProc>><U foo><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
     method <C <U TestProc>><U foo1> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=41:3 end=41:14}
       argument <C <U TestProc>><U foo1>x<> -> AppliedType {

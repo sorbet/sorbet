@@ -30,8 +30,8 @@ class TestProc
   def bad(x, y, z, w)
   end
 
-  sig {params.params.returns(Integer)} # error: Malformed `params`: Multiple calls to `.params`
-  def foo; 0; end
+  sig {params(x: Integer).params(x: Integer).returns(Integer)} # error: Malformed `params`: Multiple calls to `.params`
+  def foo(x); 0; end
 
   sig do
     params(

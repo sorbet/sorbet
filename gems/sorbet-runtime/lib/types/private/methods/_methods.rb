@@ -28,7 +28,7 @@ module T::Private::Methods
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE)
+    SigBuilder.new(PROC_TYPE)
   end
 
   def self.finalize_proc(decl)
@@ -38,7 +38,7 @@ module T::Private::Methods
       raise "Procs cannot have override/abstract modifiers"
     end
     if decl.mod != PROC_TYPE
-      raise "You are passing a DeclBuilder as a type. Did you accidentally use `self` inside a `sig` block?"
+      raise "You are passing a SigBuilder as a type. Did you accidentally use `self` inside a `sig` block?"
     end
     if decl.returns == ARG_NOT_PROVIDED
       raise "Procs must specify a return type"
@@ -178,7 +178,7 @@ module T::Private::Methods
     current_declaration =
       begin
         run_builder(declaration_block)
-      rescue DeclBuilder::BuilderError => e
+      rescue SigBuilder::SigBuilderError => e
         T::Private::ErrorHandler.handle_sig_builder_error(e, declaration_block.loc)
         nil
       end
@@ -195,7 +195,7 @@ module T::Private::Methods
   end
 
   def self.run_builder(declaration_block)
-    builder = DeclBuilder.new(declaration_block.mod)
+    builder = SigBuilder.new(declaration_block.mod)
     builder.
       instance_exec(&declaration_block.blk).
       finalize!.

@@ -158,38 +158,38 @@ end
   )
 )
 class Sorbet
-  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
+  sig {params(blk: T.proc.bind(T::Private::Methods::SigBuilder).void).void}
   def self.sig(&blk)
   end
 end
-class Sorbet::Private::Builder
-  Sorbet.sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
+class T::Private::Methods::SigBuilder
+  Sorbet.sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def type_parameters(*params); end
-  Sorbet.sig {returns(Sorbet::Private::Builder)}
+  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
   def generated; end
-  Sorbet.sig {returns(Sorbet::Private::Builder)}
+  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
   def abstract; end
-  Sorbet.sig {returns(Sorbet::Private::Builder)}
+  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
   def implementation; end
-  Sorbet.sig {returns(Sorbet::Private::Builder)}
-  def override; end
-  Sorbet.sig {returns(Sorbet::Private::Builder)}
+  Sorbet.sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::SigBuilder)}
+  def override(allow_incompatible: false); end
+  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
   def overridable; end
-  Sorbet.sig {params(type: T.untyped).returns(Sorbet::Private::Builder)}
+  Sorbet.sig {params(type: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def bind(type); end
-  Sorbet.sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
-  def params(**params); end
-  Sorbet.sig {params(type: T.untyped).returns(Sorbet::Private::Builder)}
+  Sorbet.sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  def params(params); end
+  Sorbet.sig {params(type: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def returns(type); end
-  Sorbet.sig {returns(Sorbet::Private::Builder)}
+  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
   def void; end
-  Sorbet.sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
-  def soft(**params); end
-  Sorbet.sig {params(arg: T.untyped).returns(Sorbet::Private::Builder)}
+  Sorbet.sig {params(notify: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  def soft(notify:); end
+  Sorbet.sig {params(arg: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def checked(arg); end
 end
 module T::Sig
-  sig {params(blk: T.proc.bind(Sorbet::Private::Builder).void).void}
+  sig {params(blk: T.proc.bind(T::Private::Methods::SigBuilder).void).void}
   def sig(&blk); end
 end
 module T
@@ -229,7 +229,7 @@ module T
 end
 module T::Generic
   include T::Helpers
-  sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
+  sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def type_parameters(*params); end
   def type_member(variance=:invariant, fixed: nil); end
   def type_template(variance=:invariant, fixed: nil); end

@@ -40,7 +40,7 @@ end
 class Generics0
    extend T::Sig
 
-   sig {params().returns(NilClass)}
+   sig {returns(NilClass)}
    def create()
      s = Box[String].new
      s.store("foo")
