@@ -332,32 +332,28 @@ public:
         return SymbolRef(nullptr, 64);
     }
 
-    static SymbolRef Sorbet_Private_Builder() {
+    static SymbolRef T_Sig() {
         return SymbolRef(nullptr, 65);
     }
 
-    static SymbolRef T_Sig() {
+    static SymbolRef Magic_undeclaredFieldStub() {
         return SymbolRef(nullptr, 66);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub() {
+    static SymbolRef Magic_undeclaredFieldStub_blk() {
         return SymbolRef(nullptr, 67);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub_blk() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_arg0() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_arg0() {
-        return SymbolRef(nullptr, 70);
-    }
-
     static SymbolRef Sorbet_Private_Static_badAliasMethodStub_blk() {
-        return SymbolRef(nullptr, 71);
+        return SymbolRef(nullptr, 70);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

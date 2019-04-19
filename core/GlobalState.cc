@@ -209,8 +209,6 @@ void GlobalState::initEmpty() {
     id.data(*this)->resultType = make_type<core::TypeVar>(id);
     ENFORCE(id ==
             Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Builder());
-    ENFORCE(id == Symbols::Sorbet_Private_Builder());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE(id == Symbols::T_Sig());
 
