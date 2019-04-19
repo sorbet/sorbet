@@ -3,7 +3,7 @@ module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
 
-  sig {params(blk: T.proc.bind(T::Private::Methods::Builder).void).void}
+  sig {params(blk: T.proc.bind(T::Private::Methods::SigBuilder).void).void}
   def sig(&blk); end
 end
 
@@ -67,7 +67,7 @@ end
 module T::Generic
   include T::Helpers
 
-  sig {params(params: T.untyped).returns(T::Private::Methods::Builder)}
+  sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def type_parameters(*params); end
 
   def type_member(variance=:invariant, fixed: nil); end

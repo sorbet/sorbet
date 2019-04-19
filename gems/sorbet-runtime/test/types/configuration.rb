@@ -88,7 +88,7 @@ module Opus::Types::Test
         it 'handles a sig builder error' do
           CustomReceiver.expects(:receive).once.with do |error, location|
             error.message == "You can't use .checked with .generated." &&
-              error.is_a?(T::Private::Methods::Builder::BuilderError) &&
+              error.is_a?(T::Private::Methods::SigBuilder::BuilderError) &&
               location.is_a?(Thread::Backtrace::Location)
           end
           @mod.sig {generated.returns(Symbol).checked(:always)}

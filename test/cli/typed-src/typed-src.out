@@ -10,9 +10,9 @@ class A
   #
   # <U <finalReturn>>: T.noreturn
   # dead=1
-  # <U <statTemp>>$8: T::Private::Methods::Builder
+  # <U <statTemp>>$8: T::Private::Methods::SigBuilder
   #
-  # <U <statTemp>>$9: T::Private::Methods::Builder
+  # <U <statTemp>>$9: T::Private::Methods::SigBuilder
   #
   # <U <statTemp>>$10: ShapeType {
   #   Symbol(:"x") => MetaType
@@ -27,7 +27,7 @@ class A
   #
   # <U <statTemp>>$19: T.class_of(Integer)
   #
-  # <U <blockReturnTemp>>$7: T::Private::Methods::Builder
+  # <U <blockReturnTemp>>$7: T::Private::Methods::SigBuilder
   #
   # <U <blockReturnTemp>>$20: T.noreturn
   #
