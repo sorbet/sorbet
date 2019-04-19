@@ -1,5 +1,6 @@
 #include "GlobalState.h"
 
+#include "common/Timer.h"
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
@@ -7,7 +8,6 @@
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include <utility>
-#include "common/Timer.h"
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"

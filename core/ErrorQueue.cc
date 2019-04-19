@@ -1,7 +1,7 @@
 #include "core/ErrorQueue.h"
 #include "common/FileSystem.h"
-#include "core/Error.h"
 #include "common/Timer.h"
+#include "core/Error.h"
 
 namespace sorbet::core {
 

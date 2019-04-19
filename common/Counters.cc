@@ -174,8 +174,7 @@ int getThreadId() {
 }
 
 void timingAdd(string_view measure, unsigned long start, unsigned long end) {
-    CounterImpl::Timing tim{0,       (string)measure, start, end - start, getThreadId(),
-                            CounterImpl::Timing::Duration};
+    CounterImpl::Timing tim{0, (string)measure, start, end - start, getThreadId(), CounterImpl::Timing::Duration};
     counterState.timingAdd(tim);
 }
 

@@ -590,18 +590,18 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         Timer timeit(firstPass.gs->tracer(), "index-rem");
         auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore);
         {
-        Timer timeit(pluginPass.gs->tracer(), "moving gs?");
-        gs = move(pluginPass.gs);
+            Timer timeit(pluginPass.gs->tracer(), "moving gs?");
+            gs = move(pluginPass.gs);
         }
         {
-        Timer timeit(gs->tracer(), "moving trees?");
-        ret = move(pluginPass.trees);
+            Timer timeit(gs->tracer(), "moving trees?");
+            ret = move(pluginPass.trees);
         }
     }
 
     {
-    Timer timeit(gs->tracer(), "sortingFiles");
-    fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+        Timer timeit(gs->tracer(), "sortingFiles");
+        fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
     }
     return ret;
 }
@@ -814,7 +814,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
             typecheck_thread_result threadResult;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer()); !result.done();
+                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer());
+                     !result.done();
                      result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer())) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
