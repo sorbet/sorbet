@@ -51,9 +51,6 @@ public:
         SignatureHelp = 7,
     };
 
-    /** Memory allocator for rapidjson objects. */
-    rapidjson::MemoryPoolAllocator<> alloc;
-
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     options::Options opts;
 
@@ -92,15 +89,6 @@ public:
      * Note: Use this method *before* the client performs initialization with the server.
      */
     void enableAllExperimentalFeatures();
-
-    /**
-     * WARNING! Only use this if you know what you are doing!
-     *
-     * This is only safe to use if you are no longer holding references to anything transitively held by a LSPMessage.
-     *
-     * Frees all memory associated with JSON objects.
-     */
-    void freeJSONObjects();
 };
 
 } // namespace sorbet::realmain::lsp

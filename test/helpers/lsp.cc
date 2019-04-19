@@ -124,8 +124,7 @@ unique_ptr<InitializeParams> makeInitializeParams(string rootPath, string rootUr
     return initializeParams;
 }
 
-unique_ptr<LSPMessage> makeDefinitionRequest(rapidjson::MemoryPoolAllocator<> &alloc, int id, std::string_view uri,
-                                             int line, int character) {
+unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
@@ -244,8 +243,7 @@ bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage 
     return expectedMethod == response.method();
 }
 
-optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(rapidjson::MemoryPoolAllocator<> &alloc,
-                                                                NotificationMessage &notifMsg) {
+optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg) {
     auto publishDiagnosticParams = get_if<unique_ptr<PublishDiagnosticsParams>>(&notifMsg.params);
     if (!publishDiagnosticParams || !*publishDiagnosticParams) {
         ADD_FAILURE() << "textDocument/publishDiagnostics message is missing parameters.";
@@ -289,7 +287,8 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     // Complete initialization handshake with an 'initialized' message.
     {
         rapidjson::Value emptyObject(rapidjson::kObjectType);
-        auto initialized = make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
+        auto initialized =
+            make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
         return lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
     }
 }

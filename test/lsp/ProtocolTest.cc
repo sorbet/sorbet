@@ -119,7 +119,7 @@ unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
 }
 
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
-    return makeDefinitionRequest(lspWrapper->alloc, nextId++, getUri(path), line, character);
+    return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
@@ -164,7 +164,7 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>>
     // Verify that messages are sound (contains proper JSON shape for method type) by serializing and re-parsing them.
     vector<unique_ptr<LSPMessage>> reparsedMessages;
     for (auto &m : messages) {
-        reparsedMessages.push_back(LSPMessage::fromClient(lspWrapper->alloc, m->toJSON()));
+        reparsedMessages.push_back(LSPMessage::fromClient(m->toJSON()));
     }
     auto responses = lspWrapper->getLSPResponsesFor(reparsedMessages);
     updateDiagnostics(responses);
@@ -174,11 +174,11 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>>
 void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messages) {
     for (auto &msg : messages) {
         if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
-            if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
+            if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
                 // Will explicitly overwrite older diagnostics that are irrelevant.
                 // TODO: Have a better way of copying.
-                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move(
-                    PublishDiagnosticsParams::fromJSON(lspWrapper->alloc, (*diagnosticParams)->toJSON())->diagnostics);
+                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] =
+                    move(PublishDiagnosticsParams::fromJSON((*diagnosticParams)->toJSON())->diagnostics);
             }
         }
     }

@@ -666,8 +666,8 @@ public:
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
-        assign(out, fmt::format("{0}::fromJSONValue({1}, assertJSONField({2}, \"{3}\"), \"{3}\")", typeName,
-                                ALLOCATOR_VAR, from, fieldName));
+        assign(out,
+               fmt::format("{0}::fromJSONValue(assertJSONField({1}, \"{2}\"), \"{2}\")", typeName, from, fieldName));
     }
 
     void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
@@ -681,14 +681,11 @@ public:
     void emitDeclaration(fmt::memory_buffer &out) {
         fmt::format_to(out, "class {} final : public JSONBaseType {{\n", typeName);
         fmt::format_to(out, "public:\n");
-        fmt::format_to(
-            out,
-            "static std::unique_ptr<{}> fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, std::string_view json);\n",
-            typeName);
+        fmt::format_to(out, "static std::unique_ptr<{}> fromJSON(std::string_view json);\n", typeName);
         fmt::format_to(out,
-                       "static {} fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
-                       "rapidjson::Value &val, std::string_view fieldName = JSONBaseType::defaultFieldName);\n",
-                       getCPPType(), ALLOCATOR_VAR);
+                       "static {} fromJSONValue(const rapidjson::Value &val, std::string_view fieldName = "
+                       "JSONBaseType::defaultFieldName);\n",
+                       getCPPType());
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             fieldDef->emitDeclaration(out);
         }
@@ -721,21 +718,17 @@ public:
                            }));
             fmt::format_to(out, "}}\n");
         }
-        fmt::format_to(out,
-                       "std::unique_ptr<{0}> {0}::fromJSON(rapidjson::MemoryPoolAllocator<> &alloc, "
-                       "std::string_view json) {{\n",
-                       typeName);
+        fmt::format_to(out, "std::unique_ptr<{0}> {0}::fromJSON(std::string_view json) {{\n", typeName);
+        fmt::format_to(out, "rapidjson::MemoryPoolAllocator<> alloc;");
         fmt::format_to(out, "rapidjson::Document d(&alloc);\n");
         fmt::format_to(out, "d.Parse(std::string(json));\n");
         fmt::format_to(out, "if (!d.IsObject()) {{\n");
         fmt::format_to(out, "throw JSONTypeError(\"document root\", \"object\", d);\n");
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "return fromJSONValue(alloc, d.GetObject(), \"root\");\n");
+        fmt::format_to(out, "return fromJSONValue(d.GetObject(), \"root\");\n");
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out,
-                       "{} {}::fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
-                       "rapidjson::Value &val, std::string_view fieldName) {{\n",
-                       getCPPType(), typeName, ALLOCATOR_VAR);
+        fmt::format_to(out, "{} {}::fromJSONValue(const rapidjson::Value &val, std::string_view fieldName) {{\n",
+                       getCPPType(), typeName);
         fmt::format_to(out, "if (!val.IsObject()) {{\n");
         fmt::format_to(out, "throw JSONTypeError(fieldName, \"object\", val);\n");
         fmt::format_to(out, "}}\n");

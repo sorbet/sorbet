@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
-    unique_ptr<LSPMessage> msg = LSPMessage::fromClient(alloc, json);
+    unique_ptr<LSPMessage> msg = LSPMessage::fromClient(json);
     return LSPLoop::processRequest(move(gs), *msg);
 }
 
@@ -32,7 +32,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalSt
                                                        vector<unique_ptr<LSPMessage>> messages) {
     LSPLoop::QueueState state{{}, false, false, 0};
     for (auto &message : messages) {
-        enqueueRequest(alloc, logger, state, move(message));
+        enqueueRequest(logger, state, move(message));
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 

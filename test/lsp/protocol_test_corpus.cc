@@ -210,7 +210,7 @@ TEST_F(ProtocolTest, EmptyRootUri) {
     auto &msg = diagnostics.at(0);
     if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
         // Will fail test if this does not parse.
-        if (auto diagnosticParams = getPublishDiagnosticParams(lspWrapper->alloc, msg->asNotification())) {
+        if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
             EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
         }
     }

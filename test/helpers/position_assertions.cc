@@ -336,8 +336,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
     string defUri = filePathToUri(uriPrefix, filename);
 
     int id = nextId++;
-    auto responses =
-        lspWrapper.getLSPResponsesFor(*makeDefinitionRequest(lspWrapper.alloc, id, queryLoc.uri, line, character));
+    auto responses = lspWrapper.getLSPResponsesFor(*makeDefinitionRequest(id, queryLoc.uri, line, character));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
         return;
