@@ -42,7 +42,6 @@ public:
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
-    static bool fastpathDisabled;
 };
 } // namespace sorbet::test
 #endif // TEST_LSPTEST_H

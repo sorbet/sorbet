@@ -696,11 +696,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (res["lsp-disable-fastpath"].as<bool>()) {
-        printf("disabling lsp fastpath\n");
-        sorbet::test::LSPTest::fastpathDisabled = true;
-    }
-
     sorbet::test::singleTest = res["single_test"].as<std::string>();
 
     ::testing::InitGoogleTest(&argc, (char **)argv);
