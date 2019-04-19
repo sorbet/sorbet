@@ -44,6 +44,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                             const LSPMethod forMethod, bool errorIfFileIsUntyped) {
+    Timer timeit(logger, "setupLSPQueryByLoc");
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
         return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
@@ -70,6 +71,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
+    Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
     return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);

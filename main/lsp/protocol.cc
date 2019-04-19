@@ -18,6 +18,7 @@ namespace sorbet::realmain::lsp {
  */
 unique_ptr<LSPMessage> getNewRequest(rapidjson::MemoryPoolAllocator<> &alloc, const shared_ptr<spd::logger> &logger,
                                      int inputFd, string &buffer) {
+    Timer timeit(logger, "getNewRequest");
     int length = -1;
     string allRead;
     {

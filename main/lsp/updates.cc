@@ -38,6 +38,7 @@ LSPLoop::ShowOperation::~ShowOperation() {
 }
 
 core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
+    Timer timeit(logger, "updateFile");
     core::FileRef fref;
     if (!file)
         return fref;
@@ -59,6 +60,7 @@ core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
 }
 
 vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
+    Timer timeit(logger, "computeStateHashes");
     vector<unsigned int> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
@@ -119,6 +121,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
 void LSPLoop::reIndexFromFileSystem() {
     ShowOperation op(*this, "Indexing", "Sorbet: Indexing files...");
+    Timer timeit(logger, "reIndexFromFileSystem");
     indexed.clear();
     vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames);
     for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore)) {
@@ -236,6 +239,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
     }
 
     if (good) {
+        Timer timeit(logger, "fast_path");
         if (allFiles) {
             subset.clear();
             for (int i = 1; i < finalGs->filesUsed(); i++) {
