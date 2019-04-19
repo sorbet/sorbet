@@ -1,39 +1,39 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/self.rb start=3:1 end=44:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/self.rb start=3:1 end=42:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=44:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=42:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <C <U TestSelf>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=3:15}
     method <C <U TestSelf>><U good1> (s, <blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=10:3 end=10:15}
       argument <C <U TestSelf>><U good1>s<> -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=7:12 end=7:13}
       argument <C <U TestSelf>><U good1><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
-    method <C <U TestSelf>><U pass> (<blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=18:3 end=18:13}
+    method <C <U TestSelf>><U pass> (<blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=17:3 end=17:13}
       argument <C <U TestSelf>><U pass><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <S <C <U TestSelf>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/self.rb start=3:7 end=3:15}
     method <S <C <U TestSelf>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=6:3 end=9:6}
       argument <S <C <U TestSelf>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
-  class <C <U TestSelfGeneric>>[<C <U Elem>>] < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=24:1 end=24:22}
-    type-member(=) <C <U TestSelfGeneric>><C <U Elem>> @ Loc {file=test/testdata/resolver/self.rb start=28:3 end=28:21}
+  class <C <U TestSelfGeneric>>[<C <U Elem>>] < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=23:1 end=23:22}
+    type-member(=) <C <U TestSelfGeneric>><C <U Elem>> @ Loc {file=test/testdata/resolver/self.rb start=27:3 end=27:21}
     method <C <U TestSelfGeneric>><U good1> (s, <blk>) -> AppliedType {
       klass = <C <U TestSelfGeneric>>
       targs = [
         <C <U Elem>> = SelfTypeParam(<C <U TestSelfGeneric>><C <U Elem>>)
       ]
-    } @ Loc {file=test/testdata/resolver/self.rb start=33:3 end=33:15}
+    } @ Loc {file=test/testdata/resolver/self.rb start=32:3 end=32:15}
       argument <C <U TestSelfGeneric>><U good1>s<> -> AppliedType {
         klass = <C <U TestSelfGeneric>>
         targs = [
           <C <U Elem>> = SelfTypeParam(<C <U TestSelfGeneric>><C <U Elem>>)
         ]
-      } @ Loc {file=test/testdata/resolver/self.rb start=30:12 end=30:13}
+      } @ Loc {file=test/testdata/resolver/self.rb start=29:12 end=29:13}
       argument <C <U TestSelfGeneric>><U good1><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
     method <C <U TestSelfGeneric>><U pass> (<blk>) -> AppliedType {
       klass = <C <U TestSelfGeneric>>
       targs = [
         <C <U Elem>> = SelfTypeParam(<C <U TestSelfGeneric>><C <U Elem>>)
       ]
-    } @ Loc {file=test/testdata/resolver/self.rb start=41:3 end=41:13}
+    } @ Loc {file=test/testdata/resolver/self.rb start=39:3 end=39:13}
       argument <C <U TestSelfGeneric>><U pass><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
-  class <S <C <U TestSelfGeneric>> $1> < <S <C <U Object>> $1> (<C <U Sig>>, <C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/self.rb start=24:7 end=24:22}
-    method <S <C <U TestSelfGeneric>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=29:3 end=32:6}
+  class <S <C <U TestSelfGeneric>> $1> < <S <C <U Object>> $1> (<C <U Sig>>, <C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/self.rb start=23:7 end=23:22}
+    method <S <C <U TestSelfGeneric>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=28:3 end=31:6}
       argument <S <C <U TestSelfGeneric>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
 
