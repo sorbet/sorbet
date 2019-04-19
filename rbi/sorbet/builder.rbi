@@ -11,7 +11,7 @@ class T::Private::Methods::SigBuilder
   Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
   def implementation; end
 
-  Sorbet.sig {params(allow_incompatible: T::Boolean)}.returns(T::Private::Methods::SigBuilder)}
+  Sorbet.sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::SigBuilder)}
   def override(allow_incompatible: false); end
 
   Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
