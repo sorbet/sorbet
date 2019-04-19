@@ -3998,9 +3998,11 @@
 # wrong constant name <static-init>
 # wrong constant name real_ancestors
 # wrong constant name real_constants
+# wrong constant name real_instance_methods
 # wrong constant name real_is_a?
 # wrong constant name real_name
 # wrong constant name real_object_id
+# wrong constant name real_private_instance_methods
 # wrong constant name <static-init>
 # wrong constant name load_bundler
 # wrong constant name load_rails
@@ -4030,16 +4032,7 @@
 # wrong constant name main
 # wrong constant name output_file
 # wrong constant name suggest_typed
-# wrong constant name final_name
-# wrong constant name has_children
-# wrong constant name has_children=
-# wrong constant name initialize
-# wrong constant name name
-# wrong constant name parents
-# wrong constant name superclass_id
 # wrong constant name <static-init>
-# wrong constant name <static-init>
-# wrong constant name find_all
 # wrong constant name main
 # wrong constant name output_file
 # uninitialized constant SortedSet::InspectKey
