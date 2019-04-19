@@ -255,7 +255,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Method `{}` does not exist on `Sorbet::Private::Builder`", send->fun.show(ctx));
+                    e.setHeader("Method `{}` does not exist on `T::Private::Methods::Builder`", send->fun.show(ctx));
                 }
         }
         auto recv = ast::cast_tree<ast::Send>(send->recv.get());
@@ -265,7 +265,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 if (!sig.seen.proc) {
                     if (auto e =
                             ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Method does not exist on `Sorbet::Private::Builder`");
+                        e.setHeader("Method does not exist on `T::Private::Methods::Builder`");
                     }
                 }
             }

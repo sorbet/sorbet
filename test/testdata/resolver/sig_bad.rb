@@ -2,7 +2,7 @@
 class T1; end
 class T2; end
 
-class Sorbet::Private::Builder
+class T::Private::Methods::Builder
   def unsupported
   end
 end
