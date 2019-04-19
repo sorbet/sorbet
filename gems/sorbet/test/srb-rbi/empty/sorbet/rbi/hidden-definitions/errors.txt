@@ -3835,10 +3835,6 @@
 # wrong constant name union
 # uninitialized constant Ripper
 # uninitialized constant Ripper
-# uninitialized constant RubyTyper
-# Did you mean?  RUBY_PLATFORM
-# uninitialized constant RubyTyper
-# Did you mean?  RUBY_PLATFORM
 # wrong constant name absolute_path
 # wrong constant name base_label
 # wrong constant name disasm
@@ -4025,6 +4021,8 @@
 # wrong constant name valid_method_name
 # wrong constant name <static-init>
 # wrong constant name header
+# uninitialized constant Sorbet::Private::Static
+# uninitialized constant Sorbet::Private::Static
 # wrong constant name <static-init>
 # wrong constant name main
 # wrong constant name output_file
