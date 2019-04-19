@@ -106,8 +106,8 @@ class Sorbet::Private::Serialize
         ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
-      # next if !value.is_a?(T::Types::TypeVariable)
-      next if value.is_a?(Module)
+      # next if !Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeVariable)
+      next if Sorbet::Private::RealStdlib.real_is_a?(value, Module)
       next if !comparable?(value)
       [const_sym, value]
     end
@@ -120,7 +120,7 @@ class Sorbet::Private::Serialize
         ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
-      next if value.is_a?(Module)
+      next if Sorbet::Private::RealStdlib.real_is_a?(value, Module)
       next if !comparable?(value)
       [const_sym, value]
     end
@@ -183,9 +183,9 @@ class Sorbet::Private::Serialize
   end
 
   def comparable?(value)
-    return false if value.is_a?(BigDecimal) && value.nan?
-    return false if value.is_a?(Float) && value.nan?
-    return false if value.is_a?(Complex)
+    return false if Sorbet::Private::RealStdlib.real_is_a?(value, BigDecimal) && value.nan?
+    return false if Sorbet::Private::RealStdlib.real_is_a?(value, Float) && value.nan?
+    return false if Sorbet::Private::RealStdlib.real_is_a?(value, Complex)
     true
   end
 
@@ -213,9 +213,9 @@ class Sorbet::Private::Serialize
   end
 
   def constant(const, value)
-    #if value.is_a?(T::Types::TypeTemplate)
+    #if Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeTemplate)
       #"  #{const} = type_template"
-    #elsif value.is_a?(T::Types::TypeMember)
+    #elsif Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeMember)
       #"  #{const} = type_member"
     #else
       #"  #{const} = ::T.let(nil, ::T.untyped)"
