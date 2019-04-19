@@ -136,7 +136,7 @@ class Index extends React.Component {
             <div className="column">
               <p>
                 Sorbet is 100% compatible with Ruby. It type checks normal
-                method definitions, andintroduces backwards-compatible syntax
+                method definitions, and introduces backwards-compatible syntax
                 for method signatures.
               </p>
               <p>
