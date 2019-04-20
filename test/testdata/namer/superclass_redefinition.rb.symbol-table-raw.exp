@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:1 end=8:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:1 end=8:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2748:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:1 end=8:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=??? end=???}

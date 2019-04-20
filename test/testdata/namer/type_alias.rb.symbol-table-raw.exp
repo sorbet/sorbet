@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2748:4})
   class <C <U A>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/type_alias.rb start=2:1 end=2:9}
     class <C <U A>><C <U C1>> < <C <U Object>> () @ Loc {file=test/testdata/namer/type_alias.rb start=5:3 end=5:11}
     class <C <U A>><S <C <U C1>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/type_alias.rb start=5:9 end=5:11}

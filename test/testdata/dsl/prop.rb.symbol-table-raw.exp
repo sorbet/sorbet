@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb start=2:1 end=146:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb start=2:1 end=146:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2748:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=146:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
@@ -338,7 +338,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
     method <S <C <U NotAODM>> $1><U prop> (args, <blk>) @ Loc {file=test/testdata/dsl/prop.rb start=3:5 end=3:25}
       argument <S <C <U NotAODM>> $1><U prop>args<repeated> @ Loc {file=test/testdata/dsl/prop.rb start=3:20 end=3:24}
       argument <S <C <U NotAODM>> $1><U prop><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=731:1 end=731:27}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=231:1 end=231:27}
     method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=84:1 end=84:9}
       argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
   class <C <U PropHelpers>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=65:1 end=65:18}
