@@ -10,8 +10,6 @@ class LoadError < ScriptError
 end
 class RuntimeError < StandardError
 end
-module Sorbet::Private::Static::StubModule
-end
 module Kernel
   sig do
     params(
@@ -46,8 +44,6 @@ class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Documen
   def initialize(options)
   end
 end
-module Opus::DB::Model; end
-::M = Opus::DB::Model
 class Struct
   sig do
     params(
@@ -204,34 +200,8 @@ end
 T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
 module Comparable
 end
-module DidYouMean::Correctable
-end
-module DidYouMean::Jaro
-end
-module DidYouMean::Levenshtein
-end
-module DidYouMean::NameErrorCheckers
-end
-module Errno
-end
-module FileTest
-end
-module FileUtils::LowMethods
-end
-module FileUtils::StreamUtils_
-end
-module Gem::Deprecate
-end
-module IO::WaitReadable
-end
-module IO::WaitWritable
-end
-module MonitorMixin
-end
 class Object < BasicObject
   include Kernel
-end
-module SingleForwardable
 end
 class StringIO < Data
   include Enumerable
@@ -242,14 +212,6 @@ class Struct < Object
   include Enumerable
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
-end
-module URI::Escape
-end
-module URI::RFC2396_REGEXP
-end
-module URI::Util
-end
-module Warning
 end
 ARGF = T.let(T.unsafe(nil), Object)
 ARGV = T.let(T.unsafe(nil), Array)
@@ -720,8 +682,6 @@ class BigDecimal < Numeric
   def to_i(); end
   sig {returns(String)}
   def to_s(); end
-end
-module BigMath
 end
 class Class < Module
   sig {returns(T.untyped)}
@@ -1935,10 +1895,6 @@ module Kernel
     .returns(T.noreturn)
   end
   def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
-end
-module Math
-  E = T.let(T.unsafe(nil), Float)
-  PI = T.let(T.unsafe(nil), Float)
 end
 class Method < Object
   sig {returns(Proc)}
