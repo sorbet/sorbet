@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/gvar.rb start=2:1 end=10:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2704:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/gvar.rb start=2:1 end=10:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2528:4})
   field <U $a> @ Loc {file=test/testdata/namer/gvar.rb start=2:1 end=2:3}
   field <U $b> @ Loc {file=test/testdata/namer/gvar.rb start=5:3 end=5:5}
   field <U $c> @ Loc {file=test/testdata/namer/gvar.rb start=8:14 end=8:16}
