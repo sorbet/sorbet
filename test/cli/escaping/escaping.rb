@@ -1,5 +1,7 @@
 # typed: true
-Sorbet.sig{params(a: Integer).void}
+extend T::Sig
+
+sig{params(a: Integer).void}
 
 def foo(a)
 end

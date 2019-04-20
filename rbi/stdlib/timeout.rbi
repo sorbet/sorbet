@@ -24,7 +24,7 @@ class Timeout::Error < RuntimeError
     @thread = T.let(T.unsafe(nil), T.nilable(Thread))
   end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -32,6 +32,6 @@ class Timeout::Error < RuntimeError
   end
   def exception(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def thread(); end
 end

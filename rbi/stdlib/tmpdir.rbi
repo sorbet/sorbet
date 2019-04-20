@@ -4,7 +4,7 @@
 # typed: strict
 
 module Dir::Tmpname
-  Sorbet.sig do
+  sig do
     params(
       basename: ::T.untyped,
       tmpdir: ::T.untyped,
@@ -15,7 +15,7 @@ module Dir::Tmpname
   end
   def self.create(basename, tmpdir=T.unsafe(nil), max_try: T.unsafe(nil), **opts); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       n: ::T.untyped,
@@ -24,19 +24,19 @@ module Dir::Tmpname
   end
   def self.make_tmpname(_, n); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.tmpdir(); end
 end
 
 class Dir
-  Sorbet.sig do
+  sig do
     params(
       prefix_suffix: T.nilable(T.any(String, T::Array[String])),
       tmpdir: T.nilable(String),
     )
     .returns(String)
   end
-  Sorbet.sig do
+  sig do
     type_parameters(:U).params(
       prefix_suffix: T.nilable(T.any(String, T::Array[String])),
       tmpdir: T.nilable(String),

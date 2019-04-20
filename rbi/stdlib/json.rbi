@@ -14,7 +14,7 @@ module JSON
   VERSION_MAJOR = ::T.let(nil, ::T.untyped)
   VERSION_MINOR = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       object: ::T.untyped,
       opts: ::T.untyped,
@@ -23,7 +23,7 @@ module JSON
   end
   def self.[](object, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       modul: ::T.untyped,
       constant: ::T.untyped,
@@ -32,10 +32,10 @@ module JSON
   end
   def self.const_defined_in?(modul, constant); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.create_id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       create_id: ::T.untyped,
     )
@@ -43,7 +43,7 @@ module JSON
   end
   def self.create_id=(create_id); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
     )
@@ -51,7 +51,7 @@ module JSON
   end
   def self.deep_const_get(path); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       args: ::T.untyped,
@@ -60,10 +60,10 @@ module JSON
   end
   def self.dump(obj, *args); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.dump_default_options(); end
 
-  Sorbet.sig do
+  sig do
     params(
       dump_default_options: ::T.untyped,
     )
@@ -71,7 +71,7 @@ module JSON
   end
   def self.dump_default_options=(dump_default_options); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       opts: ::T.untyped,
@@ -80,7 +80,7 @@ module JSON
   end
   def self.fast_generate(obj, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       opts: ::T.untyped,
@@ -89,7 +89,7 @@ module JSON
   end
   def self.fast_unparse(obj, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       args: ::T.untyped,
@@ -98,10 +98,10 @@ module JSON
   end
   def self.generate(obj, *args); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.generator(); end
 
-  Sorbet.sig do
+  sig do
     params(
       generator: ::T.untyped,
     )
@@ -109,7 +109,7 @@ module JSON
   end
   def self.generator=(generator); end
 
-  Sorbet.sig do
+  sig do
     params(
       to: ::T.untyped,
       from: ::T.untyped,
@@ -119,7 +119,7 @@ module JSON
   end
   def self.iconv(to, from, string); end
 
-  Sorbet.sig do
+  sig do
     params(
       source: ::T.untyped,
       proc: ::T.untyped,
@@ -129,10 +129,10 @@ module JSON
   end
   def self.load(source, proc=T.unsafe(nil), options=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.load_default_options(); end
 
-  Sorbet.sig do
+  sig do
     params(
       load_default_options: ::T.untyped,
     )
@@ -140,7 +140,7 @@ module JSON
   end
   def self.load_default_options=(load_default_options); end
 
-  Sorbet.sig do
+  sig do
     params(
       json: ::T.untyped,
       args: ::T.untyped,
@@ -149,7 +149,7 @@ module JSON
   end
   def self.parse(json, args=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       source: ::T.untyped,
       opts: ::T.untyped,
@@ -158,10 +158,10 @@ module JSON
   end
   def self.parse!(source, opts=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.parser(); end
 
-  Sorbet.sig do
+  sig do
     params(
       parser: ::T.untyped,
     )
@@ -169,7 +169,7 @@ module JSON
   end
   def self.parser=(parser); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       args: ::T.untyped,
@@ -178,7 +178,7 @@ module JSON
   end
   def self.pretty_generate(obj, *args); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       opts: ::T.untyped,
@@ -187,7 +187,7 @@ module JSON
   end
   def self.pretty_unparse(obj, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       result: ::T.untyped,
       proc: ::T.untyped,
@@ -196,7 +196,7 @@ module JSON
   end
   def self.recurse_proc(result, &proc); end
 
-  Sorbet.sig do
+  sig do
     params(
       source: ::T.untyped,
       proc: ::T.untyped,
@@ -206,10 +206,10 @@ module JSON
   end
   def self.restore(source, proc=T.unsafe(nil), options=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.state(); end
 
-  Sorbet.sig do
+  sig do
     params(
       state: ::T.untyped,
     )
@@ -217,7 +217,7 @@ module JSON
   end
   def self.state=(state); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
     )
@@ -225,7 +225,7 @@ module JSON
   end
   def self.swap!(string); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       opts: ::T.untyped,
@@ -234,7 +234,7 @@ module JSON
   end
   def self.unparse(obj, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       anIO: ::T.untyped,
@@ -244,7 +244,7 @@ module JSON
   end
   def self.unsafe_dump(obj, anIO=T.unsafe(nil), limit=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       opts: ::T.untyped,
@@ -253,7 +253,7 @@ module JSON
   end
   def self.unsafe_generate(obj, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       source: ::T.untyped,
       opts: ::T.untyped,
@@ -262,7 +262,7 @@ module JSON
   end
   def self.unsafe_parse(source, opts=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       opts: ::T.untyped,
@@ -279,7 +279,7 @@ class JSON::GeneratorError < JSON::JSONError
 end
 
 class JSON::GenericObject < OpenStruct
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
     )
@@ -287,7 +287,7 @@ class JSON::GenericObject < OpenStruct
   end
   def [](name); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       value: ::T.untyped,
@@ -296,7 +296,7 @@ class JSON::GenericObject < OpenStruct
   end
   def []=(name, value); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -304,10 +304,10 @@ class JSON::GenericObject < OpenStruct
   end
   def as_json(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_hash(); end
 
-  Sorbet.sig do
+  sig do
     params(
       a: ::T.untyped,
     )
@@ -315,7 +315,7 @@ class JSON::GenericObject < OpenStruct
   end
   def to_json(*a); end
 
-  Sorbet.sig do
+  sig do
     params(
       other: ::T.untyped,
     )
@@ -323,7 +323,7 @@ class JSON::GenericObject < OpenStruct
   end
   def |(other); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -331,7 +331,7 @@ class JSON::GenericObject < OpenStruct
   end
   def self.[](*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       obj: ::T.untyped,
       args: ::T.untyped,
@@ -340,7 +340,7 @@ class JSON::GenericObject < OpenStruct
   end
   def self.dump(obj, *args); end
 
-  Sorbet.sig do
+  sig do
     params(
       object: ::T.untyped,
     )
@@ -348,7 +348,7 @@ class JSON::GenericObject < OpenStruct
   end
   def self.from_hash(object); end
 
-  Sorbet.sig do
+  sig do
     params(
       json_creatable: ::T.untyped,
     )
@@ -356,10 +356,10 @@ class JSON::GenericObject < OpenStruct
   end
   def self.json_creatable=(json_creatable); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.json_creatable?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -367,7 +367,7 @@ class JSON::GenericObject < OpenStruct
   end
   def self.json_create(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       source: ::T.untyped,
       proc: ::T.untyped,
@@ -379,7 +379,7 @@ class JSON::GenericObject < OpenStruct
 end
 
 class JSON::JSONError < StandardError
-  Sorbet.sig do
+  sig do
     params(
       exception: ::T.untyped,
     )

@@ -19,10 +19,6 @@ begin
 
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
     def <U initialize><<U initialize>>(<blk>)
       begin
         <U @v1> = begin
@@ -68,14 +64,6 @@ begin
       <U @v5> = <U v5>
     end
 
-    def <U v6><<U v6>>(<blk>)
-      <U @v6>
-    end
-
-    def <U v6=><<U v6=>>(v6, <blk>)
-      <U @v6> = <U v6>
-    end
-
     def self.<U <static-init>><<U <static-init>>>(<blk>)
       begin
         <U <self>>.<U sig>() do ||
@@ -95,12 +83,6 @@ begin
         end
         <U <self>>.<U sig>() do ||
           <U <self>>.<U returns>(::String)
-        end
-        ::Sorbet.<U sig>() do ||
-          <U <self>>.<U returns>(::String)
-        end
-        ::Sorbet.<U sig>() do ||
-          <U <self>>.<U params>({:"v6" => ::String}).<U returns>(::String)
         end
         <emptyTree>
       end

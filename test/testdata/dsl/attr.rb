@@ -23,7 +23,4 @@ class TestAttr
   attr_writer :v4, :v5 # error: This function does not have a `sig`
 #              ^^        error: Use of undeclared variable `@v4`
 #                   ^^   error: Use of undeclared variable `@v5`
-
-  Sorbet.sig {returns(String)}
-  attr_accessor :v6
 end

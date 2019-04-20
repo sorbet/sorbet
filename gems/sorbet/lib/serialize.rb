@@ -56,6 +56,7 @@ class Sorbet::Private::Serialize
     end
     superclass_str = !superclass_str || superclass_str.empty? ? '' : " < #{superclass_str}"
     ret << (klass.is_a?(Class) ? "class #{class_name}#{superclass_str}\n" : "module #{class_name}\n")
+    ret << " extend T::Sig\n"
 
     # We don't use .included_modules since that also has all the aweful things
     # that are mixed into Object. This way we at least have a delimiter before
@@ -254,7 +255,7 @@ class Sorbet::Private::Serialize
   def serialize_sig(parameters)
     ret = String.new
     if !parameters.empty?
-      ret << "  Sorbet.sig do\n"
+      ret << "  sig do\n"
       ret << "    params(\n"
       parameters.each do |(_kind, name)|
         ret << "      #{name}: ::T.untyped,\n"
@@ -263,7 +264,7 @@ class Sorbet::Private::Serialize
       ret << "    .returns(::T.untyped)\n"
       ret << "  end\n"
     else
-      ret << "  Sorbet.sig {returns(::T.untyped)}\n"
+      ret << "  sig {returns(::T.untyped)}\n"
     end
     ret
   end

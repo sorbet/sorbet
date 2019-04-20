@@ -10,7 +10,7 @@ module OpenSSL
   OPENSSL_VERSION_NUMBER = ::T.let(nil, ::T.untyped)
   VERSION = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
     )
@@ -18,10 +18,10 @@ module OpenSSL
   end
   def self.Digest(name); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.debug(); end
 
-  Sorbet.sig do
+  sig do
     params(
       debug: ::T.untyped,
     )
@@ -29,10 +29,10 @@ module OpenSSL
   end
   def self.debug=(debug); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.errors(); end
 
-  Sorbet.sig do
+  sig do
     params(
       fips_mode: ::T.untyped,
     )
@@ -73,7 +73,7 @@ module OpenSSL::ASN1
   UTF8STRING = ::T.let(nil, ::T.untyped)
   VIDEOTEXSTRING = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -81,7 +81,7 @@ module OpenSSL::ASN1
   end
   def self.BMPString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -89,7 +89,7 @@ module OpenSSL::ASN1
   end
   def self.BitString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -97,7 +97,7 @@ module OpenSSL::ASN1
   end
   def self.Boolean(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -105,7 +105,7 @@ module OpenSSL::ASN1
   end
   def self.EndOfContent(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -113,7 +113,7 @@ module OpenSSL::ASN1
   end
   def self.Enumerated(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -121,7 +121,7 @@ module OpenSSL::ASN1
   end
   def self.GeneralString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -129,7 +129,7 @@ module OpenSSL::ASN1
   end
   def self.GeneralizedTime(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -137,7 +137,7 @@ module OpenSSL::ASN1
   end
   def self.GraphicString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -145,7 +145,7 @@ module OpenSSL::ASN1
   end
   def self.IA5String(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -153,7 +153,7 @@ module OpenSSL::ASN1
   end
   def self.ISO64String(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -161,7 +161,7 @@ module OpenSSL::ASN1
   end
   def self.Integer(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -169,7 +169,7 @@ module OpenSSL::ASN1
   end
   def self.Null(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -177,7 +177,7 @@ module OpenSSL::ASN1
   end
   def self.NumericString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -185,7 +185,7 @@ module OpenSSL::ASN1
   end
   def self.ObjectId(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -193,7 +193,7 @@ module OpenSSL::ASN1
   end
   def self.OctetString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -201,7 +201,7 @@ module OpenSSL::ASN1
   end
   def self.PrintableString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -209,7 +209,7 @@ module OpenSSL::ASN1
   end
   def self.Sequence(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -217,7 +217,7 @@ module OpenSSL::ASN1
   end
   def self.Set(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -225,7 +225,7 @@ module OpenSSL::ASN1
   end
   def self.T61String(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -233,7 +233,7 @@ module OpenSSL::ASN1
   end
   def self.UTCTime(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -241,7 +241,7 @@ module OpenSSL::ASN1
   end
   def self.UTF8String(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -249,7 +249,7 @@ module OpenSSL::ASN1
   end
   def self.UniversalString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -257,7 +257,7 @@ module OpenSSL::ASN1
   end
   def self.VideotexString(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -265,7 +265,7 @@ module OpenSSL::ASN1
   end
   def self.decode(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -273,7 +273,7 @@ module OpenSSL::ASN1
   end
   def self.decode_all(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -283,10 +283,10 @@ module OpenSSL::ASN1
 end
 
 class OpenSSL::ASN1::ASN1Data
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def infinite_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       infinite_length: ::T.untyped,
     )
@@ -294,7 +294,7 @@ class OpenSSL::ASN1::ASN1Data
   end
   def infinite_length=(infinite_length); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -304,10 +304,10 @@ class OpenSSL::ASN1::ASN1Data
   end
   def initialize(_, _1, _2); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tag(); end
 
-  Sorbet.sig do
+  sig do
     params(
       tag: ::T.untyped,
     )
@@ -315,10 +315,10 @@ class OpenSSL::ASN1::ASN1Data
   end
   def tag=(tag); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tag_class(); end
 
-  Sorbet.sig do
+  sig do
     params(
       tag_class: ::T.untyped,
     )
@@ -326,13 +326,13 @@ class OpenSSL::ASN1::ASN1Data
   end
   def tag_class=(tag_class); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 
-  Sorbet.sig do
+  sig do
     params(
       value: ::T.untyped,
     )
@@ -348,10 +348,10 @@ class OpenSSL::ASN1::BMPString < OpenSSL::ASN1::Primitive
 end
 
 class OpenSSL::ASN1::BitString < OpenSSL::ASN1::Primitive
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def unused_bits(); end
 
-  Sorbet.sig do
+  sig do
     params(
       unused_bits: ::T.untyped,
     )
@@ -365,10 +365,10 @@ end
 
 class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   include ::Enumerable
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -376,10 +376,10 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tagging(); end
 
-  Sorbet.sig do
+  sig do
     params(
       tagging: ::T.untyped,
     )
@@ -387,12 +387,12 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   end
   def tagging=(tagging); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 end
 
 class OpenSSL::ASN1::EndOfContent < OpenSSL::ASN1::ASN1Data
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def initialize(); end
 end
 
@@ -424,22 +424,22 @@ class OpenSSL::ASN1::NumericString < OpenSSL::ASN1::Primitive
 end
 
 class OpenSSL::ASN1::ObjectId < OpenSSL::ASN1::Primitive
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ln(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def long_name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def oid(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def short_name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sn(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -454,7 +454,7 @@ class OpenSSL::ASN1::OctetString < OpenSSL::ASN1::Primitive
 end
 
 class OpenSSL::ASN1::Primitive < OpenSSL::ASN1::ASN1Data
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -462,10 +462,10 @@ class OpenSSL::ASN1::Primitive < OpenSSL::ASN1::ASN1Data
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tagging(); end
 
-  Sorbet.sig do
+  sig do
     params(
       tagging: ::T.untyped,
     )
@@ -473,7 +473,7 @@ class OpenSSL::ASN1::Primitive < OpenSSL::ASN1::ASN1Data
   end
   def tagging=(tagging); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 end
 
@@ -503,7 +503,7 @@ end
 
 class OpenSSL::BN
   include ::Comparable
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -511,7 +511,7 @@ class OpenSSL::BN
   end
   def %(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -519,7 +519,7 @@ class OpenSSL::BN
   end
   def *(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -527,7 +527,7 @@ class OpenSSL::BN
   end
   def **(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -535,7 +535,7 @@ class OpenSSL::BN
   end
   def +(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -544,7 +544,7 @@ class OpenSSL::BN
   def -(_); end
 
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -552,7 +552,7 @@ class OpenSSL::BN
   end
   def <<(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -560,7 +560,7 @@ class OpenSSL::BN
   end
   def <=>(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -568,7 +568,7 @@ class OpenSSL::BN
   end
   def ==(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -576,7 +576,7 @@ class OpenSSL::BN
   end
   def ===(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -584,7 +584,7 @@ class OpenSSL::BN
   end
   def >>(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -592,7 +592,7 @@ class OpenSSL::BN
   end
   def bit_set?(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -600,7 +600,7 @@ class OpenSSL::BN
   end
   def clear_bit!(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -608,7 +608,7 @@ class OpenSSL::BN
   end
   def cmp(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -616,7 +616,7 @@ class OpenSSL::BN
   end
   def coerce(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -624,7 +624,7 @@ class OpenSSL::BN
   end
   def copy(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -632,7 +632,7 @@ class OpenSSL::BN
   end
   def eql?(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -640,10 +640,10 @@ class OpenSSL::BN
   end
   def gcd(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hash(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -651,7 +651,7 @@ class OpenSSL::BN
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -659,7 +659,7 @@ class OpenSSL::BN
   end
   def lshift!(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -667,7 +667,7 @@ class OpenSSL::BN
   end
   def mask_bits!(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -676,7 +676,7 @@ class OpenSSL::BN
   end
   def mod_add(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -685,7 +685,7 @@ class OpenSSL::BN
   end
   def mod_exp(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -693,7 +693,7 @@ class OpenSSL::BN
   end
   def mod_inverse(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -702,7 +702,7 @@ class OpenSSL::BN
   end
   def mod_mul(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -710,7 +710,7 @@ class OpenSSL::BN
   end
   def mod_sqr(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -719,19 +719,19 @@ class OpenSSL::BN
   end
   def mod_sub(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def num_bits(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def num_bytes(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def odd?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def one?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       q: ::T.untyped,
     )
@@ -739,7 +739,7 @@ class OpenSSL::BN
   end
   def pretty_print(q); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -747,7 +747,7 @@ class OpenSSL::BN
   end
   def prime?(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -755,7 +755,7 @@ class OpenSSL::BN
   end
   def prime_fasttest?(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -763,7 +763,7 @@ class OpenSSL::BN
   end
   def rshift!(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -771,19 +771,19 @@ class OpenSSL::BN
   end
   def set_bit!(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sqr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_bn(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_i(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_int(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -791,7 +791,7 @@ class OpenSSL::BN
   end
   def to_s(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -799,10 +799,10 @@ class OpenSSL::BN
   end
   def ucmp(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def zero?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -810,7 +810,7 @@ class OpenSSL::BN
   end
   def self.generate_prime(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -818,7 +818,7 @@ class OpenSSL::BN
   end
   def self.pseudo_rand(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -826,7 +826,7 @@ class OpenSSL::BN
   end
   def self.pseudo_rand_range(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -834,7 +834,7 @@ class OpenSSL::BN
   end
   def self.rand(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -850,7 +850,7 @@ module OpenSSL::Buffering
   include ::Enumerable
   BLOCK_SIZE = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -858,10 +858,10 @@ module OpenSSL::Buffering
   end
   def <<(s); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig do
+  sig do
     params(
       eol: ::T.untyped,
     )
@@ -869,10 +869,10 @@ module OpenSSL::Buffering
   end
   def each(eol=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_byte(); end
 
-  Sorbet.sig do
+  sig do
     params(
       eol: ::T.untyped,
     )
@@ -880,19 +880,19 @@ module OpenSSL::Buffering
   end
   def each_line(eol=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def eof(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def eof?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def flush(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def getc(); end
 
-  Sorbet.sig do
+  sig do
     params(
       eol: ::T.untyped,
       limit: ::T.untyped,
@@ -901,7 +901,7 @@ module OpenSSL::Buffering
   end
   def gets(eol=T.unsafe(nil), limit=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -909,7 +909,7 @@ module OpenSSL::Buffering
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -917,7 +917,7 @@ module OpenSSL::Buffering
   end
   def print(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
       args: ::T.untyped,
@@ -926,7 +926,7 @@ module OpenSSL::Buffering
   end
   def printf(s, *args); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -934,7 +934,7 @@ module OpenSSL::Buffering
   end
   def puts(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       size: ::T.untyped,
       buf: ::T.untyped,
@@ -943,7 +943,7 @@ module OpenSSL::Buffering
   end
   def read(size=T.unsafe(nil), buf=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       maxlen: ::T.untyped,
       buf: ::T.untyped,
@@ -953,10 +953,10 @@ module OpenSSL::Buffering
   end
   def read_nonblock(maxlen, buf=T.unsafe(nil), exception: T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def readchar(); end
 
-  Sorbet.sig do
+  sig do
     params(
       eol: ::T.untyped,
     )
@@ -964,7 +964,7 @@ module OpenSSL::Buffering
   end
   def readline(eol=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       eol: ::T.untyped,
     )
@@ -972,7 +972,7 @@ module OpenSSL::Buffering
   end
   def readlines(eol=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       maxlen: ::T.untyped,
       buf: ::T.untyped,
@@ -981,10 +981,10 @@ module OpenSSL::Buffering
   end
   def readpartial(maxlen, buf=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sync(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sync: ::T.untyped,
     )
@@ -992,7 +992,7 @@ module OpenSSL::Buffering
   end
   def sync=(sync); end
 
-  Sorbet.sig do
+  sig do
     params(
       c: ::T.untyped,
     )
@@ -1000,7 +1000,7 @@ module OpenSSL::Buffering
   end
   def ungetc(c); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -1008,7 +1008,7 @@ module OpenSSL::Buffering
   end
   def write(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
       exception: ::T.untyped,
@@ -1019,7 +1019,7 @@ module OpenSSL::Buffering
 end
 
 class OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       auth_data: ::T.untyped,
     )
@@ -1027,7 +1027,7 @@ class OpenSSL::Cipher
   end
   def auth_data=(auth_data); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1035,7 +1035,7 @@ class OpenSSL::Cipher
   end
   def auth_tag(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       auth_tag: ::T.untyped,
     )
@@ -1043,7 +1043,7 @@ class OpenSSL::Cipher
   end
   def auth_tag=(auth_tag); end
 
-  Sorbet.sig do
+  sig do
     params(
       auth_tag_len: ::T.untyped,
     )
@@ -1051,13 +1051,13 @@ class OpenSSL::Cipher
   end
   def auth_tag_len=(auth_tag_len); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def authenticated?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def block_size(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1065,7 +1065,7 @@ class OpenSSL::Cipher
   end
   def decrypt(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1073,10 +1073,10 @@ class OpenSSL::Cipher
   end
   def encrypt(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def final(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1084,7 +1084,7 @@ class OpenSSL::Cipher
   end
   def initialize(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       iv: ::T.untyped,
     )
@@ -1092,10 +1092,10 @@ class OpenSSL::Cipher
   end
   def iv=(iv); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def iv_len(); end
 
-  Sorbet.sig do
+  sig do
     params(
       iv_len: ::T.untyped,
     )
@@ -1103,7 +1103,7 @@ class OpenSSL::Cipher
   end
   def iv_len=(iv_len); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -1111,10 +1111,10 @@ class OpenSSL::Cipher
   end
   def key=(key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def key_len(); end
 
-  Sorbet.sig do
+  sig do
     params(
       key_len: ::T.untyped,
     )
@@ -1122,10 +1122,10 @@ class OpenSSL::Cipher
   end
   def key_len=(key_len); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       padding: ::T.untyped,
     )
@@ -1133,7 +1133,7 @@ class OpenSSL::Cipher
   end
   def padding=(padding); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1141,16 +1141,16 @@ class OpenSSL::Cipher
   end
   def pkcs5_keyivgen(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def random_iv(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def random_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1158,12 +1158,12 @@ class OpenSSL::Cipher
   end
   def update(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.ciphers(); end
 end
 
 class OpenSSL::Cipher::AES < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1173,7 +1173,7 @@ class OpenSSL::Cipher::AES < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::AES128 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       mode: ::T.untyped,
     )
@@ -1183,7 +1183,7 @@ class OpenSSL::Cipher::AES128 < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::AES192 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       mode: ::T.untyped,
     )
@@ -1193,7 +1193,7 @@ class OpenSSL::Cipher::AES192 < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::AES256 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       mode: ::T.untyped,
     )
@@ -1203,7 +1203,7 @@ class OpenSSL::Cipher::AES256 < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::BF < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1213,7 +1213,7 @@ class OpenSSL::Cipher::BF < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::CAST5 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1226,7 +1226,7 @@ class OpenSSL::Cipher::CipherError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::Cipher::DES < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1236,7 +1236,7 @@ class OpenSSL::Cipher::DES < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::IDEA < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1246,7 +1246,7 @@ class OpenSSL::Cipher::IDEA < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::RC2 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1256,7 +1256,7 @@ class OpenSSL::Cipher::RC2 < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::RC4 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1266,7 +1266,7 @@ class OpenSSL::Cipher::RC4 < OpenSSL::Cipher
 end
 
 class OpenSSL::Cipher::RC5 < OpenSSL::Cipher
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -1279,7 +1279,7 @@ class OpenSSL::Config
   include ::Enumerable
   DEFAULT_CONFIG_FILE = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       section: ::T.untyped,
     )
@@ -1287,7 +1287,7 @@ class OpenSSL::Config
   end
   def [](section); end
 
-  Sorbet.sig do
+  sig do
     params(
       section: ::T.untyped,
       pairs: ::T.untyped,
@@ -1296,7 +1296,7 @@ class OpenSSL::Config
   end
   def []=(section, pairs); end
 
-  Sorbet.sig do
+  sig do
     params(
       section: ::T.untyped,
       key: ::T.untyped,
@@ -1306,13 +1306,13 @@ class OpenSSL::Config
   end
   def add_value(section, key, value); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each(); end
 
-  Sorbet.sig do
+  sig do
     params(
       section: ::T.untyped,
       key: ::T.untyped,
@@ -1321,7 +1321,7 @@ class OpenSSL::Config
   end
   def get_value(section, key); end
 
-  Sorbet.sig do
+  sig do
     params(
       filename: ::T.untyped,
     )
@@ -1329,10 +1329,10 @@ class OpenSSL::Config
   end
   def initialize(filename=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
     )
@@ -1340,13 +1340,13 @@ class OpenSSL::Config
   end
   def section(name); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sections(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig do
+  sig do
     params(
       arg1: ::T.untyped,
       arg2: ::T.untyped,
@@ -1355,7 +1355,7 @@ class OpenSSL::Config
   end
   def value(arg1, arg2=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
       section: ::T.untyped,
@@ -1365,7 +1365,7 @@ class OpenSSL::Config
   end
   def self.get_key_string(data, section, key); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1373,7 +1373,7 @@ class OpenSSL::Config
   end
   def self.load(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
     )
@@ -1381,7 +1381,7 @@ class OpenSSL::Config
   end
   def self.parse(string); end
 
-  Sorbet.sig do
+  sig do
     params(
       io: ::T.untyped,
     )
@@ -1394,7 +1394,7 @@ class OpenSSL::ConfigError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::Digest < Digest::Class
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1402,13 +1402,13 @@ class OpenSSL::Digest < Digest::Class
   end
   def <<(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def block_length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def digest_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1416,13 +1416,13 @@ class OpenSSL::Digest < Digest::Class
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1430,7 +1430,7 @@ class OpenSSL::Digest < Digest::Class
   end
   def update(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       data: ::T.untyped,
@@ -1441,7 +1441,7 @@ class OpenSSL::Digest < Digest::Class
 end
 
 class OpenSSL::Digest::DSS < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1449,7 +1449,7 @@ class OpenSSL::Digest::DSS < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1457,7 +1457,7 @@ class OpenSSL::Digest::DSS < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1467,7 +1467,7 @@ class OpenSSL::Digest::DSS < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::DSS1 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1475,7 +1475,7 @@ class OpenSSL::Digest::DSS1 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1483,7 +1483,7 @@ class OpenSSL::Digest::DSS1 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1496,7 +1496,7 @@ class OpenSSL::Digest::DigestError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::Digest::MD2 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1504,7 +1504,7 @@ class OpenSSL::Digest::MD2 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1512,7 +1512,7 @@ class OpenSSL::Digest::MD2 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1522,7 +1522,7 @@ class OpenSSL::Digest::MD2 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::MD4 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1530,7 +1530,7 @@ class OpenSSL::Digest::MD4 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1538,7 +1538,7 @@ class OpenSSL::Digest::MD4 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1548,7 +1548,7 @@ class OpenSSL::Digest::MD4 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::MD5 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1556,7 +1556,7 @@ class OpenSSL::Digest::MD5 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1564,7 +1564,7 @@ class OpenSSL::Digest::MD5 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1574,7 +1574,7 @@ class OpenSSL::Digest::MD5 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::MDC2 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1582,7 +1582,7 @@ class OpenSSL::Digest::MDC2 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1590,7 +1590,7 @@ class OpenSSL::Digest::MDC2 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1600,7 +1600,7 @@ class OpenSSL::Digest::MDC2 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::RIPEMD160 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1608,7 +1608,7 @@ class OpenSSL::Digest::RIPEMD160 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1616,7 +1616,7 @@ class OpenSSL::Digest::RIPEMD160 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1626,7 +1626,7 @@ class OpenSSL::Digest::RIPEMD160 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::SHA < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1634,7 +1634,7 @@ class OpenSSL::Digest::SHA < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1642,7 +1642,7 @@ class OpenSSL::Digest::SHA < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1652,7 +1652,7 @@ class OpenSSL::Digest::SHA < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::SHA1 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1660,7 +1660,7 @@ class OpenSSL::Digest::SHA1 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1668,7 +1668,7 @@ class OpenSSL::Digest::SHA1 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1678,7 +1678,7 @@ class OpenSSL::Digest::SHA1 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::SHA224 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1686,7 +1686,7 @@ class OpenSSL::Digest::SHA224 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1694,7 +1694,7 @@ class OpenSSL::Digest::SHA224 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1704,7 +1704,7 @@ class OpenSSL::Digest::SHA224 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::SHA256 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1712,7 +1712,7 @@ class OpenSSL::Digest::SHA256 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1720,7 +1720,7 @@ class OpenSSL::Digest::SHA256 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1730,7 +1730,7 @@ class OpenSSL::Digest::SHA256 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::SHA384 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1738,7 +1738,7 @@ class OpenSSL::Digest::SHA384 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1746,7 +1746,7 @@ class OpenSSL::Digest::SHA384 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1756,7 +1756,7 @@ class OpenSSL::Digest::SHA384 < OpenSSL::Digest
 end
 
 class OpenSSL::Digest::SHA512 < OpenSSL::Digest
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1764,7 +1764,7 @@ class OpenSSL::Digest::SHA512 < OpenSSL::Digest
   end
   def initialize(data=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1772,7 +1772,7 @@ class OpenSSL::Digest::SHA512 < OpenSSL::Digest
   end
   def self.digest(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -1791,7 +1791,7 @@ class OpenSSL::Engine
   METHOD_RAND = ::T.let(nil, ::T.untyped)
   METHOD_RSA = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1799,10 +1799,10 @@ class OpenSSL::Engine
   end
   def cipher(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cmds(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1810,7 +1810,7 @@ class OpenSSL::Engine
   end
   def ctrl_cmd(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1818,16 +1818,16 @@ class OpenSSL::Engine
   end
   def digest(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def finish(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def id(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1835,7 +1835,7 @@ class OpenSSL::Engine
   end
   def load_private_key(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1843,10 +1843,10 @@ class OpenSSL::Engine
   end
   def load_public_key(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1854,7 +1854,7 @@ class OpenSSL::Engine
   end
   def set_default(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1862,13 +1862,13 @@ class OpenSSL::Engine
   end
   def self.by_id(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.cleanup(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.engines(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1888,7 +1888,7 @@ module OpenSSL::ExtConfig
 end
 
 class OpenSSL::HMAC
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1896,13 +1896,13 @@ class OpenSSL::HMAC
   end
   def <<(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def digest(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hexdigest(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1911,16 +1911,16 @@ class OpenSSL::HMAC
   end
   def initialize(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reset(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1928,7 +1928,7 @@ class OpenSSL::HMAC
   end
   def update(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1938,7 +1938,7 @@ class OpenSSL::HMAC
   end
   def self.digest(_, _1, _2); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1956,10 +1956,10 @@ module OpenSSL::Netscape
 end
 
 class OpenSSL::Netscape::SPKI
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def challenge(); end
 
-  Sorbet.sig do
+  sig do
     params(
       challenge: ::T.untyped,
     )
@@ -1967,7 +1967,7 @@ class OpenSSL::Netscape::SPKI
   end
   def challenge=(challenge); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1975,10 +1975,10 @@ class OpenSSL::Netscape::SPKI
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       public_key: ::T.untyped,
     )
@@ -1986,7 +1986,7 @@ class OpenSSL::Netscape::SPKI
   end
   def public_key=(public_key); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1995,19 +1995,19 @@ class OpenSSL::Netscape::SPKI
   end
   def sign(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2056,7 +2056,7 @@ module OpenSSL::OCSP
 end
 
 class OpenSSL::OCSP::BasicResponse
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2064,7 +2064,7 @@ class OpenSSL::OCSP::BasicResponse
   end
   def add_nonce(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2078,7 +2078,7 @@ class OpenSSL::OCSP::BasicResponse
   end
   def add_status(_, _1, _2, _3, _4, _5, _6); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2086,7 +2086,7 @@ class OpenSSL::OCSP::BasicResponse
   end
   def copy_nonce(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2094,7 +2094,7 @@ class OpenSSL::OCSP::BasicResponse
   end
   def find_response(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2102,10 +2102,10 @@ class OpenSSL::OCSP::BasicResponse
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def responses(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2113,13 +2113,13 @@ class OpenSSL::OCSP::BasicResponse
   end
   def sign(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def status(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2129,7 +2129,7 @@ class OpenSSL::OCSP::BasicResponse
 end
 
 class OpenSSL::OCSP::CertificateId
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2137,7 +2137,7 @@ class OpenSSL::OCSP::CertificateId
   end
   def cmp(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2145,10 +2145,10 @@ class OpenSSL::OCSP::CertificateId
   end
   def cmp_issuer(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hash_algorithm(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2156,16 +2156,16 @@ class OpenSSL::OCSP::CertificateId
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer_key_hash(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer_name_hash(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def serial(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 end
 
@@ -2173,7 +2173,7 @@ class OpenSSL::OCSP::OCSPError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::OCSP::Request
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2181,7 +2181,7 @@ class OpenSSL::OCSP::Request
   end
   def add_certid(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2189,10 +2189,10 @@ class OpenSSL::OCSP::Request
   end
   def add_nonce(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def certid(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2200,7 +2200,7 @@ class OpenSSL::OCSP::Request
   end
   def check_nonce(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2208,7 +2208,7 @@ class OpenSSL::OCSP::Request
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2216,10 +2216,10 @@ class OpenSSL::OCSP::Request
   end
   def sign(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2229,10 +2229,10 @@ class OpenSSL::OCSP::Request
 end
 
 class OpenSSL::OCSP::Response
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def basic(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2240,16 +2240,16 @@ class OpenSSL::OCSP::Response
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def status(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def status_string(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2260,13 +2260,13 @@ class OpenSSL::OCSP::Response
 end
 
 class OpenSSL::OCSP::SingleResponse
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert_status(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def certid(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2274,10 +2274,10 @@ class OpenSSL::OCSP::SingleResponse
   end
   def check_validity(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extensions(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2285,19 +2285,19 @@ class OpenSSL::OCSP::SingleResponse
   end
   def initialize(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def next_update(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def revocation_reason(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def revocation_time(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def this_update(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 end
 
@@ -2305,13 +2305,13 @@ class OpenSSL::OpenSSLError < StandardError
 end
 
 class OpenSSL::PKCS12
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ca_certs(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def certificate(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2319,13 +2319,13 @@ class OpenSSL::PKCS12
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2338,7 +2338,7 @@ class OpenSSL::PKCS12::PKCS12Error < OpenSSL::OpenSSLError
 end
 
 module OpenSSL::PKCS5
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2350,7 +2350,7 @@ module OpenSSL::PKCS5
   end
   def self.pbkdf2_hmac(_, _1, _2, _3, _4); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2377,7 +2377,7 @@ class OpenSSL::PKCS7
   NOVERIFY = ::T.let(nil, ::T.untyped)
   TEXT = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2385,7 +2385,7 @@ class OpenSSL::PKCS7
   end
   def add_certificate(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2393,7 +2393,7 @@ class OpenSSL::PKCS7
   end
   def add_crl(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2401,7 +2401,7 @@ class OpenSSL::PKCS7
   end
   def add_data(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2409,7 +2409,7 @@ class OpenSSL::PKCS7
   end
   def add_recipient(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2417,10 +2417,10 @@ class OpenSSL::PKCS7
   end
   def add_signer(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def certificates(); end
 
-  Sorbet.sig do
+  sig do
     params(
       certificates: ::T.untyped,
     )
@@ -2428,7 +2428,7 @@ class OpenSSL::PKCS7
   end
   def certificates=(certificates); end
 
-  Sorbet.sig do
+  sig do
     params(
       cipher: ::T.untyped,
     )
@@ -2436,10 +2436,10 @@ class OpenSSL::PKCS7
   end
   def cipher=(cipher); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def crls(); end
 
-  Sorbet.sig do
+  sig do
     params(
       crls: ::T.untyped,
     )
@@ -2447,10 +2447,10 @@ class OpenSSL::PKCS7
   end
   def crls=(crls); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -2458,7 +2458,7 @@ class OpenSSL::PKCS7
   end
   def data=(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2466,10 +2466,10 @@ class OpenSSL::PKCS7
   end
   def decrypt(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def detached(); end
 
-  Sorbet.sig do
+  sig do
     params(
       detached: ::T.untyped,
     )
@@ -2477,13 +2477,13 @@ class OpenSSL::PKCS7
   end
   def detached=(detached); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def detached?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error_string(); end
 
-  Sorbet.sig do
+  sig do
     params(
       error_string: ::T.untyped,
     )
@@ -2491,7 +2491,7 @@ class OpenSSL::PKCS7
   end
   def error_string=(error_string); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2499,25 +2499,25 @@ class OpenSSL::PKCS7
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def recipients(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def signers(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       type: ::T.untyped,
     )
@@ -2525,7 +2525,7 @@ class OpenSSL::PKCS7
   end
   def type=(type); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2533,7 +2533,7 @@ class OpenSSL::PKCS7
   end
   def verify(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2541,7 +2541,7 @@ class OpenSSL::PKCS7
   end
   def self.encrypt(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2549,7 +2549,7 @@ class OpenSSL::PKCS7
   end
   def self.read_smime(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2557,7 +2557,7 @@ class OpenSSL::PKCS7
   end
   def self.sign(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2570,10 +2570,10 @@ class OpenSSL::PKCS7::PKCS7Error < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::PKCS7::RecipientInfo
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def enc_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2581,15 +2581,15 @@ class OpenSSL::PKCS7::RecipientInfo
   end
   def initialize(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def serial(); end
 end
 
 class OpenSSL::PKCS7::SignerInfo
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2599,23 +2599,23 @@ class OpenSSL::PKCS7::SignerInfo
   end
   def initialize(_, _1, _2); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def serial(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def signed_time(); end
 end
 
 module OpenSSL::PKey
   DEFAULT_TMP_DH_CALLBACK = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2628,7 +2628,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   DEFAULT_1024 = ::T.let(nil, ::T.untyped)
   DEFAULT_2048 = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2636,13 +2636,13 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def compute_key(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def export(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def g(); end
 
-  Sorbet.sig do
+  sig do
     params(
       g: ::T.untyped,
     )
@@ -2650,10 +2650,10 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def g=(g); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def generate_key!(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2661,10 +2661,10 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def p(); end
 
-  Sorbet.sig do
+  sig do
     params(
       p: ::T.untyped,
     )
@@ -2672,16 +2672,16 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def p=(p); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def params(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def params_ok?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def priv_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       priv_key: ::T.untyped,
     )
@@ -2689,13 +2689,13 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def priv_key=(priv_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pub_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       pub_key: ::T.untyped,
     )
@@ -2703,16 +2703,16 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def pub_key=(pub_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def q(); end
 
-  Sorbet.sig do
+  sig do
     params(
       q: ::T.untyped,
     )
@@ -2720,7 +2720,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def q=(q); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2729,7 +2729,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def set_key(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2739,19 +2739,19 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   end
   def set_pqg(_, _1, _2); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2764,7 +2764,7 @@ class OpenSSL::PKey::DHError < OpenSSL::PKey::PKeyError
 end
 
 class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2772,10 +2772,10 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def export(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def g(); end
 
-  Sorbet.sig do
+  sig do
     params(
       g: ::T.untyped,
     )
@@ -2783,7 +2783,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def g=(g); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2791,10 +2791,10 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def p(); end
 
-  Sorbet.sig do
+  sig do
     params(
       p: ::T.untyped,
     )
@@ -2802,13 +2802,13 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def p=(p); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def params(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def priv_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       priv_key: ::T.untyped,
     )
@@ -2816,13 +2816,13 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def priv_key=(priv_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pub_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       pub_key: ::T.untyped,
     )
@@ -2830,16 +2830,16 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def pub_key=(pub_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def q(); end
 
-  Sorbet.sig do
+  sig do
     params(
       q: ::T.untyped,
     )
@@ -2847,7 +2847,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def q=(q); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2856,7 +2856,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def set_key(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2866,7 +2866,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def set_pqg(_, _1, _2); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2874,7 +2874,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def syssign(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2883,10 +2883,10 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def sysverify(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2894,7 +2894,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def to_pem(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2902,10 +2902,10 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   end
   def to_s(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2920,10 +2920,10 @@ end
 class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   NAMED_CURVE = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def check_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2931,7 +2931,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def dh_compute_key(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2939,7 +2939,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def dsa_sign_asn1(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -2948,7 +2948,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def dsa_verify_asn1(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2956,16 +2956,16 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def export(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def generate_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def generate_key!(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def group(); end
 
-  Sorbet.sig do
+  sig do
     params(
       group: ::T.untyped,
     )
@@ -2973,7 +2973,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def group=(group); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -2981,13 +2981,13 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       private_key: ::T.untyped,
     )
@@ -2995,16 +2995,16 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def private_key=(private_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private_key?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       public_key: ::T.untyped,
     )
@@ -3012,13 +3012,13 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def public_key=(public_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3026,13 +3026,13 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def to_pem(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.builtin_curves(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3042,7 +3042,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
 end
 
 class OpenSSL::PKey::EC::Group
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3050,10 +3050,10 @@ class OpenSSL::PKey::EC::Group
   end
   def ==(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def asn1_flag(); end
 
-  Sorbet.sig do
+  sig do
     params(
       asn1_flag: ::T.untyped,
     )
@@ -3061,16 +3061,16 @@ class OpenSSL::PKey::EC::Group
   end
   def asn1_flag=(asn1_flag); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cofactor(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def curve_name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def degree(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3078,10 +3078,10 @@ class OpenSSL::PKey::EC::Group
   end
   def eql?(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def generator(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3089,13 +3089,13 @@ class OpenSSL::PKey::EC::Group
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def order(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def point_conversion_form(); end
 
-  Sorbet.sig do
+  sig do
     params(
       point_conversion_form: ::T.untyped,
     )
@@ -3103,10 +3103,10 @@ class OpenSSL::PKey::EC::Group
   end
   def point_conversion_form=(point_conversion_form); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def seed(); end
 
-  Sorbet.sig do
+  sig do
     params(
       seed: ::T.untyped,
     )
@@ -3114,7 +3114,7 @@ class OpenSSL::PKey::EC::Group
   end
   def seed=(seed); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3124,13 +3124,13 @@ class OpenSSL::PKey::EC::Group
   end
   def set_generator(_, _1, _2); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 end
 
@@ -3138,7 +3138,7 @@ class OpenSSL::PKey::EC::Group::Error < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::PKey::EC::Point
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3146,7 +3146,7 @@ class OpenSSL::PKey::EC::Point
   end
   def ==(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3154,13 +3154,13 @@ class OpenSSL::PKey::EC::Point
   end
   def eql?(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def group(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def infinity?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3168,13 +3168,13 @@ class OpenSSL::PKey::EC::Point
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def invert!(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def make_affine!(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3182,13 +3182,13 @@ class OpenSSL::PKey::EC::Point
   end
   def mul(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def on_curve?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def set_to_infinity!(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3204,10 +3204,10 @@ class OpenSSL::PKey::ECError < OpenSSL::PKey::PKeyError
 end
 
 class OpenSSL::PKey::PKey
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def initialize(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3216,7 +3216,7 @@ class OpenSSL::PKey::PKey
   end
   def sign(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3236,10 +3236,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   PKCS1_PADDING = ::T.let(nil, ::T.untyped)
   SSLV23_PADDING = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def d(); end
 
-  Sorbet.sig do
+  sig do
     params(
       d: ::T.untyped,
     )
@@ -3247,10 +3247,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def d=(d); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def dmp1(); end
 
-  Sorbet.sig do
+  sig do
     params(
       dmp1: ::T.untyped,
     )
@@ -3258,10 +3258,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def dmp1=(dmp1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def dmq1(); end
 
-  Sorbet.sig do
+  sig do
     params(
       dmq1: ::T.untyped,
     )
@@ -3269,10 +3269,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def dmq1=(dmq1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def e(); end
 
-  Sorbet.sig do
+  sig do
     params(
       e: ::T.untyped,
     )
@@ -3280,7 +3280,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def e=(e); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3288,7 +3288,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def export(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3296,10 +3296,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def iqmp(); end
 
-  Sorbet.sig do
+  sig do
     params(
       iqmp: ::T.untyped,
     )
@@ -3307,10 +3307,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def iqmp=(iqmp); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def n(); end
 
-  Sorbet.sig do
+  sig do
     params(
       n: ::T.untyped,
     )
@@ -3318,10 +3318,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def n=(n); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def p(); end
 
-  Sorbet.sig do
+  sig do
     params(
       p: ::T.untyped,
     )
@@ -3329,13 +3329,13 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def p=(p); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def params(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3343,7 +3343,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def private_decrypt(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3351,10 +3351,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def private_encrypt(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3362,7 +3362,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def public_decrypt(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3370,13 +3370,13 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def public_encrypt(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def q(); end
 
-  Sorbet.sig do
+  sig do
     params(
       q: ::T.untyped,
     )
@@ -3384,7 +3384,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def q=(q); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3394,7 +3394,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def set_crt_params(_, _1, _2); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3403,7 +3403,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def set_factors(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3413,10 +3413,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def set_key(_, _1, _2); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3424,7 +3424,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def to_pem(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3432,10 +3432,10 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def to_s(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3448,7 +3448,7 @@ class OpenSSL::PKey::RSAError < OpenSSL::PKey::PKeyError
 end
 
 module OpenSSL::Random
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3456,7 +3456,7 @@ module OpenSSL::Random
   end
   def self.egd(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3465,7 +3465,7 @@ module OpenSSL::Random
   end
   def self.egd_bytes(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3473,7 +3473,7 @@ module OpenSSL::Random
   end
   def self.load_random_file(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3481,7 +3481,7 @@ module OpenSSL::Random
   end
   def self.pseudo_bytes(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -3490,7 +3490,7 @@ module OpenSSL::Random
   end
   def self.random_add(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3498,7 +3498,7 @@ module OpenSSL::Random
   end
   def self.random_bytes(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3506,10 +3506,10 @@ module OpenSSL::Random
   end
   def self.seed(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.status?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3555,7 +3555,7 @@ module OpenSSL::SSL
   VERIFY_NONE = ::T.let(nil, ::T.untyped)
   VERIFY_PEER = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       cert: ::T.untyped,
       hostname: ::T.untyped,
@@ -3564,7 +3564,7 @@ module OpenSSL::SSL
   end
   def self.verify_certificate_identity(cert, hostname); end
 
-  Sorbet.sig do
+  sig do
     params(
       hostname: ::T.untyped,
       san: ::T.untyped,
@@ -3573,7 +3573,7 @@ module OpenSSL::SSL
   end
   def self.verify_hostname(hostname, san); end
 
-  Sorbet.sig do
+  sig do
     params(
       domain_component: ::T.untyped,
       san_component: ::T.untyped,
@@ -3595,10 +3595,10 @@ class OpenSSL::SSL::SSLContext
   SESSION_CACHE_OFF = ::T.let(nil, ::T.untyped)
   SESSION_CACHE_SERVER = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ca_file(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ca_file: ::T.untyped,
     )
@@ -3606,10 +3606,10 @@ class OpenSSL::SSL::SSLContext
   end
   def ca_file=(ca_file); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ca_path(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ca_path: ::T.untyped,
     )
@@ -3617,10 +3617,10 @@ class OpenSSL::SSL::SSLContext
   end
   def ca_path=(ca_path); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert(); end
 
-  Sorbet.sig do
+  sig do
     params(
       cert: ::T.untyped,
     )
@@ -3628,10 +3628,10 @@ class OpenSSL::SSL::SSLContext
   end
   def cert=(cert); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert_store(); end
 
-  Sorbet.sig do
+  sig do
     params(
       cert_store: ::T.untyped,
     )
@@ -3639,10 +3639,10 @@ class OpenSSL::SSL::SSLContext
   end
   def cert_store=(cert_store); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ciphers(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ciphers: ::T.untyped,
     )
@@ -3650,10 +3650,10 @@ class OpenSSL::SSL::SSLContext
   end
   def ciphers=(ciphers); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def client_ca(); end
 
-  Sorbet.sig do
+  sig do
     params(
       client_ca: ::T.untyped,
     )
@@ -3661,10 +3661,10 @@ class OpenSSL::SSL::SSLContext
   end
   def client_ca=(client_ca); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def client_cert_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       client_cert_cb: ::T.untyped,
     )
@@ -3672,7 +3672,7 @@ class OpenSSL::SSL::SSLContext
   end
   def client_cert_cb=(client_cert_cb); end
 
-  Sorbet.sig do
+  sig do
     params(
       ecdh_curves: ::T.untyped,
     )
@@ -3680,10 +3680,10 @@ class OpenSSL::SSL::SSLContext
   end
   def ecdh_curves=(ecdh_curves); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extra_chain_cert(); end
 
-  Sorbet.sig do
+  sig do
     params(
       extra_chain_cert: ::T.untyped,
     )
@@ -3691,7 +3691,7 @@ class OpenSSL::SSL::SSLContext
   end
   def extra_chain_cert=(extra_chain_cert); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3699,10 +3699,10 @@ class OpenSSL::SSL::SSLContext
   end
   def flush_sessions(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def freeze(); end
 
-  Sorbet.sig do
+  sig do
     params(
       version: ::T.untyped,
     )
@@ -3710,10 +3710,10 @@ class OpenSSL::SSL::SSLContext
   end
   def initialize(version=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -3721,10 +3721,10 @@ class OpenSSL::SSL::SSLContext
   end
   def key=(key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def npn_protocols(); end
 
-  Sorbet.sig do
+  sig do
     params(
       npn_protocols: ::T.untyped,
     )
@@ -3732,10 +3732,10 @@ class OpenSSL::SSL::SSLContext
   end
   def npn_protocols=(npn_protocols); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def npn_select_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       npn_select_cb: ::T.untyped,
     )
@@ -3743,10 +3743,10 @@ class OpenSSL::SSL::SSLContext
   end
   def npn_select_cb=(npn_select_cb); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def options(); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
     )
@@ -3754,10 +3754,10 @@ class OpenSSL::SSL::SSLContext
   end
   def options=(options); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def renegotiation_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       renegotiation_cb: ::T.untyped,
     )
@@ -3765,10 +3765,10 @@ class OpenSSL::SSL::SSLContext
   end
   def renegotiation_cb=(renegotiation_cb); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def security_level(); end
 
-  Sorbet.sig do
+  sig do
     params(
       security_level: ::T.untyped,
     )
@@ -3776,10 +3776,10 @@ class OpenSSL::SSL::SSLContext
   end
   def security_level=(security_level); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def servername_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       servername_cb: ::T.untyped,
     )
@@ -3787,7 +3787,7 @@ class OpenSSL::SSL::SSLContext
   end
   def servername_cb=(servername_cb); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3795,10 +3795,10 @@ class OpenSSL::SSL::SSLContext
   end
   def session_add(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_cache_mode(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session_cache_mode: ::T.untyped,
     )
@@ -3806,10 +3806,10 @@ class OpenSSL::SSL::SSLContext
   end
   def session_cache_mode=(session_cache_mode); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_cache_size(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session_cache_size: ::T.untyped,
     )
@@ -3817,13 +3817,13 @@ class OpenSSL::SSL::SSLContext
   end
   def session_cache_size=(session_cache_size); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_cache_stats(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_get_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session_get_cb: ::T.untyped,
     )
@@ -3831,10 +3831,10 @@ class OpenSSL::SSL::SSLContext
   end
   def session_get_cb=(session_get_cb); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_id_context(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session_id_context: ::T.untyped,
     )
@@ -3842,10 +3842,10 @@ class OpenSSL::SSL::SSLContext
   end
   def session_id_context=(session_id_context); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_new_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session_new_cb: ::T.untyped,
     )
@@ -3853,7 +3853,7 @@ class OpenSSL::SSL::SSLContext
   end
   def session_new_cb=(session_new_cb); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3861,10 +3861,10 @@ class OpenSSL::SSL::SSLContext
   end
   def session_remove(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_remove_cb(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session_remove_cb: ::T.untyped,
     )
@@ -3872,7 +3872,7 @@ class OpenSSL::SSL::SSLContext
   end
   def session_remove_cb=(session_remove_cb); end
 
-  Sorbet.sig do
+  sig do
     params(
       params: ::T.untyped,
     )
@@ -3880,13 +3880,13 @@ class OpenSSL::SSL::SSLContext
   end
   def set_params(params=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def setup(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ssl_timeout: ::T.untyped,
     )
@@ -3894,7 +3894,7 @@ class OpenSSL::SSL::SSLContext
   end
   def ssl_timeout=(ssl_timeout); end
 
-  Sorbet.sig do
+  sig do
     params(
       ssl_version: ::T.untyped,
     )
@@ -3902,10 +3902,10 @@ class OpenSSL::SSL::SSLContext
   end
   def ssl_version=(ssl_version); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       timeout: ::T.untyped,
     )
@@ -3913,10 +3913,10 @@ class OpenSSL::SSL::SSLContext
   end
   def timeout=(timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tmp_dh_callback(); end
 
-  Sorbet.sig do
+  sig do
     params(
       tmp_dh_callback: ::T.untyped,
     )
@@ -3924,10 +3924,10 @@ class OpenSSL::SSL::SSLContext
   end
   def tmp_dh_callback=(tmp_dh_callback); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tmp_ecdh_callback(); end
 
-  Sorbet.sig do
+  sig do
     params(
       tmp_ecdh_callback: ::T.untyped,
     )
@@ -3935,10 +3935,10 @@ class OpenSSL::SSL::SSLContext
   end
   def tmp_ecdh_callback=(tmp_ecdh_callback); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_callback(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_callback: ::T.untyped,
     )
@@ -3946,10 +3946,10 @@ class OpenSSL::SSL::SSLContext
   end
   def verify_callback=(verify_callback); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_depth(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_depth: ::T.untyped,
     )
@@ -3957,10 +3957,10 @@ class OpenSSL::SSL::SSLContext
   end
   def verify_depth=(verify_depth); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_hostname(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_hostname: ::T.untyped,
     )
@@ -3968,10 +3968,10 @@ class OpenSSL::SSL::SSLContext
   end
   def verify_hostname=(verify_hostname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_mode(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_mode: ::T.untyped,
     )
@@ -3993,13 +3993,13 @@ end
 
 class OpenSSL::SSL::SSLServer
   include ::OpenSSL::SSL::SocketForwarder
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig do
+  sig do
     params(
       svr: ::T.untyped,
       ctx: ::T.untyped,
@@ -4008,7 +4008,7 @@ class OpenSSL::SSL::SSLServer
   end
   def initialize(svr, ctx); end
 
-  Sorbet.sig do
+  sig do
     params(
       backlog: ::T.untyped,
     )
@@ -4016,7 +4016,7 @@ class OpenSSL::SSL::SSLServer
   end
   def listen(backlog=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       how: ::T.untyped,
     )
@@ -4024,10 +4024,10 @@ class OpenSSL::SSL::SSLServer
   end
   def shutdown(how=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def start_immediately(); end
 
-  Sorbet.sig do
+  sig do
     params(
       start_immediately: ::T.untyped,
     )
@@ -4035,7 +4035,7 @@ class OpenSSL::SSL::SSLServer
   end
   def start_immediately=(start_immediately); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_io(); end
 end
 
@@ -4043,10 +4043,10 @@ class OpenSSL::SSL::SSLSocket
   include ::OpenSSL::SSL::SocketForwarder
   include ::OpenSSL::Buffering
   include ::Enumerable
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4054,19 +4054,19 @@ class OpenSSL::SSL::SSLSocket
   end
   def accept_nonblock(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cipher(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def client_ca(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def connect(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4074,13 +4074,13 @@ class OpenSSL::SSL::SSLSocket
   end
   def connect_nonblock(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def context(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hostname(); end
 
-  Sorbet.sig do
+  sig do
     params(
       hostname: ::T.untyped,
     )
@@ -4088,7 +4088,7 @@ class OpenSSL::SSL::SSLSocket
   end
   def hostname=(hostname); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4096,22 +4096,22 @@ class OpenSSL::SSL::SSLSocket
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def io(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def npn_protocol(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def peer_cert(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def peer_cert_chain(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pending(); end
 
-  Sorbet.sig do
+  sig do
     params(
       hostname: ::T.untyped,
     )
@@ -4119,10 +4119,10 @@ class OpenSSL::SSL::SSLSocket
   end
   def post_connection_check(hostname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session(); end
 
-  Sorbet.sig do
+  sig do
     params(
       session: ::T.untyped,
     )
@@ -4130,19 +4130,19 @@ class OpenSSL::SSL::SSLSocket
   end
   def session=(session); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def session_reused?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_version(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def state(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sync_close(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sync_close: ::T.untyped,
     )
@@ -4150,10 +4150,10 @@ class OpenSSL::SSL::SSLSocket
   end
   def sync_close=(sync_close); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sysclose(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4161,7 +4161,7 @@ class OpenSSL::SSL::SSLSocket
   end
   def sysread(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4169,15 +4169,15 @@ class OpenSSL::SSL::SSLSocket
   end
   def syswrite(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_io(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_result(); end
 end
 
 class OpenSSL::SSL::Session
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4185,10 +4185,10 @@ class OpenSSL::SSL::Session
   end
   def ==(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4196,10 +4196,10 @@ class OpenSSL::SSL::Session
   end
   def initialize(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def time(); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -4207,10 +4207,10 @@ class OpenSSL::SSL::Session
   end
   def time=(time); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       timeout: ::T.untyped,
     )
@@ -4218,13 +4218,13 @@ class OpenSSL::SSL::Session
   end
   def timeout=(timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 end
 
@@ -4232,13 +4232,13 @@ class OpenSSL::SSL::Session::SessionError < OpenSSL::OpenSSLError
 end
 
 module OpenSSL::SSL::SocketForwarder
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def addr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def closed?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       flag: ::T.untyped,
     )
@@ -4246,7 +4246,7 @@ module OpenSSL::SSL::SocketForwarder
   end
   def do_not_reverse_lookup=(flag); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -4254,7 +4254,7 @@ module OpenSSL::SSL::SocketForwarder
   end
   def fcntl(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       level: ::T.untyped,
       optname: ::T.untyped,
@@ -4263,10 +4263,10 @@ module OpenSSL::SSL::SocketForwarder
   end
   def getsockopt(level, optname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def peeraddr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       level: ::T.untyped,
       optname: ::T.untyped,
@@ -4352,7 +4352,7 @@ module OpenSSL::X509
 end
 
 class OpenSSL::X509::Attribute
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4360,10 +4360,10 @@ class OpenSSL::X509::Attribute
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def oid(); end
 
-  Sorbet.sig do
+  sig do
     params(
       oid: ::T.untyped,
     )
@@ -4371,13 +4371,13 @@ class OpenSSL::X509::Attribute
   end
   def oid=(oid); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 
-  Sorbet.sig do
+  sig do
     params(
       value: ::T.untyped,
     )
@@ -4390,7 +4390,7 @@ class OpenSSL::X509::AttributeError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::CRL
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4398,7 +4398,7 @@ class OpenSSL::X509::CRL
   end
   def add_extension(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4406,10 +4406,10 @@ class OpenSSL::X509::CRL
   end
   def add_revoked(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extensions(); end
 
-  Sorbet.sig do
+  sig do
     params(
       extensions: ::T.untyped,
     )
@@ -4417,7 +4417,7 @@ class OpenSSL::X509::CRL
   end
   def extensions=(extensions); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4425,10 +4425,10 @@ class OpenSSL::X509::CRL
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer(); end
 
-  Sorbet.sig do
+  sig do
     params(
       issuer: ::T.untyped,
     )
@@ -4436,10 +4436,10 @@ class OpenSSL::X509::CRL
   end
   def issuer=(issuer); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def last_update(); end
 
-  Sorbet.sig do
+  sig do
     params(
       last_update: ::T.untyped,
     )
@@ -4447,10 +4447,10 @@ class OpenSSL::X509::CRL
   end
   def last_update=(last_update); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def next_update(); end
 
-  Sorbet.sig do
+  sig do
     params(
       next_update: ::T.untyped,
     )
@@ -4458,10 +4458,10 @@ class OpenSSL::X509::CRL
   end
   def next_update=(next_update); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def revoked(); end
 
-  Sorbet.sig do
+  sig do
     params(
       revoked: ::T.untyped,
     )
@@ -4469,7 +4469,7 @@ class OpenSSL::X509::CRL
   end
   def revoked=(revoked); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -4478,22 +4478,22 @@ class OpenSSL::X509::CRL
   end
   def sign(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def signature_algorithm(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4501,10 +4501,10 @@ class OpenSSL::X509::CRL
   end
   def verify(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       version: ::T.untyped,
     )
@@ -4517,7 +4517,7 @@ class OpenSSL::X509::CRLError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::Certificate
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4525,7 +4525,7 @@ class OpenSSL::X509::Certificate
   end
   def add_extension(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4533,10 +4533,10 @@ class OpenSSL::X509::Certificate
   end
   def check_private_key(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extensions(); end
 
-  Sorbet.sig do
+  sig do
     params(
       extensions: ::T.untyped,
     )
@@ -4544,7 +4544,7 @@ class OpenSSL::X509::Certificate
   end
   def extensions=(extensions); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4552,13 +4552,13 @@ class OpenSSL::X509::Certificate
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer(); end
 
-  Sorbet.sig do
+  sig do
     params(
       issuer: ::T.untyped,
     )
@@ -4566,10 +4566,10 @@ class OpenSSL::X509::Certificate
   end
   def issuer=(issuer); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def not_after(); end
 
-  Sorbet.sig do
+  sig do
     params(
       not_after: ::T.untyped,
     )
@@ -4577,10 +4577,10 @@ class OpenSSL::X509::Certificate
   end
   def not_after=(not_after); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def not_before(); end
 
-  Sorbet.sig do
+  sig do
     params(
       not_before: ::T.untyped,
     )
@@ -4588,7 +4588,7 @@ class OpenSSL::X509::Certificate
   end
   def not_before=(not_before); end
 
-  Sorbet.sig do
+  sig do
     params(
       q: ::T.untyped,
     )
@@ -4596,10 +4596,10 @@ class OpenSSL::X509::Certificate
   end
   def pretty_print(q); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       public_key: ::T.untyped,
     )
@@ -4607,10 +4607,10 @@ class OpenSSL::X509::Certificate
   end
   def public_key=(public_key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def serial(); end
 
-  Sorbet.sig do
+  sig do
     params(
       serial: ::T.untyped,
     )
@@ -4618,7 +4618,7 @@ class OpenSSL::X509::Certificate
   end
   def serial=(serial); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -4627,13 +4627,13 @@ class OpenSSL::X509::Certificate
   end
   def sign(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def signature_algorithm(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subject(); end
 
-  Sorbet.sig do
+  sig do
     params(
       subject: ::T.untyped,
     )
@@ -4641,19 +4641,19 @@ class OpenSSL::X509::Certificate
   end
   def subject=(subject); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4661,10 +4661,10 @@ class OpenSSL::X509::Certificate
   end
   def verify(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       version: ::T.untyped,
     )
@@ -4677,7 +4677,7 @@ class OpenSSL::X509::CertificateError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::Extension
-  Sorbet.sig do
+  sig do
     params(
       critical: ::T.untyped,
     )
@@ -4685,10 +4685,10 @@ class OpenSSL::X509::Extension
   end
   def critical=(critical); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def critical?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4696,10 +4696,10 @@ class OpenSSL::X509::Extension
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def oid(); end
 
-  Sorbet.sig do
+  sig do
     params(
       oid: ::T.untyped,
     )
@@ -4707,22 +4707,22 @@ class OpenSSL::X509::Extension
   end
   def oid=(oid); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_a(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_h(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 
-  Sorbet.sig do
+  sig do
     params(
       value: ::T.untyped,
     )
@@ -4735,10 +4735,10 @@ class OpenSSL::X509::ExtensionError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::ExtensionFactory
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def config(); end
 
-  Sorbet.sig do
+  sig do
     params(
       config: ::T.untyped,
     )
@@ -4746,7 +4746,7 @@ class OpenSSL::X509::ExtensionFactory
   end
   def config=(config); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4754,7 +4754,7 @@ class OpenSSL::X509::ExtensionFactory
   end
   def create_ext(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       ary: ::T.untyped,
     )
@@ -4762,7 +4762,7 @@ class OpenSSL::X509::ExtensionFactory
   end
   def create_ext_from_array(ary); end
 
-  Sorbet.sig do
+  sig do
     params(
       hash: ::T.untyped,
     )
@@ -4770,7 +4770,7 @@ class OpenSSL::X509::ExtensionFactory
   end
   def create_ext_from_hash(hash); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -4778,7 +4778,7 @@ class OpenSSL::X509::ExtensionFactory
   end
   def create_ext_from_string(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       arg: ::T.untyped,
     )
@@ -4786,10 +4786,10 @@ class OpenSSL::X509::ExtensionFactory
   end
   def create_extension(*arg); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def crl(); end
 
-  Sorbet.sig do
+  sig do
     params(
       crl: ::T.untyped,
     )
@@ -4797,7 +4797,7 @@ class OpenSSL::X509::ExtensionFactory
   end
   def crl=(crl); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4805,10 +4805,10 @@ class OpenSSL::X509::ExtensionFactory
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def issuer_certificate(); end
 
-  Sorbet.sig do
+  sig do
     params(
       issuer_certificate: ::T.untyped,
     )
@@ -4816,10 +4816,10 @@ class OpenSSL::X509::ExtensionFactory
   end
   def issuer_certificate=(issuer_certificate); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subject_certificate(); end
 
-  Sorbet.sig do
+  sig do
     params(
       subject_certificate: ::T.untyped,
     )
@@ -4827,10 +4827,10 @@ class OpenSSL::X509::ExtensionFactory
   end
   def subject_certificate=(subject_certificate); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subject_request(); end
 
-  Sorbet.sig do
+  sig do
     params(
       subject_request: ::T.untyped,
     )
@@ -4848,7 +4848,7 @@ class OpenSSL::X509::Name
   ONELINE = ::T.let(nil, ::T.untyped)
   RFC2253 = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4856,7 +4856,7 @@ class OpenSSL::X509::Name
   end
   def <=>(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4864,7 +4864,7 @@ class OpenSSL::X509::Name
   end
   def add_entry(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4872,7 +4872,7 @@ class OpenSSL::X509::Name
   end
   def cmp(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4880,13 +4880,13 @@ class OpenSSL::X509::Name
   end
   def eql?(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hash(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hash_old(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4894,7 +4894,7 @@ class OpenSSL::X509::Name
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       q: ::T.untyped,
     )
@@ -4902,13 +4902,13 @@ class OpenSSL::X509::Name
   end
   def pretty_print(q); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_a(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4916,7 +4916,7 @@ class OpenSSL::X509::Name
   end
   def to_s(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
       template: ::T.untyped,
@@ -4925,7 +4925,7 @@ class OpenSSL::X509::Name
   end
   def self.parse(str, template=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
       template: ::T.untyped,
@@ -4934,7 +4934,7 @@ class OpenSSL::X509::Name
   end
   def self.parse_openssl(str, template=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
       template: ::T.untyped,
@@ -4956,7 +4956,7 @@ module OpenSSL::X509::Name::RFC2253DN
   StringChar = ::T.let(nil, ::T.untyped)
   TypeAndValue = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -4964,7 +4964,7 @@ module OpenSSL::X509::Name::RFC2253DN
   end
   def self.expand_hexstring(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -4972,7 +4972,7 @@ module OpenSSL::X509::Name::RFC2253DN
   end
   def self.expand_pair(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       str1: ::T.untyped,
       str2: ::T.untyped,
@@ -4982,7 +4982,7 @@ module OpenSSL::X509::Name::RFC2253DN
   end
   def self.expand_value(str1, str2, str3); end
 
-  Sorbet.sig do
+  sig do
     params(
       dn: ::T.untyped,
     )
@@ -4995,7 +4995,7 @@ class OpenSSL::X509::NameError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::Request
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5003,10 +5003,10 @@ class OpenSSL::X509::Request
   end
   def add_attribute(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def attributes(); end
 
-  Sorbet.sig do
+  sig do
     params(
       attributes: ::T.untyped,
     )
@@ -5014,7 +5014,7 @@ class OpenSSL::X509::Request
   end
   def attributes=(attributes); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5022,10 +5022,10 @@ class OpenSSL::X509::Request
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def public_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       public_key: ::T.untyped,
     )
@@ -5033,7 +5033,7 @@ class OpenSSL::X509::Request
   end
   def public_key=(public_key); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -5042,13 +5042,13 @@ class OpenSSL::X509::Request
   end
   def sign(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def signature_algorithm(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subject(); end
 
-  Sorbet.sig do
+  sig do
     params(
       subject: ::T.untyped,
     )
@@ -5056,19 +5056,19 @@ class OpenSSL::X509::Request
   end
   def subject=(subject); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_der(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_pem(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5076,10 +5076,10 @@ class OpenSSL::X509::Request
   end
   def verify(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       version: ::T.untyped,
     )
@@ -5092,7 +5092,7 @@ class OpenSSL::X509::RequestError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::Revoked
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5100,10 +5100,10 @@ class OpenSSL::X509::Revoked
   end
   def add_extension(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extensions(); end
 
-  Sorbet.sig do
+  sig do
     params(
       extensions: ::T.untyped,
     )
@@ -5111,7 +5111,7 @@ class OpenSSL::X509::Revoked
   end
   def extensions=(extensions); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5119,10 +5119,10 @@ class OpenSSL::X509::Revoked
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def serial(); end
 
-  Sorbet.sig do
+  sig do
     params(
       serial: ::T.untyped,
     )
@@ -5130,10 +5130,10 @@ class OpenSSL::X509::Revoked
   end
   def serial=(serial); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def time(); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -5146,7 +5146,7 @@ class OpenSSL::X509::RevokedError < OpenSSL::OpenSSLError
 end
 
 class OpenSSL::X509::Store
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5154,7 +5154,7 @@ class OpenSSL::X509::Store
   end
   def add_cert(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5162,7 +5162,7 @@ class OpenSSL::X509::Store
   end
   def add_crl(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5170,7 +5170,7 @@ class OpenSSL::X509::Store
   end
   def add_file(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5178,16 +5178,16 @@ class OpenSSL::X509::Store
   end
   def add_path(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def chain(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error_string(); end
 
-  Sorbet.sig do
+  sig do
     params(
       flags: ::T.untyped,
     )
@@ -5195,7 +5195,7 @@ class OpenSSL::X509::Store
   end
   def flags=(flags); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5203,7 +5203,7 @@ class OpenSSL::X509::Store
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       purpose: ::T.untyped,
     )
@@ -5211,10 +5211,10 @@ class OpenSSL::X509::Store
   end
   def purpose=(purpose); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def set_default_paths(); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -5222,7 +5222,7 @@ class OpenSSL::X509::Store
   end
   def time=(time); end
 
-  Sorbet.sig do
+  sig do
     params(
       trust: ::T.untyped,
     )
@@ -5230,7 +5230,7 @@ class OpenSSL::X509::Store
   end
   def trust=(trust); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5238,10 +5238,10 @@ class OpenSSL::X509::Store
   end
   def verify(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_callback(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_callback: ::T.untyped,
     )
@@ -5251,22 +5251,22 @@ class OpenSSL::X509::Store
 end
 
 class OpenSSL::X509::StoreContext
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def chain(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cleanup(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def current_cert(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def current_crl(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error(); end
 
-  Sorbet.sig do
+  sig do
     params(
       error: ::T.untyped,
     )
@@ -5274,13 +5274,13 @@ class OpenSSL::X509::StoreContext
   end
   def error=(error); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error_depth(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error_string(); end
 
-  Sorbet.sig do
+  sig do
     params(
       flags: ::T.untyped,
     )
@@ -5288,7 +5288,7 @@ class OpenSSL::X509::StoreContext
   end
   def flags=(flags); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5296,7 +5296,7 @@ class OpenSSL::X509::StoreContext
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       purpose: ::T.untyped,
     )
@@ -5304,7 +5304,7 @@ class OpenSSL::X509::StoreContext
   end
   def purpose=(purpose); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -5312,7 +5312,7 @@ class OpenSSL::X509::StoreContext
   end
   def time=(time); end
 
-  Sorbet.sig do
+  sig do
     params(
       trust: ::T.untyped,
     )
@@ -5320,7 +5320,7 @@ class OpenSSL::X509::StoreContext
   end
   def trust=(trust); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify(); end
 end
 

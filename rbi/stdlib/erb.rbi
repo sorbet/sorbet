@@ -3,7 +3,7 @@
 class ERB
   Revision = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       superklass: ::T.untyped,
       methodname: ::T.untyped,
@@ -12,7 +12,7 @@ class ERB
   end
   def def_class(superklass=T.unsafe(nil), methodname=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       mod: ::T.untyped,
       methodname: ::T.untyped,
@@ -22,7 +22,7 @@ class ERB
   end
   def defMethod(mod, methodname, fname=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       methodname: ::T.untyped,
     )
@@ -30,13 +30,13 @@ class ERB
   end
   def defModule(methodname=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def encoding(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def filename(); end
 
-  Sorbet.sig do
+  sig do
     params(
       filename: ::T.untyped,
     )
@@ -44,7 +44,7 @@ class ERB
   end
   def filename=(filename); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
       safe_level: ::T.untyped,
@@ -55,10 +55,10 @@ class ERB
   end
   def initialize(str, safe_level=T.unsafe(nil), trim_mode=T.unsafe(nil), eoutvar=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def lineno(); end
 
-  Sorbet.sig do
+  sig do
     params(
       lineno: ::T.untyped,
     )
@@ -66,7 +66,7 @@ class ERB
   end
   def lineno=(lineno); end
 
-  Sorbet.sig do
+  sig do
     params(
       location: ::T.untyped,
     )
@@ -74,7 +74,7 @@ class ERB
   end
   def location=(location); end
 
-  Sorbet.sig do
+  sig do
     params(
       trim_mode: ::T.untyped,
     )
@@ -82,7 +82,7 @@ class ERB
   end
   def make_compiler(trim_mode); end
 
-  Sorbet.sig do
+  sig do
     params(
       b: ::T.untyped,
     )
@@ -90,7 +90,7 @@ class ERB
   end
   def result(b=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       b: ::T.untyped,
     )
@@ -98,7 +98,7 @@ class ERB
   end
   def run(b=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       compiler: ::T.untyped,
       eoutvar: ::T.untyped,
@@ -107,15 +107,15 @@ class ERB
   end
   def set_eoutvar(compiler, eoutvar=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def src(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.version(); end
 end
 
 class ERB::Compiler
-  Sorbet.sig do
+  sig do
     params(
       out: ::T.untyped,
       content: ::T.untyped,
@@ -124,7 +124,7 @@ class ERB::Compiler
   end
   def add_insert_cmd(out, content); end
 
-  Sorbet.sig do
+  sig do
     params(
       out: ::T.untyped,
       content: ::T.untyped,
@@ -133,7 +133,7 @@ class ERB::Compiler
   end
   def add_put_cmd(out, content); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -141,7 +141,7 @@ class ERB::Compiler
   end
   def compile(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       stag: ::T.untyped,
       out: ::T.untyped,
@@ -150,7 +150,7 @@ class ERB::Compiler
   end
   def compile_content(stag, out); end
 
-  Sorbet.sig do
+  sig do
     params(
       etag: ::T.untyped,
       out: ::T.untyped,
@@ -160,7 +160,7 @@ class ERB::Compiler
   end
   def compile_etag(etag, out, scanner); end
 
-  Sorbet.sig do
+  sig do
     params(
       stag: ::T.untyped,
       out: ::T.untyped,
@@ -170,7 +170,7 @@ class ERB::Compiler
   end
   def compile_stag(stag, out, scanner); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -178,7 +178,7 @@ class ERB::Compiler
   end
   def content_dump(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       trim_mode: ::T.untyped,
     )
@@ -186,10 +186,10 @@ class ERB::Compiler
   end
   def initialize(trim_mode); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def insert_cmd(); end
 
-  Sorbet.sig do
+  sig do
     params(
       insert_cmd: ::T.untyped,
     )
@@ -197,7 +197,7 @@ class ERB::Compiler
   end
   def insert_cmd=(insert_cmd); end
 
-  Sorbet.sig do
+  sig do
     params(
       src: ::T.untyped,
     )
@@ -205,13 +205,13 @@ class ERB::Compiler
   end
   def make_scanner(src); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def percent(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def post_cmd(); end
 
-  Sorbet.sig do
+  sig do
     params(
       post_cmd: ::T.untyped,
     )
@@ -219,10 +219,10 @@ class ERB::Compiler
   end
   def post_cmd=(post_cmd); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pre_cmd(); end
 
-  Sorbet.sig do
+  sig do
     params(
       pre_cmd: ::T.untyped,
     )
@@ -230,7 +230,7 @@ class ERB::Compiler
   end
   def pre_cmd=(pre_cmd); end
 
-  Sorbet.sig do
+  sig do
     params(
       mode: ::T.untyped,
     )
@@ -238,10 +238,10 @@ class ERB::Compiler
   end
   def prepare_trim_mode(mode); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def put_cmd(); end
 
-  Sorbet.sig do
+  sig do
     params(
       put_cmd: ::T.untyped,
     )
@@ -249,18 +249,18 @@ class ERB::Compiler
   end
   def put_cmd=(put_cmd); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def trim_mode(); end
 end
 
 class ERB::Compiler::Buffer
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       compiler: ::T.untyped,
       enc: ::T.untyped,
@@ -270,7 +270,7 @@ class ERB::Compiler::Buffer
   end
   def initialize(compiler, enc=T.unsafe(nil), frozen=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
     )
@@ -278,20 +278,20 @@ class ERB::Compiler::Buffer
   end
   def push(cmd); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def script(); end
 end
 
 class ERB::Compiler::ExplicitScanner < ERB::Compiler::Scanner
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def scan(); end
 end
 
 class ERB::Compiler::PercentLine
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def empty?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -299,18 +299,18 @@ class ERB::Compiler::PercentLine
   end
   def initialize(str); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 end
 
 class ERB::Compiler::Scanner
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def etags(); end
 
-  Sorbet.sig do
+  sig do
     params(
       src: ::T.untyped,
       trim_mode: ::T.untyped,
@@ -320,13 +320,13 @@ class ERB::Compiler::Scanner
   end
   def initialize(src, trim_mode, percent); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def scan(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def stag(); end
 
-  Sorbet.sig do
+  sig do
     params(
       stag: ::T.untyped,
     )
@@ -334,10 +334,10 @@ class ERB::Compiler::Scanner
   end
   def stag=(stag); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def stags(); end
 
-  Sorbet.sig do
+  sig do
     params(
       klass: ::T.untyped,
     )
@@ -345,7 +345,7 @@ class ERB::Compiler::Scanner
   end
   def self.default_scanner=(klass); end
 
-  Sorbet.sig do
+  sig do
     params(
       src: ::T.untyped,
       trim_mode: ::T.untyped,
@@ -355,7 +355,7 @@ class ERB::Compiler::Scanner
   end
   def self.make_scanner(src, trim_mode, percent); end
 
-  Sorbet.sig do
+  sig do
     params(
       klass: ::T.untyped,
       trim_mode: ::T.untyped,
@@ -365,7 +365,7 @@ class ERB::Compiler::Scanner
   end
   def self.regist_scanner(klass, trim_mode, percent); end
 
-  Sorbet.sig do
+  sig do
     params(
       klass: ::T.untyped,
       trim_mode: ::T.untyped,
@@ -377,14 +377,14 @@ class ERB::Compiler::Scanner
 end
 
 class ERB::Compiler::SimpleScanner < ERB::Compiler::Scanner
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def scan(); end
 end
 
 class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   ERB_STAG = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       line: ::T.untyped,
     )
@@ -392,7 +392,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def explicit_trim_line(line); end
 
-  Sorbet.sig do
+  sig do
     params(
       src: ::T.untyped,
       trim_mode: ::T.untyped,
@@ -402,7 +402,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def initialize(src, trim_mode, percent); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -410,7 +410,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def is_erb_stag?(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       line: ::T.untyped,
       block: ::T.untyped,
@@ -419,7 +419,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def percent_line(line, &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       block: ::T.untyped,
     )
@@ -427,7 +427,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def scan(&block); end
 
-  Sorbet.sig do
+  sig do
     params(
       line: ::T.untyped,
     )
@@ -435,7 +435,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def scan_line(line); end
 
-  Sorbet.sig do
+  sig do
     params(
       line: ::T.untyped,
     )
@@ -443,7 +443,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
   end
   def trim_line1(line); end
 
-  Sorbet.sig do
+  sig do
     params(
       line: ::T.untyped,
     )
@@ -453,7 +453,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
 end
 
 module ERB::DefMethod
-  Sorbet.sig do
+  sig do
     params(
       methodname: ::T.untyped,
       erb_or_fname: ::T.untyped,
@@ -464,7 +464,7 @@ module ERB::DefMethod
 end
 
 module ERB::Util
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -472,7 +472,7 @@ module ERB::Util
   end
   def self.h(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -480,7 +480,7 @@ module ERB::Util
   end
   def self.html_escape(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -488,7 +488,7 @@ module ERB::Util
   end
   def self.u(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
