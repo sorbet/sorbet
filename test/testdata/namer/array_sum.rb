@@ -5,6 +5,7 @@
 # handled filling in arguments over top of intrinsic methods.
 
 class Array
-  Sorbet.sig {returns(T.untyped)}
+  extend T::Sig
+  sig {returns(T.untyped)}
   def sum; end
 end
