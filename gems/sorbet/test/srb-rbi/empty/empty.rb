@@ -49,6 +49,8 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
     Dir.foreach(dir) do |item|
       seen << item
       next if (item == ".") || (item == "..")
+      # TODO make these files recordable
+      next if item == "hidden-definitions"
       expfile = expdir + '/' + item
       file = dir + '/' + item
       if File.directory?(file)
