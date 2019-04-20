@@ -13,10 +13,10 @@ class CGI
   PATH_SEPARATOR = ::T.let(nil, ::T.untyped)
   REVISION = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept_charset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
     )
@@ -24,7 +24,7 @@ class CGI
   end
   def header(options=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
     )
@@ -32,7 +32,7 @@ class CGI
   end
   def http_header(options=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
       block: ::T.untyped,
@@ -41,10 +41,10 @@ class CGI
   end
   def initialize(options=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def nph?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
     )
@@ -52,7 +52,7 @@ class CGI
   end
   def out(options=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
     )
@@ -60,10 +60,10 @@ class CGI
   end
   def print(*options); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.accept_charset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       accept_charset: ::T.untyped,
     )
@@ -71,7 +71,7 @@ class CGI
   end
   def self.accept_charset=(accept_charset); end
 
-  Sorbet.sig do
+  sig do
     params(
       query: ::T.untyped,
     )
@@ -83,10 +83,10 @@ end
 class CGI::Cookie < Array
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def domain(); end
 
-  Sorbet.sig do
+  sig do
     params(
       domain: ::T.untyped,
     )
@@ -94,10 +94,10 @@ class CGI::Cookie < Array
   end
   def domain=(domain); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def expires(); end
 
-  Sorbet.sig do
+  sig do
     params(
       expires: ::T.untyped,
     )
@@ -105,10 +105,10 @@ class CGI::Cookie < Array
   end
   def expires=(expires); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def httponly(); end
 
-  Sorbet.sig do
+  sig do
     params(
       val: ::T.untyped,
     )
@@ -116,7 +116,7 @@ class CGI::Cookie < Array
   end
   def httponly=(val); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       value: ::T.untyped,
@@ -125,13 +125,13 @@ class CGI::Cookie < Array
   end
   def initialize(name=T.unsafe(nil), *value); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
     )
@@ -139,10 +139,10 @@ class CGI::Cookie < Array
   end
   def name=(name); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def path(); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
     )
@@ -150,10 +150,10 @@ class CGI::Cookie < Array
   end
   def path=(path); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def secure(); end
 
-  Sorbet.sig do
+  sig do
     params(
       val: ::T.untyped,
     )
@@ -161,13 +161,13 @@ class CGI::Cookie < Array
   end
   def secure=(val); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 
-  Sorbet.sig do
+  sig do
     params(
       val: ::T.untyped,
     )
@@ -175,7 +175,7 @@ class CGI::Cookie < Array
   end
   def value=(val); end
 
-  Sorbet.sig do
+  sig do
     params(
       raw_cookie: ::T.untyped,
     )
@@ -185,7 +185,7 @@ class CGI::Cookie < Array
 end
 
 module CGI::QueryExtension
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -193,34 +193,34 @@ module CGI::QueryExtension
   end
   def [](key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept_charset(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept_encoding(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept_language(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def auth_type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cache_control(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cookies(); end
 
-  Sorbet.sig do
+  sig do
     params(
       cookies: ::T.untyped,
     )
@@ -228,7 +228,7 @@ module CGI::QueryExtension
   end
   def cookies=(cookies); end
 
-  Sorbet.sig do
+  sig do
     params(
       is_large: ::T.untyped,
     )
@@ -236,16 +236,16 @@ module CGI::QueryExtension
   end
   def create_body(is_large); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def files(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def from(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def gateway_interface(); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -253,10 +253,10 @@ module CGI::QueryExtension
   end
   def has_key?(*args); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def host(); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -264,7 +264,7 @@ module CGI::QueryExtension
   end
   def include?(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -272,7 +272,7 @@ module CGI::QueryExtension
   end
   def key?(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -280,16 +280,16 @@ module CGI::QueryExtension
   end
   def keys(*args); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def negotiate(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def params(); end
 
-  Sorbet.sig do
+  sig do
     params(
       hash: ::T.untyped,
     )
@@ -297,61 +297,61 @@ module CGI::QueryExtension
   end
   def params=(hash); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def path_info(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def path_translated(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pragma(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def query_string(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def raw_cookie(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def raw_cookie2(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def referer(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def remote_addr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def remote_host(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def remote_ident(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def remote_user(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def request_method(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def script_name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def server_name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def server_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def server_protocol(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def server_software(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def unescape_filename?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def user_agent(); end
 end
 
@@ -361,7 +361,7 @@ module CGI::Util
   RFC822_MONTHS = ::T.let(nil, ::T.untyped)
   TABLE_FOR_ESCAPE_HTML__ = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -369,7 +369,7 @@ module CGI::Util
   end
   def escape(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
       elements: ::T.untyped,
@@ -378,7 +378,7 @@ module CGI::Util
   end
   def escapeElement(string, *elements); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -386,7 +386,7 @@ module CGI::Util
   end
   def escapeHTML(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
       elements: ::T.untyped,
@@ -395,7 +395,7 @@ module CGI::Util
   end
   def escape_element(string, *elements); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -403,7 +403,7 @@ module CGI::Util
   end
   def escape_html(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -411,7 +411,7 @@ module CGI::Util
   end
   def h(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
       shift: ::T.untyped,
@@ -420,7 +420,7 @@ module CGI::Util
   end
   def pretty(string, shift=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -428,7 +428,7 @@ module CGI::Util
   end
   def rfc1123_date(time); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -436,7 +436,7 @@ module CGI::Util
   end
   def unescape(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
       elements: ::T.untyped,
@@ -445,7 +445,7 @@ module CGI::Util
   end
   def unescapeElement(string, *elements); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -453,7 +453,7 @@ module CGI::Util
   end
   def unescapeHTML(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       string: ::T.untyped,
       elements: ::T.untyped,
@@ -462,7 +462,7 @@ module CGI::Util
   end
   def unescape_element(string, *elements); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -472,7 +472,7 @@ module CGI::Util
 end
 
 module CGI::Escape
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -480,7 +480,7 @@ module CGI::Escape
   end
   def escape(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -488,7 +488,7 @@ module CGI::Escape
   end
   def escapeHTML(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -496,7 +496,7 @@ module CGI::Escape
   end
   def unescape(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )

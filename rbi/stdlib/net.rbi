@@ -9,7 +9,7 @@ end
 class Net::BufferedIO
   BUFSIZE = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -17,16 +17,16 @@ class Net::BufferedIO
   end
   def <<(str); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def closed?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def continue_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       continue_timeout: ::T.untyped,
     )
@@ -34,10 +34,10 @@ class Net::BufferedIO
   end
   def continue_timeout=(continue_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def debug_output(); end
 
-  Sorbet.sig do
+  sig do
     params(
       debug_output: ::T.untyped,
     )
@@ -45,10 +45,10 @@ class Net::BufferedIO
   end
   def debug_output=(debug_output); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def eof?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       io: ::T.untyped,
       read_timeout: ::T.untyped,
@@ -59,13 +59,13 @@ class Net::BufferedIO
   end
   def initialize(io, read_timeout: T.unsafe(nil), continue_timeout: T.unsafe(nil), debug_output: T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def io(); end
 
-  Sorbet.sig do
+  sig do
     params(
       len: ::T.untyped,
       dest: ::T.untyped,
@@ -75,7 +75,7 @@ class Net::BufferedIO
   end
   def read(len, dest=T.unsafe(nil), ignore_eof=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       dest: ::T.untyped,
     )
@@ -83,10 +83,10 @@ class Net::BufferedIO
   end
   def read_all(dest=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def read_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       read_timeout: ::T.untyped,
     )
@@ -94,10 +94,10 @@ class Net::BufferedIO
   end
   def read_timeout=(read_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def readline(); end
 
-  Sorbet.sig do
+  sig do
     params(
       terminator: ::T.untyped,
       ignore_eof: ::T.untyped,
@@ -106,7 +106,7 @@ class Net::BufferedIO
   end
   def readuntil(terminator, ignore_eof=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -114,7 +114,7 @@ class Net::BufferedIO
   end
   def write(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -137,10 +137,10 @@ class Net::FTP < Net::Protocol
   OCTAL_PARSER = ::T.let(nil, ::T.untyped)
   TIME_PARSER = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def abort(); end
 
-  Sorbet.sig do
+  sig do
     params(
       account: ::T.untyped,
     )
@@ -148,10 +148,10 @@ class Net::FTP < Net::Protocol
   end
   def acct(account); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def binary(); end
 
-  Sorbet.sig do
+  sig do
     params(
       newmode: ::T.untyped,
     )
@@ -159,7 +159,7 @@ class Net::FTP < Net::Protocol
   end
   def binary=(newmode); end
 
-  Sorbet.sig do
+  sig do
     params(
       dirname: ::T.untyped,
     )
@@ -167,13 +167,13 @@ class Net::FTP < Net::Protocol
   end
   def chdir(dirname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def closed?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -182,10 +182,10 @@ class Net::FTP < Net::Protocol
   end
   def connect(host, port=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def debug_mode(); end
 
-  Sorbet.sig do
+  sig do
     params(
       debug_mode: ::T.untyped,
     )
@@ -193,7 +193,7 @@ class Net::FTP < Net::Protocol
   end
   def debug_mode=(debug_mode); end
 
-  Sorbet.sig do
+  sig do
     params(
       filename: ::T.untyped,
     )
@@ -201,7 +201,7 @@ class Net::FTP < Net::Protocol
   end
   def delete(filename); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
       block: ::T.untyped,
@@ -210,7 +210,7 @@ class Net::FTP < Net::Protocol
   end
   def dir(*args, &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       remotefile: ::T.untyped,
       localfile: ::T.untyped,
@@ -221,7 +221,7 @@ class Net::FTP < Net::Protocol
   end
   def get(remotefile, localfile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       remotefile: ::T.untyped,
       localfile: ::T.untyped,
@@ -232,10 +232,10 @@ class Net::FTP < Net::Protocol
   end
   def getbinaryfile(remotefile, localfile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def getdir(); end
 
-  Sorbet.sig do
+  sig do
     params(
       remotefile: ::T.untyped,
       localfile: ::T.untyped,
@@ -245,7 +245,7 @@ class Net::FTP < Net::Protocol
   end
   def gettextfile(remotefile, localfile=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       arg: ::T.untyped,
     )
@@ -253,7 +253,7 @@ class Net::FTP < Net::Protocol
   end
   def help(arg=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       user_or_options: ::T.untyped,
@@ -264,16 +264,16 @@ class Net::FTP < Net::Protocol
   end
   def initialize(host=T.unsafe(nil), user_or_options=T.unsafe(nil), passwd=T.unsafe(nil), acct=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def last_response(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def last_response_code(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def lastresp(); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
       block: ::T.untyped,
@@ -282,7 +282,7 @@ class Net::FTP < Net::Protocol
   end
   def list(*args, &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       passwd: ::T.untyped,
@@ -292,7 +292,7 @@ class Net::FTP < Net::Protocol
   end
   def login(user=T.unsafe(nil), passwd=T.unsafe(nil), acct=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
       block: ::T.untyped,
@@ -301,7 +301,7 @@ class Net::FTP < Net::Protocol
   end
   def ls(*args, &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       filename: ::T.untyped,
     )
@@ -309,7 +309,7 @@ class Net::FTP < Net::Protocol
   end
   def mdtm(filename); end
 
-  Sorbet.sig do
+  sig do
     params(
       dirname: ::T.untyped,
     )
@@ -317,7 +317,7 @@ class Net::FTP < Net::Protocol
   end
   def mkdir(dirname); end
 
-  Sorbet.sig do
+  sig do
     params(
       pathname: ::T.untyped,
       block: ::T.untyped,
@@ -326,7 +326,7 @@ class Net::FTP < Net::Protocol
   end
   def mlsd(pathname=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       pathname: ::T.untyped,
     )
@@ -334,7 +334,7 @@ class Net::FTP < Net::Protocol
   end
   def mlst(pathname=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       filename: ::T.untyped,
       local: ::T.untyped,
@@ -343,7 +343,7 @@ class Net::FTP < Net::Protocol
   end
   def mtime(filename, local=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       dir: ::T.untyped,
     )
@@ -351,13 +351,13 @@ class Net::FTP < Net::Protocol
   end
   def nlst(dir=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def noop(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def open_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       open_timeout: ::T.untyped,
     )
@@ -365,10 +365,10 @@ class Net::FTP < Net::Protocol
   end
   def open_timeout=(open_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def passive(); end
 
-  Sorbet.sig do
+  sig do
     params(
       passive: ::T.untyped,
     )
@@ -376,7 +376,7 @@ class Net::FTP < Net::Protocol
   end
   def passive=(passive); end
 
-  Sorbet.sig do
+  sig do
     params(
       localfile: ::T.untyped,
       remotefile: ::T.untyped,
@@ -387,7 +387,7 @@ class Net::FTP < Net::Protocol
   end
   def put(localfile, remotefile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       localfile: ::T.untyped,
       remotefile: ::T.untyped,
@@ -398,7 +398,7 @@ class Net::FTP < Net::Protocol
   end
   def putbinaryfile(localfile, remotefile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       localfile: ::T.untyped,
       remotefile: ::T.untyped,
@@ -408,16 +408,16 @@ class Net::FTP < Net::Protocol
   end
   def puttextfile(localfile, remotefile=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pwd(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def quit(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def read_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sec: ::T.untyped,
     )
@@ -425,7 +425,7 @@ class Net::FTP < Net::Protocol
   end
   def read_timeout=(sec); end
 
-  Sorbet.sig do
+  sig do
     params(
       fromname: ::T.untyped,
       toname: ::T.untyped,
@@ -434,10 +434,10 @@ class Net::FTP < Net::Protocol
   end
   def rename(fromname, toname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def resume(); end
 
-  Sorbet.sig do
+  sig do
     params(
       resume: ::T.untyped,
     )
@@ -445,7 +445,7 @@ class Net::FTP < Net::Protocol
   end
   def resume=(resume); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
       blocksize: ::T.untyped,
@@ -455,7 +455,7 @@ class Net::FTP < Net::Protocol
   end
   def retrbinary(cmd, blocksize, rest_offset=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
     )
@@ -463,10 +463,10 @@ class Net::FTP < Net::Protocol
   end
   def retrlines(cmd); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def return_code(); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -474,7 +474,7 @@ class Net::FTP < Net::Protocol
   end
   def return_code=(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       dirname: ::T.untyped,
     )
@@ -482,7 +482,7 @@ class Net::FTP < Net::Protocol
   end
   def rmdir(dirname); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
     )
@@ -490,7 +490,7 @@ class Net::FTP < Net::Protocol
   end
   def sendcmd(cmd); end
 
-  Sorbet.sig do
+  sig do
     params(
       sock: ::T.untyped,
       get_greeting: ::T.untyped,
@@ -499,7 +499,7 @@ class Net::FTP < Net::Protocol
   end
   def set_socket(sock, get_greeting=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       arg: ::T.untyped,
     )
@@ -507,7 +507,7 @@ class Net::FTP < Net::Protocol
   end
   def site(arg); end
 
-  Sorbet.sig do
+  sig do
     params(
       filename: ::T.untyped,
     )
@@ -515,10 +515,10 @@ class Net::FTP < Net::Protocol
   end
   def size(filename); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_handshake_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ssl_handshake_timeout: ::T.untyped,
     )
@@ -526,7 +526,7 @@ class Net::FTP < Net::Protocol
   end
   def ssl_handshake_timeout=(ssl_handshake_timeout); end
 
-  Sorbet.sig do
+  sig do
     params(
       pathname: ::T.untyped,
     )
@@ -534,7 +534,7 @@ class Net::FTP < Net::Protocol
   end
   def status(pathname=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
       file: ::T.untyped,
@@ -545,7 +545,7 @@ class Net::FTP < Net::Protocol
   end
   def storbinary(cmd, file, blocksize, rest_offset=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
       file: ::T.untyped,
@@ -554,10 +554,10 @@ class Net::FTP < Net::Protocol
   end
   def storlines(cmd, file); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def system(); end
 
-  Sorbet.sig do
+  sig do
     params(
       cmd: ::T.untyped,
     )
@@ -565,13 +565,13 @@ class Net::FTP < Net::Protocol
   end
   def voidcmd(cmd); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def welcome(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_passive(); end
 
-  Sorbet.sig do
+  sig do
     params(
       value: ::T.untyped,
     )
@@ -579,7 +579,7 @@ class Net::FTP < Net::Protocol
   end
   def self.default_passive=(value); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       args: ::T.untyped,
@@ -590,7 +590,7 @@ class Net::FTP < Net::Protocol
 end
 
 class Net::FTP::BufferedSSLSocket < Net::FTP::BufferedSocket
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -598,7 +598,7 @@ class Net::FTP::BufferedSSLSocket < Net::FTP::BufferedSocket
   end
   def initialize(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       mesg: ::T.untyped,
       flags: ::T.untyped,
@@ -608,7 +608,7 @@ class Net::FTP::BufferedSSLSocket < Net::FTP::BufferedSocket
   end
   def send(mesg, flags, dest=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -618,7 +618,7 @@ class Net::FTP::BufferedSSLSocket < Net::FTP::BufferedSocket
 end
 
 class Net::FTP::BufferedSocket < Net::BufferedIO
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -626,10 +626,10 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   end
   def addr(*args); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def gets(); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -637,7 +637,7 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   end
   def local_address(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -645,7 +645,7 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   end
   def peeraddr(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       len: ::T.untyped,
     )
@@ -653,10 +653,10 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   end
   def read(len=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def readline(); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -664,7 +664,7 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   end
   def remote_address(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -672,7 +672,7 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   end
   def send(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -682,37 +682,37 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
 end
 
 class Net::FTP::MLSxEntry
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def appendable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def charset(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def creatable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def create(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def deletable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def directory?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def directory_makable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def enterable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def facts(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def file?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       facts: ::T.untyped,
       pathname: ::T.untyped,
@@ -721,54 +721,54 @@ class Net::FTP::MLSxEntry
   end
   def initialize(facts, pathname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def lang(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def listable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def modify(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pathname(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def perm(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def purgeable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def readable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def renamable?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def unique(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def writable?(); end
 end
 
 class Net::FTP::NullSocket
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def closed?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       mid: ::T.untyped,
       args: ::T.untyped,
@@ -777,7 +777,7 @@ class Net::FTP::NullSocket
   end
   def method_missing(mid, *args); end
 
-  Sorbet.sig do
+  sig do
     params(
       sec: ::T.untyped,
     )
@@ -812,16 +812,16 @@ class Net::HTTP < Net::Protocol
   SSL_ATTRIBUTES = ::T.let(nil, ::T.untyped)
   SSL_IVNAMES = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def active?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def address(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ca_file(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ca_file: ::T.untyped,
     )
@@ -829,10 +829,10 @@ class Net::HTTP < Net::Protocol
   end
   def ca_file=(ca_file); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ca_path(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ca_path: ::T.untyped,
     )
@@ -840,10 +840,10 @@ class Net::HTTP < Net::Protocol
   end
   def ca_path=(ca_path); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert(); end
 
-  Sorbet.sig do
+  sig do
     params(
       cert: ::T.untyped,
     )
@@ -851,10 +851,10 @@ class Net::HTTP < Net::Protocol
   end
   def cert=(cert); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert_store(); end
 
-  Sorbet.sig do
+  sig do
     params(
       cert_store: ::T.untyped,
     )
@@ -862,10 +862,10 @@ class Net::HTTP < Net::Protocol
   end
   def cert_store=(cert_store); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ciphers(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ciphers: ::T.untyped,
     )
@@ -873,10 +873,10 @@ class Net::HTTP < Net::Protocol
   end
   def ciphers=(ciphers); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close_on_empty_response(); end
 
-  Sorbet.sig do
+  sig do
     params(
       close_on_empty_response: ::T.untyped,
     )
@@ -884,10 +884,10 @@ class Net::HTTP < Net::Protocol
   end
   def close_on_empty_response=(close_on_empty_response); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def continue_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sec: ::T.untyped,
     )
@@ -895,7 +895,7 @@ class Net::HTTP < Net::Protocol
   end
   def continue_timeout=(sec); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -904,7 +904,7 @@ class Net::HTTP < Net::Protocol
   end
   def copy(path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -913,10 +913,10 @@ class Net::HTTP < Net::Protocol
   end
   def delete(path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def finish(); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -927,7 +927,7 @@ class Net::HTTP < Net::Protocol
   end
   def get(path, initheader=T.unsafe(nil), dest=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -937,7 +937,7 @@ class Net::HTTP < Net::Protocol
   end
   def get2(path, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -946,7 +946,7 @@ class Net::HTTP < Net::Protocol
   end
   def head(path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -956,7 +956,7 @@ class Net::HTTP < Net::Protocol
   end
   def head2(path, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       address: ::T.untyped,
       port: ::T.untyped,
@@ -965,13 +965,13 @@ class Net::HTTP < Net::Protocol
   end
   def initialize(address, port=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def keep_alive_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       keep_alive_timeout: ::T.untyped,
     )
@@ -979,10 +979,10 @@ class Net::HTTP < Net::Protocol
   end
   def keep_alive_timeout=(keep_alive_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -990,10 +990,10 @@ class Net::HTTP < Net::Protocol
   end
   def key=(key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def local_host(); end
 
-  Sorbet.sig do
+  sig do
     params(
       local_host: ::T.untyped,
     )
@@ -1001,10 +1001,10 @@ class Net::HTTP < Net::Protocol
   end
   def local_host=(local_host); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def local_port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       local_port: ::T.untyped,
     )
@@ -1012,7 +1012,7 @@ class Net::HTTP < Net::Protocol
   end
   def local_port=(local_port); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       body: ::T.untyped,
@@ -1022,7 +1022,7 @@ class Net::HTTP < Net::Protocol
   end
   def lock(path, body, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       body: ::T.untyped,
@@ -1032,7 +1032,7 @@ class Net::HTTP < Net::Protocol
   end
   def mkcol(path, body=T.unsafe(nil), initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -1041,10 +1041,10 @@ class Net::HTTP < Net::Protocol
   end
   def move(path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def open_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       open_timeout: ::T.untyped,
     )
@@ -1052,7 +1052,7 @@ class Net::HTTP < Net::Protocol
   end
   def open_timeout=(open_timeout); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -1061,7 +1061,7 @@ class Net::HTTP < Net::Protocol
   end
   def options(path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1073,13 +1073,13 @@ class Net::HTTP < Net::Protocol
   end
   def patch(path, data, initheader=T.unsafe(nil), dest=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def peer_cert(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1091,7 +1091,7 @@ class Net::HTTP < Net::Protocol
   end
   def post(path, data, initheader=T.unsafe(nil), dest=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1102,7 +1102,7 @@ class Net::HTTP < Net::Protocol
   end
   def post2(path, data, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       body: ::T.untyped,
@@ -1112,7 +1112,7 @@ class Net::HTTP < Net::Protocol
   end
   def propfind(path, body=T.unsafe(nil), initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       body: ::T.untyped,
@@ -1122,13 +1122,13 @@ class Net::HTTP < Net::Protocol
   end
   def proppatch(path, body, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_address(); end
 
-  Sorbet.sig do
+  sig do
     params(
       proxy_address: ::T.untyped,
     )
@@ -1136,7 +1136,7 @@ class Net::HTTP < Net::Protocol
   end
   def proxy_address=(proxy_address); end
 
-  Sorbet.sig do
+  sig do
     params(
       proxy_from_env: ::T.untyped,
     )
@@ -1144,13 +1144,13 @@ class Net::HTTP < Net::Protocol
   end
   def proxy_from_env=(proxy_from_env); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_from_env?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_pass(); end
 
-  Sorbet.sig do
+  sig do
     params(
       proxy_pass: ::T.untyped,
     )
@@ -1158,10 +1158,10 @@ class Net::HTTP < Net::Protocol
   end
   def proxy_pass=(proxy_pass); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       proxy_port: ::T.untyped,
     )
@@ -1169,13 +1169,13 @@ class Net::HTTP < Net::Protocol
   end
   def proxy_port=(proxy_port); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_uri(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_user(); end
 
-  Sorbet.sig do
+  sig do
     params(
       proxy_user: ::T.untyped,
     )
@@ -1183,13 +1183,13 @@ class Net::HTTP < Net::Protocol
   end
   def proxy_user=(proxy_user); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxyaddr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxyport(); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1199,7 +1199,7 @@ class Net::HTTP < Net::Protocol
   end
   def put(path, data, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1210,10 +1210,10 @@ class Net::HTTP < Net::Protocol
   end
   def put2(path, data, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def read_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sec: ::T.untyped,
     )
@@ -1221,7 +1221,7 @@ class Net::HTTP < Net::Protocol
   end
   def read_timeout=(sec); end
 
-  Sorbet.sig do
+  sig do
     params(
       req: ::T.untyped,
       body: ::T.untyped,
@@ -1231,7 +1231,7 @@ class Net::HTTP < Net::Protocol
   end
   def request(req, body=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -1241,7 +1241,7 @@ class Net::HTTP < Net::Protocol
   end
   def request_get(path, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -1251,7 +1251,7 @@ class Net::HTTP < Net::Protocol
   end
   def request_head(path, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1262,7 +1262,7 @@ class Net::HTTP < Net::Protocol
   end
   def request_post(path, data, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       data: ::T.untyped,
@@ -1273,7 +1273,7 @@ class Net::HTTP < Net::Protocol
   end
   def request_put(path, data, initheader=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       path: ::T.untyped,
@@ -1284,7 +1284,7 @@ class Net::HTTP < Net::Protocol
   end
   def send_request(name, path, data=T.unsafe(nil), header=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       output: ::T.untyped,
     )
@@ -1292,10 +1292,10 @@ class Net::HTTP < Net::Protocol
   end
   def set_debug_output(output); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ssl_timeout: ::T.untyped,
     )
@@ -1303,10 +1303,10 @@ class Net::HTTP < Net::Protocol
   end
   def ssl_timeout=(ssl_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ssl_version: ::T.untyped,
     )
@@ -1314,13 +1314,13 @@ class Net::HTTP < Net::Protocol
   end
   def ssl_version=(ssl_version); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def start(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def started?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -1329,7 +1329,7 @@ class Net::HTTP < Net::Protocol
   end
   def trace(path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       req: ::T.untyped,
     )
@@ -1337,7 +1337,7 @@ class Net::HTTP < Net::Protocol
   end
   def transport_request(req); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       body: ::T.untyped,
@@ -1347,7 +1347,7 @@ class Net::HTTP < Net::Protocol
   end
   def unlock(path, body, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       flag: ::T.untyped,
     )
@@ -1355,13 +1355,13 @@ class Net::HTTP < Net::Protocol
   end
   def use_ssl=(flag); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def use_ssl?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_callback(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_callback: ::T.untyped,
     )
@@ -1369,10 +1369,10 @@ class Net::HTTP < Net::Protocol
   end
   def verify_callback=(verify_callback); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_depth(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_depth: ::T.untyped,
     )
@@ -1380,10 +1380,10 @@ class Net::HTTP < Net::Protocol
   end
   def verify_depth=(verify_depth); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_mode(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_mode: ::T.untyped,
     )
@@ -1391,7 +1391,7 @@ class Net::HTTP < Net::Protocol
   end
   def verify_mode=(verify_mode); end
 
-  Sorbet.sig do
+  sig do
     params(
       p_addr: ::T.untyped,
       p_port: ::T.untyped,
@@ -1402,10 +1402,10 @@ class Net::HTTP < Net::Protocol
   end
   def self.Proxy(p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri_or_host: ::T.untyped,
       path: ::T.untyped,
@@ -1415,7 +1415,7 @@ class Net::HTTP < Net::Protocol
   end
   def self.get(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri_or_host: ::T.untyped,
       path: ::T.untyped,
@@ -1425,7 +1425,7 @@ class Net::HTTP < Net::Protocol
   end
   def self.get_print(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri_or_host: ::T.untyped,
       path: ::T.untyped,
@@ -1436,19 +1436,19 @@ class Net::HTTP < Net::Protocol
   end
   def self.get_response(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.http_default_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.https_default_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.is_version_1_1?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.is_version_1_2?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       address: ::T.untyped,
       port: ::T.untyped,
@@ -1461,7 +1461,7 @@ class Net::HTTP < Net::Protocol
   end
   def self.new(address, port=T.unsafe(nil), p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1469,7 +1469,7 @@ class Net::HTTP < Net::Protocol
   end
   def self.newobj(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       url: ::T.untyped,
       data: ::T.untyped,
@@ -1479,7 +1479,7 @@ class Net::HTTP < Net::Protocol
   end
   def self.post(url, data, header=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       url: ::T.untyped,
       params: ::T.untyped,
@@ -1488,25 +1488,25 @@ class Net::HTTP < Net::Protocol
   end
   def self.post_form(url, params); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.proxy_address(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.proxy_class?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.proxy_pass(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.proxy_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.proxy_user(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socket_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       address: ::T.untyped,
       arg: ::T.untyped,
@@ -1516,13 +1516,13 @@ class Net::HTTP < Net::Protocol
   end
   def self.start(address, *arg, &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.version_1_1?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.version_1_2(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.version_1_2?(); end
 end
 
@@ -1544,7 +1544,7 @@ class Net::HTTP::DigestAuth
   include ::MonitorMixin
   VERSION = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
       www_authenticate: ::T.untyped,
@@ -1555,7 +1555,7 @@ class Net::HTTP::DigestAuth
   end
   def auth_header(uri, www_authenticate, method, iis=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       ignored: ::T.untyped,
     )
@@ -1563,10 +1563,10 @@ class Net::HTTP::DigestAuth
   end
   def initialize(ignored=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def make_cnonce(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def next_nonce(); end
 end
 
@@ -1628,10 +1628,10 @@ class Net::HTTP::Persistent
   RETRIED_EXCEPTIONS = ::T.let(nil, ::T.untyped)
   VERSION = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ca_file(); end
 
-  Sorbet.sig do
+  sig do
     params(
       file: ::T.untyped,
     )
@@ -1639,7 +1639,7 @@ class Net::HTTP::Persistent
   end
   def ca_file=(file); end
 
-  Sorbet.sig do
+  sig do
     params(
       req: ::T.untyped,
       retried_on_ruby_2: ::T.untyped,
@@ -1648,10 +1648,10 @@ class Net::HTTP::Persistent
   end
   def can_retry?(req, retried_on_ruby_2=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert(); end
 
-  Sorbet.sig do
+  sig do
     params(
       certificate: ::T.untyped,
     )
@@ -1659,10 +1659,10 @@ class Net::HTTP::Persistent
   end
   def cert=(certificate); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cert_store(); end
 
-  Sorbet.sig do
+  sig do
     params(
       store: ::T.untyped,
     )
@@ -1670,10 +1670,10 @@ class Net::HTTP::Persistent
   end
   def cert_store=(store); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def certificate(); end
 
-  Sorbet.sig do
+  sig do
     params(
       certificate: ::T.untyped,
     )
@@ -1681,7 +1681,7 @@ class Net::HTTP::Persistent
   end
   def certificate=(certificate); end
 
-  Sorbet.sig do
+  sig do
     params(
       generation: ::T.untyped,
       thread: ::T.untyped,
@@ -1691,7 +1691,7 @@ class Net::HTTP::Persistent
   end
   def cleanup(generation, thread=T.unsafe(nil), generation_key=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       header: ::T.untyped,
     )
@@ -1699,7 +1699,7 @@ class Net::HTTP::Persistent
   end
   def connection_close?(header); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
     )
@@ -1707,7 +1707,7 @@ class Net::HTTP::Persistent
   end
   def connection_for(uri); end
 
-  Sorbet.sig do
+  sig do
     params(
       header: ::T.untyped,
     )
@@ -1715,10 +1715,10 @@ class Net::HTTP::Persistent
   end
   def connection_keep_alive?(header); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def debug_output(); end
 
-  Sorbet.sig do
+  sig do
     params(
       debug_output: ::T.untyped,
     )
@@ -1726,7 +1726,7 @@ class Net::HTTP::Persistent
   end
   def debug_output=(debug_output); end
 
-  Sorbet.sig do
+  sig do
     params(
       connection: ::T.untyped,
     )
@@ -1734,7 +1734,7 @@ class Net::HTTP::Persistent
   end
   def error_message(connection); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -1742,7 +1742,7 @@ class Net::HTTP::Persistent
   end
   def escape(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       connection: ::T.untyped,
     )
@@ -1750,7 +1750,7 @@ class Net::HTTP::Persistent
   end
   def expired?(connection); end
 
-  Sorbet.sig do
+  sig do
     params(
       connection: ::T.untyped,
       thread: ::T.untyped,
@@ -1759,19 +1759,19 @@ class Net::HTTP::Persistent
   end
   def finish(connection, thread=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def generation(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def generation_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def headers(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def http_class(); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
     )
@@ -1779,10 +1779,10 @@ class Net::HTTP::Persistent
   end
   def http_version(uri); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def http_versions(); end
 
-  Sorbet.sig do
+  sig do
     params(
       req: ::T.untyped,
     )
@@ -1790,10 +1790,10 @@ class Net::HTTP::Persistent
   end
   def idempotent?(req); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def idle_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       idle_timeout: ::T.untyped,
     )
@@ -1801,7 +1801,7 @@ class Net::HTTP::Persistent
   end
   def idle_timeout=(idle_timeout); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       proxy: ::T.untyped,
@@ -1810,10 +1810,10 @@ class Net::HTTP::Persistent
   end
   def initialize(name=T.unsafe(nil), proxy=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def keep_alive(); end
 
-  Sorbet.sig do
+  sig do
     params(
       keep_alive: ::T.untyped,
     )
@@ -1821,10 +1821,10 @@ class Net::HTTP::Persistent
   end
   def keep_alive=(keep_alive); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -1832,13 +1832,13 @@ class Net::HTTP::Persistent
   end
   def key=(key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def max_age(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def max_requests(); end
 
-  Sorbet.sig do
+  sig do
     params(
       max_requests: ::T.untyped,
     )
@@ -1846,13 +1846,13 @@ class Net::HTTP::Persistent
   end
   def max_requests=(max_requests); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def no_proxy(); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
     )
@@ -1860,10 +1860,10 @@ class Net::HTTP::Persistent
   end
   def normalize_uri(uri); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def open_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       open_timeout: ::T.untyped,
     )
@@ -1871,10 +1871,10 @@ class Net::HTTP::Persistent
   end
   def open_timeout=(open_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def override_headers(); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
       requests: ::T.untyped,
@@ -1884,10 +1884,10 @@ class Net::HTTP::Persistent
   end
   def pipeline(uri, requests, &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def private_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -1895,7 +1895,7 @@ class Net::HTTP::Persistent
   end
   def private_key=(key); end
 
-  Sorbet.sig do
+  sig do
     params(
       proxy: ::T.untyped,
     )
@@ -1903,7 +1903,7 @@ class Net::HTTP::Persistent
   end
   def proxy=(proxy); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -1912,16 +1912,16 @@ class Net::HTTP::Persistent
   end
   def proxy_bypass?(host, port); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_from_env(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def proxy_uri(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def read_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       read_timeout: ::T.untyped,
     )
@@ -1929,13 +1929,13 @@ class Net::HTTP::Persistent
   end
   def read_timeout=(read_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reconnect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reconnect_ssl(); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
       req: ::T.untyped,
@@ -1945,7 +1945,7 @@ class Net::HTTP::Persistent
   end
   def request(uri, req=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       exception: ::T.untyped,
       req: ::T.untyped,
@@ -1955,10 +1955,10 @@ class Net::HTTP::Persistent
   end
   def request_failed(exception, req, connection); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def request_key(); end
 
-  Sorbet.sig do
+  sig do
     params(
       req_or_uri: ::T.untyped,
     )
@@ -1966,7 +1966,7 @@ class Net::HTTP::Persistent
   end
   def request_setup(req_or_uri); end
 
-  Sorbet.sig do
+  sig do
     params(
       connection: ::T.untyped,
     )
@@ -1974,10 +1974,10 @@ class Net::HTTP::Persistent
   end
   def reset(connection); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def retry_change_requests(); end
 
-  Sorbet.sig do
+  sig do
     params(
       retry_change_requests: ::T.untyped,
     )
@@ -1985,10 +1985,10 @@ class Net::HTTP::Persistent
   end
   def retry_change_requests=(retry_change_requests); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reuse_ssl_sessions(); end
 
-  Sorbet.sig do
+  sig do
     params(
       reuse_ssl_sessions: ::T.untyped,
     )
@@ -1996,7 +1996,7 @@ class Net::HTTP::Persistent
   end
   def reuse_ssl_sessions=(reuse_ssl_sessions); end
 
-  Sorbet.sig do
+  sig do
     params(
       thread: ::T.untyped,
     )
@@ -2004,13 +2004,13 @@ class Net::HTTP::Persistent
   end
   def shutdown(thread=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def shutdown_in_all_threads(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def socket_options(); end
 
-  Sorbet.sig do
+  sig do
     params(
       connection: ::T.untyped,
     )
@@ -2018,7 +2018,7 @@ class Net::HTTP::Persistent
   end
   def ssl(connection); end
 
-  Sorbet.sig do
+  sig do
     params(
       generation: ::T.untyped,
     )
@@ -2026,16 +2026,16 @@ class Net::HTTP::Persistent
   end
   def ssl_cleanup(generation); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_generation(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_generation_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl_version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ssl_version: ::T.untyped,
     )
@@ -2043,7 +2043,7 @@ class Net::HTTP::Persistent
   end
   def ssl_version=(ssl_version); end
 
-  Sorbet.sig do
+  sig do
     params(
       connection: ::T.untyped,
     )
@@ -2051,13 +2051,13 @@ class Net::HTTP::Persistent
   end
   def start(connection); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def timeout_key(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_callback(); end
 
-  Sorbet.sig do
+  sig do
     params(
       callback: ::T.untyped,
     )
@@ -2065,10 +2065,10 @@ class Net::HTTP::Persistent
   end
   def verify_callback=(callback); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def verify_mode(); end
 
-  Sorbet.sig do
+  sig do
     params(
       verify_mode: ::T.untyped,
     )
@@ -2076,7 +2076,7 @@ class Net::HTTP::Persistent
   end
   def verify_mode=(verify_mode); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
       max: ::T.untyped,
@@ -2090,7 +2090,7 @@ class Net::HTTP::Persistent::Error < StandardError
 end
 
 class Net::HTTP::Persistent::SSLReuse < Net::HTTP
-  Sorbet.sig do
+  sig do
     params(
       address: ::T.untyped,
       port: ::T.untyped,
@@ -2188,10 +2188,10 @@ class Net::HTTPError < Net::ProtocolError
 end
 
 module Net::HTTPExceptions
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       msg: ::T.untyped,
       res: ::T.untyped,
@@ -2200,7 +2200,7 @@ module Net::HTTPExceptions
   end
   def initialize(msg, res); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def response(); end
 end
 
@@ -2235,7 +2235,7 @@ end
 
 class Net::HTTPGenericRequest
   include ::Net::HTTPHeader
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
       val: ::T.untyped,
@@ -2244,10 +2244,10 @@ class Net::HTTPGenericRequest
   end
   def []=(key, val); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def body(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -2255,13 +2255,13 @@ class Net::HTTPGenericRequest
   end
   def body=(str); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def body_exist?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def body_stream(); end
 
-  Sorbet.sig do
+  sig do
     params(
       input: ::T.untyped,
     )
@@ -2269,10 +2269,10 @@ class Net::HTTPGenericRequest
   end
   def body_stream=(input); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def decode_content(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sock: ::T.untyped,
       ver: ::T.untyped,
@@ -2282,7 +2282,7 @@ class Net::HTTPGenericRequest
   end
   def exec(sock, ver, path); end
 
-  Sorbet.sig do
+  sig do
     params(
       m: ::T.untyped,
       reqbody: ::T.untyped,
@@ -2294,22 +2294,22 @@ class Net::HTTPGenericRequest
   end
   def initialize(m, reqbody, resbody, uri_or_path, initheader=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def method(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def path(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def request_body_permitted?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def response_body_permitted?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -2317,7 +2317,7 @@ class Net::HTTPGenericRequest
   end
   def set_body_internal(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       addr: ::T.untyped,
       port: ::T.untyped,
@@ -2327,15 +2327,15 @@ class Net::HTTPGenericRequest
   end
   def update_uri(addr, port, ssl); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def uri(); end
 end
 
 class Net::HTTPGenericRequest::Chunker
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def finish(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sock: ::T.untyped,
     )
@@ -2343,7 +2343,7 @@ class Net::HTTPGenericRequest::Chunker
   end
   def initialize(sock); end
 
-  Sorbet.sig do
+  sig do
     params(
       buf: ::T.untyped,
     )
@@ -2358,7 +2358,7 @@ class Net::HTTPGone < Net::HTTPClientError
 end
 
 module Net::HTTPHeader
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -2366,7 +2366,7 @@ module Net::HTTPHeader
   end
   def [](key); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
       val: ::T.untyped,
@@ -2375,7 +2375,7 @@ module Net::HTTPHeader
   end
   def []=(key, val); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
       val: ::T.untyped,
@@ -2384,7 +2384,7 @@ module Net::HTTPHeader
   end
   def add_field(key, val); end
 
-  Sorbet.sig do
+  sig do
     params(
       account: ::T.untyped,
       password: ::T.untyped,
@@ -2393,22 +2393,22 @@ module Net::HTTPHeader
   end
   def basic_auth(account, password); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def canonical_each(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def chunked?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def connection_close?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def connection_keep_alive?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       len: ::T.untyped,
     )
@@ -2416,13 +2416,13 @@ module Net::HTTPHeader
   end
   def content_length=(len); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_range(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       type: ::T.untyped,
       params: ::T.untyped,
@@ -2431,7 +2431,7 @@ module Net::HTTPHeader
   end
   def content_type=(type, params=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -2439,19 +2439,19 @@ module Net::HTTPHeader
   end
   def delete(key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_capitalized(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_capitalized_name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_header(); end
 
-  Sorbet.sig do
+  sig do
     params(
       block: ::T.untyped,
     )
@@ -2459,7 +2459,7 @@ module Net::HTTPHeader
   end
   def each_key(&block); end
 
-  Sorbet.sig do
+  sig do
     params(
       block: ::T.untyped,
     )
@@ -2467,10 +2467,10 @@ module Net::HTTPHeader
   end
   def each_name(&block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_value(); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
       args: ::T.untyped,
@@ -2480,7 +2480,7 @@ module Net::HTTPHeader
   end
   def fetch(key, *args, &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       params: ::T.untyped,
       sep: ::T.untyped,
@@ -2489,7 +2489,7 @@ module Net::HTTPHeader
   end
   def form_data=(params, sep=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -2497,7 +2497,7 @@ module Net::HTTPHeader
   end
   def get_fields(key); end
 
-  Sorbet.sig do
+  sig do
     params(
       initheader: ::T.untyped,
     )
@@ -2505,7 +2505,7 @@ module Net::HTTPHeader
   end
   def initialize_http_header(initheader); end
 
-  Sorbet.sig do
+  sig do
     params(
       key: ::T.untyped,
     )
@@ -2513,13 +2513,13 @@ module Net::HTTPHeader
   end
   def key?(key); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def main_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       account: ::T.untyped,
       password: ::T.untyped,
@@ -2528,10 +2528,10 @@ module Net::HTTPHeader
   end
   def proxy_basic_auth(account, password); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def range(); end
 
-  Sorbet.sig do
+  sig do
     params(
       r: ::T.untyped,
       e: ::T.untyped,
@@ -2540,10 +2540,10 @@ module Net::HTTPHeader
   end
   def range=(r, e=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def range_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       type: ::T.untyped,
       params: ::T.untyped,
@@ -2552,7 +2552,7 @@ module Net::HTTPHeader
   end
   def set_content_type(type, params=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       params: ::T.untyped,
       enctype: ::T.untyped,
@@ -2562,7 +2562,7 @@ module Net::HTTPHeader
   end
   def set_form(params, enctype=T.unsafe(nil), formopt=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       params: ::T.untyped,
       sep: ::T.untyped,
@@ -2571,7 +2571,7 @@ module Net::HTTPHeader
   end
   def set_form_data(params, sep=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       r: ::T.untyped,
       e: ::T.untyped,
@@ -2580,16 +2580,16 @@ module Net::HTTPHeader
   end
   def set_range(r, e=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sub_type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_hash(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def type_params(); end
 end
 
@@ -2722,7 +2722,7 @@ class Net::HTTPRedirection < Net::HTTPResponse
 end
 
 class Net::HTTPRequest < Net::HTTPGenericRequest
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       initheader: ::T.untyped,
@@ -2767,10 +2767,10 @@ class Net::HTTPResponse
   CODE_CLASS_TO_OBJ = ::T.let(nil, ::T.untyped)
   CODE_TO_OBJ = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def body(); end
 
-  Sorbet.sig do
+  sig do
     params(
       value: ::T.untyped,
     )
@@ -2778,16 +2778,16 @@ class Net::HTTPResponse
   end
   def body=(value); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def code(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def code_type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def decode_content(); end
 
-  Sorbet.sig do
+  sig do
     params(
       decode_content: ::T.untyped,
     )
@@ -2795,22 +2795,22 @@ class Net::HTTPResponse
   end
   def decode_content=(decode_content); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def entity(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error!(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def error_type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def header(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def http_version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       httpv: ::T.untyped,
       code: ::T.untyped,
@@ -2820,16 +2820,16 @@ class Net::HTTPResponse
   end
   def initialize(httpv, code, msg); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def message(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def msg(); end
 
-  Sorbet.sig do
+  sig do
     params(
       dest: ::T.untyped,
       block: ::T.untyped,
@@ -2838,10 +2838,10 @@ class Net::HTTPResponse
   end
   def read_body(dest=T.unsafe(nil), &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def read_header(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sock: ::T.untyped,
       reqmethodallowbody: ::T.untyped,
@@ -2850,13 +2850,13 @@ class Net::HTTPResponse
   end
   def reading_body(sock, reqmethodallowbody); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def response(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def uri(); end
 
-  Sorbet.sig do
+  sig do
     params(
       uri: ::T.untyped,
     )
@@ -2864,16 +2864,16 @@ class Net::HTTPResponse
   end
   def uri=(uri); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.body_permitted?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.exception_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sock: ::T.untyped,
     )
@@ -2883,10 +2883,10 @@ class Net::HTTPResponse
 end
 
 class Net::HTTPResponse::Inflater
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def finish(); end
 
-  Sorbet.sig do
+  sig do
     params(
       dest: ::T.untyped,
     )
@@ -2894,7 +2894,7 @@ class Net::HTTPResponse::Inflater
   end
   def inflate_adapter(dest); end
 
-  Sorbet.sig do
+  sig do
     params(
       socket: ::T.untyped,
     )
@@ -2902,7 +2902,7 @@ class Net::HTTPResponse::Inflater
   end
   def initialize(socket); end
 
-  Sorbet.sig do
+  sig do
     params(
       clen: ::T.untyped,
       dest: ::T.untyped,
@@ -2912,7 +2912,7 @@ class Net::HTTPResponse::Inflater
   end
   def read(clen, dest, ignore_eof=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       dest: ::T.untyped,
     )
@@ -3023,7 +3023,7 @@ class Net::IMAP
   SSL_PORT = ::T.let(nil, ::T.untyped)
   UNMARKED = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       handler: ::T.untyped,
     )
@@ -3031,7 +3031,7 @@ class Net::IMAP
   end
   def add_response_handler(handler=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
       message: ::T.untyped,
@@ -3042,7 +3042,7 @@ class Net::IMAP
   end
   def append(mailbox, message, flags=T.unsafe(nil), date_time=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       auth_type: ::T.untyped,
       args: ::T.untyped,
@@ -3051,16 +3051,16 @@ class Net::IMAP
   end
   def authenticate(auth_type, *args); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capability(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def check(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def client_thread(); end
 
-  Sorbet.sig do
+  sig do
     params(
       client_thread: ::T.untyped,
     )
@@ -3068,10 +3068,10 @@ class Net::IMAP
   end
   def client_thread=(client_thread); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close(); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3080,7 +3080,7 @@ class Net::IMAP
   end
   def copy(set, mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3088,7 +3088,7 @@ class Net::IMAP
   end
   def create(mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3096,13 +3096,13 @@ class Net::IMAP
   end
   def delete(mailbox); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disconnect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disconnected?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3110,10 +3110,10 @@ class Net::IMAP
   end
   def examine(mailbox); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def expunge(); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       attr: ::T.untyped,
@@ -3122,7 +3122,7 @@ class Net::IMAP
   end
   def fetch(set, attr); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3130,7 +3130,7 @@ class Net::IMAP
   end
   def getacl(mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3138,7 +3138,7 @@ class Net::IMAP
   end
   def getquota(mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3146,10 +3146,10 @@ class Net::IMAP
   end
   def getquotaroot(mailbox); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def greeting(); end
 
-  Sorbet.sig do
+  sig do
     params(
       timeout: ::T.untyped,
       response_handler: ::T.untyped,
@@ -3158,10 +3158,10 @@ class Net::IMAP
   end
   def idle(timeout=T.unsafe(nil), &response_handler); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def idle_done(); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port_or_options: ::T.untyped,
@@ -3173,7 +3173,7 @@ class Net::IMAP
   end
   def initialize(host, port_or_options=T.unsafe(nil), usessl=T.unsafe(nil), certs=T.unsafe(nil), verify=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       refname: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3182,7 +3182,7 @@ class Net::IMAP
   end
   def list(refname, mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       password: ::T.untyped,
@@ -3191,10 +3191,10 @@ class Net::IMAP
   end
   def login(user, password); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def logout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       refname: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3203,7 +3203,7 @@ class Net::IMAP
   end
   def lsub(refname, mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3212,10 +3212,10 @@ class Net::IMAP
   end
   def move(set, mailbox); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def noop(); end
 
-  Sorbet.sig do
+  sig do
     params(
       handler: ::T.untyped,
     )
@@ -3223,7 +3223,7 @@ class Net::IMAP
   end
   def remove_response_handler(handler); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
       newname: ::T.untyped,
@@ -3232,13 +3232,13 @@ class Net::IMAP
   end
   def rename(mailbox, newname); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def response_handlers(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def responses(); end
 
-  Sorbet.sig do
+  sig do
     params(
       keys: ::T.untyped,
       charset: ::T.untyped,
@@ -3247,7 +3247,7 @@ class Net::IMAP
   end
   def search(keys, charset=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3255,7 +3255,7 @@ class Net::IMAP
   end
   def select(mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
       user: ::T.untyped,
@@ -3265,7 +3265,7 @@ class Net::IMAP
   end
   def setacl(mailbox, user, rights); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
       quota: ::T.untyped,
@@ -3274,7 +3274,7 @@ class Net::IMAP
   end
   def setquota(mailbox, quota); end
 
-  Sorbet.sig do
+  sig do
     params(
       sort_keys: ::T.untyped,
       search_keys: ::T.untyped,
@@ -3284,7 +3284,7 @@ class Net::IMAP
   end
   def sort(sort_keys, search_keys, charset); end
 
-  Sorbet.sig do
+  sig do
     params(
       options: ::T.untyped,
       verify: ::T.untyped,
@@ -3293,7 +3293,7 @@ class Net::IMAP
   end
   def starttls(options=T.unsafe(nil), verify=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
       attr: ::T.untyped,
@@ -3302,7 +3302,7 @@ class Net::IMAP
   end
   def status(mailbox, attr); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       attr: ::T.untyped,
@@ -3312,7 +3312,7 @@ class Net::IMAP
   end
   def store(set, attr, flags); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3320,7 +3320,7 @@ class Net::IMAP
   end
   def subscribe(mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       algorithm: ::T.untyped,
       search_keys: ::T.untyped,
@@ -3330,7 +3330,7 @@ class Net::IMAP
   end
   def thread(algorithm, search_keys, charset); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3339,7 +3339,7 @@ class Net::IMAP
   end
   def uid_copy(set, mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       attr: ::T.untyped,
@@ -3348,7 +3348,7 @@ class Net::IMAP
   end
   def uid_fetch(set, attr); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3357,7 +3357,7 @@ class Net::IMAP
   end
   def uid_move(set, mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       keys: ::T.untyped,
       charset: ::T.untyped,
@@ -3366,7 +3366,7 @@ class Net::IMAP
   end
   def uid_search(keys, charset=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       sort_keys: ::T.untyped,
       search_keys: ::T.untyped,
@@ -3376,7 +3376,7 @@ class Net::IMAP
   end
   def uid_sort(sort_keys, search_keys, charset); end
 
-  Sorbet.sig do
+  sig do
     params(
       set: ::T.untyped,
       attr: ::T.untyped,
@@ -3386,7 +3386,7 @@ class Net::IMAP
   end
   def uid_store(set, attr, flags); end
 
-  Sorbet.sig do
+  sig do
     params(
       algorithm: ::T.untyped,
       search_keys: ::T.untyped,
@@ -3396,7 +3396,7 @@ class Net::IMAP
   end
   def uid_thread(algorithm, search_keys, charset); end
 
-  Sorbet.sig do
+  sig do
     params(
       mailbox: ::T.untyped,
     )
@@ -3404,7 +3404,7 @@ class Net::IMAP
   end
   def unsubscribe(mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       refname: ::T.untyped,
       mailbox: ::T.untyped,
@@ -3413,7 +3413,7 @@ class Net::IMAP
   end
   def xlist(refname, mailbox); end
 
-  Sorbet.sig do
+  sig do
     params(
       auth_type: ::T.untyped,
       authenticator: ::T.untyped,
@@ -3422,10 +3422,10 @@ class Net::IMAP
   end
   def self.add_authenticator(auth_type, authenticator); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.debug(); end
 
-  Sorbet.sig do
+  sig do
     params(
       val: ::T.untyped,
     )
@@ -3433,7 +3433,7 @@ class Net::IMAP
   end
   def self.debug=(val); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -3441,22 +3441,22 @@ class Net::IMAP
   end
   def self.decode_utf7(s); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_imap_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_imaps_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_ssl_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_tls_port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       s: ::T.untyped,
     )
@@ -3464,7 +3464,7 @@ class Net::IMAP
   end
   def self.encode_utf7(s); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -3472,7 +3472,7 @@ class Net::IMAP
   end
   def self.format_date(time); end
 
-  Sorbet.sig do
+  sig do
     params(
       time: ::T.untyped,
     )
@@ -3480,10 +3480,10 @@ class Net::IMAP
   end
   def self.format_datetime(time); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.max_flag_count(); end
 
-  Sorbet.sig do
+  sig do
     params(
       count: ::T.untyped,
     )
@@ -3493,10 +3493,10 @@ class Net::IMAP
 end
 
 class Net::IMAP::Address < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def host(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3504,10 +3504,10 @@ class Net::IMAP::Address < Struct
   end
   def host=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def mailbox(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3515,10 +3515,10 @@ class Net::IMAP::Address < Struct
   end
   def mailbox=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3526,10 +3526,10 @@ class Net::IMAP::Address < Struct
   end
   def name=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def route(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3537,7 +3537,7 @@ class Net::IMAP::Address < Struct
   end
   def route=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3545,10 +3545,10 @@ class Net::IMAP::Address < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3558,7 +3558,7 @@ class Net::IMAP::Address < Struct
 end
 
 class Net::IMAP::Atom
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -3566,7 +3566,7 @@ class Net::IMAP::Atom
   end
   def initialize(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       imap: ::T.untyped,
     )
@@ -3574,7 +3574,7 @@ class Net::IMAP::Atom
   end
   def send_data(imap); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def validate(); end
 end
 
@@ -3582,10 +3582,10 @@ class Net::IMAP::BadResponseError < Net::IMAP::ResponseError
 end
 
 class Net::IMAP::BodyTypeAttachment
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3593,13 +3593,13 @@ class Net::IMAP::BodyTypeAttachment
   end
   def media_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def param(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3607,10 +3607,10 @@ class Net::IMAP::BodyTypeAttachment
   end
   def param=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subtype(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3620,10 +3620,10 @@ class Net::IMAP::BodyTypeAttachment
 end
 
 class Net::IMAP::BodyTypeBasic
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3631,10 +3631,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def content_id=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def description(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3642,10 +3642,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def description=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disposition(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3653,10 +3653,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def disposition=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def encoding(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3664,10 +3664,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def encoding=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extension(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3675,10 +3675,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def extension=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def language(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3686,10 +3686,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def language=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def md5(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3697,13 +3697,13 @@ class Net::IMAP::BodyTypeBasic
   end
   def md5=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_subtype(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3711,13 +3711,13 @@ class Net::IMAP::BodyTypeBasic
   end
   def media_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def param(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3725,10 +3725,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def param=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3736,10 +3736,10 @@ class Net::IMAP::BodyTypeBasic
   end
   def size=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subtype(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3749,10 +3749,10 @@ class Net::IMAP::BodyTypeBasic
 end
 
 class Net::IMAP::BodyTypeExtension
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3760,10 +3760,10 @@ class Net::IMAP::BodyTypeExtension
   end
   def content_id=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def description(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3771,10 +3771,10 @@ class Net::IMAP::BodyTypeExtension
   end
   def description=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def encoding(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3782,10 +3782,10 @@ class Net::IMAP::BodyTypeExtension
   end
   def encoding=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3793,13 +3793,13 @@ class Net::IMAP::BodyTypeExtension
   end
   def media_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def params(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3807,10 +3807,10 @@ class Net::IMAP::BodyTypeExtension
   end
   def params=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3818,10 +3818,10 @@ class Net::IMAP::BodyTypeExtension
   end
   def size=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subtype(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3831,10 +3831,10 @@ class Net::IMAP::BodyTypeExtension
 end
 
 class Net::IMAP::BodyTypeMessage
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def body(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3842,10 +3842,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def body=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3853,10 +3853,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def content_id=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def description(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3864,10 +3864,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def description=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disposition(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3875,10 +3875,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def disposition=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def encoding(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3886,10 +3886,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def encoding=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def envelope(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3897,10 +3897,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def envelope=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extension(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3908,10 +3908,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def extension=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def language(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3919,10 +3919,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def language=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def lines(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3930,10 +3930,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def lines=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def md5(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3941,13 +3941,13 @@ class Net::IMAP::BodyTypeMessage
   end
   def md5=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_subtype(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3955,13 +3955,13 @@ class Net::IMAP::BodyTypeMessage
   end
   def media_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def param(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3969,10 +3969,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def param=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3980,10 +3980,10 @@ class Net::IMAP::BodyTypeMessage
   end
   def size=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subtype(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -3993,10 +3993,10 @@ class Net::IMAP::BodyTypeMessage
 end
 
 class Net::IMAP::BodyTypeMultipart
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disposition(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4004,10 +4004,10 @@ class Net::IMAP::BodyTypeMultipart
   end
   def disposition=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extension(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4015,10 +4015,10 @@ class Net::IMAP::BodyTypeMultipart
   end
   def extension=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def language(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4026,13 +4026,13 @@ class Net::IMAP::BodyTypeMultipart
   end
   def language=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_subtype(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4040,13 +4040,13 @@ class Net::IMAP::BodyTypeMultipart
   end
   def media_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def param(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4054,10 +4054,10 @@ class Net::IMAP::BodyTypeMultipart
   end
   def param=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def parts(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4065,10 +4065,10 @@ class Net::IMAP::BodyTypeMultipart
   end
   def parts=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subtype(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4078,10 +4078,10 @@ class Net::IMAP::BodyTypeMultipart
 end
 
 class Net::IMAP::BodyTypeText
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def content_id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4089,10 +4089,10 @@ class Net::IMAP::BodyTypeText
   end
   def content_id=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def description(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4100,10 +4100,10 @@ class Net::IMAP::BodyTypeText
   end
   def description=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disposition(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4111,10 +4111,10 @@ class Net::IMAP::BodyTypeText
   end
   def disposition=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def encoding(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4122,10 +4122,10 @@ class Net::IMAP::BodyTypeText
   end
   def encoding=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def extension(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4133,10 +4133,10 @@ class Net::IMAP::BodyTypeText
   end
   def extension=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def language(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4144,10 +4144,10 @@ class Net::IMAP::BodyTypeText
   end
   def language=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def lines(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4155,10 +4155,10 @@ class Net::IMAP::BodyTypeText
   end
   def lines=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def md5(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4166,13 +4166,13 @@ class Net::IMAP::BodyTypeText
   end
   def md5=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_subtype(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def media_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4180,13 +4180,13 @@ class Net::IMAP::BodyTypeText
   end
   def media_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def multipart?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def param(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4194,10 +4194,10 @@ class Net::IMAP::BodyTypeText
   end
   def param=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4205,10 +4205,10 @@ class Net::IMAP::BodyTypeText
   end
   def size=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subtype(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4221,10 +4221,10 @@ class Net::IMAP::ByeResponseError < Net::IMAP::ResponseError
 end
 
 class Net::IMAP::ContentDisposition < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def dsp_type(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4232,10 +4232,10 @@ class Net::IMAP::ContentDisposition < Struct
   end
   def dsp_type=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def param(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4243,7 +4243,7 @@ class Net::IMAP::ContentDisposition < Struct
   end
   def param=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4251,10 +4251,10 @@ class Net::IMAP::ContentDisposition < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4264,10 +4264,10 @@ class Net::IMAP::ContentDisposition < Struct
 end
 
 class Net::IMAP::ContinuationRequest < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4275,10 +4275,10 @@ class Net::IMAP::ContinuationRequest < Struct
   end
   def data=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def raw_data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4286,7 +4286,7 @@ class Net::IMAP::ContinuationRequest < Struct
   end
   def raw_data=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4294,10 +4294,10 @@ class Net::IMAP::ContinuationRequest < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4307,7 +4307,7 @@ class Net::IMAP::ContinuationRequest < Struct
 end
 
 class Net::IMAP::CramMD5Authenticator
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       password: ::T.untyped,
@@ -4316,7 +4316,7 @@ class Net::IMAP::CramMD5Authenticator
   end
   def initialize(user, password); end
 
-  Sorbet.sig do
+  sig do
     params(
       challenge: ::T.untyped,
     )
@@ -4332,7 +4332,7 @@ class Net::IMAP::DigestMD5Authenticator
   STAGE_ONE = ::T.let(nil, ::T.untyped)
   STAGE_TWO = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       password: ::T.untyped,
@@ -4342,7 +4342,7 @@ class Net::IMAP::DigestMD5Authenticator
   end
   def initialize(user, password, authname=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       challenge: ::T.untyped,
     )
@@ -4352,10 +4352,10 @@ class Net::IMAP::DigestMD5Authenticator
 end
 
 class Net::IMAP::Envelope < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def bcc(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4363,10 +4363,10 @@ class Net::IMAP::Envelope < Struct
   end
   def bcc=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cc(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4374,10 +4374,10 @@ class Net::IMAP::Envelope < Struct
   end
   def cc=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def date(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4385,10 +4385,10 @@ class Net::IMAP::Envelope < Struct
   end
   def date=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def from(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4396,10 +4396,10 @@ class Net::IMAP::Envelope < Struct
   end
   def from=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def in_reply_to(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4407,10 +4407,10 @@ class Net::IMAP::Envelope < Struct
   end
   def in_reply_to=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def message_id(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4418,10 +4418,10 @@ class Net::IMAP::Envelope < Struct
   end
   def message_id=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reply_to(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4429,10 +4429,10 @@ class Net::IMAP::Envelope < Struct
   end
   def reply_to=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sender(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4440,10 +4440,10 @@ class Net::IMAP::Envelope < Struct
   end
   def sender=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def subject(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4451,10 +4451,10 @@ class Net::IMAP::Envelope < Struct
   end
   def subject=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4462,7 +4462,7 @@ class Net::IMAP::Envelope < Struct
   end
   def to=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4470,10 +4470,10 @@ class Net::IMAP::Envelope < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4486,10 +4486,10 @@ class Net::IMAP::Error < StandardError
 end
 
 class Net::IMAP::FetchData < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def attr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4497,10 +4497,10 @@ class Net::IMAP::FetchData < Struct
   end
   def attr=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def seqno(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4508,7 +4508,7 @@ class Net::IMAP::FetchData < Struct
   end
   def seqno=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4516,10 +4516,10 @@ class Net::IMAP::FetchData < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4532,7 +4532,7 @@ class Net::IMAP::FlagCountError < Net::IMAP::Error
 end
 
 class Net::IMAP::Literal
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -4540,7 +4540,7 @@ class Net::IMAP::Literal
   end
   def initialize(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       imap: ::T.untyped,
     )
@@ -4548,7 +4548,7 @@ class Net::IMAP::Literal
   end
   def send_data(imap); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def validate(); end
 end
 
@@ -4556,7 +4556,7 @@ class Net::IMAP::LoginAuthenticator
   STATE_PASSWORD = ::T.let(nil, ::T.untyped)
   STATE_USER = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       password: ::T.untyped,
@@ -4565,7 +4565,7 @@ class Net::IMAP::LoginAuthenticator
   end
   def initialize(user, password); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -4575,10 +4575,10 @@ class Net::IMAP::LoginAuthenticator
 end
 
 class Net::IMAP::MailboxACLItem < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def mailbox(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4586,10 +4586,10 @@ class Net::IMAP::MailboxACLItem < Struct
   end
   def mailbox=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def rights(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4597,10 +4597,10 @@ class Net::IMAP::MailboxACLItem < Struct
   end
   def rights=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def user(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4608,7 +4608,7 @@ class Net::IMAP::MailboxACLItem < Struct
   end
   def user=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4616,10 +4616,10 @@ class Net::IMAP::MailboxACLItem < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4629,10 +4629,10 @@ class Net::IMAP::MailboxACLItem < Struct
 end
 
 class Net::IMAP::MailboxList < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def attr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4640,10 +4640,10 @@ class Net::IMAP::MailboxList < Struct
   end
   def attr=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def delim(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4651,10 +4651,10 @@ class Net::IMAP::MailboxList < Struct
   end
   def delim=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4662,7 +4662,7 @@ class Net::IMAP::MailboxList < Struct
   end
   def name=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4670,10 +4670,10 @@ class Net::IMAP::MailboxList < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4683,10 +4683,10 @@ class Net::IMAP::MailboxList < Struct
 end
 
 class Net::IMAP::MailboxQuota < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def mailbox(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4694,10 +4694,10 @@ class Net::IMAP::MailboxQuota < Struct
   end
   def mailbox=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def quota(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4705,10 +4705,10 @@ class Net::IMAP::MailboxQuota < Struct
   end
   def quota=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def usage(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4716,7 +4716,7 @@ class Net::IMAP::MailboxQuota < Struct
   end
   def usage=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4724,10 +4724,10 @@ class Net::IMAP::MailboxQuota < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4737,10 +4737,10 @@ class Net::IMAP::MailboxQuota < Struct
 end
 
 class Net::IMAP::MailboxQuotaRoot < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def mailbox(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4748,10 +4748,10 @@ class Net::IMAP::MailboxQuotaRoot < Struct
   end
   def mailbox=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def quotaroots(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4759,7 +4759,7 @@ class Net::IMAP::MailboxQuotaRoot < Struct
   end
   def quotaroots=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4767,10 +4767,10 @@ class Net::IMAP::MailboxQuotaRoot < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4780,7 +4780,7 @@ class Net::IMAP::MailboxQuotaRoot < Struct
 end
 
 class Net::IMAP::MessageSet
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -4788,7 +4788,7 @@ class Net::IMAP::MessageSet
   end
   def initialize(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       imap: ::T.untyped,
     )
@@ -4796,7 +4796,7 @@ class Net::IMAP::MessageSet
   end
   def send_data(imap); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def validate(); end
 end
 
@@ -4804,7 +4804,7 @@ class Net::IMAP::NoResponseError < Net::IMAP::ResponseError
 end
 
 module Net::IMAP::NumValidator
-  Sorbet.sig do
+  sig do
     params(
       num: ::T.untyped,
     )
@@ -4812,7 +4812,7 @@ module Net::IMAP::NumValidator
   end
   def self.ensure_number(num); end
 
-  Sorbet.sig do
+  sig do
     params(
       num: ::T.untyped,
     )
@@ -4820,7 +4820,7 @@ module Net::IMAP::NumValidator
   end
   def self.ensure_nz_number(num); end
 
-  Sorbet.sig do
+  sig do
     params(
       num: ::T.untyped,
     )
@@ -4828,7 +4828,7 @@ module Net::IMAP::NumValidator
   end
   def self.valid_number?(num); end
 
-  Sorbet.sig do
+  sig do
     params(
       num: ::T.untyped,
     )
@@ -4838,7 +4838,7 @@ module Net::IMAP::NumValidator
 end
 
 class Net::IMAP::PlainAuthenticator
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       password: ::T.untyped,
@@ -4847,7 +4847,7 @@ class Net::IMAP::PlainAuthenticator
   end
   def initialize(user, password); end
 
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -4857,7 +4857,7 @@ class Net::IMAP::PlainAuthenticator
 end
 
 class Net::IMAP::QuotedString
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -4865,7 +4865,7 @@ class Net::IMAP::QuotedString
   end
   def initialize(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       imap: ::T.untyped,
     )
@@ -4873,12 +4873,12 @@ class Net::IMAP::QuotedString
   end
   def send_data(imap); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def validate(); end
 end
 
 class Net::IMAP::RawData
-  Sorbet.sig do
+  sig do
     params(
       data: ::T.untyped,
     )
@@ -4886,7 +4886,7 @@ class Net::IMAP::RawData
   end
   def initialize(data); end
 
-  Sorbet.sig do
+  sig do
     params(
       imap: ::T.untyped,
     )
@@ -4894,15 +4894,15 @@ class Net::IMAP::RawData
   end
   def send_data(imap); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def validate(); end
 end
 
 class Net::IMAP::ResponseCode < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4910,10 +4910,10 @@ class Net::IMAP::ResponseCode < Struct
   end
   def data=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4921,7 +4921,7 @@ class Net::IMAP::ResponseCode < Struct
   end
   def name=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4929,10 +4929,10 @@ class Net::IMAP::ResponseCode < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -4942,7 +4942,7 @@ class Net::IMAP::ResponseCode < Struct
 end
 
 class Net::IMAP::ResponseError < Net::IMAP::Error
-  Sorbet.sig do
+  sig do
     params(
       response: ::T.untyped,
     )
@@ -4950,10 +4950,10 @@ class Net::IMAP::ResponseError < Net::IMAP::Error
   end
   def initialize(response); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def response(); end
 
-  Sorbet.sig do
+  sig do
     params(
       response: ::T.untyped,
     )
@@ -4998,10 +4998,10 @@ class Net::IMAP::ResponseParser
   T_STAR = ::T.let(nil, ::T.untyped)
   T_TEXT = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def initialize(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -5011,10 +5011,10 @@ class Net::IMAP::ResponseParser
 end
 
 class Net::IMAP::ResponseParser::Token < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def symbol(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5022,10 +5022,10 @@ class Net::IMAP::ResponseParser::Token < Struct
   end
   def symbol=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def value(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5033,7 +5033,7 @@ class Net::IMAP::ResponseParser::Token < Struct
   end
   def value=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5041,10 +5041,10 @@ class Net::IMAP::ResponseParser::Token < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5054,10 +5054,10 @@ class Net::IMAP::ResponseParser::Token < Struct
 end
 
 class Net::IMAP::ResponseText < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def code(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5065,10 +5065,10 @@ class Net::IMAP::ResponseText < Struct
   end
   def code=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def text(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5076,7 +5076,7 @@ class Net::IMAP::ResponseText < Struct
   end
   def text=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5084,10 +5084,10 @@ class Net::IMAP::ResponseText < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5097,10 +5097,10 @@ class Net::IMAP::ResponseText < Struct
 end
 
 class Net::IMAP::StatusData < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def attr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5108,10 +5108,10 @@ class Net::IMAP::StatusData < Struct
   end
   def attr=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def mailbox(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5119,7 +5119,7 @@ class Net::IMAP::StatusData < Struct
   end
   def mailbox=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5127,10 +5127,10 @@ class Net::IMAP::StatusData < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5140,10 +5140,10 @@ class Net::IMAP::StatusData < Struct
 end
 
 class Net::IMAP::TaggedResponse < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5151,10 +5151,10 @@ class Net::IMAP::TaggedResponse < Struct
   end
   def data=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5162,10 +5162,10 @@ class Net::IMAP::TaggedResponse < Struct
   end
   def name=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def raw_data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5173,10 +5173,10 @@ class Net::IMAP::TaggedResponse < Struct
   end
   def raw_data=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tag(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5184,7 +5184,7 @@ class Net::IMAP::TaggedResponse < Struct
   end
   def tag=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5192,10 +5192,10 @@ class Net::IMAP::TaggedResponse < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5205,10 +5205,10 @@ class Net::IMAP::TaggedResponse < Struct
 end
 
 class Net::IMAP::ThreadMember < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def children(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5216,10 +5216,10 @@ class Net::IMAP::ThreadMember < Struct
   end
   def children=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def seqno(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5227,7 +5227,7 @@ class Net::IMAP::ThreadMember < Struct
   end
   def seqno=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5235,10 +5235,10 @@ class Net::IMAP::ThreadMember < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5248,10 +5248,10 @@ class Net::IMAP::ThreadMember < Struct
 end
 
 class Net::IMAP::UntaggedResponse < Struct
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5259,10 +5259,10 @@ class Net::IMAP::UntaggedResponse < Struct
   end
   def data=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5270,10 +5270,10 @@ class Net::IMAP::UntaggedResponse < Struct
   end
   def name=(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def raw_data(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5281,7 +5281,7 @@ class Net::IMAP::UntaggedResponse < Struct
   end
   def raw_data=(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5289,10 +5289,10 @@ class Net::IMAP::UntaggedResponse < Struct
   end
   def self.[](*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.members(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5302,13 +5302,13 @@ class Net::IMAP::UntaggedResponse < Struct
 end
 
 class Net::InternetMessageIO < Net::BufferedIO
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_list_item(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def each_message_chunk(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -5316,7 +5316,7 @@ class Net::InternetMessageIO < Net::BufferedIO
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       src: ::T.untyped,
     )
@@ -5324,7 +5324,7 @@ class Net::InternetMessageIO < Net::BufferedIO
   end
   def write_message(src); end
 
-  Sorbet.sig do
+  sig do
     params(
       src: ::T.untyped,
     )
@@ -5332,7 +5332,7 @@ class Net::InternetMessageIO < Net::BufferedIO
   end
   def write_message_0(src); end
 
-  Sorbet.sig do
+  sig do
     params(
       block: ::T.untyped,
     )
@@ -5369,7 +5369,7 @@ class Net::ProtoUnknownError < Net::ProtocolError
 end
 
 class Net::Protocol
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       val: ::T.untyped,
@@ -5383,7 +5383,7 @@ class Net::ProtocolError < StandardError
 end
 
 class Net::ReadAdapter
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -5391,7 +5391,7 @@ class Net::ReadAdapter
   end
   def <<(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       block: ::T.untyped,
     )
@@ -5399,7 +5399,7 @@ class Net::ReadAdapter
   end
   def initialize(block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 end
 
@@ -5413,10 +5413,10 @@ class Net::SMTP < Net::Protocol
   OMASK = ::T.let(nil, ::T.untyped)
   Revision = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def address(); end
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       secret: ::T.untyped,
@@ -5425,7 +5425,7 @@ class Net::SMTP < Net::Protocol
   end
   def auth_cram_md5(user, secret); end
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       secret: ::T.untyped,
@@ -5434,7 +5434,7 @@ class Net::SMTP < Net::Protocol
   end
   def auth_login(user, secret); end
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       secret: ::T.untyped,
@@ -5443,7 +5443,7 @@ class Net::SMTP < Net::Protocol
   end
   def auth_plain(user, secret); end
 
-  Sorbet.sig do
+  sig do
     params(
       user: ::T.untyped,
       secret: ::T.untyped,
@@ -5453,22 +5453,22 @@ class Net::SMTP < Net::Protocol
   end
   def authenticate(user, secret, authtype=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capable_auth_types(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capable_cram_md5_auth?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capable_login_auth?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capable_plain_auth?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capable_starttls?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       msgstr: ::T.untyped,
       block: ::T.untyped,
@@ -5477,7 +5477,7 @@ class Net::SMTP < Net::Protocol
   end
   def data(msgstr=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       arg: ::T.untyped,
     )
@@ -5485,16 +5485,16 @@ class Net::SMTP < Net::Protocol
   end
   def debug_output=(arg); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disable_ssl(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disable_starttls(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def disable_tls(); end
 
-  Sorbet.sig do
+  sig do
     params(
       domain: ::T.untyped,
     )
@@ -5502,7 +5502,7 @@ class Net::SMTP < Net::Protocol
   end
   def ehlo(domain); end
 
-  Sorbet.sig do
+  sig do
     params(
       context: ::T.untyped,
     )
@@ -5510,7 +5510,7 @@ class Net::SMTP < Net::Protocol
   end
   def enable_ssl(context=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       context: ::T.untyped,
     )
@@ -5518,7 +5518,7 @@ class Net::SMTP < Net::Protocol
   end
   def enable_starttls(context=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       context: ::T.untyped,
     )
@@ -5526,7 +5526,7 @@ class Net::SMTP < Net::Protocol
   end
   def enable_starttls_auto(context=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       context: ::T.untyped,
     )
@@ -5534,10 +5534,10 @@ class Net::SMTP < Net::Protocol
   end
   def enable_tls(context=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def esmtp(); end
 
-  Sorbet.sig do
+  sig do
     params(
       esmtp: ::T.untyped,
     )
@@ -5545,13 +5545,13 @@ class Net::SMTP < Net::Protocol
   end
   def esmtp=(esmtp); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def esmtp?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def finish(); end
 
-  Sorbet.sig do
+  sig do
     params(
       domain: ::T.untyped,
     )
@@ -5559,7 +5559,7 @@ class Net::SMTP < Net::Protocol
   end
   def helo(domain); end
 
-  Sorbet.sig do
+  sig do
     params(
       address: ::T.untyped,
       port: ::T.untyped,
@@ -5568,10 +5568,10 @@ class Net::SMTP < Net::Protocol
   end
   def initialize(address, port=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig do
+  sig do
     params(
       from_addr: ::T.untyped,
     )
@@ -5579,7 +5579,7 @@ class Net::SMTP < Net::Protocol
   end
   def mailfrom(from_addr); end
 
-  Sorbet.sig do
+  sig do
     params(
       from_addr: ::T.untyped,
       to_addrs: ::T.untyped,
@@ -5589,10 +5589,10 @@ class Net::SMTP < Net::Protocol
   end
   def open_message_stream(from_addr, *to_addrs, &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def open_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       open_timeout: ::T.untyped,
     )
@@ -5600,13 +5600,13 @@ class Net::SMTP < Net::Protocol
   end
   def open_timeout=(open_timeout); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def quit(); end
 
-  Sorbet.sig do
+  sig do
     params(
       to_addr: ::T.untyped,
     )
@@ -5614,7 +5614,7 @@ class Net::SMTP < Net::Protocol
   end
   def rcptto(to_addr); end
 
-  Sorbet.sig do
+  sig do
     params(
       to_addrs: ::T.untyped,
     )
@@ -5622,10 +5622,10 @@ class Net::SMTP < Net::Protocol
   end
   def rcptto_list(to_addrs); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def read_timeout(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sec: ::T.untyped,
     )
@@ -5633,7 +5633,7 @@ class Net::SMTP < Net::Protocol
   end
   def read_timeout=(sec); end
 
-  Sorbet.sig do
+  sig do
     params(
       from_addr: ::T.untyped,
       to_addrs: ::T.untyped,
@@ -5643,10 +5643,10 @@ class Net::SMTP < Net::Protocol
   end
   def ready(from_addr, *to_addrs, &block); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def rset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       msgstr: ::T.untyped,
       from_addr: ::T.untyped,
@@ -5656,7 +5656,7 @@ class Net::SMTP < Net::Protocol
   end
   def send_mail(msgstr, from_addr, *to_addrs); end
 
-  Sorbet.sig do
+  sig do
     params(
       msgstr: ::T.untyped,
       from_addr: ::T.untyped,
@@ -5666,7 +5666,7 @@ class Net::SMTP < Net::Protocol
   end
   def send_message(msgstr, from_addr, *to_addrs); end
 
-  Sorbet.sig do
+  sig do
     params(
       msgstr: ::T.untyped,
       from_addr: ::T.untyped,
@@ -5676,7 +5676,7 @@ class Net::SMTP < Net::Protocol
   end
   def sendmail(msgstr, from_addr, *to_addrs); end
 
-  Sorbet.sig do
+  sig do
     params(
       arg: ::T.untyped,
     )
@@ -5684,10 +5684,10 @@ class Net::SMTP < Net::Protocol
   end
   def set_debug_output(arg); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ssl?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       helo: ::T.untyped,
       user: ::T.untyped,
@@ -5698,40 +5698,40 @@ class Net::SMTP < Net::Protocol
   end
   def start(helo=T.unsafe(nil), user=T.unsafe(nil), secret=T.unsafe(nil), authtype=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def started?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def starttls(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def starttls?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def starttls_always?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def starttls_auto?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def tls?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_ssl_context(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_ssl_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_submission_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.default_tls_port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       address: ::T.untyped,
       port: ::T.untyped,
@@ -5747,19 +5747,19 @@ class Net::SMTP < Net::Protocol
 end
 
 class Net::SMTP::Response
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def capabilities(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def continue?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def cram_md5_challenge(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def exception_class(); end
 
-  Sorbet.sig do
+  sig do
     params(
       status: ::T.untyped,
       string: ::T.untyped,
@@ -5768,22 +5768,22 @@ class Net::SMTP::Response
   end
   def initialize(status, string); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def message(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def status(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def status_type_char(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def string(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def success?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -5820,7 +5820,7 @@ class Net::SMTPUnsupportedCommand < Net::ProtocolError
 end
 
 class Net::WriteAdapter
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -5828,7 +5828,7 @@ class Net::WriteAdapter
   end
   def <<(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       socket: ::T.untyped,
       method: ::T.untyped,
@@ -5837,10 +5837,10 @@ class Net::WriteAdapter
   end
   def initialize(socket, method); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -5848,7 +5848,7 @@ class Net::WriteAdapter
   end
   def print(str); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -5856,7 +5856,7 @@ class Net::WriteAdapter
   end
   def printf(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -5864,7 +5864,7 @@ class Net::WriteAdapter
   end
   def puts(str=T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )

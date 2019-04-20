@@ -37,22 +37,22 @@ class Chalk::ODM::Mutator::Private::HashMutator
   extend T::Generic
   K = type_member
   V = type_member
-  Sorbet.sig {params(key: K, value: V).void}
+  sig {params(key: K, value: V).void}
   def []=(key, value)
   end
 end
 class Chalk::ODM::Mutator::Private::ArrayMutator
   extend T::Generic
   Elem = type_member
-  Sorbet.sig {params(value: Elem).void}
+  sig {params(value: Elem).void}
   def <<(value)
   end
-  Sorbet.sig {params(key: Integer, value: Elem).void}
+  sig {params(key: Integer, value: Elem).void}
   def []=(key, value)
   end
 end
 class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
-  Sorbet.sig {params(options: Hash).returns(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)}
+  sig {params(options: Hash).returns(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)}
   def initialize(options)
   end
 end
@@ -163,29 +163,29 @@ class Sorbet
   end
 end
 class T::Private::Methods::SigBuilder
-  Sorbet.sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def type_parameters(*params); end
-  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
+  sig {returns(T::Private::Methods::SigBuilder)}
   def generated; end
-  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
+  sig {returns(T::Private::Methods::SigBuilder)}
   def abstract; end
-  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
+  sig {returns(T::Private::Methods::SigBuilder)}
   def implementation; end
-  Sorbet.sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::SigBuilder)}
+  sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::SigBuilder)}
   def override(allow_incompatible: false); end
-  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
+  sig {returns(T::Private::Methods::SigBuilder)}
   def overridable; end
-  Sorbet.sig {params(type: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  sig {params(type: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def bind(type); end
-  Sorbet.sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  sig {params(params: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def params(params); end
-  Sorbet.sig {params(type: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  sig {params(type: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def returns(type); end
-  Sorbet.sig {returns(T::Private::Methods::SigBuilder)}
+  sig {returns(T::Private::Methods::SigBuilder)}
   def void; end
-  Sorbet.sig {params(notify: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  sig {params(notify: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def soft(notify:); end
-  Sorbet.sig {params(arg: T.untyped).returns(T::Private::Methods::SigBuilder)}
+  sig {params(arg: T.untyped).returns(T::Private::Methods::SigBuilder)}
   def checked(arg); end
 end
 module T::Sig
@@ -1014,18 +1014,18 @@ class Array < Object
     .returns(T.nilable(T::Array[Elem]))
   end
   def slice(arg0, arg1=T.unsafe(nil)); end
-  Sorbet.sig {returns(T.any(Elem, Integer))}
-  Sorbet.sig do
+  sig {returns(T.any(Elem, Integer))}
+  sig do
     type_parameters(:T).params(
       blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:T))
     ).returns(T.any(Integer, T.type_parameter(:T)))
   end
-  Sorbet.sig do
+  sig do
     type_parameters(:T)
       .params(arg0: T.type_parameter(:T))
       .returns(T.any(Elem, T.type_parameter(:T)))
   end
-  Sorbet.sig do
+  sig do
     type_parameters(:U).params(
       arg0: T.type_parameter(:U),
       blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U))

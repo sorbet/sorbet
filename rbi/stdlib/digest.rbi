@@ -3,7 +3,7 @@
 module Digest
   REQUIRE_MUTEX = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
     )
@@ -11,7 +11,7 @@ module Digest
   end
   def self.const_missing(name); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -21,7 +21,7 @@ module Digest
 end
 
 class Digest::Base < Digest::Class
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -29,16 +29,16 @@ class Digest::Base < Digest::Class
   end
   def <<(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def block_length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def digest_length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -49,10 +49,10 @@ end
 
 class Digest::Class
   include ::Digest::Instance
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def initialize(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
       args: ::T.untyped,
@@ -61,7 +61,7 @@ class Digest::Class
   end
   def self.base64digest(str, *args); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -69,7 +69,7 @@ class Digest::Class
   end
   def self.digest(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
       args: ::T.untyped,
@@ -78,7 +78,7 @@ class Digest::Class
   end
   def self.file(name, *args); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -88,7 +88,7 @@ class Digest::Class
 end
 
 module Digest::Instance
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -96,7 +96,7 @@ module Digest::Instance
   end
   def <<(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -104,7 +104,7 @@ module Digest::Instance
   end
   def ==(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -112,13 +112,13 @@ module Digest::Instance
   end
   def base64digest(str=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def base64digest!(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def block_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -126,13 +126,13 @@ module Digest::Instance
   end
   def digest(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def digest!(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def digest_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       name: ::T.untyped,
     )
@@ -140,7 +140,7 @@ module Digest::Instance
   end
   def file(name); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -148,28 +148,28 @@ module Digest::Instance
   end
   def hexdigest(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def hexdigest!(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def new(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reset(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def size(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -185,7 +185,7 @@ class Digest::SHA1 < Digest::Base
 end
 
 class Digest::SHA2 < Digest::Class
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )
@@ -193,13 +193,13 @@ class Digest::SHA2 < Digest::Class
   end
   def <<(str); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def block_length(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def digest_length(); end
 
-  Sorbet.sig do
+  sig do
     params(
       bitlen: ::T.untyped,
     )
@@ -207,13 +207,13 @@ class Digest::SHA2 < Digest::Class
   end
   def initialize(bitlen=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def reset(); end
 
-  Sorbet.sig do
+  sig do
     params(
       str: ::T.untyped,
     )

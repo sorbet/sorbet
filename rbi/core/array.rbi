@@ -783,7 +783,7 @@ class Array < Object
   #   T::Array[Float].new.sum #=> 0
   # @example returning {Elem}
   #   [1.0].sum #=> 1.0
-  Sorbet.sig {returns(T.any(Elem, Integer))}
+  sig {returns(T.any(Elem, Integer))}
   # {#sum} can optionally take a block to perform a function on each element of
   # the receiver before summation. (It will still return `0` for an empty
   # array.)
@@ -792,7 +792,7 @@ class Array < Object
   #   T::Array[Float].new.sum(&:to_f) #=> 0
   # @example returing generic type
   #   ['a', 'b'].sum{|t| t.ord.to_f} #=> 195.0
-  Sorbet.sig do
+  sig do
     type_parameters(:T).params(
       blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:T))
     ).returns(T.any(Integer, T.type_parameter(:T)))
@@ -805,7 +805,7 @@ class Array < Object
   #   [1.0].sum(1) #=> 2.0
   # @example returning generic type
   #   T::Array[Float].new.sum(1) #=> 1
-  Sorbet.sig do
+  sig do
     type_parameters(:T)
       .params(arg0: T.type_parameter(:T))
       .returns(T.any(Elem, T.type_parameter(:T)))
@@ -820,7 +820,7 @@ class Array < Object
   #   T::Array[Float].new.sum(1) {|t| Complex(t, 1)} #=> 1
   # @example this is valid ruby via coercion but does not typecheck
   #   [Complex(1, 2)].sum(1) {|t| 1.0} #=> 2.0
-  Sorbet.sig do
+  sig do
     type_parameters(:U).params(
       arg0: T.type_parameter(:U),
       blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U))

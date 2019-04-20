@@ -1,16 +1,16 @@
 # typed: strict
 
 class Addrinfo < Data
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def afamily(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def bind(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def canonname(); end
 
-  Sorbet.sig do
+  sig do
     params(
       timeout: ::T.untyped,
       block: ::T.untyped,
@@ -19,7 +19,7 @@ class Addrinfo < Data
   end
   def connect(timeout: T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
       timeout: ::T.untyped,
@@ -29,7 +29,7 @@ class Addrinfo < Data
   end
   def connect_from(*args, timeout: T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
       timeout: ::T.untyped,
@@ -39,7 +39,7 @@ class Addrinfo < Data
   end
   def connect_to(*args, timeout: T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       args: ::T.untyped,
     )
@@ -47,7 +47,7 @@ class Addrinfo < Data
   end
   def family_addrinfo(*args); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -55,7 +55,7 @@ class Addrinfo < Data
   end
   def getnameinfo(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -63,82 +63,82 @@ class Addrinfo < Data
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect_sockaddr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ip?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ip_address(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ip_port(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ip_unpack(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv4?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv4_loopback?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv4_multicast?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv4_private?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_linklocal?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_loopback?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_mc_global?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_mc_linklocal?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_mc_nodelocal?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_mc_orglocal?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_mc_sitelocal?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_multicast?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_sitelocal?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_to_ipv4(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_unique_local?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_unspecified?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_v4compat?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_v4mapped?(); end
 
-  Sorbet.sig do
+  sig do
     params(
       backlog: ::T.untyped,
     )
@@ -146,10 +146,10 @@ class Addrinfo < Data
   end
   def listen(backlog=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def marshal_dump(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -157,28 +157,28 @@ class Addrinfo < Data
   end
   def marshal_load(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def pfamily(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def protocol(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def socktype(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_sockaddr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def unix?(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def unix_path(); end
 
-  Sorbet.sig do
+  sig do
     params(
       nodename: ::T.untyped,
       service: ::T.untyped,
@@ -192,7 +192,7 @@ class Addrinfo < Data
   end
   def self.foreach(nodename, service, family=T.unsafe(nil), socktype=T.unsafe(nil), protocol=T.unsafe(nil), flags=T.unsafe(nil), &block); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -200,7 +200,7 @@ class Addrinfo < Data
   end
   def self.getaddrinfo(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -208,7 +208,7 @@ class Addrinfo < Data
   end
   def self.ip(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -217,7 +217,7 @@ class Addrinfo < Data
   end
   def self.tcp(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -226,7 +226,7 @@ class Addrinfo < Data
   end
   def self.udp(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -239,19 +239,19 @@ class BasicSocket < IO
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close_read(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def close_write(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def connect_address(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def do_not_reverse_lookup(); end
 
-  Sorbet.sig do
+  sig do
     params(
       do_not_reverse_lookup: ::T.untyped,
     )
@@ -259,16 +259,16 @@ class BasicSocket < IO
   end
   def do_not_reverse_lookup=(do_not_reverse_lookup); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def getpeereid(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def getpeername(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def getsockname(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -277,10 +277,10 @@ class BasicSocket < IO
   end
   def getsockopt(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def local_address(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -288,7 +288,7 @@ class BasicSocket < IO
   end
   def recv(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       len: ::T.untyped,
       flag: ::T.untyped,
@@ -299,7 +299,7 @@ class BasicSocket < IO
   end
   def recv_nonblock(len, flag=T.unsafe(nil), str=T.unsafe(nil), exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       dlen: ::T.untyped,
       flags: ::T.untyped,
@@ -310,7 +310,7 @@ class BasicSocket < IO
   end
   def recvmsg(dlen=T.unsafe(nil), flags=T.unsafe(nil), clen=T.unsafe(nil), scm_rights: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       dlen: ::T.untyped,
       flags: ::T.untyped,
@@ -322,10 +322,10 @@ class BasicSocket < IO
   end
   def recvmsg_nonblock(dlen=T.unsafe(nil), flags=T.unsafe(nil), clen=T.unsafe(nil), scm_rights: T.unsafe(nil), exception: T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def remote_address(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -333,7 +333,7 @@ class BasicSocket < IO
   end
   def send(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       mesg: ::T.untyped,
       flags: ::T.untyped,
@@ -344,7 +344,7 @@ class BasicSocket < IO
   end
   def sendmsg(mesg, flags=T.unsafe(nil), dest_sockaddr=T.unsafe(nil), *controls); end
 
-  Sorbet.sig do
+  sig do
     params(
       mesg: ::T.untyped,
       flags: ::T.untyped,
@@ -356,7 +356,7 @@ class BasicSocket < IO
   end
   def sendmsg_nonblock(mesg, flags=T.unsafe(nil), dest_sockaddr=T.unsafe(nil), *controls, exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -364,7 +364,7 @@ class BasicSocket < IO
   end
   def setsockopt(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -372,10 +372,10 @@ class BasicSocket < IO
   end
   def shutdown(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.do_not_reverse_lookup(); end
 
-  Sorbet.sig do
+  sig do
     params(
       do_not_reverse_lookup: ::T.untyped,
     )
@@ -383,7 +383,7 @@ class BasicSocket < IO
   end
   def self.do_not_reverse_lookup=(do_not_reverse_lookup); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -396,7 +396,7 @@ class IPSocket < BasicSocket
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -404,7 +404,7 @@ class IPSocket < BasicSocket
   end
   def addr(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -412,7 +412,7 @@ class IPSocket < BasicSocket
   end
   def peeraddr(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -420,7 +420,7 @@ class IPSocket < BasicSocket
   end
   def recvfrom(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -713,10 +713,10 @@ class Socket < BasicSocket
   TCP_WINDOW_CLAMP = ::T.let(nil, ::T.untyped)
   UDP_CORK = ::T.let(nil, ::T.untyped)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept(); end
 
-  Sorbet.sig do
+  sig do
     params(
       exception: ::T.untyped,
     )
@@ -724,7 +724,7 @@ class Socket < BasicSocket
   end
   def accept_nonblock(exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -732,7 +732,7 @@ class Socket < BasicSocket
   end
   def bind(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -740,7 +740,7 @@ class Socket < BasicSocket
   end
   def connect(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       addr: ::T.untyped,
       exception: ::T.untyped,
@@ -749,7 +749,7 @@ class Socket < BasicSocket
   end
   def connect_nonblock(addr, exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -757,10 +757,10 @@ class Socket < BasicSocket
   end
   def initialize(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6only!(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -768,7 +768,7 @@ class Socket < BasicSocket
   end
   def listen(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -776,7 +776,7 @@ class Socket < BasicSocket
   end
   def recvfrom(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       len: ::T.untyped,
       flag: ::T.untyped,
@@ -787,10 +787,10 @@ class Socket < BasicSocket
   end
   def recvfrom_nonblock(len, flag=T.unsafe(nil), str=T.unsafe(nil), exception: T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sysaccept(); end
 
-  Sorbet.sig do
+  sig do
     params(
       sockets: ::T.untyped,
     )
@@ -798,7 +798,7 @@ class Socket < BasicSocket
   end
   def self.accept_loop(*sockets); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -806,7 +806,7 @@ class Socket < BasicSocket
   end
   def self.getaddrinfo(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -814,7 +814,7 @@ class Socket < BasicSocket
   end
   def self.gethostbyaddr(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -822,13 +822,13 @@ class Socket < BasicSocket
   end
   def self.gethostbyname(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.gethostname(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.getifaddrs(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -836,7 +836,7 @@ class Socket < BasicSocket
   end
   def self.getnameinfo(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -844,7 +844,7 @@ class Socket < BasicSocket
   end
   def self.getservbyname(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -852,10 +852,10 @@ class Socket < BasicSocket
   end
   def self.getservbyport(*_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.ip_address_list(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -864,7 +864,7 @@ class Socket < BasicSocket
   end
   def self.pack_sockaddr_in(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -872,7 +872,7 @@ class Socket < BasicSocket
   end
   def self.pack_sockaddr_un(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -880,7 +880,7 @@ class Socket < BasicSocket
   end
   def self.pair(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -889,7 +889,7 @@ class Socket < BasicSocket
   end
   def self.sockaddr_in(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -897,7 +897,7 @@ class Socket < BasicSocket
   end
   def self.sockaddr_un(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -905,7 +905,7 @@ class Socket < BasicSocket
   end
   def self.socketpair(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -917,7 +917,7 @@ class Socket < BasicSocket
   end
   def self.tcp(host, port, local_host=T.unsafe(nil), local_port=T.unsafe(nil), connect_timeout: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -927,7 +927,7 @@ class Socket < BasicSocket
   end
   def self.tcp_server_loop(host=T.unsafe(nil), port, &b); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -936,7 +936,7 @@ class Socket < BasicSocket
   end
   def self.tcp_server_sockets(host=T.unsafe(nil), port); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -946,7 +946,7 @@ class Socket < BasicSocket
   end
   def self.udp_server_loop(host=T.unsafe(nil), port, &b); end
 
-  Sorbet.sig do
+  sig do
     params(
       sockets: ::T.untyped,
       b: ::T.untyped,
@@ -955,7 +955,7 @@ class Socket < BasicSocket
   end
   def self.udp_server_loop_on(sockets, &b); end
 
-  Sorbet.sig do
+  sig do
     params(
       sockets: ::T.untyped,
     )
@@ -963,7 +963,7 @@ class Socket < BasicSocket
   end
   def self.udp_server_recv(sockets); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -972,7 +972,7 @@ class Socket < BasicSocket
   end
   def self.udp_server_sockets(host=T.unsafe(nil), port); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
     )
@@ -980,7 +980,7 @@ class Socket < BasicSocket
   end
   def self.unix(path); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
       b: ::T.untyped,
@@ -989,7 +989,7 @@ class Socket < BasicSocket
   end
   def self.unix_server_loop(path, &b); end
 
-  Sorbet.sig do
+  sig do
     params(
       path: ::T.untyped,
     )
@@ -997,7 +997,7 @@ class Socket < BasicSocket
   end
   def self.unix_server_socket(path); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1005,7 +1005,7 @@ class Socket < BasicSocket
   end
   def self.unpack_sockaddr_in(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1015,7 +1015,7 @@ class Socket < BasicSocket
 end
 
 class Socket::AncillaryData
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1024,13 +1024,13 @@ class Socket::AncillaryData
   end
   def cmsg_is?(_, _1); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def family(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1041,37 +1041,37 @@ class Socket::AncillaryData
   end
   def initialize(_, _1, _2, _3); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def int(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ip_pktinfo(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_pktinfo(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_pktinfo_addr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv6_pktinfo_ifindex(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def level(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def timestamp(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def type(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def unix_rights(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1082,7 +1082,7 @@ class Socket::AncillaryData
   end
   def self.int(_, _1, _2, _3); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1090,7 +1090,7 @@ class Socket::AncillaryData
   end
   def self.ip_pktinfo(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1099,7 +1099,7 @@ class Socket::AncillaryData
   end
   def self.ipv6_pktinfo(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1392,45 +1392,45 @@ module Socket::Constants
 end
 
 class Socket::Ifaddr < Data
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def addr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def broadaddr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def dstaddr(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def flags(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ifindex(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def name(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def netmask(); end
 end
 
 class Socket::Option
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def bool(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def byte(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def data(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def family(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1441,31 +1441,31 @@ class Socket::Option
   end
   def initialize(_, _1, _2, _3); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def int(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv4_multicast_loop(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def ipv4_multicast_ttl(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def level(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def linger(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def optname(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def to_s(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1473,7 +1473,7 @@ class Socket::Option
   end
   def unpack(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1484,7 +1484,7 @@ class Socket::Option
   end
   def self.bool(_, _1, _2, _3); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1495,7 +1495,7 @@ class Socket::Option
   end
   def self.byte(_, _1, _2, _3); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1506,7 +1506,7 @@ class Socket::Option
   end
   def self.int(_, _1, _2, _3); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1514,7 +1514,7 @@ class Socket::Option
   end
   def self.ipv4_multicast_loop(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1522,7 +1522,7 @@ class Socket::Option
   end
   def self.ipv4_multicast_ttl(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1537,7 +1537,7 @@ end
 
 
 class Socket::UDPSource
-  Sorbet.sig do
+  sig do
     params(
       remote_address: ::T.untyped,
       local_address: ::T.untyped,
@@ -1547,16 +1547,16 @@ class Socket::UDPSource
   end
   def initialize(remote_address, local_address, &reply_proc); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def inspect(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def local_address(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def remote_address(); end
 
-  Sorbet.sig do
+  sig do
     params(
       msg: ::T.untyped,
     )
@@ -1569,10 +1569,10 @@ class TCPServer < TCPSocket
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept(); end
 
-  Sorbet.sig do
+  sig do
     params(
       exception: ::T.untyped,
     )
@@ -1580,7 +1580,7 @@ class TCPServer < TCPSocket
   end
   def accept_nonblock(exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1588,7 +1588,7 @@ class TCPServer < TCPSocket
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1596,7 +1596,7 @@ class TCPServer < TCPSocket
   end
   def listen(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sysaccept(); end
 end
 
@@ -1604,7 +1604,7 @@ class TCPSocket < IPSocket
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -1615,10 +1615,10 @@ class TCPSocket < IPSocket
   end
   def initialize(host=T.unsafe(nil), port=T.unsafe(nil), local_host=T.unsafe(nil), local_port=T.unsafe(nil)); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def socks_authenticate(); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
       port: ::T.untyped,
@@ -1627,10 +1627,10 @@ class TCPSocket < IPSocket
   end
   def socks_connect(host, port); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def socks_receive_reply(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1638,10 +1638,10 @@ class TCPSocket < IPSocket
   end
   def self.gethostbyname(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socks_ignores(); end
 
-  Sorbet.sig do
+  sig do
     params(
       ignores: ::T.untyped,
     )
@@ -1649,10 +1649,10 @@ class TCPSocket < IPSocket
   end
   def self.socks_ignores=(ignores); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socks_password(); end
 
-  Sorbet.sig do
+  sig do
     params(
       password: ::T.untyped,
     )
@@ -1660,10 +1660,10 @@ class TCPSocket < IPSocket
   end
   def self.socks_password=(password); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socks_port(); end
 
-  Sorbet.sig do
+  sig do
     params(
       port: ::T.untyped,
     )
@@ -1671,10 +1671,10 @@ class TCPSocket < IPSocket
   end
   def self.socks_port=(port); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socks_server(); end
 
-  Sorbet.sig do
+  sig do
     params(
       host: ::T.untyped,
     )
@@ -1682,10 +1682,10 @@ class TCPSocket < IPSocket
   end
   def self.socks_server=(host); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socks_username(); end
 
-  Sorbet.sig do
+  sig do
     params(
       username: ::T.untyped,
     )
@@ -1693,10 +1693,10 @@ class TCPSocket < IPSocket
   end
   def self.socks_username=(username); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def self.socks_version(); end
 
-  Sorbet.sig do
+  sig do
     params(
       version: ::T.untyped,
     )
@@ -1709,7 +1709,7 @@ class UDPSocket < IPSocket
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1718,7 +1718,7 @@ class UDPSocket < IPSocket
   end
   def bind(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
       _1: ::T.untyped,
@@ -1727,7 +1727,7 @@ class UDPSocket < IPSocket
   end
   def connect(_, _1); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1735,7 +1735,7 @@ class UDPSocket < IPSocket
   end
   def initialize(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       len: ::T.untyped,
       flag: ::T.untyped,
@@ -1746,7 +1746,7 @@ class UDPSocket < IPSocket
   end
   def recvfrom_nonblock(len, flag=T.unsafe(nil), outbuf=T.unsafe(nil), exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1758,10 +1758,10 @@ end
 class UNIXServer < UNIXSocket
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def accept(); end
 
-  Sorbet.sig do
+  sig do
     params(
       exception: ::T.untyped,
     )
@@ -1769,7 +1769,7 @@ class UNIXServer < UNIXSocket
   end
   def accept_nonblock(exception: T.unsafe(nil)); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1777,7 +1777,7 @@ class UNIXServer < UNIXSocket
   end
   def initialize(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1785,7 +1785,7 @@ class UNIXServer < UNIXSocket
   end
   def listen(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def sysaccept(); end
 end
 
@@ -1793,10 +1793,10 @@ class UNIXSocket < BasicSocket
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def addr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1804,13 +1804,13 @@ class UNIXSocket < BasicSocket
   end
   def initialize(_); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def path(); end
 
-  Sorbet.sig {returns(::T.untyped)}
+  sig {returns(::T.untyped)}
   def peeraddr(); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1818,7 +1818,7 @@ class UNIXSocket < BasicSocket
   end
   def recv_io(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1826,7 +1826,7 @@ class UNIXSocket < BasicSocket
   end
   def recvfrom(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1834,7 +1834,7 @@ class UNIXSocket < BasicSocket
   end
   def send_io(_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
@@ -1842,7 +1842,7 @@ class UNIXSocket < BasicSocket
   end
   def self.pair(*_); end
 
-  Sorbet.sig do
+  sig do
     params(
       _: ::T.untyped,
     )
