@@ -213,26 +213,6 @@ class Struct < Object
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
 end
-ARGF = T.let(T.unsafe(nil), Object)
-ARGV = T.let(T.unsafe(nil), Array)
-CROSS_COMPILING = T.let(T.unsafe(nil), NilClass)
-FALSE = T.let(T.unsafe(nil), FalseClass)
-NIL = T.let(T.unsafe(nil), NilClass)
-RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
-RUBY_COPYRIGHT = T.let(T.unsafe(nil), String)
-RUBY_DESCRIPTION = T.let(T.unsafe(nil), String)
-RUBY_ENGINE = T.let(T.unsafe(nil), String)
-RUBY_ENGINE_VERSION = T.let(T.unsafe(nil), String)
-RUBY_PATCHLEVEL = T.let(T.unsafe(nil), Integer)
-RUBY_PLATFORM = T.let(T.unsafe(nil), String)
-RUBY_RELEASE_DATE = T.let(T.unsafe(nil), String)
-RUBY_REVISION = T.let(T.unsafe(nil), Integer)
-RUBY_VERSION = T.let(T.unsafe(nil), String)
-STDERR = T.let(T.unsafe(nil), IO)
-STDIN = T.let(T.unsafe(nil), IO)
-STDOUT = T.let(T.unsafe(nil), IO)
-TOPLEVEL_BINDING = T.let(T.unsafe(nil), Binding)
-TRUE = T.let(T.unsafe(nil), TrueClass)
 class Array < Object
   include Enumerable
   extend T::Generic
@@ -500,28 +480,7 @@ class BasicObject
   def ==(other); end
 end
 class BigDecimal < Numeric
-  BASE = T.let(T.unsafe(nil), Integer)
-  EXCEPTION_ALL = T.let(T.unsafe(nil), Integer)
-  EXCEPTION_INFINITY = T.let(T.unsafe(nil), Integer)
-  EXCEPTION_OVERFLOW = T.let(T.unsafe(nil), Integer)
-  EXCEPTION_UNDERFLOW = T.let(T.unsafe(nil), Integer)
-  EXCEPTION_ZERODIVIDE = T.let(T.unsafe(nil), Integer)
-  INFINITY = T.let(T.unsafe(nil), BigDecimal)
-  NAN = T.let(T.unsafe(nil), BigDecimal)
-  ROUND_CEILING = T.let(T.unsafe(nil), Integer)
-  ROUND_DOWN = T.let(T.unsafe(nil), Integer)
-  ROUND_FLOOR = T.let(T.unsafe(nil), Integer)
-  ROUND_HALF_DOWN = T.let(T.unsafe(nil), Integer)
   ROUND_HALF_EVEN = T.let(T.unsafe(nil), Integer)
-  ROUND_HALF_UP = T.let(T.unsafe(nil), Integer)
-  ROUND_MODE = T.let(T.unsafe(nil), Integer)
-  ROUND_UP = T.let(T.unsafe(nil), Integer)
-  SIGN_NEGATIVE_FINITE = T.let(T.unsafe(nil), Integer)
-  SIGN_NEGATIVE_INFINITE = T.let(T.unsafe(nil), Integer)
-  SIGN_NEGATIVE_ZERO = T.let(T.unsafe(nil), Integer)
-  SIGN_POSITIVE_FINITE = T.let(T.unsafe(nil), Integer)
-  SIGN_POSITIVE_INFINITE = T.let(T.unsafe(nil), Integer)
-  SIGN_POSITIVE_ZERO = T.let(T.unsafe(nil), Integer)
   sig do
     params(
       initial: T.any(Integer, Float, Rational, BigDecimal, String),
@@ -1023,44 +982,7 @@ class FalseClass
   end
 end
 class File < IO
-  ALT_SEPARATOR = T.let(T.unsafe(nil), NilClass)
-  APPEND = T.let(T.unsafe(nil), Integer)
-  BINARY = T.let(T.unsafe(nil), Integer)
-  CREAT = T.let(T.unsafe(nil), Integer)
-  DIRECT = T.let(T.unsafe(nil), Integer)
-  DSYNC = T.let(T.unsafe(nil), Integer)
-  EXCL = T.let(T.unsafe(nil), Integer)
-  FNM_CASEFOLD = T.let(T.unsafe(nil), Integer)
-  FNM_DOTMATCH = T.let(T.unsafe(nil), Integer)
-  FNM_EXTGLOB = T.let(T.unsafe(nil), Integer)
-  FNM_NOESCAPE = T.let(T.unsafe(nil), Integer)
-  FNM_PATHNAME = T.let(T.unsafe(nil), Integer)
-  FNM_SHORTNAME = T.let(T.unsafe(nil), Integer)
-  FNM_SYSCASE = T.let(T.unsafe(nil), Integer)
-  LOCK_EX = T.let(T.unsafe(nil), Integer)
-  LOCK_NB = T.let(T.unsafe(nil), Integer)
-  LOCK_SH = T.let(T.unsafe(nil), Integer)
-  LOCK_UN = T.let(T.unsafe(nil), Integer)
-  NOATIME = T.let(T.unsafe(nil), Integer)
-  NOCTTY = T.let(T.unsafe(nil), Integer)
-  NOFOLLOW = T.let(T.unsafe(nil), Integer)
-  NONBLOCK = T.let(T.unsafe(nil), Integer)
   NULL = T.let(T.unsafe(nil), String)
-  PATH_SEPARATOR = T.let(T.unsafe(nil), String)
-  RDONLY = T.let(T.unsafe(nil), Integer)
-  RDWR = T.let(T.unsafe(nil), Integer)
-  RSYNC = T.let(T.unsafe(nil), Integer)
-  SEEK_CUR = T.let(T.unsafe(nil), Integer)
-  SEEK_DATA = T.let(T.unsafe(nil), Integer)
-  SEEK_END = T.let(T.unsafe(nil), Integer)
-  SEEK_HOLE = T.let(T.unsafe(nil), Integer)
-  SEEK_SET = T.let(T.unsafe(nil), Integer)
-  SEPARATOR = T.let(T.unsafe(nil), String)
-  SHARE_DELETE = T.let(T.unsafe(nil), Integer)
-  SYNC = T.let(T.unsafe(nil), Integer)
-  TMPFILE = T.let(T.unsafe(nil), Integer)
-  TRUNC = T.let(T.unsafe(nil), Integer)
-  WRONLY = T.let(T.unsafe(nil), Integer)
   extend T::Generic
   Elem = type_member(:out, fixed: String)
   sig do
@@ -1075,51 +997,11 @@ class File < IO
   def initialize(file, mode=T.unsafe(nil), perm=T.unsafe(nil), opt=T.unsafe(nil)); end
 end
 module File::Constants
-  APPEND = T.let(T.unsafe(nil), Integer)
-  BINARY = T.let(T.unsafe(nil), Integer)
-  CREAT = T.let(T.unsafe(nil), Integer)
-  DIRECT = T.let(T.unsafe(nil), Integer)
-  DSYNC = T.let(T.unsafe(nil), Integer)
-  EXCL = T.let(T.unsafe(nil), Integer)
-  FNM_CASEFOLD = T.let(T.unsafe(nil), Integer)
-  FNM_DOTMATCH = T.let(T.unsafe(nil), Integer)
-  FNM_EXTGLOB = T.let(T.unsafe(nil), Integer)
-  FNM_NOESCAPE = T.let(T.unsafe(nil), Integer)
-  FNM_PATHNAME = T.let(T.unsafe(nil), Integer)
-  FNM_SHORTNAME = T.let(T.unsafe(nil), Integer)
-  FNM_SYSCASE = T.let(T.unsafe(nil), Integer)
-  LOCK_EX = T.let(T.unsafe(nil), Integer)
-  LOCK_NB = T.let(T.unsafe(nil), Integer)
-  LOCK_SH = T.let(T.unsafe(nil), Integer)
-  LOCK_UN = T.let(T.unsafe(nil), Integer)
-  NOATIME = T.let(T.unsafe(nil), Integer)
-  NOCTTY = T.let(T.unsafe(nil), Integer)
-  NOFOLLOW = T.let(T.unsafe(nil), Integer)
-  NONBLOCK = T.let(T.unsafe(nil), Integer)
   NULL = T.let(T.unsafe(nil), String)
-  RDONLY = T.let(T.unsafe(nil), Integer)
-  RDWR = T.let(T.unsafe(nil), Integer)
-  RSYNC = T.let(T.unsafe(nil), Integer)
-  SHARE_DELETE = T.let(T.unsafe(nil), Integer)
-  SYNC = T.let(T.unsafe(nil), Integer)
-  TMPFILE = T.let(T.unsafe(nil), Integer)
-  TRUNC = T.let(T.unsafe(nil), Integer)
-  WRONLY = T.let(T.unsafe(nil), Integer)
 end
 class Float < Numeric
-  DIG = T.let(T.unsafe(nil), Integer)
-  EPSILON = T.let(T.unsafe(nil), Float)
-  INFINITY = T.let(T.unsafe(nil), Float)
-  MANT_DIG = T.let(T.unsafe(nil), Integer)
   MAX = T.let(T.unsafe(nil), Float)
-  MAX_10_EXP = T.let(T.unsafe(nil), Integer)
-  MAX_EXP = T.let(T.unsafe(nil), Integer)
   MIN = T.let(T.unsafe(nil), Float)
-  MIN_10_EXP = T.let(T.unsafe(nil), Integer)
-  MIN_EXP = T.let(T.unsafe(nil), Integer)
-  NAN = T.let(T.unsafe(nil), Float)
-  RADIX = T.let(T.unsafe(nil), Integer)
-  ROUNDS = T.let(T.unsafe(nil), Integer)
   sig do
     params(
         arg0: Integer,
@@ -1589,41 +1471,7 @@ class IO < Object
   include Enumerable
   extend T::Generic
   Elem = type_member(:out, fixed: String)
-  APPEND = T.let(T.unsafe(nil), Integer)
-  BINARY = T.let(T.unsafe(nil), Integer)
-  CREAT = T.let(T.unsafe(nil), Integer)
-  DIRECT = T.let(T.unsafe(nil), Integer)
-  DSYNC = T.let(T.unsafe(nil), Integer)
-  EXCL = T.let(T.unsafe(nil), Integer)
-  FNM_CASEFOLD = T.let(T.unsafe(nil), Integer)
-  FNM_DOTMATCH = T.let(T.unsafe(nil), Integer)
-  FNM_EXTGLOB = T.let(T.unsafe(nil), Integer)
-  FNM_NOESCAPE = T.let(T.unsafe(nil), Integer)
-  FNM_PATHNAME = T.let(T.unsafe(nil), Integer)
-  FNM_SHORTNAME = T.let(T.unsafe(nil), Integer)
-  FNM_SYSCASE = T.let(T.unsafe(nil), Integer)
-  LOCK_EX = T.let(T.unsafe(nil), Integer)
-  LOCK_NB = T.let(T.unsafe(nil), Integer)
-  LOCK_SH = T.let(T.unsafe(nil), Integer)
-  LOCK_UN = T.let(T.unsafe(nil), Integer)
-  NOATIME = T.let(T.unsafe(nil), Integer)
-  NOCTTY = T.let(T.unsafe(nil), Integer)
-  NOFOLLOW = T.let(T.unsafe(nil), Integer)
-  NONBLOCK = T.let(T.unsafe(nil), Integer)
   NULL = T.let(T.unsafe(nil), String)
-  RDONLY = T.let(T.unsafe(nil), Integer)
-  RDWR = T.let(T.unsafe(nil), Integer)
-  RSYNC = T.let(T.unsafe(nil), Integer)
-  SEEK_CUR = T.let(T.unsafe(nil), Integer)
-  SEEK_DATA = T.let(T.unsafe(nil), Integer)
-  SEEK_END = T.let(T.unsafe(nil), Integer)
-  SEEK_HOLE = T.let(T.unsafe(nil), Integer)
-  SEEK_SET = T.let(T.unsafe(nil), Integer)
-  SHARE_DELETE = T.let(T.unsafe(nil), Integer)
-  SYNC = T.let(T.unsafe(nil), Integer)
-  TMPFILE = T.let(T.unsafe(nil), Integer)
-  TRUNC = T.let(T.unsafe(nil), Integer)
-  WRONLY = T.let(T.unsafe(nil), Integer)
   sig do
     params(
         arg0: BasicObject,
@@ -1679,7 +1527,6 @@ class IO < Object
   def to_i(); end
 end
 module Kernel
-  RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
   sig do
     params(
         start_or_range: Integer,
@@ -1901,25 +1748,6 @@ class Method < Object
   def to_proc; end
 end
 class Module < Object
-  ARGF = T.let(T.unsafe(nil), Object)
-  ARGV = T.let(T.unsafe(nil), Array)
-  CROSS_COMPILING = T.let(T.unsafe(nil), NilClass)
-  FALSE = T.let(T.unsafe(nil), FalseClass)
-  NIL = T.let(T.unsafe(nil), NilClass)
-  RUBY_COPYRIGHT = T.let(T.unsafe(nil), String)
-  RUBY_DESCRIPTION = T.let(T.unsafe(nil), String)
-  RUBY_ENGINE = T.let(T.unsafe(nil), String)
-  RUBY_ENGINE_VERSION = T.let(T.unsafe(nil), String)
-  RUBY_PATCHLEVEL = T.let(T.unsafe(nil), Integer)
-  RUBY_PLATFORM = T.let(T.unsafe(nil), String)
-  RUBY_RELEASE_DATE = T.let(T.unsafe(nil), String)
-  RUBY_REVISION = T.let(T.unsafe(nil), Integer)
-  RUBY_VERSION = T.let(T.unsafe(nil), String)
-  STDERR = T.let(T.unsafe(nil), IO)
-  STDIN = T.let(T.unsafe(nil), IO)
-  STDOUT = T.let(T.unsafe(nil), IO)
-  TOPLEVEL_BINDING = T.let(T.unsafe(nil), Binding)
-  TRUE = T.let(T.unsafe(nil), TrueClass)
   sig do
     params(
         other: Module,
@@ -2341,10 +2169,8 @@ class Rational < Numeric
 end
 class Regexp < Object
   EXTENDED = T.let(T.unsafe(nil), Integer)
-  FIXEDENCODING = T.let(T.unsafe(nil), Integer)
   IGNORECASE = T.let(T.unsafe(nil), Integer)
   MULTILINE = T.let(T.unsafe(nil), Integer)
-  NOENCODING = T.let(T.unsafe(nil), Integer)
   sig do
     params(
         other: BasicObject,
@@ -2608,8 +2434,6 @@ class Symbol < Object
 end
 class Time < Object
   include Comparable
-  RFC2822_DAY_NAME = T.let(T.unsafe(nil), Array)
-  RFC2822_MONTH_NAME = T.let(T.unsafe(nil), Array)
   sig do
     params(
         seconds: T.any(Time, Numeric)
