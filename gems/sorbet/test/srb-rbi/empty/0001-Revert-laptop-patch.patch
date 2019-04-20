@@ -1,0 +1,3379 @@
+From e3bb2e99cf126f6399942b2b2497ed474a767ee3 Mon Sep 17 00:00:00 2001
+From: Paul Tarjan <pt@stripe.com>
+Date: Mon, 15 Apr 2019 13:05:46 -0700
+Subject: [PATCH] Revert "laptop patch"
+
+This reverts commit 31dbafc3db2d06e533efc7ba1cf16772aa4f8cff.
+---
+ .../sorbet/rbi/hidden-definitions/errors.txt  |  757 +------
+ .../sorbet/rbi/hidden-definitions/hidden.rbi  | 1966 +++--------------
+ 2 files changed, 293 insertions(+), 2430 deletions(-)
+
+diff --git a/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/errors.txt b/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/errors.txt
+index 81141fc1b..cbdd9df2e 100644
+--- a/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/errors.txt
++++ b/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/errors.txt
+@@ -185,7 +185,6 @@
+ # wrong constant name <Class:UI>
+ # wrong constant name <Class:VersionConflict>
+ # wrong constant name <Class:VirtualProtocolError>
+-# wrong constant name <Class:YAMLSerializer>
+ # wrong constant name <Class:YamlSyntaxError>
+ # wrong constant name status_code
+ # wrong constant name <static-init>
+@@ -527,14 +526,14 @@
+ #                DateTime
+ # uninitialized constant Bundler::EndpointSpecification::DateTimeFormat
+ # Did you mean?  Bundler::EndpointSpecification::DateTimeFormat
++# uninitialized constant Bundler::EndpointSpecification::Dupable
++# Did you mean?  Bundler::EndpointSpecification::Dupable
+ # uninitialized constant Bundler::EndpointSpecification::EMPTY
+ # Did you mean?  Bundler::EndpointSpecification::EMPTY
+ # uninitialized constant Bundler::EndpointSpecification::GENERICS
+ # Did you mean?  Bundler::EndpointSpecification::GENERICS
+ # uninitialized constant Bundler::EndpointSpecification::GENERIC_CACHE
+ # Did you mean?  Bundler::EndpointSpecification::GENERIC_CACHE
+-# uninitialized constant Bundler::EndpointSpecification::INITIALIZE_CODE_FOR_DEFAULTS
+-# Did you mean?  Bundler::EndpointSpecification::INITIALIZE_CODE_FOR_DEFAULTS
+ # uninitialized constant Bundler::EndpointSpecification::MARSHAL_FIELDS
+ # Did you mean?  Bundler::EndpointSpecification::MARSHAL_FIELDS
+ # uninitialized constant Bundler::EndpointSpecification::NONEXISTENT_SPECIFICATION_VERSION
+@@ -738,6 +737,21 @@
+ # wrong constant name issues_url
+ # wrong constant name log_error
+ # wrong constant name request_issue_report_for
++# wrong constant name <Class:PlatformMatch>
++# wrong constant name <=>
++# uninitialized constant Bundler::GemHelpers::PlatformMatch::Elem
++# wrong constant name cpu_match
++# wrong constant name cpu_match=
++# wrong constant name os_match
++# wrong constant name os_match=
++# wrong constant name platform_version_match
++# wrong constant name platform_version_match=
++# wrong constant name <static-init>
++# wrong constant name []
++# wrong constant name cpu_match
++# wrong constant name members
++# wrong constant name os_match
++# wrong constant name platform_version_match
+ # wrong constant name <static-init>
+ # wrong constant name generic
+ # wrong constant name generic_local_platform
+@@ -1931,14 +1945,10 @@
+ # wrong constant name <static-init>
+ # wrong constant name status_code
+ # wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name dump
+-# wrong constant name load
+ # wrong constant name initialize
+ # wrong constant name orig_exception
+ # wrong constant name status_code
+ # wrong constant name <static-init>
+-# wrong constant name <static-init>
+ # wrong constant name app_cache
+ # wrong constant name app_config_path
+ # wrong constant name bin_path
+@@ -1961,7 +1971,6 @@
+ # wrong constant name git_present?
+ # wrong constant name home
+ # wrong constant name install_path
+-# wrong constant name load
+ # wrong constant name load_gemspec
+ # wrong constant name load_gemspec_uncached
+ # wrong constant name load_marshal
+@@ -2497,7 +2506,6 @@
+ # wrong constant name rmtree
+ # wrong constant name safe_unlink
+ # wrong constant name symlink
+-# wrong constant name touch
+ # wrong constant name uptodate?
+ # undefined method `rationalize$2' for class `Float'
+ # Did you mean?  Rational
+@@ -2514,16 +2522,10 @@
+ # wrong constant name stat$2
+ # wrong constant name stress=
+ # wrong constant name verify_internal_consistency
+-# wrong constant name <Class:BundlerVersionFinder>
+ # wrong constant name <Class:ConfigFile>
+ # wrong constant name <Class:ConsoleUI>
+ # wrong constant name <Class:DefaultUserInteraction>
+-# wrong constant name DependencyResolver$1
+-# wrong constant name <Class:DependencyResolver>
+ # wrong constant name <Class:Ext>
+-# wrong constant name <Class:RequestSet>
+-# wrong constant name <Class:Resolver>
+-# wrong constant name <Class:RuntimeRequirementNotMetError>
+ # wrong constant name <Class:SilentUI>
+ # wrong constant name <Class:Source>
+ # wrong constant name <Class:StreamUI>
+@@ -2563,13 +2565,6 @@
+ # wrong constant name version
+ # wrong constant name <static-init>
+ # wrong constant name default_specifications_dir
+-# wrong constant name <static-init>
+-# wrong constant name bundler_version
+-# wrong constant name bundler_version_with_reason
+-# wrong constant name compatible?
+-# wrong constant name filter!
+-# wrong constant name missing_version_message
+-# wrong constant name without_filtering
+ # wrong constant name ==
+ # wrong constant name []
+ # wrong constant name []=
+@@ -2604,7 +2599,6 @@
+ # wrong constant name ssl_client_cert
+ # wrong constant name ssl_verify_mode
+ # wrong constant name to_yaml
+-# wrong constant name unset_api_key!
+ # wrong constant name update_sources
+ # wrong constant name update_sources=
+ # wrong constant name verbose
+@@ -2658,17 +2652,13 @@
+ # wrong constant name conflict
+ # wrong constant name conflicting_dependencies
+ # wrong constant name initialize
+-# wrong constant name <Class:Molinillo>
+-# wrong constant name <Class:Delegates>
+ # wrong constant name <static-init>
+ # wrong constant name deprecate
+ # wrong constant name skip
+ # wrong constant name skip=
+ # wrong constant name skip_during
+-# wrong constant name _deprecated_source_exception
+ # wrong constant name source_exception
+ # wrong constant name source_exception=
+-# wrong constant name <static-init>
+ # wrong constant name <Class:Builder>
+ # wrong constant name build_args
+ # wrong constant name build_args=
+@@ -2737,123 +2727,6 @@
+ # wrong constant name platforms
+ # wrong constant name version
+ # wrong constant name wordy
+-# wrong constant name <Class:GemDependencyAPI>
+-# wrong constant name <Class:Lockfile>
+-# wrong constant name always_install
+-# wrong constant name always_install=
+-# wrong constant name dependencies
+-# wrong constant name development
+-# wrong constant name development=
+-# wrong constant name development_shallow
+-# wrong constant name development_shallow=
+-# wrong constant name errors
+-# wrong constant name gem
+-# wrong constant name git_set
+-# wrong constant name ignore_dependencies
+-# wrong constant name ignore_dependencies=
+-# wrong constant name import
+-# wrong constant name initialize
+-# wrong constant name install
+-# wrong constant name install_dir
+-# wrong constant name install_from_gemdeps
+-# wrong constant name install_into
+-# wrong constant name load_gemdeps
+-# wrong constant name prerelease
+-# wrong constant name prerelease=
+-# wrong constant name pretty_print
+-# wrong constant name remote
+-# wrong constant name remote=
+-# wrong constant name resolve
+-# wrong constant name resolve_current
+-# wrong constant name resolver
+-# wrong constant name sets
+-# wrong constant name soft_missing
+-# wrong constant name soft_missing=
+-# wrong constant name sorted_requests
+-# wrong constant name source_set
+-# wrong constant name specs
+-# wrong constant name specs_in
+-# wrong constant name tsort_each_node
+-# wrong constant name vendor_set
+-# wrong constant name dependencies
+-# wrong constant name find_gemspec
+-# wrong constant name gem
+-# wrong constant name gem_deps_file
+-# wrong constant name gem_git_reference
+-# wrong constant name gemspec
+-# wrong constant name git
+-# wrong constant name git_set
+-# wrong constant name git_source
+-# wrong constant name group
+-# wrong constant name initialize
+-# wrong constant name installing=
+-# wrong constant name load
+-# wrong constant name platform
+-# wrong constant name platforms
+-# wrong constant name requires
+-# wrong constant name ruby
+-# wrong constant name source
+-# wrong constant name vendor_set
+-# wrong constant name without_groups
+-# wrong constant name without_groups=
+-# wrong constant name <static-init>
+-# wrong constant name <Class:ParseError>
+-# wrong constant name <Class:Parser>
+-# wrong constant name <Class:Tokenizer>
+-# wrong constant name add_DEPENDENCIES
+-# wrong constant name add_GEM
+-# wrong constant name add_GIT
+-# wrong constant name add_PATH
+-# wrong constant name add_PLATFORMS
+-# wrong constant name initialize
+-# wrong constant name platforms
+-# wrong constant name relative_path_from
+-# wrong constant name spec_groups
+-# wrong constant name write
+-# wrong constant name column
+-# wrong constant name initialize
+-# wrong constant name line
+-# wrong constant name path
+-# wrong constant name <static-init>
+-# wrong constant name get
+-# wrong constant name initialize
+-# wrong constant name parse
+-# wrong constant name parse_DEPENDENCIES
+-# wrong constant name parse_GEM
+-# wrong constant name parse_GIT
+-# wrong constant name parse_PATH
+-# wrong constant name parse_PLATFORMS
+-# wrong constant name parse_dependency
+-# wrong constant name <static-init>
+-# wrong constant name <Class:Token>
+-# wrong constant name empty?
+-# wrong constant name initialize
+-# wrong constant name make_parser
+-# wrong constant name next_token
+-# wrong constant name peek
+-# wrong constant name shift
+-# wrong constant name skip
+-# wrong constant name to_a
+-# wrong constant name token_pos
+-# wrong constant name unshift
+-# uninitialized constant Gem::RequestSet::Lockfile::Tokenizer::Token::Elem
+-# wrong constant name column
+-# wrong constant name column=
+-# wrong constant name line
+-# wrong constant name line=
+-# wrong constant name type
+-# wrong constant name type=
+-# wrong constant name value
+-# wrong constant name value=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name members
+-# wrong constant name <static-init>
+-# wrong constant name from_file
+-# wrong constant name <static-init>
+-# wrong constant name build
+-# wrong constant name requests_to_deps
+-# wrong constant name <static-init>
+ # wrong constant name ==
+ # wrong constant name ===
+ # wrong constant name =~
+@@ -2878,457 +2751,6 @@
+ # wrong constant name default
+ # wrong constant name parse
+ # wrong constant name source_set
+-# wrong constant name <Class:APISet>
+-# wrong constant name <Class:APISpecification>
+-# wrong constant name <Class:ActivationRequest>
+-# wrong constant name <Class:BestSet>
+-# wrong constant name <Class:ComposedSet>
+-# wrong constant name <Class:Conflict>
+-# wrong constant name <Class:CurrentSet>
+-# wrong constant name <Class:DependencyRequest>
+-# wrong constant name <Class:GitSet>
+-# wrong constant name <Class:GitSpecification>
+-# wrong constant name <Class:IndexSet>
+-# wrong constant name <Class:IndexSpecification>
+-# wrong constant name <Class:InstalledSpecification>
+-# wrong constant name <Class:InstallerSet>
+-# wrong constant name <Class:LocalSpecification>
+-# wrong constant name <Class:LockSet>
+-# wrong constant name <Class:LockSpecification>
+-# wrong constant name <Class:Molinillo>
+-# wrong constant name <Class:RequirementList>
+-# wrong constant name <Class:Set>
+-# wrong constant name <Class:SourceSet>
+-# wrong constant name <Class:SpecSpecification>
+-# wrong constant name <Class:Specification>
+-# wrong constant name <Class:Stats>
+-# wrong constant name <Class:VendorSet>
+-# wrong constant name <Class:VendorSpecification>
+-# wrong constant name activation_request
+-# wrong constant name development
+-# wrong constant name development=
+-# wrong constant name development_shallow
+-# wrong constant name development_shallow=
+-# wrong constant name explain
+-# wrong constant name explain_list
+-# wrong constant name find_possible
+-# wrong constant name ignore_dependencies
+-# wrong constant name ignore_dependencies=
+-# wrong constant name initialize
+-# wrong constant name missing
+-# wrong constant name requests
+-# wrong constant name resolve
+-# wrong constant name select_local_platforms
+-# wrong constant name skip_gems
+-# wrong constant name skip_gems=
+-# wrong constant name soft_missing
+-# wrong constant name soft_missing=
+-# wrong constant name stats
+-# wrong constant name dep_uri
+-# wrong constant name initialize
+-# wrong constant name prefetch_now
+-# wrong constant name pretty_print
+-# wrong constant name source
+-# wrong constant name uri
+-# wrong constant name versions
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name development?
+-# wrong constant name download
+-# wrong constant name full_name
+-# wrong constant name full_spec
+-# wrong constant name initialize
+-# wrong constant name installed?
+-# wrong constant name name
+-# wrong constant name others_possible?
+-# wrong constant name parent
+-# wrong constant name pretty_print
+-# wrong constant name request
+-# wrong constant name spec
+-# wrong constant name version
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name pick_sets
+-# wrong constant name pretty_print
+-# wrong constant name replace_failed_api_set
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name prerelease=
+-# wrong constant name remote=
+-# wrong constant name sets
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name activated
+-# wrong constant name conflicting_dependencies
+-# wrong constant name dependency
+-# wrong constant name explain
+-# wrong constant name explanation
+-# wrong constant name failed_dep
+-# wrong constant name for_spec?
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name request_path
+-# wrong constant name requester
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name dependency
+-# wrong constant name development?
+-# wrong constant name explicit?
+-# wrong constant name implicit?
+-# wrong constant name initialize
+-# wrong constant name match?
+-# wrong constant name matches_spec?
+-# wrong constant name name
+-# wrong constant name pretty_print
+-# wrong constant name request_context
+-# wrong constant name requester
+-# wrong constant name requirement
+-# wrong constant name type
+-# wrong constant name <static-init>
+-# wrong constant name add_git_gem
+-# wrong constant name add_git_spec
+-# wrong constant name need_submodules
+-# wrong constant name pretty_print
+-# wrong constant name repositories
+-# wrong constant name root_dir
+-# wrong constant name root_dir=
+-# wrong constant name specs
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name add_dependency
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name add_always_install
+-# wrong constant name add_local
+-# wrong constant name always_install
+-# wrong constant name consider_local?
+-# wrong constant name consider_remote?
+-# wrong constant name ignore_dependencies
+-# wrong constant name ignore_dependencies=
+-# wrong constant name ignore_installed
+-# wrong constant name ignore_installed=
+-# wrong constant name initialize
+-# wrong constant name load_spec
+-# wrong constant name local?
+-# wrong constant name prerelease=
+-# wrong constant name pretty_print
+-# wrong constant name remote=
+-# wrong constant name remote_set
+-# wrong constant name <static-init>
+-# wrong constant name pretty_print
+-# wrong constant name <static-init>
+-# wrong constant name add
+-# wrong constant name initialize
+-# wrong constant name load_spec
+-# wrong constant name pretty_print
+-# wrong constant name specs
+-# wrong constant name <static-init>
+-# wrong constant name add_dependency
+-# wrong constant name initialize
+-# wrong constant name pretty_print
+-# wrong constant name sources
+-# wrong constant name <static-init>
+-# wrong constant name <Class:CircularDependencyError>
+-# wrong constant name <Class:Delegates>
+-# wrong constant name <Class:DependencyGraph>
+-# wrong constant name <Class:DependencyState>
+-# wrong constant name <Class:NoSuchDependencyError>
+-# wrong constant name <Class:PossibilityState>
+-# wrong constant name <Class:ResolutionState>
+-# wrong constant name <Class:Resolver>
+-# wrong constant name <Class:ResolverError>
+-# wrong constant name <Class:SpecificationProvider>
+-# wrong constant name <Class:UI>
+-# wrong constant name <Class:VersionConflict>
+-# wrong constant name dependencies
+-# wrong constant name initialize
+-# wrong constant name <static-init>
+-# wrong constant name <Class:ResolutionState>
+-# wrong constant name <Class:SpecificationProvider>
+-# wrong constant name activated
+-# wrong constant name conflicts
+-# wrong constant name depth
+-# wrong constant name name
+-# wrong constant name possibilities
+-# wrong constant name requirement
+-# wrong constant name requirements
+-# wrong constant name <static-init>
+-# wrong constant name allow_missing?
+-# wrong constant name dependencies_for
+-# wrong constant name name_for
+-# wrong constant name name_for_explicit_dependency_source
+-# wrong constant name name_for_locking_dependency_source
+-# wrong constant name requirement_satisfied_by?
+-# wrong constant name search_for
+-# wrong constant name sort_dependencies
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name <Class:Action>
+-# wrong constant name <Class:AddEdgeNoCircular>
+-# wrong constant name <Class:AddVertex>
+-# wrong constant name <Class:DeleteEdge>
+-# wrong constant name <Class:DetachVertexNamed>
+-# wrong constant name <Class:Edge>
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyGraph::Elem
+-# wrong constant name <Class:Log>
+-# wrong constant name <Class:SetPayload>
+-# wrong constant name <Class:Tag>
+-# wrong constant name <Class:Vertex>
+-# wrong constant name add_child_vertex
+-# wrong constant name add_edge
+-# wrong constant name add_vertex
+-# wrong constant name delete_edge
+-# wrong constant name detach_vertex_named
+-# wrong constant name each
+-# wrong constant name log
+-# wrong constant name rewind_to
+-# wrong constant name root_vertex_named
+-# wrong constant name set_payload
+-# wrong constant name tag
+-# wrong constant name to_dot
+-# wrong constant name tsort_each_child
+-# wrong constant name vertex_named
+-# wrong constant name vertices
+-# wrong constant name down
+-# wrong constant name next
+-# wrong constant name next=
+-# wrong constant name previous
+-# wrong constant name previous=
+-# wrong constant name up
+-# wrong constant name <static-init>
+-# wrong constant name action_name
+-# wrong constant name destination
+-# wrong constant name initialize
+-# wrong constant name make_edge
+-# wrong constant name origin
+-# wrong constant name requirement
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name name
+-# wrong constant name payload
+-# wrong constant name root
+-# wrong constant name <static-init>
+-# wrong constant name destination_name
+-# wrong constant name initialize
+-# wrong constant name make_edge
+-# wrong constant name origin_name
+-# wrong constant name requirement
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name name
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyGraph::Edge::Elem
+-# wrong constant name destination
+-# wrong constant name destination=
+-# wrong constant name origin
+-# wrong constant name origin=
+-# wrong constant name requirement
+-# wrong constant name requirement=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name members
+-# wrong constant name add_edge_no_circular
+-# wrong constant name add_vertex
+-# wrong constant name delete_edge
+-# wrong constant name detach_vertex_named
+-# wrong constant name each
+-# wrong constant name pop!
+-# wrong constant name reverse_each
+-# wrong constant name rewind_to
+-# wrong constant name set_payload
+-# wrong constant name tag
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyGraph::Log::Elem
+-# wrong constant name initialize
+-# wrong constant name name
+-# wrong constant name payload
+-# wrong constant name <static-init>
+-# wrong constant name down
+-# wrong constant name initialize
+-# wrong constant name tag
+-# wrong constant name up
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name ancestor?
+-# wrong constant name descendent?
+-# wrong constant name eql?
+-# wrong constant name explicit_requirements
+-# wrong constant name incoming_edges
+-# wrong constant name incoming_edges=
+-# wrong constant name initialize
+-# wrong constant name is_reachable_from?
+-# wrong constant name name
+-# wrong constant name name=
+-# wrong constant name outgoing_edges
+-# wrong constant name outgoing_edges=
+-# wrong constant name path_to?
+-# wrong constant name payload
+-# wrong constant name payload=
+-# wrong constant name predecessors
+-# wrong constant name recursive_predecessors
+-# wrong constant name recursive_successors
+-# wrong constant name requirements
+-# wrong constant name root
+-# wrong constant name root=
+-# wrong constant name root?
+-# wrong constant name shallow_eql?
+-# wrong constant name successors
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name tsort
+-# uninitialized constant Gem::Resolver::Molinillo::DependencyState::Elem
+-# wrong constant name pop_possibility_state
+-# wrong constant name <static-init>
+-# wrong constant name dependency
+-# wrong constant name dependency=
+-# wrong constant name initialize
+-# wrong constant name required_by
+-# wrong constant name required_by=
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::Molinillo::PossibilityState::Elem
+-# uninitialized constant Gem::Resolver::Molinillo::ResolutionState::Elem
+-# wrong constant name activated
+-# wrong constant name activated=
+-# wrong constant name conflicts
+-# wrong constant name conflicts=
+-# wrong constant name depth
+-# wrong constant name depth=
+-# wrong constant name name
+-# wrong constant name name=
+-# wrong constant name possibilities
+-# wrong constant name possibilities=
+-# wrong constant name requirement
+-# wrong constant name requirement=
+-# wrong constant name requirements
+-# wrong constant name requirements=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name empty
+-# wrong constant name members
+-# wrong constant name <Class:Resolution>
+-# wrong constant name initialize
+-# wrong constant name resolve
+-# wrong constant name resolver_ui
+-# wrong constant name specification_provider
+-# wrong constant name <Class:Conflict>
+-# wrong constant name base
+-# wrong constant name initialize
+-# wrong constant name iteration_rate=
+-# wrong constant name original_requested
+-# wrong constant name resolve
+-# wrong constant name resolver_ui
+-# wrong constant name specification_provider
+-# wrong constant name started_at=
+-# wrong constant name states=
+-# uninitialized constant Gem::Resolver::Molinillo::Resolver::Resolution::Conflict::Elem
+-# wrong constant name activated_by_name
+-# wrong constant name activated_by_name=
+-# wrong constant name existing
+-# wrong constant name existing=
+-# wrong constant name locked_requirement
+-# wrong constant name locked_requirement=
+-# wrong constant name possibility
+-# wrong constant name possibility=
+-# wrong constant name requirement
+-# wrong constant name requirement=
+-# wrong constant name requirement_trees
+-# wrong constant name requirement_trees=
+-# wrong constant name requirements
+-# wrong constant name requirements=
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name members
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name allow_missing?
+-# wrong constant name dependencies_for
+-# wrong constant name name_for
+-# wrong constant name name_for_explicit_dependency_source
+-# wrong constant name name_for_locking_dependency_source
+-# wrong constant name requirement_satisfied_by?
+-# wrong constant name search_for
+-# wrong constant name sort_dependencies
+-# wrong constant name <static-init>
+-# wrong constant name after_resolution
+-# wrong constant name before_resolution
+-# wrong constant name debug
+-# wrong constant name debug?
+-# wrong constant name indicate_progress
+-# wrong constant name output
+-# wrong constant name progress_rate
+-# wrong constant name <static-init>
+-# wrong constant name conflicts
+-# wrong constant name initialize
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# uninitialized constant Gem::Resolver::RequirementList::Elem
+-# wrong constant name add
+-# wrong constant name each
+-# wrong constant name empty?
+-# wrong constant name next5
+-# wrong constant name remove
+-# wrong constant name size
+-# wrong constant name <static-init>
+-# wrong constant name errors
+-# wrong constant name errors=
+-# wrong constant name find_all
+-# wrong constant name prefetch
+-# wrong constant name prerelease
+-# wrong constant name prerelease=
+-# wrong constant name remote
+-# wrong constant name remote=
+-# wrong constant name remote?
+-# wrong constant name <static-init>
+-# wrong constant name add_source_gem
+-# wrong constant name <static-init>
+-# wrong constant name initialize
+-# wrong constant name <static-init>
+-# wrong constant name dependencies
+-# wrong constant name fetch_development_dependencies
+-# wrong constant name full_name
+-# wrong constant name install
+-# wrong constant name installable_platform?
+-# wrong constant name local?
+-# wrong constant name name
+-# wrong constant name platform
+-# wrong constant name set
+-# wrong constant name source
+-# wrong constant name spec
+-# wrong constant name version
+-# wrong constant name <static-init>
+-# wrong constant name backtracking!
+-# wrong constant name display
+-# wrong constant name iteration!
+-# wrong constant name record_depth
+-# wrong constant name record_requirements
+-# wrong constant name requirement!
+-# wrong constant name <static-init>
+-# wrong constant name add_vendor_gem
+-# wrong constant name load_spec
+-# wrong constant name pretty_print
+-# wrong constant name specs
+-# wrong constant name <static-init>
+-# wrong constant name ==
+-# wrong constant name <static-init>
+-# wrong constant name <static-init>
+-# wrong constant name compose_sets
+-# wrong constant name for_current_gems
+-# wrong constant name suggestion
+-# wrong constant name suggestion=
+-# wrong constant name <static-init>
+ # wrong constant name initialize
+ # wrong constant name <static-init>
+ # wrong constant name <=>
+@@ -3429,11 +2851,6 @@
+ # Did you mean?  Gem::Specification::GENERICS
+ # uninitialized constant Gem::Specification::GENERIC_CACHE
+ # Did you mean?  Gem::Specification::GENERIC_CACHE
+-# wrong constant name _deprecated_default_executable
+-# wrong constant name _deprecated_default_executable=
+-# wrong constant name _deprecated_has_rdoc
+-# wrong constant name _deprecated_has_rdoc=
+-# wrong constant name _deprecated_has_rdoc?
+ # wrong constant name _dump
+ # wrong constant name abbreviate
+ # wrong constant name activate
+@@ -3584,7 +3001,6 @@
+ # wrong constant name traverse
+ # wrong constant name validate
+ # wrong constant name validate_dependencies
+-# wrong constant name validate_metadata
+ # wrong constant name validate_permissions
+ # wrong constant name version=
+ # wrong constant name warning
+@@ -3608,7 +3024,6 @@
+ # wrong constant name each_gemspec
+ # wrong constant name each_spec
+ # wrong constant name find_active_stub_by_path
+-# wrong constant name find_all_by_full_name
+ # wrong constant name find_all_by_name
+ # wrong constant name find_by_name
+ # wrong constant name find_by_path
+@@ -3630,12 +3045,6 @@
+ # wrong constant name stubs
+ # wrong constant name stubs_for
+ # wrong constant name unresolved_deps
+-# wrong constant name <Class:SilentDownloadReporter>
+-# wrong constant name <Class:SilentProgressReporter>
+-# wrong constant name <Class:SimpleProgressReporter>
+-# wrong constant name <Class:VerboseDownloadReporter>
+-# wrong constant name <Class:VerboseProgressReporter>
+-# wrong constant name _deprecated_debug
+ # wrong constant name _gets_noecho
+ # wrong constant name alert
+ # wrong constant name alert_error
+@@ -3653,38 +3062,9 @@
+ # wrong constant name ins
+ # wrong constant name outs
+ # wrong constant name progress_reporter
+-# wrong constant name require_io_console
+ # wrong constant name say
+ # wrong constant name terminate_interaction
+ # wrong constant name tty?
+-# wrong constant name done
+-# wrong constant name fetch
+-# wrong constant name initialize
+-# wrong constant name update
+-# wrong constant name <static-init>
+-# wrong constant name count
+-# wrong constant name done
+-# wrong constant name initialize
+-# wrong constant name updated
+-# wrong constant name <static-init>
+-# wrong constant name count
+-# wrong constant name done
+-# wrong constant name initialize
+-# wrong constant name updated
+-# wrong constant name <static-init>
+-# wrong constant name done
+-# wrong constant name fetch
+-# wrong constant name file_name
+-# wrong constant name initialize
+-# wrong constant name progress
+-# wrong constant name total_bytes
+-# wrong constant name update
+-# wrong constant name <static-init>
+-# wrong constant name count
+-# wrong constant name done
+-# wrong constant name initialize
+-# wrong constant name updated
+-# wrong constant name <static-init>
+ # wrong constant name <static-init>
+ # wrong constant name build_extensions
+ # wrong constant name extensions
+@@ -3729,11 +3109,9 @@
+ # wrong constant name traverse_parents
+ # wrong constant name <=>
+ # wrong constant name _segments
+-# wrong constant name _split_segments
+ # wrong constant name _version
+ # wrong constant name approximate_recommendation
+ # wrong constant name bump
+-# wrong constant name canonical_segments
+ # wrong constant name encode_with
+ # wrong constant name eql?
+ # wrong constant name init_with
+@@ -3751,15 +3129,8 @@
+ # wrong constant name create
+ # wrong constant name new
+ # undefined singleton method `bin_path$1' for `Gem'
+-# undefined singleton method `datadir$1' for `Gem'
+-# wrong constant name _deprecated_datadir
+-# wrong constant name _deprecated_detect_gemdeps
+-# wrong constant name _deprecated_gunzip
+-# wrong constant name _deprecated_gzip
+-# wrong constant name _deprecated_inflate
+ # wrong constant name activate_bin_path
+ # wrong constant name bin_path$1
+-# wrong constant name datadir$1
+ # wrong constant name default_ext_dir_for
+ # wrong constant name default_gems_use_full_paths?
+ # wrong constant name default_spec_cache_dir
+@@ -3889,18 +3260,35 @@
+ # undefined method `sysread$1' for class `IO'
+ # undefined method `sysseek$1' for class `IO'
+ # wrong constant name advise$1
++# wrong constant name beep
++# wrong constant name cooked
++# wrong constant name cooked!
++# wrong constant name cursor
++# wrong constant name cursor=
+ # wrong constant name each$2
+ # wrong constant name each_line$2
++# wrong constant name echo=
++# wrong constant name echo?
+ # wrong constant name external_encoding
+ # wrong constant name fcntl$1
++# wrong constant name getch
++# wrong constant name getpass
++# wrong constant name goto
++# wrong constant name iflush
+ # wrong constant name initialize$1
+ # wrong constant name ioctl$1
++# wrong constant name ioflush
+ # wrong constant name lines$2
++# wrong constant name noecho
+ # wrong constant name nonblock
+ # wrong constant name nonblock=
+ # wrong constant name nonblock?
+ # wrong constant name nread
++# wrong constant name oflush
+ # wrong constant name pathconf
++# wrong constant name pressed?
++# wrong constant name raw
++# wrong constant name raw!
+ # wrong constant name read$1
+ # wrong constant name read_nonblock$2
+ # wrong constant name readpartial$2
+@@ -3913,6 +3301,8 @@
+ # wrong constant name wait
+ # wrong constant name wait_readable
+ # wrong constant name wait_writable
++# wrong constant name winsize
++# wrong constant name winsize=
+ # wrong constant name write_nonblock
+ # undefined singleton method `binread$1' for `IO'
+ # undefined singleton method `binwrite$1' for `IO'
+@@ -3923,6 +3313,7 @@
+ # undefined singleton method `write$1' for `IO'
+ # wrong constant name binread$1
+ # wrong constant name binwrite$1
++# wrong constant name console
+ # wrong constant name copy_stream$1
+ # wrong constant name for_fd$1
+ # wrong constant name foreach
+@@ -3943,14 +3334,6 @@
+ # wrong constant name rationalize$2
+ # wrong constant name to_bn
+ # wrong constant name to_s$1
+-# wrong constant name <Class:CircularDatastructure>
+-# wrong constant name <Class:Ext>
+-# wrong constant name <Class:GeneratorError>
+-# wrong constant name <Class:GenericObject>
+-# wrong constant name <Class:JSONError>
+-# wrong constant name <Class:MissingUnicodeSupport>
+-# wrong constant name <Class:NestingError>
+-# wrong constant name <Class:ParserError>
+ # wrong constant name <Class:Generator>
+ # wrong constant name <Class:Parser>
+ # wrong constant name <Class:GeneratorMethods>
+@@ -4017,49 +3400,12 @@
+ # wrong constant name parse
+ # wrong constant name source
+ # wrong constant name <static-init>
+-# uninitialized constant JSON::GenericObject::InspectKey
+-# Did you mean?  JSON::GenericObject::InspectKey
+-# wrong constant name as_json
+-# wrong constant name to_hash
+-# wrong constant name to_json
+-# wrong constant name |
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name dump
+-# wrong constant name from_hash
+-# wrong constant name json_creatable=
+-# wrong constant name json_create
+-# wrong constant name load
+-# wrong constant name <static-init>
+-# wrong constant name wrap
+-# wrong constant name <static-init>
+-# wrong constant name []
+-# wrong constant name create_id
+-# wrong constant name create_id=
+-# wrong constant name deep_const_get
+-# wrong constant name dump
+-# wrong constant name dump_default_options
+-# wrong constant name dump_default_options=
+-# wrong constant name fast_generate
+-# wrong constant name fast_unparse
+-# wrong constant name generate
+-# wrong constant name generator
+-# wrong constant name generator=
+-# wrong constant name iconv
+-# wrong constant name load
+-# wrong constant name load_default_options
+-# wrong constant name load_default_options=
+-# wrong constant name parse
+-# wrong constant name parse!
+-# wrong constant name parser
+-# wrong constant name parser=
+-# wrong constant name pretty_generate
+-# wrong constant name pretty_unparse
+-# wrong constant name recurse_proc
+-# wrong constant name restore
+-# wrong constant name state
+-# wrong constant name state=
+-# wrong constant name unparse
++# undefined singleton method `dump$1' for `JSON'
++# undefined singleton method `generate$1' for `JSON'
++# undefined singleton method `pretty_generate$1' for `JSON'
++# wrong constant name dump$1
++# wrong constant name generate$1
++# wrong constant name pretty_generate$1
+ # undefined method `clone$1' for module `Kernel'
+ # Did you mean?  clone
+ # undefined method `define_singleton_method$2' for module `Kernel'
+@@ -4297,23 +3643,6 @@
+ # wrong constant name each_object$2
+ # wrong constant name garbage_collect
+ # wrong constant name undefine_finalizer
+-# wrong constant name ==
+-# wrong constant name []
+-# wrong constant name []=
+-# wrong constant name delete_field
+-# wrong constant name dig
+-# wrong constant name each_pair
+-# wrong constant name eql?
+-# wrong constant name initialize
+-# wrong constant name marshal_dump
+-# wrong constant name marshal_load
+-# wrong constant name method_missing
+-# wrong constant name modifiable
+-# wrong constant name new_ostruct_member
+-# wrong constant name table
+-# wrong constant name table!
+-# wrong constant name to_h
+-# wrong constant name <static-init>
+ # uninitialized constant Opus
+ # uninitialized constant Opus
+ # uninitialized constant PP
+diff --git a/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/hidden.rbi b/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/hidden.rbi
+index 1243cd1f4..32821df69 100644
+--- a/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/hidden.rbi
++++ b/gems/sorbet/test/srb-rbi/empty/sorbet/rbi/hidden-definitions/hidden.rbi
+@@ -1118,6 +1118,34 @@ module Bundler::GemHelpers
+   GENERIC_CACHE = ::T.let(nil, ::T.untyped)
+ end
+ 
++class Bundler::GemHelpers::PlatformMatch
++  def cpu_match(); end
++
++  def cpu_match=(_); end
++
++  def os_match(); end
++
++  def os_match=(_); end
++
++  def platform_version_match(); end
++
++  def platform_version_match=(_); end
++  EXACT_MATCH = ::T.let(nil, ::T.untyped)
++  WORST_MATCH = ::T.let(nil, ::T.untyped)
++end
++
++class Bundler::GemHelpers::PlatformMatch
++  def self.[](*_); end
++
++  def self.cpu_match(spec_platform, user_platform); end
++
++  def self.members(); end
++
++  def self.os_match(spec_platform, user_platform); end
++
++  def self.platform_version_match(spec_platform, user_platform); end
++end
++
+ module Bundler::GemHelpers
+   def self.generic(p); end
+ 
+@@ -3706,17 +3734,6 @@ end
+ class Bundler::VirtualProtocolError
+ end
+ 
+-module Bundler::YAMLSerializer
+-  ARRAY_REGEX = ::T.let(nil, ::T.untyped)
+-  HASH_REGEX = ::T.let(nil, ::T.untyped)
+-end
+-
+-module Bundler::YAMLSerializer
+-  def self.dump(hash); end
+-
+-  def self.load(str); end
+-end
+-
+ class Bundler::YamlSyntaxError
+   def initialize(orig_exception, msg); end
+ 
+@@ -3729,6 +3746,7 @@ class Bundler::YamlSyntaxError
+ end
+ 
+ module Bundler
++  extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
+   def self.app_cache(custom_path=T.unsafe(nil)); end
+ 
+   def self.app_config_path(); end
+@@ -3773,8 +3791,6 @@ module Bundler
+ 
+   def self.install_path(); end
+ 
+-  def self.load(); end
+-
+   def self.load_gemspec(file, validate=T.unsafe(nil)); end
+ 
+   def self.load_gemspec_uncached(file, validate=T.unsafe(nil)); end
+@@ -4039,6 +4055,18 @@ module DidYouMean
+   extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
+ end
+ 
++class Digest::Class
++  include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
++end
++
++module Digest::Instance
++  extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
++end
++
++module Digest
++  extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
++end
++
+ class Dir
+   include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
+ end
+@@ -4713,8 +4741,6 @@ module FileUtils
+ 
+   def self.symlink(src, dest, force: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
+ 
+-  def self.touch(list, noop: T.unsafe(nil), verbose: T.unsafe(nil), mtime: T.unsafe(nil), nocreate: T.unsafe(nil)); end
+-
+   def self.uptodate?(new, old_list); end
+ end
+ 
+@@ -4744,7 +4770,6 @@ module Gem
+   RbConfigPriorities = ::T.let(nil, ::T.untyped)
+   RubyGemsPackageVersion = ::T.let(nil, ::T.untyped)
+   RubyGemsVersion = ::T.let(nil, ::T.untyped)
+-  USE_BUNDLER_FOR_GEMDEPS = ::T.let(nil, ::T.untyped)
+ end
+ 
+ class Gem::BasicSpecification
+@@ -4818,23 +4843,6 @@ class Gem::BasicSpecification
+   def self.default_specifications_dir(); end
+ end
+ 
+-module Gem::BundlerVersionFinder
+-end
+-
+-module Gem::BundlerVersionFinder
+-  def self.bundler_version(); end
+-
+-  def self.bundler_version_with_reason(); end
+-
+-  def self.compatible?(spec); end
+-
+-  def self.filter!(specs); end
+-
+-  def self.missing_version_message(); end
+-
+-  def self.without_filtering(); end
+-end
+-
+ class Gem::ConfigFile
+   include ::Gem::UserInteraction
+   include ::Gem::DefaultUserInteraction
+@@ -4906,8 +4914,6 @@ class Gem::ConfigFile
+ 
+   def to_yaml(); end
+ 
+-  def unset_api_key!(); end
+-
+   def update_sources(); end
+ 
+   def update_sources=(update_sources); end
+@@ -5034,36 +5040,6 @@ class Gem::DependencyResolutionError
+   def initialize(conflict); end
+ end
+ 
+-class Gem::Resolver
+-end
+-
+-Gem::DependencyResolver::Conflict = Gem::Resolver::Conflict
+-
+-Gem::DependencyResolver::DependencyConflict = Gem::Resolver::Conflict
+-
+-module Gem::Resolver::Molinillo
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates
+-end
+-
+-Gem::DependencyResolver::Molinillo::Delegates::ResolutionState = Gem::Resolver::Molinillo::Delegates::ResolutionState
+-
+-Gem::DependencyResolver::Molinillo::Delegates::SpecificationProvider = Gem::Resolver::Molinillo::Delegates::SpecificationProvider
+-
+-module Gem::Resolver::Molinillo::Delegates
+-end
+-
+-Gem::DependencyResolver::Molinillo::SpecificationProvider = Gem::Resolver::Molinillo::SpecificationProvider
+-
+-Gem::DependencyResolver::Molinillo::UI = Gem::Resolver::Molinillo::UI
+-
+-module Gem::Resolver::Molinillo
+-end
+-
+-class Gem::Resolver
+-end
+-
+ module Gem::Deprecate
+   extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
+   def self.deprecate(name, repl, year, month); end
+@@ -5080,17 +5056,11 @@ class Gem::ErrorReason
+ end
+ 
+ class Gem::Exception
+-  def _deprecated_source_exception(); end
+-
+-  def source_exception(*args, &block); end
++  def source_exception(); end
+ 
+   def source_exception=(source_exception); end
+ end
+ 
+-class Gem::Exception
+-  extend ::Gem::Deprecate
+-end
+-
+ module Gem::Ext
+ end
+ 
+@@ -5271,1490 +5241,272 @@ class Gem::PlatformMismatch
+   def wordy(); end
+ end
+ 
+-class Gem::RequestSet
+-  include ::TSort
+-  def always_install(); end
+-
+-  def always_install=(always_install); end
++class Gem::Requirement
++  include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
++  def ==(other); end
+ 
+-  def dependencies(); end
++  def ===(version); end
+ 
+-  def development(); end
++  def =~(version); end
+ 
+-  def development=(development); end
++  def as_list(); end
+ 
+-  def development_shallow(); end
++  def concat(new); end
+ 
+-  def development_shallow=(development_shallow); end
++  def encode_with(coder); end
+ 
+-  def errors(); end
++  def exact?(); end
+ 
+-  def gem(name, *reqs); end
++  def for_lockfile(); end
+ 
+-  def git_set(); end
++  def init_with(coder); end
+ 
+-  def ignore_dependencies(); end
++  def initialize(*requirements); end
+ 
+-  def ignore_dependencies=(ignore_dependencies); end
++  def marshal_dump(); end
+ 
+-  def import(deps); end
++  def marshal_load(array); end
+ 
+-  def initialize(*deps); end
++  def none?(); end
+ 
+-  def install(options, &block); end
++  def prerelease?(); end
+ 
+-  def install_dir(); end
++  def pretty_print(q); end
+ 
+-  def install_from_gemdeps(options, &block); end
++  def requirements(); end
+ 
+-  def install_into(dir, force=T.unsafe(nil), options=T.unsafe(nil)); end
++  def satisfied_by?(version); end
+ 
+-  def load_gemdeps(path, without_groups=T.unsafe(nil), installing=T.unsafe(nil)); end
++  def specific?(); end
+ 
+-  def prerelease(); end
++  def to_yaml_properties(); end
+ 
+-  def prerelease=(prerelease); end
++  def yaml_initialize(tag, vals); end
++  DefaultRequirement = ::T.let(nil, ::T.untyped)
++end
+ 
+-  def pretty_print(q); end
++class Gem::Requirement
++  def self.create(input); end
+ 
+-  def remote(); end
++  def self.default(); end
+ 
+-  def remote=(remote); end
++  def self.parse(obj); end
+ 
+-  def resolve(set=T.unsafe(nil)); end
++  def self.source_set(); end
++end
+ 
+-  def resolve_current(); end
++class Gem::SilentUI
++  def initialize(); end
++end
+ 
+-  def resolver(); end
++class Gem::SilentUI
++end
+ 
+-  def sets(); end
++class Gem::Source
++  include ::Comparable
++  def ==(other); end
+ 
+-  def soft_missing(); end
++  def api_uri(); end
+ 
+-  def soft_missing=(soft_missing); end
++  def cache_dir(uri); end
+ 
+-  def sorted_requests(); end
++  def dependency_resolver_set(); end
+ 
+-  def source_set(); end
++  def download(spec, dir=T.unsafe(nil)); end
+ 
+-  def specs(); end
++  def eql?(other); end
+ 
+-  def specs_in(dir); end
++  def fetch_spec(name_tuple); end
+ 
+-  def tsort_each_node(&block); end
++  def initialize(uri); end
+ 
+-  def vendor_set(); end
+-end
++  def load_specs(type); end
+ 
+-Gem::RequestSet::GemDepedencyAPI = Gem::RequestSet::GemDependencyAPI
++  def pretty_print(q); end
+ 
+-class Gem::RequestSet::GemDependencyAPI
+-  def dependencies(); end
++  def update_cache?(); end
+ 
+-  def find_gemspec(name, path); end
++  def uri(); end
++  FILES = ::T.let(nil, ::T.untyped)
++end
+ 
+-  def gem(name, *requirements); end
++class Gem::Source::Git
++  def base_dir(); end
+ 
+-  def gem_deps_file(); end
++  def cache(); end
+ 
+-  def gem_git_reference(options); end
++  def checkout(); end
+ 
+-  def gemspec(options=T.unsafe(nil)); end
++  def dir_shortref(); end
+ 
+-  def git(repository); end
++  def download(full_spec, path); end
+ 
+-  def git_set(); end
++  def initialize(name, repository, reference, submodules=T.unsafe(nil)); end
+ 
+-  def git_source(name, &callback); end
++  def install_dir(); end
+ 
+-  def group(*groups); end
++  def name(); end
+ 
+-  def initialize(set, path); end
++  def need_submodules(); end
+ 
+-  def installing=(installing); end
++  def reference(); end
+ 
+-  def load(); end
++  def remote(); end
+ 
+-  def platform(*platforms); end
++  def remote=(remote); end
+ 
+-  def platforms(*platforms); end
++  def repo_cache_dir(); end
+ 
+-  def requires(); end
++  def repository(); end
+ 
+-  def ruby(version, options=T.unsafe(nil)); end
++  def rev_parse(); end
+ 
+-  def source(url); end
++  def root_dir(); end
+ 
+-  def vendor_set(); end
++  def root_dir=(root_dir); end
+ 
+-  def without_groups(); end
++  def specs(); end
+ 
+-  def without_groups=(without_groups); end
+-  ENGINE_MAP = ::T.let(nil, ::T.untyped)
+-  PLATFORM_MAP = ::T.let(nil, ::T.untyped)
+-  VERSION_MAP = ::T.let(nil, ::T.untyped)
+-  WINDOWS = ::T.let(nil, ::T.untyped)
++  def uri_hash(); end
+ end
+ 
+-class Gem::RequestSet::GemDependencyAPI
++class Gem::Source::Git
+ end
+ 
+-class Gem::RequestSet::Lockfile
+-  def add_DEPENDENCIES(out); end
++class Gem::Source::Installed
++  def download(spec, path); end
++
++  def initialize(); end
++end
+ 
+-  def add_GEM(out, spec_groups); end
++class Gem::Source::Installed
++end
+ 
+-  def add_GIT(out, git_requests); end
++class Gem::Source::Local
++  def download(spec, cache_dir=T.unsafe(nil)); end
+ 
+-  def add_PATH(out, path_requests); end
++  def fetch_spec(name); end
+ 
+-  def add_PLATFORMS(out); end
++  def find_gem(gem_name, version=T.unsafe(nil), prerelease=T.unsafe(nil)); end
+ 
+-  def initialize(request_set, gem_deps_file, dependencies); end
++  def initialize(); end
++end
+ 
+-  def platforms(); end
++class Gem::Source::Local
++end
+ 
+-  def relative_path_from(dest, base); end
++class Gem::Source::Lock
++  def initialize(source); end
+ 
+-  def spec_groups(); end
++  def wrapped(); end
++end
+ 
+-  def write(); end
++class Gem::Source::Lock
+ end
+ 
+-class Gem::RequestSet::Lockfile::ParseError
+-  def column(); end
++class Gem::Source::SpecificFile
++  def fetch_spec(name); end
+ 
+-  def initialize(message, column, line, path); end
++  def initialize(file); end
+ 
+-  def line(); end
++  def load_specs(*a); end
+ 
+   def path(); end
+-end
+ 
+-class Gem::RequestSet::Lockfile::ParseError
++  def spec(); end
+ end
+ 
+-class Gem::RequestSet::Lockfile::Parser
+-  def get(expected_types=T.unsafe(nil), expected_value=T.unsafe(nil)); end
++class Gem::Source::SpecificFile
++end
+ 
+-  def initialize(tokenizer, set, platforms, filename=T.unsafe(nil)); end
++class Gem::Source::Vendor
++  def initialize(path); end
++end
+ 
+-  def parse(); end
++class Gem::Source::Vendor
++end
+ 
+-  def parse_DEPENDENCIES(); end
++class Gem::Source
++end
+ 
+-  def parse_GEM(); end
++class Gem::SourceFetchProblem
++  def error(); end
+ 
+-  def parse_GIT(); end
++  def exception(); end
+ 
+-  def parse_PATH(); end
++  def initialize(source, error); end
+ 
+-  def parse_PLATFORMS(); end
++  def source(); end
+ 
+-  def parse_dependency(name, op); end
++  def wordy(); end
+ end
+ 
+-class Gem::RequestSet::Lockfile::Parser
+-end
++class Gem::SpecificGemNotFoundException
++  def errors(); end
+ 
+-class Gem::RequestSet::Lockfile::Tokenizer
+-  def empty?(); end
++  def initialize(name, version, errors=T.unsafe(nil)); end
+ 
+-  def initialize(input, filename=T.unsafe(nil), line=T.unsafe(nil), pos=T.unsafe(nil)); end
++  def name(); end
+ 
+-  def make_parser(set, platforms); end
++  def version(); end
++end
+ 
+-  def next_token(); end
++class Gem::Specification
++  include ::Bundler::MatchPlatform
++  include ::Bundler::GemHelpers
++  def ==(other); end
+ 
+-  def peek(); end
++  def _dump(limit); end
+ 
+-  def shift(); end
++  def abbreviate(); end
+ 
+-  def skip(type); end
++  def activate(); end
+ 
+-  def to_a(); end
++  def activate_dependencies(); end
+ 
+-  def token_pos(byte_offset); end
++  def activated(); end
+ 
+-  def unshift(token); end
+-  EOF = ::T.let(nil, ::T.untyped)
+-end
++  def activated=(activated); end
+ 
+-class Gem::RequestSet::Lockfile::Tokenizer::Token
+-  def column(); end
++  def add_bindir(executables); end
+ 
+-  def column=(_); end
++  def add_dependency(gem, *requirements); end
+ 
+-  def line(); end
++  def add_development_dependency(gem, *requirements); end
+ 
+-  def line=(_); end
++  def add_runtime_dependency(gem, *requirements); end
+ 
+-  def type(); end
++  def add_self_to_load_path(); end
+ 
+-  def type=(_); end
++  def author(); end
+ 
+-  def value(); end
++  def author=(o); end
+ 
+-  def value=(_); end
+-end
++  def authors(); end
+ 
+-class Gem::RequestSet::Lockfile::Tokenizer::Token
+-  def self.[](*_); end
++  def authors=(value); end
+ 
+-  def self.members(); end
+-end
++  def autorequire(); end
+ 
+-class Gem::RequestSet::Lockfile::Tokenizer
+-  def self.from_file(file); end
+-end
++  def autorequire=(autorequire); end
+ 
+-class Gem::RequestSet::Lockfile
+-  def self.build(request_set, gem_deps_file, dependencies=T.unsafe(nil)); end
++  def bin_dir(); end
+ 
+-  def self.requests_to_deps(requests); end
+-end
++  def bin_file(name); end
+ 
+-class Gem::RequestSet
+-end
++  def bindir(); end
+ 
+-class Gem::Requirement
+-  include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
+-  def ==(other); end
++  def bindir=(bindir); end
+ 
+-  def ===(version); end
++  def build_args(); end
+ 
+-  def =~(version); end
++  def build_extensions(); end
+ 
+-  def as_list(); end
++  def build_info_dir(); end
+ 
+-  def concat(new); end
++  def build_info_file(); end
+ 
+-  def encode_with(coder); end
+-
+-  def exact?(); end
+-
+-  def for_lockfile(); end
+-
+-  def init_with(coder); end
+-
+-  def initialize(*requirements); end
+-
+-  def marshal_dump(); end
+-
+-  def marshal_load(array); end
+-
+-  def none?(); end
+-
+-  def prerelease?(); end
+-
+-  def pretty_print(q); end
+-
+-  def requirements(); end
+-
+-  def satisfied_by?(version); end
+-
+-  def specific?(); end
+-
+-  def to_yaml_properties(); end
+-
+-  def yaml_initialize(tag, vals); end
+-  DefaultRequirement = ::T.let(nil, ::T.untyped)
+-end
+-
+-class Gem::Requirement
+-  def self.create(*inputs); end
+-
+-  def self.default(); end
+-
+-  def self.parse(obj); end
+-
+-  def self.source_set(); end
+-end
+-
+-class Gem::Resolver
+-  include ::Gem::Resolver::Molinillo::UI
+-  include ::Gem::Resolver::Molinillo::SpecificationProvider
+-  def activation_request(dep, possible); end
+-
+-  def development(); end
+-
+-  def development=(development); end
+-
+-  def development_shallow(); end
+-
+-  def development_shallow=(development_shallow); end
+-
+-  def explain(stage, *data); end
+-
+-  def explain_list(stage); end
+-
+-  def find_possible(dependency); end
+-
+-  def ignore_dependencies(); end
+-
+-  def ignore_dependencies=(ignore_dependencies); end
+-
+-  def initialize(needed, set=T.unsafe(nil)); end
+-
+-  def missing(); end
+-
+-  def requests(s, act, reqs=T.unsafe(nil)); end
+-
+-  def resolve(); end
+-
+-  def select_local_platforms(specs); end
+-
+-  def skip_gems(); end
+-
+-  def skip_gems=(skip_gems); end
+-
+-  def soft_missing(); end
+-
+-  def soft_missing=(soft_missing); end
+-
+-  def stats(); end
+-  DEBUG_RESOLVER = ::T.let(nil, ::T.untyped)
+-end
+-
+-class Gem::Resolver::APISet
+-  def dep_uri(); end
+-
+-  def initialize(dep_uri=T.unsafe(nil)); end
+-
+-  def prefetch_now(); end
+-
+-  def pretty_print(q); end
+-
+-  def source(); end
+-
+-  def uri(); end
+-
+-  def versions(name); end
+-end
+-
+-class Gem::Resolver::APISet
+-end
+-
+-class Gem::Resolver::APISpecification
+-  def ==(other); end
+-
+-  def initialize(set, api_data); end
+-
+-  def pretty_print(q); end
+-end
+-
+-class Gem::Resolver::APISpecification
+-end
+-
+-class Gem::Resolver::ActivationRequest
+-  def ==(other); end
+-
+-  def development?(); end
+-
+-  def download(path); end
+-
+-  def full_name(); end
+-
+-  def full_spec(); end
+-
+-  def initialize(spec, request, others_possible=T.unsafe(nil)); end
+-
+-  def installed?(); end
+-
+-  def name(); end
+-
+-  def others_possible?(); end
+-
+-  def parent(); end
+-
+-  def pretty_print(q); end
+-
+-  def request(); end
+-
+-  def spec(); end
+-
+-  def version(); end
+-end
+-
+-class Gem::Resolver::ActivationRequest
+-end
+-
+-class Gem::Resolver::BestSet
+-  def initialize(sources=T.unsafe(nil)); end
+-
+-  def pick_sets(); end
+-
+-  def pretty_print(q); end
+-
+-  def replace_failed_api_set(error); end
+-end
+-
+-class Gem::Resolver::BestSet
+-end
+-
+-class Gem::Resolver::ComposedSet
+-  def initialize(*sets); end
+-
+-  def prerelease=(allow_prerelease); end
+-
+-  def remote=(remote); end
+-
+-  def sets(); end
+-end
+-
+-class Gem::Resolver::ComposedSet
+-end
+-
+-class Gem::Resolver::Conflict
+-  def ==(other); end
+-
+-  def activated(); end
+-
+-  def conflicting_dependencies(); end
+-
+-  def dependency(); end
+-
+-  def explain(); end
+-
+-  def explanation(); end
+-
+-  def failed_dep(); end
+-
+-  def for_spec?(spec); end
+-
+-  def initialize(dependency, activated, failed_dep=T.unsafe(nil)); end
+-
+-  def pretty_print(q); end
+-
+-  def request_path(current); end
+-
+-  def requester(); end
+-end
+-
+-class Gem::Resolver::Conflict
+-end
+-
+-class Gem::Resolver::CurrentSet
+-end
+-
+-class Gem::Resolver::CurrentSet
+-end
+-
+-class Gem::Resolver::DependencyRequest
+-  def ==(other); end
+-
+-  def dependency(); end
+-
+-  def development?(); end
+-
+-  def explicit?(); end
+-
+-  def implicit?(); end
+-
+-  def initialize(dependency, requester); end
+-
+-  def match?(spec, allow_prerelease=T.unsafe(nil)); end
+-
+-  def matches_spec?(spec); end
+-
+-  def name(); end
+-
+-  def pretty_print(q); end
+-
+-  def request_context(); end
+-
+-  def requester(); end
+-
+-  def requirement(); end
+-
+-  def type(); end
+-end
+-
+-class Gem::Resolver::DependencyRequest
+-end
+-
+-class Gem::Resolver::GitSet
+-  def add_git_gem(name, repository, reference, submodules); end
+-
+-  def add_git_spec(name, version, repository, reference, submodules); end
+-
+-  def need_submodules(); end
+-
+-  def pretty_print(q); end
+-
+-  def repositories(); end
+-
+-  def root_dir(); end
+-
+-  def root_dir=(root_dir); end
+-
+-  def specs(); end
+-end
+-
+-class Gem::Resolver::GitSet
+-end
+-
+-class Gem::Resolver::GitSpecification
+-  def ==(other); end
+-
+-  def add_dependency(dependency); end
+-
+-  def pretty_print(q); end
+-end
+-
+-class Gem::Resolver::GitSpecification
+-end
+-
+-class Gem::Resolver::IndexSet
+-  def initialize(source=T.unsafe(nil)); end
+-
+-  def pretty_print(q); end
+-end
+-
+-class Gem::Resolver::IndexSet
+-end
+-
+-class Gem::Resolver::IndexSpecification
+-  def initialize(set, name, version, source, platform); end
+-
+-  def pretty_print(q); end
+-end
+-
+-class Gem::Resolver::IndexSpecification
+-end
+-
+-class Gem::Resolver::InstalledSpecification
+-  def ==(other); end
+-
+-  def pretty_print(q); end
+-end
+-
+-class Gem::Resolver::InstalledSpecification
+-end
+-
+-class Gem::Resolver::InstallerSet
+-  def add_always_install(dependency); end
+-
+-  def add_local(dep_name, spec, source); end
+-
+-  def always_install(); end
+-
+-  def consider_local?(); end
+-
+-  def consider_remote?(); end
+-
+-  def ignore_dependencies(); end
+-
+-  def ignore_dependencies=(ignore_dependencies); end
+-
+-  def ignore_installed(); end
+-
+-  def ignore_installed=(ignore_installed); end
+-
+-  def initialize(domain); end
+-
+-  def load_spec(name, ver, platform, source); end
+-
+-  def local?(dep_name); end
+-
+-  def prerelease=(allow_prerelease); end
+-
+-  def pretty_print(q); end
+-
+-  def remote=(remote); end
+-
+-  def remote_set(); end
+-end
+-
+-class Gem::Resolver::InstallerSet
+-end
+-
+-class Gem::Resolver::LocalSpecification
+-  def pretty_print(q); end
+-end
+-
+-class Gem::Resolver::LocalSpecification
+-end
+-
+-class Gem::Resolver::LockSet
+-  def add(name, version, platform); end
+-
+-  def initialize(sources); end
+-
+-  def load_spec(name, version, platform, source); end
+-
+-  def pretty_print(q); end
+-
+-  def specs(); end
+-end
+-
+-class Gem::Resolver::LockSet
+-end
+-
+-class Gem::Resolver::LockSpecification
+-  def add_dependency(dependency); end
+-
+-  def initialize(set, name, version, sources, platform); end
+-
+-  def pretty_print(q); end
+-
+-  def sources(); end
+-end
+-
+-class Gem::Resolver::LockSpecification
+-end
+-
+-module Gem::Resolver::Molinillo
+-  VERSION = ::T.let(nil, ::T.untyped)
+-end
+-
+-class Gem::Resolver::Molinillo::CircularDependencyError
+-  def dependencies(); end
+-
+-  def initialize(nodes); end
+-end
+-
+-class Gem::Resolver::Molinillo::CircularDependencyError
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates::ResolutionState
+-  def activated(); end
+-
+-  def conflicts(); end
+-
+-  def depth(); end
+-
+-  def name(); end
+-
+-  def possibilities(); end
+-
+-  def requirement(); end
+-
+-  def requirements(); end
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates::ResolutionState
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates::SpecificationProvider
+-  def allow_missing?(dependency); end
+-
+-  def dependencies_for(specification); end
+-
+-  def name_for(dependency); end
+-
+-  def name_for_explicit_dependency_source(); end
+-
+-  def name_for_locking_dependency_source(); end
+-
+-  def requirement_satisfied_by?(requirement, activated, spec); end
+-
+-  def search_for(dependency); end
+-
+-  def sort_dependencies(dependencies, activated, conflicts); end
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates::SpecificationProvider
+-end
+-
+-module Gem::Resolver::Molinillo::Delegates
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph
+-  include ::Enumerable
+-  include ::TSort
+-  def ==(other); end
+-
+-  def add_child_vertex(name, payload, parent_names, requirement); end
+-
+-  def add_edge(origin, destination, requirement); end
+-
+-  def add_vertex(name, payload, root=T.unsafe(nil)); end
+-
+-  def delete_edge(edge); end
+-
+-  def detach_vertex_named(name); end
+-
+-  def each(); end
+-
+-  def log(); end
+-
+-  def rewind_to(tag); end
+-
+-  def root_vertex_named(name); end
+-
+-  def set_payload(name, payload); end
+-
+-  def tag(tag); end
+-
+-  def to_dot(options=T.unsafe(nil)); end
+-
+-  def tsort_each_child(vertex, &block); end
+-
+-  def vertex_named(name); end
+-
+-  def vertices(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Action
+-  def down(graph); end
+-
+-  def next(); end
+-
+-  def next=(_); end
+-
+-  def previous(); end
+-
+-  def previous=(previous); end
+-
+-  def up(graph); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Action
+-  def self.action_name(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::AddEdgeNoCircular
+-  def destination(); end
+-
+-  def initialize(origin, destination, requirement); end
+-
+-  def make_edge(graph); end
+-
+-  def origin(); end
+-
+-  def requirement(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::AddEdgeNoCircular
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::AddVertex
+-  def initialize(name, payload, root); end
+-
+-  def name(); end
+-
+-  def payload(); end
+-
+-  def root(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::AddVertex
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::DeleteEdge
+-  def destination_name(); end
+-
+-  def initialize(origin_name, destination_name, requirement); end
+-
+-  def make_edge(graph); end
+-
+-  def origin_name(); end
+-
+-  def requirement(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::DeleteEdge
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::DetachVertexNamed
+-  def initialize(name); end
+-
+-  def name(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::DetachVertexNamed
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Edge
+-  def destination(); end
+-
+-  def destination=(_); end
+-
+-  def origin(); end
+-
+-  def origin=(_); end
+-
+-  def requirement(); end
+-
+-  def requirement=(_); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Edge
+-  def self.[](*_); end
+-
+-  def self.members(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Log
+-  def add_edge_no_circular(graph, origin, destination, requirement); end
+-
+-  def add_vertex(graph, name, payload, root); end
+-
+-  def delete_edge(graph, origin_name, destination_name, requirement); end
+-
+-  def detach_vertex_named(graph, name); end
+-
+-  def each(); end
+-
+-  def pop!(graph); end
+-
+-  def reverse_each(); end
+-
+-  def rewind_to(graph, tag); end
+-
+-  def set_payload(graph, name, payload); end
+-
+-  def tag(graph, tag); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Log
+-  extend ::Enumerable
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::SetPayload
+-  def initialize(name, payload); end
+-
+-  def name(); end
+-
+-  def payload(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::SetPayload
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Tag
+-  def down(_graph); end
+-
+-  def initialize(tag); end
+-
+-  def tag(); end
+-
+-  def up(_graph); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Tag
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Vertex
+-  def ==(other); end
+-
+-  def ancestor?(other); end
+-
+-  def descendent?(other); end
+-
+-  def eql?(other); end
+-
+-  def explicit_requirements(); end
+-
+-  def incoming_edges(); end
+-
+-  def incoming_edges=(incoming_edges); end
+-
+-  def initialize(name, payload); end
+-
+-  def is_reachable_from?(other); end
+-
+-  def name(); end
+-
+-  def name=(name); end
+-
+-  def outgoing_edges(); end
+-
+-  def outgoing_edges=(outgoing_edges); end
+-
+-  def path_to?(other); end
+-
+-  def payload(); end
+-
+-  def payload=(payload); end
+-
+-  def predecessors(); end
+-
+-  def recursive_predecessors(); end
+-
+-  def recursive_successors(); end
+-
+-  def requirements(); end
+-
+-  def root(); end
+-
+-  def root=(root); end
+-
+-  def root?(); end
+-
+-  def shallow_eql?(other); end
+-
+-  def successors(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph::Vertex
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyGraph
+-  def self.tsort(vertices); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyState
+-  def pop_possibility_state(); end
+-end
+-
+-class Gem::Resolver::Molinillo::DependencyState
+-end
+-
+-class Gem::Resolver::Molinillo::NoSuchDependencyError
+-  def dependency(); end
+-
+-  def dependency=(dependency); end
+-
+-  def initialize(dependency, required_by=T.unsafe(nil)); end
+-
+-  def required_by(); end
+-
+-  def required_by=(required_by); end
+-end
+-
+-class Gem::Resolver::Molinillo::NoSuchDependencyError
+-end
+-
+-class Gem::Resolver::Molinillo::PossibilityState
+-end
+-
+-class Gem::Resolver::Molinillo::PossibilityState
+-end
+-
+-class Gem::Resolver::Molinillo::ResolutionState
+-  def activated(); end
+-
+-  def activated=(_); end
+-
+-  def conflicts(); end
+-
+-  def conflicts=(_); end
+-
+-  def depth(); end
+-
+-  def depth=(_); end
+-
+-  def name(); end
+-
+-  def name=(_); end
+-
+-  def possibilities(); end
+-
+-  def possibilities=(_); end
+-
+-  def requirement(); end
+-
+-  def requirement=(_); end
+-
+-  def requirements(); end
+-
+-  def requirements=(_); end
+-end
+-
+-class Gem::Resolver::Molinillo::ResolutionState
+-  def self.[](*_); end
+-
+-  def self.empty(); end
+-
+-  def self.members(); end
+-end
+-
+-class Gem::Resolver::Molinillo::Resolver
+-  def initialize(specification_provider, resolver_ui); end
+-
+-  def resolve(requested, base=T.unsafe(nil)); end
+-
+-  def resolver_ui(); end
+-
+-  def specification_provider(); end
+-end
+-
+-class Gem::Resolver::Molinillo::Resolver::Resolution
+-  include ::Gem::Resolver::Molinillo::Delegates::ResolutionState
+-  include ::Gem::Resolver::Molinillo::Delegates::SpecificationProvider
+-  def base(); end
+-
+-  def initialize(specification_provider, resolver_ui, requested, base); end
+-
+-  def iteration_rate=(iteration_rate); end
+-
+-  def original_requested(); end
+-
+-  def resolve(); end
+-
+-  def resolver_ui(); end
+-
+-  def specification_provider(); end
+-
+-  def started_at=(started_at); end
+-
+-  def states=(states); end
+-end
+-
+-class Gem::Resolver::Molinillo::Resolver::Resolution::Conflict
+-  def activated_by_name(); end
+-
+-  def activated_by_name=(_); end
+-
+-  def existing(); end
+-
+-  def existing=(_); end
+-
+-  def locked_requirement(); end
+-
+-  def locked_requirement=(_); end
+-
+-  def possibility(); end
+-
+-  def possibility=(_); end
+-
+-  def requirement(); end
+-
+-  def requirement=(_); end
+-
+-  def requirement_trees(); end
+-
+-  def requirement_trees=(_); end
+-
+-  def requirements(); end
+-
+-  def requirements=(_); end
+-end
+-
+-class Gem::Resolver::Molinillo::Resolver::Resolution::Conflict
+-  def self.[](*_); end
+-
+-  def self.members(); end
+-end
+-
+-class Gem::Resolver::Molinillo::Resolver::Resolution
+-end
+-
+-class Gem::Resolver::Molinillo::Resolver
+-end
+-
+-class Gem::Resolver::Molinillo::ResolverError
+-end
+-
+-class Gem::Resolver::Molinillo::ResolverError
+-end
+-
+-module Gem::Resolver::Molinillo::SpecificationProvider
+-  def allow_missing?(dependency); end
+-
+-  def dependencies_for(specification); end
+-
+-  def name_for(dependency); end
+-
+-  def name_for_explicit_dependency_source(); end
+-
+-  def name_for_locking_dependency_source(); end
+-
+-  def requirement_satisfied_by?(requirement, activated, spec); end
+-
+-  def search_for(dependency); end
+-
+-  def sort_dependencies(dependencies, activated, conflicts); end
+-end
+-
+-module Gem::Resolver::Molinillo::SpecificationProvider
+-end
+-
+-module Gem::Resolver::Molinillo::UI
+-  def after_resolution(); end
+-
+-  def before_resolution(); end
+-
+-  def debug(depth=T.unsafe(nil)); end
+-
+-  def debug?(); end
+-
+-  def indicate_progress(); end
+-
+-  def output(); end
+-
+-  def progress_rate(); end
+-end
+-
+-module Gem::Resolver::Molinillo::UI
+-end
+-
+-class Gem::Resolver::Molinillo::VersionConflict
+-  def conflicts(); end
+-
+-  def initialize(conflicts); end
+-end
+-
+-class Gem::Resolver::Molinillo::VersionConflict
+-end
+-
+-module Gem::Resolver::Molinillo
+-end
+-
+-class Gem::Resolver::RequirementList
+-  include ::Enumerable
+-  def add(req); end
+-
+-  def each(); end
+-
+-  def empty?(); end
+-
+-  def next5(); end
+-
+-  def remove(); end
+-
+-  def size(); end
+-end
+-
+-class Gem::Resolver::RequirementList
+-end
+-
+-class Gem::Resolver::Set
+-  def errors(); end
+-
+-  def errors=(errors); end
+-
+-  def find_all(req); end
+-
+-  def prefetch(reqs); end
+-
+-  def prerelease(); end
+-
+-  def prerelease=(prerelease); end
+-
+-  def remote(); end
+-
+-  def remote=(remote); end
+-
+-  def remote?(); end
+-end
+-
+-class Gem::Resolver::Set
+-end
+-
+-class Gem::Resolver::SourceSet
+-  def add_source_gem(name, source); end
+-end
+-
+-class Gem::Resolver::SourceSet
+-end
+-
+-class Gem::Resolver::SpecSpecification
+-  def initialize(set, spec, source=T.unsafe(nil)); end
+-end
+-
+-class Gem::Resolver::SpecSpecification
+-end
+-
+-class Gem::Resolver::Specification
+-  def dependencies(); end
+-
+-  def fetch_development_dependencies(); end
+-
+-  def full_name(); end
+-
+-  def install(options=T.unsafe(nil)); end
+-
+-  def installable_platform?(); end
+-
+-  def local?(); end
+-
+-  def name(); end
+-
+-  def platform(); end
+-
+-  def set(); end
+-
+-  def source(); end
+-
+-  def spec(); end
+-
+-  def version(); end
+-end
+-
+-class Gem::Resolver::Specification
+-end
+-
+-class Gem::Resolver::Stats
+-  def backtracking!(); end
+-
+-  def display(); end
+-
+-  def iteration!(); end
+-
+-  def record_depth(stack); end
+-
+-  def record_requirements(reqs); end
+-
+-  def requirement!(); end
+-  PATTERN = ::T.let(nil, ::T.untyped)
+-end
+-
+-class Gem::Resolver::Stats
+-end
+-
+-class Gem::Resolver::VendorSet
+-  def add_vendor_gem(name, directory); end
+-
+-  def load_spec(name, version, platform, source); end
+-
+-  def pretty_print(q); end
+-
+-  def specs(); end
+-end
+-
+-class Gem::Resolver::VendorSet
+-end
+-
+-class Gem::Resolver::VendorSpecification
+-  def ==(other); end
+-end
+-
+-class Gem::Resolver::VendorSpecification
+-end
+-
+-class Gem::Resolver
+-  def self.compose_sets(*sets); end
+-
+-  def self.for_current_gems(needed); end
+-end
+-
+-class Gem::RuntimeRequirementNotMetError
+-  def suggestion(); end
+-
+-  def suggestion=(suggestion); end
+-end
+-
+-class Gem::RuntimeRequirementNotMetError
+-end
+-
+-class Gem::SilentUI
+-  def initialize(); end
+-end
+-
+-class Gem::SilentUI
+-end
+-
+-class Gem::Source
+-  include ::Comparable
+-  def ==(other); end
+-
+-  def api_uri(); end
+-
+-  def cache_dir(uri); end
+-
+-  def dependency_resolver_set(); end
+-
+-  def download(spec, dir=T.unsafe(nil)); end
+-
+-  def eql?(other); end
+-
+-  def fetch_spec(name_tuple); end
+-
+-  def initialize(uri); end
+-
+-  def load_specs(type); end
+-
+-  def pretty_print(q); end
+-
+-  def update_cache?(); end
+-
+-  def uri(); end
+-  FILES = ::T.let(nil, ::T.untyped)
+-end
+-
+-class Gem::Source::Git
+-  def base_dir(); end
+-
+-  def cache(); end
+-
+-  def checkout(); end
+-
+-  def dir_shortref(); end
+-
+-  def download(full_spec, path); end
+-
+-  def initialize(name, repository, reference, submodules=T.unsafe(nil)); end
+-
+-  def install_dir(); end
+-
+-  def name(); end
+-
+-  def need_submodules(); end
+-
+-  def reference(); end
+-
+-  def remote(); end
+-
+-  def remote=(remote); end
+-
+-  def repo_cache_dir(); end
+-
+-  def repository(); end
+-
+-  def rev_parse(); end
+-
+-  def root_dir(); end
+-
+-  def root_dir=(root_dir); end
+-
+-  def specs(); end
+-
+-  def uri_hash(); end
+-end
+-
+-class Gem::Source::Git
+-end
+-
+-class Gem::Source::Installed
+-  def download(spec, path); end
+-
+-  def initialize(); end
+-end
+-
+-class Gem::Source::Installed
+-end
+-
+-class Gem::Source::Local
+-  def download(spec, cache_dir=T.unsafe(nil)); end
+-
+-  def fetch_spec(name); end
+-
+-  def find_gem(gem_name, version=T.unsafe(nil), prerelease=T.unsafe(nil)); end
+-
+-  def initialize(); end
+-end
+-
+-class Gem::Source::Local
+-end
+-
+-class Gem::Source::Lock
+-  def initialize(source); end
+-
+-  def wrapped(); end
+-end
+-
+-class Gem::Source::Lock
+-end
+-
+-class Gem::Source::SpecificFile
+-  def fetch_spec(name); end
+-
+-  def initialize(file); end
+-
+-  def load_specs(*a); end
+-
+-  def path(); end
+-
+-  def spec(); end
+-end
+-
+-class Gem::Source::SpecificFile
+-end
+-
+-class Gem::Source::Vendor
+-  def initialize(path); end
+-end
+-
+-class Gem::Source::Vendor
+-end
+-
+-class Gem::Source
+-end
+-
+-class Gem::SourceFetchProblem
+-  def error(); end
+-
+-  def exception(); end
+-
+-  def initialize(source, error); end
+-
+-  def source(); end
+-
+-  def wordy(); end
+-end
+-
+-class Gem::SpecificGemNotFoundException
+-  def errors(); end
+-
+-  def initialize(name, version, errors=T.unsafe(nil)); end
+-
+-  def name(); end
+-
+-  def version(); end
+-end
+-
+-class Gem::Specification
+-  include ::Bundler::MatchPlatform
+-  include ::Bundler::GemHelpers
+-  def ==(other); end
+-
+-  def _deprecated_default_executable(); end
+-
+-  def _deprecated_default_executable=(_deprecated_default_executable); end
+-
+-  def _deprecated_has_rdoc(); end
+-
+-  def _deprecated_has_rdoc=(ignored); end
+-
+-  def _deprecated_has_rdoc?(*args, &block); end
+-
+-  def _dump(limit); end
+-
+-  def abbreviate(); end
+-
+-  def activate(); end
+-
+-  def activate_dependencies(); end
+-
+-  def activated(); end
+-
+-  def activated=(activated); end
+-
+-  def add_bindir(executables); end
+-
+-  def add_dependency(gem, *requirements); end
+-
+-  def add_development_dependency(gem, *requirements); end
+-
+-  def add_runtime_dependency(gem, *requirements); end
+-
+-  def add_self_to_load_path(); end
+-
+-  def author(); end
+-
+-  def author=(o); end
+-
+-  def authors(); end
+-
+-  def authors=(value); end
+-
+-  def autorequire(); end
+-
+-  def autorequire=(autorequire); end
+-
+-  def bin_dir(); end
+-
+-  def bin_file(name); end
+-
+-  def bindir(); end
+-
+-  def bindir=(bindir); end
+-
+-  def build_args(); end
+-
+-  def build_extensions(); end
+-
+-  def build_info_dir(); end
+-
+-  def build_info_file(); end
+-
+-  def bundled_gem_in_old_ruby?(); end
++  def bundled_gem_in_old_ruby?(); end
+ 
+   def cache_dir(); end
+ 
+@@ -6772,9 +5524,9 @@ class Gem::Specification
+ 
+   def date=(date); end
+ 
+-  def default_executable(*args, &block); end
++  def default_executable(); end
+ 
+-  def default_executable=(*args, &block); end
++  def default_executable=(default_executable); end
+ 
+   def default_value(name); end
+ 
+@@ -6830,11 +5582,11 @@ class Gem::Specification
+ 
+   def has_conflicts?(); end
+ 
+-  def has_rdoc(*args, &block); end
++  def has_rdoc(); end
+ 
+-  def has_rdoc=(*args, &block); end
++  def has_rdoc=(ignored); end
+ 
+-  def has_rdoc?(*args, &block); end
++  def has_rdoc?(); end
+ 
+   def has_test_suite?(); end
+ 
+@@ -7004,8 +5756,6 @@ class Gem::Specification
+ 
+   def validate_dependencies(); end
+ 
+-  def validate_metadata(); end
+-
+   def validate_permissions(); end
+ 
+   def version=(version); end
+@@ -7015,12 +5765,12 @@ class Gem::Specification
+   def yaml_initialize(tag, vals); end
+   DateLike = ::T.let(nil, ::T.untyped)
+   DateTimeFormat = ::T.let(nil, ::T.untyped)
+-  INITIALIZE_CODE_FOR_DEFAULTS = ::T.let(nil, ::T.untyped)
++  Dupable = ::T.let(nil, ::T.untyped)
+ end
+ 
+ class Gem::Specification
+-  extend ::Enumerable
+   extend ::Gem::Deprecate
++  extend ::Enumerable
+   def self._all(); end
+ 
+   def self._clear_load_cache(); end
+@@ -7057,8 +5807,6 @@ class Gem::Specification
+ 
+   def self.find_active_stub_by_path(path); end
+ 
+-  def self.find_all_by_full_name(full_name); end
+-
+   def self.find_all_by_name(name, *requirements); end
+ 
+   def self.find_by_name(name, *requirements); end
+@@ -7103,8 +5851,6 @@ class Gem::Specification
+ end
+ 
+ class Gem::StreamUI
+-  def _deprecated_debug(statement); end
+-
+   def _gets_noecho(); end
+ 
+   def alert(statement, question=T.unsafe(nil)); end
+@@ -7125,7 +5871,7 @@ class Gem::StreamUI
+ 
+   def close(); end
+ 
+-  def debug(*args, &block); end
++  def debug(statement); end
+ 
+   def download_reporter(*args); end
+ 
+@@ -7139,8 +5885,6 @@ class Gem::StreamUI
+ 
+   def progress_reporter(*args); end
+ 
+-  def require_io_console(); end
+-
+   def say(statement=T.unsafe(nil)); end
+ 
+   def terminate_interaction(status=T.unsafe(nil)); end
+@@ -7148,81 +5892,7 @@ class Gem::StreamUI
+   def tty?(); end
+ end
+ 
+-class Gem::StreamUI::SilentDownloadReporter
+-  def done(); end
+-
+-  def fetch(filename, filesize); end
+-
+-  def initialize(out_stream, *args); end
+-
+-  def update(current); end
+-end
+-
+-class Gem::StreamUI::SilentDownloadReporter
+-end
+-
+-class Gem::StreamUI::SilentProgressReporter
+-  def count(); end
+-
+-  def done(); end
+-
+-  def initialize(out_stream, size, initial_message, terminal_message=T.unsafe(nil)); end
+-
+-  def updated(message); end
+-end
+-
+-class Gem::StreamUI::SilentProgressReporter
+-end
+-
+-class Gem::StreamUI::SimpleProgressReporter
+-  include ::Gem::DefaultUserInteraction
+-  def count(); end
+-
+-  def done(); end
+-
+-  def initialize(out_stream, size, initial_message, terminal_message=T.unsafe(nil)); end
+-
+-  def updated(message); end
+-end
+-
+-class Gem::StreamUI::SimpleProgressReporter
+-end
+-
+-class Gem::StreamUI::VerboseDownloadReporter
+-  def done(); end
+-
+-  def fetch(file_name, total_bytes); end
+-
+-  def file_name(); end
+-
+-  def initialize(out_stream, *args); end
+-
+-  def progress(); end
+-
+-  def total_bytes(); end
+-
+-  def update(bytes); end
+-end
+-
+-class Gem::StreamUI::VerboseDownloadReporter
+-end
+-
+-class Gem::StreamUI::VerboseProgressReporter
+-  include ::Gem::DefaultUserInteraction
+-  def count(); end
+-
+-  def done(); end
+-
+-  def initialize(out_stream, size, initial_message, terminal_message=T.unsafe(nil)); end
+-
+-  def updated(message); end
+-end
+-
+-class Gem::StreamUI::VerboseProgressReporter
+-end
+-
+ class Gem::StreamUI
+-  extend ::Gem::Deprecate
+ end
+ 
+ class Gem::StubSpecification
+@@ -7325,23 +5995,19 @@ module Gem::Util
+ 
+   def self.silent_system(*command); end
+ 
+-  def self.traverse_parents(directory, &block); end
++  def self.traverse_parents(directory); end
+ end
+ 
+ class Gem::Version
+   include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
+   def _segments(); end
+ 
+-  def _split_segments(); end
+-
+   def _version(); end
+ 
+   def approximate_recommendation(); end
+ 
+   def bump(); end
+ 
+-  def canonical_segments(); end
+-
+   def encode_with(coder); end
+ 
+   def eql?(other); end
+@@ -7381,16 +6047,6 @@ end
+ 
+ module Gem
+   extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
+-  def self._deprecated_datadir(gem_name); end
+-
+-  def self._deprecated_detect_gemdeps(path=T.unsafe(nil)); end
+-
+-  def self._deprecated_gunzip(data); end
+-
+-  def self._deprecated_gzip(data); end
+-
+-  def self._deprecated_inflate(data); end
+-
+   def self.activate_bin_path(name, *args); end
+ 
+   def self.default_ext_dir_for(base_dir); end
+@@ -7401,7 +6057,7 @@ module Gem
+ 
+   def self.deflate(data); end
+ 
+-  def self.detect_gemdeps(*args, &block); end
++  def self.detect_gemdeps(path=T.unsafe(nil)); end
+ 
+   def self.dir(); end
+ 
+@@ -7431,15 +6087,15 @@ module Gem
+ 
+   def self.gemdeps(); end
+ 
+-  def self.gunzip(*args, &block); end
++  def self.gunzip(data); end
+ 
+-  def self.gzip(*args, &block); end
++  def self.gzip(data); end
+ 
+   def self.host(); end
+ 
+   def self.host=(host); end
+ 
+-  def self.inflate(*args, &block); end
++  def self.inflate(data); end
+ 
+   def self.install(name, version=T.unsafe(nil), *options); end
+ 
+@@ -7463,7 +6119,7 @@ module Gem
+ 
+   def self.loaded_specs(); end
+ 
+-  def self.location_of_caller(depth=T.unsafe(nil)); end
++  def self.location_of_caller(); end
+ 
+   def self.marshal_version(); end
+ 
+@@ -7610,8 +6266,34 @@ end
+ 
+ class IO
+   include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
++  def beep(); end
++
++  def cooked(); end
++
++  def cooked!(); end
++
++  def cursor(); end
++
++  def cursor=(); end
++
++  def echo=(echo); end
++
++  def echo?(); end
++
+   def external_encoding(); end
+ 
++  def getch(*_); end
++
++  def getpass(*_); end
++
++  def goto(); end
++
++  def iflush(); end
++
++  def ioflush(); end
++
++  def noecho(); end
++
+   def nonblock(*_); end
+ 
+   def nonblock=(nonblock); end
+@@ -7620,8 +6302,16 @@ class IO
+ 
+   def nread(); end
+ 
++  def oflush(); end
++
+   def pathconf(_); end
+ 
++  def pressed?(); end
++
++  def raw(*_); end
++
++  def raw!(*_); end
++
+   def ready?(); end
+ 
+   def wait(*_); end
+@@ -7630,6 +6320,10 @@ class IO
+ 
+   def wait_writable(*_); end
+ 
++  def winsize(); end
++
++  def winsize=(winsize); end
++
+   def write_nonblock(buf, exception: T.unsafe(nil)); end
+ end
+ 
+@@ -7646,6 +6340,8 @@ module IO::WaitWritable
+ end
+ 
+ class IO
++  def self.console(*_); end
++
+   def self.foreach(*_); end
+ 
+   def self.pipe(*_); end
+@@ -7658,27 +6354,6 @@ class Integer
+ 
+   def to_bn(); end
+ 
+-  GMP_VERSION = ::T.let(nil, ::T.untyped)
+-end
+-
+-module JSON
+-  FAST_STATE_PROTOTYPE = ::T.let(nil, ::T.untyped)
+-  Infinity = ::T.let(nil, ::T.untyped)
+-  JSON_LOADED = ::T.let(nil, ::T.untyped)
+-  MinusInfinity = ::T.let(nil, ::T.untyped)
+-  PRETTY_STATE_PROTOTYPE = ::T.let(nil, ::T.untyped)
+-  SAFE_STATE_PROTOTYPE = ::T.let(nil, ::T.untyped)
+-  VERSION = ::T.let(nil, ::T.untyped)
+-  VERSION_ARRAY = ::T.let(nil, ::T.untyped)
+-  VERSION_BUILD = ::T.let(nil, ::T.untyped)
+-  VERSION_MAJOR = ::T.let(nil, ::T.untyped)
+-  VERSION_MINOR = ::T.let(nil, ::T.untyped)
+-end
+-
+-class JSON::CircularDatastructure
+-end
+-
+-class JSON::CircularDatastructure
+ end
+ 
+ module JSON::Ext
+@@ -7837,121 +6512,14 @@ end
+ module JSON::Ext
+ end
+ 
+-class JSON::GeneratorError
+-end
+-
+-class JSON::GeneratorError
+-end
+-
+-class JSON::GenericObject
+-  def as_json(*_); end
+-
+-  def to_hash(); end
+-
+-  def to_json(*a); end
+-
+-  def |(other); end
+-end
+-
+-class JSON::GenericObject
+-  def self.[](*_); end
+-
+-  def self.dump(obj, *args); end
+-
+-  def self.from_hash(object); end
+-
+-  def self.json_creatable=(json_creatable); end
+-
+-  def self.json_create(data); end
+-
+-  def self.load(source, proc=T.unsafe(nil), opts=T.unsafe(nil)); end
+-end
+-
+-class JSON::JSONError
+-end
+-
+-class JSON::JSONError
+-  def self.wrap(exception); end
+-end
+-
+-class JSON::MissingUnicodeSupport
+-end
+-
+-class JSON::MissingUnicodeSupport
+-end
+-
+-class JSON::NestingError
+-end
+-
+-class JSON::NestingError
+-end
+-
+ JSON::Parser = JSON::Ext::Parser
+ 
+-class JSON::ParserError
+-end
+-
+-class JSON::ParserError
+-end
+-
+ JSON::State = JSON::Ext::Generator::State
+ 
+ JSON::UnparserError = JSON::GeneratorError
+ 
+ module JSON
+-  def self.[](object, opts=T.unsafe(nil)); end
+-
+-  def self.create_id(); end
+-
+-  def self.create_id=(create_id); end
+-
+-  def self.deep_const_get(path); end
+-
+-  def self.dump(obj, anIO=T.unsafe(nil), limit=T.unsafe(nil)); end
+-
+-  def self.dump_default_options(); end
+-
+-  def self.dump_default_options=(dump_default_options); end
+-
+-  def self.fast_generate(obj, opts=T.unsafe(nil)); end
+-
+-  def self.fast_unparse(obj, opts=T.unsafe(nil)); end
+-
+-  def self.generate(obj, opts=T.unsafe(nil)); end
+-
+-  def self.generator(); end
+-
+-  def self.generator=(generator); end
+-
+-  def self.iconv(to, from, string); end
+-
+-  def self.load(source, proc=T.unsafe(nil), options=T.unsafe(nil)); end
+-
+-  def self.load_default_options(); end
+-
+-  def self.load_default_options=(load_default_options); end
+-
+-  def self.parse(source, opts=T.unsafe(nil)); end
+-
+-  def self.parse!(source, opts=T.unsafe(nil)); end
+-
+-  def self.parser(); end
+-
+-  def self.parser=(parser); end
+-
+-  def self.pretty_generate(obj, opts=T.unsafe(nil)); end
+-
+-  def self.pretty_unparse(obj, opts=T.unsafe(nil)); end
+-
+-  def self.recurse_proc(result, &proc); end
+-
+-  def self.restore(source, proc=T.unsafe(nil), options=T.unsafe(nil)); end
+-
+-  def self.state(); end
+-
+-  def self.state=(state); end
+-
+-  def self.unparse(obj, opts=T.unsafe(nil)); end
++  extend ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride
+ end
+ 
+ module Kernel
+@@ -8176,41 +6744,7 @@ module ObjectSpace
+ end
+ 
+ class OpenStruct
+-  def ==(other); end
+-
+-  def [](name); end
+-
+-  def []=(name, value); end
+-
+-  def delete_field(name); end
+-
+-  def dig(name, *names); end
+-
+-  def each_pair(); end
+-
+-  def eql?(other); end
+-
+-  def initialize(hash=T.unsafe(nil)); end
+-
+-  def marshal_dump(); end
+-
+-  def marshal_load(x); end
+-
+-  def method_missing(mid, *args); end
+-
+-  def modifiable(); end
+-
+-  def new_ostruct_member(name); end
+-
+-  def table(); end
+-
+-  def table!(); end
+-
+-  def to_h(); end
+-  InspectKey = ::T.let(nil, ::T.untyped)
+-end
+-
+-class OpenStruct
++  include ::Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride
+ end
+ 
+ class Pathname
+@@ -8325,7 +6859,7 @@ end
+ module Readline
+   def self.basic_quote_characters(); end
+ 
+-  def self.basic_quote_characters=(basic_quote_characters); end
++  def self.basic_quote_characters=(); end
+ 
+   def self.basic_word_break_characters(); end
+ 
+@@ -8351,7 +6885,7 @@ module Readline
+ 
+   def self.completion_proc=(completion_proc); end
+ 
+-  def self.delete_text(*_); end
++  def self.delete_text(); end
+ 
+   def self.emacs_editing_mode(); end
+ 
+@@ -8359,7 +6893,7 @@ module Readline
+ 
+   def self.filename_quote_characters(); end
+ 
+-  def self.filename_quote_characters=(filename_quote_characters); end
++  def self.filename_quote_characters=(); end
+ 
+   def self.get_screen_size(); end
+ 
+@@ -8381,7 +6915,7 @@ module Readline
+ 
+   def self.quoting_detection_proc(); end
+ 
+-  def self.quoting_detection_proc=(quoting_detection_proc); end
++  def self.quoting_detection_proc=(); end
+ 
+   def self.redisplay(); end
+ 
+-- 
+2.21.0
+

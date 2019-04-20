@@ -3,6 +3,8 @@ set -e
 
 COMMAND_FILE=$(mktemp)
 
+echo 'RECORD=1 ruby gems/sorbet/test/srb-rbi/empty/empty.rb > /dev/null && patch -p1 < gems/sorbet/test/srb-rbi/empty/0001-Revert-laptop-patch.patch > /dev/null' >> "$COMMAND_FILE"
+
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg autogen)
 
 bazel build test/cli:update test/lsp:update //main:sorbet-light -c opt "$@"
