@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=3325:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2538:4})
   field <U $c> @ Loc {file=test/testdata/desugar/sclass.rb start=19:1 end=19:3}
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}
@@ -54,7 +54,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/scla
   class <S <S <C <U H>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
     method <S <S <C <U H>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=76:17}
       argument <S <S <C <U H>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=731:1 end=731:27}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=213:1 end=213:27}
     method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=84:1 end=84:9}
       argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
 
