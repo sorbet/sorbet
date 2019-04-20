@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2748:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2704:4})
   class <C <U LetErrors>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/let_errors.rb start=2:1 end=2:16}
     static-field <C <U LetErrors>><U @@cv> -> Symbol @ Loc {file=test/testdata/resolver/let_errors.rb start=15:3 end=15:7}
     static-field <C <U LetErrors>><U @@cvar> -> Integer @ Loc {file=test/testdata/resolver/let_errors.rb start=4:5 end=4:11}

@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2748:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2704:4})
   class <C <U Foo>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=2:10}
     static-field-type-alias <C <U Foo>><C <U A>> -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=5:3 end=5:4}
     static-field-type-alias <C <U Foo>><C <U ADDRESS_TYPE>> -> NilClass | ShapeType {
