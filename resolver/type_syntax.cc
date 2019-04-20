@@ -65,23 +65,41 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                                bool allowSelfType, core::SymbolRef untypedBlame) {
     ParsedSig sig;
 
-    ast::Send *send;
+    vector<ast::Send *> sends;
 
     if (isTProc(ctx, sigSend)) {
-        send = sigSend;
+        sends.emplace_back(sigSend);
     } else {
         sig.seen.sig = true;
         ENFORCE(sigSend->fun == core::Names::sig());
         auto block = ast::cast_tree<ast::Block>(sigSend->block.get());
         ENFORCE(block);
-        send = ast::cast_tree<ast::Send>(block->body.get());
-        if (!send) {
-            // The resolver will error out, I guess give them back an empty sig?
-            return sig;
+        auto send = ast::cast_tree<ast::Send>(block->body.get());
+        if (send) {
+            sends.emplace_back(send);
+        } else {
+            auto insseq = ast::cast_tree<ast::InsSeq>(block->body.get());
+            if (insseq) {
+                for (auto &stat : insseq->stats) {
+                    send = ast::cast_tree<ast::Send>(stat.get());
+                    if (!send) {
+                        return sig;
+                    }
+                    sends.emplace_back(send);
+                }
+                send = ast::cast_tree<ast::Send>(insseq->expr.get());
+                if (!send) {
+                    return sig;
+                }
+                sends.emplace_back(send);
+            } else {
+                return sig;
+            }
         }
     }
+    ENFORCE(!sends.empty());
 
-    {
+    for (auto &send : sends) {
         ast::Send *tsend = send;
         // extract type parameters early
         while (tsend != nullptr) {
@@ -126,153 +144,156 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
         parent = &sig;
     }
 
-    while (send != nullptr) {
-        switch (send->fun._id) {
-            case core::Names::proc()._id:
-                sig.seen.proc = true;
-                break;
-            case core::Names::bind()._id: {
-                if (sig.seen.bind) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
+    for (auto &send : sends) {
+        while (send != nullptr) {
+            switch (send->fun._id) {
+                case core::Names::proc()._id:
+                    sig.seen.proc = true;
+                    break;
+                case core::Names::bind()._id: {
+                    if (sig.seen.bind) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
+                        }
+                        sig.bind = core::SymbolRef();
                     }
-                    sig.bind = core::SymbolRef();
-                }
-                sig.seen.bind = true;
+                    sig.seen.bind = true;
 
-                if (send->args.size() != 1) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "bind", 1,
-                                    send->args.size());
+                    if (send->args.size() != 1) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "bind", 1,
+                                        send->args.size());
+                        }
+                        break;
+                    }
+
+                    auto bind = getResultType(ctx, *(send->args.front()), *parent, allowSelfType, untypedBlame);
+                    auto classType = core::cast_type<core::ClassType>(bind.get());
+                    if (!classType) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
+                        }
+                    } else {
+                        sig.bind = classType->symbol;
+                    }
+
+                    break;
+                }
+                case core::Names::params()._id: {
+                    if (sig.seen.params) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
+                        }
+                        sig.argTypes.clear();
+                    }
+                    sig.seen.params = true;
+
+                    if (send->args.empty()) {
+                        break;
+                    }
+
+                    if (send->args.size() > 1) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
+                                        "0-1", send->args.size());
+                        }
+                    }
+                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                    if (hash == nullptr) {
+                        // Error will be reported in infer
+                        break;
+                    }
+
+                    int i = 0;
+                    for (auto &key : hash->keys) {
+                        auto &value = hash->values[i++];
+                        auto lit = ast::cast_tree<ast::Literal>(key.get());
+                        if (lit && lit->isSymbol(ctx)) {
+                            core::NameRef name = lit->asSymbol(ctx);
+                            auto resultAndBind =
+                                getResultTypeAndBind(ctx, *value, *parent, allowSelfType, true, untypedBlame);
+                            sig.argTypes.emplace_back(
+                                ParsedSig::ArgSpec{key->loc, name, resultAndBind.type, resultAndBind.rebind});
+                        }
                     }
                     break;
                 }
-
-                auto bind = getResultType(ctx, *(send->args.front()), *parent, allowSelfType, untypedBlame);
-                auto classType = core::cast_type<core::ClassType>(bind.get());
-                if (!classType) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
+                case core::Names::typeParameters()._id:
+                    // was handled above
+                    break;
+                case core::Names::abstract()._id:
+                    sig.seen.abstract = true;
+                    break;
+                case core::Names::override_()._id:
+                    sig.seen.override_ = true;
+                    break;
+                case core::Names::implementation()._id:
+                    sig.seen.implementation = true;
+                    break;
+                case core::Names::overridable()._id:
+                    sig.seen.overridable = true;
+                    break;
+                case core::Names::final()._id:
+                    sig.seen.final = true;
+                    break;
+                case core::Names::returns()._id: {
+                    sig.seen.returns = true;
+                    if (send->args.size() != 1) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
+                                        send->args.size());
+                        }
+                        break;
                     }
-                } else {
-                    sig.bind = classType->symbol;
-                }
 
+                    auto nil = ast::cast_tree<ast::Literal>(send->args[0].get());
+                    if (nil && nil->isNil(ctx)) {
+                        if (auto e = ctx.state.beginError(send->args[0]->loc,
+                                                          core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("You probably meant .returns(NilClass)");
+                        }
+                        sig.returns = core::Types::nilClass();
+                        break;
+                    }
+
+                    sig.returns = getResultType(ctx, *(send->args.front()), *parent, allowSelfType, untypedBlame);
+
+                    break;
+                }
+                case core::Names::void_()._id:
+                    sig.seen.void_ = true;
+                    sig.returns = core::Types::void_();
+                    break;
+                case core::Names::checked()._id:
+                    sig.seen.checked = true;
+                    break;
+                case core::Names::soft()._id:
+                    break;
+                case core::Names::generated()._id:
+                    sig.seen.generated = true;
+                    break;
+                default:
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Method `{}` does not exist on `T::Private::Methods::SigBuilder`",
+                                    send->fun.show(ctx));
+                    }
+            }
+            auto recv = ast::cast_tree<ast::Send>(send->recv.get());
+
+            if (!recv) {
+                if (!send->recv->isSelfReference()) {
+                    if (!sig.seen.proc) {
+                        if (auto e =
+                                ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Method does not exist on `T::Private::Methods::SigBuilder`");
+                        }
+                    }
+                }
                 break;
             }
-            case core::Names::params()._id: {
-                if (sig.seen.params) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
-                    }
-                    sig.argTypes.clear();
-                }
-                sig.seen.params = true;
 
-                if (send->args.empty()) {
-                    break;
-                }
-
-                if (send->args.size() > 1) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
-                                    "0-1", send->args.size());
-                    }
-                }
-                auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
-                if (hash == nullptr) {
-                    // Error will be reported in infer
-                    break;
-                }
-
-                int i = 0;
-                for (auto &key : hash->keys) {
-                    auto &value = hash->values[i++];
-                    auto lit = ast::cast_tree<ast::Literal>(key.get());
-                    if (lit && lit->isSymbol(ctx)) {
-                        core::NameRef name = lit->asSymbol(ctx);
-                        auto resultAndBind =
-                            getResultTypeAndBind(ctx, *value, *parent, allowSelfType, true, untypedBlame);
-                        sig.argTypes.emplace_back(
-                            ParsedSig::ArgSpec{key->loc, name, resultAndBind.type, resultAndBind.rebind});
-                    }
-                }
-                break;
-            }
-            case core::Names::typeParameters()._id:
-                // was handled above
-                break;
-            case core::Names::abstract()._id:
-                sig.seen.abstract = true;
-                break;
-            case core::Names::override_()._id:
-                sig.seen.override_ = true;
-                break;
-            case core::Names::implementation()._id:
-                sig.seen.implementation = true;
-                break;
-            case core::Names::overridable()._id:
-                sig.seen.overridable = true;
-                break;
-            case core::Names::final()._id:
-                sig.seen.final = true;
-                break;
-            case core::Names::returns()._id: {
-                sig.seen.returns = true;
-                if (send->args.size() != 1) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
-                                    send->args.size());
-                    }
-                    break;
-                }
-
-                auto nil = ast::cast_tree<ast::Literal>(send->args[0].get());
-                if (nil && nil->isNil(ctx)) {
-                    if (auto e =
-                            ctx.state.beginError(send->args[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("You probably meant .returns(NilClass)");
-                    }
-                    sig.returns = core::Types::nilClass();
-                    break;
-                }
-
-                sig.returns = getResultType(ctx, *(send->args.front()), *parent, allowSelfType, untypedBlame);
-
-                break;
-            }
-            case core::Names::void_()._id:
-                sig.seen.void_ = true;
-                sig.returns = core::Types::void_();
-                break;
-            case core::Names::checked()._id:
-                sig.seen.checked = true;
-                break;
-            case core::Names::soft()._id:
-                break;
-            case core::Names::generated()._id:
-                sig.seen.generated = true;
-                break;
-            default:
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Method `{}` does not exist on `T::Private::Methods::SigBuilder`", send->fun.show(ctx));
-                }
+            send = recv;
         }
-        auto recv = ast::cast_tree<ast::Send>(send->recv.get());
-
-        if (!recv) {
-            if (!send->recv->isSelfReference()) {
-                if (!sig.seen.proc) {
-                    if (auto e =
-                            ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Method does not exist on `T::Private::Methods::SigBuilder`");
-                    }
-                }
-            }
-            break;
-        }
-
-        send = recv;
     }
     ENFORCE(sig.seen.sig || sig.seen.proc);
 
