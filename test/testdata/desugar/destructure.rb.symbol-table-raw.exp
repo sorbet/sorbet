@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2528:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2538:4})
   class <C <U Destructure>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=2:18}
     method <C <U Destructure>><U f> ((x,y), z, <blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=3:3 end=3:18}
       argument <C <U Destructure>><U f>(x,y)<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:9 end=3:14}

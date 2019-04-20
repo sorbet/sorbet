@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2528:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2538:4})
   class <C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/todo/block_in_class.rb start=2:1 end=2:8}
     static-field <C <U C>><C <U L>> -> AppliedType {
       klass = <C <U Proc1>>
