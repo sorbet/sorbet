@@ -202,101 +202,97 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 }
 
 void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
-    // Squish any consecutive didChanges that are for the same file together, and combine all Watchman file system
-    // updates into a single update.
     // TODO: if we ever support diffs, this would need to be extended
-    int didChangeRequestsMerged = 0;
-    int foundWatchmanRequests = 0;
-    optional<FlowId> firstWatchmanTimestamp;
-    int firstWatchmanCounter;
+    int requestsMerged = 0;
     int originalSize = pendingRequests.size();
+    vector<unique_ptr<SorbetWorkspaceEdit>> workspaceEdits();
     UnorderedSet<string> updatedFiles;
+    optional<FlowId> firstMergedTimestamp;
+    int firstMergedCounter = 0;
+
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
+        bool merged = false;
         if (current->isNotification()) {
-            auto method = current->method();
             auto &params = current->asNotification().params;
-            if (method == LSPMethod::TextDocumentDidChange) {
-                auto &currentChanges = get<unique_ptr<DidChangeTextDocumentParams>>(params);
-                string_view thisURI = currentChanges->textDocument->uri;
-                auto nextIt = it + 1;
-                if (nextIt != pendingRequests.end()) {
-                    auto &next = *nextIt;
-                    auto nextMethod = next->method();
-                    if (nextMethod == LSPMethod::TextDocumentDidChange && next->isNotification()) {
-                        auto &nextNotif = next->asNotification();
-                        auto &nextChanges = get<unique_ptr<DidChangeTextDocumentParams>>(nextNotif.params);
-                        string_view nextURI = nextChanges->textDocument->uri;
-                        if (nextURI == thisURI) {
-                            auto &currentUpdates = currentChanges->contentChanges;
-                            auto &nextUpdates = nextChanges->contentChanges;
-                            std::move(std::begin(nextUpdates), std::end(nextUpdates),
-                                      std::back_inserter(currentUpdates));
-                            nextChanges->contentChanges = move(currentUpdates);
-                            didChangeRequestsMerged += 1;
-                            nextNotif.params = move(nextChanges);
-                            it = pendingRequests.erase(it);
-                            continue;
-                        }
-                    }
-                }
-            } else if (method == LSPMethod::SorbetWatchmanFileChange) {
-                auto &changes = get<unique_ptr<WatchmanQueryResponse>>(params);
-                updatedFiles.insert(changes->files.begin(), changes->files.end());
-                if (foundWatchmanRequests == 0) {
-                    // Use timestamp/counter from the earliest file system change.
-                    firstWatchmanTimestamp = current->startTracer;
-                    firstWatchmanCounter = current->counter;
-                }
-                foundWatchmanRequests++;
-                it = pendingRequests.erase(it);
-                continue;
+            switch (current->method()) {
+                case LSPMethod::TextDocumentDidOpen:
+                    workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
+                        SorbetWorkspaceEditType::EditorOpen,
+                        move(get<unique_ptr<DidOpenTextDocumentParams>>(params)),
+                    ));
+                    merged = true;
+                    break;
+                case LSPMethod::TextDocumentDidChange:
+                    workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
+                        SorbetWorkspaceEditType::EditorChange,
+                        move(get<unique_ptr<DidChangeTextDocumentParams>>(params)),
+                    ));
+                    merged = true;
+                    break;
+                case LSPMethod::TextDocumentDidClose:
+                    workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
+                        SorbetWorkspaceEditType::EditorClose,
+                        move(get<unique_ptr<DidCloseTextDocumentParams>>(params)),
+                    ));
+                    merged = true;
+                    break;
+                case LSPMethod::SorbetWatchmanFileChange:
+                    auto &changes = get<unique_ptr<WatchmanQueryResponse>>(params);
+                    updatedFiles.insert(changes->files.begin(), changes->files.end());
+                    merged = true;
+                    break;
+                case LSPMethod::SorbetWorkspaceEdit:
+                    auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
+                    workspaceEdits.insert(editParams->contents.begin(), editParams->contents.end());
+                    merged = true;
+                    break;
             }
         }
-        ++it;
-    }
-    ENFORCE(pendingRequests.size() + didChangeRequestsMerged + foundWatchmanRequests == originalSize);
+        
+        if (merged) {
+            requestsMerged++;
+            // N.B.: Advances `it` to next item.
+            it = pendingRequests.erase(it);
+            if (!firstMergedTimestamp) {
+                firstMergedTimestamp = current->startTracer;
+                firstMergedCounter = current->counter;
+            }
+        }
+        
+        // Enqueue a merge update if we've encountered a message we couldn't merge, or we are at the end of the queue.
+        if (!merged || it == pendingRequests.end()) {
+            // Nothing merged. Should we enqueue a combined workspace update?
+            if (updatedFiles.size() > 0) {
+                workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::FileSystem, make_unique<WatchmanQueryResponse>("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()))));
+                updatedFiles.clear();
+            }
+            if (workspaceEdits.size() > 0) {
+                // If we merge 2 requests into 1, then we've only merged 1 request.
+                requestsMerged--;
 
-    prodCategoryCounterAdd("lsp.messages.processed", "text_document_did_change_merged", didChangeRequestsMerged);
+                auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWorkspaceEdit, make_unique<SorbetWorkspaceEditParams>(move(workspaceEdits)));
+                auto lspMessage = make_unique<LSPMessage>(move(notif));
+                lspMessage->startTracer = firstMergedTimestamp;
+                lspMessage->counter = firstMergedCounter;
+                // Insert merged updates, then push iterator back to where it was.
+                it = pendingRequests.insert(it, move(lspMessage)) + 1;
 
-    /**
-     * If we found any watchman updates, inject a single update that contains all of the FS updates.
-     *
-     * Ordering with textDocumentDidChange notifications effectively does *not* matter. We ignore Watchman updates on
-     * files that are open in the editor, and re-pick up the file system version when the editor closes the file.
-     *
-     * It's possible that this reordering will cause transient errors if the user intended the TextDocumentDidChange to
-     * apply against the other changed files on disk. For example, the user may have git pulled in changes to bar.rb,
-     * and are editing foo.rb which requires the updated bar.rb to pass typechecking. However, we already have that
-     * problem with the devbox rsync loop + autogen latency.
-     *
-     * I (jvilk) think the harm of these transient errors is small compared to the potential delay in this common
-     * scenario:
-     * 1. User runs git pull.
-     * 2. User begins editing file.
-     * 3. While user is editing file, pay up is rsyncing changes + autogen is running.
-     * 4. Sorbet is picking up user's edits mixed in with file system updates.
-     *
-     * If DidChange acts like a fence for combining file system updates, then Sorbet may have to run the slow path many
-     * times to catch up with the file system changes.
-     *
-     * TODO(jvilk): Since the slow path is slow, I actually think that we may want to (eventually) combine all file
-     * updates from different sources into a single event to make catching up faster. Then, we can merge all DidChange
-     * and Watchman updates into a single update.
-     */
-    if (foundWatchmanRequests > 0) {
-        prodCategoryCounterAdd("lsp.messages.processed", "watchman_file_change_merged", foundWatchmanRequests - 1);
-        // Enqueue the changes at *back* of the queue. Defers Sorbet from processing updates until the last
-        // possible moment.
-        auto watchmanUpdates =
-            make_unique<WatchmanQueryResponse>("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()));
-        auto notifMsg =
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(watchmanUpdates));
-        auto msg = make_unique<LSPMessage>(move(notifMsg));
-        msg->counter = firstWatchmanCounter;
-        msg->startTracer = firstWatchmanTimestamp;
-        pendingRequests.push_back(move(msg));
+                // Clear state for next round.
+                workspaceEdits.clear();
+                firstMergedTimestamp = nullopt;
+                firstMergedCounter = 0;
+            }
+        }
+
+        if (!merged) {
+            // No messages were merged, so `it` needs to be advanced.
+            it++;
+        }
     }
+    ENFORCE(pendingRequests.size() + requestsMerged == originalSize);
+
+    prodCategoryCounterAdd("lsp.messages.processed", "file_updates_merged", requestsMerged);
 }
 
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,

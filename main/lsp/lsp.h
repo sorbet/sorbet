@@ -210,8 +210,7 @@ class LSPLoop {
                                                                const MessageId &id,
                                                                const TextDocumentPositionParams &params);
     /**
-     * Merges all pending Watchman updates into a single update, and merges any consecutive textDocumentDidChange events
-     * into a single update.
+     * Merges all consecutive file updates into a single update.
      */
     static void mergeFileChanges(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     /**
