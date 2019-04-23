@@ -533,6 +533,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
+        opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {
             opts.errorCodeWhiteList = raw["error-white-list"].as<vector<int>>();
         }
