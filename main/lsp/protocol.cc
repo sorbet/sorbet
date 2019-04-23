@@ -205,7 +205,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     // TODO: if we ever support diffs, this would need to be extended
     int requestsMerged = 0;
     int originalSize = pendingRequests.size();
-    vector<unique_ptr<SorbetWorkspaceEdit>> workspaceEdits();
+    vector<unique_ptr<SorbetWorkspaceEdit>> workspaceEdits;
     UnorderedSet<string> updatedFiles;
     optional<FlowId> firstMergedTimestamp;
     int firstMergedCounter = 0;
@@ -216,62 +216,71 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
         if (current->isNotification()) {
             auto &params = current->asNotification().params;
             switch (current->method()) {
-                case LSPMethod::TextDocumentDidOpen:
+                case LSPMethod::TextDocumentDidOpen: {
                     workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
-                        SorbetWorkspaceEditType::EditorOpen,
-                        move(get<unique_ptr<DidOpenTextDocumentParams>>(params)),
-                    ));
+                        SorbetWorkspaceEditType::EditorOpen, move(get<unique_ptr<DidOpenTextDocumentParams>>(params))));
                     merged = true;
                     break;
-                case LSPMethod::TextDocumentDidChange:
-                    workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
-                        SorbetWorkspaceEditType::EditorChange,
-                        move(get<unique_ptr<DidChangeTextDocumentParams>>(params)),
-                    ));
+                }
+                case LSPMethod::TextDocumentDidChange: {
+                    workspaceEdits.push_back(
+                        make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorChange,
+                                                         move(get<unique_ptr<DidChangeTextDocumentParams>>(params))));
                     merged = true;
                     break;
-                case LSPMethod::TextDocumentDidClose:
-                    workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
-                        SorbetWorkspaceEditType::EditorClose,
-                        move(get<unique_ptr<DidCloseTextDocumentParams>>(params)),
-                    ));
+                }
+                case LSPMethod::TextDocumentDidClose: {
+                    workspaceEdits.push_back(
+                        make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorClose,
+                                                         move(get<unique_ptr<DidCloseTextDocumentParams>>(params))));
                     merged = true;
                     break;
-                case LSPMethod::SorbetWatchmanFileChange:
+                }
+                case LSPMethod::SorbetWatchmanFileChange: {
                     auto &changes = get<unique_ptr<WatchmanQueryResponse>>(params);
                     updatedFiles.insert(changes->files.begin(), changes->files.end());
                     merged = true;
                     break;
-                case LSPMethod::SorbetWorkspaceEdit:
+                }
+                case LSPMethod::SorbetWorkspaceEdit: {
                     auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
-                    workspaceEdits.insert(editParams->contents.begin(), editParams->contents.end());
+                    workspaceEdits.insert(workspaceEdits.end(), make_move_iterator(editParams->changes.begin()),
+                                          make_move_iterator(editParams->changes.end()));
                     merged = true;
+                    break;
+                }
+                default:
                     break;
             }
         }
-        
+
         if (merged) {
             requestsMerged++;
-            // N.B.: Advances `it` to next item.
-            it = pendingRequests.erase(it);
             if (!firstMergedTimestamp) {
                 firstMergedTimestamp = current->startTracer;
                 firstMergedCounter = current->counter;
             }
+            // N.B.: Advances `it` to next item.
+            it = pendingRequests.erase(it);
         }
-        
+
         // Enqueue a merge update if we've encountered a message we couldn't merge, or we are at the end of the queue.
         if (!merged || it == pendingRequests.end()) {
             // Nothing merged. Should we enqueue a combined workspace update?
             if (updatedFiles.size() > 0) {
-                workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::FileSystem, make_unique<WatchmanQueryResponse>("", "", false, vector<string>(updatedFiles.begin(), updatedFiles.end()))));
+                workspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
+                    SorbetWorkspaceEditType::FileSystem,
+                    make_unique<WatchmanQueryResponse>("", "", false,
+                                                       vector<string>(updatedFiles.begin(), updatedFiles.end()))));
                 updatedFiles.clear();
             }
             if (workspaceEdits.size() > 0) {
                 // If we merge 2 requests into 1, then we've only merged 1 request.
                 requestsMerged--;
 
-                auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWorkspaceEdit, make_unique<SorbetWorkspaceEditParams>(move(workspaceEdits)));
+                auto notif =
+                    make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWorkspaceEdit,
+                                                     make_unique<SorbetWorkspaceEditParams>(move(workspaceEdits)));
                 auto lspMessage = make_unique<LSPMessage>(move(notif));
                 lspMessage->startTracer = firstMergedTimestamp;
                 lspMessage->counter = firstMergedCounter;

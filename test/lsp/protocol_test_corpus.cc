@@ -186,6 +186,44 @@ TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
     EXPECT_EQ(diagnosticCount, 1) << "Expected a diagnostic error for foo.rb";
 }
 
+// Applies all consecutive file changes at once.
+TEST_F(ProtocolTest, MergesDidChangesAcrossFiles) {
+    assertDiagnostics(initializeLSP(), {});
+    vector<unique_ptr<LSPMessage>> requests;
+    // File is fine at first.
+    requests.push_back(openFile("foo.rb", ""));
+    // Invalid: Returns false.
+    requests.push_back(changeFile("foo.rb",
+                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                  "{returns(Integer)}\n  def bar\n    false\n  end\nend\n",
+                                  2));
+    requests.push_back(openFile("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    // Invalid: Returns float
+    requests.push_back(changeFile("foo.rb",
+                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                  "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
+                                  3));
+    writeFilesToFS({{"baz.rb", "# typed: true\nclass Foo2\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    requests.push_back(watchmanFileUpdate({"baz.rb"}));
+    // Final state: Returns unknown identifier.
+    requests.push_back(changeFile("foo.rb",
+                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  4));
+
+    auto msgs = send(move(requests));
+    int diagnosticCount = 0;
+    for (auto &msg : msgs) {
+        if (msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            diagnosticCount++;
+        }
+    }
+    EXPECT_EQ(diagnosticCount, 3) << "Expected three responses with diagnostics.";
+    assertDiagnostics(move(msgs), {{"bar.rb", 3, "doesn't match `Integer`"},
+                                   {"baz.rb", 3, "doesn't match `Integer`"},
+                                   {"foo.rb", 7, "Method `blah` does not exist"}});
+}
+
 TEST_F(ProtocolTest, NotInitialized) {
     auto msgs = send(*getDefinition("foo.rb", 12, 24));
     ASSERT_EQ(msgs.size(), 1);

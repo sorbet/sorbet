@@ -65,7 +65,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::drainLSPResponses() {
     return rv;
 }
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &message) {
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(LSPMessage &message) {
     gs = lspLoop->processRequest(move(gs), message);
 
     // Should always run typechecking at least once for each request post-initialization.
