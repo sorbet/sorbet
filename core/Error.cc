@@ -93,7 +93,7 @@ string ErrorSection::toString(const GlobalState &gs) const {
 string Error::toString(const GlobalState &gs) const {
     stringstream buf;
     buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
-        << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code
+        << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " " << gs.errorUrlBase << what.code
         << RESET_COLOR;
     if (loc.exists()) {
         buf << '\n' << loc.toStringWithTabs(gs, 2);

@@ -148,6 +148,9 @@ public:
     unsigned int hash() const;
     std::vector<std::shared_ptr<File>> getFiles() const;
 
+    // Contains a string to be used as the base of the error URL.
+    // The error code is appended to this string.
+    std::string errorUrlBase;
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
 
