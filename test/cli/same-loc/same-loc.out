@@ -1,165 +1,165 @@
-test/cli/same-loc/same-loc.rb:3: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:3: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      3 |class MyClass < Foo::Bar
                         ^^^
 
-test/cli/same-loc/same-loc.rb:3: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:3: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      3 |class MyClass < Foo::Bar
                         ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `ODM` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `ODM` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `ODM` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `ODM` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` http://go/e/5002
+test/cli/same-loc/same-loc.rb:4: Unable to resolve constant `Foo` https://sorbet.org/docs/error-reference#5002
      4 |  const :foo, T::Array[Foo::Baz]
                                ^^^
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` https://sorbet.org/docs/error-reference#7003
 
-test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `params` does not exist on `T.class_of(MyClass)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `params` does not exist on `T.class_of(MyClass)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://sorbet.org/docs/error-reference#7003
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` https://sorbet.org/docs/error-reference#7003
 
-test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` http://go/e/7003
+test/cli/same-loc/same-loc.rb: Method `keep_for_typechecking` does not exist on `T.class_of(Sorbet::Private::Static)` https://sorbet.org/docs/error-reference#7003
 
-test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `params` does not exist on `T.class_of(MyClass::Mutator)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `params` does not exist on `T.class_of(MyClass::Mutator)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` http://go/e/7004
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `returns` does not exist on `T.class_of(MyClass::Mutator)` http://go/e/7003
+test/cli/same-loc/same-loc.rb:4: Method `returns` does not exist on `T.class_of(MyClass::Mutator)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 40

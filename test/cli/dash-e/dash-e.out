@@ -3,7 +3,7 @@ class ::<root> < ::Object () @ (https://github.com/stripe/sorbet/tree/master/baz
   class ::Foo < ::Object () @ -e:1
   class ::<Class:Foo> < ::<Class:Object> () @ -e:1
 
--e:2: This function does not have a `sig` http://go/e/7017
+-e:2: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      2 |def foo; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect

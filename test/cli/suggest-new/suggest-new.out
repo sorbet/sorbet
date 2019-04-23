@@ -1,4 +1,4 @@
-test/cli/suggest-new/suggest-new.rb:9: Method `ABC` does not exist on `T.class_of(<root>)` http://go/e/7003
+test/cli/suggest-new/suggest-new.rb:9: Method `ABC` does not exist on `T.class_of(<root>)` https://sorbet.org/docs/error-reference#7003
      9 |ABC(1)
         ^^^^^^
     test/cli/suggest-new/suggest-new.rb:4: Did you mean: `ABE.new`?

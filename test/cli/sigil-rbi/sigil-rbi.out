@@ -1,4 +1,4 @@
-test/cli/sigil-rbi/no_type.rbi:3: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none) http://go/e/5038
+test/cli/sigil-rbi/no_type.rbi:3: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none) https://sorbet.org/docs/error-reference#5038
      3 |sig {returns(Integer)}
         ^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

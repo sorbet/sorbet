@@ -1,4 +1,4 @@
-suggest-type-alias.rb:4: Reassigning a type alias is not allowed http://go/e/5034
+suggest-type-alias.rb:4: Reassigning a type alias is not allowed https://sorbet.org/docs/error-reference#5034
      4 |B = A
             ^
     suggest-type-alias.rb:3: Originally defined here

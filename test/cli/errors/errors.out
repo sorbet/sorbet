@@ -1,8 +1,8 @@
-test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
+test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://sorbet.org/docs/error-reference#5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
+test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L772: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
@@ -13,7 +13,7 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
     12 |  def foo(arg)
                   ^^^
 
-test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
+test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` https://sorbet.org/docs/error-reference#7002
     18 |    foo("foo")
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
@@ -24,7 +24,7 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
     18 |    foo("foo")
                 ^^^^^
 
-test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
+test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` https://sorbet.org/docs/error-reference#7002
     32 |    bar(a)
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
@@ -45,11 +45,11 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     32 |    bar(a)
                 ^
 Errors: 4
-test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
+test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://sorbet.org/docs/error-reference#5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
+test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L772: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
@@ -60,7 +60,7 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
     12 |  def foo(arg)
                   ^^^
 
-test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
+test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` https://sorbet.org/docs/error-reference#7002
     18 |    foo("foo")
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
@@ -71,7 +71,7 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
     18 |    foo("foo")
                 ^^^^^
 
-test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
+test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` https://sorbet.org/docs/error-reference#7002
     32 |    bar(a)
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
@@ -92,11 +92,11 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     32 |    bar(a)
                 ^
 Errors: 4
-test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
+test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://sorbet.org/docs/error-reference#5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
+test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L772: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
@@ -107,7 +107,7 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
     12 |  def foo(arg)
                   ^^^
 
-test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
+test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` https://sorbet.org/docs/error-reference#7002
     18 |    foo("foo")
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
@@ -118,7 +118,7 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
     18 |    foo("foo")
                 ^^^^^
 
-test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
+test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` https://sorbet.org/docs/error-reference#7002
     32 |    bar(a)
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`

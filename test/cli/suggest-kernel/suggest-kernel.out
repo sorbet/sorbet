@@ -1,4 +1,4 @@
-test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` http://go/e/7003
+test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://sorbet.org/docs/error-reference#7003
      4 |    raise "hi"
             ^^^^^^^^^^
   Did you mean to `include Kernel` in this module?

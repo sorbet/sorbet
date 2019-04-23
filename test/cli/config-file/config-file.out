@@ -1,4 +1,4 @@
-config-file.rb:2: Method `+` does not exist on `Symbol` component of `Symbol(:"sym")` http://go/e/7003
+config-file.rb:2: Method `+` does not exist on `Symbol` component of `Symbol(:"sym")` https://sorbet.org/docs/error-reference#7003
      2 |puts :sym + ''
              ^^^^^^^^^
 Errors: 1

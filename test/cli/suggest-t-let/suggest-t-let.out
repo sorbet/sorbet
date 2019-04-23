@@ -1,4 +1,4 @@
-suggest-t-let.rb:5: Changing the type of a variable in a loop is not permitted http://go/e/7001
+suggest-t-let.rb:5: Changing the type of a variable in a loop is not permitted https://sorbet.org/docs/error-reference#7001
      5 |  x = true
               ^^^^
   Existing variable has type: `FalseClass`
@@ -9,7 +9,7 @@ suggest-t-let.rb:5: Changing the type of a variable in a loop is not permitted h
      3 |x = false
             ^^^^^
 
-suggest-t-let.rb:10: Changing the type of a variable in a loop is not permitted http://go/e/7001
+suggest-t-let.rb:10: Changing the type of a variable in a loop is not permitted https://sorbet.org/docs/error-reference#7001
     10 |  y = ''
               ^^
   Existing variable has type: `NilClass`

@@ -1,4 +1,4 @@
--e:2: Parse Error: unexpected token: syntax error http://go/e/2001
+-e:2: Parse Error: unexpected token: syntax error https://sorbet.org/docs/error-reference#2001
      2 |# typed: true
                     ^
 Errors: 1

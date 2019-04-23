@@ -1,4 +1,4 @@
-test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` http://go/e/7003
+test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://sorbet.org/docs/error-reference#7003
      4 |foo[0]
         ^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -6,7 +6,7 @@ test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilC
      4 |foo[0]
         ^^^
 
-test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `String` for argument `arg0` http://go/e/7002
+test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
      6 |"hi" + foo
         ^^^^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/string.rbi#L23: Method `String#+` has specified `arg0` as `String`

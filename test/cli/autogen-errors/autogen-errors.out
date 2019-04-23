@@ -1,4 +1,4 @@
-test/cli/autogen-errors/autogen-errors.rb:5: Circular dependency: `Bar` and `Foo` are declared as parents of each other http://go/e/5011
+test/cli/autogen-errors/autogen-errors.rb:5: Circular dependency: `Bar` and `Foo` are declared as parents of each other https://sorbet.org/docs/error-reference#5011
      5 |class Bar < Foo
                     ^^^
 Errors: 1

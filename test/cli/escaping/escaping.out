@@ -1,4 +1,4 @@
-test/cli/escaping/escaping.rb:9: `String("\n")` doesn't match `Integer` for argument `a` http://go/e/7002
+test/cli/escaping/escaping.rb:9: `String("\n")` doesn't match `Integer` for argument `a` https://sorbet.org/docs/error-reference#7002
      9 |foo( #error: `String("\n")` doesn't match
     10 |'
     11 |'

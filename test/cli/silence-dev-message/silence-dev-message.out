@@ -4,17 +4,17 @@ Check out the README to learn how to build Sorbet in release mode.
 To forcibly silence this error, either pass --silence-dev-message,
 or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.
 
--e:1: Method `x` does not exist on `T.class_of(<root>)` http://go/e/7003
+-e:1: Method `x` does not exist on `T.class_of(<root>)` https://sorbet.org/docs/error-reference#7003
      1 |x
         ^
 Errors: 1
 -----------------------------------------------------------------------
--e:1: Method `x` does not exist on `T.class_of(<root>)` http://go/e/7003
+-e:1: Method `x` does not exist on `T.class_of(<root>)` https://sorbet.org/docs/error-reference#7003
      1 |x
         ^
 Errors: 1
 -----------------------------------------------------------------------
--e:1: Method `x` does not exist on `T.class_of(<root>)` http://go/e/7003
+-e:1: Method `x` does not exist on `T.class_of(<root>)` https://sorbet.org/docs/error-reference#7003
      1 |x
         ^
 Errors: 1

@@ -1,4 +1,4 @@
-test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Integer` for argument `arg0` http://go/e/7002
+test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
      3 |1 + "1"
         ^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
@@ -9,11 +9,11 @@ test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Inte
      3 |1 + "1"
             ^^^
 
-test/cli/error-blacklist/error-blacklist.rb:4: Useless cast: inferred type `Integer(1)` is already a subtype of `T.nilable(Integer)` http://go/e/7015
+test/cli/error-blacklist/error-blacklist.rb:4: Useless cast: inferred type `Integer(1)` is already a subtype of `T.nilable(Integer)` https://sorbet.org/docs/error-reference#7015
      4 |T.cast(1, T.nilable(Integer))
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 2
-test/cli/error-blacklist/error-blacklist.rb:4: Useless cast: inferred type `Integer(1)` is already a subtype of `T.nilable(Integer)` http://go/e/7015
+test/cli/error-blacklist/error-blacklist.rb:4: Useless cast: inferred type `Integer(1)` is already a subtype of `T.nilable(Integer)` https://sorbet.org/docs/error-reference#7015
      4 |T.cast(1, T.nilable(Integer))
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
