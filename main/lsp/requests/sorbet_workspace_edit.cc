@@ -115,7 +115,9 @@ unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<cor
                 auto &params = get<unique_ptr<WatchmanQueryResponse>>(edit->contents);
                 for (auto file : params->files) {
                     string localPath = absl::StrCat(rootPath, "/", file);
-                    if (openFiles.find(localPath) == openFiles.end()) {
+                    if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
+                                                opts.relativeIgnorePatterns) &&
+                        openFiles.find(localPath) == openFiles.end()) {
                         updates[localPath] = readFile(localPath, *opts.fs);
                     }
                 }
