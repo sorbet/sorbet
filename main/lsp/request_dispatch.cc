@@ -55,33 +55,33 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         Timer timeit(logger, fmt::format("notification {}", convertLSPMethodToString(method)));
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::TextDocumentDidChange) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet.workspaceEdit");
             vector<shared_ptr<core::File>> files;
             auto &edits = get<unique_ptr<DidChangeTextDocumentParams>>(params);
             auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorChange, move(edits));
             return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::TextDocumentDidOpen) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet.workspaceEdit");
             auto &edits = get<unique_ptr<DidOpenTextDocumentParams>>(params);
             auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorOpen, move(edits));
             return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::TextDocumentDidClose) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet.workspaceEdit");
             auto &edits = get<unique_ptr<DidCloseTextDocumentParams>>(params);
             auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorClose, move(edits));
             return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::SorbetWatchmanFileChange) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet.workspaceEdit");
             auto &queryResponse = get<unique_ptr<WatchmanQueryResponse>>(params);
             auto sorbetEdit =
                 make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::FileSystem, move(queryResponse));
             return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::SorbetWorkspaceEdit) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet.workspaceEdit");
             auto &edits = get<unique_ptr<SorbetWorkspaceEditParams>>(params)->changes;
             if (!initialized) {
                 for (auto &edit : edits) {
