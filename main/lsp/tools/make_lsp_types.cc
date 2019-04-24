@@ -1226,6 +1226,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // Empty object.
     auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
 
+    /* Sorbet LSP extensions */
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
     auto SorbetShowOperationParams = makeObject("SorbetShowOperationParams",
                                                 {
@@ -1250,6 +1251,40 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 makeField("files", makeArray(JSONString)),
                                             },
                                             classTypes);
+
+    auto SorbetWorkspaceEditType =
+        makeStrEnum("SorbetWorkspaceEditType", {"EditorOpen", "EditorChange", "EditorClose", "FileSystem"}, enumTypes);
+
+    auto editTypeField = makeField("type", SorbetWorkspaceEditType);
+    auto SorbetWorkspaceEdit =
+        makeObject("SorbetWorkspaceEdit",
+                   {
+                       editTypeField,
+                       makeField("contents", makeDiscriminatedUnion(editTypeField,
+                                                                    {
+                                                                        {"EditorOpen", DidOpenTextDocumentParams},
+                                                                        {"EditorChange", DidChangeTextDocumentParams},
+                                                                        {"EditorClose", DidCloseTextDocumentParams},
+                                                                        {"FileSystem", WatchmanQueryResponse},
+                                                                    })),
+                   },
+                   classTypes);
+
+    auto SorbetWorkspaceEditCounts = makeObject("SorbetWorkspaceEditCounts",
+                                                {
+                                                    makeField("textDocumentDidOpen", JSONInt),
+                                                    makeField("textDocumentDidChange", JSONInt),
+                                                    makeField("textDocumentDidClose", JSONInt),
+                                                    makeField("sorbetWatchmanFileChange", JSONInt),
+                                                },
+                                                classTypes);
+
+    auto SorbetWorkspaceEditParams = makeObject("SorbetWorkspaceEditParams",
+                                                {
+                                                    makeField("counts", SorbetWorkspaceEditCounts),
+                                                    makeField("changes", makeArray(SorbetWorkspaceEdit)),
+                                                },
+                                                classTypes);
 
     /* Core LSPMessage objects */
     // N.B.: Only contains LSP methods that Sorbet actually cares about.
@@ -1278,6 +1313,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "sorbet/watchmanFileChange",
                                      "sorbet/showOperation",
                                      "sorbet/error",
+                                     "sorbet/workspaceEdit",
                                  },
                                  enumTypes);
 
@@ -1347,6 +1383,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                             });
     auto NotificationMessage = makeObject("NotificationMessage",
                                           {makeField("jsonrpc", JSONRPCConstant), makeField("method", LSPMethod),

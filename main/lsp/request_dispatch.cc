@@ -1,4 +1,3 @@
-#include "absl/strings/match.h"
 #include "common/Timer.h"
 #include "lsp.h"
 
@@ -11,7 +10,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
     return LSPLoop::processRequest(move(gs), *msg);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, LSPMessage &msg) {
     auto id = msg.id();
     Timer timeit(logger, "process_request");
     try {
@@ -42,7 +41,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalSt
     return gs;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, LSPMessage &msg) {
     if (handleReplies(msg)) {
         return gs;
     }
@@ -58,111 +57,52 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         if (method == LSPMethod::TextDocumentDidChange) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
             vector<shared_ptr<core::File>> files;
-
             auto &edits = get<unique_ptr<DidChangeTextDocumentParams>>(params);
-            string_view uri = edits->textDocument->uri;
-            // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
-            // taught about it too: it merges consecutive TextDocumentDidChange
-            if (absl::StartsWith(uri, rootUri)) {
-                string localPath = remoteName2Local(uri);
-                if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                           opts.relativeIgnorePatterns)) {
-                    return gs;
-                }
-                auto currentFileRef = initialGS->findFileByPath(localPath);
-                unique_ptr<core::File> file;
-                if (currentFileRef.exists()) {
-                    file = make_unique<core::File>(string(currentFileRef.data(*initialGS).path()),
-                                                   string(currentFileRef.data(*initialGS).source()),
-                                                   core::File::Type::Normal);
-                } else {
-                    file = make_unique<core::File>(string(localPath), "", core::File::Type::Normal);
-                }
-
-                for (auto &change : edits->contentChanges) {
-                    if (change->range) {
-                        auto &range = *change->range;
-                        // incremental update
-                        auto old = move(file);
-                        string oldContent = string(old->source());
-                        core::Loc::Detail start, end;
-                        start.line = range->start->line + 1;
-                        start.column = range->start->character + 1;
-                        end.line = range->end->line + 1;
-                        end.column = range->end->character + 1;
-                        auto startOffset = core::Loc::pos2Offset(*old, start);
-                        auto endOffset = core::Loc::pos2Offset(*old, end);
-                        string newContent = oldContent.replace(startOffset, endOffset - startOffset, change->text);
-                        file = make_unique<core::File>(string(old->path()), move(newContent), core::File::Type::Normal);
-                    } else {
-                        // replace
-                        auto old = move(file);
-                        file =
-                            make_unique<core::File>(string(old->path()), move(change->text), core::File::Type::Normal);
-                    }
-                }
-
-                logger->trace("Updating {} to have the following contents: {}", remoteName2Local(uri), file->source());
-
-                files.emplace_back(move(file));
-
-                return pushDiagnostics(tryFastPath(move(gs), files));
-            }
+            auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorChange, move(edits));
+            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::TextDocumentDidOpen) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
             auto &edits = get<unique_ptr<DidOpenTextDocumentParams>>(params);
-            string_view uri = edits->textDocument->uri;
-            if (absl::StartsWith(uri, rootUri)) {
-                auto localPath = remoteName2Local(uri);
-                if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                           opts.relativeIgnorePatterns)) {
-                    return gs;
-                }
-                vector<shared_ptr<core::File>> files;
-                files.emplace_back(make_shared<core::File>(string(localPath), move(edits->textDocument->text),
-                                                           core::File::Type::Normal));
-                openFiles.insert(localPath);
-                return pushDiagnostics(tryFastPath(move(gs), files));
-            }
+            auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorOpen, move(edits));
+            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::TextDocumentDidClose) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
             auto &edits = get<unique_ptr<DidCloseTextDocumentParams>>(params);
-            string_view uri = edits->textDocument->uri;
-            if (absl::StartsWith(uri, rootUri)) {
-                auto localPath = remoteName2Local(uri);
-                if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                           opts.relativeIgnorePatterns)) {
-                    return gs;
-                }
-                auto it = openFiles.find(localPath);
-                if (it != openFiles.end()) {
-                    openFiles.erase(it);
-                }
-                // Treat as if Watchman told us the file updated.
-                // Forces LSP to re-read file from disk, as the user may have discarded editor
-                // changes.
-                return handleWatchmanUpdates(move(gs), {localPath});
-            }
+            auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorClose, move(edits));
+            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
         }
         if (method == LSPMethod::SorbetWatchmanFileChange) {
             prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
             auto &queryResponse = get<unique_ptr<WatchmanQueryResponse>>(params);
-            // Watchman returns file paths that are relative to the rootPath. Turn them into absolute paths
-            // before they propagate further through the codebase.
-            vector<string> absoluteFilePaths;
-            absoluteFilePaths.reserve(queryResponse->files.size());
-            transform(queryResponse->files.begin(), queryResponse->files.end(), back_inserter(absoluteFilePaths),
-                      [&](const string &relPath) -> string { return absl::StrCat(rootPath, "/", relPath); });
-
+            auto sorbetEdit =
+                make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::FileSystem, move(queryResponse));
+            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
+        }
+        if (method == LSPMethod::SorbetWorkspaceEdit) {
+            // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
+            auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
+            auto &edits = editParams->changes;
+            auto &counts = editParams->counts;
+            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didChange", counts->textDocumentDidChange);
+            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didOpen", counts->textDocumentDidOpen);
+            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didClose", counts->textDocumentDidClose);
+            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/watchmanFileChange",
+                                   counts->sorbetWatchmanFileChange);
+            // Number of messages merged together into a workspace edit.
+            prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
+                                                   counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
+                                                      1);
             if (!initialized) {
-                for (auto &file : absoluteFilePaths) {
-                    deferredWatchmanUpdates.insert(file);
+                for (auto &edit : edits) {
+                    if (edit->type != SorbetWorkspaceEditType::FileSystem) {
+                        logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
+                        return gs;
+                    }
                 }
-                return gs;
             }
-            return handleWatchmanUpdates(move(gs), absoluteFilePaths);
+            return handleSorbetWorkspaceEdits(move(gs), edits);
         }
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
@@ -181,12 +121,9 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
 
             // process deferred watchman updates
-            vector<string> deferredUpdatesVector;
-            for (auto &updatedFile : deferredWatchmanUpdates) {
-                deferredUpdatesVector.push_back(updatedFile);
-            }
-            deferredWatchmanUpdates.clear();
-            return handleWatchmanUpdates(move(newGs), deferredUpdatesVector);
+            auto deferredFileEditsClone = move(deferredFileEdits);
+            deferredFileEdits.clear();
+            return handleSorbetWorkspaceEdits(move(newGs), deferredFileEditsClone);
         }
         if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");

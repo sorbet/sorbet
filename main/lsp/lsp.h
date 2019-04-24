@@ -110,9 +110,10 @@ class LSPLoop {
     const bool disableFastPath;
     /** The set of files currently open in the user's editor. */
     UnorderedSet<std::string> openFiles;
-    /** The set of files that have been updated before initialization completes. Will be processed post-initialization.
+    /** The set of (file system) edits that have occurred before initialization completed. Will be processed
+     * post-initialization.
      */
-    UnorderedSet<std::string> deferredWatchmanUpdates;
+    std::vector<std::unique_ptr<SorbetWorkspaceEdit>> deferredFileEdits;
     /**
      * Set to true once the server is initialized.
      * TODO(jvilk): Use to raise server not initialized errors.
@@ -210,8 +211,7 @@ class LSPLoop {
                                                                const MessageId &id,
                                                                const TextDocumentPositionParams &params);
     /**
-     * Merges all pending Watchman updates into a single update, and merges any consecutive textDocumentDidChange events
-     * into a single update.
+     * Merges all consecutive file updates into a single update.
      */
     static void mergeFileChanges(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     /**
@@ -227,11 +227,12 @@ class LSPLoop {
                              const CancelParams &cancellationRequest);
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
-    std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs,
-                                                              const LSPMessage &msg);
-
-    std::unique_ptr<core::GlobalState> handleWatchmanUpdates(std::unique_ptr<core::GlobalState> gs,
-                                                             std::vector<std::string> changedFiles);
+    std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs, LSPMessage &msg);
+    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                                                 std::unique_ptr<SorbetWorkspaceEdit> &edit);
+    std::unique_ptr<core::GlobalState>
+    handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
+                               std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
@@ -243,7 +244,7 @@ public:
             const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &output,
             bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
-    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
+    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, LSPMessage &msg);
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
     /**
      * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.
