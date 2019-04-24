@@ -55,7 +55,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         Timer timeit(logger, fmt::format("notification {}", convertLSPMethodToString(method)));
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::TextDocumentDidChange) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet.didChange");
+            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
             vector<shared_ptr<core::File>> files;
             auto &edits = get<unique_ptr<DidChangeTextDocumentParams>>(params);
             auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorChange, move(edits));

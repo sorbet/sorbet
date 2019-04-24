@@ -321,7 +321,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
         }
 
         if (!preMerged) {
-            // canMerge is only `false` if `it` points to a non-mergeable item right now.
+            // preMerged is only `false` if `it` points to a non-mergeable item right now.
             ENFORCE(it != pendingRequests.end());
             // No messages were merged, so `it` needs to be advanced.
             it++;
