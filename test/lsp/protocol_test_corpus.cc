@@ -204,24 +204,51 @@ TEST_F(ProtocolTest, MergesDidChangesAcrossFiles) {
                                   "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
                                   3));
     writeFilesToFS({{"baz.rb", "# typed: true\nclass Foo2\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    writeFilesToFS({{"bat.rb", "# typed: true\nclass Foo3\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
     requests.push_back(watchmanFileUpdate({"baz.rb"}));
     // Final state: Returns unknown identifier.
     requests.push_back(changeFile("foo.rb",
                                   "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                   "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
                                   4));
+    requests.push_back(closeFile("bat.rb"));
 
     auto msgs = send(move(requests));
-    int diagnosticCount = 0;
-    for (auto &msg : msgs) {
-        if (msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
-            diagnosticCount++;
-        }
-    }
-    EXPECT_EQ(diagnosticCount, 3) << "Expected three responses with diagnostics.";
+    EXPECT_EQ(msgs.size(), 4) << "Expected only 4 diagnostic responses to the merged file changes";
     assertDiagnostics(move(msgs), {{"bar.rb", 3, "doesn't match `Integer`"},
                                    {"baz.rb", 3, "doesn't match `Integer`"},
+                                   {"bat.rb", 3, "doesn't match `Integer`"},
                                    {"foo.rb", 7, "Method `blah` does not exist"}});
+}
+
+TEST_F(ProtocolTest, DoesNotMergeFileChangesAcrossOtherRequests) {
+    assertDiagnostics(initializeLSP(), {});
+    vector<unique_ptr<LSPMessage>> requests;
+    requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                          "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
+    // Should block ^ and V from merging.
+    requests.push_back(documentSymbol("foo.rb"));
+    requests.push_back(changeFile("foo.rb",
+                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  4));
+
+    auto msgs = send(move(requests));
+    // [diagnostics, documentsymbol, diagnostics]
+    EXPECT_EQ(msgs.size(), 3);
+    if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(0)->asNotification())) {
+        EXPECT_TRUE((*diagnosticParams)->uri.find("foo.rb") != string::npos);
+        auto &diagnostics = (*diagnosticParams)->diagnostics;
+        EXPECT_EQ(diagnostics.size(), 1);
+        EXPECT_TRUE(diagnostics.at(0)->message.find("Returning value") != string::npos);
+    }
+    EXPECT_TRUE(msgs.at(1)->isResponse());
+    if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(2)->asNotification())) {
+        EXPECT_TRUE((*diagnosticParams)->uri.find("foo.rb") != string::npos);
+        auto &diagnostics = (*diagnosticParams)->diagnostics;
+        EXPECT_EQ(diagnostics.size(), 1);
+        EXPECT_TRUE(diagnostics.at(0)->message.find("Method `blah` does not exist") != string::npos);
+    }
 }
 
 TEST_F(ProtocolTest, NotInitialized) {
@@ -229,6 +256,15 @@ TEST_F(ProtocolTest, NotInitialized) {
     ASSERT_EQ(msgs.size(), 1);
     auto &msg1 = msgs.at(0);
     assertResponseError(-32002, "not initialize", *msg1);
+}
+
+// There's a different code path that checks for file edits before initialization occurs.
+TEST_F(ProtocolTest, NotFileEditInitialized) {
+    // This update should be ignored.
+    assertDiagnostics(
+        send(*openFile("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n")), {});
+    // We shouldn't have any code errors post-initialization since the previous edit was ignored.
+    assertDiagnostics(initializeLSP(), {});
 }
 
 // Monaco doesn't send a root URI.
