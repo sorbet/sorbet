@@ -258,11 +258,13 @@ TEST_F(ProtocolTest, NotInitialized) {
     assertResponseError(-32002, "not initialize", *msg1);
 }
 
-// There's a different code path that checks for file edits before initialization occurs.
-TEST_F(ProtocolTest, NotFileEditInitialized) {
+// There's a different code path that checks for workspace edits before initialization occurs.
+TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
+    // Purposefully send a vector of requests to trigger merging, which should turn this into a WorkspaceEdit.
+    vector<unique_ptr<LSPMessage>> toSend;
+    toSend.push_back(openFile("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
     // This update should be ignored.
-    assertDiagnostics(
-        send(*openFile("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n")), {});
+    assertDiagnostics(send(move(toSend)), {});
     // We shouldn't have any code errors post-initialization since the previous edit was ignored.
     assertDiagnostics(initializeLSP(), {});
 }
