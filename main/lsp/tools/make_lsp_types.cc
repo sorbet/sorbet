@@ -1270,8 +1270,18 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    },
                    classTypes);
 
+    auto SorbetWorkspaceEditCounts = makeObject("SorbetWorkspaceEditCounts",
+                                                {
+                                                    makeField("textDocumentDidOpen", JSONInt),
+                                                    makeField("textDocumentDidChange", JSONInt),
+                                                    makeField("textDocumentDidClose", JSONInt),
+                                                    makeField("sorbetWatchmanFileChange", JSONInt),
+                                                },
+                                                classTypes);
+
     auto SorbetWorkspaceEditParams = makeObject("SorbetWorkspaceEditParams",
                                                 {
+                                                    makeField("counts", SorbetWorkspaceEditCounts),
                                                     makeField("changes", makeArray(SorbetWorkspaceEdit)),
                                                 },
                                                 classTypes);

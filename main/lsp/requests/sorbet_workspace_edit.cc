@@ -11,6 +11,9 @@ string readFile(string_view path, const FileSystem &fs) {
         return fs.readFile(path);
     } catch (FileNotFoundException e) {
         // Act as if file is completely empty.
+        // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman updates
+        // that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted files.
+        // TODO(jvilk): Use Tombstone files instead.
         return "";
     }
 }
