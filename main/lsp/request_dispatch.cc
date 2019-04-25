@@ -11,20 +11,8 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
 }
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, LSPMessage &msg) {
-    auto id = msg.id();
     Timer timeit(logger, "process_request");
-    try {
-        return processRequestInternal(move(gs), msg);
-    } catch (const DeserializationError &e) {
-        // TODO(jvilk): Can remove once all parsing happens up-front.
-        if (id.has_value()) {
-            ResponseMessage response("2.0", *id, LSPMethod::SorbetError);
-            response.error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, e.what());
-            sendResponse(response);
-        }
-        // Run the slow path so that the caller still has a GlobalState.
-        return runSlowPath({}).gs;
-    }
+    return processRequestInternal(move(gs), msg);
 }
 
 unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalState> gs,

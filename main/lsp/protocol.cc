@@ -332,53 +332,49 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
                              std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
-    try {
-        msg->counter = state.requestCounter++;
-        msg->startTracer = timingAddFlowStart(
-            "processing_time",
-            chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch()).count());
+    msg->counter = state.requestCounter++;
+    msg->startTracer = timingAddFlowStart(
+        "processing_time",
+        chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch()).count());
 
-        const LSPMethod method = msg->method();
-        if (method == LSPMethod::$CancelRequest) {
-            // see if they are canceling request that we didn't yet even start processing.
-            auto it = findRequestToBeCancelled(state.pendingRequests,
-                                               *get<unique_ptr<CancelParams>>(msg->asNotification().params));
-            if (it != state.pendingRequests.end() && (*it)->isRequest()) {
-                auto canceledRequest = move(*it);
-                canceledRequest->canceled = true;
-                state.pendingRequests.erase(it);
-                // move the canceled request to the front
-                auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
-                state.pendingRequests.insert(itFront, move(canceledRequest));
-                LSPLoop::mergeFileChanges(state.pendingRequests);
-            }
-            // if we started processing it already, well... swallow the cancellation request and
-            // continue computing.
-        } else if (method == LSPMethod::PAUSE) {
-            ENFORCE(!state.paused);
-            logger->error("Pausing");
-            state.paused = true;
-        } else if (method == LSPMethod::RESUME) {
-            logger->error("Resuming");
-            ENFORCE(state.paused);
-            state.paused = false;
-        } else if (method == LSPMethod::Exit) {
-            // Don't override previous error code if already terminated.
-            if (!state.terminate) {
-                state.terminate = true;
-                state.errorCode = 0;
-            }
-            state.pendingRequests.push_back(move(msg));
-        } else if (method == LSPMethod::SorbetError) {
-            // Place errors at the *front* of the queue.
-            // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.
-            state.pendingRequests.insert(findFirstPositionAfterLSPInitialization(state.pendingRequests), move(msg));
-        } else {
-            state.pendingRequests.push_back(move(msg));
+    const LSPMethod method = msg->method();
+    if (method == LSPMethod::$CancelRequest) {
+        // see if they are canceling request that we didn't yet even start processing.
+        auto it = findRequestToBeCancelled(state.pendingRequests,
+                                           *get<unique_ptr<CancelParams>>(msg->asNotification().params));
+        if (it != state.pendingRequests.end() && (*it)->isRequest()) {
+            auto canceledRequest = move(*it);
+            canceledRequest->canceled = true;
+            state.pendingRequests.erase(it);
+            // move the canceled request to the front
+            auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
+            state.pendingRequests.insert(itFront, move(canceledRequest));
             LSPLoop::mergeFileChanges(state.pendingRequests);
         }
-    } catch (DeserializationError e) {
-        logger->error("Unable to deserialize LSP request: {}", e.what());
+        // if we started processing it already, well... swallow the cancellation request and
+        // continue computing.
+    } else if (method == LSPMethod::PAUSE) {
+        ENFORCE(!state.paused);
+        logger->error("Pausing");
+        state.paused = true;
+    } else if (method == LSPMethod::RESUME) {
+        logger->error("Resuming");
+        ENFORCE(state.paused);
+        state.paused = false;
+    } else if (method == LSPMethod::Exit) {
+        // Don't override previous error code if already terminated.
+        if (!state.terminate) {
+            state.terminate = true;
+            state.errorCode = 0;
+        }
+        state.pendingRequests.push_back(move(msg));
+    } else if (method == LSPMethod::SorbetError) {
+        // Place errors at the *front* of the queue.
+        // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.
+        state.pendingRequests.insert(findFirstPositionAfterLSPInitialization(state.pendingRequests), move(msg));
+    } else {
+        state.pendingRequests.push_back(move(msg));
+        LSPLoop::mergeFileChanges(state.pendingRequests);
     }
 
     if (collectThreadCounters) {
