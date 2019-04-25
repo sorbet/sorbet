@@ -12,13 +12,13 @@ the notion some other languages have of "primitive" types. For example, `"abc"`
 is an instance of the `String` class, and so `"abc"` has type `String`. The same
 goes for many other values in Ruby:
 
-| Type    | Example value |
-| ---     | ---           |
-| `"abc"` | `String`      |
-| `:abc`  | `Symbol`      |
-| `42`    | `Integer`     |
-| `3.14`  | `Float`       |
-| `nil`   | `NilClass`    |
+| Type       | Example value |
+| ---        | ---           |
+| `String`   | `"abc"`       |
+| `Symbol`   | `:abc`        |
+| `Integer`  | `42`          |
+| `Float`    | `3.14`        |
+| `NilClass` | `nil`         |
 
 To reiterate: a class type means "any value which is an instance of this class".
 If `x.is_a?(SomeClass)` would return `true` when run, then `x` has type
