@@ -494,7 +494,7 @@ class T::Props::Decorator
     TYPES_NOT_NEEDING_CLONE << Opus::Enum
   end
 
-  sig {params(type: PropType).returns(Boolean)}
+  sig {params(type: PropType).returns(T::Boolean)}
   private def shallow_clone_ok(type)
     inner_type =
       if type.is_a?(T::Types::TypedArray)
