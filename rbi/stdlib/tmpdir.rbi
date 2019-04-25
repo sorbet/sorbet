@@ -40,7 +40,7 @@ class Dir
     type_parameters(:U).params(
       prefix_suffix: T.nilable(T.any(String, T::Array[String])),
       tmpdir: T.nilable(String),
-      blk: T.proc.params(String).returns(T.type_parameter(:U)),
+      blk: T.proc.params(dir: String).returns(T.type_parameter(:U)),
     )
     .returns(T.type_parameter(:U))
   end
