@@ -10,7 +10,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
     return LSPLoop::processRequest(move(gs), *msg);
 }
 
-
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, LSPMessage &msg) {
     Timer timeit(logger, "process_request");
     return processRequestInternal(move(gs), msg);
