@@ -182,23 +182,43 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     // Compute the `_` foreign accessor
     if (foreign) {
         unique_ptr<ast::Expression> type;
+        unique_ptr<ast::Expression> nonNilType;
         if (ASTUtil::dupType(foreign.get()) == nullptr) {
             // If it's not a valid type, just use untyped
             type = ast::MK::Untyped(loc);
+            nonNilType = ast::MK::Untyped(loc);
         } else {
             type = ast::MK::Nilable(loc, std::move(foreign));
+            nonNilType = std::move(foreign);
         }
-        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
+
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
+        stats.emplace_back(
+            ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
+
         // def $fk_method(**opts)
         //  T.unsafe(nil)
         // end
-        stats.emplace_back(
-            ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
+
+        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
 
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         stats.emplace_back(ast::MK::Method1(loc, loc, fk_method, std::move(arg),
+                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
+
+        // sig {params(opts: T.untyped).returns($foreign)}
+        stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
+                                         std::move(nonNilType)));
+
+        // def $fk_method_bang(**opts)
+        //  T.unsafe(nil)
+        // end
+
+        auto fk_method_bang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
+        unique_ptr<ast::Expression> arg2 =
+            ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
+        stats.emplace_back(ast::MK::Method1(loc, loc, fk_method_bang, std::move(arg2),
                                             ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
     }
 
