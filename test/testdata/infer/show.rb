@@ -28,6 +28,7 @@ class Main
         T.assert_type!(foo, T.any(String, Integer)) # error: asserted type `T.any(String, Integer)`
         T.assert_type!(foo, T.all(A, B)) # error: asserted type `T.all(A, B)`
         T.assert_type!(foo, T.nilable(String)) # error: asserted type `T.nilable(String)`
+        T.assert_type!(foo, T.any(NilClass, NilClass)) # error: asserted type `NilClass`
         T.assert_type!(foo, T.any(String, NilClass)) # error: asserted type `T.nilable(String)`
         T.assert_type!(foo, T.any(NilClass, String)) # error: asserted type `T.nilable(String)`
         T.assert_type!(foo, T.any(String, Symbol, NilClass)) # error: asserted type `T.nilable(T.any(String, Symbol))`

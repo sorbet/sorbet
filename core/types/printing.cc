@@ -158,7 +158,7 @@ struct OrInfo {
     int numTypes;
 };
 
-static inline OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
+static OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
     return OrInfo{
         left.containsNil || right.containsNil,
         left.numTypes + right.numTypes,
@@ -168,42 +168,46 @@ static inline OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
 pair<OrInfo, optional<string>> showOrs(const GlobalState &, TypePtr, TypePtr);
 
 pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, TypePtr ty) {
-    auto *nil = cast_type<ClassType>(ty.get());
-    if (nil != nullptr && nil->symbol == Symbols::NilClass()) {
-        return make_pair(OrInfo{true, 0}, nullopt);
-    }
-
-    auto *ot = cast_type<OrType>(ty.get());
-    if (ot != nullptr) {
-        return showOrs(gs, ot->left, ot->right);
+    if (auto classType = cast_type<ClassType>(ty.get())) {
+        if (classType->symbol == Symbols::NilClass()) {
+            return make_pair(OrInfo{true, 0}, nullopt);
+        }
+    } else if (auto orType = cast_type<OrType>(ty.get())) {
+        return showOrs(gs, orType->left, orType->right);
     }
 
     return make_pair(OrInfo{false, 1}, make_optional(ty->show(gs)));
 }
 
 pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
-    auto [linfo, lstr] = showOrElem(gs, left);
-    auto [rinfo, rstr] = showOrElem(gs, right);
+    auto [leftInfo, leftStr] = showOrElem(gs, left);
+    auto [rightInfo, rightStr] = showOrElem(gs, right);
 
-    OrInfo merged = mergeOrInfo(linfo, rinfo);
+    OrInfo merged = mergeOrInfo(leftInfo, rightInfo);
 
-    if (lstr.has_value() && rstr.has_value()) {
-        return make_pair(merged, make_optional(fmt::format("{}, {}", *lstr, *rstr)));
-    } else if (lstr.has_value()) {
-        return make_pair(merged, lstr);
+    if (leftStr.has_value() && rightStr.has_value()) {
+        return make_pair(merged, make_optional(fmt::format("{}, {}", *leftStr, *rightStr)));
+    } else if (leftStr.has_value()) {
+        return make_pair(merged, leftStr);
     } else {
-        return make_pair(merged, rstr);
+        return make_pair(merged, rightStr);
     }
 }
 
 string OrType::show(const GlobalState &gs) const {
     auto [info, str] = showOrs(gs, this->left, this->right);
 
+    // If str is empty at this point, all of the types present in the flattened
+    // OrType are NilClass.
+    if (!str.has_value()) {
+        return Symbols::NilClass().show(gs);
+    }
+
     string res;
     if (info.numTypes > 1) {
-        res = fmt::format("T.any({})", str.value_or(""));
+        res = fmt::format("T.any({})", *str);
     } else {
-        res = str.value_or("");
+        res = *str;
     }
 
     if (info.containsNil) {
