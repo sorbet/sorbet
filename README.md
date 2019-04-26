@@ -645,7 +645,8 @@ You are encouraged to play around with various clang-based tools which use the
 -   [vscode-clangd] -- Clangd extension for VS Code
 
     This extension integrates clangd (see above) with VS Code. It will also
-    run `clang-format` whenever you save.
+    run `clang-format` whenever you save. **Note: Microsoft's C/C++ extension
+    does *not* work properly with Sorbet's `compile_commands.json`.**
 
     clangd will need to be on your path, or you will need to change the
     "clangd.path" setting.
