@@ -1,4 +1,4 @@
--e:1: Method `to_` does not exist on `Integer` component of `Integer(1)` http://go/e/7003
+-e:1: Method `to_` does not exist on `Integer` component of `Integer(1)` https://sorbet.org/docs/error-reference#7003
      1 |1.to_
         ^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L742: Did you mean: `Integer#to_c`?

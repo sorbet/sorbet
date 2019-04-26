@@ -1,4 +1,4 @@
-test/cli/forgot-typed/forgot-typed.rb:2: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none) http://go/e/5038
+test/cli/forgot-typed/forgot-typed.rb:2: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none) https://sorbet.org/docs/error-reference#5038
      2 |sig {void} # error: `sig` in untyped file. Did you mean to put `# typed: true` in this file?
         ^^^^^^^^^^
 Errors: 1

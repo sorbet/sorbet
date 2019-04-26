@@ -1,4 +1,4 @@
-test/cli/error-whitelist/error-whitelist.rb:6: This function does not have a `sig` http://go/e/7017
+test/cli/error-whitelist/error-whitelist.rb:6: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      6 | def foo
          ^^^^^^^
   Autocorrect: Use `-a` to autocorrect

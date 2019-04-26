@@ -1,0 +1,12 @@
+test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/errors/?error=5002
+     4 |    MissingConstant
+            ^^^^^^^^^^^^^^^
+Errors: 1
+test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/error/5002
+     4 |    MissingConstant
+            ^^^^^^^^^^^^^^^
+Errors: 1
+test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/error#5002
+     4 |    MissingConstant
+            ^^^^^^^^^^^^^^^
+Errors: 1

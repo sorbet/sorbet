@@ -90,6 +90,7 @@ struct Options {
     std::string storeState = "";
     bool enableCounters = false;
     std::vector<std::string> someCounters;
+    std::string errorUrlBase;
     std::vector<int> errorCodeWhiteList;
     std::vector<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */

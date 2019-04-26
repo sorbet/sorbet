@@ -1,4 +1,4 @@
-suggest-sig-garbage.rb:5: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:5: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -7,11 +7,11 @@ suggest-sig-garbage.rb:5: This function does not have a `sig` http://go/e/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^
 
-suggest-sig-garbage.rb:8: Method `someCondition` does not exist on `Object` http://go/e/7003
+suggest-sig-garbage.rb:8: Method `someCondition` does not exist on `Object` https://sorbet.org/docs/error-reference#7003
      8 |  if someCondition
              ^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:7: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:7: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      7 |def baz
         ^^^^^^^
   Autocorrect: Done
@@ -20,7 +20,7 @@ suggest-sig-garbage.rb:7: This function does not have a `sig` http://go/e/7017
      7 |def baz
         ^
 
-suggest-sig-garbage.rb:18: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:18: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Done
@@ -29,11 +29,11 @@ suggest-sig-garbage.rb:18: This function does not have a `sig` http://go/e/7017
     18 |def bla; give_me_void; end
         ^
 
-suggest-sig-garbage.rb:21: Method `someCondition` does not exist on `Object` http://go/e/7003
+suggest-sig-garbage.rb:21: Method `someCondition` does not exist on `Object` https://sorbet.org/docs/error-reference#7003
     21 |  if someCondition
              ^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:20: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:20: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     20 |def bbq
         ^^^^^^^
   Autocorrect: Done
@@ -42,7 +42,7 @@ suggest-sig-garbage.rb:20: This function does not have a `sig` http://go/e/7017
     20 |def bbq
         ^
 
-suggest-sig-garbage.rb:28: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:28: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     28 |def idk(a); a / a + a * a; end
         ^^^^^^^^^^
   Autocorrect: Done
@@ -51,7 +51,7 @@ suggest-sig-garbage.rb:28: This function does not have a `sig` http://go/e/7017
     28 |def idk(a); a / a + a * a; end
         ^
 
-suggest-sig-garbage.rb:30: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:30: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -60,7 +60,7 @@ suggest-sig-garbage.rb:30: This function does not have a `sig` http://go/e/7017
     30 |def give_me_literal; 1; end;
         ^
 
-suggest-sig-garbage.rb:32: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:32: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -69,7 +69,7 @@ suggest-sig-garbage.rb:32: This function does not have a `sig` http://go/e/7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^
 
-suggest-sig-garbage.rb:34: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:34: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -78,7 +78,7 @@ suggest-sig-garbage.rb:34: This function does not have a `sig` http://go/e/7017
     34 |private def root_private; end
         ^
 
-suggest-sig-garbage.rb:36: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:36: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -87,7 +87,7 @@ suggest-sig-garbage.rb:36: This function does not have a `sig` http://go/e/7017
     36 |protected def root_protected; end
         ^
 
-suggest-sig-garbage.rb:46: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:46: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     46 |def foo(a)
         ^^^^^^^^^^
   Autocorrect: Done
@@ -96,7 +96,7 @@ suggest-sig-garbage.rb:46: This function does not have a `sig` http://go/e/7017
     46 |def foo(a)
         ^
 
-suggest-sig-garbage.rb:56: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:56: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -105,7 +105,7 @@ suggest-sig-garbage.rb:56: This function does not have a `sig` http://go/e/7017
     56 |def fooCond(a, cond)
         ^
 
-suggest-sig-garbage.rb:64: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:64: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -114,7 +114,7 @@ suggest-sig-garbage.rb:64: This function does not have a `sig` http://go/e/7017
     64 |def fooWhile(a, cond1, cond2)
         ^
 
-suggest-sig-garbage.rb:74: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:74: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     74 |def takesBlock
         ^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -123,7 +123,7 @@ suggest-sig-garbage.rb:74: This function does not have a `sig` http://go/e/7017
     74 |def takesBlock
         ^
 
-suggest-sig-garbage.rb:79: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:79: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -132,19 +132,19 @@ suggest-sig-garbage.rb:79: This function does not have a `sig` http://go/e/7017
     79 |def list_ints_or_empty_list
         ^
 
-suggest-sig-garbage.rb:85: This code is unreachable http://go/e/7006
+suggest-sig-garbage.rb:85: This code is unreachable https://sorbet.org/docs/error-reference#7006
     85 |  if true || qux || blah
                      ^^^
 
-suggest-sig-garbage.rb:85: This code is unreachable http://go/e/7006
+suggest-sig-garbage.rb:85: This code is unreachable https://sorbet.org/docs/error-reference#7006
     85 |  if true || qux || blah
                             ^^^^
 
-suggest-sig-garbage.rb:88: This code is unreachable http://go/e/7006
+suggest-sig-garbage.rb:88: This code is unreachable https://sorbet.org/docs/error-reference#7006
     88 |    takesString(x)
             ^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:84: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:84: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     84 |def dead(x)
         ^^^^^^^^^^^
   Autocorrect: Done
@@ -153,7 +153,7 @@ suggest-sig-garbage.rb:84: This function does not have a `sig` http://go/e/7017
     84 |def dead(x)
         ^
 
-suggest-sig-garbage.rb:92: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:92: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     92 |def with_block
         ^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -162,15 +162,15 @@ suggest-sig-garbage.rb:92: This function does not have a `sig` http://go/e/7017
     92 |def with_block
         ^
 
-suggest-sig-garbage.rb:98: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:98: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     98 |def takesRepated(*a); end;
         ^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:99: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:99: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     99 |def hasNoName(*); end;
         ^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:118: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:118: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -179,7 +179,7 @@ suggest-sig-garbage.rb:118: This function does not have a `sig` http://go/e/7017
      118 |def cantRun(a)
           ^
 
-suggest-sig-garbage.rb:125: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:125: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      125 |def fooCondGeneratedCurly(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -188,7 +188,7 @@ suggest-sig-garbage.rb:125: This function does not have a `sig` http://go/e/7017
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
 
-suggest-sig-garbage.rb:139: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:139: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      139 |def fooCondGeneratedDo(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -201,7 +201,7 @@ suggest-sig-garbage.rb:139: This function does not have a `sig` http://go/e/7017
      138 |end
      139 |def fooCondGeneratedDo(a, cond)
 
-suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:148: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      148 |def updatesUntypedToProfiled(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -210,7 +210,7 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
      147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      148 |def updatesUntypedToProfiled(a, cond)
 
-suggest-sig-garbage.rb:152: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:152: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      152 |def recur
           ^^^^^^^^^
   Autocorrect: Done
@@ -219,7 +219,7 @@ suggest-sig-garbage.rb:152: This function does not have a `sig` http://go/e/7017
      152 |def recur
           ^
 
-suggest-sig-garbage.rb:41: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:41: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
   Autocorrect: Done
@@ -228,7 +228,7 @@ suggest-sig-garbage.rb:41: This function does not have a `sig` http://go/e/7017
     41 |  private def a_private; end
           ^
 
-suggest-sig-garbage.rb:43: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:43: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
     43 |  protected def a_protected; end
                     ^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -237,23 +237,23 @@ suggest-sig-garbage.rb:43: This function does not have a `sig` http://go/e/7017
     43 |  protected def a_protected; end
           ^
 
-suggest-sig-garbage.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:102: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:102: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:102: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:102: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:112: This function does not have a `sig` http://go/e/7017
+suggest-sig-garbage.rb:112: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -267,11 +267,11 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` http://go/e/7017
      105 |  class Merchant
           ^
 
-suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
+suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` https://sorbet.org/docs/error-reference#7003
      108 |  sig {params(merchant: Merchant).void}
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` http://go/e/7003
+suggest-sig-garbage.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://sorbet.org/docs/error-reference#7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 37

@@ -1,6 +1,6 @@
-test/cli/override-typed-bad/override-typed-bad.rb: Useless override of strictness level http://go/e/2001
+test/cli/override-typed-bad/override-typed-bad.rb: Useless override of strictness level https://sorbet.org/docs/error-reference#2001
 
-test/cli/override-typed-bad/override-typed-bad.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` http://go/e/7002
+test/cli/override-typed-bad/override-typed-bad.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
      2 |1 + "s"
         ^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`

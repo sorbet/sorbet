@@ -1,4 +1,4 @@
-test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` http://go/e/5002
+test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` https://sorbet.org/docs/error-reference#5002
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L98: Did you mean: `Enumerator::Yielder`?
@@ -11,7 +11,7 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
      3 |class Fiber < Object
         ^^^^^^^^^^^^^^^^^^^^
 
-test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` http://go/e/5002
+test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://sorbet.org/docs/error-reference#5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L38: Did you mean: `Date`?
@@ -21,7 +21,7 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
      2 |class Integer < Numeric
         ^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` http://go/e/5002
+test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://sorbet.org/docs/error-reference#5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
     https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
@@ -34,7 +34,7 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
      2 |class Set < Object
         ^^^^^^^^^^^^^^^^^^
 
-test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` http://go/e/5002
+test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://sorbet.org/docs/error-reference#5002
      7 |module A::B; Constant; end
                      ^^^^^^^^
     test/cli/constant-fuzzy/constant-fuzzy.rb:5: Did you mean: `A::Constant`?

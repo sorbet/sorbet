@@ -1,8 +1,8 @@
-test/cli/suggest-not-stub/suggest-not-stub.rb:3: Unable to resolve constant `B` http://go/e/5002
+test/cli/suggest-not-stub/suggest-not-stub.rb:3: Unable to resolve constant `B` https://sorbet.org/docs/error-reference#5002
      3 |  B
           ^
 
-test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` http://go/e/5002
+test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` https://sorbet.org/docs/error-reference#5002
      6 |B
         ^
     test/cli/suggest-not-stub/suggest-not-stub.rb:2: Did you mean: `A`?
