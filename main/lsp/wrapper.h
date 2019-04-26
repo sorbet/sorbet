@@ -61,7 +61,7 @@ public:
     /**
      * Send a message to LSP, and returns any responses.
      */
-    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPMessage &message);
+    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(const LSPMessage &message);
 
     /**
      * Send a message to LSP, and returns any responses.

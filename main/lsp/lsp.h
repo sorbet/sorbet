@@ -113,7 +113,7 @@ class LSPLoop {
     /** The set of (file system) edits that have occurred before initialization completed. Will be processed
      * post-initialization.
      */
-    std::vector<std::unique_ptr<SorbetWorkspaceEdit>> deferredFileEdits;
+    UnorderedMap<std::string, std::string> deferredFileEdits;
     /**
      * Set to true once the server is initialized.
      * TODO(jvilk): Use to raise server not initialized errors.
@@ -227,12 +227,30 @@ class LSPLoop {
                              const CancelParams &cancellationRequest);
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
-    std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs, LSPMessage &msg);
+    std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs,
+                                                              const LSPMessage &msg);
+
+    void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
+                                       UnorderedMap<std::string, std::string> &updates);
+    void preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
+                                       UnorderedMap<std::string, std::string> &updates);
+    void preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
+                                       UnorderedMap<std::string, std::string> &updates);
+    void preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
+                                       UnorderedMap<std::string, std::string> &updates);
     std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                                                 std::unique_ptr<SorbetWorkspaceEdit> &edit);
+                                                                 const DidChangeTextDocumentParams &changeParams);
+    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                                                 const DidOpenTextDocumentParams &openParams);
+    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                                                 const DidCloseTextDocumentParams &closeParams);
+    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                                                 const WatchmanQueryResponse &queryResponse);
     std::unique_ptr<core::GlobalState>
     handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
                                std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits);
+    std::unique_ptr<core::GlobalState> commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
+                                                                  UnorderedMap<std::string, std::string> &updates);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
@@ -244,7 +262,7 @@ public:
             const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &output,
             bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
-    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, LSPMessage &msg);
+    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
     std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
     /**
      * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.

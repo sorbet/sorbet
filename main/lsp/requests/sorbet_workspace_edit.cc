@@ -32,11 +32,119 @@ string getFileContents(UnorderedMap<string, string> &updates, unique_ptr<core::G
     }
 }
 
+void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
+                                            UnorderedMap<string, string> &updates) {
+    string_view uri = changeParams.textDocument->uri;
+    if (absl::StartsWith(uri, rootUri)) {
+        string localPath = remoteName2Local(uri);
+        if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+            return;
+        }
+        string fileContents = getFileContents(updates, initialGS, localPath);
+        for (auto &change : changeParams.contentChanges) {
+            if (change->range) {
+                auto &range = *change->range;
+                // incremental update
+                core::Loc::Detail start, end;
+                start.line = range->start->line + 1;
+                start.column = range->start->character + 1;
+                end.line = range->end->line + 1;
+                end.column = range->end->character + 1;
+                core::File old(string(localPath), string(fileContents), core::File::Type::Normal);
+                auto startOffset = core::Loc::pos2Offset(old, start);
+                auto endOffset = core::Loc::pos2Offset(old, end);
+                fileContents = fileContents.replace(startOffset, endOffset - startOffset, change->text);
+            } else {
+                // replace
+                fileContents = change->text;
+            }
+        }
+        updates[localPath] = fileContents;
+    }
+}
+
+void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
+                                            UnorderedMap<string, string> &updates) {
+    string_view uri = openParams.textDocument->uri;
+    if (absl::StartsWith(uri, rootUri)) {
+        string localPath = remoteName2Local(uri);
+        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+            openFiles.insert(localPath);
+            updates[localPath] = move(openParams.textDocument->text);
+        }
+    }
+}
+
+void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
+                                            UnorderedMap<string, string> &updates) {
+    string_view uri = closeParams.textDocument->uri;
+    if (absl::StartsWith(uri, rootUri)) {
+        string localPath = remoteName2Local(uri);
+        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+            auto it = openFiles.find(localPath);
+            if (it != openFiles.end()) {
+                openFiles.erase(it);
+            }
+            // Use contents of file on disk.
+            updates[localPath] = readFile(localPath, *opts.fs);
+        }
+    }
+}
+
+void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
+                                            UnorderedMap<string, string> &updates) {
+    // If Sorbet isn't initialized yet, we should defer these updates.
+    UnorderedMap<string, string> &updatesToUpdate = !initialized ? deferredFileEdits : updates;
+    for (auto file : queryResponse.files) {
+        string localPath = absl::StrCat(rootPath, "/", file);
+        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns) &&
+            openFiles.find(localPath) == openFiles.end()) {
+            updatesToUpdate[localPath] = readFile(localPath, *opts.fs);
+        }
+    }
+}
+
+unique_ptr<core::GlobalState> LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
+                                                                  UnorderedMap<string, string> &updates) {
+    if (updates.size() > 0) {
+        vector<shared_ptr<core::File>> files;
+        files.reserve(updates.size());
+        for (auto &update : updates) {
+            files.push_back(
+                make_shared<core::File>(string(update.first), move(update.second), core::File::Type::Normal));
+        }
+        return pushDiagnostics(tryFastPath(move(gs), files));
+    } else {
+        return gs;
+    }
+}
+
 unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                                                 unique_ptr<SorbetWorkspaceEdit> &edit) {
-    vector<unique_ptr<SorbetWorkspaceEdit>> edits;
-    edits.push_back(move(edit));
-    return handleSorbetWorkspaceEdits(move(gs), edits);
+                                                                 const DidChangeTextDocumentParams &changeParams) {
+    UnorderedMap<string, string> updates;
+    preprocessSorbetWorkspaceEdit(changeParams, updates);
+    return commitSorbetWorkspaceEdits(move(gs), updates);
+}
+
+unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                                 const DidOpenTextDocumentParams &openParams) {
+    UnorderedMap<string, string> updates;
+    preprocessSorbetWorkspaceEdit(openParams, updates);
+    return commitSorbetWorkspaceEdits(move(gs), updates);
+}
+
+unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                                 const DidCloseTextDocumentParams &closeParams) {
+    UnorderedMap<string, string> updates;
+    preprocessSorbetWorkspaceEdit(closeParams, updates);
+    return commitSorbetWorkspaceEdits(move(gs), updates);
+}
+
+unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                                 const WatchmanQueryResponse &queryResponse) {
+    UnorderedMap<string, string> updates;
+    preprocessSorbetWorkspaceEdit(queryResponse, updates);
+    return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
@@ -46,84 +154,19 @@ unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<cor
     for (auto &edit : edits) {
         switch (edit->type) {
             case SorbetWorkspaceEditType::EditorOpen: {
-                auto &openParams = get<unique_ptr<DidOpenTextDocumentParams>>(edit->contents);
-                string_view uri = openParams->textDocument->uri;
-                if (absl::StartsWith(uri, rootUri)) {
-                    string localPath = remoteName2Local(uri);
-                    if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                               opts.relativeIgnorePatterns)) {
-                        continue;
-                    }
-                    openFiles.insert(localPath);
-                    updates[localPath] = move(openParams->textDocument->text);
-                }
+                preprocessSorbetWorkspaceEdit(*get<unique_ptr<DidOpenTextDocumentParams>>(edit->contents), updates);
                 break;
             }
             case SorbetWorkspaceEditType::EditorChange: {
-                auto &changeParams = get<unique_ptr<DidChangeTextDocumentParams>>(edit->contents);
-                string_view uri = changeParams->textDocument->uri;
-                if (absl::StartsWith(uri, rootUri)) {
-                    string localPath = remoteName2Local(uri);
-                    if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                               opts.relativeIgnorePatterns)) {
-                        continue;
-                    }
-                    string fileContents = getFileContents(updates, initialGS, localPath);
-                    for (auto &change : changeParams->contentChanges) {
-                        if (change->range) {
-                            auto &range = *change->range;
-                            // incremental update
-                            core::Loc::Detail start, end;
-                            start.line = range->start->line + 1;
-                            start.column = range->start->character + 1;
-                            end.line = range->end->line + 1;
-                            end.column = range->end->character + 1;
-                            core::File old(string(localPath), string(fileContents), core::File::Type::Normal);
-                            auto startOffset = core::Loc::pos2Offset(old, start);
-                            auto endOffset = core::Loc::pos2Offset(old, end);
-                            fileContents = fileContents.replace(startOffset, endOffset - startOffset, change->text);
-                        } else {
-                            // replace
-                            fileContents = change->text;
-                        }
-                    }
-                    updates[localPath] = fileContents;
-                }
+                preprocessSorbetWorkspaceEdit(*get<unique_ptr<DidChangeTextDocumentParams>>(edit->contents), updates);
                 break;
             }
             case SorbetWorkspaceEditType::EditorClose: {
-                auto &closeParams = get<unique_ptr<DidCloseTextDocumentParams>>(edit->contents);
-                string_view uri = closeParams->textDocument->uri;
-                if (absl::StartsWith(uri, rootUri)) {
-                    string localPath = remoteName2Local(uri);
-                    if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                               opts.relativeIgnorePatterns)) {
-                        continue;
-                    }
-                    auto it = openFiles.find(localPath);
-                    if (it != openFiles.end()) {
-                        openFiles.erase(it);
-                    }
-                    // Use contents of file on disk.
-                    updates[localPath] = readFile(localPath, *opts.fs);
-                }
+                preprocessSorbetWorkspaceEdit(*get<unique_ptr<DidCloseTextDocumentParams>>(edit->contents), updates);
                 break;
             }
             case SorbetWorkspaceEditType::FileSystem: {
-                if (!initialized) {
-                    // We can receive watchman updates before LSP is initialized.
-                    deferredFileEdits.push_back(move(edit));
-                    continue;
-                }
-                auto &params = get<unique_ptr<WatchmanQueryResponse>>(edit->contents);
-                for (auto file : params->files) {
-                    string localPath = absl::StrCat(rootPath, "/", file);
-                    if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns,
-                                                opts.relativeIgnorePatterns) &&
-                        openFiles.find(localPath) == openFiles.end()) {
-                        updates[localPath] = readFile(localPath, *opts.fs);
-                    }
-                }
+                preprocessSorbetWorkspaceEdit(*get<unique_ptr<WatchmanQueryResponse>>(edit->contents), updates);
                 break;
             }
         }
