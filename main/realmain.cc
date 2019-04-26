@@ -236,8 +236,8 @@ int realmain(int argc, char *argv[]) {
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
-        kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir,
-                                             opts.skipDSLPasses ? "nodsl" : "", );
+        kvstore =
+            make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir, opts.skipDSLPasses ? "nodsl" : "");
     }
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
