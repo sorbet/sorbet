@@ -154,14 +154,14 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 struct OrInfo {
-    bool contains_nil;
-    int num_types;
+    bool containsNil;
+    int numTypes;
 };
 
 static inline OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
     return OrInfo{
-        left.contains_nil || right.contains_nil,
-        left.num_types + right.num_types,
+        left.containsNil || right.containsNil,
+        left.numTypes + right.numTypes,
     };
 }
 
@@ -182,31 +182,31 @@ pair<OrInfo, string> showOrElem(const GlobalState &gs, TypePtr ty) {
 }
 
 pair<OrInfo, string> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
-    auto li = showOrElem(gs, left);
-    auto ri = showOrElem(gs, right);
+    auto [linfo,lstr] = showOrElem(gs, left);
+    auto [rinfo,rstr] = showOrElem(gs, right);
 
-    OrInfo merged = mergeOrInfo(li.first, ri.first);
+    OrInfo merged = mergeOrInfo(linfo, rinfo);
 
-    if (!li.second.empty() && !ri.second.empty()) {
-        return make_pair(merged, fmt::format("{}, {}", li.second, ri.second));
-    } else if (!li.second.empty()) {
-        return make_pair(merged, li.second);
+    if (!lstr.empty() && !rstr.empty()) {
+        return make_pair(merged, fmt::format("{}, {}", lstr, rstr));
+    } else if (!lstr.empty()) {
+        return make_pair(merged, lstr);
     } else {
-        return make_pair(merged, ri.second);
+        return make_pair(merged, rstr);
     }
 }
 
 string OrType::show(const GlobalState &gs) const {
-    auto pair = showOrs(gs, this->left, this->right);
+    auto [info,str] = showOrs(gs, this->left, this->right);
 
     string res;
-    if (pair.first.num_types > 1) {
-        res = fmt::format("T.any({})", pair.second);
+    if (info.numTypes > 1) {
+        res = fmt::format("T.any({})", str);
     } else {
-        res = pair.second;
+        res = str;
     }
 
-    if (pair.first.contains_nil) {
+    if (info.containsNil) {
         return fmt::format("T.nilable({})", res);
     } else {
         return res;
