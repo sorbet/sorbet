@@ -171,18 +171,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<cor
             }
         }
     }
-
-    if (updates.size() > 0) {
-        vector<shared_ptr<core::File>> files;
-        files.reserve(updates.size());
-        for (auto &update : updates) {
-            files.push_back(
-                make_shared<core::File>(string(update.first), move(update.second), core::File::Type::Normal));
-        }
-        return pushDiagnostics(tryFastPath(move(gs), files));
-    } else {
-        return gs;
-    }
+    return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
 } // namespace sorbet::realmain::lsp
