@@ -254,6 +254,55 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
         }
     }
 
+    if (left.pos.required.size() == right.pos.required.size()) {
+        for (int i = 0; i < left.pos.required.size(); i++) {
+            auto superArgType = left.pos.required[i].data(gs)->resultType;
+            auto argType = right.pos.required[i].data(gs)->resultType;
+            if (!argType) {
+                argType = core::Types::untypedUntracked();
+            }
+
+            if (!superArgType) {
+                superArgType = core::Types::untypedUntracked();
+            }
+            if (!argType->isFullyDefined() || !superArgType->isFullyDefined()) {
+                continue;
+            }
+            core::Context ctx(gs, core::Symbols::root());
+            if (!core::Types::isSubType(ctx, superArgType, argType)) {
+                if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    // FIXME: make this error better
+                    e.setHeader("Arg is not a supertype");
+                }
+            }
+        }
+    }
+
+    if (left.kw.required.size() == right.kw.required.size()) {
+        for (int i = 0; i < left.kw.required.size(); i++) {
+            auto superArgType = left.kw.required[i].data(gs)->resultType;
+            auto argType = right.kw.required[i].data(gs)->resultType;
+            if (!argType) {
+                argType = core::Types::untypedUntracked();
+            }
+
+            if (!superArgType) {
+                superArgType = core::Types::untypedUntracked();
+            }
+            if (argType->isFullyDefined() || superArgType->isFullyDefined()) {
+                continue;
+            }
+            core::Context ctx(gs, core::Symbols::root());
+            if (!core::Types::isSubType(ctx, superArgType, argType)) {
+                if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    // FIXME: make this error better
+                    e.setHeader("Arg is not a supertype");
+                }
+            }
+        }
+    }
+    // Check if return type is a subtype of the super return type
+
     if (!right.kw.rest.exists()) {
         for (auto req : left.kw.required) {
             auto nm = req.data(gs)->name;
