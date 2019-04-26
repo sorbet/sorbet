@@ -153,31 +153,64 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
-string showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
-    auto *lt = cast_type<OrType>(left.get());
-    auto *rt = cast_type<OrType>(right.get());
-    return fmt::format("{}, {}", lt != nullptr ? showOrs(gs, lt->left, lt->right) : left->show(gs),
-                       rt != nullptr ? showOrs(gs, rt->left, rt->right) : right->show(gs));
+struct OrInfo {
+    bool contains_nil;
+    int num_types;
+};
+
+static inline OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
+    return OrInfo{
+        left.contains_nil || right.contains_nil,
+        left.num_types + right.num_types,
+    };
 }
 
-string showOrSpecialCase(const GlobalState &gs, TypePtr type, TypePtr rest) {
-    auto *ct = cast_type<ClassType>(type.get());
-    if (ct != nullptr && ct->symbol == Symbols::NilClass()) {
-        return fmt::format("T.nilable({})", rest->show(gs));
+pair<OrInfo, string> showOrs(const GlobalState &, TypePtr, TypePtr);
+
+pair<OrInfo, string> showOrElem(const GlobalState &gs, TypePtr ty) {
+    auto *nil = cast_type<ClassType>(ty.get());
+    if (nil != nullptr && nil->symbol == Symbols::NilClass()) {
+        return make_pair(OrInfo{true, 0}, "");
     }
-    return "";
+
+    auto *ot = cast_type<OrType>(ty.get());
+    if (ot != nullptr) {
+        return showOrs(gs, ot->left, ot->right);
+    }
+
+    return make_pair(OrInfo{false, 1}, ty->show(gs));
+}
+
+pair<OrInfo, string> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
+    auto li = showOrElem(gs, left);
+    auto ri = showOrElem(gs, right);
+
+    OrInfo merged = mergeOrInfo(li.first, ri.first);
+
+    if (!li.second.empty() && !ri.second.empty()) {
+        return make_pair(merged, fmt::format("{}, {}", li.second, ri.second));
+    } else if (!li.second.empty()) {
+        return make_pair(merged, li.second);
+    } else {
+        return make_pair(merged, ri.second);
+    }
 }
 
 string OrType::show(const GlobalState &gs) const {
-    string ret;
-    if (!(ret = showOrSpecialCase(gs, this->left, this->right)).empty()) {
-        return ret;
-    }
-    if (!(ret = showOrSpecialCase(gs, this->right, this->left)).empty()) {
-        return ret;
+    auto pair = showOrs(gs, this->left, this->right);
+
+    string res;
+    if (pair.first.num_types > 1) {
+        res = fmt::format("T.any({})", pair.second);
+    } else {
+        res = pair.second;
     }
 
-    return fmt::format("T.any({})", showOrs(gs, this->left, this->right));
+    if (pair.first.contains_nil) {
+        return fmt::format("T.nilable({})", res);
+    } else {
+        return res;
+    }
 }
 
 string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
