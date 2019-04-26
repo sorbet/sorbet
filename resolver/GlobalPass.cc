@@ -254,8 +254,10 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
         }
     }
 
+    core::Context ctx(gs, core::Symbols::root());
     if (left.pos.required.size() == right.pos.required.size()) {
         for (int i = 0; i < left.pos.required.size(); i++) {
+            auto arg = right.pos.required[i];
             auto superArgType = left.pos.required[i].data(gs)->resultType;
             auto argType = right.pos.required[i].data(gs)->resultType;
             if (!argType) {
@@ -268,9 +270,8 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
             if (!argType->isFullyDefined() || !superArgType->isFullyDefined()) {
                 continue;
             }
-            core::Context ctx(gs, core::Symbols::root());
             if (!core::Types::isSubType(ctx, superArgType, argType)) {
-                if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                if (auto e = gs.beginError(arg.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
                     // FIXME: make this error better
                     e.setHeader("Arg is not a supertype");
                 }
@@ -280,6 +281,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
 
     if (left.kw.required.size() == right.kw.required.size()) {
         for (int i = 0; i < left.kw.required.size(); i++) {
+            auto arg = right.kw.required[i];
             auto superArgType = left.kw.required[i].data(gs)->resultType;
             auto argType = right.kw.required[i].data(gs)->resultType;
             if (!argType) {
@@ -289,19 +291,36 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
             if (!superArgType) {
                 superArgType = core::Types::untypedUntracked();
             }
-            if (argType->isFullyDefined() || superArgType->isFullyDefined()) {
+            if (!argType->isFullyDefined() || !superArgType->isFullyDefined()) {
                 continue;
             }
-            core::Context ctx(gs, core::Symbols::root());
             if (!core::Types::isSubType(ctx, superArgType, argType)) {
-                if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                if (auto e = gs.beginError(arg.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
                     // FIXME: make this error better
                     e.setHeader("Arg is not a supertype");
                 }
             }
         }
     }
-    // Check if return type is a subtype of the super return type
+    auto returnType = method.data(gs)->resultType;
+    auto superReturnType = superMethod.data(gs)->resultType;
+    if (!returnType) {
+        returnType = core::Types::untypedUntracked();
+    }
+
+    if (!superReturnType) {
+        superReturnType = core::Types::untypedUntracked();
+    }
+    if (returnType->isFullyDefined() && superReturnType->isFullyDefined()) {
+        if (!core::Types::isSubType(ctx, returnType, superReturnType)) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader(
+                    "Implementation of abstract method `{}` has return type which is not supertype of base return type",
+                    superMethod.data(gs)->show(gs));
+                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            }
+        }
+    }
 
     if (!right.kw.rest.exists()) {
         for (auto req : left.kw.required) {
