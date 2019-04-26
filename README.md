@@ -599,7 +599,7 @@ You are encouraged to play around with various clang-based tools which use the
 -   [clangd] -- Clang-based language server implementation
 
     ```shell
-    brew install llvm@7
+    brew install llvm@8
 
     # => /usr/local/opt/llvm/bin/clangd
     # You might need to put this on your PATH to tell your editor about it.
@@ -642,12 +642,23 @@ You are encouraged to play around with various clang-based tools which use the
     CLion can be made aware of the `compile_commands.json` database.
     Replaces your entire text editing workflow (full-fledged IDE).
 
+-   [vscode-clangd] -- Clangd extension for VS Code
+
+    This extension integrates clangd (see above) with VS Code. It will also
+    run `clang-format` whenever you save.
+
+    clangd will need to be on your path, or you will need to change the
+    "clangd.path" setting.
+
+    clangd operates on `compile_commands.json`, so make sure you run the
+    `./tools/scripts/build_compilation_db.sh` script.
 
 [Compilation Database]: https://clang.llvm.org/docs/JSONCompilationDatabase.html
 [rtags]: https://github.com/Andersbakken/rtags
 [clangd]: https://clang.llvm.org/extra/clangd.html
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [CLion]: https://www.jetbrains.com/clion/
+[vscode-clangd]: https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd
 
 Here are some sample config setups:
 

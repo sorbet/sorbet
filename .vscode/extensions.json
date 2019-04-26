@@ -1,0 +1,6 @@
+{
+  "recommendations": [
+    // C++ intellisense with clangd.
+    "llvm-vs-code-extensions.vscode-clangd"
+  ]
+}
