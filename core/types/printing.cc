@@ -165,12 +165,12 @@ static inline OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
     };
 }
 
-pair<OrInfo, string> showOrs(const GlobalState &, TypePtr, TypePtr);
+pair<OrInfo, optional<string>> showOrs(const GlobalState &, TypePtr, TypePtr);
 
-pair<OrInfo, string> showOrElem(const GlobalState &gs, TypePtr ty) {
+pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, TypePtr ty) {
     auto *nil = cast_type<ClassType>(ty.get());
     if (nil != nullptr && nil->symbol == Symbols::NilClass()) {
-        return make_pair(OrInfo{true, 0}, "");
+        return make_pair(OrInfo{true, 0}, nullopt);
     }
 
     auto *ot = cast_type<OrType>(ty.get());
@@ -178,18 +178,18 @@ pair<OrInfo, string> showOrElem(const GlobalState &gs, TypePtr ty) {
         return showOrs(gs, ot->left, ot->right);
     }
 
-    return make_pair(OrInfo{false, 1}, ty->show(gs));
+    return make_pair(OrInfo{false, 1}, make_optional(ty->show(gs)));
 }
 
-pair<OrInfo, string> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
-    auto [linfo,lstr] = showOrElem(gs, left);
-    auto [rinfo,rstr] = showOrElem(gs, right);
+pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
+    auto [linfo, lstr] = showOrElem(gs, left);
+    auto [rinfo, rstr] = showOrElem(gs, right);
 
     OrInfo merged = mergeOrInfo(linfo, rinfo);
 
-    if (!lstr.empty() && !rstr.empty()) {
-        return make_pair(merged, fmt::format("{}, {}", lstr, rstr));
-    } else if (!lstr.empty()) {
+    if (lstr.has_value() && rstr.has_value()) {
+        return make_pair(merged, make_optional(fmt::format("{}, {}", *lstr, *rstr)));
+    } else if (lstr.has_value()) {
         return make_pair(merged, lstr);
     } else {
         return make_pair(merged, rstr);
@@ -197,13 +197,13 @@ pair<OrInfo, string> showOrs(const GlobalState &gs, TypePtr left, TypePtr right)
 }
 
 string OrType::show(const GlobalState &gs) const {
-    auto [info,str] = showOrs(gs, this->left, this->right);
+    auto [info, str] = showOrs(gs, this->left, this->right);
 
     string res;
     if (info.numTypes > 1) {
-        res = fmt::format("T.any({})", str);
+        res = fmt::format("T.any({})", str.value_or(""));
     } else {
-        res = str;
+        res = str.value_or("");
     }
 
     if (info.containsNil) {
