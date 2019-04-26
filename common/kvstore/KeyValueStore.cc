@@ -7,13 +7,17 @@ constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 constexpr size_t MAX_DB_SIZE_BYTES =
     1L * 1024 * 1024 * 1024; // 1G. This is both maximum fs db size and max virtual memory usage.
-KeyValueStore::KeyValueStore(string version, string path) : path(move(path)), writerId(this_thread::get_id()) {
+KeyValueStore::KeyValueStore(string version, string path, string flavor) : path(move(path)), flavor(move(flavor)), writerId(this_thread::get_id()) {
     int rc;
     rc = mdb_env_create(&env);
     if (rc != 0) {
         goto fail;
     }
     rc = mdb_env_set_mapsize(env, MAX_DB_SIZE_BYTES);
+    if (rc != 0) {
+        goto fail;
+    }
+    rc = mdb_env_set_maxdbs(env, 3);
     if (rc != 0) {
         goto fail;
     }
@@ -145,7 +149,7 @@ void KeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_open(txn, nullptr, MDB_CREATE, &dbi);
+    rc = mdb_open(txn, flavor.c_str(), MDB_CREATE, &dbi);
     if (rc != 0) {
         goto fail;
     }

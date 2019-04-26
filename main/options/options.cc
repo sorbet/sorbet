@@ -464,11 +464,6 @@ void readOptions(Options &opts, int argc, char *argv[],
             throw EarlyReturnWithCode(1);
         }
 
-        if (opts.skipDSLPasses && !opts.cacheDir.empty()) {
-            logger->error("`{}` does not support caching", "--skip-dsl-passes");
-            throw EarlyReturnWithCode(1);
-        }
-
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
