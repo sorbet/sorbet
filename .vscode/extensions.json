@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    // C++ intellisense with clangd.
+    "llvm-vs-code-extensions.vscode-clangd"
+  ],
+  "unwantedRecommendations": [
+    // Microsoft C++ intellisense (doesn't work properly with Sorbet)
+    "ms-vscode.cpptools"
+  ]
+}

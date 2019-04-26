@@ -1,0 +1,4 @@
+{
+  // Runs clang-format when you save (provided by vscode-clangd).
+  "editor.formatOnSave": true
+}
