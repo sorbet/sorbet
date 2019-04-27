@@ -250,7 +250,7 @@ bool shouldShow(vector<string> &wantNames, string_view name) {
     return absl::c_linear_search(wantNames, name);
 }
 
-constexpr double TIMING_TO_MSEC_MULTIPLIER = 0.001;
+constexpr double TIMING_TO_MSEC_MULTIPLIER = 0.000001;
 
 string getCounterStatistics(vector<string> names) {
     counterState.canonicalize();
