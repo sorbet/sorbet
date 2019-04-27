@@ -38,7 +38,7 @@ struct CounterImpl {
         std::optional<CounterType> duration;
         std::optional<int> threadId;
         std::vector<std::pair<char const *, std::string>> args;
-        enum Kind { Duration, Async, FlowStart, FlowEnd };
+        enum Kind { Duration, FlowStart, FlowEnd };
         Kind kind;
     };
     void timingAdd(Timing timing);

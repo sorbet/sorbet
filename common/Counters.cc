@@ -188,14 +188,6 @@ void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end,
     counterState.timingAdd(tim);
 }
 
-void timingAddAsync(ConstExprStr measure, unsigned long start, unsigned long end,
-                    initializer_list<pair<ConstExprStr, string_view>> args) {
-    CounterImpl::Timing tim{
-        getGlobalTimingId(),       measure.str, start, end - start, std::nullopt, givenArgs2StoredArgs(args),
-        CounterImpl::Timing::Async};
-    counterState.timingAdd(tim);
-}
-
 FlowId timingAddFlowStart(ConstExprStr measure) {
     int id = getGlobalTimingId();
     CounterImpl::Timing tim{

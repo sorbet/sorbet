@@ -67,15 +67,6 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
                            "{{\"name\":\"{}\",\"cat\":\"T,D\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":"
                            "{:.3f},\"pid\":{},\"tid\":{}{}}},\n",
                            e.measure, e.ts / 1000.0, e.duration.value() / 1000.0, pid, e.threadId.value(), maybeArgs);
-        } else if (e.kind == CounterImpl::Timing::Async) {
-            fmt::format_to(result,
-                           "{{\"name\":\"{}\",\"cat\":\"T,A\",\"ph\":\"b\",\"ts\":{:.3f},\"pid\":{},"
-                           "\"id\":{}{}}},\n",
-                           e.measure, e.ts / 1000.0, pid, e.id, maybeArgs);
-            fmt::format_to(result,
-                           "{{\"name\":\"{}\",\"cat\":\"T,A\",\"ph\":\"e\",\"ts\":{:.3f},\"pid\":{}, "
-                           "\"id\":{}{}}},\n",
-                           e.measure, (e.ts + e.duration.value()) / 1000.0, pid, e.id, maybeArgs);
         } else if (e.kind == CounterImpl::Timing::FlowStart) {
             fmt::format_to(result,
                            "{{\"name\":\"{}\",\"cat\":\"T,F\",\"ph\":\"s\",\"ts\":{:.3f},\"pid\":{},"
