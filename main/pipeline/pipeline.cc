@@ -409,6 +409,7 @@ struct IndexResult {
 struct IndexThreadResultPack {
     CounterState counters;
     IndexResult res;
+    FlowId flow;
 };
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
@@ -429,6 +430,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
             } else {
                 Timer timeit(cgs->tracer(), "substitute");
+                timingAddFlowEnd(threadResult.flow);
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
                 for (auto &tree : threadResult.res.trees) {
@@ -465,6 +467,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
     }
 
     workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore]() {
+        Timer timeit(baseGs->tracer(), "indexSuppliedFilesWorker");
         unique_ptr<core::GlobalState> localGs = baseGs->deepCopy();
         IndexThreadResultPack threadResult;
 
@@ -486,6 +489,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
+            threadResult.flow = timingAddFlowStart("indexSuppliedFilesWorker");
             resultq->push(move(threadResult), threadResult.res.trees.size());
         }
     });
@@ -510,6 +514,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
     }
     const shared_ptr<core::GlobalState> protoGs = move(firstPass.gs);
     workers.multiplexJob("indexPluginFiles", [protoGs, &opts, pluginFileq, resultq, &kvstore]() {
+        Timer timeit(protoGs->tracer(), "indexPluginFilesWorker");
         auto localGs = protoGs->deepCopy();
         IndexThreadResultPack threadResult;
         core::FileRef job;
@@ -525,6 +530,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
+            threadResult.flow = timingAddFlowStart("indexPluginFilesWorker");
             auto sizeIncrement = threadResult.res.trees.size();
             resultq->push(move(threadResult), sizeIncrement);
         }
