@@ -3,7 +3,7 @@ using namespace std;
 namespace sorbet {
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args)
-    : log(log), name(name), prev(prev), self{0}, args(move(args)), begin(chrono::steady_clock::now()){};
+    : log(log), name(name), prev(prev), self{0}, args(args), begin(chrono::steady_clock::now()){};
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
     : Timer(log, name, FlowId{0}, args){};

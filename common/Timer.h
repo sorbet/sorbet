@@ -27,7 +27,7 @@ private:
     ConstExprStr name;
     FlowId prev;
     FlowId self;
-    std::initializer_list<std::pair<ConstExprStr, std::string>> args;
+    std::vector<std::pair<ConstExprStr, std::string>> args;
     const std::chrono::time_point<std::chrono::steady_clock> begin;
 };
 } // namespace sorbet

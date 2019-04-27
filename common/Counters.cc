@@ -168,7 +168,7 @@ int getThreadId() {
     return counter;
 }
 
-vector<pair<const char *, string>> givenArgs2StoredArgs(initializer_list<pair<ConstExprStr, string>> given) {
+vector<pair<const char *, string>> givenArgs2StoredArgs(vector<pair<ConstExprStr, string>> given) {
     vector<pair<const char *, string>> stored;
     for (auto &e : given) {
         stored.emplace_back(e.first.str, move(e.second));
@@ -176,8 +176,8 @@ vector<pair<const char *, string>> givenArgs2StoredArgs(initializer_list<pair<Co
     return stored;
 }
 
-void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end,
-               initializer_list<pair<ConstExprStr, string>> args, FlowId self, FlowId previous) {
+void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end, vector<pair<ConstExprStr, string>> args,
+               FlowId self, FlowId previous) {
     ENFORCE(
         (self.id == 0) || (previous.id == 0),
         "format doesn't support chaining"); // see "case 1" in
