@@ -24,33 +24,18 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
                    Version::full_version_string);
     counters.counters->canonicalize();
     for (auto &cat : counters.counters->countersByCategory) {
-        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"CC\",\"args\":{{",
-                       cat.first, now, pid);
-        bool seenFirst = false;
-        for (auto &e : cat.second) {
-            if (seenFirst) {
-                fmt::format_to(result, ",");
-            }
-            fmt::format_to(result, "\"{}\":{}", e.first, e.second);
-            seenFirst = true;
-        }
-        fmt::format_to(result, "}}}},\n");
+        fmt::format_to(result,
+                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"CC\",\"args\":{{{}}}}},\n",
+                       cat.first, now, pid, fmt::map_join(cat.second, ",", [](const auto &e) -> string {
+                           return fmt::format("\"{}\":{}", e.first, e.second);
+                       }));
     }
 
     for (auto &hist : counters.counters->histograms) {
-        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"H\",\"args\":{{",
-                       hist.first, now, pid);
-
-        bool seenFirst = false;
-        for (auto &e : hist.second) {
-            if (seenFirst) {
-                fmt::format_to(result, ",");
-            }
-
-            fmt::format_to(result, "\"{}\":{}", e.first, e.second);
-            seenFirst = true;
-        }
-        fmt::format_to(result, "}}}},\n");
+        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"H\",\"args\":{{{}}}}},\n",
+                       hist.first, now, pid, fmt::map_join(hist.second, ",", [](const auto &e) -> string {
+                           return fmt::format("\"{}\":{}", e.first, e.second);
+                       }));
     }
 
     for (auto &e : counters.counters->counters) {
