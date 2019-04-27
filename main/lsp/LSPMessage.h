@@ -55,7 +55,7 @@ public:
     LSPMessage(const std::string &json);
 
     /** A tracer for following LSP message in time traces */
-    std::optional<FlowId> startTracer;
+    FlowId startTracer;
 
     /** Request counter. */
     int counter;

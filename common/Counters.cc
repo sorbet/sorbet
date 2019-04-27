@@ -158,11 +158,6 @@ void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned lo
     counterState.categoryCounterAdd(category.str, counter.str, value);
 }
 
-int getGlobalTimingId() {
-    static atomic<int> counter = 0;
-    return ++counter;
-}
-
 int genThreadId() {
     static atomic<int> counter{0};
     return ++counter;
@@ -182,40 +177,14 @@ vector<pair<const char *, string>> givenArgs2StoredArgs(initializer_list<pair<Co
 }
 
 void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end,
-               initializer_list<pair<ConstExprStr, string_view>> args) {
-    CounterImpl::Timing tim{
-        0, measure.str, start, end - start, getThreadId(), givenArgs2StoredArgs(args), CounterImpl::Timing::Duration};
-    counterState.timingAdd(tim);
-}
-
-FlowId timingAddFlowStart(ConstExprStr measure) {
-    int id = getGlobalTimingId();
-    CounterImpl::Timing tim{
-        id,
-        measure.str,
-        static_cast<CounterImpl::CounterType>(
-            chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch())
-                .count()), // cast signed to unsigned. Will break if run with clock <1970
-        nullopt,
-        getThreadId(),
-        {},
-        CounterImpl::Timing::FlowStart};
-    counterState.timingAdd(tim);
-    FlowId ret{measure.str, id};
-    return ret;
-}
-
-void timingAddFlowEnd(FlowId flowId) {
-    CounterImpl::Timing tim{
-        flowId.id,
-        flowId.measure,
-        static_cast<CounterImpl::CounterType>(
-            chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch())
-                .count()), // cast signed to unsigned. Will break if run with clock <1970
-        nullopt,
-        getThreadId(),
-        {},
-        CounterImpl::Timing::FlowEnd};
+               initializer_list<pair<ConstExprStr, string_view>> args, FlowId self, FlowId previous) {
+    ENFORCE(
+        (self.id == 0) || (previous.id == 0),
+        "format doesn't support chaining"); // see "case 1" in
+                                            // https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
+                                            // for workaround
+    CounterImpl::Timing tim{0,    measure.str, start, end - start, getThreadId(), givenArgs2StoredArgs(args),
+                            self, previous};
     counterState.timingAdd(tim);
 }
 
@@ -366,7 +335,7 @@ string getCounterStatistics(vector<string> names) {
         UnorderedMap<string, vector<CounterImpl::CounterType>> timings;
         for (const auto &e : counterState.timings) {
             if (e.duration) {
-                timings[e.measure].emplace_back(e.duration.value());
+                timings[e.measure].emplace_back(e.duration);
             }
         }
         for (const auto &e : timings) {

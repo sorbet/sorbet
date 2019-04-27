@@ -429,8 +429,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
             } else {
-                Timer timeit(cgs->tracer(), "substitute");
-                timingAddFlowEnd(threadResult.flow);
+                Timer timeit(cgs->tracer(), "substitute", threadResult.flow);
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
                 for (auto &tree : threadResult.res.trees) {
@@ -489,7 +488,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            threadResult.flow = timingAddFlowStart("indexSuppliedFilesWorker");
+            threadResult.flow = timeit.getFlowEdge();
             resultq->push(move(threadResult), threadResult.res.trees.size());
         }
     });
@@ -530,7 +529,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            threadResult.flow = timingAddFlowStart("indexPluginFilesWorker");
+            threadResult.flow = timeit.getFlowEdge();
             auto sizeIncrement = threadResult.res.trees.size();
             resultq->push(move(threadResult), sizeIncrement);
         }

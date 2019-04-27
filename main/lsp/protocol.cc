@@ -175,12 +175,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.messages.received");
-        auto startTracer = msg->startTracer;
         gs = processRequest(move(gs), *msg);
         auto currentTime = chrono::steady_clock::now();
-        if (startTracer) {
-            timingAddFlowEnd(startTracer.value());
-        }
         if (shouldSendCountersToStatsd(currentTime)) {
             {
                 // Merge counters from worker threads.
@@ -282,7 +278,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
     vector<unique_ptr<SorbetWorkspaceEdit>> consecutiveWorkspaceEdits;
     UnorderedSet<string> updatedFiles;
-    optional<FlowId> firstMergedTimestamp;
+    FlowId firstMergedTimestamp{0};
     int firstMergedCounter = 0;
 
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
@@ -290,7 +286,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
         const bool preMerged = tryPreMerge(*current, *counts, consecutiveWorkspaceEdits, updatedFiles);
         if (preMerged) {
             requestsMergedCounter++;
-            if (!firstMergedTimestamp) {
+            if (firstMergedTimestamp.id == 0) {
                 firstMergedTimestamp = current->startTracer;
                 firstMergedCounter = current->counter;
             }
@@ -312,7 +308,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 
                 // Clear state for next round.
                 counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-                firstMergedTimestamp = nullopt;
+                firstMergedTimestamp.id = 0;
                 firstMergedCounter = 0;
                 updatedFiles.clear();
                 consecutiveWorkspaceEdits.clear();
@@ -331,8 +327,9 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
                              std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
+    Timer timeit(logger, "enqueueRequest");
     msg->counter = state.requestCounter++;
-    msg->startTracer = timingAddFlowStart("processing_time");
+    msg->startTracer = timeit.getFlowEdge();
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {

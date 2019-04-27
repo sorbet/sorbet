@@ -33,6 +33,13 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
                        }));
     }
 
+    for (auto &e : counters.counters->counters) {
+        fmt::format_to(result,
+                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"args\":"
+                       "{{\"value\":{}}}}},\n",
+                       e.first, now, pid, e.second);
+    }
+
     for (auto &hist : counters.counters->histograms) {
         fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"H\",\"args\":{{{}}}}},\n",
                        hist.first, now, pid, fmt::map_join(hist.second, ",", [](const auto &e) -> string {
@@ -40,44 +47,26 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
                        }));
     }
 
-    for (auto &e : counters.counters->counters) {
-        fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"C\",\"args\":"
-                       "{{\"value\":{}}}}},\n",
-                       e.first, now, pid, e.second);
-    }
-
-    // When drawing the trace, chrome does not take advantage of order for "X" traces.
-    // If we have traces with the same time stamp for either begin or end, chrome will not draw them well.
-    // For events with same timestamp that are stored in array "earlier" events are stored with
-    // int count = 0;
-    // int reverseCount = counters.counters->timings.size();
-    // double incorrectionScale = 0.001 / reverseCount;
     for (const auto &e : counters.counters->timings) {
         string maybeArgs;
-        // count++;
-        // reverseCount--;
         if (!e.args.empty()) {
             maybeArgs = fmt::format(",\"args\":{{{}}}", fmt::map_join(e.args, ",", [](const auto &nameValue) -> string {
                                         return fmt::format("\"{}\":\"{}\"", nameValue.first, nameValue.second);
                                     }));
         }
-        if (e.kind == CounterImpl::Timing::Duration) {
-            fmt::format_to(result,
-                           "{{\"name\":\"{}\",\"cat\":\"T,D\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":"
-                           "{:.3f},\"pid\":{},\"tid\":{}{}}},\n",
-                           e.measure, e.ts / 1000.0, e.duration.value() / 1000.0, pid, e.threadId.value(), maybeArgs);
-        } else if (e.kind == CounterImpl::Timing::FlowStart) {
-            fmt::format_to(result,
-                           "{{\"name\":\"{}\",\"cat\":\"T,F\",\"ph\":\"s\",\"ts\":{:.3f},\"pid\":{},"
-                           "\"tid\":{},\"id\":{}{}}},\n",
-                           e.measure, e.ts / 1000.0, pid, e.threadId.value(), e.id, maybeArgs);
-        } else if (e.kind == CounterImpl::Timing::FlowEnd) {
-            fmt::format_to(result,
-                           "{{\"name\":\"{}\",\"cat\":\"T,F\",\"ph\":\"f\",\"bp\":\"e\",\"ts\":"
-                           "{:.3f},\"pid\":{},\"tid\":{},\"id\":{}{}}},\n",
-                           e.measure, e.ts / 1000.0, pid, e.threadId.value(), e.id, maybeArgs);
+
+        string maybeFlow;
+        if (e.self.id != 0) {
+            ENFORCE(e.prev.id == 0);
+            maybeFlow = fmt::format(",\"bind_id\":\"{}\",\"flow_in\":false,\"flow_out\":true", e.self.id);
+        } else if (e.prev.id != 0) {
+            maybeFlow = fmt::format(",\"bind_id\":\"{}\",\"flow_in\":true,\"flow_out\":false", e.prev.id);
         }
+
+        fmt::format_to(result,
+                       "{{\"name\":\"{}\",\"cat\":\"T,D\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":"
+                       "{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
+                       e.measure, e.ts / 1000.0, e.duration / 1000.0, pid, e.threadId, maybeArgs, maybeFlow);
     }
 
     fmt::format_to(result, "\n");

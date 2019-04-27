@@ -107,11 +107,11 @@ LSPMessage::RawLSPMessage fromJSON(const std::string &json) {
     return fromJSONValue(d);
 }
 
-LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)) {}
+LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)), startTracer{0} {}
 
-LSPMessage::LSPMessage(rapidjson::Document &d) : msg(fromJSONValue(d)) {}
+LSPMessage::LSPMessage(rapidjson::Document &d) : LSPMessage::LSPMessage(fromJSONValue(d)) {}
 
-LSPMessage::LSPMessage(const std::string &json) : msg(fromJSON(json)) {}
+LSPMessage::LSPMessage(const std::string &json) : LSPMessage::LSPMessage(fromJSON(json)) {}
 
 optional<MessageId> LSPMessage::id() const {
     if (isRequest()) {
