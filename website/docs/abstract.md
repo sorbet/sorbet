@@ -18,7 +18,7 @@ anywhere your class / module is inherited, included, or extended.
 
 ## Creating an abstract method
 
-1.  Add `extend T::Helpers` to your class or module.
+1.  Add `extend T::Helpers` to your class or module (as well as `extend T::Sig`).
 1.  Add `abstract!` or `interface!` to the top of your class or module.
     - (`interface!` requires that *all* methods are abstract)
 1.  Add a `sig` with `abstract` to any methods that should be abstract.
@@ -28,6 +28,7 @@ Example:
 
 ```ruby
 module Runnable
+  extend T::Sig
   extend T::Helpers                                    # (1)
   interface!                                           # (2)
 
@@ -46,6 +47,7 @@ Example:
 
 ```ruby
 class HelloWorld
+  extend T::Sig
   include Runnable
 
   sig {implementation.params(args: T::Array[String]).void}
@@ -146,6 +148,7 @@ module A
   interface!
 
   module ClassMethods
+    extend T::Sig
     extend T::Helpers
     abstract!
 
