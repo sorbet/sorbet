@@ -40,12 +40,16 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
                        e.first, now, pid, e.second);
     }
 
-    for (auto &hist : counters.counters->histograms) {
-        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"H\",\"args\":{{{}}}}},\n",
-                       hist.first, now, pid, fmt::map_join(hist.second, ",", [](const auto &e) -> string {
-                           return fmt::format("\"{}\":{}", e.first, e.second);
-                       }));
-    }
+    // // for some reason, emmiting all of our counters breaks flow even visualitaion. @dmitry decided to not emmit
+    // // histograms
+    //
+    // for (auto &hist : counters.counters->histograms) {
+    //     fmt::format_to(result,
+    //     "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"H\",\"args\":{{{}}}}},\n",
+    //                    hist.first, now, pid, fmt::map_join(hist.second, ",", [](const auto &e) -> string {
+    //                        return fmt::format("\"{}\":{}", e.first, e.second);
+    //                    }));
+    // }
 
     for (const auto &e : counters.counters->timings) {
         string maybeArgs;
