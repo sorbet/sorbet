@@ -94,13 +94,15 @@ void prodHistogramInc(ConstExprStr histogram, int key);
 void prodHistogramAdd(ConstExprStr histogram, int key, unsigned long value);
 /* Does not aggregate over measures, instead, reports them separately.
  * Use with care, as it can make us report a LOT of data. */
-void timingAdd(std::string_view measure, unsigned long start, unsigned long end);
-void timingAddAsync(std::string_view measure, unsigned long start, unsigned long end);
+void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end,
+               std::initializer_list<std::pair<ConstExprStr, std::string_view>> args);
+void timingAddAsync(ConstExprStr measure, unsigned long start, unsigned long end,
+                    std::initializer_list<std::pair<ConstExprStr, std::string_view>> args);
 struct FlowId {
-    std::string name;
+    char const *measure;
     int id;
 };
-FlowId timingAddFlowStart(std::string_view measure, unsigned long start);
+FlowId timingAddFlowStart(ConstExprStr measure, unsigned long start);
 void timingAddFlowEnd(FlowId flowId, unsigned long end);
 UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);

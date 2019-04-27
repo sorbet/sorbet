@@ -80,7 +80,7 @@ unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::File
 }
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
-    Timer timeit(gs.tracer(), fmt::format("runParser: {}", file.data(gs).path()));
+    Timer timeit(gs.tracer(), "runParser", {{"file", file.data(gs).path()}});
     unique_ptr<parser::Node> nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
@@ -97,7 +97,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 
 unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
                                        const options::Printers &print) {
-    Timer timeit(gs.tracer(), fmt::format("runDesugar: {}", file.data(gs).path()));
+    Timer timeit(gs.tracer(), "runDesugar", {{"file", file.data(gs).path()}});
     unique_ptr<ast::Expression> ast;
     core::MutableContext ctx(gs, core::Symbols::root());
     {
@@ -116,7 +116,7 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
 
 unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
     core::MutableContext ctx(gs, core::Symbols::root());
-    Timer timeit(gs.tracer(), fmt::format("runDSL: {}", file.data(gs).path()));
+    Timer timeit(gs.tracer(), "runDSL", {{"file", file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
     return dsl::DSL::run(ctx, move(ast));
@@ -184,7 +184,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
     ast::ParsedFile dslsInlined{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
 
-    Timer timeit(gs.tracer(), fmt::format("indexOneWithPlugins {}", file.data(gs).path()));
+    Timer timeit(gs.tracer(), "indexOneWithPlugins", {{"file", file.data(gs).path()}});
     try {
         unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore);
 
@@ -362,7 +362,7 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
         return;
     }
     auto fileName = file.dataAllowingUnsafe(*gs).path();
-    Timer timeit(gs->tracer(), fmt::format("readFileWithStrictnessOverrides {}", fileName));
+    Timer timeit(gs->tracer(), "readFileWithStrictnessOverrides", {{"file", fileName}});
     string src;
     bool fileFound = true;
     try {
@@ -616,7 +616,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         return result;
     }
 
-    Timer timeit(ctx.state.tracer(), fmt::format("typecheckOne {}", f.data(ctx).path()));
+    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", f.data(ctx).path()}});
     try {
         if (opts.print.CFG) {
             fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
@@ -662,7 +662,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                 ast::ParsedFile ast;
                 {
                     core::MutableContext ctx(gs, core::Symbols::root());
-                    Timer timeit(gs.tracer(), fmt::format("naming {}", file.data(gs).path()));
+                    Timer timeit(gs.tracer(), "naming", {{"file", file.data(gs).path()}});
                     core::ErrorRegion errs(gs, file);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols

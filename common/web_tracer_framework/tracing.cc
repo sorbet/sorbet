@@ -61,30 +61,36 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     }
 
     for (const auto &e : counters.counters->timings) {
+        string maybeArgs;
+        if (!e.args.empty()) {
+            maybeArgs = fmt::format(",\"args\":{{{}}}", fmt::map_join(e.args, ",", [](const auto &nameValue) -> string {
+                                        return fmt::format("\"{}\":\"{}\"", nameValue.first, nameValue.second);
+                                    }));
+        }
         if (e.kind == CounterImpl::Timing::Duration) {
             fmt::format_to(result,
                            "{{\"name\":\"{}\",\"cat\":\"T,D\",\"ph\":\"X\",\"ts\":{},\"dur\":"
-                           "{},\"pid\":{},\"tid\":{}}},\n",
-                           e.namePrefix, e.ts, e.duration.value(), pid, e.threadId.value());
+                           "{},\"pid\":{},\"tid\":{}{}}},\n",
+                           e.measure, e.ts, e.duration.value(), pid, e.threadId.value(), maybeArgs);
         } else if (e.kind == CounterImpl::Timing::Async) {
             fmt::format_to(result,
                            "{{\"name\":\"{}\",\"cat\":\"T,A\",\"ph\":\"b\",\"ts\":{},\"pid\":{},"
-                           "\"id\":{}}},\n",
-                           e.namePrefix, e.ts, pid, e.id);
+                           "\"id\":{}{}}},\n",
+                           e.measure, e.ts, pid, e.id, maybeArgs);
             fmt::format_to(result,
                            "{{\"name\":\"{}\",\"cat\":\"T,A\",\"ph\":\"e\",\"ts\":{},\"pid\":{}, "
-                           "\"id\":{}}},\n",
-                           e.namePrefix, e.ts + e.duration.value(), pid, e.id);
+                           "\"id\":{}{}}},\n",
+                           e.measure, e.ts + e.duration.value(), pid, e.id, maybeArgs);
         } else if (e.kind == CounterImpl::Timing::FlowStart) {
             fmt::format_to(result,
                            "{{\"name\":\"{}\",\"cat\":\"T,F\",\"ph\":\"s\",\"ts\":{},\"pid\":{},"
-                           "\"tid\":{},\"id\":{}}},\n",
-                           e.namePrefix, e.ts, pid, e.threadId.value(), e.id);
+                           "\"tid\":{},\"id\":{}{}}},\n",
+                           e.measure, e.ts, pid, e.threadId.value(), e.id, maybeArgs);
         } else if (e.kind == CounterImpl::Timing::FlowEnd) {
             fmt::format_to(result,
                            "{{\"name\":\"{}\",\"cat\":\"T,F\",\"ph\":\"f\",\"bp\":\"e\",\"ts\":"
-                           "{},\"pid\":{},\"tid\":{},\"id\":{}}},\n",
-                           e.namePrefix, e.ts, pid, e.threadId.value(), e.id);
+                           "{},\"pid\":{},\"tid\":{},\"id\":{}{}}},\n",
+                           e.measure, e.ts, pid, e.threadId.value(), e.id, maybeArgs);
         }
     }
     fmt::format_to(result, "\n");

@@ -93,14 +93,14 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     UnorderedMap<int, CounterImpl::Timing> flowStarts;
     for (const auto &e : counters.counters->timings) {
         if (e.duration) {
-            statsd.timing(e.namePrefix, e.duration.value());
+            statsd.timing(e.measure, e.duration.value());
         } else if (e.kind == CounterImpl::Timing::FlowStart) {
             flowStarts.emplace(e.id, e);
         } else if (e.kind == CounterImpl::Timing::FlowEnd) {
             auto fnd = flowStarts.find(e.id);
             if (fnd != flowStarts.end()) {
                 auto &start = *fnd;
-                statsd.timing(e.namePrefix, e.ts - start.second.ts);
+                statsd.timing(e.measure, e.ts - start.second.ts);
             }
         }
     }

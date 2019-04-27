@@ -33,10 +33,11 @@ struct CounterImpl {
     struct Timing {
         // see https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit
         int id;
-        std::string namePrefix;
+        char const *measure;
         CounterType ts;
         std::optional<CounterType> duration;
         std::optional<int> threadId;
+        std::vector<std::pair<char const *, std::string>> args;
         enum Kind { Duration, Async, FlowStart, FlowEnd };
         Kind kind;
     };
