@@ -3899,6 +3899,79 @@ ClassDef{
                 args = [
                   Hash{
                     pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                          }
+                          fun = <U untyped>
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U ForeignClass>>
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U foreign_!><<C <U <todo sym>>>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+            }
+            fun = <U unsafe>
+            block = nullptr
+            args = [
+              Literal{ value = nil }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
                     ]
                   }
                 ]
@@ -4095,6 +4168,79 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_lazy_><<C <U <todo sym>>>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+            }
+            fun = <U unsafe>
+            block = nullptr
+            args = [
+              Literal{ value = nil }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                          }
+                          fun = <U untyped>
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U ForeignClass>>
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U foreign_lazy_!><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U opts>
@@ -4369,6 +4515,79 @@ ClassDef{
                 args = [
                   Hash{
                     pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                          }
+                          fun = <U untyped>
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U ForeignClass>>
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U foreign_proc_!><<C <U <todo sym>>>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+            }
+            fun = <U unsafe>
+            block = nullptr
+            args = [
+              Literal{ value = nil }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
                     ]
                   }
                 ]
@@ -4561,6 +4780,85 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_invalid_><<C <U <todo sym>>>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+            }
+            fun = <U unsafe>
+            block = nullptr
+            args = [
+              Literal{ value = nil }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                          }
+                          fun = <U untyped>
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U untyped>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = <U foreign_invalid_!><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U opts>
@@ -6823,6 +7121,32 @@ ClassDef{
                   ]
                 }
                 fun = <U foreign_>
+                block = nullptr
+                args = [
+                ]
+              }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U AdvancedODM>>
+                  }
+                  fun = <U new>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U foreign_!>
                 block = nullptr
                 args = [
                 ]

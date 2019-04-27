@@ -12,4 +12,5 @@ def test
   T.reveal_type(di.foo) # error: Revealed type: `String`
 
   T.reveal_type(di.foo_) # error: Revealed type: `T.nilable(Other)`
+  T.reveal_type(di.foo_!) # error: Revealed type: `Other`
 end

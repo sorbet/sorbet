@@ -110,6 +110,7 @@ def main
     AdvancedODM.new.enum_prop = "hello" # error: Method `enum_prop=` does not exist
 
     T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
+    T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `ForeignClass`
     T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(ForeignClass)`
 
     # Check that the method still exists even if we can't parse the type
