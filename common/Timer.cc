@@ -2,19 +2,18 @@
 using namespace std;
 namespace sorbet {
 
-Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
-             initializer_list<pair<ConstExprStr, string_view>> args)
+Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args)
     : log(log), name(name), prev(prev), self{0}, args(move(args)), begin(chrono::steady_clock::now()){};
 
-Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string_view>> args)
+Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
     : Timer(log, name, FlowId{0}, args){};
 
 Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
-             initializer_list<pair<ConstExprStr, string_view>> args)
+             initializer_list<pair<ConstExprStr, string>> args)
     : Timer(*log, name, prev, args){};
 
 Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name,
-             initializer_list<pair<ConstExprStr, string_view>> args)
+             initializer_list<pair<ConstExprStr, string>> args)
     : Timer(*log, name, args){};
 
 Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name) : Timer(*log, name, {}){};

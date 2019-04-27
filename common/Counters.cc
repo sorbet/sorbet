@@ -168,22 +168,22 @@ int getThreadId() {
     return counter;
 }
 
-vector<pair<const char *, string>> givenArgs2StoredArgs(initializer_list<pair<ConstExprStr, string_view>> given) {
+vector<pair<const char *, string>> givenArgs2StoredArgs(initializer_list<pair<ConstExprStr, string>> given) {
     vector<pair<const char *, string>> stored;
     for (auto &e : given) {
-        stored.emplace_back(e.first.str, (string)e.second);
+        stored.emplace_back(e.first.str, move(e.second));
     }
     return stored;
 }
 
 void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end,
-               initializer_list<pair<ConstExprStr, string_view>> args, FlowId self, FlowId previous) {
+               initializer_list<pair<ConstExprStr, string>> args, FlowId self, FlowId previous) {
     ENFORCE(
         (self.id == 0) || (previous.id == 0),
         "format doesn't support chaining"); // see "case 1" in
                                             // https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
                                             // for workaround
-    CounterImpl::Timing tim{0,    measure.str, start, end - start, getThreadId(), givenArgs2StoredArgs(args),
+    CounterImpl::Timing tim{0,    measure.str, start, end - start, getThreadId(), givenArgs2StoredArgs(move(args)),
                             self, previous};
     counterState.timingAdd(tim);
 }
