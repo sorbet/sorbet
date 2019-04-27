@@ -68,7 +68,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         }
 
         fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"cat\":\"T,D\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":"
+                       "{{\"name\":\"{}\",\"cat\":\"T\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":"
                        "{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
                        e.measure, e.ts / 1000.0, e.duration / 1000.0, pid, e.threadId, maybeArgs, maybeFlow);
     }
