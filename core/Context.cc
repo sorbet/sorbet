@@ -1,4 +1,5 @@
 #include "core/Context.h"
+#include "common/Timer.h"
 #include "core/Hashing.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
@@ -61,6 +62,7 @@ Context Context::withOwner(SymbolRef sym) const {
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                                        const GlobalState *optionalCommonParent)
     : toGlobalStateId(to.globalStateId) {
+    Timer timeit(to.tracer(), "GlobalSubstitution.new", from.creation);
     ENFORCE(toGlobalStateId != 0, "toGlobalStateId is only used for sanity checks, but should always be set.");
     ENFORCE(from.symbols.size() == to.symbols.size(), "Can't substitute symbols yet");
 

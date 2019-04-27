@@ -541,6 +541,8 @@ int nearestPowerOf2(int from) {
 }
 
 void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
+    Timer timeit(result.tracer(), "unpickleGS");
+    result.creation = timeit.getFlowEdge();
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
     }
@@ -647,10 +649,8 @@ vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
 void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
     UnPickler p(data);
-    gs.trace("Decompression done");
     SerializerImpl::unpickleGS(p, gs);
     gs.installIntrinsics();
-    gs.trace("Done reading GS");
 }
 
 template <class T> void SerializerImpl::pickleTree(Pickler &p, FileRef file, unique_ptr<T> &t) {

@@ -409,7 +409,6 @@ struct IndexResult {
 struct IndexThreadResultPack {
     CounterState counters;
     IndexResult res;
-    FlowId flow;
 };
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
@@ -429,21 +428,23 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
             } else {
-                Timer timeit(cgs->tracer(), "substitute", threadResult.flow);
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
-                for (auto &tree : threadResult.res.trees) {
-                    auto file = tree.file;
-                    core::ErrorRegion errs(*ret.gs, file);
-                    if (!file.data(*ret.gs).cachedParseTree) {
-                        tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
-                        if (kvstore) {
-                            string fileHashKey = fileKey(*ret.gs, file);
-                            kvstore->write(fileHashKey,
-                                           core::serialize::Serializer::storeExpression(*ret.gs, tree.tree));
+                {
+                    Timer timeit(cgs->tracer(), "substituteTrees");
+                    for (auto &tree : threadResult.res.trees) {
+                        auto file = tree.file;
+                        core::ErrorRegion errs(*ret.gs, file);
+                        if (!file.data(*ret.gs).cachedParseTree) {
+                            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+                            if (kvstore) {
+                                string fileHashKey = fileKey(*ret.gs, file);
+                                kvstore->write(fileHashKey,
+                                               core::serialize::Serializer::storeExpression(*ret.gs, tree.tree));
+                            }
                         }
+                        ret.trees.emplace_back(move(tree));
                     }
-                    ret.trees.emplace_back(move(tree));
                 }
                 ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
@@ -488,7 +489,6 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            threadResult.flow = timeit.getFlowEdge();
             resultq->push(move(threadResult), threadResult.res.trees.size());
         }
     });
@@ -529,7 +529,6 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            threadResult.flow = timeit.getFlowEdge();
             auto sizeIncrement = threadResult.res.trees.size();
             resultq->push(move(threadResult), sizeIncrement);
         }
