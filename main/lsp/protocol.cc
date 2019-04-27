@@ -179,8 +179,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         gs = processRequest(move(gs), *msg);
         auto currentTime = chrono::steady_clock::now();
         if (startTracer) {
-            auto processingFinish = chrono::duration_cast<chrono::microseconds>(currentTime.time_since_epoch()).count();
-            timingAddFlowEnd(startTracer.value(), processingFinish);
+            timingAddFlowEnd(startTracer.value());
         }
         if (shouldSendCountersToStatsd(currentTime)) {
             {
@@ -333,9 +332,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
                              std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     msg->counter = state.requestCounter++;
-    msg->startTracer = timingAddFlowStart(
-        "processing_time",
-        chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch()).count());
+    msg->startTracer = timingAddFlowStart("processing_time");
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {

@@ -102,8 +102,8 @@ struct FlowId {
     char const *measure;
     int id;
 };
-FlowId timingAddFlowStart(ConstExprStr measure, unsigned long start);
-void timingAddFlowEnd(FlowId flowId, unsigned long end);
+FlowId timingAddFlowStart(ConstExprStr measure);
+void timingAddFlowEnd(FlowId flowId);
 UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);
 

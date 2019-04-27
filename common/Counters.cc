@@ -196,16 +196,34 @@ void timingAddAsync(ConstExprStr measure, unsigned long start, unsigned long end
     counterState.timingAdd(tim);
 }
 
-FlowId timingAddFlowStart(ConstExprStr measure, unsigned long start) {
+FlowId timingAddFlowStart(ConstExprStr measure) {
     int id = getGlobalTimingId();
-    CounterImpl::Timing tim{id, measure.str, start, nullopt, getThreadId(), {}, CounterImpl::Timing::FlowStart};
+    CounterImpl::Timing tim{
+        id,
+        measure.str,
+        static_cast<CounterImpl::CounterType>(
+            chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch())
+                .count()), // cast signed to unsigned. Will break if run with clock <1970
+        nullopt,
+        getThreadId(),
+        {},
+        CounterImpl::Timing::FlowStart};
     counterState.timingAdd(tim);
     FlowId ret{measure.str, id};
     return ret;
 }
 
-void timingAddFlowEnd(FlowId flowId, unsigned long end) {
-    CounterImpl::Timing tim{flowId.id, flowId.measure, end, nullopt, getThreadId(), {}, CounterImpl::Timing::FlowEnd};
+void timingAddFlowEnd(FlowId flowId) {
+    CounterImpl::Timing tim{
+        flowId.id,
+        flowId.measure,
+        static_cast<CounterImpl::CounterType>(
+            chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch())
+                .count()), // cast signed to unsigned. Will break if run with clock <1970
+        nullopt,
+        getThreadId(),
+        {},
+        CounterImpl::Timing::FlowEnd};
     counterState.timingAdd(tim);
 }
 
