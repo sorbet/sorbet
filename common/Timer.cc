@@ -24,7 +24,7 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name) : Timer(log, name, {}){};
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}){};
 
 int getGlobalTimingId() {
-    static atomic<int> counter = 0;
+    static atomic<int> counter = 1;
     return ++counter;
 }
 
