@@ -27,6 +27,14 @@ class <emptyTree><<C <U <root>>>> < ()
     def <U foo_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
       ::T.<U unsafe>(nil)
     end
+
+    ::Sorbet.<U sig>() do ||
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(<emptyTree>::<C <U Other>>)
+    end
+
+    def <U foo_!><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
   end
 
   def <U test><<C <U <todo sym>>>>(&<U <blk>>)
@@ -34,6 +42,7 @@ class <emptyTree><<C <U <root>>>> < ()
       <U di> = <emptyTree>::<C <U SomeDataInterface>>.<U new>()
       <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo>())
       <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo_>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo_!>())
     end
   end
 end

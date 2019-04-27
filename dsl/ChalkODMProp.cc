@@ -188,8 +188,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             type = ast::MK::Untyped(loc);
             nonNilType = ast::MK::Untyped(loc);
         } else {
-            type = ast::MK::Nilable(loc, std::move(foreign));
-            nonNilType = std::move(foreign);
+            type = ast::MK::Nilable(loc, ASTUtil::dupType(foreign.get()));
+            nonNilType = ASTUtil::dupType(foreign.get());
         }
 
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}

@@ -357,6 +357,14 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(<emptyTree>::<C <U ForeignClass>>)
+    end
+
+    def <U foreign_!><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
       <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
@@ -377,6 +385,14 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     def <U foreign_lazy_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(<emptyTree>::<C <U ForeignClass>>)
+    end
+
+    def <U foreign_lazy_!><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
       ::T.<U unsafe>(nil)
     end
 
@@ -405,6 +421,14 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     ::Sorbet.<U sig>() do ||
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(<emptyTree>::<C <U ForeignClass>>)
+    end
+
+    def <U foreign_proc_!><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
       <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
     end
 
@@ -425,6 +449,14 @@ class <emptyTree><<C <U <root>>>> < ()
     end
 
     def <U foreign_invalid_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
+      ::T.<U unsafe>(nil)
+    end
+
+    ::Sorbet.<U sig>() do ||
+      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U untyped>())
+    end
+
+    def <U foreign_invalid_!><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
       ::T.<U unsafe>(nil)
     end
 
@@ -605,6 +637,7 @@ class <emptyTree><<C <U <root>>>> < ()
       <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U enum_prop>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U enum_prop=>("hello")
       <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_>())
+      <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_!>())
       <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_lazy_>())
       <emptyTree>::<C <U AdvancedODM>>.<U new>().<U foreign_invalid_>()
       <emptyTree>::<C <U T>>.<U reveal_type>(<emptyTree>::<C <U PropHelpers>>.<U new>().<U token>())
