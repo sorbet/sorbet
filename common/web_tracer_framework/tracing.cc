@@ -27,7 +27,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
 
     for (auto &cat : counters.counters->countersByCategory) {
         fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"CC\",\"args\":{{{}}}}},\n",
+                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"cat\":\"C\",\"args\":{{{}}}}},\n",
                        cat.first, now, pid, fmt::map_join(cat.second, ",", [](const auto &e) -> string {
                            return fmt::format("\"{}\":{}", e.first, e.second);
                        }));
