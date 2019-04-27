@@ -12,8 +12,8 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name) : Timer(log, name, {}){};
 
 Timer::~Timer() {
     auto clock = chrono::steady_clock::now();
-    auto beginTs = std::chrono::duration_cast<std::chrono::microseconds>(begin.time_since_epoch()).count();
-    auto endTs = std::chrono::duration_cast<std::chrono::microseconds>(clock.time_since_epoch()).count();
+    auto beginTs = std::chrono::duration_cast<std::chrono::nanoseconds>(begin.time_since_epoch()).count();
+    auto endTs = std::chrono::duration_cast<std::chrono::nanoseconds>(clock.time_since_epoch()).count();
     log.debug("{}: {}ms", this->name.str, (endTs - beginTs) * 0.001);
     sorbet::timingAdd(this->name, beginTs, endTs, move(args));
 }

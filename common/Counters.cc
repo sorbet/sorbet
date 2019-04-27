@@ -202,7 +202,7 @@ FlowId timingAddFlowStart(ConstExprStr measure) {
         id,
         measure.str,
         static_cast<CounterImpl::CounterType>(
-            chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch())
+            chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch())
                 .count()), // cast signed to unsigned. Will break if run with clock <1970
         nullopt,
         getThreadId(),
@@ -218,7 +218,7 @@ void timingAddFlowEnd(FlowId flowId) {
         flowId.id,
         flowId.measure,
         static_cast<CounterImpl::CounterType>(
-            chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now().time_since_epoch())
+            chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch())
                 .count()), // cast signed to unsigned. Will break if run with clock <1970
         nullopt,
         getThreadId(),
