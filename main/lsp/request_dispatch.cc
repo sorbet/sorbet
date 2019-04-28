@@ -40,7 +40,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         return gs;
     }
     if (msg.isNotification()) {
-        Timer timeit(logger, fmt::format("notification {}", convertLSPMethodToString(method)));
+        Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::TextDocumentDidChange) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
@@ -118,7 +118,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             return gs;
         }
     } else if (msg.isRequest()) {
-        Timer timeit(logger, fmt::format("request {}", convertLSPMethodToString(method)));
+        Timer timeit(logger, "request", {{"method", convertLSPMethodToString(method)}});
         auto &requestMessage = msg.asRequest();
         // asRequest() should guarantee the presence of an ID.
         ENFORCE(msg.id());

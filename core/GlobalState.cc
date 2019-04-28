@@ -1022,9 +1022,10 @@ bool GlobalState::unfreezeSymbolTable() {
 }
 
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
-    Timer timeit(tracer(), "GlobalState::deepCopy");
+    Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
+
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
@@ -1067,6 +1068,10 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     }
     result->pathPrefix = this->pathPrefix;
     result->sanityCheck();
+    {
+        Timer timeit2(tracer(), "GlobalState::deepCopyOut");
+        result->creation = timeit2.getFlowEdge();
+    }
     return result;
 }
 

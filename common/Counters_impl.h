@@ -32,13 +32,14 @@ struct CounterImpl {
     UnorderedMap<const char *, const char *> stringsByPtr;
     struct Timing {
         // see https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit
+        // and https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit
         int id;
-        std::string namePrefix;
-        CounterType ts;
-        std::optional<CounterType> duration;
-        std::optional<int> threadId;
-        enum Kind { Duration, Async, FlowStart, FlowEnd };
-        Kind kind;
+        char const *measure;
+        std::chrono::time_point<std::chrono::steady_clock> start, end;
+        int threadId;
+        std::vector<std::pair<char const *, std::string>> args;
+        FlowId self;
+        FlowId prev;
     };
     void timingAdd(Timing timing);
     UnorderedMap<const char *, UnorderedMap<int, CounterType>> histograms;

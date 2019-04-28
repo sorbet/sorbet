@@ -54,11 +54,10 @@ public:
     void gauge(string_view name, size_t value) { // type : g
         addMetric(name, value, "g");
     }
-    void timing(string_view name, size_t microseconds) { // type: ms
-        addMetric(absl::StrCat(name, ".duration_ns"), microseconds * 1000,
+    void timing(const CounterImpl::Timing &tim) { // type: ms
+        auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(tim.end - tim.start).count();
+        addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds,
                   "ms"); // format suggested by #observability (@sjung and @an)
-        // we started by storing nanoseconds but later switched to microseconds. We'll continue emmiting nanoseconds to
-        // statsd to keep old graphs
     }
 };
 
@@ -92,17 +91,7 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
 
     UnorderedMap<int, CounterImpl::Timing> flowStarts;
     for (const auto &e : counters.counters->timings) {
-        if (e.duration) {
-            statsd.timing(e.namePrefix, e.duration.value());
-        } else if (e.kind == CounterImpl::Timing::FlowStart) {
-            flowStarts.emplace(e.id, e);
-        } else if (e.kind == CounterImpl::Timing::FlowEnd) {
-            auto fnd = flowStarts.find(e.id);
-            if (fnd != flowStarts.end()) {
-                auto &start = *fnd;
-                statsd.timing(e.namePrefix, e.ts - start.second.ts);
-            }
-        }
+        statsd.timing(e);
     }
 
     return true;
