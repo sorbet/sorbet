@@ -33,7 +33,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     }
 
     for (auto &e : counters.counters->counters) {
-        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"args\":{{\"value\":{}}}}},\n",
+        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"args\":{{\"value\":{}}}}},\n",
                        e.first, now, pid, e.second);
     }
 
