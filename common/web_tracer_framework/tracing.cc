@@ -62,9 +62,9 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         string maybeFlow;
         if (e.self.id != 0) {
             ENFORCE(e.prev.id == 0);
-            maybeFlow = fmt::format(",\"bind_id\":\"{}\",\"flow_in\":false,\"flow_out\":true", e.self.id);
+            maybeFlow = fmt::format(",\"bind_id\":{},\"flow_out\":true", e.self.id);
         } else if (e.prev.id != 0) {
-            maybeFlow = fmt::format(",\"bind_id\":\"{}\",\"flow_in\":true,\"flow_out\":false", e.prev.id);
+            maybeFlow = fmt::format(",\"bind_id\":{},\"flow_in\":true", e.prev.id);
         }
 
         fmt::format_to(result,
