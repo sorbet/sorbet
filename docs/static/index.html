@@ -98,8 +98,8 @@ all are reported in that file. <strong>Note</strong>: ignoring a file can cause 
 appear in <em>other</em> files, because that other file references something defined
 in an ignored file. We recommend pushing the entire project to out of <code>ignore</code>
 (at Stripe, 100% of non-test files are not ignored.)</p></li>
-<li><p>At <code># typed: false</code>, only errors related to things like syntax and constant
-resolution are reported. Fixing these errors is the baseline for adopting
+<li><p>At <code># typed: false</code>, only errors related to syntax, constant resolution and correctness of <code>sig</code>s are reported.
+Fixing these errors is the baseline for adopting
 Sorbet in a new codebase, and provides value even before adding type
 annotations. <code># typed: false</code> is the <strong>default</strong> for files without sigils.</p></li>
 <li><p>At <code># typed: true</code>, things that would normally be called &quot;type errors&quot; are
