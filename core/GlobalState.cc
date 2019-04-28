@@ -1223,25 +1223,43 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
     return what;
 }
 
-unsigned int GlobalState::hash() const {
+u4 patchHash(u4 hash) {
+    if (hash == GlobalStateHash::HASH_STATE_NOT_COMPUTED) {
+        hash = GlobalStateHash::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
+    } else if (hash == GlobalStateHash::HASH_STATE_INVALID) {
+        hash = GlobalStateHash::HASH_STATE_INVALID_COLLISION_AVOID;
+    }
+    return hash;
+}
+
+GlobalStateHash GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
-    unsigned int result = 0;
+    u4 hierarchyHash = 0;
+    UnorderedMap<NameHash, u4> methodHashes;
     int counter = 0;
     for (const auto &sym : this->symbols) {
-        counter++;
         if (!sym.ignoreInHashing(*this)) {
-            result = mix(result, sym.hash(*this));
+            if (sym.isMethodArgument()) {
+                continue;
+            }
+            if (sym.isMethod()) {
+                auto target = methodHashes[NameHash(*this, sym.name.data(*this))];
+                target = mix(target, sym.hash(*this));
+                hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
+            } else {
+                hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+            }
         }
+        counter++;
         if (DEBUG_HASHING_TAIL && counter > symbolsUsed() - 15) {
-            errorQueue->logger.info("Hashing symbols: {}, {}", result, sym.name.show(*this));
+            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
         }
     }
-
-    if (result == GlobalState::HASH_STATE_NOT_COMPUTED) {
-        result = GlobalState::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
-    } else if (result == GlobalState::HASH_STATE_INVALID) {
-        result = GlobalState::HASH_STATE_INVALID_COLLISION_AVOID;
+    GlobalStateHash result;
+    for (const auto &e : methodHashes) {
+        result.methodHashes[e.first] = patchHash(e.second);
     }
+    result.hierarchyHash = patchHash(hierarchyHash);
     return result;
 }
 

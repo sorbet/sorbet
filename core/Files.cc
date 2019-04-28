@@ -80,7 +80,7 @@ StrictLevel File::fileSigil(string_view source) {
 }
 
 File::File(string &&path_, string &&source_, Type sourceType)
-    : sourceType(sourceType), path_(path_), source_(source_), globalStateHash(GlobalState::HASH_STATE_NOT_COMPUTED),
+    : sourceType(sourceType), path_(path_), source_(source_), globalStateHash(GlobalStateHash::HASH_STATE_NOT_COMPUTED),
       originalSigil(fileSigil(this->source_)), strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
@@ -94,23 +94,25 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     return ret;
 }
 
-optional<unsigned int> File::getDefinitionHash() const {
-    auto current = globalStateHash.load();
-    if (current != GlobalState::HASH_STATE_NOT_COMPUTED) {
-        return current;
-    }
-    return nullopt;
+shared_ptr<core::GlobalStateHash> File::getDefinitionHash() const {
+    return globalStateHash;
 }
 
-void File::setDefinitionHash(unsigned int hash) const {
+void File::setDefinitionHash(core::GlobalStateHash &hash) const {
     auto current = globalStateHash.load();
+
+    shared_ptr<core::GlobalStateHash> desired;
     while (true) {
-        if (current != GlobalState::HASH_STATE_NOT_COMPUTED) {
-            ENFORCE(current == hash);
-        } else {
-            if (globalStateHash.compare_exchange_weak(current, hash)) {
-                return;
-            }
+        if (current != nullptr) {
+            ENFORCE(current->hierarchyHash == hash.hierarchyHash);
+            return;
+        }
+
+        if (desired == nullptr) {
+            desired = make_shared<core::GlobalStateHash>(hash);
+        }
+        if (atomic_compare_exchange_weak(&globalStateHash, &current, desired)) {
+            return;
         }
     }
 }

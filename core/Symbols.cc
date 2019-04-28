@@ -876,8 +876,8 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     return owner;
 }
 
-unsigned int Symbol::hash(const GlobalState &gs) const {
-    unsigned int result = _hash(name.data(gs)->shortName(gs));
+u4 Symbol::hash(const GlobalState &gs) const {
+    u4 result = _hash(name.data(gs)->shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
@@ -896,6 +896,23 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
             result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+        }
+    }
+
+    return result;
+}
+
+u4 Symbol::methodShapeHash(const GlobalState &gs) const {
+    ENFORCE(isMethod());
+
+    u4 result = _hash(name.data(gs)->shortName(gs));
+    result = mix(result, this->flags);
+    result = mix(result, this->owner._id);
+    result = mix(result, this->superClassOrRebind._id);
+    for (const auto &e : argumentsOrMixins) {
+        if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
+            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, e.data(gs)->flags);
         }
     }
 

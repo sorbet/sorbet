@@ -862,7 +862,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
     }
 }
 
-unsigned int computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+core::GlobalStateHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -881,7 +881,9 @@ unsigned int computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &log
     auto errs = lgs->errorQueue->drainAllErrors();
     for (auto &e : errs) {
         if (e->what == core::errors::Parser::ParserError) {
-            return core::GlobalState::HASH_STATE_INVALID;
+            core::GlobalStateHash invalid;
+            invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
+            return invalid;
         }
     }
     pipeline::resolve(*lgs, move(single), emptyOpts, true);
