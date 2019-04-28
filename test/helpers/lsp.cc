@@ -289,8 +289,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
         rapidjson::Value emptyObject(rapidjson::kObjectType);
         auto initialized =
             make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
-        LSPMessage message(move(initialized));
-        return lspWrapper.getLSPResponsesFor(message);
+        return lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
     }
 }
 

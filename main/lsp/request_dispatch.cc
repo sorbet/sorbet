@@ -10,7 +10,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
     return LSPLoop::processRequest(move(gs), *msg);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, LSPMessage &msg) {
+unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     Timer timeit(logger, "process_request");
     return processRequestInternal(move(gs), msg);
 }
@@ -29,7 +29,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalSt
     return gs;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, LSPMessage &msg) {
+unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     if (handleReplies(msg)) {
         return gs;
     }
@@ -44,29 +44,19 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::TextDocumentDidChange) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
-            vector<shared_ptr<core::File>> files;
-            auto &edits = get<unique_ptr<DidChangeTextDocumentParams>>(params);
-            auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorChange, move(edits));
-            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
+            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidChangeTextDocumentParams>>(params));
         }
         if (method == LSPMethod::TextDocumentDidOpen) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
-            auto &edits = get<unique_ptr<DidOpenTextDocumentParams>>(params);
-            auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorOpen, move(edits));
-            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
+            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidOpenTextDocumentParams>>(params));
         }
         if (method == LSPMethod::TextDocumentDidClose) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
-            auto &edits = get<unique_ptr<DidCloseTextDocumentParams>>(params);
-            auto sorbetEdit = make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::EditorClose, move(edits));
-            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
+            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidCloseTextDocumentParams>>(params));
         }
         if (method == LSPMethod::SorbetWatchmanFileChange) {
             prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
-            auto &queryResponse = get<unique_ptr<WatchmanQueryResponse>>(params);
-            auto sorbetEdit =
-                make_unique<SorbetWorkspaceEdit>(SorbetWorkspaceEditType::FileSystem, move(queryResponse));
-            return handleSorbetWorkspaceEdit(move(gs), sorbetEdit);
+            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<WatchmanQueryResponse>>(params));
         }
         if (method == LSPMethod::SorbetWorkspaceEdit) {
             // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
@@ -109,9 +99,9 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             }
 
             // process deferred watchman updates
-            auto deferredFileEditsClone = move(deferredFileEdits);
+            newGs = commitSorbetWorkspaceEdits(move(newGs), deferredFileEdits);
             deferredFileEdits.clear();
-            return handleSorbetWorkspaceEdits(move(newGs), deferredFileEditsClone);
+            return newGs;
         }
         if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
