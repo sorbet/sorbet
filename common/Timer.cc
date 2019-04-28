@@ -3,7 +3,7 @@ using namespace std;
 namespace sorbet {
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args)
-    : log(log), name(name), prev(prev), self{0}, args(args), begin(chrono::steady_clock::now()){};
+    : log(log), name(name), prev(prev), self{0}, args(args), start(chrono::steady_clock::now()){};
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
     : Timer(log, name, FlowId{0}, args){};
@@ -36,10 +36,9 @@ FlowId Timer::getFlowEdge() {
 
 Timer::~Timer() {
     auto clock = chrono::steady_clock::now();
-    auto beginTs = std::chrono::duration_cast<std::chrono::nanoseconds>(begin.time_since_epoch()).count();
-    auto endTs = std::chrono::duration_cast<std::chrono::nanoseconds>(clock.time_since_epoch()).count();
-    log.debug("{}: {}ms", this->name.str, (endTs - beginTs) * 0.001);
-    sorbet::timingAdd(this->name, beginTs, endTs, move(args), self, prev);
+    auto dur = std::chrono::duration<double, std::milli>(clock - start);
+    log.debug("{}: {}ms", this->name.str, dur.count());
+    sorbet::timingAdd(this->name, start, clock, move(args), self, prev);
 }
 
 } // namespace sorbet

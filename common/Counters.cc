@@ -176,14 +176,15 @@ vector<pair<const char *, string>> givenArgs2StoredArgs(vector<pair<ConstExprStr
     return stored;
 }
 
-void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end, vector<pair<ConstExprStr, string>> args,
+void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
+               std::chrono::time_point<std::chrono::steady_clock> end, vector<pair<ConstExprStr, string>> args,
                FlowId self, FlowId previous) {
     ENFORCE(
         (self.id == 0) || (previous.id == 0),
         "format doesn't support chaining"); // see "case 1" in
                                             // https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
                                             // for workaround
-    CounterImpl::Timing tim{0,    measure.str, start, end - start, getThreadId(), givenArgs2StoredArgs(move(args)),
+    CounterImpl::Timing tim{0,    measure.str, start, end, getThreadId(), givenArgs2StoredArgs(move(args)),
                             self, previous};
     counterState.timingAdd(tim);
 }
@@ -249,8 +250,6 @@ bool shouldShow(vector<string> &wantNames, string_view name) {
     }
     return absl::c_linear_search(wantNames, name);
 }
-
-constexpr double TIMING_TO_MSEC_MULTIPLIER = 0.000001;
 
 string getCounterStatistics(vector<string> names) {
     counterState.canonicalize();
@@ -332,28 +331,28 @@ string getCounterStatistics(vector<string> names) {
     {
         fmt::format_to(buf, "Timings: \n");
         vector<pair<string, string>> sortedTimings;
-        UnorderedMap<string, vector<CounterImpl::CounterType>> timings;
+        UnorderedMap<string, vector<double>> timings;
         for (const auto &e : counterState.timings) {
-            if (e.duration) {
-                timings[e.measure].emplace_back(e.duration);
-            }
+            std::chrono::duration<double, std::milli> durationMs = e.end - e.start;
+            timings[e.measure].emplace_back(durationMs.count());
         }
         for (const auto &e : timings) {
             if (!shouldShow(names, e.first)) {
                 continue;
             }
             if (e.second.size() == 1) {
-                string line =
-                    fmt::format("  {:>24.24}.value :{:10.4} ms\n", e.first, e.second[0] * TIMING_TO_MSEC_MULTIPLIER);
+                string line = fmt::format("  {:>24.24}.value :{:10.4} ms\n", e.first, e.second[0]);
                 sortedTimings.emplace_back(e.first, line);
                 continue;
             }
 
-            string line =
-                fmt::format("  {:>26.26}.min :{:10.4} ms\n  {:>26.26}.max :{:10.4} ms\n  {:>26.26}.avg :{:10.4} ms\n",
-                            e.first, *absl::c_min_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
-                            *absl::c_max_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
-                            absl::c_accumulate(e.second, 0) * TIMING_TO_MSEC_MULTIPLIER / e.second.size());
+            // string line = fmt::format("  {:>26.26}.min :{:10.4} ms\n  {:>26.26}.max :{:10.4} ms\n\n", e.first,
+            //                           *absl::c_min_element(e.second), e.first, *absl::c_max_element(e.second));
+
+            string line = fmt::format(
+                "  {:>26.26}.min :{:10.2f} ms\n  {:>26.26}.max :{:10.2f} ms\n  {:>26.26}.avg :{:10.2f} ms\n", e.first,
+                *absl::c_min_element(e.second), e.first, *absl::c_max_element(e.second), e.first,
+                absl::c_accumulate(e.second, 0.0) / e.second.size());
             sortedTimings.emplace_back(e.first, line);
         }
         fast_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });

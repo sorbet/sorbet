@@ -16,8 +16,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     if (!FileOps::exists(fileName)) {
         fmt::format_to(result, "[\n");
     }
-    auto now =
-        chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count() / 1000.0;
+    auto now = std::chrono::duration<double, std::micro>(chrono::steady_clock::now().time_since_epoch()).count();
 
     auto pid = getpid();
     fmt::format_to(result,
@@ -66,7 +65,9 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
 
         fmt::format_to(result,
                        "{{\"name\":\"{}\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
-                       e.measure, e.ts / 1000.0, e.duration / 1000.0, pid, e.threadId, maybeArgs, maybeFlow);
+                       e.measure, (std::chrono::duration<double, std::micro>(e.start.time_since_epoch())).count(),
+                       (std::chrono::duration<double, std::micro>(e.end - e.start)).count(), pid, e.threadId, maybeArgs,
+                       maybeFlow);
     }
 
     fmt::format_to(result, "\n");

@@ -1,6 +1,7 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
 #include "common/common.h"
+#include <chrono>
 #include <string>
 
 namespace sorbet {
@@ -98,7 +99,8 @@ struct FlowId {
     int id;
 };
 
-void timingAdd(ConstExprStr measure, unsigned long start, unsigned long end,
+void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
+               std::chrono::time_point<std::chrono::steady_clock> end,
                std::vector<std::pair<ConstExprStr, std::string>> args, FlowId self, FlowId previous);
 
 UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);

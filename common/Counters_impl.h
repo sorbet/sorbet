@@ -35,8 +35,7 @@ struct CounterImpl {
         // and https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit
         int id;
         char const *measure;
-        CounterType ts;
-        CounterType duration;
+        std::chrono::time_point<std::chrono::steady_clock> start, end;
         int threadId;
         std::vector<std::pair<char const *, std::string>> args;
         FlowId self;

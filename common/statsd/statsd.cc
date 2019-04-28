@@ -54,8 +54,9 @@ public:
     void gauge(string_view name, size_t value) { // type : g
         addMetric(name, value, "g");
     }
-    void timing(string_view name, size_t nanoseconds) { // type: ms
-        addMetric(absl::StrCat(name, ".duration_ns"), nanoseconds,
+    void timing(const CounterImpl::Timing &tim) { // type: ms
+        auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(tim.end - tim.start).count();
+        addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds,
                   "ms"); // format suggested by #observability (@sjung and @an)
     }
 };
@@ -90,7 +91,7 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
 
     UnorderedMap<int, CounterImpl::Timing> flowStarts;
     for (const auto &e : counters.counters->timings) {
-        statsd.timing(e.measure, e.duration);
+        statsd.timing(e);
     }
 
     return true;
