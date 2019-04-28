@@ -54,6 +54,7 @@ public:
 struct ParsedFile {
     std::unique_ptr<ast::Expression> tree;
     core::FileRef file;
+    std::vector<core::NameRef> sendFuns;
 };
 
 template <class To> To *cast_tree(Expression *what) {
