@@ -45,8 +45,8 @@ Each strictness level reports all errors at lower levels, plus new errors:
   in an ignored file. We recommend pushing the entire project to out of `ignore`
   (at Stripe, 100% of non-test files are not ignored.)
 
-- At `# typed: false`, only errors related to things like syntax and constant
-  resolution are reported. Fixing these errors is the baseline for adopting
+- At `# typed: false`, only errors related to syntax, constant resolution and correctness of `sig`s are reported.
+  Fixing these errors is the baseline for adopting
   Sorbet in a new codebase, and provides value even before adding type
   annotations. `# typed: false` is the **default** for files without sigils.
 
