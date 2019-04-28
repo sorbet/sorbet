@@ -26,17 +26,14 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     counters.counters->canonicalize();
 
     for (auto &cat : counters.counters->countersByCategory) {
-        fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"cat\":\"C\",\"args\":{{{}}}}},\n",
+        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"args\":{{{}}}}},\n",
                        cat.first, now, pid, fmt::map_join(cat.second, ",", [](const auto &e) -> string {
                            return fmt::format("\"{}\":{}", e.first, e.second);
                        }));
     }
 
     for (auto &e : counters.counters->counters) {
-        fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"args\":"
-                       "{{\"value\":{}}}}},\n",
+        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"args\":{{\"value\":{}}}}},\n",
                        e.first, now, pid, e.second);
     }
 
@@ -45,7 +42,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     //
     // for (auto &hist : counters.counters->histograms) {
     //     fmt::format_to(result,
-    //     "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"cat\":\"H\",\"args\":{{{}}}}},\n",
+    //     "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"args\":{{{}}}}},\n",
     //                    hist.first, now, pid, fmt::map_join(hist.second, ",", [](const auto &e) -> string {
     //                        return fmt::format("\"{}\":{}", e.first, e.second);
     //                    }));
@@ -68,8 +65,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         }
 
         fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"cat\":\"T\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":"
-                       "{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
+                       "{{\"name\":\"{}\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
                        e.measure, e.ts / 1000.0, e.duration / 1000.0, pid, e.threadId, maybeArgs, maybeFlow);
     }
 
