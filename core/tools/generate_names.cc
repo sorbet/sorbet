@@ -187,7 +187,7 @@ NameDef names[] = {
     {"instanceRegistered", "<instance_registered>"},
     {"helpers"},
 
-    { "keywordInit", "keyword_init" },
+    {"keywordInit", "keyword_init"},
 
     {"DB", "DB", true},
     {"Model", "Model", true},

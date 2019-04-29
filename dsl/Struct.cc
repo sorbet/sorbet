@@ -24,14 +24,14 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     return ast::MK::UnresolvedConstant(node->loc, std::move(newScope), cnst->cnst);
 }
 
-static bool isKeywordInitKey(ast::Expression *node, const core::GlobalState &gs) {
+static bool isKeywordInitKey(const core::GlobalState &gs, ast::Expression *node) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
     }
     return false;
 }
 
-static bool isLiteralTrue(ast::Expression *node, const core::GlobalState &gs) {
+static bool isLiteralTrue(const core::GlobalState &gs, ast::Expression *node) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isTrue(gs);
     }
@@ -92,30 +92,25 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                        ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
 
     bool keywordInit = false;
-    if (auto hash = ast::cast_tree<ast::Hash>(send->args.back().get()); hash) {
+    if (auto hash = ast::cast_tree<ast::Hash>(send->args.back().get())) {
         if (send->args.size() == 1) {
             return empty;
         }
         if (hash->keys.size() != 1) {
             return empty;
         }
-        ENFORCE(hash->keys.size() == hash->values.size());
         auto key = hash->keys.front().get();
         auto value = hash->values.front().get();
-        if (isKeywordInitKey(key, ctx) && isLiteralTrue(value, ctx)) {
+        if (isKeywordInitKey(ctx, key) && isLiteralTrue(ctx, value)) {
             keywordInit = true;
         }
     }
 
-    for (int i = 0; i < send->args.size(); i++) {
+    const auto n = keywordInit ? send->args.size() - 1 : send->args.size();
+    for (int i = 0; i < n; i++) {
         auto sym = ast::cast_tree<ast::Literal>(send->args[i].get());
         if (!sym || !sym->isSymbol(ctx)) {
-            const bool isLastArg = i == send->args.size() - 1;
-            if (isLastArg && keywordInit) {
-                break;
-            } else {
-                return empty;
-            }
+            return empty;
         }
         core::NameRef name = sym->asSymbol(ctx);
 
