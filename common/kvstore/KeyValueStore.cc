@@ -1,12 +1,20 @@
 #include "common/kvstore/KeyValueStore.h"
 
+#include <iostream>
 #include <utility>
+
 using namespace std;
 namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 constexpr size_t MAX_DB_SIZE_BYTES =
     1L * 1024 * 1024 * 1024; // 1G. This is both maximum fs db size and max virtual memory usage.
+
+static void throw_mdb_error(string_view what, int err) {
+    cerr << "mdb error: " << what << ": " << mdb_strerror(err) << "\n";
+    throw invalid_argument(string(what));
+}
+
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
     : path(move(path)), flavor(move(flavor)), writerId(this_thread::get_id()) {
     int rc;
@@ -39,7 +47,7 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor)
         return;
     }
 fail:
-    throw invalid_argument("failed to create database");
+    throw_mdb_error("failed to create database"sv, rc);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
     if (commited) {
@@ -88,7 +96,7 @@ u1 *KeyValueStore::read(string_view key) {
         txn = txn_store;
     }
     if (rc != 0) {
-        throw invalid_argument("failed to create read transaction");
+        throw_mdb_error("failed to create read transaction"sv, rc);
     }
 
     MDB_val kv;
@@ -100,7 +108,9 @@ u1 *KeyValueStore::read(string_view key) {
         if (rc == MDB_NOTFOUND) {
             return nullptr;
         }
-        throw invalid_argument("failed read from the database");
+        std::cerr << "mdb_get(" << txn << ", " << dbi << ", '" << key << "')"
+                  << "\n";
+        throw_mdb_error("failed read from the database"sv, rc);
     }
     return (u1 *)data.mv_data;
 }
@@ -120,7 +130,7 @@ void KeyValueStore::clear() {
     refreshMainTransaction();
     return;
 fail:
-    throw invalid_argument("failed to clear the database");
+    throw_mdb_error("failed to clear the database"sv, rc);
 }
 
 string_view KeyValueStore::readString(string_view key) {
@@ -160,7 +170,7 @@ void KeyValueStore::refreshMainTransaction() {
     }
     return;
 fail:
-    throw invalid_argument("failed to create transaction");
+    throw_mdb_error("failed to create transaction"sv, rc);
 }
 
 bool KeyValueStore::commit(unique_ptr<KeyValueStore> k) {
