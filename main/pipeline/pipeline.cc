@@ -79,6 +79,19 @@ unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::File
     return nullptr;
 }
 
+void cacheTrees(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore, vector<ast::ParsedFile> &trees) {
+    if (!kvstore) {
+        return;
+    }
+    for (auto &tree : trees) {
+        if (tree.file.data(gs).cachedParseTree) {
+            continue;
+        }
+        string fileHashKey = fileKey(gs, tree.file);
+        kvstore->write(fileHashKey, core::serialize::Serializer::storeExpression(gs, tree.tree));
+    }
+}
+
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
     Timer timeit(gs.tracer(), "runParser", {{"file", (string)file.data(gs).path()}});
     unique_ptr<parser::Node> nodes;
@@ -427,6 +440,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ENFORCE(ret.trees.empty());
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
+                cacheTrees(*ret.gs, kvstore, ret.trees);
             } else {
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
@@ -437,15 +451,13 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                         core::ErrorRegion errs(*ret.gs, file);
                         if (!file.data(*ret.gs).cachedParseTree) {
                             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
-                            if (kvstore) {
-                                string fileHashKey = fileKey(*ret.gs, file);
-                                kvstore->write(fileHashKey,
-                                               core::serialize::Serializer::storeExpression(*ret.gs, tree.tree));
-                            }
                         }
-                        ret.trees.emplace_back(move(tree));
                     }
                 }
+                cacheTrees(*ret.gs, kvstore, threadResult.res.trees);
+                ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
+                                 make_move_iterator(threadResult.res.trees.begin()));
+
                 ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
@@ -586,6 +598,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                 }
                 ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore));
             }
+            cacheTrees(*gs, kvstore, ret);
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
