@@ -3,24 +3,24 @@
 class FalseClass
   extend T::Sig
 
-  sig {returns(FalseClass)}
-  def present?
-    false
+  sig {returns(TrueClass)}
+  def blank?
+    true
   end
 end
 
 class NilClass
   extend T::Sig
 
-  sig {returns(FalseClass)}
-  def present?
-    false
+  sig {returns(TrueClass)}
+  def blank?
+    true
   end
 end
 
 class Object
-  def present?
-    !self
+  def blank?
+    !!self
   end
 end
 
@@ -29,7 +29,7 @@ class A
 
   sig {params(s: T.nilable(String)).returns(NilClass)}
   def test_return(s)
-    if s.present?
+    if !s.blank?
       s.length
       nil
     end
@@ -38,7 +38,7 @@ class A
 
   sig {params(s: String).returns(NilClass)}
   def test_unchanged(s)
-    if s.present?
+    if s.blank?
       s.length
     else
       s.length
@@ -47,14 +47,16 @@ class A
   end
 
   def unreachable_nil()
-    if nil.present?
-      "foo" # error: This code is unreachable
+    a = nil
+    if !a.blank?
+      puts a # error: This code is unreachable
     end
   end
 
   def unreachable_false()
-    if false.present?
-      "foo" # error: This code is unreachable
+    a = false
+    if !a.blank?
+      puts a # error: This code is unreachable
     end
   end
 end

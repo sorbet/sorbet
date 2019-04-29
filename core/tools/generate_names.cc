@@ -247,6 +247,7 @@ NameDef names[] = {
 
     {"lambda"},
     {"nil_p", "nil?"},
+    {"blank_p", "blank?"},
     {"present_p", "present?"},
     {"nil"},
     {"super"},
