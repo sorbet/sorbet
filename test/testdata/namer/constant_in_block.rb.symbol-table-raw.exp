@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2538:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2539:4})
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/constant_in_block.rb start=2:1 end=2:8}
     static-field <C <U A>><C <U B>> -> Integer(1) @ Loc {file=test/testdata/namer/constant_in_block.rb start=12:5 end=12:6}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/constant_in_block.rb start=2:7 end=2:8}

@@ -73,7 +73,7 @@ class BadUsages
   C = Struct.new(keyword_init: true) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
   local = true # DSL runs too early to be able to support this
   D = Struct.new(keyword_init: local) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
-  E = Struct.new(:a, keyword_init: local) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg1`
+  E = Struct.new(:a, keyword_init: local)
 end
 
 class Main
