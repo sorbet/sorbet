@@ -160,7 +160,27 @@ void KeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_open(txn, flavor.c_str(), MDB_CREATE, &dbi);
+    rc = mdb_dbi_open(txn, flavor.c_str(), MDB_CREATE, &dbi);
+    if (rc != 0) {
+        goto fail;
+    }
+    // Per the docs for mdb_dbi_open:
+    //
+    // The database handle will be private to the current transaction
+    // until the transaction is successfully committed. If the
+    // transaction is aborted the handle will be closed
+    // automatically. After a successful commit the handle will reside
+    // in the shared environment, and may be used by other
+    // transactions.
+    //
+    // So we commit immediately to force the dbi into the shared space
+    // so that readers can use it, and then re-open the transaction
+    // for future writes.
+    rc = mdb_txn_commit(txn);
+    if (rc != 0) {
+        goto fail;
+    }
+    rc = mdb_txn_begin(env, nullptr, 0, &txn);
     if (rc != 0) {
         goto fail;
     }
