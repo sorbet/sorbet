@@ -155,37 +155,84 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 struct OrInfo {
     bool containsNil;
-    int numTypes;
-};
+    bool containsFalse;
+    bool containsTrue;
+    bool containsOther;
+    bool containsMultiple;
 
-static OrInfo mergeOrInfo(const OrInfo &left, const OrInfo &right) {
-    return OrInfo{
-        left.containsNil || right.containsNil,
-        left.numTypes + right.numTypes,
-    };
-}
+    bool isBoolean() const {
+        return containsTrue && containsFalse && !containsOther;
+    }
+
+    void markContainsMultiple() {
+        this->containsMultiple = true;
+    }
+
+    OrInfo()
+        : containsNil(false), containsFalse(false), containsTrue(false), containsOther(false), containsMultiple(false) {
+    }
+
+    static OrInfo nilInfo() {
+        OrInfo res;
+        res.containsNil = true;
+        return res;
+    }
+
+    static OrInfo trueInfo() {
+        OrInfo res;
+        res.containsTrue = true;
+        return res;
+    }
+
+    static OrInfo falseInfo() {
+        OrInfo res;
+        res.containsFalse = true;
+        return res;
+    }
+
+    static OrInfo otherInfo() {
+        OrInfo res;
+        res.containsOther = true;
+        return res;
+    }
+
+    static OrInfo merge(const OrInfo &left, const OrInfo &right) {
+        OrInfo res;
+        res.containsNil = left.containsNil || right.containsNil;
+        res.containsFalse = left.containsFalse || right.containsFalse;
+        res.containsTrue = left.containsTrue || right.containsTrue;
+        res.containsOther = left.containsOther || right.containsOther;
+        res.containsMultiple = left.containsMultiple || right.containsMultiple;
+        return res;
+    }
+};
 
 pair<OrInfo, optional<string>> showOrs(const GlobalState &, TypePtr, TypePtr);
 
 pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, TypePtr ty) {
     if (auto classType = cast_type<ClassType>(ty.get())) {
         if (classType->symbol == Symbols::NilClass()) {
-            return make_pair(OrInfo{true, 0}, nullopt);
+            return make_pair(OrInfo::nilInfo(), nullopt);
+        } else if (classType->symbol == Symbols::TrueClass()) {
+            return make_pair(OrInfo::trueInfo(), make_optional(classType->show(gs)));
+        } else if (classType->symbol == Symbols::FalseClass()) {
+            return make_pair(OrInfo::falseInfo(), make_optional(classType->show(gs)));
         }
     } else if (auto orType = cast_type<OrType>(ty.get())) {
         return showOrs(gs, orType->left, orType->right);
     }
 
-    return make_pair(OrInfo{false, 1}, make_optional(ty->show(gs)));
+    return make_pair(OrInfo::otherInfo(), make_optional(ty->show(gs)));
 }
 
 pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
     auto [leftInfo, leftStr] = showOrElem(gs, left);
     auto [rightInfo, rightStr] = showOrElem(gs, right);
 
-    OrInfo merged = mergeOrInfo(leftInfo, rightInfo);
+    OrInfo merged = OrInfo::merge(leftInfo, rightInfo);
 
     if (leftStr.has_value() && rightStr.has_value()) {
+        merged.markContainsMultiple();
         return make_pair(merged, make_optional(fmt::format("{}, {}", *leftStr, *rightStr)));
     } else if (leftStr.has_value()) {
         return make_pair(merged, leftStr);
@@ -204,7 +251,9 @@ string OrType::show(const GlobalState &gs) const {
     }
 
     string res;
-    if (info.numTypes > 1) {
+    if (info.isBoolean()) {
+        res = "T::Boolean";
+    } else if (info.containsMultiple) {
         res = fmt::format("T.any({})", *str);
     } else {
         res = *str;
