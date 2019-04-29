@@ -178,7 +178,7 @@ suggest-sig.rb:125: This function does not have a `sig` https://sorbet.org/docs/
      125 |def fooCondGeneratedCurly(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped)}
+    suggest-sig.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
 `
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
@@ -187,7 +187,7 @@ suggest-sig.rb:139: This function does not have a `sig` https://sorbet.org/docs/
      139 |def fooCondGeneratedDo(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped)}
+    suggest-sig.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
 `
      134 |sig do
      135 |  params(a: T.untyped, cond: T::Boolean).
@@ -398,7 +398,7 @@ def cantRun(a)
   1
 end
 
-sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped)}
+sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -408,7 +408,7 @@ def fooCondGeneratedCurly(a, cond)
 end
 
 
-sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped)}
+sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
 def fooCondGeneratedDo(a, cond)
   if cond
     takesInt(a)

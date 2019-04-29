@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<Class:A>#send_beta_invitation_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(A) = cast(<U <self>>: NilClass, T.class_of(A));\l<U invite>: T.untyped = load_arg(A.send_beta_invitation#invite)\l<U <statTemp>>$6: Integer(1) = 1\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass) = <U <statTemp>>$6: Integer(1).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$5: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<U <self>>: T.class_of(A) = cast(<U <self>>: NilClass, T.class_of(A));\l<U invite>: T.untyped = load_arg(A.send_beta_invitation#invite)\l<U <statTemp>>$6: Integer(1) = 1\l<U <ifTemp>>$5: T::Boolean = <U <statTemp>>$6: Integer(1).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$5: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];
@@ -41,7 +41,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" [
-        label = "block[id=3](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$9: Integer(2) = 2\l<U <ifTemp>>$8: T.any(TrueClass, FalseClass) = <U <statTemp>>$9: Integer(2).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$8: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=3](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$9: Integer(2) = 2\l<U <ifTemp>>$8: T::Boolean = <U <statTemp>>$9: Integer(2).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$8: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_4" [style="bold"];
@@ -53,7 +53,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" [
-        label = "block[id=5](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$12: Integer(3) = 3\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass) = <U <statTemp>>$12: Integer(3).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$11: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=5](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$12: Integer(3) = 3\l<U <ifTemp>>$11: T::Boolean = <U <statTemp>>$12: Integer(3).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$11: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_6" [style="bold"];
@@ -65,7 +65,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" [
-        label = "block[id=7](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$15: Integer(4) = 4\l<U <ifTemp>>$14: T.any(TrueClass, FalseClass) = <U <statTemp>>$15: Integer(4).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$14: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=7](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$15: Integer(4) = 4\l<U <ifTemp>>$14: T::Boolean = <U <statTemp>>$15: Integer(4).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$14: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_8" [style="bold"];
@@ -77,7 +77,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" [
-        label = "block[id=9](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$18: Integer(5) = 5\l<U <ifTemp>>$17: T.any(TrueClass, FalseClass) = <U <statTemp>>$18: Integer(5).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$17: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=9](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$18: Integer(5) = 5\l<U <ifTemp>>$17: T::Boolean = <U <statTemp>>$18: Integer(5).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$17: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_10" [style="bold"];
@@ -89,7 +89,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" [
-        label = "block[id=11](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$21: Integer(6) = 6\l<U <ifTemp>>$20: T.any(TrueClass, FalseClass) = <U <statTemp>>$21: Integer(6).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$20: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=11](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$21: Integer(6) = 6\l<U <ifTemp>>$20: T::Boolean = <U <statTemp>>$21: Integer(6).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$20: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_12" [style="bold"];
@@ -101,7 +101,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" [
-        label = "block[id=13](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$24: Integer(7) = 7\l<U <ifTemp>>$23: T.any(TrueClass, FalseClass) = <U <statTemp>>$24: Integer(7).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$23: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=13](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$24: Integer(7) = 7\l<U <ifTemp>>$23: T::Boolean = <U <statTemp>>$24: Integer(7).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$23: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_14" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" [
-        label = "block[id=15](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$27: Integer(8) = 8\l<U <ifTemp>>$26: T.any(TrueClass, FalseClass) = <U <statTemp>>$27: Integer(8).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$26: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=15](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$27: Integer(8) = 8\l<U <ifTemp>>$26: T::Boolean = <U <statTemp>>$27: Integer(8).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$26: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_16" [style="bold"];
@@ -125,7 +125,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" [
-        label = "block[id=17](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$30: Integer(9) = 9\l<U <ifTemp>>$29: T.any(TrueClass, FalseClass) = <U <statTemp>>$30: Integer(9).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$29: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=17](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$30: Integer(9) = 9\l<U <ifTemp>>$29: T::Boolean = <U <statTemp>>$30: Integer(9).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$29: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_18" [style="bold"];
@@ -137,7 +137,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" [
-        label = "block[id=19](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$33: Integer(10) = 10\l<U <ifTemp>>$32: T.any(TrueClass, FalseClass) = <U <statTemp>>$33: Integer(10).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$32: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=19](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$33: Integer(10) = 10\l<U <ifTemp>>$32: T::Boolean = <U <statTemp>>$33: Integer(10).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$32: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_20" [style="bold"];
@@ -149,7 +149,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" [
-        label = "block[id=21](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$36: Integer(11) = 11\l<U <ifTemp>>$35: T.any(TrueClass, FalseClass) = <U <statTemp>>$36: Integer(11).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$35: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=21](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$36: Integer(11) = 11\l<U <ifTemp>>$35: T::Boolean = <U <statTemp>>$36: Integer(11).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$35: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_22" [style="bold"];
@@ -161,7 +161,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" [
-        label = "block[id=23](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$39: Integer(12) = 12\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass) = <U <statTemp>>$39: Integer(12).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$38: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=23](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$39: Integer(12) = 12\l<U <ifTemp>>$38: T::Boolean = <U <statTemp>>$39: Integer(12).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$38: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_24" [style="bold"];
@@ -173,7 +173,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" [
-        label = "block[id=25](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$42: Integer(13) = 13\l<U <ifTemp>>$41: T.any(TrueClass, FalseClass) = <U <statTemp>>$42: Integer(13).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$41: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=25](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$42: Integer(13) = 13\l<U <ifTemp>>$41: T::Boolean = <U <statTemp>>$42: Integer(13).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$41: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_26" [style="bold"];
@@ -185,7 +185,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" [
-        label = "block[id=27](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$45: Integer(14) = 14\l<U <ifTemp>>$44: T.any(TrueClass, FalseClass) = <U <statTemp>>$45: Integer(14).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$44: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=27](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$45: Integer(14) = 14\l<U <ifTemp>>$44: T::Boolean = <U <statTemp>>$45: Integer(14).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$44: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_28" [style="bold"];
@@ -197,7 +197,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" [
-        label = "block[id=29](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$48: Integer(15) = 15\l<U <ifTemp>>$47: T.any(TrueClass, FalseClass) = <U <statTemp>>$48: Integer(15).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$47: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=29](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$48: Integer(15) = 15\l<U <ifTemp>>$47: T::Boolean = <U <statTemp>>$48: Integer(15).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$47: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_30" [style="bold"];
@@ -209,7 +209,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" [
-        label = "block[id=31](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$51: Integer(16) = 16\l<U <ifTemp>>$50: T.any(TrueClass, FalseClass) = <U <statTemp>>$51: Integer(16).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$50: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=31](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$51: Integer(16) = 16\l<U <ifTemp>>$50: T::Boolean = <U <statTemp>>$51: Integer(16).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$50: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_32" [style="bold"];
@@ -221,7 +221,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" [
-        label = "block[id=33](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$54: Integer(17) = 17\l<U <ifTemp>>$53: T.any(TrueClass, FalseClass) = <U <statTemp>>$54: Integer(17).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$53: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=33](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$54: Integer(17) = 17\l<U <ifTemp>>$53: T::Boolean = <U <statTemp>>$54: Integer(17).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$53: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_34" [style="bold"];
@@ -233,7 +233,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" [
-        label = "block[id=35](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$57: Integer(18) = 18\l<U <ifTemp>>$56: T.any(TrueClass, FalseClass) = <U <statTemp>>$57: Integer(18).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$56: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=35](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$57: Integer(18) = 18\l<U <ifTemp>>$56: T::Boolean = <U <statTemp>>$57: Integer(18).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$56: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_36" [style="bold"];
@@ -245,7 +245,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" [
-        label = "block[id=37](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$60: Integer(19) = 19\l<U <ifTemp>>$59: T.any(TrueClass, FalseClass) = <U <statTemp>>$60: Integer(19).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$59: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=37](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$60: Integer(19) = 19\l<U <ifTemp>>$59: T::Boolean = <U <statTemp>>$60: Integer(19).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$59: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_38" [style="bold"];
@@ -257,7 +257,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" [
-        label = "block[id=39](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$63: Integer(20) = 20\l<U <ifTemp>>$62: T.any(TrueClass, FalseClass) = <U <statTemp>>$63: Integer(20).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$62: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=39](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$63: Integer(20) = 20\l<U <ifTemp>>$62: T::Boolean = <U <statTemp>>$63: Integer(20).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$62: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_40" [style="bold"];
