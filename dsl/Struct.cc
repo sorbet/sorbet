@@ -94,6 +94,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
     bool keywordInit = false;
     if (auto hash = ast::cast_tree<ast::Hash>(send->args.back().get())) {
         if (send->args.size() == 1) {
+            // leave bad usages like `Struct.new(keyword_init: true)` untouched so we error later
             return empty;
         }
         if (hash->keys.size() != 1) {
