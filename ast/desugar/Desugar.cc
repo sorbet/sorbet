@@ -1269,6 +1269,18 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 unique_ptr<Expression> recv;
                 if (dctx.enclosingBlockArg.exists()) {
+                    // we always want to report an error if we're
+                    // using yield with a synthesized name in strict
+                    // mode
+                    auto blockArgName = dctx.enclosingBlockArg;
+                    auto synthesizedName = dctx.ctx.state.enterNameUTF8("<blk>");
+                    if (blockArgName == synthesizedName) {
+                        if (auto e = dctx.ctx.state.beginError(dctx.methodLoc, core::errors::Desugar::UnnamedBlockParameter)) {
+                            e.setHeader("Missing name for block parameter in method definition");
+                            e.addErrorLine(loc, "Arising from use of `yield` in method body");
+                        }
+                    }
+
                     recv = MK::Local(loc, dctx.enclosingBlockArg);
                 } else {
                     // No enclosing block arg can happen when e.g. yield is called in a class / at the top-level.
