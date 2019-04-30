@@ -2,7 +2,7 @@
 require_relative '../test_helper'
 
 module Opus::Types::Test
-  class SigBuilderSyntaxTest < Critic::Unit::UnitTest
+  class BuilderSyntaxTest < Critic::Unit::UnitTest
     after do
       T::Private::DeclState.current.reset!
     end

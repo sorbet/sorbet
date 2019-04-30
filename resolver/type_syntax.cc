@@ -274,7 +274,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 default:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Method `{}` does not exist on `T::Private::Methods::SigBuilder`",
+                        e.setHeader("Method `{}` does not exist on `T::Private::Methods::DeclBuilder`",
                                     send->fun.show(ctx));
                     }
             }
@@ -285,7 +285,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     if (!sig.seen.proc) {
                         if (auto e =
                                 ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Method does not exist on `T::Private::Methods::SigBuilder`");
+                            e.setHeader("Method does not exist on `T::Private::Methods::DeclBuilder`");
                         }
                     }
                 }
