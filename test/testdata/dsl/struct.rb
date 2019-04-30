@@ -71,9 +71,9 @@ class BadUsages
   A = Struct.new # error: Not enough arguments provided for method `Struct.new`. Expected: `1+`, got: `0`
   B = Struct.new(giberish: 1) # error: `{giberish: Integer(1)}` doesn't match `T.any(Symbol, String)` for argument `arg0`
   C = Struct.new(keyword_init: true) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
-  local = true # DSL runs too early to be able to support this
+  local = true
   D = Struct.new(keyword_init: local) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
-  E = Struct.new(:a, keyword_init: local)
+  E = Struct.new(:a, keyword_init: local) # we run too early in to be able to support this
 end
 
 class Main
