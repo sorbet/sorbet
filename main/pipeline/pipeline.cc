@@ -456,7 +456,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 }
                 cacheTrees(*ret.gs, kvstore, threadResult.res.trees);
                 ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
-                                 make_move_iterator(threadResult.res.trees.begin()));
+                                 make_move_iterator(threadResult.res.trees.end()));
 
                 ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
