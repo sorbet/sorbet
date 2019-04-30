@@ -1,11 +1,11 @@
-suggest-sig.rb:74: Missing name for block parameter in method definition https://sorbet.org/docs/error-reference#3007
+suggest-sig.rb:74: Method `takesBlock` uses `yield` but does not mention a block parameter https://sorbet.org/docs/error-reference#3007
     74 |def takesBlock
         ^^^^^^^^^^^^^^
     suggest-sig.rb:75: Arising from use of `yield` in method body
     75 |  yield 1
           ^^^^^^^
 
-suggest-sig.rb:92: Missing name for block parameter in method definition https://sorbet.org/docs/error-reference#3007
+suggest-sig.rb:92: Method `with_block` uses `yield` but does not mention a block parameter https://sorbet.org/docs/error-reference#3007
     92 |def with_block
         ^^^^^^^^^^^^^^
     suggest-sig.rb:93: Arising from use of `yield` in method body
