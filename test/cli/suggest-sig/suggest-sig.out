@@ -1,3 +1,17 @@
+suggest-sig.rb:74: Missing name for block parameter in method definition https://sorbet.org/docs/error-reference#3007
+    74 |def takesBlock
+        ^^^^^^^^^^^^^^
+    suggest-sig.rb:75: Arising from use of `yield` in method body
+    75 |  yield 1
+          ^^^^^^^
+
+suggest-sig.rb:92: Missing name for block parameter in method definition https://sorbet.org/docs/error-reference#3007
+    92 |def with_block
+        ^^^^^^^^^^^^^^
+    suggest-sig.rb:93: Arising from use of `yield` in method body
+    93 |  yield
+          ^^^^^
+
 suggest-sig.rb:5: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
@@ -251,7 +265,7 @@ suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http
 suggest-sig.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://sorbet.org/docs/error-reference#7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 35
+Errors: 37
 
 --------------------------------------------------------------------------
 
