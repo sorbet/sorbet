@@ -1278,8 +1278,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     if (blockArgName == synthesizedName) {
                         if (auto e = dctx.ctx.state.beginError(dctx.methodLoc,
                                                                core::errors::Desugar::UnnamedBlockParameter)) {
-                            e.setHeader("Missing name for block parameter in method definition");
-                            e.addErrorLine(loc, "Arising from use of `yield` in method body");
+                            e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
+                                        dctx.enclosingMethodName.data(dctx.ctx)->show(dctx.ctx), "yield");
+                            e.addErrorLine(loc, "Arising from use of `{}` in method body", "yield");
                         }
                     }
 
