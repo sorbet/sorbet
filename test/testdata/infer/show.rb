@@ -27,6 +27,9 @@ class Main
         T.assert_type!(foo, Array) # error: asserted type `T::Array[T.untyped]`
         T.assert_type!(foo, T.any(String, Integer)) # error: asserted type `T.any(String, Integer)`
         T.assert_type!(foo, T.all(A, B)) # error: asserted type `T.all(A, B)`
+        T.assert_type!(foo, T.any(TrueClass, NilClass, FalseClass)) # error: asserted type `T.nilable(T::Boolean)`
+        T.assert_type!(foo, T.any(TrueClass, TrueClass, FalseClass)) # error: asserted type `T::Boolean`
+        T.assert_type!(foo, T.any(TrueClass, TrueClass, FalseClass, FalseClass)) # error: asserted type `T::Boolean`
         T.assert_type!(foo, T.nilable(String)) # error: asserted type `T.nilable(String)`
         T.assert_type!(foo, T.any(NilClass, NilClass)) # error: asserted type `NilClass`
         T.assert_type!(foo, T.any(String, NilClass)) # error: asserted type `T.nilable(String)`
