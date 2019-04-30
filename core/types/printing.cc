@@ -153,11 +153,25 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
+/**
+ * Metadata collected while traversing OrType for pretty-printing.
+ */
 struct OrInfo {
+    /// True when the leaves of the OrType contains a NilClass.
     bool containsNil;
+
+    /// True when the leaves of the OrType contains a FalseClass.
     bool containsFalse;
+
+    /// True when the leaves of the OrType contains a TrueClass.
     bool containsTrue;
+
+    /// True when the leaves of the OrType contains a type that is none of the
+    /// obove cases is present (Integer, for example).
     bool containsOther;
+
+    /// True when there are more than one non-NilClass types present in the
+    /// leaves of the OrTYpe.
     bool containsMultiple;
 
     bool isBoolean() const {
