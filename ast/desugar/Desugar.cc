@@ -1270,13 +1270,11 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 unique_ptr<Expression> recv;
                 if (dctx.enclosingBlockArg.exists()) {
-                    // we always want to report an error if we're
-                    // using yield with a synthesized name in strict
-                    // mode
+                    // we always want to report an error if we're using yield with a synthesized name in
+                    // strict mode
                     auto blockArgName = dctx.enclosingBlockArg;
-                    auto synthesizedName = dctx.ctx.state.enterNameUTF8("<blk>");
-                    if (blockArgName == synthesizedName) {
-                        if (auto e = dctx.ctx.state.beginError(dctx.methodLoc,
+                    if (blockArgName == core::Names::blkArg()) {
+                        if (auto e = dctx.ctx.state.beginError(dctx.enclosingMethodLoc,
                                                                core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.data(dctx.ctx)->show(dctx.ctx), "yield");
