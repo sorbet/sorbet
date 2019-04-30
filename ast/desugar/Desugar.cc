@@ -24,8 +24,10 @@ struct DesugarContext final {
     core::Loc enclosingMethodLoc;
     core::NameRef enclosingMethodName;
 
-    DesugarContext(core::MutableContext ctx, u2 &uniqueCounter, core::NameRef enclosingBlockArg, core::Loc enclosingMethodLoc, core::NameRef enclosingMethodName)
-        : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg), enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
+    DesugarContext(core::MutableContext ctx, u2 &uniqueCounter, core::NameRef enclosingBlockArg,
+                   core::Loc enclosingMethodLoc, core::NameRef enclosingMethodName)
+        : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
 };
 
 core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
@@ -232,7 +234,8 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     ClassDef::RHS_store body;
     // Reset uniqueCounter within this scope (to keep numbers small)
     u2 uniqueCounter = 1;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc, dctx.enclosingMethodName);
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                         dctx.enclosingMethodName);
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
