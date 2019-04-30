@@ -2,7 +2,7 @@
 
 class A
     def self.each
-  # ^^^^^^^^^^^^^ error: Missing name for block parameter in method definition
+  # ^^^^^^^^^^^^^ error: does not mention a block parameter
   # ^^^^^^^^^^^^^ error: does not have a `sig`
         yield 1,2,3,4,5
         yield 6,7,8,9,0
