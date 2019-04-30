@@ -41,6 +41,34 @@ class <emptyTree><<C <U <root>>>> < ()
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
+
+    class <emptyTree>::<C <U KeywordInit>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+
+      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+        <emptyTree>
+      end
+
+      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
+      end
+
+      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
+        <emptyTree>
+      end
+
+      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
+      end
+
+      ::Sorbet.<U sig>() do ||
+        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U returns>(<emptyTree>::<C <U KeywordInit>>)
+      end
+
+      def self.<U new><<C <U <todo sym>>>>(<U foo>: = nil, <U bar>: = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U KeywordInit>>)
+      end
+    end
   end
 
   class <emptyTree>::<C <U RealStructDesugar>><<C <U <todo sym>>>> < (::<todo sym>)
@@ -182,9 +210,57 @@ class <emptyTree><<C <U <root>>>> < ()
       end
     end
 
+    class <emptyTree>::<C <U MyKeywordInitStruct>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
+      <U <self>>.<U include>(<emptyTree>::<C <U MyMixin>>)
+
+      <U <self>>.<U new>().<U x>()
+
+      <U <self>>.<U new>().<U foo>()
+
+      <U <self>>.<U new>(1, 2)
+
+      <U <self>>.<U new>({:"giberish" => 1})
+
+      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+
+      def <U x><<C <U <todo sym>>>>(&<U <blk>>)
+        <emptyTree>
+      end
+
+      def <U x=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
+        <U arg0>
+      end
+
+      ::Sorbet.<U sig>() do ||
+        <U <self>>.<U params>({:"x" => ::BasicObject}).<U returns>(<emptyTree>::<C <U MyKeywordInitStruct>>)
+      end
+
+      def self.<U new><<C <U <todo sym>>>>(<U x>: = nil, &<U <blk>>)
+        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U MyKeywordInitStruct>>)
+      end
+    end
+
+    <emptyTree>::<C <U MyKeywordInitStruct>>.<U new>(1, 2)
+
+    <emptyTree>::<C <U MyKeywordInitStruct>>.<U new>({:"giberish" => 1})
+
     <emptyTree>::<C <U MyStruct>>.<U new>().<U x>()
 
     <emptyTree>::<C <U MyStruct>>.<U new>().<U foo>()
+  end
+
+  class <emptyTree>::<C <U BadUsages>><<C <U <todo sym>>>> < (::<todo sym>)
+    <emptyTree>::<C <U A>> = <emptyTree>::<C <U Struct>>.<U new>()
+
+    <emptyTree>::<C <U B>> = <emptyTree>::<C <U Struct>>.<U new>({:"giberish" => 1})
+
+    <emptyTree>::<C <U C>> = <emptyTree>::<C <U Struct>>.<U new>({:"keyword_init" => true})
+
+    <U local> = true
+
+    <emptyTree>::<C <U D>> = <emptyTree>::<C <U Struct>>.<U new>({:"keyword_init" => <U local>})
+
+    <emptyTree>::<C <U E>> = <emptyTree>::<C <U Struct>>.<U new>(:"a", {:"keyword_init" => <U local>})
   end
 
   class <emptyTree>::<C <U Main>><<C <U <todo sym>>>> < (::<todo sym>)
@@ -196,6 +272,10 @@ class <emptyTree><<C <U <root>>>> < ()
         <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(2), <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStruct>>::<C <U A>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2), <emptyTree>::<C <U RealStruct>>::<C <U A>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>(), <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>({:"foo" => 1}), <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>({:"foo" => 2, :"bar" => 3}), <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>)
+        <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>(1, 2)
         <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStructDesugar>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStructDesugar>>::<C <U A>>)
       end
     end

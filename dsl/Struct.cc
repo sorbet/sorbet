@@ -24,6 +24,20 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     return ast::MK::UnresolvedConstant(node->loc, std::move(newScope), cnst->cnst);
 }
 
+static bool isKeywordInitKey(const core::GlobalState &gs, ast::Expression *node) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
+        return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
+    }
+    return false;
+}
+
+static bool isLiteralTrue(const core::GlobalState &gs, ast::Expression *node) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
+        return lit->isTrue(gs);
+    }
+    return false;
+}
+
 vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
 
@@ -77,8 +91,25 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::typeMember(),
                        ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
 
-    for (auto &arg : send->args) {
-        auto sym = ast::cast_tree<ast::Literal>(arg.get());
+    bool keywordInit = false;
+    if (auto hash = ast::cast_tree<ast::Hash>(send->args.back().get())) {
+        if (send->args.size() == 1) {
+            // leave bad usages like `Struct.new(keyword_init: true)` untouched so we error later
+            return empty;
+        }
+        if (hash->keys.size() != 1) {
+            return empty;
+        }
+        auto key = hash->keys.front().get();
+        auto value = hash->values.front().get();
+        if (isKeywordInitKey(ctx, key) && isLiteralTrue(ctx, value)) {
+            keywordInit = true;
+        }
+    }
+
+    const auto n = keywordInit ? send->args.size() - 1 : send->args.size();
+    for (int i = 0; i < n; i++) {
+        auto sym = ast::cast_tree<ast::Literal>(send->args[i].get());
         if (!sym || !sym->isSymbol(ctx)) {
             return empty;
         }
@@ -86,7 +117,11 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
 
         sigKeys.emplace_back(ast::MK::Symbol(loc, name));
         sigValues.emplace_back(ast::MK::Constant(loc, core::Symbols::BasicObject()));
-        newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, ast::MK::Local(loc, name), ast::MK::Nil(loc)));
+        auto argName = ast::MK::Local(loc, name);
+        if (keywordInit) {
+            argName = ast::MK::KeywordArg(loc, move(argName));
+        }
+        newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, move(argName), ast::MK::Nil(loc)));
 
         body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
         body.emplace_back(ast::MK::Method1(loc, loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),
