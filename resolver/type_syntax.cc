@@ -277,12 +277,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 default:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;
-                        e.setHeader("Unknown method `{}` found in a `{}` block", send->fun.show(ctx), "sig");
-                        e.addErrorLine(send->loc,
-                                       "Valid methods in this context include `{}`, `{}`, `{}`, `{}`, `{}`, and `{}`",
-                                       core::Names::params().show(ctx), core::Names::bind().show(ctx),
-                                       core::Names::returns().show(ctx), core::Names::void_().show(ctx),
-                                       core::Names::soft().show(ctx), core::Names::checked().show(ctx));
+                        e.setHeader("Malformed signature: `{}` is invalid in this context", send->fun.show(ctx));
+                        e.addErrorLine(send->loc, "Consult https://sorbet.org/docs/sigs for signature syntax");
                     }
             }
             auto recv = ast::cast_tree<ast::Send>(send->recv.get());
@@ -293,7 +289,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     if (!sig.seen.proc) {
                         if (auto e =
                                 ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Unknown method `{}` used in a `{}` block", send->fun.show(ctx), "sig");
+                            e.setHeader("Malformed signature: `{}` is invalid in this context", send->fun.show(ctx));
+                            e.addErrorLine(send->loc, "Consult https://sorbet.org/docs/sigs for signature syntax");
                         }
                     }
                 }
