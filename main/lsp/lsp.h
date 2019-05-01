@@ -81,7 +81,7 @@ class LSPLoop {
     /** Trees that have been indexed and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
-    std::vector<unsigned int> globalStateHashes;
+    std::vector<std::pair<std::shared_ptr<core::GlobalStateHash>, std::vector<core::NameRef>>> globalStateHashes;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
     /** Root of LSP client workspace */
@@ -163,7 +163,7 @@ class LSPLoop {
 
     LSPResult pushDiagnostics(TypecheckRun filesTypechecked);
 
-    std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
+    std::vector<std::shared_ptr<core::GlobalStateHash>> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
                            const std::unique_ptr<core::GlobalState> &currentGs);
 

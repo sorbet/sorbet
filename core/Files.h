@@ -90,8 +90,6 @@ public:
     int lineCount() const;
     StrictLevel minErrorLevel() const;
 
-    std::shared_ptr<GlobalStateHash> getDefinitionHash() const;
-    void setDefinitionHash(GlobalStateHash &hash) const;
     /** Given a 1-based line number, returns a string view of the line. */
     std::string_view getLine(int i);
 
@@ -100,7 +98,6 @@ private:
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
-    mutable std::shared_ptr<GlobalStateHash> globalStateHash;
 
 public:
     const StrictLevel originalSigil;

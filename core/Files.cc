@@ -80,8 +80,8 @@ StrictLevel File::fileSigil(string_view source) {
 }
 
 File::File(string &&path_, string &&source_, Type sourceType)
-    : sourceType(sourceType), path_(path_), source_(source_), globalStateHash(GlobalStateHash::HASH_STATE_NOT_COMPUTED),
-      originalSigil(fileSigil(this->source_)), strictLevel(originalSigil) {}
+    : sourceType(sourceType), path_(path_), source_(source_), originalSigil(fileSigil(this->source_)),
+      strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -89,32 +89,8 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType);
     ret->lineBreaks_ = lineBreaks_;
     ret->minErrorLevel_ = minErrorLevel_;
-    ret->globalStateHash = globalStateHash.load();
     ret->strictLevel = strictLevel;
     return ret;
-}
-
-shared_ptr<core::GlobalStateHash> File::getDefinitionHash() const {
-    return globalStateHash;
-}
-
-void File::setDefinitionHash(core::GlobalStateHash &hash) const {
-    auto current = globalStateHash.load();
-
-    shared_ptr<core::GlobalStateHash> desired;
-    while (true) {
-        if (current != nullptr) {
-            ENFORCE(current->hierarchyHash == hash.hierarchyHash);
-            return;
-        }
-
-        if (desired == nullptr) {
-            desired = make_shared<core::GlobalStateHash>(hash);
-        }
-        if (atomic_compare_exchange_weak(&globalStateHash, &current, desired)) {
-            return;
-        }
-    }
 }
 
 FileRef::FileRef(unsigned int id) : _id(id) {
