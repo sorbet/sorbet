@@ -146,8 +146,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
     for (auto &send : sends) {
         while (send != nullptr) {
-            // so we don't report redundant "method does not exist" errors
-            bool seen_error = false;
+            // so we don't report multiple "method does not exist" errors arising from the same expression
+            bool reportedInvalidMethod = false;
             switch (send->fun._id) {
                 case core::Names::proc()._id:
                     sig.seen.proc = true;
@@ -276,7 +276,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 default:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        seen_error = true;
+                        reportedInvalidMethod = true;
                         e.setHeader("Unknown method `{}` found in a `{}` block", send->fun.show(ctx), "sig");
                         e.addErrorLine(send->loc,
                                        "Valid methods in this context include `{}`, `{}`, `{}`, `{}`, `{}`, and `{}`",
@@ -287,12 +287,12 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
             }
             auto recv = ast::cast_tree<ast::Send>(send->recv.get());
 
-            if (!recv && !seen_error) {
+            // we only report this error if we haven't reported another unknown method error
+            if (!recv && !reportedInvalidMethod) {
                 if (!send->recv->isSelfReference()) {
                     if (!sig.seen.proc) {
                         if (auto e =
                                 ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            seen_error = true;
                             e.setHeader("Unknown method `{}` used in a `{}` block", send->fun.show(ctx), "sig");
                         }
                     }
