@@ -45,22 +45,21 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     sigs.push_back(move(sig));
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                               const TextDocumentPositionParams &params) {
-    ResponseMessage response("2.0", id, LSPMethod::TextDocumentSignatureHelp);
+LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                           const TextDocumentPositionParams &params) {
+    auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
     if (!opts.lspSignatureHelpEnabled) {
-        response.error =
+        response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Signature Help` LSP feature is experimental and disabled by default.");
-        sendResponse(response);
-        return gs;
+        return LSPResult::make(move(gs), move(response));
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.signatureHelp");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentSignatureHelp, false);
     if (auto run = get_if<TypecheckRun>(&result)) {
-        auto finalGs = move(run->gs);
+        gs = move(run->gs);
         auto &queryResponses = run->responses;
         int activeParameter = -1;
         vector<unique_ptr<SignatureInformation>> signatures;
@@ -72,12 +71,13 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
 
                 auto fref = uri2FileRef(params.textDocument->uri);
                 if (!fref.exists()) {
-                    return finalGs;
+                    // TODO(jvilk): This should probably return *something*; it's a request!
+                    return LSPResult{move(gs), {}};
                 }
-                auto src = fref.data(*finalGs).source();
-                auto loc = lspPos2Loc(fref, *params.position, *finalGs);
+                auto src = fref.data(*gs).source();
+                auto loc = lspPos2Loc(fref, *params.position, *gs);
                 if (!loc) {
-                    return finalGs;
+                    return LSPResult{move(gs), {}};
                 }
                 string_view call_str = src.substr(sendLocIndex, loc->endPos() - sendLocIndex);
                 int numberCommas = absl::c_count(call_str, ',');
@@ -87,25 +87,21 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
 
                 auto firstDispatchComponentMethod = sendResp->dispatchComponents.front().method;
 
-                addSignatureHelpItem(*finalGs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
+                addSignatureHelpItem(*gs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
             }
         }
         auto result = make_unique<SignatureHelp>(move(signatures));
         if (activeParameter != -1) {
             result->activeParameter = activeParameter;
         }
-        response.result = move(result);
-        sendResponse(response);
-        return finalGs;
+        response->result = move(result);
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        response.error = move(error->first);
-        sendResponse(response);
-        return move(error->second);
+        response->error = move(error->first);
     } else {
         // Should never happen, but satisfy the compiler.
         ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
-        return nullptr;
     }
+    return LSPResult::make(move(gs), move(response));
 }
 } // namespace sorbet::realmain::lsp

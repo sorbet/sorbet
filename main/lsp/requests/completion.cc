@@ -186,16 +186,14 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
     }
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
-                                                                    const MessageId &id,
-                                                                    const CompletionParams &params) {
-    ResponseMessage response("2.0", id, LSPMethod::TextDocumentCompletion);
+LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                                const CompletionParams &params) {
+    auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     if (!opts.lspAutocompleteEnabled) {
-        response.error =
+        response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");
-        sendResponse(response);
-        return gs;
+        return LSPResult::make(move(gs), move(response));
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
@@ -204,24 +202,24 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
                                      LSPMethod::TextDocumentCompletion, false);
 
     if (auto run = get_if<TypecheckRun>(&result)) {
-        auto finalGs = move(run->gs);
+        gs = move(run->gs);
         auto &queryResponses = run->responses;
         vector<unique_ptr<CompletionItem>> items;
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
 
             if (auto sendResp = resp->isSend()) {
-                auto pattern = sendResp->name.data(*finalGs)->shortName(*finalGs);
+                auto pattern = sendResp->name.data(*gs)->shortName(*gs);
                 auto receiverType = sendResp->receiver.type;
                 logger->debug("Looking for method similar to {}", pattern);
                 UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                    findSimilarMethodsIn(*finalGs, receiverType, pattern);
+                    findSimilarMethodsIn(*gs, receiverType, pattern);
                 vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
                 methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
                                      make_move_iterator(methods.end()));
                 fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                    auto leftShortName = leftPair.first.data(*finalGs)->shortName(*finalGs);
-                    auto rightShortName = rightPair.first.data(*finalGs)->shortName(*finalGs);
+                    auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
+                    auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
                     if (leftShortName != rightShortName) {
                         return leftShortName < rightShortName;
                     }
@@ -230,29 +228,26 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
                 for (auto &entry : methodsSorted) {
                     if (entry.second[0].exists()) {
                         fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        items.push_back(getCompletionItem(*finalGs, entry.second[0], sendResp->receiver.type,
-                                                          sendResp->constraint));
+                        items.push_back(
+                            getCompletionItem(*gs, entry.second[0], sendResp->receiver.type, sendResp->constraint));
                     }
                 }
             } else if (auto identResp = resp->isIdent()) {
-                findSimilarConstantOrIdent(*finalGs, identResp->retType.type, items);
+                findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
             } else if (auto constantResp = resp->isConstant()) {
-                findSimilarConstantOrIdent(*finalGs, constantResp->retType.type, items);
+                findSimilarConstantOrIdent(*gs, constantResp->retType.type, items);
             }
         }
-        response.result = make_unique<CompletionList>(false, move(items));
-        sendResponse(response);
-        return finalGs;
+        response->result = make_unique<CompletionList>(false, move(items));
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
-        response.error = move(error->first);
-        sendResponse(response);
-        return move(error->second);
+        response->error = move(error->first);
+        gs = move(error->second);
     } else {
         // Should never happen, but satisfy the compiler.
         ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
-        return nullptr;
     }
+    return LSPResult::make(move(gs), move(response));
 }
 
 } // namespace sorbet::realmain::lsp

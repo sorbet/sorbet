@@ -104,8 +104,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryRe
     }
 }
 
-unique_ptr<core::GlobalState> LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
-                                                                  UnorderedMap<string, string> &updates) {
+LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates) {
     if (updates.size() > 0) {
         vector<shared_ptr<core::File>> files;
         files.reserve(updates.size());
@@ -115,40 +114,40 @@ unique_ptr<core::GlobalState> LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<cor
         }
         return pushDiagnostics(tryFastPath(move(gs), files));
     } else {
-        return gs;
+        return LSPResult{move(gs), {}};
     }
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                                                 const DidChangeTextDocumentParams &changeParams) {
+LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                             const DidChangeTextDocumentParams &changeParams) {
     UnorderedMap<string, string> updates;
     preprocessSorbetWorkspaceEdit(changeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                                                 const DidOpenTextDocumentParams &openParams) {
+LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                             const DidOpenTextDocumentParams &openParams) {
     UnorderedMap<string, string> updates;
     preprocessSorbetWorkspaceEdit(openParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                                                 const DidCloseTextDocumentParams &closeParams) {
+LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                             const DidCloseTextDocumentParams &closeParams) {
     UnorderedMap<string, string> updates;
     preprocessSorbetWorkspaceEdit(closeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                                                 const WatchmanQueryResponse &queryResponse) {
+LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                             const WatchmanQueryResponse &queryResponse) {
     UnorderedMap<string, string> updates;
     preprocessSorbetWorkspaceEdit(queryResponse, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
-                                                                  vector<unique_ptr<SorbetWorkspaceEdit>> &edits) {
+LSPResult LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
+                                              vector<unique_ptr<SorbetWorkspaceEdit>> &edits) {
     // path => new file contents
     UnorderedMap<string, string> updates;
     for (auto &edit : edits) {

@@ -26,14 +26,16 @@ LSPLoop::ShowOperation::ShowOperation(LSPLoop &loop, string_view operationName, 
     if (loop.enableOperationNotifications) {
         auto params = make_unique<SorbetShowOperationParams>(this->operationName, this->description,
                                                              SorbetOperationStatus::Start);
-        loop.sendNotification(NotificationMessage("2.0", LSPMethod::SorbetShowOperation, move(params)));
+        loop.sendMessage(
+            LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetShowOperation, move(params))));
     }
 }
 
 LSPLoop::ShowOperation::~ShowOperation() {
     if (loop.enableOperationNotifications) {
         auto params = make_unique<SorbetShowOperationParams>(operationName, description, SorbetOperationStatus::End);
-        loop.sendNotification(NotificationMessage("2.0", LSPMethod::SorbetShowOperation, move(params)));
+        loop.sendMessage(
+            LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetShowOperation, move(params))));
     }
 }
 

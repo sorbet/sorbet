@@ -39,6 +39,16 @@ enum class LSPErrorCodes {
     RequestCancelled = -32800,
 };
 
+/**
+ * The result from processing one or more messages from the client.
+ */
+struct LSPResult {
+    std::unique_ptr<core::GlobalState> gs;
+    std::vector<std::unique_ptr<LSPMessage>> responses;
+
+    static LSPResult make(std::unique_ptr<core::GlobalState> gs, std::unique_ptr<ResponseMessage> response);
+};
+
 class LSPLoop {
     friend class LSPWrapper;
 
@@ -68,7 +78,6 @@ class LSPLoop {
         ~ShowOperation();
     };
 
-    UnorderedMap<std::string, std::function<void(const ResponseMessage &)>> awaitingResponse;
     /** Trees that have been indexed and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
@@ -133,18 +142,11 @@ class LSPLoop {
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
 
-    /* Send the following document to client */
-    void sendRaw(std::string_view json);
-
-    void sendNotification(const NotificationMessage &notif);
-    void sendResponse(const ResponseMessage &response);
+    /* Send the given message to client */
+    void sendMessage(const LSPMessage &msg);
 
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc);
-
-    /** Returns true if there is no need to continue processing this document as it is a reply to
-     * already registered request*/
-    bool handleReplies(const LSPMessage &d);
 
     core::FileRef updateFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.
@@ -163,7 +165,7 @@ class LSPLoop {
     TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
 
-    std::unique_ptr<core::GlobalState> pushDiagnostics(TypecheckRun filesTypechecked);
+    LSPResult pushDiagnostics(TypecheckRun filesTypechecked);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
@@ -185,31 +187,26 @@ class LSPLoop {
     setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
                        const LSPMethod forMethod, bool errorIfFileIsUntyped);
     TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol);
-    std::unique_ptr<core::GlobalState> handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs,
-                                                               const MessageId &id,
-                                                               const TextDocumentPositionParams &params);
-    std::unique_ptr<core::GlobalState> handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs,
-                                                                        const MessageId &id,
-                                                                        const DocumentSymbolParams &d);
-    std::unique_ptr<core::GlobalState> handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs,
-                                                              const MessageId &id, const WorkspaceSymbolParams &params);
-    std::unique_ptr<core::GlobalState> handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs,
-                                                                    const MessageId &id, const ReferenceParams &params);
-    std::unique_ptr<core::GlobalState> handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs,
-                                                                    const MessageId &id,
-                                                                    const TextDocumentPositionParams &params);
-    std::unique_ptr<core::GlobalState> handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs,
-                                                                    const MessageId &id,
-                                                                    const CompletionParams &params);
+    LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                      const TextDocumentPositionParams &params);
+    LSPResult handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                               const DocumentSymbolParams &d);
+    LSPResult handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                     const WorkspaceSymbolParams &params);
+    LSPResult handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                           const ReferenceParams &params);
+    LSPResult handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                           const TextDocumentPositionParams &params);
+    LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                           const CompletionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
                                                       const std::shared_ptr<core::TypeConstraint> &constraint);
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
                                     std::vector<std::unique_ptr<CompletionItem>> &items);
     void sendShowMessageNotification(MessageType messageType, std::string_view message);
-    std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
-                                                               const MessageId &id,
-                                                               const TextDocumentPositionParams &params);
+    LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                      const TextDocumentPositionParams &params);
     /**
      * Merges all consecutive file updates into a single update.
      */
@@ -227,8 +224,7 @@ class LSPLoop {
                              const CancelParams &cancellationRequest);
     static std::deque<std::unique_ptr<LSPMessage>>::iterator
     findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
-    std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs,
-                                                              const LSPMessage &msg);
+    LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
 
     void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
                                        UnorderedMap<std::string, std::string> &updates);
@@ -238,19 +234,18 @@ class LSPLoop {
                                        UnorderedMap<std::string, std::string> &updates);
     void preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
                                        UnorderedMap<std::string, std::string> &updates);
-    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                                                 const DidChangeTextDocumentParams &changeParams);
-    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                                                 const DidOpenTextDocumentParams &openParams);
-    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                                                 const DidCloseTextDocumentParams &closeParams);
-    std::unique_ptr<core::GlobalState> handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                                                 const WatchmanQueryResponse &queryResponse);
-    std::unique_ptr<core::GlobalState>
-    handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
-                               std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits);
-    std::unique_ptr<core::GlobalState> commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
-                                                                  UnorderedMap<std::string, std::string> &updates);
+    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                        const DidChangeTextDocumentParams &changeParams);
+    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                        const DidOpenTextDocumentParams &openParams);
+    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                        const DidCloseTextDocumentParams &closeParams);
+    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                        const WatchmanQueryResponse &queryResponse);
+    LSPResult handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
+                                         std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits);
+    LSPResult commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
+                                         UnorderedMap<std::string, std::string> &updates);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
@@ -262,13 +257,12 @@ public:
             const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &output,
             bool skipConfigatron = false, bool disableFastPath = false);
     std::unique_ptr<core::GlobalState> runLSP();
-    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
-    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
+    LSPResult processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
+    LSPResult processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
     /**
      * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.
      */
-    std::unique_ptr<core::GlobalState> processRequests(std::unique_ptr<core::GlobalState> gs,
-                                                       std::vector<std::unique_ptr<LSPMessage>> messages);
+    LSPResult processRequests(std::unique_ptr<core::GlobalState> gs, std::vector<std::unique_ptr<LSPMessage>> messages);
 };
 
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
