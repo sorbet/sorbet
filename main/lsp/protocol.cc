@@ -18,7 +18,6 @@ namespace sorbet::realmain::lsp {
  * Throws an exception on read error or EOF.
  */
 unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spd::logger> &logger, int inputFd, string &buffer) {
-    Timer timeit(logger, "getNewRequest");
     int length = -1;
     string allRead;
     {
@@ -130,12 +129,15 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             NotifyOnDestruction notify(mtx, guardedState.terminate);
             string buffer;
             try {
+                auto timeit = make_unique<Timer>(logger, "getNewRequest");
                 while (true) {
                     auto msg = getNewRequest(logger, inputFd, buffer);
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState.
                         if (msg) {
                             enqueueRequest(logger, guardedState, move(msg), true);
+                            // Reset span now that we've found a request.
+                            timeit = make_unique<Timer>(logger, "getNewRequest");
                         }
                         // Check if it's time to exit.
                         if (guardedState.terminate) {
