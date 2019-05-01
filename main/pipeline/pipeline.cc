@@ -862,7 +862,26 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
     }
 }
 
-core::GlobalStateHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+class AllSendsCollector {
+public:
+    core::UsageHash acc;
+    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
+        acc.usages.emplace_back(ctx.state, original->fun.data(ctx));
+        return original;
+    }
+};
+
+core::UsageHash getAllSends(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
+    AllSendsCollector collector;
+    tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), collector, move(tree));
+    fast_sort(collector.acc.usages);
+    collector.acc.usages.resize(std::distance(collector.acc.usages.begin(),
+                                              std::unique(collector.acc.usages.begin(), collector.acc.usages.end())));
+    return move(collector.acc);
+};
+
+pair<shared_ptr<core::GlobalStateHash>, core::UsageHash> computeFileHash(shared_ptr<core::File> forWhat,
+                                                                         spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -883,12 +902,13 @@ core::GlobalStateHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::lo
         if (e->what == core::errors::Parser::ParserError) {
             core::GlobalStateHash invalid;
             invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-            return invalid;
+            return {make_shared<core::GlobalStateHash>(move(invalid)), {}};
         }
     }
+    auto allSends = getAllSends(*lgs, single[0].tree);
     pipeline::resolve(*lgs, move(single), emptyOpts, true);
 
-    return lgs->hash();
+    return {make_shared<core::GlobalStateHash>(lgs->hash()), move(allSends)};
 }
 
 } // namespace sorbet::realmain::pipeline

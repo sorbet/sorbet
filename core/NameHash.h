@@ -44,6 +44,10 @@ struct GlobalStateHash {
     UnorderedMap<NameHash, u4> methodHashes;
 };
 
+struct UsageHash {
+    std::vector<core::NameHash> usages;
+};
+
 }; // namespace sorbet::core
 
 #endif // RUBY_TYPER_NAME_HASH_H
