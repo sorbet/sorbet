@@ -14,14 +14,18 @@ public:
     }
     NameHash(const NameHash &nm) = default;
     NameHash() : _hashValue(0){};
-    bool operator==(const NameHash &rhs) const {
+    inline bool operator==(const NameHash &rhs) const {
         ENFORCE(isDefined());
         ENFORCE(rhs.isDefined());
         return _hashValue == rhs._hashValue;
     }
 
-    bool operator!=(const NameHash &rhs) const {
+    inline bool operator!=(const NameHash &rhs) const {
         return !(rhs == *this);
+    }
+
+    inline bool operator<(const NameHash &rhs) const {
+        return this->_hashValue < rhs._hashValue;
     }
 
     u4 _hashValue;
