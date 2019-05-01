@@ -24,7 +24,7 @@ public:
         return !(rhs == *this);
     }
 
-    const u4 _hashValue;
+    u4 _hashValue;
 };
 
 template <typename H> H AbslHashValue(H h, const NameHash &m) {
