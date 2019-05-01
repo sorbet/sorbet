@@ -287,10 +287,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
             if (!recv && !reportedInvalidMethod) {
                 if (!send->recv->isSelfReference()) {
                     if (!sig.seen.proc) {
-                        if (auto e =
-                                ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed signature: `{}` is invalid in this context", send->fun.show(ctx));
-                            e.addErrorLine(send->loc, "Consult https://sorbet.org/docs/sigs for signature syntax");
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed signature: `{}` being invoked on an invalid receiver",
+                                        send->fun.show(ctx));
                         }
                     }
                 }
