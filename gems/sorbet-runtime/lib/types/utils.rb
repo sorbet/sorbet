@@ -22,7 +22,7 @@ module T::Utils
       T::Types::FixedArray.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif val.is_a?(::Hash)
       T::Types::FixedHash.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
-    elsif val.is_a?(T::Private::Methods::SigBuilder)
+    elsif val.is_a?(T::Private::Methods::DeclBuilder)
       T::Private::Methods.finalize_proc(val.decl)
     else
       raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \

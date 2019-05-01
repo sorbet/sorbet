@@ -2,7 +2,7 @@
 class T1; end
 class T2; end
 
-class T::Private::Methods::SigBuilder
+class T::Private::Methods::DeclBuilder
   def unsupported
   end
 end

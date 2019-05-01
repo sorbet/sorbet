@@ -118,7 +118,7 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
 
     "bb::<Class:Parent>#<static-init>_3" -> "bb::<Class:Parent>#<static-init>_1" [style="bold"];
     "bb::<Class:Parent>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(Parent), <U <selfRestore>>$5: T.class_of(Parent))\louterLoops: 1\l<U <self>>: T::Private::Methods::SigBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder = <U <self>>: T::Private::Methods::SigBuilder.<U returns>(<U <statTemp>>$10: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:Parent>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: T.class_of(Parent), <U <selfRestore>>$5: T.class_of(Parent))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$10: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:Parent>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_5" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
@@ -171,7 +171,7 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
 
     "bb::<Class:Generic>#<static-init>_3" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
     "bb::<Class:Generic>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(Generic), <U <selfRestore>>$5: T.class_of(Generic))\louterLoops: 1\l<U <self>>: T::Private::Methods::SigBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$13: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$12: T.untyped = <U <statTemp>>$13: T.class_of(T).<U self_type>()\l<U <statTemp>>$10: <Type: Generic[T.untyped]> = <U <statTemp>>$11: T.class_of(Generic).<U []>(<U <statTemp>>$12: T.untyped)\l<U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder = <U <self>>: T::Private::Methods::SigBuilder.<U returns>(<U <statTemp>>$10: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$14: T.noreturn = blockreturn<::<Class:Generic>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: T.class_of(Generic), <U <selfRestore>>$5: T.class_of(Generic))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(Generic) = alias <C <U Generic>>\l<U <statTemp>>$13: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$12: T.untyped = <U <statTemp>>$13: T.class_of(T).<U self_type>()\l<U <statTemp>>$10: <Type: Generic[T.untyped]> = <U <statTemp>>$11: T.class_of(Generic).<U []>(<U <statTemp>>$12: T.untyped)\l<U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$10: <Type: Generic[T.untyped]>)\l<U <blockReturnTemp>>$14: T.noreturn = blockreturn<::<Class:Generic>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_5" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
@@ -224,7 +224,7 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
 
     "bb::<Class:Array>#<static-init>_3" -> "bb::<Class:Array>#<static-init>_1" [style="bold"];
     "bb::<Class:Array>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(Array), <U <selfRestore>>$5: T.class_of(Array))\louterLoops: 1\l<U <self>>: T::Private::Methods::SigBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder = <U <self>>: T::Private::Methods::SigBuilder.<U returns>(<U <statTemp>>$10: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:Array>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: T.class_of(Array), <U <selfRestore>>$5: T.class_of(Array))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$10: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:Array>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_5" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
@@ -277,7 +277,7 @@ subgraph "cluster_::<Class:B>#<static-init>" {
 
     "bb::<Class:B>#<static-init>_3" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
     "bb::<Class:B>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(B), <U <selfRestore>>$5: T.class_of(B))\louterLoops: 1\l<U <self>>: T::Private::Methods::SigBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder = <U <self>>: T::Private::Methods::SigBuilder.<U returns>(<U <statTemp>>$10: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:B>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::SigBuilder\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: T.class_of(B), <U <selfRestore>>$5: T.class_of(B))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$10: T.untyped = <U <statTemp>>$11: T.class_of(T).<U self_type>()\l<U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$10: T.untyped)\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:B>#<static-init>#<block>> <U <blockReturnTemp>>$8: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_5" -> "bb::<Class:B>#<static-init>_2" [style="bold"];

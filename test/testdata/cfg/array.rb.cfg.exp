@@ -82,7 +82,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
 
     "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$6: T.class_of(TestArray))\louterLoops: 1\l<U <self>>: T::Private::Methods::SigBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(Integer) = alias <C <U Integer>>\l<U <blockReturnTemp>>$9: T::Private::Methods::SigBuilder = <U <self>>: T::Private::Methods::SigBuilder.<U returns>(<U <statTemp>>$11: T.class_of(Integer))\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <U <blockReturnTemp>>$9: T::Private::Methods::SigBuilder\l<unconditional>\l"
+        label = "block[id=5](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$6: T.class_of(TestArray))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(Integer) = alias <C <U Integer>>\l<U <blockReturnTemp>>$9: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$11: T.class_of(Integer))\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <U <blockReturnTemp>>$9: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
@@ -99,7 +99,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_9" [
-        label = "block[id=9](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$16: T.class_of(TestArray))\louterLoops: 1\l<U <self>>: T::Private::Methods::SigBuilder = loadSelf\l<U <statTemp>>$21: T.class_of(String) = alias <C <U String>>\l<U <blockReturnTemp>>$19: T::Private::Methods::SigBuilder = <U <self>>: T::Private::Methods::SigBuilder.<U returns>(<U <statTemp>>$21: T.class_of(String))\l<U <blockReturnTemp>>$22: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <U <blockReturnTemp>>$19: T::Private::Methods::SigBuilder\l<unconditional>\l"
+        label = "block[id=9](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$16: T.class_of(TestArray))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$21: T.class_of(String) = alias <C <U String>>\l<U <blockReturnTemp>>$19: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$21: T.class_of(String))\l<U <blockReturnTemp>>$22: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <U <blockReturnTemp>>$19: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_9" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
