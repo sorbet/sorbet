@@ -335,9 +335,11 @@ int realmain(int argc, char *argv[]) {
                 tree = move(pf.tree);
 
                 if (opts.print.Autogen) {
+                    Timer timeit(logger, "autogenToString");
                     fmt::print("{}", pf.toString(ctx));
                 }
                 if (opts.print.AutogenMsgPack) {
+                    Timer timeit(logger, "autogenToMsgpack");
                     fmt::print("{}", pf.toMsgpack(ctx, opts.autogenVersion));
                 }
             }
