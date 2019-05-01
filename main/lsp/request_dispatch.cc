@@ -5,40 +5,50 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
+LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
     unique_ptr<LSPMessage> msg = LSPMessage::fromClient(json);
     return LSPLoop::processRequest(move(gs), *msg);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     Timer timeit(logger, "process_request");
     return processRequestInternal(move(gs), msg);
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequests(unique_ptr<core::GlobalState> gs,
-                                                       vector<unique_ptr<LSPMessage>> messages) {
+LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
     LSPLoop::QueueState state{{}, false, false, 0};
     for (auto &message : messages) {
         enqueueRequest(logger, state, move(message));
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 
+    LSPResult rv{move(gs), {}};
     for (auto &message : state.pendingRequests) {
-        gs = processRequest(move(gs), *message);
+        auto rslt = processRequest(move(rv.gs), *message);
+        rv.gs = move(rslt.gs);
+        rv.responses.insert(rv.responses.end(), make_move_iterator(rslt.responses.begin()),
+                            make_move_iterator(rslt.responses.end()));
     }
-    return gs;
+    return rv;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
-    if (handleReplies(msg)) {
-        return gs;
-    }
-
+LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     const LSPMethod method = msg.method();
 
     if (!ensureInitialized(method, msg, gs)) {
-        return gs;
+        logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
+        vector<unique_ptr<LSPMessage>> responses;
+        if (!msg.isNotification()) {
+            auto id = msg.id().value_or(0);
+            auto response = make_unique<ResponseMessage>("2.0", id, msg.method());
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::ServerNotInitialized,
+                                                         "IDE did not initialize Sorbet correctly. No requests should "
+                                                         "be made before Initialize & Initialized have been completed");
+            responses.push_back(make_unique<LSPMessage>(move(response)));
+        }
+        return LSPResult{move(gs), move(responses)};
     }
+
     if (msg.isNotification()) {
         Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         auto &params = msg.asNotification().params;
@@ -76,7 +86,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 for (auto &edit : edits) {
                     if (edit->type != SorbetWorkspaceEditType::FileSystem) {
                         logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
-                        return gs;
+                        return LSPResult{move(gs), {}};
                     }
                 }
             }
@@ -85,27 +95,30 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             // initialize ourselves
-            unique_ptr<core::GlobalState> newGs;
+            LSPResult result;
             {
                 Timer timeit(logger, "initial_index");
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
-                newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
-                ENFORCE(newGs);
+                result = pushDiagnostics(runSlowPath(move(changedFiles)));
+                ENFORCE(result.gs);
                 if (!disableFastPath) {
-                    this->globalStateHashes = computeStateHashes(newGs->getFiles());
+                    this->globalStateHashes = computeStateHashes(result.gs->getFiles());
                 }
                 initialized = true;
             }
 
             // process deferred watchman updates
-            newGs = commitSorbetWorkspaceEdits(move(newGs), deferredFileEdits);
+            auto result2 = commitSorbetWorkspaceEdits(move(result.gs), deferredFileEdits);
             deferredFileEdits.clear();
-            return newGs;
+            result.gs = move(result2.gs);
+            result.responses.insert(result.responses.end(), make_move_iterator(result2.responses.begin()),
+                                    make_move_iterator(result2.responses.end()));
+            return result;
         }
         if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
-            return gs;
+            return LSPResult{move(gs), {}};
         }
         if (method == LSPMethod::SorbetError) {
             auto &errorInfo = get<unique_ptr<SorbetErrorParams>>(params);
@@ -115,7 +128,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             } else {
                 logger->error(errorInfo->message);
             }
-            return gs;
+            return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {
         Timer timeit(logger, "request", {{"method", convertLSPMethodToString(method)}});
@@ -123,12 +136,11 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
         // asRequest() should guarantee the presence of an ID.
         ENFORCE(msg.id());
         auto id = *msg.id();
-        ResponseMessage response("2.0", id, method);
+        auto response = make_unique<ResponseMessage>("2.0", id, method);
         if (msg.canceled) {
             prodCounterInc("lsp.messages.canceled");
-            response.error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
-            sendResponse(response);
-            return gs;
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
+            return LSPResult::make(move(gs), move(response));
         }
 
         auto &rawParams = requestMessage.params;
@@ -175,8 +187,8 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
                 serverCap->completionProvider = move(completionProvider);
             }
 
-            response.result = make_unique<InitializeResult>(move(serverCap));
-            sendResponse(response);
+            response->result = make_unique<InitializeResult>(move(serverCap));
+            return LSPResult::make(move(gs), move(response));
         } else if (method == LSPMethod::TextDocumentDocumentSymbol) {
             auto &params = get<unique_ptr<DocumentSymbolParams>>(rawParams);
             return handleTextDocumentDocumentSymbol(move(gs), id, *params);
@@ -200,25 +212,22 @@ unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::G
             return handleTextDocumentReferences(move(gs), id, *params);
         } else if (method == LSPMethod::Shutdown) {
             prodCategoryCounterInc("lsp.messages.processed", "shutdown");
-            response.result = JSONNullObject();
-            sendResponse(response);
-            return gs;
+            response->result = JSONNullObject();
         } else if (method == LSPMethod::SorbetError) {
             auto &params = get<unique_ptr<SorbetErrorParams>>(rawParams);
-            response.error = make_unique<ResponseError>(params->code, params->message);
-            sendResponse(response);
+            response->error = make_unique<ResponseError>(params->code, params->message);
         } else {
             // Method parsed, but isn't a request. Use SorbetError for `requestMethod`, as `method` isn't valid for a
             // response.
-            response.requestMethod = LSPMethod::SorbetError;
-            response.error = make_unique<ResponseError>(
+            response->requestMethod = LSPMethod::SorbetError;
+            response->error = make_unique<ResponseError>(
                 (int)LSPErrorCodes::MethodNotFound,
                 fmt::format("Notification method sent as request: {}", convertLSPMethodToString(method)));
-            sendResponse(response);
         }
+        return LSPResult::make(move(gs), move(response));
     } else {
         logger->debug("Unable to process request {}; LSP message is not a request.", convertLSPMethodToString(method));
     }
-    return gs;
+    return LSPResult{move(gs), {}};
 }
 } // namespace sorbet::realmain::lsp

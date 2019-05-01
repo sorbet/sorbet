@@ -88,24 +88,15 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
         forMethod == LSPMethod::SorbetError) {
         return true;
     }
-    logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
-    if (!msg.isNotification()) {
-        auto id = msg.id().value_or(0);
-        ResponseMessage response("2.0", id, msg.method());
-        response.error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::ServerNotInitialized,
-            "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
-            "have been completed");
-        sendResponse(response);
-    }
     return false;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
+LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
+    vector<unique_ptr<LSPMessage>> responses;
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {
@@ -187,11 +178,12 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
                 }
             }
 
-            sendNotification(NotificationMessage("2.0", LSPMethod::TextDocumentPublishDiagnostics,
-                                                 make_unique<PublishDiagnosticsParams>(uri, move(diagnostics))));
+            responses.push_back(make_unique<LSPMessage>(
+                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics,
+                                                 make_unique<PublishDiagnosticsParams>(uri, move(diagnostics)))));
         }
     }
-    return move(run.gs);
+    return LSPResult{move(run.gs), move(responses)};
 }
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
@@ -214,6 +206,12 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     if (!opts.webTraceFile.empty()) {
         web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
     }
+}
+
+LSPResult LSPResult::make(unique_ptr<core::GlobalState> gs, unique_ptr<ResponseMessage> response) {
+    LSPResult rv{move(gs), {}};
+    rv.responses.push_back(make_unique<LSPMessage>(move(response)));
+    return rv;
 }
 
 } // namespace sorbet::realmain::lsp

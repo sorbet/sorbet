@@ -64,30 +64,27 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     return result;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs,
-                                                                        const MessageId &id,
-                                                                        const DocumentSymbolParams &params) {
-    ResponseMessage response("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
+LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                                    const DocumentSymbolParams &params) {
+    auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!opts.lspDocumentSymbolEnabled) {
-        response.error =
+        response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Document Symbol` LSP feature is experimental and disabled by default.");
-        sendResponse(response);
-        return gs;
+        return LSPResult::make(move(gs), move(response));
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentSymbol");
     vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params.textDocument->uri;
     auto fref = uri2FileRef(uri);
-    auto finalGs = move(gs);
-    for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
-        core::SymbolRef ref(finalGs.get(), idx);
-        if (!hideSymbol(*finalGs, ref) && (ref.data(*finalGs)->owner.data(*finalGs)->loc().file() != fref ||
-                                           ref.data(*finalGs)->owner == core::Symbols::root())) {
-            for (auto definitionLocation : ref.data(*finalGs)->locs()) {
+    for (u4 idx = 1; idx < gs->symbolsUsed(); idx++) {
+        core::SymbolRef ref(gs.get(), idx);
+        if (!hideSymbol(*gs, ref) &&
+            (ref.data(*gs)->owner.data(*gs)->loc().file() != fref || ref.data(*gs)->owner == core::Symbols::root())) {
+            for (auto definitionLocation : ref.data(*gs)->locs()) {
                 if (definitionLocation.file() == fref) {
-                    auto data = symbolRef2DocumentSymbol(*finalGs, ref, fref);
+                    auto data = symbolRef2DocumentSymbol(*gs, ref, fref);
                     if (data) {
                         result.push_back(move(data));
                         break;
@@ -96,9 +93,8 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_p
             }
         }
     }
-    response.result = move(result);
-    sendResponse(response);
-    return finalGs;
+    response->result = move(result);
+    return LSPResult::make(move(gs), move(response));
 }
 
 } // namespace sorbet::realmain::lsp

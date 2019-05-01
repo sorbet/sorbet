@@ -175,7 +175,12 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.messages.received");
-        gs = processRequest(move(gs), *msg);
+        auto result = processRequest(move(gs), *msg);
+        gs = move(result.gs);
+        for (auto &msg : result.responses) {
+            sendMessage(*msg);
+        }
+
         auto currentTime = chrono::steady_clock::now();
         if (shouldSendCountersToStatsd(currentTime)) {
             {
@@ -407,8 +412,8 @@ LSPLoop::findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPM
 }
 
 void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) {
-    sendNotification(NotificationMessage("2.0", LSPMethod::WindowShowMessage,
-                                         make_unique<ShowMessageParams>(messageType, string(message))));
+    sendMessage(LSPMessage(make_unique<NotificationMessage>(
+        "2.0", LSPMethod::WindowShowMessage, make_unique<ShowMessageParams>(messageType, string(message)))));
 }
 
 // Is this a notification the server should be sending?
@@ -424,16 +429,6 @@ bool isServerNotification(const LSPMethod method) {
     }
 }
 
-void LSPLoop::sendNotification(const NotificationMessage &msg) {
-    ENFORCE(isServerNotification(msg.method));
-    sendRaw(msg.toJSON());
-}
-
-void LSPLoop::sendResponse(const ResponseMessage &resp) {
-    ENFORCE(resp.result || resp.error, "A valid ResponseMessage must have a result or an error.");
-    sendRaw(resp.toJSON());
-}
-
 unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) {
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
@@ -442,24 +437,14 @@ unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &po
     return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 
-bool LSPLoop::handleReplies(const LSPMessage &msg) {
+void LSPLoop::sendMessage(const LSPMessage &msg) {
     if (msg.isResponse()) {
-        auto &resp = msg.asResponse();
-        auto id = resp.id;
-        if (auto stringId = get_if<string>(&id)) {
-            auto fnd = awaitingResponse.find(*stringId);
-            if (fnd != awaitingResponse.end()) {
-                auto func = move(fnd->second);
-                awaitingResponse.erase(fnd);
-                func(resp);
-            }
-        }
-        return true;
+        ENFORCE(msg.asResponse().result || msg.asResponse().error,
+                "A valid ResponseMessage must have a result or an error.");
+    } else if (msg.isNotification()) {
+        ENFORCE(isServerNotification(msg.method()));
     }
-    return false;
-}
-
-void LSPLoop::sendRaw(string_view json) {
+    auto json = msg.toJSON();
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
     logger->debug("Write: {}\n", json);
     outputStream << outResult << flush;

@@ -7,66 +7,11 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
-regex contentLengthRegex("^Content-Length: ([0-9]+)$");
-
 const std::string LSPWrapper::EMPTY_STRING = "";
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::drainLSPResponses() {
-    vector<unique_ptr<LSPMessage>> rv;
-    string responses = lspOstream.str();
-    // Reset error flags and change contents of stream to the empty string.
-    lspOstream.clear();
-    lspOstream.str(string());
-
-    if (responses.length() == 0) {
-        // No response.
-        return rv;
-    }
-
-    // Parse the results. Should be of the form:
-    // Content-Length: length\r\n
-    // \r\n
-    // [length characters]
-    // ...in sequence.
-
-    int pos = 0;
-    int len = responses.length();
-    while (pos < len) {
-        int newlinePos = responses.find("\r\n", pos);
-        if (newlinePos == string::npos) {
-            Exception::raise("Couldn't find Content-Length in response.");
-        }
-        string contentLengthLine = responses.substr(pos, newlinePos - pos);
-        smatch matches;
-        if (!regex_match(contentLengthLine, matches, contentLengthRegex)) {
-            Exception::raise("Invalid Content-Length line:\n{}", contentLengthLine);
-        }
-
-        int contentLength = stoi(matches[1]);
-        pos = newlinePos + 2;
-        string emptyLine = responses.substr(pos, 2);
-        if (emptyLine != "\r\n") {
-            Exception::raise("A carraige return and a newline must separate headers and the body of the LSP message."
-                             " Instead, got:\n{}",
-                             emptyLine);
-        }
-        pos += 2;
-
-        if (pos + contentLength > len) {
-            Exception::raise("Invalid Content-Length: Server specified `{}`, but only `{}` characters provided.",
-                             contentLength, len - pos);
-        }
-
-        string messageLine = responses.substr(pos, contentLength);
-        rv.push_back(make_unique<LSPMessage>(messageLine));
-        pos += contentLength;
-    }
-
-    return rv;
-}
-
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &message) {
-    gs = lspLoop->processRequest(move(gs), message);
+    auto result = lspLoop->processRequest(move(gs), message);
+    gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
     ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
@@ -74,7 +19,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &
         initialized = true;
     }
 
-    return drainLSPResponses();
+    return move(result.responses);
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
@@ -92,13 +37,14 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
         }
     }
 
-    gs = lspLoop->processRequests(move(gs), move(messages));
+    auto result = lspLoop->processRequests(move(gs), move(messages));
+    gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
     ENFORCE(!initialized || !foundPostInitializationRequest || gs->lspTypecheckCount > 0,
             "Fatal error: LSPLoop did not typecheck GlobalState.");
 
-    return drainLSPResponses();
+    return move(result.responses);
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &message) {
