@@ -149,8 +149,17 @@ unique_ptr<LSPMessage> ProtocolTest::cancelRequest(int id) {
         make_unique<NotificationMessage>("2.0", LSPMethod::$CancelRequest, make_unique<CancelParams>(id)));
 }
 
+// Verify that messages are sound (contains proper JSON shape for method type) by serializing and re-parsing them.
+vector<unique_ptr<LSPMessage>> verify(const vector<unique_ptr<LSPMessage>> &msgs) {
+    vector<unique_ptr<LSPMessage>> reparsedMessages;
+    for (auto &msg : msgs) {
+        reparsedMessages.push_back(LSPMessage::fromClient(msg->toJSON()));
+    }
+    return reparsedMessages;
+}
+
 std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string &json) {
-    auto responses = lspWrapper->getLSPResponsesFor(json);
+    auto responses = verify(lspWrapper->getLSPResponsesFor(json));
     updateDiagnostics(responses);
     return responses;
 }
@@ -161,12 +170,8 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
 }
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>> messages) {
-    // Verify that messages are sound (contains proper JSON shape for method type) by serializing and re-parsing them.
-    vector<unique_ptr<LSPMessage>> reparsedMessages;
-    for (auto &m : messages) {
-        reparsedMessages.push_back(LSPMessage::fromClient(m->toJSON()));
-    }
-    auto responses = lspWrapper->getLSPResponsesFor(reparsedMessages);
+    vector<unique_ptr<LSPMessage>> reparsedMessages = verify(messages);
+    auto responses = verify(lspWrapper->getLSPResponsesFor(reparsedMessages));
     updateDiagnostics(responses);
     return responses;
 }
