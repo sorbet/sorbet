@@ -398,11 +398,19 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
+            string thisStr = thisType->show(ctx);
             if (args.fullType.get() != thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx)->show(ctx),
                             thisType->show(ctx), args.fullType->show(ctx));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisType->show(ctx));
+                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisStr);
+
+                // catch the special case of `interface!` or `abstract!` and
+                // suggest adding `extend T::Helpers`.
+                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract()) {
+                    e.addErrorSection(ErrorSection(ErrorColors::format(
+                        "You may need to add `extend T::Helpers` to the definition of {}", thisStr)));
+                }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
