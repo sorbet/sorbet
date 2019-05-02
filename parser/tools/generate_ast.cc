@@ -334,7 +334,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case Name:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
-                    << "\\n\", core::JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                    << "\\n\", JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
                 break;
             case Node:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";

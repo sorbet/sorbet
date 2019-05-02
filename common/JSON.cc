@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace sorbet::core {
+namespace sorbet {
 
 string JSON::escape(string from) {
     fmt::memory_buffer buf;
@@ -53,4 +53,4 @@ string JSON::escape(string from) {
     return to_string(buf);
 }
 
-} // namespace sorbet::core
+} // namespace sorbet

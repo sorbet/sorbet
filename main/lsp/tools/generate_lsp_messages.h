@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "core/core.h"
-
 using namespace sorbet;
 
 // rapidjson::Allocator variable, which is assumed to be available in serialization and deserialization methods.
@@ -984,7 +982,7 @@ public:
         }
         fmt::format_to(out, "}} else {{\n");
         fmt::format_to(out, "throw JSONTypeError(\"{}\", \"{}\", unwrappedValue);\n", fieldName,
-                       sorbet::core::JSON::escape(getJSONType()));
+                       sorbet::JSON::escape(getJSONType()));
         fmt::format_to(out, "}}\n");
         fmt::format_to(out, "}}\n");
     }
