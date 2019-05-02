@@ -107,8 +107,6 @@ u1 *KeyValueStore::read(string_view key) {
         if (rc == MDB_NOTFOUND) {
             return nullptr;
         }
-        std::cerr << "mdb_get(" << txn << ", " << dbi << ", '" << key << "')"
-                  << "\n";
         throw_mdb_error("failed read from the database"sv, rc);
     }
     return (u1 *)data.mv_data;
