@@ -65,7 +65,7 @@ LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
     opts.rawInputDirNames.emplace_back(rootPath);
 
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
-    stderrColorSink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
+    stderrColorSink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
     auto logger = make_shared<spd::logger>("console", stderrColorSink);
     typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");

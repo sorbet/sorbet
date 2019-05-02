@@ -28,8 +28,8 @@ private:
      * Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
      */
     std::unique_ptr<WorkerPool> workers;
-    std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
-    std::shared_ptr<spd::logger> typeErrorsConsole;
+    std::shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
+    std::shared_ptr<spdlog::logger> typeErrorsConsole;
 
     /** The output stream used by LSP. Completely unused, but for legacy reasons LSP requires it. */
     std::stringstream lspOstream;

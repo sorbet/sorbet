@@ -12,7 +12,7 @@ class KeyValueStore;
 }
 
 namespace sorbet::realmain::options {
-class Options;
+struct Options;
 }
 
 namespace sorbet::realmain::lsp {
@@ -45,11 +45,6 @@ private:
     std::shared_ptr<core::ErrorQueue> errorQueue GUARDED_BY(mtx);
     /** The set of files currently open in the user's editor. */
     UnorderedSet<std::string> openFiles GUARDED_BY(mtx);
-    /**
-     * The set of (file system) edits that have occurred before initialization completed. Will be processed
-     * post-initialization.
-     */
-    UnorderedMap<std::string, std::string> deferredFileEdits GUARDED_BY(mtx);
 
     std::shared_ptr<spdlog::logger> logger;
 
