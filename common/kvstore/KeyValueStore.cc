@@ -1,19 +1,31 @@
 #include "common/kvstore/KeyValueStore.h"
 
 #include <utility>
+
 using namespace std;
 namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 constexpr size_t MAX_DB_SIZE_BYTES =
     1L * 1024 * 1024 * 1024; // 1G. This is both maximum fs db size and max virtual memory usage.
-KeyValueStore::KeyValueStore(string version, string path) : path(move(path)), writerId(this_thread::get_id()) {
+
+static void throw_mdb_error(string_view what, int err) {
+    fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
+    throw invalid_argument(string(what));
+}
+
+KeyValueStore::KeyValueStore(string version, string path, string flavor)
+    : path(move(path)), flavor(move(flavor)), writerId(this_thread::get_id()) {
     int rc;
     rc = mdb_env_create(&env);
     if (rc != 0) {
         goto fail;
     }
     rc = mdb_env_set_mapsize(env, MAX_DB_SIZE_BYTES);
+    if (rc != 0) {
+        goto fail;
+    }
+    rc = mdb_env_set_maxdbs(env, 3);
     if (rc != 0) {
         goto fail;
     }
@@ -34,7 +46,7 @@ KeyValueStore::KeyValueStore(string version, string path) : path(move(path)), wr
         return;
     }
 fail:
-    throw invalid_argument("failed to create database");
+    throw_mdb_error("failed to create database"sv, rc);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
     if (commited) {
@@ -83,7 +95,7 @@ u1 *KeyValueStore::read(string_view key) {
         txn = txn_store;
     }
     if (rc != 0) {
-        throw invalid_argument("failed to create read transaction");
+        throw_mdb_error("failed to create read transaction"sv, rc);
     }
 
     MDB_val kv;
@@ -95,7 +107,7 @@ u1 *KeyValueStore::read(string_view key) {
         if (rc == MDB_NOTFOUND) {
             return nullptr;
         }
-        throw invalid_argument("failed read from the database");
+        throw_mdb_error("failed read from the database"sv, rc);
     }
     return (u1 *)data.mv_data;
 }
@@ -115,7 +127,7 @@ void KeyValueStore::clear() {
     refreshMainTransaction();
     return;
 fail:
-    throw invalid_argument("failed to clear the database");
+    throw_mdb_error("failed to clear the database"sv, rc);
 }
 
 string_view KeyValueStore::readString(string_view key) {
@@ -145,7 +157,27 @@ void KeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_open(txn, nullptr, MDB_CREATE, &dbi);
+    rc = mdb_dbi_open(txn, flavor.c_str(), MDB_CREATE, &dbi);
+    if (rc != 0) {
+        goto fail;
+    }
+    // Per the docs for mdb_dbi_open:
+    //
+    // The database handle will be private to the current transaction
+    // until the transaction is successfully committed. If the
+    // transaction is aborted the handle will be closed
+    // automatically. After a successful commit the handle will reside
+    // in the shared environment, and may be used by other
+    // transactions.
+    //
+    // So we commit immediately to force the dbi into the shared space
+    // so that readers can use it, and then re-open the transaction
+    // for future writes.
+    rc = mdb_txn_commit(txn);
+    if (rc != 0) {
+        goto fail;
+    }
+    rc = mdb_txn_begin(env, nullptr, 0, &txn);
     if (rc != 0) {
         goto fail;
     }
@@ -155,7 +187,7 @@ void KeyValueStore::refreshMainTransaction() {
     }
     return;
 fail:
-    throw invalid_argument("failed to create transaction");
+    throw_mdb_error("failed to create transaction"sv, rc);
 }
 
 bool KeyValueStore::commit(unique_ptr<KeyValueStore> k) {
