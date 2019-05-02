@@ -2,6 +2,7 @@
 
 class HasAbstract
   extend T::Sig
+  extend T::Helpers
   abstract!
 
   sig {params(x: Integer).abstract.returns(String)}
@@ -21,12 +22,14 @@ end
 
 class InterfaceClass
   extend T::Sig
+  extend T::Helpers
 
   interface! # error: Classes can't be interfaces
 end
 
 class AbstractMethodNotClass
   extend T::Sig
+  extend T::Helpers
 
   sig {returns(T.untyped).abstract}
   def f; end # error: you must mark your class/module as abstract
@@ -34,6 +37,7 @@ end
 
 module InterfaceModule
   extend T::Sig
+  extend T::Helpers
 
   interface!
 

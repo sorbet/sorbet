@@ -5,6 +5,7 @@ class T2; end
 
 class A
   extend T::Sig
+  extend T::Helpers
   sig {returns(T.noreturn)}
   def noreturn
     raise "foo"

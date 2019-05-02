@@ -146,6 +146,7 @@ end
 
 class Abstract
   extend T::Sig
+  extend T::Helpers
   abstract!
   sig {abstract.params(a: T.untyped).void}
   def abstract_foo(a); end

@@ -6,6 +6,7 @@ end
 
 module Interface
   extend T::Sig
+  extend T::Helpers
 
   interface!
 
