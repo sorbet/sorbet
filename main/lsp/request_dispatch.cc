@@ -82,38 +82,19 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
                                                    counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
                                                       1);
-            if (!initialized) {
-                for (auto &edit : edits) {
-                    if (edit->type != SorbetWorkspaceEditType::FileSystem) {
-                        logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
-                        return LSPResult{move(gs), {}};
-                    }
-                }
-            }
             return handleSorbetWorkspaceEdits(move(gs), edits);
         }
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
-            // initialize ourselves
-            LSPResult result;
-            {
-                Timer timeit(logger, "initial_index");
-                reIndexFromFileSystem();
-                vector<shared_ptr<core::File>> changedFiles;
-                result = pushDiagnostics(runSlowPath(move(changedFiles)));
-                ENFORCE(result.gs);
-                if (!disableFastPath) {
-                    this->globalStateHashes = computeStateHashes(result.gs->getFiles());
-                }
-                initialized = true;
+            Timer timeit(logger, "initial_index");
+            reIndexFromFileSystem();
+            vector<shared_ptr<core::File>> changedFiles;
+            LSPResult result = pushDiagnostics(runSlowPath(move(changedFiles)));
+            ENFORCE(result.gs);
+            if (!disableFastPath) {
+                this->globalStateHashes = computeStateHashes(result.gs->getFiles());
             }
-
-            // process deferred watchman updates
-            auto result2 = commitSorbetWorkspaceEdits(move(result.gs), deferredFileEdits);
-            deferredFileEdits.clear();
-            result.gs = move(result2.gs);
-            result.responses.insert(result.responses.end(), make_move_iterator(result2.responses.begin()),
-                                    make_move_iterator(result2.responses.end()));
+            initialized = true;
             return result;
         }
         if (method == LSPMethod::Exit) {

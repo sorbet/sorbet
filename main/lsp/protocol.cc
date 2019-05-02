@@ -1,4 +1,5 @@
 #include "absl/synchronization/mutex.h"
+#include "absl/synchronization/notification.h"
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "lsp.h"
@@ -85,10 +86,23 @@ public:
     }
 };
 
+class NotifyNotificationOnDestruction {
+    absl::Notification &notification;
+
+public:
+    NotifyNotificationOnDestruction(absl::Notification &notif) : notification(notif){};
+    ~NotifyNotificationOnDestruction() {
+        if (!notification.HasBeenNotified()) {
+            notification.Notify();
+        }
+    }
+};
+
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     LSPLoop::QueueState guardedState{{}, false, false, 0};
     absl::Mutex mtx;
+    absl::Notification initializedNotification;
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
     if (!opts.disableWatchman) {
@@ -96,10 +110,13 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             // The lambda below intentionally does not capture `this`.
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
                 logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-                [&guardedState, &mtx, logger = this->logger](std::unique_ptr<WatchmanQueryResponse> response) {
+                [&guardedState, &mtx, logger = this->logger,
+                 &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
                     auto notifMsg =
                         make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
+                    // Don't start enqueueing requests until LSP is initialized.
+                    initializedNotification.WaitForNotification();
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
                         // Merge with any existing pending watchman file updates.
@@ -153,46 +170,55 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 
     mainThreadId = this_thread::get_id();
     unique_ptr<core::GlobalState> gs;
-    while (true) {
-        unique_ptr<LSPMessage> msg;
-        {
-            absl::MutexLock lck(&mtx);
-            Timer timeit(logger, "idle");
-            mtx.Await(absl::Condition(
-                +[](LSPLoop::QueueState *guardedState) -> bool {
-                    return guardedState->terminate || (!guardedState->paused && !guardedState->pendingRequests.empty());
-                },
-                &guardedState));
-            ENFORCE(!guardedState.paused);
-            if (guardedState.terminate) {
-                if (guardedState.errorCode != 0) {
-                    // Abnormal termination.
-                    throw options::EarlyReturnWithCode(guardedState.errorCode);
-                } else if (guardedState.pendingRequests.empty()) {
-                    // Normal termination. Wait until all pending requests finish.
-                    break;
-                }
-            }
-            msg = move(guardedState.pendingRequests.front());
-            guardedState.pendingRequests.pop_front();
-        }
-        prodCounterInc("lsp.messages.received");
-        auto result = processRequest(move(gs), *msg);
-        gs = move(result.gs);
-        for (auto &msg : result.responses) {
-            sendMessage(*msg);
-        }
-
-        auto currentTime = chrono::steady_clock::now();
-        if (shouldSendCountersToStatsd(currentTime)) {
+    {
+        // Ensure Watchman thread gets unstuck when thread exits.
+        NotifyNotificationOnDestruction notify(initializedNotification);
+        while (true) {
+            unique_ptr<LSPMessage> msg;
             {
-                // Merge counters from worker threads.
-                absl::MutexLock counterLck(&mtx);
-                if (!guardedState.counters.hasNullCounters()) {
-                    counterConsume(move(guardedState.counters));
+                absl::MutexLock lck(&mtx);
+                Timer timeit(logger, "idle");
+                mtx.Await(absl::Condition(
+                    +[](LSPLoop::QueueState *guardedState) -> bool {
+                        return guardedState->terminate ||
+                               (!guardedState->paused && !guardedState->pendingRequests.empty());
+                    },
+                    &guardedState));
+                ENFORCE(!guardedState.paused);
+                if (guardedState.terminate) {
+                    if (guardedState.errorCode != 0) {
+                        // Abnormal termination.
+                        throw options::EarlyReturnWithCode(guardedState.errorCode);
+                    } else if (guardedState.pendingRequests.empty()) {
+                        // Normal termination. Wait until all pending requests finish.
+                        break;
+                    }
                 }
+                msg = move(guardedState.pendingRequests.front());
+                guardedState.pendingRequests.pop_front();
             }
-            sendCountersToStatsd(currentTime);
+            prodCounterInc("lsp.messages.received");
+            auto result = processRequest(move(gs), *msg);
+            gs = move(result.gs);
+            for (auto &msg : result.responses) {
+                sendMessage(*msg);
+            }
+
+            if (initialized && !initializedNotification.HasBeenNotified()) {
+                initializedNotification.Notify();
+            }
+
+            auto currentTime = chrono::steady_clock::now();
+            if (shouldSendCountersToStatsd(currentTime)) {
+                {
+                    // Merge counters from worker threads.
+                    absl::MutexLock counterLck(&mtx);
+                    if (!guardedState.counters.hasNullCounters()) {
+                        counterConsume(move(guardedState.counters));
+                    }
+                }
+                sendCountersToStatsd(currentTime);
+            }
         }
     }
 
