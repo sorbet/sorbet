@@ -1,6 +1,5 @@
 #include "common/kvstore/KeyValueStore.h"
 
-#include <iostream>
 #include <utility>
 
 using namespace std;
@@ -11,7 +10,7 @@ constexpr size_t MAX_DB_SIZE_BYTES =
     1L * 1024 * 1024 * 1024; // 1G. This is both maximum fs db size and max virtual memory usage.
 
 static void throw_mdb_error(string_view what, int err) {
-    cerr << "mdb error: " << what << ": " << mdb_strerror(err) << "\n";
+    fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
     throw invalid_argument(string(what));
 }
 
