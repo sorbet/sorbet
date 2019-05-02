@@ -29,8 +29,8 @@ command=$1
 shift
 
 typecheck() {
-  # We're using bash string operations here to avoid forking
-  # (using dirname / basename) etc. would mean ~15ms for each call.
+  # We're using bash string operations here to avoid forking.
+  # Using dirname / basename / etc. would mean ~15ms for each call.
 
   # /path/to/gems/sorbet-0.0.1/bin/srb
   srb_path="${BASH_SOURCE[0]}"
