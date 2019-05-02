@@ -409,7 +409,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract()) {
                     e.addErrorSection(ErrorSection(ErrorColors::format(
-                        "You may need to add `extend T::Helpers` to the definition of {}", thisStr)));
+                        "You may need to add `extend T::Helpers` to the definition of `{}`", thisStr)));
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
