@@ -53,7 +53,6 @@ cc_binary(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",
-        "//core",
         "@rapidjson",
     ],
 )

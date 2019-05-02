@@ -3,11 +3,11 @@
 
 #include <string>
 
-namespace sorbet::core {
+namespace sorbet {
 
 struct JSON {
     static std::string escape(std::string from);
 };
 
-} // namespace sorbet::core
+} // namespace sorbet
 #endif // SORBET_JSON
