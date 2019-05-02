@@ -86,6 +86,18 @@ public:
     }
 };
 
+class NotifyNotificationOnDestruction {
+    absl::Notification &notification;
+
+public:
+    NotifyNotificationOnDestruction(absl::Notification &notif) : notification(notif){};
+    ~NotifyNotificationOnDestruction() {
+        if (!notification.HasBeenNotified()) {
+            notification.Notify();
+        }
+    }
+};
+
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     LSPLoop::QueueState guardedState{{}, false, false, 0};
@@ -158,56 +170,56 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 
     mainThreadId = this_thread::get_id();
     unique_ptr<core::GlobalState> gs;
-    while (true) {
-        unique_ptr<LSPMessage> msg;
-        {
-            absl::MutexLock lck(&mtx);
-            Timer timeit(logger, "idle");
-            mtx.Await(absl::Condition(
-                +[](LSPLoop::QueueState *guardedState) -> bool {
-                    return guardedState->terminate || (!guardedState->paused && !guardedState->pendingRequests.empty());
-                },
-                &guardedState));
-            ENFORCE(!guardedState.paused);
-            if (guardedState.terminate) {
-                if (guardedState.errorCode != 0) {
-                    // Abnormal termination.
-                    throw options::EarlyReturnWithCode(guardedState.errorCode);
-                } else if (guardedState.pendingRequests.empty()) {
-                    // Normal termination. Wait until all pending requests finish.
-                    break;
-                }
-            }
-            msg = move(guardedState.pendingRequests.front());
-            guardedState.pendingRequests.pop_front();
-        }
-        prodCounterInc("lsp.messages.received");
-        auto result = processRequest(move(gs), *msg);
-        gs = move(result.gs);
-        for (auto &msg : result.responses) {
-            sendMessage(*msg);
-        }
-
-        if (initialized && !initializedNotification.HasBeenNotified()) {
-            initializedNotification.Notify();
-        }
-
-        auto currentTime = chrono::steady_clock::now();
-        if (shouldSendCountersToStatsd(currentTime)) {
+    {
+        // Ensure Watchman thread gets unstuck when thread exits.
+        NotifyNotificationOnDestruction notify(initializedNotification);
+        while (true) {
+            unique_ptr<LSPMessage> msg;
             {
-                // Merge counters from worker threads.
-                absl::MutexLock counterLck(&mtx);
-                if (!guardedState.counters.hasNullCounters()) {
-                    counterConsume(move(guardedState.counters));
+                absl::MutexLock lck(&mtx);
+                Timer timeit(logger, "idle");
+                mtx.Await(absl::Condition(
+                    +[](LSPLoop::QueueState *guardedState) -> bool {
+                        return guardedState->terminate ||
+                               (!guardedState->paused && !guardedState->pendingRequests.empty());
+                    },
+                    &guardedState));
+                ENFORCE(!guardedState.paused);
+                if (guardedState.terminate) {
+                    if (guardedState.errorCode != 0) {
+                        // Abnormal termination.
+                        throw options::EarlyReturnWithCode(guardedState.errorCode);
+                    } else if (guardedState.pendingRequests.empty()) {
+                        // Normal termination. Wait until all pending requests finish.
+                        break;
+                    }
                 }
+                msg = move(guardedState.pendingRequests.front());
+                guardedState.pendingRequests.pop_front();
             }
-            sendCountersToStatsd(currentTime);
-        }
-    }
+            prodCounterInc("lsp.messages.received");
+            auto result = processRequest(move(gs), *msg);
+            gs = move(result.gs);
+            for (auto &msg : result.responses) {
+                sendMessage(*msg);
+            }
 
-    // Make sure Watchman thread gets unstuck.
-    if (!initializedNotification.HasBeenNotified()) {
-        initializedNotification.Notify();
+            if (initialized && !initializedNotification.HasBeenNotified()) {
+                initializedNotification.Notify();
+            }
+
+            auto currentTime = chrono::steady_clock::now();
+            if (shouldSendCountersToStatsd(currentTime)) {
+                {
+                    // Merge counters from worker threads.
+                    absl::MutexLock counterLck(&mtx);
+                    if (!guardedState.counters.hasNullCounters()) {
+                        counterConsume(move(guardedState.counters));
+                    }
+                }
+                sendCountersToStatsd(currentTime);
+            }
+        }
     }
 
     if (gs) {
