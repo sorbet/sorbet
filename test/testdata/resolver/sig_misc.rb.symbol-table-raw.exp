@@ -1,6 +1,6 @@
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=107:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2539:4})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=111:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/light.rbi start=7:1 end=2539:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=107:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=111:4}
       argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=6:1 end=6:8}
     method <C <U A>><U f1> (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=27:3 end=27:12}
@@ -34,6 +34,8 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig
     method <C <U A>><U test_implementation> (x, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=80:3 end=80:29}
       argument <C <U A>><U test_implementation>x<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=80:27 end=80:28}
       argument <C <U A>><U test_implementation><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
+    method <C <U A>><U test_junk_again> (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=107:17 end=107:36}
+      argument <C <U A>><U test_junk_again><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U test_junk_inside> (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/sig_misc.rb start=104:19 end=104:39}
       argument <C <U A>><U test_junk_inside><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U test_kwargs> (returns, <blk>) -> T2 @ Loc {file=test/testdata/resolver/sig_misc.rb start=22:3 end=22:27}

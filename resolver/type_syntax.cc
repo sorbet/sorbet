@@ -146,6 +146,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
     for (auto &send : sends) {
         while (send != nullptr) {
+            // so we don't report multiple "method does not exist" errors arising from the same expression
+            bool reportedInvalidMethod = false;
             switch (send->fun._id) {
                 case core::Names::proc()._id:
                     sig.seen.proc = true;
@@ -274,18 +276,20 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 default:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Method `{}` does not exist on `T::Private::Methods::DeclBuilder`",
-                                    send->fun.show(ctx));
+                        reportedInvalidMethod = true;
+                        e.setHeader("Malformed signature: `{}` is invalid in this context", send->fun.show(ctx));
+                        e.addErrorLine(send->loc, "Consult https://sorbet.org/docs/sigs for signature syntax");
                     }
             }
             auto recv = ast::cast_tree<ast::Send>(send->recv.get());
 
-            if (!recv) {
+            // we only report this error if we haven't reported another unknown method error
+            if (!recv && !reportedInvalidMethod) {
                 if (!send->recv->isSelfReference()) {
                     if (!sig.seen.proc) {
-                        if (auto e =
-                                ctx.state.beginError(send->recv->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Method does not exist on `T::Private::Methods::DeclBuilder`");
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed signature: `{}` being invoked on an invalid receiver",
+                                        send->fun.show(ctx));
                         }
                     }
                 }

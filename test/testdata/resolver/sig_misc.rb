@@ -101,7 +101,11 @@ class A
 
   sig {}; def test_standard_untyped; end # error: Malformed `sig`: No return type specified. Specify one with .returns()
 
-  sig {void.foo}; def test_junk_inside; end # error: Method `foo` does not exist on `T::Private::Methods::DeclBuilder`
+  sig {void.foo}; def test_junk_inside; end # error: invalid in this context
+     # ^^^^^^^^ error: Method `foo` does not exist
+
+  sig {T.void}; def test_junk_again; end # error: being invoked on an invalid receiver
+     # ^^^^^^ error: Method `void` does not exist
 
   sig {params(z: T1).returns(T1)} # error: Malformed `sig`. No method def following it
 end
