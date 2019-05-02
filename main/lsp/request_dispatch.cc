@@ -123,8 +123,8 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         if (method == LSPMethod::SorbetError) {
             auto &errorInfo = get<unique_ptr<SorbetErrorParams>>(params);
             if (errorInfo->code == (int)LSPErrorCodes::MethodNotFound) {
-                // Not an error; we just don't care about this notification type.
-                logger->info(errorInfo->message);
+                // Not an error; we just don't care about this notification type (e.g. TextDocumentDidSave).
+                logger->debug(errorInfo->message);
             } else {
                 logger->error(errorInfo->message);
             }
