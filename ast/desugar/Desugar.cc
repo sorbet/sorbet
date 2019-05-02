@@ -482,6 +482,51 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                     unique_ptr<Expression> res = MK::EmptyTree();
                     result.swap(res);
+                } else if (auto i = cast_tree<InsSeq>(recv.get())) {
+                    // The logic below is explained more fully in the OpAsgn case
+                    if (auto ifExpr = cast_tree<If>(i->expr.get())) {
+                        if (auto s = cast_tree<Send>(ifExpr->elsep.get())) {
+                            auto sendLoc = s->loc;
+                            InsSeq::STATS_store stats;
+                            stats.reserve(s->args.size() + 2);
+                            core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                    s->fun, ++dctx.uniqueCounter);
+                            stats.emplace_back(MK::Assign(sendLoc, tempRecv, std::move(s->recv)));
+                            Send::ARGS_store readArgs;
+                            Send::ARGS_store assgnArgs;
+                            readArgs.reserve(s->args.size());
+                            assgnArgs.reserve(s->args.size() + 1);
+
+                            for (auto &arg : s->args) {
+                                core::Loc argLoc = arg->loc;
+                                core::NameRef name = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                    s->fun, ++dctx.uniqueCounter);
+                                stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
+                                readArgs.emplace_back(MK::Local(argLoc, name));
+                                assgnArgs.emplace_back(MK::Local(argLoc, name));
+                            }
+                            assgnArgs.emplace_back(std::move(arg));
+                            auto cond =
+                                MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                            core::NameRef tempResult = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                      s->fun, ++dctx.uniqueCounter);
+                            stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
+
+                            auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
+                                                 std::move(assgnArgs), s->flags);
+                            auto elsep = MK::Local(sendLoc, tempResult);
+                            auto iff =
+                                MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
+                            auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
+                            ifExpr->elsep.swap(wrapped);
+                            result.swap(recv);
+
+                        } else {
+                            Exception::notImplemented();
+                        }
+                    } else {
+                        Exception::notImplemented();
+                    }
                 } else {
                     Exception::notImplemented();
                 }
@@ -532,6 +577,50 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                     unique_ptr<Expression> res = MK::EmptyTree();
                     result.swap(res);
+                } else if (auto i = cast_tree<InsSeq>(recv.get())) {
+                    // The logic below is explained more fully in the OpAsgn case
+                    if (auto ifExpr = cast_tree<If>(i->expr.get())) {
+                        if (auto s = cast_tree<Send>(ifExpr->elsep.get())) {
+                            auto sendLoc = s->loc;
+                            InsSeq::STATS_store stats;
+                            stats.reserve(s->args.size() + 2);
+                            core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                    s->fun, ++dctx.uniqueCounter);
+                            stats.emplace_back(MK::Assign(sendLoc, tempRecv, std::move(s->recv)));
+                            Send::ARGS_store readArgs;
+                            Send::ARGS_store assgnArgs;
+                            readArgs.reserve(s->args.size());
+                            assgnArgs.reserve(s->args.size() + 1);
+                            for (auto &arg : s->args) {
+                                core::Loc argLoc = arg->loc;
+                                core::NameRef name = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                    s->fun, ++dctx.uniqueCounter);
+                                stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
+                                readArgs.emplace_back(MK::Local(argLoc, name));
+                                assgnArgs.emplace_back(MK::Local(argLoc, name));
+                            }
+                            assgnArgs.emplace_back(std::move(arg));
+                            auto cond =
+                                MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                            core::NameRef tempResult = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                      s->fun, ++dctx.uniqueCounter);
+                            stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
+
+                            auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
+                                                  std::move(assgnArgs), s->flags);
+                            auto body = MK::Local(sendLoc, tempResult);
+                            auto iff =
+                                MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
+                            auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
+                            ifExpr->elsep.swap(wrapped);
+                            result.swap(recv);
+
+                        } else {
+                            Exception::notImplemented();
+                        }
+                    } else {
+                        Exception::notImplemented();
+                    }
                 } else {
                     Exception::notImplemented();
                 }
@@ -578,6 +667,53 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                     unique_ptr<Expression> res = MK::EmptyTree();
                     result.swap(res);
+                } else if (auto i = cast_tree<InsSeq>(recv.get())) {
+                    // if this is an InsSeq, then is probably the result of a safe send (i.e. an expression of the form
+                    // x&.y on the LHS) which means it'll take the rough shape:
+                    //   { $temp = x; if $temp == nil then nil else $temp.y }
+                    // on the LHS. We want to insert the y= into the if-expression at the end, like:
+                    //   { $temp = x; if $temp == nil then nil else { $t2 = $temp.y; $temp.y = $t2 op RHS } }
+                    // that means we first need to find out whether the final expression is an If...
+                    if (auto ifExpr = cast_tree<If>(i->expr.get())) {
+                        // and if so, find out whether the else-case is a send...
+                        if (auto s = cast_tree<Send>(ifExpr->elsep.get())) {
+                            // and then perform basically the same logic as above for a send, but replacing it within
+                            // the else-case of the if at the end instead
+                            auto sendLoc = s->loc;
+                            InsSeq::STATS_store stats;
+                            stats.reserve(s->args.size() + 2);
+                            core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                    s->fun, ++dctx.uniqueCounter);
+                            stats.emplace_back(MK::Assign(loc, tempRecv, std::move(s->recv)));
+                            Send::ARGS_store readArgs;
+                            Send::ARGS_store assgnArgs;
+                            readArgs.reserve(s->args.size());
+                            assgnArgs.reserve(s->args.size() + 1);
+                            for (auto &arg : s->args) {
+                                core::Loc argLoc = arg->loc;
+                                core::NameRef name = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
+                                                                                    s->fun, ++dctx.uniqueCounter);
+                                stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
+                                readArgs.emplace_back(MK::Local(argLoc, name));
+                                assgnArgs.emplace_back(MK::Local(argLoc, name));
+                            }
+                            auto prevValue =
+                                MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                            auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, std::move(rhs));
+                            assgnArgs.emplace_back(std::move(newValue));
+
+                            auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
+                                                std::move(assgnArgs), s->flags);
+                            auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(res));
+                            ifExpr->elsep.swap(wrapped);
+                            result.swap(recv);
+
+                        } else {
+                            Exception::notImplemented();
+                        }
+                    } else {
+                        Exception::notImplemented();
+                    }
                 } else {
                     Exception::notImplemented();
                 }
