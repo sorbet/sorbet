@@ -197,7 +197,8 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
     });
 
     AutogenResult out;
-    for (auto res = resultq->try_pop(out); !res.done(); res = resultq->try_pop(out)) {
+    for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
+         res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
         if (!res.gotItem()) {
             continue;
         }
