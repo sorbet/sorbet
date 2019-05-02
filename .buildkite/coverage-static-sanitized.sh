@@ -42,7 +42,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcac
 echo "+++ tests"
 
 err=0
-./bazel coverage //... --config=buildfarm --config=coverage --javabase=@embedded_jdk//:jdk || err=$?  # workaround https://github.com/bazelbuild/bazel/issues/6993
+./bazel coverage //... --config=coverage --config=buildfarm --javabase=@embedded_jdk//:jdk || err=$?  # workaround https://github.com/bazelbuild/bazel/issues/6993
 
 echo "--- uploading coverage results"
 
