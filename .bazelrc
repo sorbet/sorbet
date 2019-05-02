@@ -110,8 +110,13 @@ build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp -
 test:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
 test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 
-build:buildfarm --curses=no
-test:buildfarm --curses=no
+build:reduce-intermediate-file-size --copt=-g0 --linkopt=-g0 --cxxopt=-g0 # used by buildfarm to have less debug information on disk
+build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --cxxopt=-Os
+build:reduce-intermediate-file-size --strip=always
+build:reduce-intermediate-file-size --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug --cxxopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
+
+build:buildfarm --curses=no --config=reduce-intermediate-file-size
+test:buildfarm --curses=no --config=reduce-intermediate-file-size
 test:buildfarm --test_output=errors
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
 test:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
