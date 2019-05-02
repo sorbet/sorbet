@@ -119,10 +119,6 @@ class LSPLoop {
     const bool disableFastPath;
     /** The set of files currently open in the user's editor. */
     UnorderedSet<std::string> openFiles;
-    /** The set of (file system) edits that have occurred before initialization completed. Will be processed
-     * post-initialization.
-     */
-    UnorderedMap<std::string, std::string> deferredFileEdits;
     /**
      * Set to true once the server is initialized.
      * TODO(jvilk): Use to raise server not initialized errors.
