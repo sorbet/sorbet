@@ -93,13 +93,11 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &cl
 
 void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
                                             UnorderedMap<string, string> &updates) {
-    // If Sorbet isn't initialized yet, we should defer these updates.
-    UnorderedMap<string, string> &updatesToUpdate = !initialized ? deferredFileEdits : updates;
     for (auto file : queryResponse.files) {
         string localPath = absl::StrCat(rootPath, "/", file);
         if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns) &&
             openFiles.find(localPath) == openFiles.end()) {
-            updatesToUpdate[localPath] = readFile(localPath, *opts.fs);
+            updates[localPath] = readFile(localPath, *opts.fs);
         }
     }
 }

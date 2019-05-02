@@ -43,15 +43,6 @@ TEST_F(ProtocolTest, DeleteFileUnknownToSorbet) {
     assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
 }
 
-// Ensures that Sorbet defers processing any file updates that happen prior to initialization.
-TEST_F(ProtocolTest, DefersWatchmanFileUpdatesBeforeInitialization) {
-    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
-    assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
-
-    ExpectedDiagnostic d = {"foo.rb", 3, "doesn't match `Integer`"};
-    assertDiagnostics(initializeLSP(), {d});
-}
-
 // Updates a file, opens it in editor (but it's empty), closes file without saving to disk.
 TEST_F(ProtocolTest, IgnoresFileUpdatesWhileFileIsOpen) {
     assertDiagnostics(initializeLSP(), {});

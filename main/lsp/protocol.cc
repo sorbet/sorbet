@@ -1,4 +1,5 @@
 #include "absl/synchronization/mutex.h"
+#include "absl/synchronization/notification.h"
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "lsp.h"
@@ -89,6 +90,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     LSPLoop::QueueState guardedState{{}, false, false, 0};
     absl::Mutex mtx;
+    absl::Notification initializedNotification;
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
     if (!opts.disableWatchman) {
@@ -96,10 +98,13 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             // The lambda below intentionally does not capture `this`.
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
                 logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-                [&guardedState, &mtx, logger = this->logger](std::unique_ptr<WatchmanQueryResponse> response) {
+                [&guardedState, &mtx, logger = this->logger,
+                 &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
                     auto notifMsg =
                         make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
+                    // Don't start enqueueing requests until LSP is initialized.
+                    initializedNotification.WaitForNotification();
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState
                         // Merge with any existing pending watchman file updates.
@@ -183,6 +188,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             sendMessage(*msg);
         }
 
+        if (initialized && !initializedNotification.HasBeenNotified()) {
+            initializedNotification.Notify();
+        }
+
         auto currentTime = chrono::steady_clock::now();
         if (shouldSendCountersToStatsd(currentTime)) {
             {
@@ -194,6 +203,11 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             }
             sendCountersToStatsd(currentTime);
         }
+    }
+
+    // Make sure Watchman thread gets unstuck.
+    if (!initializedNotification.HasBeenNotified()) {
+        initializedNotification.Notify();
     }
 
     if (gs) {

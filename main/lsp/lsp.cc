@@ -80,12 +80,8 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
                                 const unique_ptr<core::GlobalState> &currentGs) {
-    // Note: Watchman file updates happen independent of the client. We tolerate these before initialization by
-    // deferring them. SorbetWorkspaceEdit updates can contain Watchman file updates.
-    if (initialized || forMethod == LSPMethod::SorbetWatchmanFileChange ||
-        forMethod == LSPMethod::SorbetWorkspaceEdit || forMethod == LSPMethod::Initialize ||
-        forMethod == LSPMethod::Initialized || forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown ||
-        forMethod == LSPMethod::SorbetError) {
+    if (initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
+        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError) {
         return true;
     }
     return false;
