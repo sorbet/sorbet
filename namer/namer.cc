@@ -358,7 +358,9 @@ public:
                 }
             }
         }
-        return true;
+
+        // explicitly keep the namer dsl functions present
+        return false;
     }
 
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
