@@ -2,6 +2,7 @@
 #include "absl/strings/str_cat.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -189,7 +190,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const CompletionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
-    if (!opts.lspAutocompleteEnabled) {
+    if (!state.opts.lspAutocompleteEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");

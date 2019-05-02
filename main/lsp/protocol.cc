@@ -18,7 +18,7 @@ namespace sorbet::realmain::lsp {
  *
  * Throws an exception on read error or EOF.
  */
-unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spd::logger> &logger, int inputFd, string &buffer) {
+unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spdlog::logger> &logger, int inputFd, string &buffer) {
     int length = -1;
     string allRead;
     {
@@ -222,11 +222,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         }
     }
 
-    if (gs) {
-        return gs;
-    } else {
-        return move(initialGS);
-    }
+    ENFORCE(gs);
+    return gs;
 }
 
 /**
@@ -371,7 +368,7 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
     return;
 }
 
-void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
+void LSPLoop::enqueueRequest(const shared_ptr<spdlog::logger> &logger, LSPLoop::QueueState &state,
                              std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     Timer timeit(logger, "enqueueRequest");
     msg->counter = state.requestCounter++;

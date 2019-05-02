@@ -1,5 +1,6 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
 LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
-    if (!opts.lspSignatureHelpEnabled) {
+    if (!state.opts.lspSignatureHelpEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Signature Help` LSP feature is experimental and disabled by default.");
@@ -68,7 +69,7 @@ LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, con
             // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
             if (auto sendResp = resp->isSend()) {
                 auto sendLocIndex = sendResp->termLoc.beginPos();
-
+                absl::MutexLock lock(&state.mtx);
                 auto fref = uri2FileRef(params.textDocument->uri);
                 if (!fref.exists()) {
                     // TODO(jvilk): This should probably return *something*; it's a request!

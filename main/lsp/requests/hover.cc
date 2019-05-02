@@ -1,5 +1,6 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -7,7 +8,7 @@ namespace sorbet::realmain::lsp {
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
-    if (!opts.lspHoverEnabled) {
+    if (!state.opts.lspHoverEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest, "The `Hover` LSP feature is experimental and disabled by default.");
         return LSPResult::make(move(gs), move(response));

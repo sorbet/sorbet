@@ -13,6 +13,7 @@ cc_library(
         "lsp.h",
         "lsp_messages_gen.h",
         "lsp_messages_gen_helpers.h",
+        "lsp_state.h",
         "watchman/WatchmanProcess.h",
         "wrapper.h",
     ],

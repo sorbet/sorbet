@@ -1,5 +1,6 @@
 #include "common/Timer.h"
 #include "lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -86,15 +87,16 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         }
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
-            Timer timeit(logger, "initial_index");
-            reIndexFromFileSystem();
-            vector<shared_ptr<core::File>> changedFiles;
-            LSPResult result = pushDiagnostics(runSlowPath(move(changedFiles)));
-            ENFORCE(result.gs);
-            if (!disableFastPath) {
-                this->globalStateHashes = computeStateHashes(result.gs->getFiles());
+            // initialize ourselves
+            LSPResult result;
+            {
+                Timer timeit(logger, "initial_index");
+                ShowOperation op(*this, "Indexing", "Sorbet: Indexing files...");
+                absl::MutexLock lock(&state.mtx);
+                result = pushDiagnostics(state.reIndexFromFileSystem());
+                ENFORCE(result.gs);
+                initialized = true;
             }
-            initialized = true;
             return result;
         }
         if (method == LSPMethod::Exit) {
@@ -150,19 +152,19 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
 
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
-            serverCap->definitionProvider = opts.lspGoToDefinitionEnabled;
-            serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
-            serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
-            serverCap->hoverProvider = opts.lspHoverEnabled;
-            serverCap->referencesProvider = opts.lspFindReferencesEnabled;
+            serverCap->definitionProvider = state.opts.lspGoToDefinitionEnabled;
+            serverCap->documentSymbolProvider = state.opts.lspDocumentSymbolEnabled;
+            serverCap->workspaceSymbolProvider = state.opts.lspWorkspaceSymbolsEnabled;
+            serverCap->hoverProvider = state.opts.lspHoverEnabled;
+            serverCap->referencesProvider = state.opts.lspFindReferencesEnabled;
 
-            if (opts.lspSignatureHelpEnabled) {
+            if (state.opts.lspSignatureHelpEnabled) {
                 auto sigHelpProvider = make_unique<SignatureHelpOptions>();
                 sigHelpProvider->triggerCharacters = {"(", ","};
                 serverCap->signatureHelpProvider = move(sigHelpProvider);
             }
 
-            if (opts.lspAutocompleteEnabled) {
+            if (state.opts.lspAutocompleteEnabled) {
                 auto completionProvider = make_unique<CompletionOptions>();
                 completionProvider->triggerCharacters = {"."};
                 serverCap->completionProvider = move(completionProvider);

@@ -1,6 +1,7 @@
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ namespace sorbet::realmain::lsp {
 LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const ReferenceParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
-    if (!opts.lspFindReferencesEnabled) {
+    if (!state.opts.lspFindReferencesEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Find References` LSP feature is experimental and disabled by default.");
@@ -40,7 +41,8 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 }
             } else if (auto identResp = resp->isIdent()) {
                 std::vector<std::shared_ptr<core::File>> files;
-                auto run2 = runLSPQuery(
+                absl::MutexLock lock(&state.mtx);
+                auto run2 = state.runLSPQuery(
                     move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable), files, true);
                 gs = move(run2.gs);
                 vector<unique_ptr<Location>> result;

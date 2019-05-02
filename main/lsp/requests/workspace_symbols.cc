@@ -1,5 +1,6 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
 LSPResult LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                           const WorkspaceSymbolParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
-    if (!opts.lspWorkspaceSymbolsEnabled) {
+    if (!state.opts.lspWorkspaceSymbolsEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Workspace Symbols` LSP feature is experimental and disabled by default.");

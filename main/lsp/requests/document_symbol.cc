@@ -1,5 +1,6 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -67,7 +68,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                     const DocumentSymbolParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
-    if (!opts.lspDocumentSymbolEnabled) {
+    if (!state.opts.lspDocumentSymbolEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Document Symbol` LSP feature is experimental and disabled by default.");
@@ -77,17 +78,20 @@ LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentSymbol");
     vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params.textDocument->uri;
-    auto fref = uri2FileRef(uri);
-    for (u4 idx = 1; idx < gs->symbolsUsed(); idx++) {
-        core::SymbolRef ref(gs.get(), idx);
-        if (!hideSymbol(*gs, ref) &&
-            (ref.data(*gs)->owner.data(*gs)->loc().file() != fref || ref.data(*gs)->owner == core::Symbols::root())) {
-            for (auto definitionLocation : ref.data(*gs)->locs()) {
-                if (definitionLocation.file() == fref) {
-                    auto data = symbolRef2DocumentSymbol(*gs, ref, fref);
-                    if (data) {
-                        result.push_back(move(data));
-                        break;
+    {
+        absl::MutexLock lock(&state.mtx);
+        auto fref = uri2FileRef(uri);
+        for (u4 idx = 1; idx < gs->symbolsUsed(); idx++) {
+            core::SymbolRef ref(gs.get(), idx);
+            if (!hideSymbol(*gs, ref) && (ref.data(*gs)->owner.data(*gs)->loc().file() != fref ||
+                                          ref.data(*gs)->owner == core::Symbols::root())) {
+                for (auto definitionLocation : ref.data(*gs)->locs()) {
+                    if (definitionLocation.file() == fref) {
+                        auto data = symbolRef2DocumentSymbol(*gs, ref, fref);
+                        if (data) {
+                            result.push_back(move(data));
+                            break;
+                        }
                     }
                 }
             }

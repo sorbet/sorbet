@@ -40,7 +40,7 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
-    return initialGS->findFileByPath(needle);
+    return state.findFileByPath(needle);
 }
 
 string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {

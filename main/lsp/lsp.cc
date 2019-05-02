@@ -5,22 +5,18 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include "main/options/options.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, const shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, int inputFd, std::ostream &outputStream, bool skipConfigatron,
-                 bool disableFastPath)
-    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputFd(inputFd),
-      outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath),
-      lastMetricUpdateTime(chrono::steady_clock::now()) {
-    errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
-    ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
-    ENFORCE(errorQueue->ignoreFlushes,
-            "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
-
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
+                 const shared_ptr<spdlog::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &outputStream,
+                 bool skipConfigatron, bool disableFastPath)
+    : opts(opts), logger(logger), inputFd(inputFd), outputStream(outputStream),
+      lastMetricUpdateTime(chrono::steady_clock::now()),
+      state(move(gs), logger, opts, workers, skipConfigatron, disableFastPath) {
     if (opts.rawInputDirNames.size() != 1) {
         logger->error("Sorbet's language server requires a single input directory.");
         throw options::EarlyReturnWithCode(1);
@@ -28,24 +24,11 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
     rootPath = opts.rawInputDirNames.at(0);
 }
 
-LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
-                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
-    ENFORCE(gs->lspQuery.isEmpty());
-    ENFORCE(initialGS->lspQuery.isEmpty());
-    ENFORCE(!q.isEmpty());
-    initialGS->lspQuery = gs->lspQuery = q;
-
-    // TODO(jvilk): If this throws, then we'll want to reset `lspQuery` on `initialGS`.
-    // If throwing is common, then we need some way to *not* throw away `gs`.
-    auto rv = tryFastPath(move(gs), changedFiles, allFiles);
-    rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
-    return rv;
-}
-
-variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
+variant<TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                             const LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(logger, "setupLSPQueryByLoc");
+    absl::MutexLock lock(&state.mtx);
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
         return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
@@ -69,13 +52,15 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
 
     vector<shared_ptr<core::File>> files;
     files.emplace_back(fref.data(*gs).deepCopy(*gs));
-    return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
+    return state.runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
+
+TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
     Timer timeit(logger, "setupLSPQueryBySymbol");
+    absl::MutexLock lock(&state.mtx);
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
-    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
+    return state.runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,

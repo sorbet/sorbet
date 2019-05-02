@@ -1,6 +1,8 @@
 #include "absl/strings/match.h"
+#include "common/FileSystem.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "main/options/options.h"
 
 using namespace std;
 
@@ -18,15 +20,15 @@ string readFile(string_view path, const FileSystem &fs) {
     }
 }
 
-string getFileContents(UnorderedMap<string, string> &updates, unique_ptr<core::GlobalState> &initialGS,
-                       const string &path) {
+string getFileContents(UnorderedMap<string, string> &updates, LSPState &state, const string &path)
+    EXCLUSIVE_LOCKS_REQUIRED(state.mtx) {
     if (updates.find(path) != updates.end()) {
         return updates[path];
     }
 
-    auto currentFileRef = initialGS->findFileByPath(path);
-    if (currentFileRef.exists()) {
-        return string(currentFileRef.data(*initialGS).source());
+    auto contents = state.getFileContents(state.findFileByPath(path));
+    if (contents) {
+        return *contents;
     } else {
         return "";
     }
@@ -37,10 +39,11 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &c
     string_view uri = changeParams.textDocument->uri;
     if (absl::StartsWith(uri, rootUri)) {
         string localPath = remoteName2Local(uri);
-        if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+        if (FileOps::isFileIgnored(rootPath, localPath, state.opts.absoluteIgnorePatterns,
+                                   state.opts.relativeIgnorePatterns)) {
             return;
         }
-        string fileContents = getFileContents(updates, initialGS, localPath);
+        string fileContents = getFileContents(updates, state, localPath);
         for (auto &change : changeParams.contentChanges) {
             if (change->range) {
                 auto &range = *change->range;
@@ -69,7 +72,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &ope
     if (absl::StartsWith(uri, rootUri)) {
         string localPath = remoteName2Local(uri);
         if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
-            openFiles.insert(localPath);
+            state.openFile(localPath);
             updates[localPath] = move(openParams.textDocument->text);
         }
     }
@@ -81,10 +84,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &cl
     if (absl::StartsWith(uri, rootUri)) {
         string localPath = remoteName2Local(uri);
         if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
-            auto it = openFiles.find(localPath);
-            if (it != openFiles.end()) {
-                openFiles.erase(it);
-            }
+            state.closeFile(localPath);
             // Use contents of file on disk.
             updates[localPath] = readFile(localPath, *opts.fs);
         }
@@ -96,13 +96,14 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryRe
     for (auto file : queryResponse.files) {
         string localPath = absl::StrCat(rootPath, "/", file);
         if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns) &&
-            openFiles.find(localPath) == openFiles.end()) {
+            !state.isFileOpen(localPath)) {
             updates[localPath] = readFile(localPath, *opts.fs);
         }
     }
 }
 
-LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates) {
+LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates)
+    EXCLUSIVE_LOCKS_REQUIRED(state.mtx) {
     if (updates.size() > 0) {
         vector<shared_ptr<core::File>> files;
         files.reserve(updates.size());
@@ -110,7 +111,7 @@ LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, 
             files.push_back(
                 make_shared<core::File>(string(update.first), move(update.second), core::File::Type::Normal));
         }
-        return pushDiagnostics(tryFastPath(move(gs), files));
+        return pushDiagnostics(state.tryFastPath(move(gs), files));
     } else {
         return LSPResult{move(gs), {}};
     }
@@ -119,6 +120,7 @@ LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, 
 LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                              const DidChangeTextDocumentParams &changeParams) {
     UnorderedMap<string, string> updates;
+    absl::MutexLock lock(&state.mtx);
     preprocessSorbetWorkspaceEdit(changeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
@@ -126,6 +128,7 @@ LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
 LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                              const DidOpenTextDocumentParams &openParams) {
     UnorderedMap<string, string> updates;
+    absl::MutexLock lock(&state.mtx);
     preprocessSorbetWorkspaceEdit(openParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
@@ -133,6 +136,7 @@ LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
 LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                              const DidCloseTextDocumentParams &closeParams) {
     UnorderedMap<string, string> updates;
+    absl::MutexLock lock(&state.mtx);
     preprocessSorbetWorkspaceEdit(closeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
@@ -140,6 +144,7 @@ LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
 LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                              const WatchmanQueryResponse &queryResponse) {
     UnorderedMap<string, string> updates;
+    absl::MutexLock lock(&state.mtx);
     preprocessSorbetWorkspaceEdit(queryResponse, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
@@ -148,6 +153,7 @@ LSPResult LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
                                               vector<unique_ptr<SorbetWorkspaceEdit>> &edits) {
     // path => new file contents
     UnorderedMap<string, string> updates;
+    absl::MutexLock lock(&state.mtx);
     for (auto &edit : edits) {
         switch (edit->type) {
             case SorbetWorkspaceEditType::EditorOpen: {
