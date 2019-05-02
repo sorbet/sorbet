@@ -21,9 +21,13 @@ struct DesugarContext final {
     core::MutableContext ctx;
     u2 &uniqueCounter;
     core::NameRef enclosingBlockArg;
+    core::Loc enclosingMethodLoc;
+    core::NameRef enclosingMethodName;
 
-    DesugarContext(core::MutableContext ctx, u2 &uniqueCounter, core::NameRef enclosingBlockArg)
-        : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg){};
+    DesugarContext(core::MutableContext ctx, u2 &uniqueCounter, core::NameRef enclosingBlockArg,
+                   core::Loc enclosingMethodLoc, core::NameRef enclosingMethodName)
+        : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
 };
 
 core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
@@ -113,7 +117,7 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     u2 uniqueCounter = 1;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg);
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name);
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
 
     if (args.empty() || !isa_tree<BlockArg>(args.back().get())) {
@@ -125,7 +129,7 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
     ENFORCE(blkArg != nullptr, "Every method's last arg must be a block arg by now.");
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
-    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg);
+    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
     auto desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
@@ -230,7 +234,8 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     ClassDef::RHS_store body;
     // Reset uniqueCounter within this scope (to keep numbers small)
     u2 uniqueCounter = 1;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg);
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                         dctx.enclosingMethodName);
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
@@ -1268,6 +1273,18 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 unique_ptr<Expression> recv;
                 if (dctx.enclosingBlockArg.exists()) {
+                    // we always want to report an error if we're using yield with a synthesized name in
+                    // strict mode
+                    auto blockArgName = dctx.enclosingBlockArg;
+                    if (blockArgName == core::Names::blkArg()) {
+                        if (auto e = dctx.ctx.state.beginError(dctx.enclosingMethodLoc,
+                                                               core::errors::Desugar::UnnamedBlockParameter)) {
+                            e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
+                                        dctx.enclosingMethodName.data(dctx.ctx)->show(dctx.ctx), "yield");
+                            e.addErrorLine(loc, "Arising from use of `{}` in method body", "yield");
+                        }
+                    }
+
                     recv = MK::Local(loc, dctx.enclosingBlockArg);
                 } else {
                     // No enclosing block arg can happen when e.g. yield is called in a class / at the top-level.
@@ -1522,7 +1539,7 @@ unique_ptr<Expression> node2Tree(core::MutableContext ctx, unique_ptr<parser::No
     try {
         u2 uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
-        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName());
+        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::Loc::none(), core::NameRef::noName());
         auto loc = what->loc;
         auto result = node2TreeImpl(dctx, std::move(what));
         result = liftTopLevel(dctx, loc, std::move(result));

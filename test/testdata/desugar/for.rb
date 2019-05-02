@@ -1,7 +1,9 @@
 # typed: strict
 
 class A
-    def self.each # error: does not have a `sig`
+    def self.each
+  # ^^^^^^^^^^^^^ error: does not mention a block parameter
+  # ^^^^^^^^^^^^^ error: does not have a `sig`
         yield 1,2,3,4,5
         yield 6,7,8,9,0
     end
