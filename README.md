@@ -312,7 +312,7 @@ To create a test_corpus test, add any file `<name>.rb` to `test/testdata`, in
 any folder depth. The file must either:
 
 - typecheck entirely, or
-- throw errors **only** on lines marked lines.
+- throw errors **only** on lines marked with a comment (see below).
 
 To mark that a line should have errors, append `# error: <message>` (the
 `<message>` must match the raised error message). In case there are multiple
