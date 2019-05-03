@@ -534,12 +534,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
 
                     caseBody = walk(cctx, rescueCase->body.get(), caseBody);
-                    if (ret == cctx.inWhat.deadBlock()) {
-                        // If the main body -> else -> ensure -> ret path is dead, we need
-                        // to have a path out of the exception handlers
-                        ret = cctx.inWhat.freshBlock(cctx.loops);
-                        ensureBody = ret;
-                    }
                     unconditionalJump(caseBody, ensureBody, cctx.inWhat, a->loc);
                 }
 
