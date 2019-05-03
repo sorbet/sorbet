@@ -21,8 +21,7 @@ end while false
 
 y = 0
 y = begin
-  # This *should* be unreachable, but isn't because Sorbet doesn't equate 'true.!()' and 'false'
-  puts 2
+  puts 2 # error: This code is unreachable
   1
 end until true
 
