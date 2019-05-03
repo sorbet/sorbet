@@ -222,8 +222,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         }
     }
 
-    ENFORCE(gs);
-    return gs;
+    if (gs) {
+        return gs;
+    }
+    return state.releaseGlobalState();
 }
 
 /**

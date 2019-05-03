@@ -83,6 +83,11 @@ public:
     core::FileRef findFileByPath(std::string_view path) EXCLUSIVE_LOCKS_REQUIRED(mtx);
     std::optional<std::string> getFileContents(core::FileRef fref) EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
+    /**
+     * Releases the held GlobalState object and leaves this object in an unusable state.
+     */
+    std::unique_ptr<core::GlobalState> releaseGlobalState();
+
     void openFile(std::string_view path) EXCLUSIVE_LOCKS_REQUIRED(mtx);
     void closeFile(std::string_view path) EXCLUSIVE_LOCKS_REQUIRED(mtx);
     bool isFileOpen(std::string_view path) EXCLUSIVE_LOCKS_REQUIRED(mtx);

@@ -302,4 +302,9 @@ bool LSPState::isFileOpen(std::string_view path) {
     return openFiles.find(string(path)) != openFiles.end();
 }
 
+unique_ptr<core::GlobalState> LSPState::releaseGlobalState() {
+    absl::MutexLock lock(&mtx);
+    return move(initialGS);
+}
+
 } // namespace sorbet::realmain::lsp
