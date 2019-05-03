@@ -588,9 +588,15 @@ public:
         Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
         ResolveConstantsWalk constants(ctx);
 
-        for (auto &tree : trees) {
-            tree.tree = ast::TreeMap::apply(ctx, constants, std::move(tree.tree));
+        {
+            Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.walk");
+
+            for (auto &tree : trees) {
+                tree.tree = ast::TreeMap::apply(ctx, constants, std::move(tree.tree));
+            }
         }
+
+        Timer timeit1(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point");
 
         auto todo = std::move(constants.todo_);
         auto todoAncestors = std::move(constants.todoAncestors_);
@@ -601,6 +607,7 @@ public:
         while (!(todo.empty() && todoAncestors.empty()) && progress) {
             counterInc("resolve.constants.retries");
             {
+                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
                 // else.
@@ -614,6 +621,7 @@ public:
                 categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
             }
             {
+                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.constants");
                 int origSize = todo.size();
                 auto it = remove_if(todo.begin(), todo.end(),
                                     [ctx](ResolutionItem &job) -> bool { return resolveJob(ctx, job); });
@@ -622,6 +630,7 @@ public:
                 categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
             }
             {
+                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.class_aliases");
                 // This is an optimization. The order should not matter semantically
                 // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
                 // every item in todoClassAliases implicitly depends on an item in item in todo
@@ -636,6 +645,7 @@ public:
                 categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
             }
             {
+                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.type_aliases");
                 int origSize = todoTypeAliases.size();
                 auto it =
                     remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
@@ -680,15 +690,18 @@ public:
 
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
-        for (auto &job : todo) {
-            constantResolutionFailed(ctx, job);
-        }
+        {
+            Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.errors");
+            for (auto &job : todo) {
+                constantResolutionFailed(ctx, job);
+            }
 
-        for (auto &job : todoAncestors) {
-            auto resolved = resolveAncestorJob(ctx, job, true);
-            if (!resolved) {
-                resolved = resolveAncestorJob(ctx, job, true);
-                ENFORCE(resolved);
+            for (auto &job : todoAncestors) {
+                auto resolved = resolveAncestorJob(ctx, job, true);
+                if (!resolved) {
+                    resolved = resolveAncestorJob(ctx, job, true);
+                    ENFORCE(resolved);
+                }
             }
         }
 
