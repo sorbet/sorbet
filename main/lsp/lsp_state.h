@@ -1,14 +1,11 @@
 #include "ast/ast.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "core/core.h"
 
 class WorkerPool;
 
 namespace spdlog {
 class logger;
-}
-
-namespace sorbet {
-class KeyValueStore;
 }
 
 namespace sorbet::realmain::options {

@@ -1,7 +1,6 @@
 #include "main/lsp/lsp_state.h"
 #include "ast/treemap/treemap.h"
 #include "core/Unfreeze.h"
-#include "main/common/kvstore.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/pipeline/pipeline.h"

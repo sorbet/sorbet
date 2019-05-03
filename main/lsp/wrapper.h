@@ -3,9 +3,11 @@
 
 #include "spdlog/spdlog.h"
 // has to come before the next spdlog include. This comment stops formatter from reordering them
+#include "common/concurrency/WorkerPool.h"
 #include "lsp.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
+#include "main/options/options.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <sstream>
 #include <string_view>
