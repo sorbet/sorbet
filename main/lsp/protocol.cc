@@ -98,6 +98,22 @@ public:
     }
 };
 
+bool isEdit(const LSPMessage &msg) {
+    if (msg.isNotification()) {
+        switch (msg.method()) {
+            case LSPMethod::SorbetWorkspaceEdit:
+            case LSPMethod::SorbetWatchmanFileChange:
+            case LSPMethod::TextDocumentDidOpen:
+            case LSPMethod::TextDocumentDidClose:
+            case LSPMethod::TextDocumentDidChange:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     LSPLoop::QueueState guardedState{{}, false, false, 0};
@@ -196,6 +212,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 }
                 msg = move(guardedState.pendingRequests.front());
                 guardedState.pendingRequests.pop_front();
+                if (isEdit(*msg)) {
+                    absl::MutexLock stateLock(&state.mtx);
+                    state.willUpdateFiles();
+                }
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequest(move(gs), *msg);

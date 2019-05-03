@@ -102,8 +102,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryRe
     }
 }
 
-LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates)
-    EXCLUSIVE_LOCKS_REQUIRED(state.mtx) {
+LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates) {
     if (updates.size() > 0) {
         vector<shared_ptr<core::File>> files;
         files.reserve(updates.size());
@@ -111,7 +110,7 @@ LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, 
             files.push_back(
                 make_shared<core::File>(string(update.first), move(update.second), core::File::Type::Normal));
         }
-        return pushDiagnostics(state.tryFastPath(move(gs), files));
+        return pushDiagnostics(state.runTypechecking(move(gs), files));
     } else {
         return LSPResult{move(gs), {}};
     }
@@ -149,11 +148,8 @@ LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-LSPResult LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
-                                              vector<unique_ptr<SorbetWorkspaceEdit>> &edits) {
-    // path => new file contents
-    UnorderedMap<string, string> updates;
-    absl::MutexLock lock(&state.mtx);
+void LSPLoop::preprocessSorbetWorkspaceEdits(const std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits,
+                                             UnorderedMap<std::string, std::string> &updates) {
     for (auto &edit : edits) {
         switch (edit->type) {
             case SorbetWorkspaceEditType::EditorOpen: {
@@ -174,6 +170,14 @@ LSPResult LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
             }
         }
     }
+}
+
+LSPResult LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
+                                              const vector<unique_ptr<SorbetWorkspaceEdit>> &edits) {
+    // path => new file contents
+    UnorderedMap<string, string> updates;
+    absl::MutexLock lock(&state.mtx);
+    preprocessSorbetWorkspaceEdits(edits, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 

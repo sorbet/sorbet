@@ -135,16 +135,17 @@ class LSPLoop {
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
     std::variant<TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
     setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
-                       const LSPMethod forMethod, bool errorIfFileIsUntyped);
-    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol);
+                       const LSPMethod forMethod, bool errorIfFileIsUntyped) LOCKS_EXCLUDED(state.mtx);
+    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol)
+        LOCKS_EXCLUDED(state.mtx);
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params);
     LSPResult handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                               const DocumentSymbolParams &d);
+                                               const DocumentSymbolParams &d) LOCKS_EXCLUDED(state.mtx);
     LSPResult handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                      const WorkspaceSymbolParams &params);
     LSPResult handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const ReferenceParams &params);
+                                           const ReferenceParams &params) LOCKS_EXCLUDED(state.mtx);
     LSPResult handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params);
     LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
@@ -156,7 +157,7 @@ class LSPLoop {
                                     std::vector<std::unique_ptr<CompletionItem>> &items);
     void sendShowMessageNotification(MessageType messageType, std::string_view message);
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                      const TextDocumentPositionParams &params);
+                                      const TextDocumentPositionParams &params) LOCKS_EXCLUDED(state.mtx);
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
      * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.
@@ -165,7 +166,8 @@ class LSPLoop {
     static void enqueueRequest(const std::shared_ptr<spdlog::logger> &logger, LSPLoop::QueueState &queue,
                                std::unique_ptr<LSPMessage> msg, bool collectThreadCounters = false);
 
-    LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
+    LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg)
+        LOCKS_EXCLUDED(state.mtx);
 
     void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
                                        UnorderedMap<std::string, std::string> &updates)
@@ -179,16 +181,20 @@ class LSPLoop {
     void preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
                                        UnorderedMap<std::string, std::string> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
+    void preprocessSorbetWorkspaceEdits(const std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits,
+                                        UnorderedMap<std::string, std::string> &updates)
+        EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
     LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const DidChangeTextDocumentParams &changeParams);
+                                        const DidChangeTextDocumentParams &changeParams) LOCKS_EXCLUDED(state.mtx);
     LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const DidOpenTextDocumentParams &openParams);
+                                        const DidOpenTextDocumentParams &openParams) LOCKS_EXCLUDED(state.mtx);
     LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const DidCloseTextDocumentParams &closeParams);
+                                        const DidCloseTextDocumentParams &closeParams) LOCKS_EXCLUDED(state.mtx);
     LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const WatchmanQueryResponse &queryResponse);
+                                        const WatchmanQueryResponse &queryResponse) LOCKS_EXCLUDED(state.mtx);
     LSPResult handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
-                                         std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits);
+                                         const std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits)
+        LOCKS_EXCLUDED(state.mtx);
     LSPResult commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
                                          UnorderedMap<std::string, std::string> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
