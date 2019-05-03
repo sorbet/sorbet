@@ -355,6 +355,83 @@ string prettyArity(Context ctx, SymbolRef method) {
     }
 }
 
+/* Duplicated from SigSuggestion.cc */
+struct LocAndColumn {
+    core::Loc loc;
+    u4 padding;
+};
+
+LocAndColumn findStartOfLine(core::Context ctx, core::Loc loc) {
+    core::Loc::Detail startDetail = loc.position(ctx).first;
+    u4 lineStart = core::Loc::pos2Offset(loc.file().data(ctx), {startDetail.line, 1});
+    string_view lineView = loc.file().data(ctx).source().substr(lineStart);
+
+    u4 padding = lineView.find_first_not_of(" \t");
+    u4 startOffset = lineStart + padding;
+    return {core::Loc(loc.file(), startOffset, startOffset), padding};
+}
+
+// Walks the chain of attached classes to find the one at the end of the chain.
+core::SymbolRef topAttachedClass(core::Context ctx, core::SymbolRef classSymbol) {
+    while (true) {
+        auto attachedClass = classSymbol.data(ctx)->attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            break;
+        }
+        classSymbol = attachedClass;
+    }
+    return classSymbol;
+}
+
+bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
+    ENFORCE(enclosingClass.exists());
+    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
+    ENFORCE(enclosingSingletonClass.exists());
+    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
+}
+/* End duplication from SigSuggestion.cc */
+
+/**
+ * Make an autocorrection for adding `extends T::Helpers`, when needed.
+ */
+optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, const Type *thisType,
+                                                                 const Loc &call) {
+    auto classType = cast_type<ClassType>(thisType);
+    if (classType == nullptr) {
+        return nullopt;
+    }
+
+    auto enclosingClass = topAttachedClass(ctx, classType->symbol);
+    if (extendsTHelpers(ctx, enclosingClass)) {
+        // No need to suggest here, because it already has 'extend T::Sig'
+        return nullopt;
+    }
+
+    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == call.file(); };
+    auto classLocs = enclosingClass.data(ctx)->locs();
+    auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
+
+    if (classLoc == classLocs.end()) {
+        // Couldn't a loc for the enclosing class in this file, give up.
+        return nullopt;
+    }
+
+    auto [classStart, classEnd] = classLoc->position(ctx);
+
+    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    auto thisLinePadding = findStartOfLine(ctx, thisLineLoc).padding;
+
+    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
+    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    auto [replacementLoc, nextLinePadding] = findStartOfLine(ctx, nextLineLoc);
+
+    // Preserve the indentation of the line below us.
+    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
+    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -408,8 +485,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 // catch the special case of `interface!` or `abstract!` and
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract()) {
-                    e.addErrorSection(ErrorSection(ErrorColors::format(
-                        "You may need to add `extend T::Helpers` to the definition of `{}`", thisStr)));
+                    if (auto suggestion = maybeSuggestExtendTHelpers(ctx, thisType, args.locs.call)) {
+                        e.addAutocorrect(std::move(*suggestion));
+                    }
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
