@@ -87,16 +87,11 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         }
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
-            // initialize ourselves
-            LSPResult result;
-            {
-                Timer timeit(logger, "initial_index");
-                ShowOperation op(*this, "Indexing", "Sorbet: Indexing files...");
-                absl::MutexLock lock(&state.mtx);
-                result = pushDiagnostics(state.reIndexFromFileSystem());
-                ENFORCE(result.gs);
-                initialized = true;
-            }
+            Timer timeit(logger, "initial_index");
+            absl::MutexLock lock(&state.mtx);
+            LSPResult result = pushDiagnostics(state.reIndexFromFileSystem());
+            ENFORCE(result.gs);
+            initialized = true;
             return result;
         }
         if (method == LSPMethod::Exit) {
