@@ -1,7 +1,7 @@
 ---
 id: stdlib-generics
-title: Arrays, Hashes and other generics
-sidebar_label: Arrays, Hashes and other generics
+title: Arrays, Hashes, and Generics in the Standard Library
+sidebar_label: Arrays & Hashes
 ---
 
 > TODO: This page is still a fragment. Contributions welcome!
