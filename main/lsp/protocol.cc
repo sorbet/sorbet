@@ -449,7 +449,7 @@ bool mainThreadHasCommittedToAction(LSPState *state) EXCLUSIVE_LOCKS_REQUIRED(st
 }
 
 void LSPLoop::maybeCancelSlowPath(LSPLoop::QueueState &queue) {
-    if (!queue.pendingRequests.empty()) {
+    if (queue.pendingRequests.empty()) {
         logger->info("Cancel slow path: no pending requests.");
         return;
     }

@@ -823,7 +823,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             typecheck_thread_result threadResult;
             {
                 for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer());
-                     !result.done();
+                     !result.done() && typecheckingCancelled->load() == false;
                      result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer())) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
