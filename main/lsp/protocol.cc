@@ -450,12 +450,14 @@ bool mainThreadHasCommittedToAction(LSPState *state) EXCLUSIVE_LOCKS_REQUIRED(st
 
 void LSPLoop::maybeCancelSlowPath(LSPLoop::QueueState &queue) {
     if (!queue.pendingRequests.empty()) {
+        logger->info("Cancel slow path: no pending requests.");
         return;
     }
 
     // Don't do anything if LSP isn't initialized yet.
     absl::MutexLock stateLock(&state.mtx);
     if (state.mainThreadStatus == MainThreadStatus::NotInitialized) {
+        logger->info("Cancel slow path: not initialized.");
         return;
     }
 
@@ -483,9 +485,18 @@ void LSPLoop::maybeCancelSlowPath(LSPLoop::QueueState &queue) {
                 preprocessSorbetWorkspaceEdits(params->changes, changes);
                 if (!state.canRunFastPath(changes)) {
                     state.cancelTypechecking();
+                    logger->info("Cancel slow path: Canceled slow path.");
+                } else {
+                    logger->info("Cancel slow path: Changes will run fast path.");
                 }
+            } else {
+                logger->info("Cancel slow path: slow path isn't running");
             }
+        } else {
+            logger->info("Cancel slow path: {} edit events found", editEventsFound);
         }
+    } else {
+        logger->info("Cancel slow path: Front request doesn't mutate file contents.");
     }
 }
 
