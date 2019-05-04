@@ -131,9 +131,9 @@ TypecheckRun LSPState::runSlowPath(const vector<shared_ptr<core::File>> &changed
         pipeline::typecheck(finalGs, move(resolved), opts, workers);
         finalGs->lspTypecheckCount++;
     }
+    const bool canceled = finalGs->cancelTypechecking->load();
     auto out = finalGs->errorQueue->drainWithQueryResponses();
-    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs),
-                        finalGs->cancelTypechecking->load()};
+    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs), canceled};
 }
 
 bool LSPState::canRunFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
