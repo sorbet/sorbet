@@ -59,6 +59,7 @@ build:dbg --config=debugsymbols
 build:dbg --config=nopie
 
 build:coverage --config=dbg
+build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
 test:coverage --spawn_strategy=standalone
 
 ##
