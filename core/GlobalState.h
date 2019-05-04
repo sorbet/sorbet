@@ -140,6 +140,8 @@ public:
     // Indicates the number of times LSP has run the type checker with this global state.
     // Used to ensure GlobalState is in the correct state to process requests.
     unsigned int lspTypecheckCount = 0;
+    // If 'true', GlobalState should halt typechecking right now.
+    std::shared_ptr<std::atomic<bool>> cancelTypechecking;
 
     void trace(std::string_view msg) const;
 

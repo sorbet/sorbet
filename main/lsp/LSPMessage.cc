@@ -239,6 +239,22 @@ LSPMethod LSPMessage::method() const {
     }
 }
 
+bool LSPMessage::mutatesFileContents() const {
+    if (isNotification()) {
+        switch (method()) {
+            case LSPMethod::SorbetWorkspaceEdit:
+            case LSPMethod::SorbetWatchmanFileChange:
+            case LSPMethod::TextDocumentDidOpen:
+            case LSPMethod::TextDocumentDidClose:
+            case LSPMethod::TextDocumentDidChange:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
 string LSPMessage::toJSON() const {
     if (isRequest()) {
         return asRequest().toJSON();

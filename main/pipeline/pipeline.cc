@@ -792,13 +792,15 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq]() {
+            auto &typecheckingCancelled = gs->cancelTypechecking;
+            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq, &typecheckingCancelled]() {
                 typecheck_thread_result threadResult;
                 ast::ParsedFile job;
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    for (auto result = fileq->try_pop(job); !result.done() && typecheckingCancelled->load() == false;
+                         result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
                             core::FileRef file = job.file;

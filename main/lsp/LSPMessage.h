@@ -131,6 +131,11 @@ public:
     LSPMethod method() const;
 
     /**
+     * Returns 'true' if the message will mutate file contents.
+     */
+    bool mutatesFileContents() const;
+
+    /**
      * Returns the message in JSON form.
      */
     std::string toJSON() const;

@@ -55,6 +55,7 @@ GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
     int namesByHashSize = 2 * maxNameCount;
     namesByHash.resize(namesByHashSize);
     ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
+    cancelTypechecking = make_shared<atomic<bool>>(false);
 }
 
 void GlobalState::initEmpty() {
@@ -1048,6 +1049,8 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
     result->lspTypecheckCount = this->lspTypecheckCount;
+    // (LSP) Setting 'cancelTypechecking' in initialGS should also impact copies.
+    result->cancelTypechecking = this->cancelTypechecking;
     result->errorUrlBase = this->errorUrlBase;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;

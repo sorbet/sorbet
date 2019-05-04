@@ -98,22 +98,6 @@ public:
     }
 };
 
-bool isEdit(const LSPMessage &msg) {
-    if (msg.isNotification()) {
-        switch (msg.method()) {
-            case LSPMethod::SorbetWorkspaceEdit:
-            case LSPMethod::SorbetWatchmanFileChange:
-            case LSPMethod::TextDocumentDidOpen:
-            case LSPMethod::TextDocumentDidClose:
-            case LSPMethod::TextDocumentDidChange:
-                return true;
-            default:
-                return false;
-        }
-    }
-    return false;
-}
-
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     LSPLoop::QueueState guardedState{{}, false, false, 0};
@@ -126,8 +110,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             // The lambda below intentionally does not capture `this`.
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
                 logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-                [&guardedState, &mtx, logger = this->logger,
-                 &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
+                [&guardedState, &mtx, logger = this->logger, &initializedNotification,
+                 this](std::unique_ptr<WatchmanQueryResponse> response) {
                     auto notifMsg =
                         make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
                     auto msg = make_unique<LSPMessage>(move(notifMsg));
@@ -137,6 +121,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                         absl::MutexLock lck(&mtx); // guards guardedState
                         // Merge with any existing pending watchman file updates.
                         enqueueRequest(logger, guardedState, move(msg), true);
+                        this->maybeCancelSlowPath(guardedState);
                     }
                 },
                 [&guardedState, &mtx](int watchmanExitCode) {
@@ -156,7 +141,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     }
 
     auto readerThread =
-        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, inputFd = this->inputFd] {
+        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, inputFd = this->inputFd, this] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
@@ -165,10 +150,14 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 auto timeit = make_unique<Timer>(logger, "getNewRequest");
                 while (true) {
                     auto msg = getNewRequest(logger, inputFd, buffer);
+                    const bool mutatesFileContents = msg->mutatesFileContents();
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState.
                         if (msg) {
                             enqueueRequest(logger, guardedState, move(msg), true);
+                            if (mutatesFileContents) {
+                                this->maybeCancelSlowPath(guardedState);
+                            }
                             // Reset span now that we've found a request.
                             timeit = make_unique<Timer>(logger, "getNewRequest");
                         }
@@ -212,16 +201,32 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 }
                 msg = move(guardedState.pendingRequests.front());
                 guardedState.pendingRequests.pop_front();
-                if (isEdit(*msg)) {
+                // Change main thread status *while holding both locks* to ensure that other threads know what this
+                // thread will do before acquiring message queue lock again.
+                if (msg->mutatesFileContents()) {
                     absl::MutexLock stateLock(&state.mtx);
-                    state.willUpdateFiles();
+                    state.mainThreadStatus = MainThreadStatus::MayRunSlowPath;
                 }
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequest(move(gs), *msg);
             gs = move(result.gs);
-            for (auto &msg : result.responses) {
-                sendMessage(*msg);
+            if (msg->mutatesFileContents() && gs->cancelTypechecking->load() == true) {
+                // Need to re-enqueue message + reset cancelTypechecking.
+                absl::MutexLock lck(&mtx);
+                LSPLoop::enqueueRequest(logger, guardedState, move(msg));
+                gs->cancelTypechecking->store(false);
+            } else {
+                for (auto &msg : result.responses) {
+                    sendMessage(*msg);
+                }
+            }
+
+            if (initialized) {
+                absl::MutexLock stateLock(&state.mtx);
+                // NotInitialized => NotRunningSlowPath
+                // Also updates in case processRequest short-circuited and never ran runTypechecking.
+                state.mainThreadStatus = MainThreadStatus::NotRunningSlowPath;
             }
 
             if (initialized && !initializedNotification.HasBeenNotified()) {
@@ -425,6 +430,62 @@ void LSPLoop::enqueueRequest(const shared_ptr<spdlog::logger> &logger, LSPLoop::
             counterConsume(move(state.counters));
         }
         state.counters = getAndClearThreadCounters();
+    }
+}
+
+bool mainThreadHasCommittedToAction(LSPState *state) EXCLUSIVE_LOCKS_REQUIRED(state->mtx) {
+    switch (state->mainThreadStatus) {
+        case MainThreadStatus::NotInitialized: // We already checked this above....
+            ENFORCE(false, "LSP should never become uninitialized after initializing.");
+            return true;
+        case MainThreadStatus::MayRunSlowPath:
+            // Invariant: The main thread will *always* transition status to
+            // {NotRunning,Running}SlowPath.
+            return false;
+        case MainThreadStatus::NotRunningSlowPath:
+        case MainThreadStatus::RunningSlowPath:
+            return true;
+    }
+}
+
+void LSPLoop::maybeCancelSlowPath(LSPLoop::QueueState &queue) {
+    if (!queue.pendingRequests.empty()) {
+        return;
+    }
+
+    // Don't do anything if LSP isn't initialized yet.
+    absl::MutexLock stateLock(&state.mtx);
+    if (state.mainThreadStatus == MainThreadStatus::NotInitialized) {
+        return;
+    }
+
+    const LSPMessage &front = **queue.pendingRequests.begin();
+    if (front.mutatesFileContents()) {
+        int editEventsFound = 0;
+        for (const auto &msg : queue.pendingRequests) {
+            if (msg->mutatesFileContents()) {
+                editEventsFound++;
+            }
+        }
+
+        if (editEventsFound == 1) {
+            if (front.method() != LSPMethod::SorbetWorkspaceEdit) {
+                // Should never happen, but gracefully handle to avoid unexpected breakages.
+                logger->debug("Unable to cancel typechecking: blocked by unexpected method {}.",
+                              convertLSPMethodToString(front.method()));
+                return;
+            }
+            // Wait until main thread has decided if it is running slow path or not.
+            state.mtx.Await(absl::Condition(mainThreadHasCommittedToAction, &state));
+            if (state.mainThreadStatus == MainThreadStatus::RunningSlowPath) {
+                const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(front.asNotification().params);
+                UnorderedMap<string, pair<string, bool>> changes;
+                preprocessSorbetWorkspaceEdits(params->changes, changes);
+                if (!state.canRunFastPath(changes)) {
+                    state.cancelTypechecking();
+                }
+            }
+        }
     }
 }
 

@@ -24,6 +24,13 @@ struct TypecheckRun {
     bool canceled;
 };
 
+enum class MainThreadStatus {
+    NotInitialized,
+    NotRunningSlowPath,
+    MayRunSlowPath,
+    RunningSlowPath,
+};
+
 class LSPState final {
 private:
     /** Trees that have been indexed and can be reused between different runs */
@@ -44,8 +51,6 @@ private:
     std::shared_ptr<core::ErrorQueue> errorQueue GUARDED_BY(mtx);
     /** The set of files currently open in the user's editor. */
     UnorderedSet<std::string> openFiles GUARDED_BY(mtx);
-    /** If 'true', the file contents and hashes in LSPState are up-to-date with the message processing thread. */
-    bool fileContentsAndHashesUpToDate GUARDED_BY(mtx) = false;
 
     std::shared_ptr<spdlog::logger> logger;
 
@@ -55,20 +60,19 @@ private:
     const bool disableFastPath;
 
     core::FileRef updateFile(const std::shared_ptr<core::File> &file) EXCLUSIVE_LOCKS_REQUIRED(mtx);
-    std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
 
     /** Conservatively rerun entire pipeline without caching any trees. If operation is canceled, restores the hash and
      * file state in oldGlobalStateHashes and oldFiles. */
-    TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                             const std::vector<std::string> &openedFiles, const std::vector<std::string> &closedFiles,
-                             const std::vector<unsigned int> &oldGlobalStateHashes,
-                             const std::vector<std::shared_ptr<core::File>> &oldFiles) EXCLUSIVE_LOCKS_REQUIRED(mtx);
+    TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles)
+        EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
 public:
     /**
      * Mutex that must be held during all operations on LSPState and all memory transitively accessible from LSPState.
      */
     absl::Mutex mtx;
+    /** Indicates the status of the main thread, and whether or not it is running the slow path. */
+    MainThreadStatus mainThreadStatus GUARDED_BY(mtx) = MainThreadStatus::NotInitialized;
     const options::Options &opts;
 
     LSPState(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,
@@ -78,17 +82,22 @@ public:
      * This runs code that is not considered performance critical and this is expected to be slow */
     TypecheckRun reIndexFromFileSystem() EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
+    std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
+
     /** Returns 'true' if the fast path can be run given the changed files *without* mutating any state. */
-    bool canRunFastPath(const core::GlobalState &gs, const std::vector<std::shared_ptr<core::File>> &changedFiles,
+    bool canRunFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                         const std::vector<unsigned int> &hashes) EXCLUSIVE_LOCKS_REQUIRED(mtx);
+    bool canRunFastPath(UnorderedMap<std::string, std::pair<std::string, bool>> &changes) EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
     /** Typecheck the given files, or all files if specified. Tries to apply conservative heuristics to see if we can
      * run a fast path. If it cannot, it bails out and runs a slow path */
     TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs,
                                  std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                 const std::vector<std::string> &openedFiles = {},
-                                 const std::vector<std::string> &closedFiles = {}, bool allFiles = false)
+                                 const UnorderedMap<std::string, bool> &openStatuses, bool allFiles = false)
         EXCLUSIVE_LOCKS_REQUIRED(mtx);
+    TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs,
+                                 UnorderedMap<std::string, std::pair<std::string, bool>> &changes,
+                                 bool allFiles = false) EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
     TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false)
@@ -103,17 +112,9 @@ public:
     std::unique_ptr<core::GlobalState> releaseGlobalState() LOCKS_EXCLUDED(mtx);
 
     /**
-     * Informs LSP state of an intent to update files in the future. Called on the message processing thread.
+     * If typechecking is currently running, cancels the operation.
      */
-    void willUpdateFiles() EXCLUSIVE_LOCKS_REQUIRED(mtx);
-
-    /**
-     * If the message processing thread is processing an edit message, wait for it to update file contents and hashes
-     * before returning.
-     *
-     * Cannot be called on the message processing thread.
-     */
-    void waitForUpdatedFiles() EXCLUSIVE_LOCKS_REQUIRED(mtx);
+    void cancelTypechecking() EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
     /**
      * Checks if the file is open in the editor according to the last edit that typechecked.

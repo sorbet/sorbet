@@ -23,6 +23,7 @@ LSPState::LSPState(unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::lo
 TypecheckRun LSPState::reIndexFromFileSystem() {
     Timer timeit(logger, "reIndexFromFileSystem");
     indexed.clear();
+    ENFORCE(mainThreadStatus == MainThreadStatus::NotInitialized);
     vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames);
     for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore)) {
         int id = t.file.id();
@@ -31,7 +32,7 @@ TypecheckRun LSPState::reIndexFromFileSystem() {
         }
         indexed[id] = move(t);
     }
-    auto result = runSlowPath({}, {}, {}, {}, {});
+    auto result = runSlowPath({});
     if (!disableFastPath) {
         this->globalStateHashes = computeStateHashes(result.gs->getFiles());
     }
@@ -95,14 +96,12 @@ public:
     }
 };
 
-TypecheckRun LSPState::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles,
-                                   const vector<string> &openedFiles, const vector<string> &closedFiles,
-                                   const std::vector<unsigned int> &oldGlobalStateHashes,
-                                   const std::vector<std::shared_ptr<core::File>> &oldFiles) {
+TypecheckRun LSPState::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
     // ShowOperation slowPathOp(*this, "SlowPath", "Sorbet: Typechecking...");
     Timer timeit(logger, "slow_path");
+    ENFORCE(mainThreadStatus == MainThreadStatus::NotInitialized ||
+            mainThreadStatus == MainThreadStatus::RunningSlowPath);
     ENFORCE(initialGS->errorQueue->isEmpty());
-    ENFORCE(oldGlobalStateHashes.size() == oldFiles.size());
     prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
 
@@ -119,32 +118,30 @@ TypecheckRun LSPState::runSlowPath(const vector<shared_ptr<core::File>> &changed
     auto finalGs = initialGS->deepCopy(true);
 
     /* It is now safe for other threads to use initialGS. The slow path has begun. */
+    vector<core::FileRef> affectedFiles;
     {
         MutexUnlocker unlock(mtx);
         auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, skipConfigatron);
         tryApplyDefLocSaver(*finalGs, resolved);
         tryApplyLocalVarSaver(*finalGs, resolved);
-        vector<core::FileRef> affectedFiles;
         for (auto &tree : resolved) {
             ENFORCE(tree.file.exists());
             affectedFiles.push_back(tree.file);
         }
         pipeline::typecheck(finalGs, move(resolved), opts, workers);
-        auto out = finalGs->errorQueue->drainWithQueryResponses();
         finalGs->lspTypecheckCount++;
-        return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs), false};
     }
+    auto out = finalGs->errorQueue->drainWithQueryResponses();
+    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs),
+                        finalGs->cancelTypechecking->load()};
 }
 
-bool LSPState::canRunFastPath(const core::GlobalState &gs, const std::vector<std::shared_ptr<core::File>> &changedFiles,
+bool LSPState::canRunFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                               const std::vector<unsigned int> &hashes) {
     if (disableFastPath) {
         logger->debug("Taking sad path because happy path is disabled.");
         return false;
     }
-    // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
-    ENFORCE(gs.lspTypecheckCount > 0,
-            "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
 
     ENFORCE(changedFiles.size() == hashes.size());
@@ -167,25 +164,52 @@ bool LSPState::canRunFastPath(const core::GlobalState &gs, const std::vector<std
     return true;
 }
 
+const pair<vector<shared_ptr<core::File>>, UnorderedMap<string, bool>>
+getChangedFilesAndOpenStatuses(UnorderedMap<string, pair<string, bool>> &changes) {
+    vector<shared_ptr<core::File>> changedFiles;
+    UnorderedMap<string, bool> fileOpenStatus;
+    for (auto &change : changes) {
+        changedFiles.push_back(
+            make_shared<core::File>(string(change.first), move(change.second.first), core::File::Type::Normal));
+        fileOpenStatus[change.first] = change.second.second;
+    }
+    return make_pair(changedFiles, fileOpenStatus);
+}
+
+bool LSPState::canRunFastPath(UnorderedMap<string, pair<string, bool>> &changes) {
+    auto converted = getChangedFilesAndOpenStatuses(changes);
+    return canRunFastPath(converted.first, computeStateHashes(converted.first));
+}
+
+TypecheckRun LSPState::runTypechecking(unique_ptr<core::GlobalState> gs,
+                                       UnorderedMap<string, pair<string, bool>> &changes, bool allFiles) {
+    auto converted = getChangedFilesAndOpenStatuses(changes);
+    return runTypechecking(move(gs), converted.first, converted.second, allFiles);
+}
+
 TypecheckRun LSPState::runTypechecking(unique_ptr<core::GlobalState> gs, vector<shared_ptr<core::File>> &changedFiles,
-                                       const vector<string> &openedFiles, const vector<string> &closedFiles,
-                                       bool allFiles) {
+                                       const UnorderedMap<string, bool> &openStatuses, bool allFiles) {
     auto hashes = computeStateHashes(changedFiles);
-    const bool takeFastPath = canRunFastPath(*gs, changedFiles, hashes);
+    const bool takeFastPath = canRunFastPath(changedFiles, hashes);
+    if (takeFastPath) {
+        // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
+        ENFORCE(gs->lspTypecheckCount > 0,
+                "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
+    }
 
     // Update global state hashes, the file contents in initial GS, and, if we are taking the fast path, the file
     // contents in gs too. Store the old contents of the files and hashes if we're taking the slow path to support
     // interrupting the slow path.
     vector<core::FileRef> updatedFiles;
     vector<shared_ptr<core::File>> oldFiles;
-    vector<unsigned int> oldHashes;
+    vector<pair<int, unsigned int>> oldHashes;
+    UnorderedMap<string, bool> oldOpenStatuses;
     int i = -1;
     {
         core::UnfreezeFileTable fileTableAccess(*initialGS);
         for (auto &f : changedFiles) {
             ++i;
             if (!takeFastPath) {
-                // fref = initialGS->findFileByPath(file->path());
                 auto oldFref = getFileContents(findFileByPath(f->path()));
                 auto fileContents = oldFref ? *oldFref : "";
                 oldFiles.push_back(
@@ -199,23 +223,29 @@ TypecheckRun LSPState::runTypechecking(unique_ptr<core::GlobalState> gs, vector<
                 gs = core::GlobalState::replaceFile(move(gs), fref, changedFiles[i]);
                 updatedFiles.emplace_back(fref);
             } else {
-                oldHashes.push_back(globalStateHashes[fref.id()]);
+                oldHashes.push_back(make_pair(fref.id(), globalStateHashes[fref.id()]));
             }
             globalStateHashes[fref.id()] = hashes[i];
         }
     }
-    openFiles.insert(openedFiles.begin(), openedFiles.end());
-    for (auto closedFile : closedFiles) {
-        auto it = openFiles.find(closedFile);
-        if (it != openFiles.end()) {
+
+    for (auto status : openStatuses) {
+        auto it = openFiles.find(status.first);
+        if (it != openFiles.end() && !status.second) {
+            // open -> closed
             openFiles.erase(it);
+            oldOpenStatuses[status.first] = true;
+        }
+        if (it == openFiles.end() && status.second) {
+            // closed -> open
+            oldOpenStatuses[status.first] = false;
+            openFiles.insert(status.first);
         }
     }
 
-    fileContentsAndHashesUpToDate = true;
-
     if (takeFastPath) {
         Timer timeit(logger, "fast_path");
+        mainThreadStatus = MainThreadStatus::NotRunningSlowPath;
         // TODO: Assert not taking fast path with a previously canceled GS.
         if (allFiles) {
             updatedFiles.clear();
@@ -247,7 +277,30 @@ TypecheckRun LSPState::runTypechecking(unique_ptr<core::GlobalState> gs, vector<
         gs->lspTypecheckCount++;
         return TypecheckRun{move(out.first), move(updatedFiles), move(out.second), move(gs), false};
     } else {
-        return runSlowPath(changedFiles, openedFiles, closedFiles, oldHashes, oldFiles);
+        mainThreadStatus = MainThreadStatus::RunningSlowPath;
+        auto rv = runSlowPath(changedFiles);
+        if (rv.canceled) {
+            // Need to undo all of the state changes.
+            ENFORCE(oldFiles.size() == oldHashes.size());
+            for (auto &f : oldFiles) {
+                updateFile(f);
+            }
+            for (auto &oldHash : oldHashes) {
+                globalStateHashes[oldHash.first] = oldHash.second;
+            }
+            for (auto &oldOpenStatus : oldOpenStatuses) {
+                if (oldOpenStatus.second) {
+                    openFiles.insert(oldOpenStatus.first);
+                } else {
+                    auto it = openFiles.find(oldOpenStatus.first);
+                    if (it != openFiles.end()) {
+                        openFiles.erase(it);
+                    }
+                }
+            }
+        }
+        mainThreadStatus = MainThreadStatus::NotRunningSlowPath;
+        return rv;
     }
 }
 
@@ -318,7 +371,7 @@ TypecheckRun LSPState::runLSPQuery(unique_ptr<core::GlobalState> gs, const core:
     ENFORCE(!q.isEmpty());
     initialGS->lspQuery = gs->lspQuery = q;
 
-    auto rv = runTypechecking(move(gs), changedFiles, {}, {}, allFiles);
+    auto rv = runTypechecking(move(gs), changedFiles, {}, allFiles);
     rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
     return rv;
 }
@@ -343,12 +396,8 @@ unique_ptr<core::GlobalState> LSPState::releaseGlobalState() {
     return move(initialGS);
 }
 
-void LSPState::willUpdateFiles() {
-    fileContentsAndHashesUpToDate = false;
-}
-
-void LSPState::waitForUpdatedFiles() {
-    mtx.Await(absl::Condition(&fileContentsAndHashesUpToDate));
+void LSPState::cancelTypechecking() {
+    initialGS->cancelTypechecking->store(true);
 }
 
 } // namespace sorbet::realmain::lsp

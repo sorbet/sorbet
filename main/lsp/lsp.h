@@ -166,23 +166,29 @@ class LSPLoop {
     static void enqueueRequest(const std::shared_ptr<spdlog::logger> &logger, LSPLoop::QueueState &queue,
                                std::unique_ptr<LSPMessage> msg, bool collectThreadCounters = false);
 
+    /**
+     * Tries to cancel a running slow path if `queue` contains updates that would trigger another slow path.
+     * Safe to call from threads other than the main thread.
+     */
+    void maybeCancelSlowPath(LSPLoop::QueueState &queue) LOCKS_EXCLUDED(state.mtx);
+
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg)
         LOCKS_EXCLUDED(state.mtx);
 
     void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
-                                       UnorderedMap<std::string, std::string> &updates)
+                                       UnorderedMap<std::string, std::pair<std::string, bool>> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
     void preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
-                                       UnorderedMap<std::string, std::string> &updates)
+                                       UnorderedMap<std::string, std::pair<std::string, bool>> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
     void preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
-                                       UnorderedMap<std::string, std::string> &updates)
+                                       UnorderedMap<std::string, std::pair<std::string, bool>> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
     void preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
-                                       UnorderedMap<std::string, std::string> &updates)
+                                       UnorderedMap<std::string, std::pair<std::string, bool>> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
     void preprocessSorbetWorkspaceEdits(const std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits,
-                                        UnorderedMap<std::string, std::string> &updates)
+                                        UnorderedMap<std::string, std::pair<std::string, bool>> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
     LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
                                         const DidChangeTextDocumentParams &changeParams) LOCKS_EXCLUDED(state.mtx);
@@ -196,7 +202,7 @@ class LSPLoop {
                                          const std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits)
         LOCKS_EXCLUDED(state.mtx);
     LSPResult commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
-                                         UnorderedMap<std::string, std::string> &updates)
+                                         UnorderedMap<std::string, std::pair<std::string, bool>> &updates)
         EXCLUSIVE_LOCKS_REQUIRED(state.mtx);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
