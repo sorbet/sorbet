@@ -108,6 +108,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryRe
 LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
                                               UnorderedMap<string, pair<string, bool>> &updates) {
     if (updates.size() > 0) {
+        ShowOperation slowPathOp(*this, "SlowPath", "Sorbet: Typechecking...");
         return pushDiagnostics(state.runTypechecking(move(gs), updates));
     } else {
         return LSPResult{move(gs), {}};
