@@ -4,3 +4,17 @@ config-file.rb:2: Method `+` does not exist on `Symbol` component of `Symbol(:"s
 Errors: 1
 ------------------------------
 No errors! Great job.
+------------------------------
+You must pass either `-e` or at least one folder or ruby file.
+
+Typechecker for Ruby
+Usage:
+  sorbet [OPTION...] <path 1> <path 2> ...
+
+  -e, string     Parse an inline ruby string (default: )
+  -q, --quiet    Silence all non-critical errors
+  -v, --verbose  Verbosity level [0-3]
+  -h,            Show short help
+      --help     Show long help
+      --version  Show version
+

@@ -11,3 +11,8 @@ echo ------------------------------
 
 # CLI args override config file args
 "$cwd/main/sorbet" --typed=false 2>&1
+
+echo ------------------------------
+
+# completely ignore config file
+"$cwd/main/sorbet" --ignore-config 2>&1

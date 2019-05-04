@@ -36,11 +36,14 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logge
         stringArgs.emplace_back(argv[0]);
     }
 
-    // Look for .sorbet/config before all other args, so that the CLI args can overwrite the config file
-    auto configFilename = "sorbet/config";
-    if (FileOps::exists(configFilename)) {
-        // TODO(jez) Recurse upwards to find file in parent directory
-        readArgsFromFile(logger, configFilename);
+    auto ignoreConfig = argc > 1 && string_view(argv[1]) == "--ignore-config";
+    if (!ignoreConfig) {
+        // Look for .sorbet/config before all other args, so that the CLI args can overwrite the config file
+        auto configFilename = "sorbet/config";
+        if (FileOps::exists(configFilename)) {
+            // TODO(jez) Recurse upwards to find file in parent directory
+            readArgsFromFile(logger, configFilename);
+        }
     }
 
     for (int i = 1; i < argc; i++) {

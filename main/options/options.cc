@@ -262,6 +262,7 @@ cxxopts::Options buildOptions() {
                                     "error code with this string.",
                                     cxxopts::value<string>()->default_value("https://sorbet.org/docs/error-reference#"),
                                     "url-base");
+    options.add_options("advanced")("ignore-config", "Ignore any options in sorbet/config");
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
     options.add_options("dev")("stop-after", to_string(all_stop_after),
