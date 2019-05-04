@@ -870,16 +870,27 @@ private:
         }
     }
 
+    void processLeftoverSigs(core::MutableContext ctx, InlinedVector<ast::Send *, 1> &lastSigs) {
+        if (!lastSigs.empty()) {
+            // These sigs won't have been parsed, as there was no methods to
+            // attach them to -- parse them here manually to force any errors.
+            for(int i=0; i<lastSigs.size(); ++i) {
+                TypeSyntax::parseSig(ctx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true, core::Symbols::untyped());
+            }
+
+            if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `{}`. No method def following it", "sig");
+            }
+        }
+    }
+
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
         InlinedVector<ast::Send *, 1> lastSigs;
         for (auto &stat : klass->rhs) {
             processStatement(ctx, stat, lastSigs);
         }
-        if (!lastSigs.empty()) {
-            if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Malformed `{}`. No method def following it", "sig");
-            }
-        }
+
+        processLeftoverSigs(ctx, lastSigs);
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
                                   [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
@@ -894,11 +905,9 @@ private:
         if (!ast::isa_tree<ast::EmptyTree>(seq->expr.get())) {
             processStatement(ctx, seq->expr, lastSigs);
         }
-        if (!lastSigs.empty()) {
-            if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Malformed `{}`. No method def following it", "sig");
-            }
-        }
+
+        processLeftoverSigs(ctx, lastSigs);
+
         auto toRemove = remove_if(seq->stats.begin(), seq->stats.end(),
                                   [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
         seq->stats.erase(toRemove, seq->stats.end());
@@ -920,9 +929,6 @@ private:
                             }
                         }
                     }
-
-                    // parsing the sig will transform the sig into a format we can use
-                    TypeSyntax::parseSig(ctx, send, nullptr, true, core::Symbols::untyped());
 
                     lastSigs.emplace_back(send);
                     return;
