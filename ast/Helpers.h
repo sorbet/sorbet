@@ -258,6 +258,15 @@ public:
         return sig;
     }
 
+    static std::unique_ptr<Expression> SigVoid(core::Loc loc, std::unique_ptr<Expression> hash) {
+        auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
+        auto void_ = Send0(loc, std::move(params), core::Names::void_());
+        auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
+        auto sigSend = ast::cast_tree<ast::Send>(sig.get());
+        sigSend->block = Block0(loc, std::move(void_));
+        return sig;
+    }
+
     static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
         auto returns = Send1(loc, Self(loc), core::Names::returns(), std::move(ret));
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
