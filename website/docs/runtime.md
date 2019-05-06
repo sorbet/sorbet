@@ -30,7 +30,10 @@ that:
 - validates the types of arguments passed in against the types in the `sig`
 - calls the original method
 - validates the return type of the original method against what was declared
-- returns what the original method returned
+- returns what the original method returned[^void]
+
+[^void]: The case for `.void` in a `sig` is slightly different. See [the docs
+for void](sigs.md#returns-void-annotating-return-types).
 
 For example:
 
@@ -78,25 +81,33 @@ annotations:
 
 - Automated test runs become tests of our type annotations!
 - Our production observability and monitoring catch bad sigs **early**, before
-  they become entrenched in a codebase!
+  they propagate false assumptions throughout a codebase.
 
 Most people are *either* familiar with a completely typed language (Java, Go,
 etc.) or a completely untyped language like Ruby; a [gradual type
 system](gradual.md) can be very foreign at first, including these runtime
-checks. But it's precisely these runtime checks that make it easier to adopt
-types in an existing codebase.
+checks. But it's precisely these runtime checks that make it easier to drive
+adoption of types in the long run.
 
 
 ## Disabling runtime checks
 
-Sometimes runtime checks don't make sense. For example, for particularly hot
-method calls, we might not have the performance budget to `sig` a method. In
-cases like these, it's possible to opt a single method out of runtime checks.
+Sometimes runtime checks don't make sense. There are two main reasons why
 
-<!-- TODO(jez) Document how to opt out of runtime checks. -->
+1.  For particularly hot method calls, we might not have the performance budget to
+    wrap a method in `sig` checks.
 
-> The API for opting out of runtime errors is currently in flux, and is likely
-> to change a lot before open source. Hang tight!
+2.  For the purposes of convincing an people to adopt Sorbet widely, we might
+    have to make the compromise that adopting Sorbet doesn't affect the runtime
+    behavior of the code.
+
+The solution for (1) is to use the [`.soft` or
+`.checked`](troubleshooting.md#soft-checked) escape hatch when annotating the
+method. See those docs for more information.
+
+For (2), it's possible to change the runtime behavior by defining callbacks. See
+[Runtime Configuration](tconfiguration.md) for more about what callbacks are
+available and how to register them.
 
 ## What's next?
 
