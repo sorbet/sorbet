@@ -64,7 +64,7 @@ bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
-optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
     auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
@@ -588,7 +588,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         }
     }
 
-    if (auto suggestion = maybeSuggestExtendTHelpers(ctx, methodSymbol)) {
+    if (auto suggestion = maybeSuggestExtendTSig(ctx, methodSymbol)) {
         e.addAutocorrect(std::move(*suggestion));
     }
     return true;
