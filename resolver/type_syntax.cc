@@ -413,6 +413,12 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 }
                 return core::Types::untypedUntracked();
             }
+            if (maybeAliased.data(ctx)->isTypeMember()) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("T.class_of can't be used with a T.type_member");
+                }
+                return core::Types::untypedUntracked();
+            }
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isStaticField()) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -420,6 +426,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 }
                 return core::Types::untypedUntracked();
             }
+
             auto singleton = sym.data(ctx)->singletonClass(ctx);
             if (!singleton.exists()) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
