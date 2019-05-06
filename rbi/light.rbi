@@ -148,6 +148,7 @@ module T
   def self.cast(value, type, checked: true); end
   sig {params(type: T.untyped).returns(BasicObject)}
   def self.nilable(type); end
+  sig {returns(T::Private::Methods::DeclBuilder)}
   def self.proc; end
   def self.class_of(klass); end
   def self.noreturn; end
