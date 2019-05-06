@@ -128,8 +128,8 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                                            ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
     }
 
-    body.emplace_back(
-        ast::MK::Sig(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues)), dupName(asgn->lhs.get())));
+    body.emplace_back(ast::MK::Sig(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues)),
+                                   dupName(asgn->lhs.get()), ast::Send::DSLSynthesized));
     body.emplace_back(ast::MK::Method(loc, loc, core::Names::new_(), std::move(newArgs),
                                       ast::MK::Cast(loc, dupName(asgn->lhs.get())),
                                       ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));

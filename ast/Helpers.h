@@ -258,6 +258,14 @@ public:
         return sig;
     }
 
+    static std::unique_ptr<Expression> Sig(core::Loc loc, std::unique_ptr<Expression> hash,
+                                           std::unique_ptr<Expression> ret, u4 flags) {
+        auto sig = Sig(loc, move(hash), move(ret));
+        auto sigSend = ast::cast_tree<ast::Send>(sig.get());
+        sigSend->flags = flags;
+        return sig;
+    }
+
     static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
         auto returns = Send1(loc, Self(loc), core::Names::returns(), std::move(ret));
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
