@@ -1,6 +1,6 @@
 # typed: true
 
-# Originally: https://github.com/stripe/sorbet/issues/399
+# Originally from https://github.com/stripe/sorbet/issues/399
 
 Parent = Struct.new(:foo)
 class Child < Parent
@@ -8,7 +8,7 @@ class Child < Parent
   end
 end
 
-T.reveal_type(Child.new) # Revealed type: `Child`
+T.reveal_type(Child.new) # error: Revealed type: `Child`
 Child.new.hello
 
 class B < Struct
@@ -17,4 +17,4 @@ class B < Struct
   end
 end
 
-T.reveal_type(B.new) # Revealed type: `B`
+T.reveal_type(B.new) # error: Revealed type: `B`

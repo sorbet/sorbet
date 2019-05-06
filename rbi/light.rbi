@@ -51,9 +51,9 @@ class Struct
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
     )
-    .returns(T.class_of(Sorbet::Private::Static::DynamicStruct))
+    .void
   end
-  def self.new(arg0, *arg1, keyword_init: false); end
+  def initialize(arg0, *arg1, keyword_init: false); end
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
