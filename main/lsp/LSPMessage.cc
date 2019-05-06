@@ -133,7 +133,6 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::Initialize:
         case LSPMethod::Initialized:
         case LSPMethod::Shutdown:
-        // These three are used to test merge functionality.
         case LSPMethod::PAUSE:
         case LSPMethod::RESUME:
         case LSPMethod::FENCE:
@@ -142,7 +141,7 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::TextDocumentDefinition:
         case LSPMethod::TextDocumentReferences:
         // I don't know yet if it's a good idea to move these.
-        case LSPMethod::TextDocumentDocumentSymbol:
+        case LSPMethod::WorkspaceSymbol:
         case LSPMethod::TextDocumentSignatureHelp:
         // These are file updates. They shouldn't be delayed (but they can be combined/expedited).
         case LSPMethod::TextDocumentDidOpen:
@@ -159,8 +158,8 @@ bool LSPMessage::isDelayable() const {
         // to merge many characters typed when we hit the slow path. If we're on the fast path,
         // we should be able to keep up with their typing and process the request in time.
         case LSPMethod::TextDocumentCompletion:
-        // VS Code requests workspace symbols automatically and in the background. It's OK to delay these requests.
-        case LSPMethod::WorkspaceSymbol:
+        // VS Code requests document symbols automatically and in the background. It's OK to delay these requests.
+        case LSPMethod::TextDocumentDocumentSymbol:
         // Sorbet processes these requests before they hit the server's queue.
         case LSPMethod::$CancelRequest:
         // Sorbet produces SorbetErrors for a variety of common things, including when it receives a message type it

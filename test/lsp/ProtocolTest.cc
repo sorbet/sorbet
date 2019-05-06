@@ -118,6 +118,12 @@ unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
     return make_unique<LSPMessage>(move(req));
 }
 
+unique_ptr<LSPMessage> ProtocolTest::workspaceSymbol(string_view query) {
+    auto wsSymParams = make_unique<WorkspaceSymbolParams>(string(query));
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::WorkspaceSymbol, move(wsSymParams));
+    return make_unique<LSPMessage>(move(req));
+}
+
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }
@@ -125,11 +131,6 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
     auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange,
                                                 make_unique<WatchmanQueryResponse>("", "", false, updatedFilePaths));
-    return make_unique<LSPMessage>(move(req));
-}
-
-std::unique_ptr<LSPMessage> ProtocolTest::fence() {
-    auto req = make_unique<NotificationMessage>("2.0", LSPMethod::FENCE, JSONNullObject());
     return make_unique<LSPMessage>(move(req));
 }
 

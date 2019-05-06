@@ -68,6 +68,8 @@ protected:
 
     std::unique_ptr<LSPMessage> documentSymbol(std::string_view path);
 
+    std::unique_ptr<LSPMessage> workspaceSymbol(std::string_view query);
+
     std::unique_ptr<LSPMessage> getDefinition(std::string_view path, int line, int character);
 
     std::unique_ptr<LSPMessage> cancelRequest(int id);
@@ -77,8 +79,6 @@ protected:
     void deleteFileFromFS(std::string_view filename);
 
     std::unique_ptr<LSPMessage> watchmanFileUpdate(std::vector<std::string> updatedFilePaths);
-
-    std::unique_ptr<LSPMessage> fence();
 
     std::vector<std::unique_ptr<LSPMessage>> sendRaw(const std::string &json);
 
