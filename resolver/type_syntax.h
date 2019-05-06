@@ -48,7 +48,7 @@ struct ParsedSig {
 
 class TypeSyntax {
 public:
-    static bool isSig(core::MutableContext ctx, ast::Send *send);
+    static bool isSig(core::Context ctx, ast::Send *send);
     static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, bool allowSelfType,
                               core::SymbolRef untypedBlame);
 

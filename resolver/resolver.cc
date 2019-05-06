@@ -1048,8 +1048,7 @@ private:
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    core::TypePtr resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
-                                      core::SymbolRef ofSym) {
+    core::TypePtr resolveConstantType(core::Context ctx, unique_ptr<ast::Expression> &expr, core::SymbolRef ofSym) {
         core::TypePtr result;
         typecase(
             expr.get(), [&](ast::Literal *a) { result = a->value; },
@@ -1148,7 +1147,7 @@ private:
         return true;
     }
 
-    core::SymbolRef methodOwner(core::MutableContext ctx) {
+    core::SymbolRef methodOwner(core::Context ctx) {
         core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
@@ -1306,7 +1305,7 @@ public:
 
 class FlattenWalk {
 private:
-    bool isDefinition(core::MutableContext ctx, const unique_ptr<ast::Expression> &what) {
+    bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
         if (ast::isa_tree<ast::MethodDef>(what.get())) {
             return true;
         }
@@ -1320,7 +1319,7 @@ private:
         return false;
     }
 
-    unique_ptr<ast::Expression> extractClassInit(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
+    unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
         ast::InsSeq::STATS_store inits;
 
         for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
@@ -1393,14 +1392,14 @@ public:
         return classDef;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> methodDef) {
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         auto &methods = curMethodSet();
         methods.stack.emplace_back(methods.methods.size());
         methods.methods.emplace_back();
         return methodDef;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         ENFORCE(!classStack.empty());
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
@@ -1411,7 +1410,7 @@ public:
         return make_unique<ast::EmptyTree>();
     };
 
-    unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> methodDef) {
+    unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
         ENFORCE(methods.methods.size() > methods.stack.back());
@@ -1422,7 +1421,7 @@ public:
         return make_unique<ast::EmptyTree>();
     };
 
-    unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
             ENFORCE(sortedClasses().empty());
             return tree;
@@ -1447,7 +1446,7 @@ public:
         return tree;
     }
 
-    unique_ptr<ast::Expression> addMethods(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -1481,7 +1480,7 @@ private:
         return ret;
     }
 
-    ast::ClassDef::RHS_store addMethods(core::MutableContext ctx, ast::ClassDef::RHS_store rhs) {
+    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
             (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
             // It was only 1 method to begin with, put it back

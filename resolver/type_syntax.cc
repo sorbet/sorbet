@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::resolver {
 
-core::TypePtr getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
+core::TypePtr getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
     core::TypePtr result;
     typecase(
         expr.get(), [&](ast::Literal *lit) { result = lit->value; },
@@ -23,7 +23,7 @@ core::TypePtr getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Express
     return result;
 }
 
-bool isTProc(core::MutableContext ctx, ast::Send *send) {
+bool isTProc(core::Context ctx, ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
             auto recv = send->recv.get();
@@ -36,7 +36,7 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
     return false;
 }
 
-bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
+bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
     if (send->fun != core::Names::sig()) {
         return false;
     }
