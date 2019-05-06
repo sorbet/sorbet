@@ -874,9 +874,8 @@ private:
         if (!lastSigs.empty()) {
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
-            for (int i = 0; i < lastSigs.size(); ++i) {
-                TypeSyntax::parseSig(ctx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
-                                     core::Symbols::untyped());
+            for (auto sig : lastSigs) {
+                TypeSyntax::parseSig(ctx, sig, nullptr, true, core::Symbols::untyped());
             }
 
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
