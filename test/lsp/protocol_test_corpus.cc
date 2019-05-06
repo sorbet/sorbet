@@ -240,7 +240,6 @@ TEST_F(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
                                   4));
 
     auto msgs = send(move(requests));
-    // Expectation: Diagnostics, followed by three document symbol responses.
     ASSERT_GT(msgs.size(), 0);
     EXPECT_TRUE(msgs.at(0)->isNotification());
     EXPECT_EQ(msgs.at(0)->method(), LSPMethod::TextDocumentPublishDiagnostics);

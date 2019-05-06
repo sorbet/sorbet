@@ -305,7 +305,12 @@ unique_ptr<LSPMessage> performMerge(const UnorderedSet<string> &updatedFiles,
 }
 
 /**
- * Merges all consecutive file updates into a single update.
+ * Merges all consecutive file updates into a single update. File updates are also merged if they are only separated by
+ * *delayable* requests (see LSPMessage::isDelayable()). Updates are merged into the earliest file update in the
+ * sequence.
+ *
+ * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
+ * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
  */
 void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     const int originalSize = pendingRequests.size();
