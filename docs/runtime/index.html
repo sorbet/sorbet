@@ -80,7 +80,7 @@ that:</p>
 <li>validates the types of arguments passed in against the types in the <code>sig</code></li>
 <li>calls the original method</li>
 <li>validates the return type of the original method against what was declared</li>
-<li>returns what the original method returned</li>
+<li>returns what the original method returned<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></li>
 </ul>
 <p>For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
@@ -118,22 +118,28 @@ annotations:</p>
 <ul>
 <li>Automated test runs become tests of our type annotations!</li>
 <li>Our production observability and monitoring catch bad sigs <strong>early</strong>, before
-they become entrenched in a codebase!</li>
+they propagate false assumptions throughout a codebase.</li>
 </ul>
 <p>Most people are <em>either</em> familiar with a completely typed language (Java, Go,
 etc.) or a completely untyped language like Ruby; a <a href="/docs/gradual">gradual type
 system</a> can be very foreign at first, including these runtime
-checks. But it's precisely these runtime checks that make it easier to adopt
-types in an existing codebase.</p>
+checks. But it's precisely these runtime checks that make it easier to drive
+adoption of types in the long run.</p>
 <h2><a class="anchor" aria-hidden="true" id="disabling-runtime-checks"></a><a href="#disabling-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Disabling runtime checks</h2>
-<p>Sometimes runtime checks don't make sense. For example, for particularly hot
-method calls, we might not have the performance budget to <code>sig</code> a method. In
-cases like these, it's possible to opt a single method out of runtime checks.</p>
-<!-- TODO(jez) Document how to opt out of runtime checks. -->
-<blockquote>
-<p>The API for opting out of runtime errors is currently in flux, and is likely
-to change a lot before open source. Hang tight!</p>
-</blockquote>
+<p>Sometimes runtime checks don't make sense. There are two main reasons why</p>
+<ol>
+<li><p>For particularly hot method calls, we might not have the performance budget to
+wrap a method in <code>sig</code> checks.</p></li>
+<li><p>For the purposes of convincing an people to adopt Sorbet widely, we might
+have to make the compromise that adopting Sorbet doesn't affect the runtime
+behavior of the code.</p></li>
+</ol>
+<p>The solution for (1) is to use the <a href="/docs/troubleshooting#soft-checked"><code>.soft</code> or
+<code>.checked</code></a> escape hatch when annotating the
+method. See those docs for more information.</p>
+<p>For (2), it's possible to change the runtime behavior by defining callbacks. See
+<a href="/docs/tconfiguration">Runtime Configuration</a> for more about what callbacks are
+available and how to register them.</p>
 <h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What's next?</h2>
 <ul>
 <li><p><a href="/docs/sigs">Signatures</a></p>
@@ -141,6 +147,14 @@ to change a lot before open source. Hang tight!</p>
 checking in our code. Learn the available syntax advanced features of
 signatures.</p></li>
 </ul>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1"  class="footnote-item"><p>The case for <code>.void</code> in a <code>sig</code> is slightly different. See <a href="/docs/sigs#returns-void-annotating-return-types">the docs
+for void</a>. <a href="#fnref1" class="footnote-backref">↩</a></p>
+</li>
+</ol>
+</section>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/static"><span class="arrow-prev">← </span><span>Enabling Static Checks</span></a><a class="docs-next button" href="/docs/rbi"><span>RBI Files</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#runtime-checked-sig-s">Runtime-checked <code>sig</code>s</a></li><li><a href="#why-have-runtime-checks">Why have runtime checks?</a></li><li><a href="#disabling-runtime-checks">Disabling runtime checks</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
