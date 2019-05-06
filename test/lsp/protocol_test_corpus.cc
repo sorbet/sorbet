@@ -173,15 +173,13 @@ TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
         if (msg->isResponse()) {
             assertResponseError(-32800, "cancel", *msg);
             cancelRequestCount++;
-        } else if (msg->isNotification()) {
-            vector<unique_ptr<LSPMessage>> m;
-            m.push_back(move(msg));
-            assertDiagnostics(move(m), {{"foo.rb", 7, "Method `blah` does not exist"}});
+        } else if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
             diagnosticCount++;
         } else {
             ADD_FAILURE() << fmt::format("Unexpected response:\n{}", msg->toJSON());
         }
     }
+    assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
     EXPECT_EQ(cancelRequestCount, 3) << "Expected three cancellation messages.";
     EXPECT_EQ(diagnosticCount, 1) << "Expected a diagnostic error for foo.rb";
 }

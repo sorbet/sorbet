@@ -305,7 +305,10 @@ unique_ptr<LSPMessage> performMerge(const UnorderedSet<string> &updatedFiles,
     return nullptr;
 }
 
-void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
+/**
+ * Merges all consecutive file updates into a single update.
+ */
+void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     int requestsMergedCounter = 0;
     const int originalSize = pendingRequests.size();
     auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
@@ -316,6 +319,7 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
+        const bool canDelay = current->isDelayable();
         const bool preMerged = tryPreMerge(*current, *counts, consecutiveWorkspaceEdits, updatedFiles);
         if (preMerged) {
             requestsMergedCounter++;
@@ -327,8 +331,9 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
             it = pendingRequests.erase(it);
         }
 
-        // Enqueue a merge update if we've encountered a message we couldn't merge, or we are at the end of the queue.
-        if (!preMerged || it == pendingRequests.end()) {
+        // Enqueue a merge update if we've encountered a message we couldn't merge and can't delay, or we are at the end
+        // of the queue.
+        if ((!preMerged && (!canDelay || (it + 1) == pendingRequests.end())) || it == pendingRequests.end()) {
             auto mergedMessage = performMerge(updatedFiles, consecutiveWorkspaceEdits, counts);
             if (mergedMessage != nullptr) {
                 // If we merge n requests into 1 request, then we've only decreased the queue size by n - 1.
@@ -358,6 +363,23 @@ void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
 }
 
+void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
+    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
+        auto &current = *it;
+        if (current->isRequest()) {
+            auto &request = current->asRequest();
+            if (request.id == cancelParams.id) {
+                // We didn't start processing it yet -- great! Cancel it and return.
+                current->canceled = true;
+                return;
+            }
+        }
+    }
+    // Else... it's too late; we have either already processed it, or are currently processing it. Swallow cancellation
+    // and ignore.
+    return;
+}
+
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
                              std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
     Timer timeit(logger, "enqueueRequest");
@@ -366,20 +388,8 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {
-        // see if they are canceling request that we didn't yet even start processing.
-        auto it = findRequestToBeCancelled(state.pendingRequests,
-                                           *get<unique_ptr<CancelParams>>(msg->asNotification().params));
-        if (it != state.pendingRequests.end() && (*it)->isRequest()) {
-            auto canceledRequest = move(*it);
-            canceledRequest->canceled = true;
-            state.pendingRequests.erase(it);
-            // move the canceled request to the front
-            auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
-            state.pendingRequests.insert(itFront, move(canceledRequest));
-            LSPLoop::mergeFileChanges(state.pendingRequests);
-        }
-        // if we started processing it already, well... swallow the cancellation request and
-        // continue computing.
+        cancelRequest(state.pendingRequests, *get<unique_ptr<CancelParams>>(msg->asNotification().params));
+        mergeFileChanges(state.pendingRequests);
     } else if (method == LSPMethod::PAUSE) {
         ENFORCE(!state.paused);
         logger->error("Pausing");
@@ -395,13 +405,9 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
             state.errorCode = 0;
         }
         state.pendingRequests.push_back(move(msg));
-    } else if (method == LSPMethod::SorbetError) {
-        // Place errors at the *front* of the queue.
-        // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.
-        state.pendingRequests.insert(findFirstPositionAfterLSPInitialization(state.pendingRequests), move(msg));
     } else {
         state.pendingRequests.push_back(move(msg));
-        LSPLoop::mergeFileChanges(state.pendingRequests);
+        mergeFileChanges(state.pendingRequests);
     }
 
     if (collectThreadCounters) {
@@ -410,33 +416,6 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
         }
         state.counters = getAndClearThreadCounters();
     }
-}
-
-std::deque<std::unique_ptr<LSPMessage>>::iterator
-LSPLoop::findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
-                                  const CancelParams &cancelParams) {
-    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
-        auto &current = *it;
-        if (current->isRequest()) {
-            auto &request = current->asRequest();
-            if (request.id == cancelParams.id) {
-                return it;
-            }
-        }
-    }
-    return pendingRequests.end();
-}
-
-std::deque<std::unique_ptr<LSPMessage>>::iterator
-LSPLoop::findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
-    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
-        auto &current = *it;
-        auto method = current->method();
-        if (method != LSPMethod::Initialize && method != LSPMethod::Initialized) {
-            return it;
-        }
-    }
-    return pendingRequests.end();
 }
 
 void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) {

@@ -128,6 +128,11 @@ unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFi
     return make_unique<LSPMessage>(move(req));
 }
 
+std::unique_ptr<LSPMessage> ProtocolTest::fence() {
+    auto req = make_unique<NotificationMessage>("2.0", LSPMethod::FENCE, JSONNullObject());
+    return make_unique<LSPMessage>(move(req));
+}
+
 void ProtocolTest::writeFilesToFS(vector<pair<string, string>> files) {
     for (auto &file : files) {
         sourceFileContents[file.first] =
