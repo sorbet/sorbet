@@ -870,6 +870,8 @@ private:
         }
     }
 
+    // Force errors from any signatures that didn't attach to methods.
+    // `lastSigs` will always be empty after this function is called.
     void processLeftoverSigs(core::MutableContext ctx, InlinedVector<ast::Send *, 1> &lastSigs) {
         if (!lastSigs.empty()) {
             // These sigs won't have been parsed, as there was no methods to
@@ -881,6 +883,8 @@ private:
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`. No method def following it", "sig");
             }
+
+            lastSigs.clear();
         }
     }
 
