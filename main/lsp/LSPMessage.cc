@@ -135,7 +135,6 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::Shutdown:
         case LSPMethod::PAUSE:
         case LSPMethod::RESUME:
-        case LSPMethod::FENCE:
         // Definition and reference requests are typically requested directly by the user, so we shouldn't delay
         // processing them.
         case LSPMethod::TextDocumentDefinition:
