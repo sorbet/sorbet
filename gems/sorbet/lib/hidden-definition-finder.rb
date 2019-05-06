@@ -131,6 +131,7 @@ class Sorbet::Private::HiddenMethodFinder
 
   def write_constants
     puts "Printing your code's symbol table into #{SOURCE_CONSTANTS}"
+    read, write = IO.pipe
     io = IO.popen(
       [
         'srb',
@@ -140,10 +141,11 @@ class Sorbet::Private::HiddenMethodFinder
         '--silence-dev-message',
         '--no-error-count',
       ],
-      err: '/dev/null'
+      err: write
     )
     File.write(SOURCE_CONSTANTS, io.read)
     io.close
+    raise "Your source can't be read by Sorbet.\nYou can try `srb tc --print=symbol-table-json -vvvv --max-threads 1` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe these errors will help:\n#{read.gets}" if File.read(SOURCE_CONSTANTS).empty?
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     # Change dir to deal with you having a sorbet/config in your cwd
