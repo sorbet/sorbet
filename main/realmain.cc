@@ -150,7 +150,7 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
 
 struct AutogenResult {
     CounterState counters;
-    vector<string> prints;
+    vector<pair<int, string>> prints;
 };
 
 void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &workers,
@@ -158,54 +158,55 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(indexed.size());
-    for (auto &file : indexed) {
-        fileq->push(&file, 1);
+    auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
+    for (int i = 0; i < indexed.size(); ++i) {
+        fileq->push(move(i), 1);
     }
 
-    workers.multiplexJob("runAutogen", [&ctx, &opts, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
             Timer timeit(logger, "autogenWorker");
-            ast::ParsedFile *tree = nullptr;
+            int idx = 0;
 
-            for (auto result = fileq->try_pop(tree); !result.done(); result = fileq->try_pop(tree)) {
+            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
-                if (tree->file.data(ctx).isRBI()) {
+                auto &tree = indexed[idx];
+                if (tree.file.data(ctx).isRBI()) {
                     continue;
                 }
-                auto pf = autogen::Autogen::generate(ctx, move(*tree));
-                *tree = move(pf.tree);
+                auto pf = autogen::Autogen::generate(ctx, move(tree));
+                tree = move(pf.tree);
 
                 if (opts.print.Autogen) {
                     Timer timeit(logger, "autogenToString");
-                    out.prints.emplace_back(pf.toString(ctx));
+                    out.prints.emplace_back(make_pair(idx, pf.toString(ctx)));
                 }
                 if (opts.print.AutogenMsgPack) {
                     Timer timeit(logger, "autogenToMsgpack");
-                    out.prints.emplace_back(pf.toMsgpack(ctx, opts.autogenVersion));
+                    out.prints.emplace_back(make_pair(idx, pf.toMsgpack(ctx, opts.autogenVersion)));
                 }
             }
         }
 
         out.counters = getAndClearThreadCounters();
-        if (out.counters.hasNullCounters()) {
-            logger->info("null counters before push?");
-        }
         resultq->push(move(out), n);
     });
 
     AutogenResult out;
+    vector<pair<int, string>> merged;
     for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
          res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
         if (!res.gotItem()) {
             continue;
         }
         counterConsume(move(out.counters));
-        for (auto &s : out.prints) {
-            fmt::print("{}", s);
-        }
+        merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
+    }
+    fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
+    for (auto &elem : merged) {
+        fmt::print("{}", elem.second);
     }
 } // namespace sorbet::realmain
 
