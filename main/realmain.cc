@@ -148,6 +148,67 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
+struct AutogenResult {
+    CounterState counters;
+    vector<string> prints;
+};
+
+void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &workers,
+                vector<ast::ParsedFile> &indexed) {
+    Timer timeit(logger, "autogen");
+
+    auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(indexed.size());
+    for (auto &file : indexed) {
+        fileq->push(&file, 1);
+    }
+
+    workers.multiplexJob("runAutogen", [&ctx, &opts, fileq, resultq]() {
+        AutogenResult out;
+        int n = 0;
+        {
+            Timer timeit(logger, "autogenWorker");
+            ast::ParsedFile *tree = nullptr;
+
+            for (auto result = fileq->try_pop(tree); !result.done(); result = fileq->try_pop(tree)) {
+                ++n;
+                if (tree->file.data(ctx).isRBI()) {
+                    continue;
+                }
+                auto pf = autogen::Autogen::generate(ctx, move(*tree));
+                *tree = move(pf.tree);
+
+                if (opts.print.Autogen) {
+                    Timer timeit(logger, "autogenToString");
+                    out.prints.emplace_back(pf.toString(ctx));
+                }
+                if (opts.print.AutogenMsgPack) {
+                    Timer timeit(logger, "autogenToMsgpack");
+                    out.prints.emplace_back(pf.toMsgpack(ctx, opts.autogenVersion));
+                }
+            }
+        }
+
+        out.counters = getAndClearThreadCounters();
+        if (out.counters.hasNullCounters()) {
+            logger->info("null counters before push?");
+        }
+        resultq->push(move(out), n);
+    });
+
+    AutogenResult out;
+    for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
+         res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
+        if (!res.gotItem()) {
+            continue;
+        }
+        counterConsume(move(out.counters));
+        for (auto &s : out.prints) {
+            fmt::print("{}", s);
+        }
+    }
+} // namespace sorbet::realmain
+
 int realmain(int argc, char *argv[]) {
     absl::InitializeSymbolizer(argv[0]);
     returnCode = 0;
@@ -327,21 +388,7 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
             }
 
-            Timer timeit(logger, "autogen");
-            for (auto &tree : indexed) {
-                if (tree.file.data(ctx).isRBI()) {
-                    continue;
-                }
-                auto pf = autogen::Autogen::generate(ctx, move(tree));
-                tree = move(pf.tree);
-
-                if (opts.print.Autogen) {
-                    fmt::print("{}", pf.toString(ctx));
-                }
-                if (opts.print.AutogenMsgPack) {
-                    fmt::print("{}", pf.toMsgpack(ctx, opts.autogenVersion));
-                }
-            }
+            runAutogen(ctx, opts, workers, indexed);
         } else {
             indexed = pipeline::resolve(*gs, move(indexed), opts);
             if (opts.stressIncrementalResolver) {
