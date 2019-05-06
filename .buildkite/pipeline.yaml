@@ -37,7 +37,7 @@ steps:
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     agents:
-      os: linux
+      os: mac
   - label: "Release build: static on Linux"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
