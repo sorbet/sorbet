@@ -150,10 +150,10 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 auto timeit = make_unique<Timer>(logger, "getNewRequest");
                 while (true) {
                     auto msg = getNewRequest(logger, inputFd, buffer);
-                    const bool mutatesFileContents = msg->mutatesFileContents();
                     {
                         absl::MutexLock lck(&mtx); // guards guardedState.
                         if (msg) {
+                            const bool mutatesFileContents = msg->mutatesFileContents();
                             enqueueRequest(logger, guardedState, move(msg), true);
                             if (mutatesFileContents) {
                                 this->maybeCancelSlowPath(guardedState);
