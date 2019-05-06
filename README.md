@@ -277,7 +277,6 @@ There are two ways to run your changes to `sorbet` over pay-server:
     This requires a bit more setup. See the section below on [Running over
     pay-server locally](#running-over-pay-server-locally).
 
-[ci/stripe-internal-sorbet-pay-server-sha]: https://git.corp.stripe.com/stripe-internal/sorbet/blob/master/ci/stripe-internal-sorbet-pay-server-sha
 [sorbet/sorbet.sha]: https://git.corp.stripe.com/stripe-internal/pay-server/blob/master/sorbet/sorbet.sha
 
 
