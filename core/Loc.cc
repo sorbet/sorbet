@@ -149,7 +149,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string Loc::showRaw(const GlobalState &gs) const {
     auto path = file().data(gs).path();
-    if (!exists()) {
+    if (!exists() || path == "https://github.com/stripe/sorbet/tree/master/rbi/light.rbi") {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
     auto [start, end] = this->position(gs);
