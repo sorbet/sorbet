@@ -23,7 +23,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(<root>))\louterLoops: 1\l<U <statTemp>>$8: Integer(2) = 2\l<D <U forTemp> $2>: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$8: Integer(2))\l<U <statTemp>>$10: FalseClass = false\l<U <ifTemp>>$9: T::Boolean = <U <statTemp>>$10: FalseClass.<U !>()\l<U <ifTemp>>$9: T::Boolean\l"
+        label = "block[id=5](<U <self>>: T.class_of(<root>))\louterLoops: 1\l<U <statTemp>>$8: Integer(2) = 2\l<D <U forTemp> $2>: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$8: Integer(2))\l<U <statTemp>>$10: FalseClass = false\l<U <ifTemp>>$9: TrueClass = <U <statTemp>>$10: FalseClass.<U !>()\l<U <ifTemp>>$9: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];
@@ -76,7 +76,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_17" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" [
-        label = "block[id=18](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\louterLoops: 1\l<U <statTemp>>$32: TrueClass = true\l<U <whileTemp>>$31: T::Boolean = <U <statTemp>>$32: TrueClass.<U !>()\l<U <whileTemp>>$31: T::Boolean\l"
+        label = "block[id=18](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\louterLoops: 1\l<U <statTemp>>$32: TrueClass = true\l<U <whileTemp>>$31: FalseClass = <U <statTemp>>$32: TrueClass.<U !>()\l<U <whileTemp>>$31: FalseClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_21" [style="bold"];
@@ -88,7 +88,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" [
-        label = "block[id=21](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\louterLoops: 1\l<U <statTemp>>$36: Integer(2) = 2\l<U <statTemp>>$34: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$36: Integer(2))\l<U y>: Integer(1) = 1\l<unconditional>\l"
+        label = "block[id=21](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\louterLoops: 1\l<U <statTemp>>$36 = 2\l<U <statTemp>>$34 = <U <self>>.<U puts>(<U <statTemp>>$36)\l<U y> = 1\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_21" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];

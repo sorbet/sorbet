@@ -9,4 +9,7 @@ class FalseClass
   sig {params(obj: BasicObject).returns(T::Boolean)}
   def |(obj)
   end
+  sig {returns(TrueClass)}
+  def !
+  end
 end

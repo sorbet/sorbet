@@ -991,6 +991,9 @@ class FalseClass
   sig {params(obj: BasicObject).returns(T::Boolean)}
   def |(obj)
   end
+  sig {returns(TrueClass)}
+  def !
+  end
 end
 class File < IO
   NULL = T.let(T.unsafe(nil), String)
@@ -1859,6 +1862,8 @@ class NilClass < Object
     .returns(T::Boolean)
   end
   def |(obj); end
+  sig {returns(TrueClass)}
+  def nil?; end
 end
 class Numeric < Object
   include Comparable
@@ -2535,5 +2540,8 @@ class TrueClass
   end
   sig {params(obj: BasicObject).returns(TrueClass)}
   def |(obj)
+  end
+  sig {returns(FalseClass)}
+  def !
   end
 end

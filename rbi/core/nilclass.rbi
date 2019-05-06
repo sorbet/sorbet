@@ -41,4 +41,7 @@ class NilClass < Object
     .returns(T::Boolean)
   end
   def |(obj); end
+
+  sig {returns(TrueClass)}
+  def nil?; end
 end
