@@ -6,7 +6,7 @@ steps:
   - label: "Linters"
     command: .buildkite/linters.sh
     agents:
-      os: mac
+      os: linux
   - label: "Test: sorbet-static on Mac"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
@@ -21,12 +21,12 @@ steps:
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
     agents:
-      os: mac
+      os: linux
   - label: "Test: sorbet-runtime"
     command: .buildkite/test-and-build-ruby-runtime.sh
     artifact_paths: _out_/**/*
     agents:
-      os: mac
+      os: linux
   - wait: ~
   - label: "Release build: static on Mac"
     artifact_paths: _out_/**/*
@@ -37,7 +37,7 @@ steps:
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     agents:
-      os: mac
+      os: linux
   - label: "Release build: static on Linux"
     artifact_paths: _out_/**/*
     command: .buildkite/release-static.sh
