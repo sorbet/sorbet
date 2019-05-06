@@ -750,6 +750,20 @@ SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
     return singleton;
 }
 
+SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
+    auto classSymbol = this->ref(gs);
+
+    while (true) {
+        auto attachedClass = classSymbol.data(gs)->attachedClass(gs);
+        if (!attachedClass.exists()) {
+            break;
+        }
+        classSymbol = attachedClass;
+    }
+
+    return classSymbol;
+}
+
 SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
         if (depthLimit == 0) {
@@ -954,4 +968,5 @@ const Symbol *SymbolData::operator->() const {
     runDebugOnlyCheck();
     return &symbol;
 };
+
 } // namespace sorbet::core

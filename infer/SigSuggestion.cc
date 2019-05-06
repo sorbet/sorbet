@@ -9,26 +9,6 @@ using namespace std;
 namespace sorbet::infer {
 
 namespace {
-struct LocAndColumn {
-    core::Loc loc;
-    u4 padding;
-};
-
-//
-// For a given Loc, returns
-//
-// - the Loc corresponding to the first non-whitespace character on this line, and
-// - how many characters of the start of this line are whitespace.
-//
-LocAndColumn findStartOfLine(core::Context ctx, core::Loc loc) {
-    core::Loc::Detail startDetail = loc.position(ctx).first;
-    u4 lineStart = core::Loc::pos2Offset(loc.file().data(ctx), {startDetail.line, 1});
-    string_view lineView = loc.file().data(ctx).source().substr(lineStart);
-
-    u4 padding = lineView.find_first_not_of(" \t");
-    u4 startOffset = lineStart + padding;
-    return {core::Loc(loc.file(), startOffset, startOffset), padding};
-}
 
 optional<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
     auto file = loc.file();
@@ -77,19 +57,7 @@ optional<u4> startOfExistingReturn(core::Context ctx, core::Loc loc) {
     }
 }
 
-// Walks the chain of attached classes to find the one at the end of the chain.
-core::SymbolRef topAttachedClass(core::Context ctx, core::SymbolRef classSymbol) {
-    while (true) {
-        auto attachedClass = classSymbol.data(ctx)->attachedClass(ctx);
-        if (!attachedClass.exists()) {
-            break;
-        }
-        classSymbol = attachedClass;
-    }
-    return classSymbol;
-}
-
-bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
+bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
     ENFORCE(enclosingSingletonClass.exists());
@@ -99,8 +67,8 @@ bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
 optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
-    auto enclosingClass = topAttachedClass(ctx, method->enclosingClass(ctx));
-    if (extendsTHelpers(ctx, enclosingClass)) {
+    auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
+    if (extendsTSig(ctx, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
     }
@@ -119,12 +87,12 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
     core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    auto thisLinePadding = findStartOfLine(ctx, thisLineLoc).padding;
+    auto [_, thisLinePadding] = thisLineLoc.findStartOfLine(ctx);
 
     ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
     core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    auto [replacementLoc, nextLinePadding] = findStartOfLine(ctx, nextLineLoc);
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.findStartOfLine(ctx);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
@@ -585,7 +553,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         fmt::format_to(ss, "returns({})}}", guessedReturnType->show(ctx));
     }
 
-    auto [replacementLoc, padding] = findStartOfLine(ctx, loc);
+    auto [replacementLoc, padding] = loc.findStartOfLine(ctx);
     string spaces(padding, ' ');
     bool hasExistingSig = methodSymbol.data(ctx)->resultType != nullptr;
 
