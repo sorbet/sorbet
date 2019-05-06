@@ -152,6 +152,10 @@ string Loc::showRaw(const GlobalState &gs) const {
     if (!exists()) {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
+    if (path == "https://github.com/stripe/sorbet/tree/master/rbi/light.rbi") {
+        // This is so that changing light.rbi doesn't necessarily mean invalidating every symbol-table exp test.
+        return fmt::format("Loc {{file={} start=removed end=removed}}", path);
+    }
     auto [start, end] = this->position(gs);
     return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
 }
