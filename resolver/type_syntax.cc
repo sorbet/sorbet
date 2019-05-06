@@ -206,8 +206,6 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                         }
-
-                        // Error will be reported in infer
                         break;
                     }
 
