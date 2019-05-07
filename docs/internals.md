@@ -579,6 +579,15 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 ### Other topics to document
 
 - `sanityCheck`s and `ENFORCE`s
+  - both: only in debug builds
+  - `sanityCheck`: internal consistency check, run at pre-determined times (like
+    "after desugar")
+  - `ENFORCE`: in-line assertion (pre- / post-condition)
+- `show` vs `toString`
+  - most data structures have both methods
+  - `show` is "something that could be shown to the user" (like Rust `Display`
+    trait)
+  - `toString` is "internal representation" (like Rust `Debug` trait)
 - `gems/sorbet/` (`srb init`)
 - `gems/sorbet-runtime/`
 
