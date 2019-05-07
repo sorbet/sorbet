@@ -6,7 +6,7 @@ steps:
   - label: "Linters"
     command: .buildkite/linters.sh
     agents:
-      os: mac
+      os: linux
   - label: "Test: sorbet-static on Mac"
     command: .buildkite/test-static-sanitized.sh
     artifact_paths: _out_/**/*
