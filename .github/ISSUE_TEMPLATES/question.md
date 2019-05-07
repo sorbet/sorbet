@@ -1,7 +1,7 @@
 ---
 name: Ask a question
 about: For when you're unsure how to do something in Sorbet.
-labels: question
+labels: question, unconfirmed
 ---
 
 Before asking your question, please make sure these are true:
