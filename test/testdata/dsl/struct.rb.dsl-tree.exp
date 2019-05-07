@@ -267,7 +267,7 @@ class <emptyTree><<C <U <root>>>> < ()
     def <U main><<C <U <todo sym>>>>(&<U <blk>>)
       begin
         <U a> = <emptyTree>::<C <U Struct>>.<U new>(:"foo")
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>, <emptyTree>::<C <U Class>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>, <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(), <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(2), <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStruct>>::<C <U A>>)

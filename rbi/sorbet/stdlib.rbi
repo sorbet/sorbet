@@ -23,6 +23,9 @@ class Struct
 
   sig {returns(T::Array[Symbol])}
   def self.members; end
+
+  sig {params(args: T.untyped).returns(Struct)}
+  def new(*args); end
 end
 
 # Type alias for file-like objects. Many, but not all, file-like

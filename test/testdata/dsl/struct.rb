@@ -79,7 +79,11 @@ end
 class Main
     def main
         a = Struct.new(:foo)
-        T.assert_type!(a, Class)
+        # a.is_a?(Struct) is actually false, because `Struct.new` dynamically
+        # allocates and returns a class object for this struct, but we don't
+        # have a great way to model that statically in the case where the
+        # result is assigned to a local variable, not a constant.
+        T.assert_type!(a, Struct)
         T.assert_type!(a.new, Struct)
         T.assert_type!(a.new(2), Struct)
 
