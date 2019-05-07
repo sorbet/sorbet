@@ -122,6 +122,50 @@ optional<MessageId> LSPMessage::id() const {
     return nullopt;
 }
 
+bool LSPMessage::isDelayable() const {
+    if (isResponse() || canceled) {
+        // Client responses to our inquiries or canceled requests should never block file update merges.
+        return true;
+    }
+    switch (method()) {
+        // These shouldn't be delayed or moved.
+        case LSPMethod::Exit:
+        case LSPMethod::Initialize:
+        case LSPMethod::Initialized:
+        case LSPMethod::Shutdown:
+        case LSPMethod::PAUSE:
+        case LSPMethod::RESUME:
+        // Definition, reference, and workspace symbol requests are typically requested directly by the user, so we
+        // shouldn't delay processing them.
+        case LSPMethod::TextDocumentDefinition:
+        case LSPMethod::TextDocumentReferences:
+        case LSPMethod::WorkspaceSymbol:
+        // These requests involve a specific file location, and should never be delayed.
+        case LSPMethod::TextDocumentHover:
+        case LSPMethod::TextDocumentCompletion:
+        case LSPMethod::TextDocumentSignatureHelp:
+        // These are file updates. They shouldn't be delayed (but they can be combined/expedited).
+        case LSPMethod::TextDocumentDidOpen:
+        case LSPMethod::TextDocumentDidChange:
+        case LSPMethod::TextDocumentDidClose:
+        case LSPMethod::SorbetWorkspaceEdit:
+        case LSPMethod::SorbetWatchmanFileChange:
+            return false;
+        // VS Code requests document symbols automatically and in the background. It's OK to delay these requests.
+        case LSPMethod::TextDocumentDocumentSymbol:
+        // Sorbet processes these requests before they hit the server's queue.
+        case LSPMethod::$CancelRequest:
+        // Sorbet produces SorbetErrors for a variety of common things, including when it receives a message type it
+        // doesn't care about (like textDocument/didSave). We should be able to merge file updates through them.
+        case LSPMethod::SorbetError:
+        // These will never show up in the server's queue, but are included for complete case coverage.
+        case LSPMethod::WindowShowMessage:
+        case LSPMethod::TextDocumentPublishDiagnostics:
+        case LSPMethod::SorbetShowOperation:
+            return true;
+    }
+}
+
 bool LSPMessage::isRequest() const {
     auto reqMsg = std::get_if<unique_ptr<RequestMessage>>(&msg);
     return !!reqMsg;

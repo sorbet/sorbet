@@ -204,10 +204,6 @@ class LSPLoop {
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params);
     /**
-     * Merges all consecutive file updates into a single update.
-     */
-    static void mergeFileChanges(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
-    /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
      * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.
      * If `collectThreadCounters` is `true`, it also merges in thread-local counters into the QueueState counters.
@@ -215,11 +211,6 @@ class LSPLoop {
     static void enqueueRequest(const std::shared_ptr<spd::logger> &logger, LSPLoop::QueueState &queue,
                                std::unique_ptr<LSPMessage> msg, bool collectThreadCounters = false);
 
-    static std::deque<std::unique_ptr<LSPMessage>>::iterator
-    findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
-                             const CancelParams &cancellationRequest);
-    static std::deque<std::unique_ptr<LSPMessage>>::iterator
-    findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests);
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
 
     void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,

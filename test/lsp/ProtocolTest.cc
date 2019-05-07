@@ -118,6 +118,12 @@ unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
     return make_unique<LSPMessage>(move(req));
 }
 
+unique_ptr<LSPMessage> ProtocolTest::workspaceSymbol(string_view query) {
+    auto wsSymParams = make_unique<WorkspaceSymbolParams>(string(query));
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::WorkspaceSymbol, move(wsSymParams));
+    return make_unique<LSPMessage>(move(req));
+}
+
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }

@@ -145,21 +145,21 @@ TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
                                   "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                   "{returns(Integer)}\n  def bar\n    false\n  end\nend\n",
                                   2));
-    requests.push_back(documentSymbol("foo.rb"));
+    requests.push_back(workspaceSymbol("Foo"));
     auto cancelId1 = nextId - 1;
     // Invalid: Returns float
     requests.push_back(changeFile("foo.rb",
                                   "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                   "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
                                   3));
-    requests.push_back(documentSymbol("foo.rb"));
+    requests.push_back(workspaceSymbol("Foo"));
     auto cancelId2 = nextId - 1;
     // Invalid: Returns unknown identifier.
     requests.push_back(changeFile("foo.rb",
                                   "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                   "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
                                   4));
-    requests.push_back(documentSymbol("foo.rb"));
+    requests.push_back(workspaceSymbol("Foo"));
     auto cancelId3 = nextId - 1;
     requests.push_back(cancelRequest(cancelId1));
     requests.push_back(cancelRequest(cancelId2));
@@ -173,15 +173,13 @@ TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
         if (msg->isResponse()) {
             assertResponseError(-32800, "cancel", *msg);
             cancelRequestCount++;
-        } else if (msg->isNotification()) {
-            vector<unique_ptr<LSPMessage>> m;
-            m.push_back(move(msg));
-            assertDiagnostics(move(m), {{"foo.rb", 7, "Method `blah` does not exist"}});
+        } else if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
             diagnosticCount++;
         } else {
             ADD_FAILURE() << fmt::format("Unexpected response:\n{}", msg->toJSON());
         }
     }
+    assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
     EXPECT_EQ(cancelRequestCount, 3) << "Expected three cancellation messages.";
     EXPECT_EQ(diagnosticCount, 1) << "Expected a diagnostic error for foo.rb";
 }
@@ -221,13 +219,44 @@ TEST_F(ProtocolTest, MergesDidChangesAcrossFiles) {
                                    {"foo.rb", 7, "Method `blah` does not exist"}});
 }
 
-TEST_F(ProtocolTest, DoesNotMergeFileChangesAcrossOtherRequests) {
+TEST_F(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
+    assertDiagnostics(initializeLSP(), {});
+    vector<unique_ptr<LSPMessage>> requests;
+    // Invalid: Returns false.
+    requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                          "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
+    // Document symbol is delayable.
+    requests.push_back(documentSymbol("foo.rb"));
+    // Invalid: Returns float
+    requests.push_back(changeFile("foo.rb",
+                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                  "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
+                                  3));
+    requests.push_back(documentSymbol("foo.rb"));
+    // Invalid: Returns unknown identifier.
+    requests.push_back(changeFile("foo.rb",
+                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
+                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  4));
+
+    auto msgs = send(move(requests));
+    ASSERT_GT(msgs.size(), 0);
+    EXPECT_TRUE(msgs.at(0)->isNotification());
+    EXPECT_EQ(msgs.at(0)->method(), LSPMethod::TextDocumentPublishDiagnostics);
+    assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
+
+    ASSERT_EQ(msgs.size(), 3) << "Expected a diagnostic error, followed by two document symbol responses.";
+    EXPECT_TRUE(msgs.at(1)->isResponse());
+    EXPECT_TRUE(msgs.at(2)->isResponse());
+}
+
+TEST_F(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                           "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
     // Should block ^ and V from merging.
-    requests.push_back(documentSymbol("foo.rb"));
+    requests.push_back(workspaceSymbol("foo.rb"));
     requests.push_back(changeFile("foo.rb",
                                   "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                   "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",

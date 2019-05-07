@@ -230,8 +230,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 }
 
 /**
- * Returns true if the given message is a workspace edit that can be merged with other workspace edits.
- * If it can be merged, it moves the message's contents into edits or updatedFiles and updates counters ('preMerge').
+ * Returns true if the given message's contents have been merged with the arguments of this function.
  */
 bool tryPreMerge(LSPMessage &current, SorbetWorkspaceEditCounts &counts,
                  vector<unique_ptr<SorbetWorkspaceEdit>> &changes, UnorderedSet<string> &updatedFiles) {
@@ -305,57 +304,71 @@ unique_ptr<LSPMessage> performMerge(const UnorderedSet<string> &updatedFiles,
     return nullptr;
 }
 
-void LSPLoop::mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
-    int requestsMergedCounter = 0;
+/**
+ * Merges all consecutive file updates into a single update. File updates are also merged if they are only separated by
+ * *delayable* requests (see LSPMessage::isDelayable()). Updates are merged into the earliest file update in the
+ * sequence.
+ *
+ * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
+ * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
+ */
+void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
     const int originalSize = pendingRequests.size();
-    auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-    vector<unique_ptr<SorbetWorkspaceEdit>> consecutiveWorkspaceEdits;
-    UnorderedSet<string> updatedFiles;
-    FlowId firstMergedTimestamp{0};
-    int firstMergedCounter = 0;
-
+    int requestsMergedCounter = 0;
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
-        auto &current = *it;
-        const bool preMerged = tryPreMerge(*current, *counts, consecutiveWorkspaceEdits, updatedFiles);
-        if (preMerged) {
-            requestsMergedCounter++;
-            if (firstMergedTimestamp.id == 0) {
-                firstMergedTimestamp = current->startTracer;
-                firstMergedCounter = current->counter;
-            }
-            // N.B.: Advances `it` to next item.
+        auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
+        vector<unique_ptr<SorbetWorkspaceEdit>> consecutiveWorkspaceEdits;
+        UnorderedSet<string> updatedFiles;
+        if (tryPreMerge(**it, *counts, consecutiveWorkspaceEdits, updatedFiles)) {
+            // See which newer requests we can enqueue. We want to merge them *backwards*.
+            int firstMergedCounter = (*it)->counter;
+            FlowId firstMergedTimestamp = (*it)->startTracer;
             it = pendingRequests.erase(it);
-        }
-
-        // Enqueue a merge update if we've encountered a message we couldn't merge, or we are at the end of the queue.
-        if (!preMerged || it == pendingRequests.end()) {
-            auto mergedMessage = performMerge(updatedFiles, consecutiveWorkspaceEdits, counts);
-            if (mergedMessage != nullptr) {
-                // If we merge n requests into 1 request, then we've only decreased the queue size by n - 1.
-                requestsMergedCounter--;
-                mergedMessage->startTracer = firstMergedTimestamp;
-                mergedMessage->counter = firstMergedCounter;
-
-                // Insert merged updates, then push iterator back to where it was.
-                it = pendingRequests.insert(it, move(mergedMessage)) + 1;
-
-                // Clear state for next round.
-                counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-                firstMergedTimestamp.id = 0;
-                firstMergedCounter = 0;
-                updatedFiles.clear();
-                consecutiveWorkspaceEdits.clear();
+            int skipped = 0;
+            while (it != pendingRequests.end()) {
+                const bool didMerge = tryPreMerge(**it, *counts, consecutiveWorkspaceEdits, updatedFiles);
+                // Stop if the pointed-to message failed to merge AND is not a delayable message.
+                if (!didMerge && !(*it)->isDelayable()) {
+                    break;
+                }
+                if (didMerge) {
+                    // Advances mergeWith to next item.
+                    it = pendingRequests.erase(it);
+                    requestsMergedCounter++;
+                } else {
+                    ++it;
+                    skipped++;
+                }
             }
-        }
-
-        if (!preMerged) {
-            // preMerged is only `false` if `it` points to a non-mergeable item right now.
-            ENFORCE(it != pendingRequests.end());
-            // No messages were merged, so `it` needs to be advanced.
+            auto mergedMessage = performMerge(updatedFiles, consecutiveWorkspaceEdits, counts);
+            mergedMessage->startTracer = firstMergedTimestamp;
+            mergedMessage->counter = firstMergedCounter;
+            // Return to where first message was found.
+            it -= skipped;
+            // Replace first message with the merged message, and skip back ahead to where we were.
+            it = pendingRequests.insert(it, move(mergedMessage)) + skipped + 1;
+        } else {
             it++;
         }
     }
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
+}
+
+void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
+    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
+        auto &current = *it;
+        if (current->isRequest()) {
+            auto &request = current->asRequest();
+            if (request.id == cancelParams.id) {
+                // We didn't start processing it yet -- great! Cancel it and return.
+                current->canceled = true;
+                return;
+            }
+        }
+    }
+    // Else... it's too late; we have either already processed it, or are currently processing it. Swallow cancellation
+    // and ignore.
+    return;
 }
 
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
@@ -366,20 +379,8 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {
-        // see if they are canceling request that we didn't yet even start processing.
-        auto it = findRequestToBeCancelled(state.pendingRequests,
-                                           *get<unique_ptr<CancelParams>>(msg->asNotification().params));
-        if (it != state.pendingRequests.end() && (*it)->isRequest()) {
-            auto canceledRequest = move(*it);
-            canceledRequest->canceled = true;
-            state.pendingRequests.erase(it);
-            // move the canceled request to the front
-            auto itFront = findFirstPositionAfterLSPInitialization(state.pendingRequests);
-            state.pendingRequests.insert(itFront, move(canceledRequest));
-            LSPLoop::mergeFileChanges(state.pendingRequests);
-        }
-        // if we started processing it already, well... swallow the cancellation request and
-        // continue computing.
+        cancelRequest(state.pendingRequests, *get<unique_ptr<CancelParams>>(msg->asNotification().params));
+        mergeFileChanges(state.pendingRequests);
     } else if (method == LSPMethod::PAUSE) {
         ENFORCE(!state.paused);
         logger->error("Pausing");
@@ -395,13 +396,9 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
             state.errorCode = 0;
         }
         state.pendingRequests.push_back(move(msg));
-    } else if (method == LSPMethod::SorbetError) {
-        // Place errors at the *front* of the queue.
-        // Otherwise, they could prevent mergeFileChanges from merging adjacent updates.
-        state.pendingRequests.insert(findFirstPositionAfterLSPInitialization(state.pendingRequests), move(msg));
     } else {
         state.pendingRequests.push_back(move(msg));
-        LSPLoop::mergeFileChanges(state.pendingRequests);
+        mergeFileChanges(state.pendingRequests);
     }
 
     if (collectThreadCounters) {
@@ -410,33 +407,6 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
         }
         state.counters = getAndClearThreadCounters();
     }
-}
-
-std::deque<std::unique_ptr<LSPMessage>>::iterator
-LSPLoop::findRequestToBeCancelled(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests,
-                                  const CancelParams &cancelParams) {
-    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
-        auto &current = *it;
-        if (current->isRequest()) {
-            auto &request = current->asRequest();
-            if (request.id == cancelParams.id) {
-                return it;
-            }
-        }
-    }
-    return pendingRequests.end();
-}
-
-std::deque<std::unique_ptr<LSPMessage>>::iterator
-LSPLoop::findFirstPositionAfterLSPInitialization(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests) {
-    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
-        auto &current = *it;
-        auto method = current->method();
-        if (method != LSPMethod::Initialize && method != LSPMethod::Initialized) {
-            return it;
-        }
-    }
-    return pendingRequests.end();
 }
 
 void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) {
