@@ -2,6 +2,7 @@
 # disable-fast-path: true
 module Interface
   extend T::Sig
+  extend T::Helpers
 
   interface!
 
@@ -15,6 +16,7 @@ end
 
 module InterfaceChild
   extend T::Sig
+  extend T::Helpers
 
   interface!
   include Interface
@@ -28,6 +30,7 @@ end
 
 class Abstract
   extend T::Sig
+  extend T::Helpers
 
   abstract!
   include InterfaceChild
@@ -38,6 +41,7 @@ end
 
 class AbstractChild < Abstract
   extend T::Sig
+  extend T::Helpers
 
   abstract!
 end
@@ -57,6 +61,7 @@ end
 
 class AbstractSingleton
   extend T::Sig
+  extend T::Helpers
 
   abstract!
 

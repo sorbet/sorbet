@@ -360,6 +360,7 @@ NameDef names[] = {
     {"RuntimeProfiled", "RuntimeProfiled", true},
     {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
+    {"Helpers", "Helpers", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

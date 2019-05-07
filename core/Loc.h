@@ -101,6 +101,13 @@ public:
         storage.endLoc = high >> 8;
         storage.beginLoc = low >> 8;
     }
+
+    // For a given Loc, returns
+    //
+    // - the Loc corresponding to the first non-whitespace character on this line, and
+    // - how many characters of the start of this line are whitespace.
+    //
+    std::pair<Loc, u4> findStartOfLine(const GlobalState &ctx) const;
 };
 CheckSize(Loc, 8, 8);
 

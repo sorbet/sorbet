@@ -200,4 +200,14 @@ bool Loc::operator!=(const Loc &rhs) const {
     return !(rhs == *this);
 }
 
+pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
+    auto startDetail = this->position(gs).first;
+    u4 lineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
+    std::string_view lineView = this->file().data(gs).source().substr(lineStart);
+
+    u4 padding = lineView.find_first_not_of(" \t");
+    u4 startOffset = lineStart + padding;
+    return make_pair(Loc(this->file(), startOffset, startOffset), padding);
+}
+
 } // namespace sorbet::core

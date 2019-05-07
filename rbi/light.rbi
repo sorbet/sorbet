@@ -192,6 +192,9 @@ module T::Generic
   def [](*types); end
 end
 module T::Helpers
+  def abstract!; end
+  def interface!; end
+  def mixes_in_class_methods(mod); end
 end
 module T::Array
   def self.[](type); end

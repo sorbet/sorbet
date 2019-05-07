@@ -40,6 +40,7 @@ class ChildOverridable < ParentOverridable
 end
 
 class ParentAbstract
+  extend T::Helpers
   extend T::Sig
   abstract!
   sig {abstract.void}
@@ -65,6 +66,7 @@ end
 
 class GrandParentImplementation
   # Only need this class to allow `implementation` below.
+  extend T::Helpers
   extend T::Sig
   abstract!
   sig {abstract.void}

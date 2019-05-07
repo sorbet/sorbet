@@ -355,6 +355,54 @@ string prettyArity(Context ctx, SymbolRef method) {
     }
 }
 
+bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
+    ENFORCE(enclosingClass.exists());
+    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
+    ENFORCE(enclosingSingletonClass.exists());
+    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
+}
+
+/**
+ * Make an autocorrection for adding `extends T::Helpers`, when needed.
+ */
+optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, const Type *thisType,
+                                                                 const Loc &call) {
+    auto *classType = cast_type<ClassType>(thisType);
+    if (classType == nullptr) {
+        return nullopt;
+    }
+
+    auto enclosingClass = classType->symbol.data(ctx)->topAttachedClass(ctx);
+    if (extendsTHelpers(ctx, enclosingClass)) {
+        // No need to suggest here, because it already has 'extend T::Sig'
+        return nullopt;
+    }
+
+    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == call.file(); };
+    auto classLocs = enclosingClass.data(ctx)->locs();
+    auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
+
+    if (classLoc == classLocs.end()) {
+        // Couldn't a loc for the enclosing class in this file, give up.
+        return nullopt;
+    }
+
+    auto [classStart, classEnd] = classLoc->position(ctx);
+
+    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    auto [_, thisLinePadding] = thisLineLoc.findStartOfLine(ctx);
+
+    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
+    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.findStartOfLine(ctx);
+
+    // Preserve the indentation of the line below us.
+    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
+    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -398,11 +446,20 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
+            string thisStr = thisType->show(ctx);
             if (args.fullType.get() != thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx)->show(ctx),
                             thisType->show(ctx), args.fullType->show(ctx));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisType->show(ctx));
+                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisStr);
+
+                // catch the special case of `interface!` or `abstract!` and
+                // suggest adding `extend T::Helpers`.
+                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract()) {
+                    if (auto suggestion = maybeSuggestExtendTHelpers(ctx, thisType, args.locs.call)) {
+                        e.addAutocorrect(std::move(*suggestion));
+                    }
+                }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));

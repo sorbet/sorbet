@@ -559,6 +559,8 @@ public:
     // Returns attached class or noSymbol if it does not exist
     SymbolRef attachedClass(const GlobalState &gs) const;
 
+    SymbolRef topAttachedClass(const GlobalState &gs) const;
+
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
 
     bool ignoreInHashing(const GlobalState &gs) const;
