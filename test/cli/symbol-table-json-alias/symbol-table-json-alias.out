@@ -1,3 +1,5 @@
-   "aliasTo": 26173
-   "aliasTo": 7
-       "aliasTo": 16
+   "name": {
+    "kind": "CONSTANT",
+    "name": "B"
+   },
+   "kind": "STATIC_FIELD",
