@@ -311,6 +311,10 @@ We aspire to have our tests be fully reproducible.
 > Thus, we expect all user-visible outputs to be explicitly sorted using a
 > key stable from one run to the next.
 
+There are many ways to test Sorbet, some "better" than others. We've ordered
+them below in order from most preferrable to least preferrable. And we always
+prefer some test to no tests!
+
 ### test_corpus tests
 
 The first kind of test can be called either [test_corpus] tests or [testdata]

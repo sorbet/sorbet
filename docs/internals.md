@@ -370,6 +370,20 @@ every method (defaulting to `T.untyped` if no sig was given). When sorbet
 encounters a method call (`cfg::Send`), it *always* looks up the type on record
 for that method rather than trying to infer it from the flow of control.
 
+Some things which are different about Sorbet's CFG than other CFG's you might be
+familiar with:
+
+- In Ruby, nearly every instruction can `raise` inside a `begin ... rescue`
+  block. But in Sorbet, we pretend that the jump to the `rescue` block happens
+  instead either immediately after entering a block, or at the very end of a
+  block.
+
+- Our CFG is **not** static single assignment (SSA), because we haven't needed
+  the power that SSA gives rise to. Instead, we largely make do by "pinning"
+  variables in outer scopes to a certain type, and saying that assignments
+  to those variables in inner scopes (i.e., within a loop or if) must not
+  change the variable's type.
+
 Sorbet's use of a CFG for type inference is pretty cool. By doing inference on
 the CFG and keeping careful track of file locations (see [`core::Loc`]),
 Sorbet's inference algorithm can be very general. We only have to implement
@@ -556,6 +570,10 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
   examples
 - Finish this doc on things I learned about C++
   - <https://paper.dropbox.com/doc/1tl7PTJjFCHEQ21S8LSld>
+
+### Other topics to document
+
+- `sanityCheck`s and `ENFORCE`s
 
 <!-- -- Links -------------------------------------------------------------- -->
 
