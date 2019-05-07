@@ -25,7 +25,7 @@ const siteConfig = {
     {label: 'Get started', href: '/docs/adopting'},
     {label: 'Docs', doc: 'overview'},
     {label: 'Try it online', href: 'https://sorbet.run'},
-    {label: 'Talks', doc: 'talks'},
+    {label: 'Talks', doc: 'talks/talks'},
   ],
 
   customDocsPath: 'website/docs',
