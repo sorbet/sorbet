@@ -3,8 +3,8 @@
 This doc is for people interested in learning how Sorbet works for the purpose
 of contributing to the codebase.
 
-For how to use Sorbet, see <http://go/types>.
-For how to build and test Sorbet, see the README.
+For how to use Sorbet, see <https://sorbet.org/docs/overview>.
+For how to build and test Sorbet, see the [README](../README.md).
 
 Otherwise, welcome!
 
@@ -75,6 +75,11 @@ sorbet
 ├── core            → Sorbet-specific data structures and utilities.
 │   └── types       → Our type system is shared by many passes of the
 │                     pipeline code above.
+│
+│   // 4. Gems
+├── gems
+│   ├── sorbet          → The Ruby source for `srb init`.
+│   └── sorbet-runtime  → The Ruby source for the runtime type checks.
 └── ···
 ```
 
@@ -574,6 +579,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 ### Other topics to document
 
 - `sanityCheck`s and `ENFORCE`s
+- `gems/sorbet/` (`srb init`)
+- `gems/sorbet-runtime/`
 
 <!-- -- Links -------------------------------------------------------------- -->
 
