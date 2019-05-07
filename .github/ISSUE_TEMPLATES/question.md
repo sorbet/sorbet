@@ -18,7 +18,7 @@ Before asking your question, please make sure these are true:
 
   - https://sorbet.run
 
-- [ ] I have read *How to ask good questions* by Julia Evans
+- [ ] I have read (or at least skimmed) *How to ask good questions* by Julia Evans
 
   - https://jvns.ca/blog/good-questions/
 
