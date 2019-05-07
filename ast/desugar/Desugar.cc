@@ -523,12 +523,13 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                             result.swap(recv);
 
                         } else {
-                            Exception::notImplemented();
+                            Exception::raise("Unexpected left-hand side of &&=: please file an issue");
                         }
                     } else {
-                        Exception::notImplemented();
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
                     }
                 } else {
+                    // the LHS has been desugared to something we haven't expected
                     Exception::notImplemented();
                 }
             },
@@ -585,12 +586,13 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                             result.swap(recv);
 
                         } else {
-                            Exception::notImplemented();
+                            Exception::raise("Unexpected left-hand side of ||=: please file an issue");
                         }
                     } else {
-                        Exception::notImplemented();
+                        Exception::raise("Unexpected left-hand side of ||=: please file an issue");
                     }
                 } else {
+                    // the LHS has been desugared to something that we haven't expected
                     Exception::notImplemented();
                 }
             },
@@ -647,12 +649,13 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                             result.swap(recv);
 
                         } else {
-                            Exception::notImplemented();
+                            Exception::raise("Unexpected left-hand side of op=: please file an issue");
                         }
                     } else {
-                        Exception::notImplemented();
+                        Exception::raise("Unexpected left-hand side of op=: please file an issue");
                     }
                 } else {
+                    // the LHS has been desugared to something we haven't expected
                     Exception::notImplemented();
                 }
             },
