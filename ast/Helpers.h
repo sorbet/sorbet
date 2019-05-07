@@ -255,14 +255,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
-        return sig;
-    }
-
-    static std::unique_ptr<Expression> Sig(core::Loc loc, std::unique_ptr<Expression> hash,
-                                           std::unique_ptr<Expression> ret, u4 flags) {
-        auto sig = Sig(loc, move(hash), move(ret));
-        auto sigSend = ast::cast_tree<ast::Send>(sig.get());
-        sigSend->flags = flags;
+        sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
         return sig;
     }
 
