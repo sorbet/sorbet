@@ -51,9 +51,9 @@ class Struct
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
     )
-    .returns(T.class_of(Sorbet::Private::Static::DynamicStruct))
+    .void
   end
-  def self.new(arg0, *arg1, keyword_init: false); end
+  def initialize(arg0, *arg1, keyword_init: false); end
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -62,6 +62,8 @@ class Struct
   end
   sig {returns(T.self_type)}
   def each(&blk); end
+  sig {params(args: T.untyped).returns(Struct)}
+  def new(*args); end
 end
 module Sorbet::Private::Static
   sig do
@@ -87,16 +89,6 @@ module Sorbet::Private::Static
     .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
   end
   def self.enumerable_to_h(*arg0); end
-end
-class Sorbet::Private::Static::DynamicStruct < Struct
-  Elem = type_member(:out, fixed: T.untyped)
-  sig do
-    params(
-        args: BasicObject,
-    )
-    .returns(Sorbet::Private::Static::DynamicStruct)
-  end
-  def self.new(*args); end
 end
 module Sorbet::Private::Static::Void
 end

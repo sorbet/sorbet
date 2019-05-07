@@ -31,18 +31,6 @@ module Sorbet::Private::Static
   def self.enumerable_to_h(*arg0); end
 end
 
-class Sorbet::Private::Static::DynamicStruct < Struct
-  Elem = type_member(:out, fixed: T.untyped)
-
-  sig do
-    params(
-        args: BasicObject,
-    )
-    .returns(Sorbet::Private::Static::DynamicStruct)
-  end
-  def self.new(*args); end
-end
-
 module Sorbet::Private::Static::StubModule
 end
 

@@ -34,10 +34,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U returns>(<emptyTree>::<C <U A>>)
+        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
@@ -62,10 +62,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U returns>(<emptyTree>::<C <U KeywordInit>>)
+        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U foo>: = nil, <U bar>: = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U foo>: = nil, <U bar>: = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U KeywordInit>>)
       end
     end
@@ -114,10 +114,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject}).<U returns>(<emptyTree>::<C <U A>>)
+        <U <self>>.<U params>({:"foo" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
@@ -134,10 +134,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject}).<U returns>(<emptyTree>::<C <U B>>)
+        <U <self>>.<U params>({:"foo" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U B>>)
       end
     end
@@ -168,10 +168,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U returns>(<emptyTree>::<C <U A>>)
+        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
       end
     end
@@ -202,10 +202,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"x" => ::BasicObject}).<U returns>(<emptyTree>::<C <U MyStruct>>)
+        <U <self>>.<U params>({:"x" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U x> = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U x> = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U MyStruct>>)
       end
     end
@@ -232,10 +232,10 @@ class <emptyTree><<C <U <root>>>> < ()
       end
 
       ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"x" => ::BasicObject}).<U returns>(<emptyTree>::<C <U MyKeywordInitStruct>>)
+        <U <self>>.<U params>({:"x" => ::BasicObject}).<U void>()
       end
 
-      def self.<U new><<C <U <todo sym>>>>(<U x>: = nil, &<U <blk>>)
+      def <U initialize><<C <U <todo sym>>>>(<U x>: = nil, &<U <blk>>)
         ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U MyKeywordInitStruct>>)
       end
     end
@@ -267,7 +267,7 @@ class <emptyTree><<C <U <root>>>> < ()
     def <U main><<C <U <todo sym>>>>(&<U <blk>>)
       begin
         <U a> = <emptyTree>::<C <U Struct>>.<U new>(:"foo")
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>, <emptyTree>::<C <U Class>>)
+        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>, <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(), <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(2), <emptyTree>::<C <U Struct>>)
         <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStruct>>::<C <U A>>)

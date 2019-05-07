@@ -57,18 +57,18 @@ class MixinStruct
     include MyMixin
     self.new.x
     self.new.foo
-    self.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct.new`. Expected: `0`, got: `2`
-    self.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct.new`
+    self.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
+    self.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   end
 
-  MyKeywordInitStruct.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct.new`. Expected: `0`, got: `2`
-  MyKeywordInitStruct.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct.new`
+  MyKeywordInitStruct.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
+  MyKeywordInitStruct.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   MyStruct.new.x
   MyStruct.new.foo
 end
 
 class BadUsages
-  A = Struct.new # error: Not enough arguments provided for method `Struct.new`. Expected: `1+`, got: `0`
+  A = Struct.new # error: Not enough arguments provided for method `Struct#initialize`. Expected: `1+`, got: `0`
   B = Struct.new(giberish: 1) # error: `{giberish: Integer(1)}` doesn't match `T.any(Symbol, String)` for argument `arg0`
   C = Struct.new(keyword_init: true) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
   local = true
@@ -79,7 +79,11 @@ end
 class Main
     def main
         a = Struct.new(:foo)
-        T.assert_type!(a, Class)
+        # a.is_a?(Struct) is actually false, because `Struct.new` dynamically
+        # allocates and returns a class object for this struct, but we don't
+        # have a great way to model that statically in the case where the
+        # result is assigned to a local variable, not a constant.
+        T.assert_type!(a, Struct)
         T.assert_type!(a.new, Struct)
         T.assert_type!(a.new(2), Struct)
 
@@ -89,7 +93,7 @@ class Main
         T.assert_type!(RealStruct::KeywordInit.new, RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 1), RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 2, bar: 3), RealStruct::KeywordInit)
-        RealStruct::KeywordInit.new(1, 2) # error: Too many arguments provided for method `RealStruct::KeywordInit.new`. Expected: `0`, got: `2`
+        RealStruct::KeywordInit.new(1, 2) # error: Too many arguments provided for method `RealStruct::KeywordInit#initialize`. Expected: `0`, got: `2`
 
         T.assert_type!(RealStructDesugar::A.new(2, 3), RealStructDesugar::A)
     end

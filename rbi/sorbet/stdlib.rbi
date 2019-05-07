@@ -8,9 +8,9 @@ class Struct
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
     )
-    .returns(T.class_of(Sorbet::Private::Static::DynamicStruct))
+    .void
   end
-  def self.new(arg0, *arg1, keyword_init: false); end
+  def initialize(arg0, *arg1, keyword_init: false); end
 
   sig do
     params(
@@ -23,6 +23,9 @@ class Struct
 
   sig {returns(T::Array[Symbol])}
   def self.members; end
+
+  sig {params(args: T.untyped).returns(Struct)}
+  def new(*args); end
 end
 
 # Type alias for file-like objects. Many, but not all, file-like
