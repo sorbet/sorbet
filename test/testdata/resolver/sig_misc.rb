@@ -24,7 +24,9 @@ class A
     T2.new
   end
 
-  sig {params(types).returns(T1)} # error: Method `types` does not exist
+  sig {params(types).returns(T1)}
+            # ^^^^^ error: Method `types` does not exist
+     # ^^^^^^^^^^^^^ error: `params` expects keyword arguments
   def f1(x) # error: Type not specified for argument
     T1.new
   end
