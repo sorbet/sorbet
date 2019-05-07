@@ -74,10 +74,19 @@ useless if developers don't trust them (consider how often YARD annotations fall
 out of sync with the code... 😰).
 
 Adding a `sig` to a method is only as good as the predictions it lets `srb` make
-about a codebase. Wrong sigs are actively harmful.
+about a codebase. Wrong sigs are actively harmful. Specifically, when `sig`s in
+our codebase are wrong:
 
-But, by leveraging runtime checks, we can gain lots of confidence in our type
-annotations:
+- we can't use them to find code to refactor. Sorbet will think some code paths
+  can never be reached when they actually can.
+- they're effectively as good as out-of-date documentation, with little added
+  benefit over just comments.
+- we could never use them to make Ruby code run faster. In the future, we hope
+  to use Sorbet types to make Ruby faster, but `sig`s that lie will actually
+  make code *slower* than no types at all.
+
+By leveraging runtime checks, we can gain lots of confidence and trust in our
+type annotations:
 
 - Automated test runs become tests of our type annotations!
 - Our production observability and monitoring catch bad sigs **early**, before
