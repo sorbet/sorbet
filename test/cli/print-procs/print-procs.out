@@ -3,11 +3,6 @@ test/cli/print-procs/print-procs.rb:11: Malformed T.proc: Too many arguments (ma
     12 |    x1: String, x2: Integer, x3: Float, x4: String, x5: Integer, x6: Float, x7: String, x8: Integer, x9: Float, x10: String, x11: Integer
     13 |  ).returns(T::Hash[Integer, String]),
 
-test/cli/print-procs/print-procs.rb:11: Malformed T.proc: Too many arguments (max `10`) https://sorbet.org/docs/error-reference#5004
-    11 |  e: T.proc.params(
-    12 |    x1: String, x2: Integer, x3: Float, x4: String, x5: Integer, x6: Float, x7: String, x8: Integer, x9: Float, x10: String, x11: Integer
-    13 |  ).returns(T::Hash[Integer, String]),
-
 test/cli/print-procs/print-procs.rb:16: Revealed type: `T.proc.returns(T::Hash[Integer, String])` https://sorbet.org/docs/error-reference#7014
     16 |  T.reveal_type(a)
           ^^^^^^^^^^^^^^^^
@@ -47,4 +42,4 @@ test/cli/print-procs/print-procs.rb:20: Revealed type: `T.untyped` https://sorbe
     test/cli/print-procs/print-procs.rb:15:
     15 |def foo(a, b, c, d, e)
                             ^
-Errors: 7
+Errors: 6

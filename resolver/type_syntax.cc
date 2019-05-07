@@ -200,9 +200,15 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                                         "0-1", send->args.size());
                         }
                     }
+
                     auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                     if (hash == nullptr) {
-                        // Error will be reported in infer
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` expects keyword arguments", paramsStr);
+                            e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
+                                "All parameters must be given names in `{}` even if they are positional", paramsStr)));
+                        }
                         break;
                     }
 
