@@ -1,3 +1,4 @@
+
 <p align="center">
   <img alt="Sorbet logo" width="200" src="docs/logo/sorbet-logo-purple-sparkles.svg">
 </p>
