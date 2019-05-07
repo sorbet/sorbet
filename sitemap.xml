@@ -25,10 +25,10 @@
 <url> <loc>https://sorbet.org/docs/static</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/static" /> </url>
 <url> <loc>https://sorbet.org/docs/stdlib-generics</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/stdlib-generics" /> </url>
 <url> <loc>https://sorbet.org/docs/strict</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/strict" /> </url>
-<url> <loc>https://sorbet.org/docs/talks</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks" /> </url>
 <url> <loc>https://sorbet.org/docs/talks/ruby-kaigi-2018</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/ruby-kaigi-2018" /> </url>
 <url> <loc>https://sorbet.org/docs/talks/ruby-kaigi-2019</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/ruby-kaigi-2019" /> </url>
 <url> <loc>https://sorbet.org/docs/talks/strange-loop-2018</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/strange-loop-2018" /> </url>
+<url> <loc>https://sorbet.org/docs/talks/talks</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/talks" /> </url>
 <url> <loc>https://sorbet.org/docs/tconfiguration</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/tconfiguration" /> </url>
 <url> <loc>https://sorbet.org/docs/troubleshooting</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/troubleshooting" /> </url>
 <url> <loc>https://sorbet.org/docs/tstruct</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/tstruct" /> </url>
