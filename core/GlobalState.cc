@@ -1227,6 +1227,11 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
             if (what == errors::Resolver::StubConstant || what == errors::Infer::UntypedMethod) {
                 return false;
             }
+        } else if (level == StrictLevel::Core) {
+            level = StrictLevel::True;
+            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass) {
+                return false;
+            }
         }
     }
     ENFORCE(level <= StrictLevel::Strong);
