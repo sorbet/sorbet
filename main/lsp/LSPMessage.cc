@@ -135,12 +135,14 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::Shutdown:
         case LSPMethod::PAUSE:
         case LSPMethod::RESUME:
-        // Definition and reference requests are typically requested directly by the user, so we shouldn't delay
-        // processing them.
+        // Definition, reference, and workspace symbol requests are typically requested directly by the user, so we
+        // shouldn't delay processing them.
         case LSPMethod::TextDocumentDefinition:
         case LSPMethod::TextDocumentReferences:
-        // I don't know yet if it's a good idea to move these.
         case LSPMethod::WorkspaceSymbol:
+        // These requests involve a specific file location, and should never be delayed.
+        case LSPMethod::TextDocumentHover:
+        case LSPMethod::TextDocumentCompletion:
         case LSPMethod::TextDocumentSignatureHelp:
         // These are file updates. They shouldn't be delayed (but they can be combined/expedited).
         case LSPMethod::TextDocumentDidOpen:
@@ -149,14 +151,6 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::SorbetWorkspaceEdit:
         case LSPMethod::SorbetWatchmanFileChange:
             return false;
-
-        // Hover requests may be accidentally triggered by the user while typing if their cursor is in the wrong
-        // location.
-        case LSPMethod::TextDocumentHover:
-        // Completion requests occur mid-typing. If they act as a fence, then we won't be able
-        // to merge many characters typed when we hit the slow path. If we're on the fast path,
-        // we should be able to keep up with their typing and process the request in time.
-        case LSPMethod::TextDocumentCompletion:
         // VS Code requests document symbols automatically and in the background. It's OK to delay these requests.
         case LSPMethod::TextDocumentDocumentSymbol:
         // Sorbet processes these requests before they hit the server's queue.
