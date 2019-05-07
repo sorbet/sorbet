@@ -444,7 +444,7 @@ void GlobalState::reserveMemory(u4 kb) {
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
-    ENFORCE((flags & Symbol::Flags::METHOD_ARGUMENT) == 0, "use specialized version: EnterMethodArgumentSymbol");
+    ENFORCE((flags & Symbol::Flags::METHOD_ARGUMENT) == 0, "use specialized version: enterMethodArgumentSymbol");
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);

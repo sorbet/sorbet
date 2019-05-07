@@ -9,13 +9,18 @@ is still in early stages, but is mature enough to run on the majority of Ruby
 code at Stripe. You are welcome to try it, though, but your experience might
 still be rough.
 
-This README contains documentation specific to developing in Sorbet. You might
-also want to see:
+This README contains documentation specifically for contributing to Sorbet. You
+might also want to:
+
+- Read the [public Sorbet docs](https://sorbet.org/docs/overview)
+  - Or even [edit the docs](#writing-docs)
+- Watch the [talks we've given](https://sorbet.org/docs/talks/talks) about Sorbet
+- Try the [Sorbet playground](https://sorbet.run) online
+
+If you are at Stripe, you might also want to see:
 
 - The Sorbet [design doc](https://hackpad.corp.stripe.com/Design-Doc-sorbet-zd1LGHPfpvW)
-- The Sorbet [user guide](http://go/types)
-- The [Sorbet internals](https://stripe.exceedlms.com/student/activity/372979) talk
-- The [Gradual Typing of Ruby at Scale](https://www.youtube.com/watch?v=uFFJyp8vXQI) talk
+- Dmitry's talk about [Sorbet's internals](https://stripe.exceedlms.com/student/activity/372979)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -23,19 +28,21 @@ also want to see:
 
 - [Sorbet user-facing design principles](#sorbet-user-facing-design-principles)
 - [Quickstart](#quickstart)
+- [Learning how Sorbet works](#learning-how-sorbet-works)
 - [Building Sorbet](#building-sorbet)
   - [Common Compilation Errors](#common-compilation-errors)
 - [Running Sorbet](#running-sorbet)
 - [Running the tests](#running-the-tests)
 - [Testing Sorbet against pay-server](#testing-sorbet-against-pay-server)
 - [Writing tests](#writing-tests)
+  - [test_corpus tests](#test_corpus-tests)
   - [Expectation tests](#expectation-tests)
   - [CLI tests](#cli-tests)
   - [LSP tests](#lsp-tests)
   - [Updating tests](#updating-tests)
 - [Running over pay-server locally](#running-over-pay-server-locally)
   - [Build `sorbet`](#build-sorbet)
-  - [Set up "autogen" locally](#set-up-autogen-locally)
+  - [Set up autogen locally](#set-up-autogen-locally)
   - [Make sure `sorbet` is on your PATH](#make-sure-sorbet-is-on-your-path)
   - [Run `sorbet/scripts/typecheck_devel`](#run-sorbetscriptstypecheck_devel)
 - [C++ conventions](#c-conventions)
@@ -59,7 +66,7 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 1. **Explicit**
 
     We're willing to write annotations, and in fact see them as
-    beneficial; They make code more readable and predictable. We're here
+    beneficial; they make code more readable and predictable. We're here
     to help readers as much as writers.
 
 2. **Feel useful, not burdensome**
@@ -75,27 +82,27 @@ Early in our project we've defiend some guidelines for how working with sorbet s
     systems. They have their place, and we need a fair amount of
     expressive power to model (enough) real Ruby code, but all else
     being equal we want to be simpler. We believe that such a system
-    scales better, and -- most importantly -- is easiest for users to
-    learn+understand.
+    scales better, and—most importantly—is easier for our users to
+    learn & understand.
 
 4. **Compatible with Ruby**
 
     In particular, we don't want new syntax. Existing Ruby syntax means
     we can leverage most of our existing tooling (editors, etc). Also,
-    the whole point here is to improve an existing Ruby codebase, so we
-    should be able to adopt it incrementally.
+    the point of Sorbet is to gradually improve an existing Ruby codebase. No
+    new syntax makes it easier to be compatible with existing tools.
 
 5. **Scales**
 
-    On all axes: in speed, team size, codebase size and time (not
-    postponing hard decisions). We already work in large Ruby codebases, and it will
-    only get larger.
+    On all axes: execution speed, number of collaborators, lines of code,
+    codebase age. We work in large Ruby code bases, and they will only get
+    larger.
 
 6. **Can be adopted gradually**
 
-    In order to make adoption possible at scale, we cannot require all
-    the teams to adopt it at once, thus we need to support teams adopting it
-    at different pace.
+    In order to make adoption possible at scale, we cannot require every team or
+    project to adopt Sorbet all at once. Sorbet needs to support teams adopting
+    it at different paces.
 
 ## Quickstart
 
@@ -110,6 +117,15 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 3. Run Sorbet!
 
     - `bazel-bin/main/sorbet -e "42 + 'hello'"`
+
+
+## Learning how Sorbet works
+
+We've documented the [internals of Sorbet](docs/internals.md) in a separate doc.
+Cross-reference between that doc and here to learn how Sorbet works and how to
+change it!
+
+[→ internals.md](docs/internals.md)
 
 
 ## Building Sorbet
@@ -188,20 +204,20 @@ open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10
 
 ## Running Sorbet
 
-Run sorbet on an expression:
+Run Sorbet on an expression:
 
 ```
 bazel-bin/main/sorbet -e "1 + false"
 ```
 
-Run sorbet on a file:
+Run Sorbet on a file:
 
 ```
 bazel-bin/main/sorbet foo.rb
 ```
 
-Running `bazel-bin/main/sorbet` `--``help` will show lots of options. These are
-the common ones:
+Running `bazel-bin/main/sorbet --help` will show lots of options. These are
+the common ones for contributors:
 
 
 - `-p <IR>`
@@ -230,7 +246,8 @@ bazel test //... --config=dbg
 
 (The `//...` literally means "all targets".)
 
-To run a subset of the test that we normally run in development run:
+To run a subset of the tests curated for faster iteration and development speed,
+run:
 
 ```
 bazel test test --config=dbg
@@ -263,13 +280,15 @@ To see the failing output, either:
 
 ## Testing Sorbet against pay-server
 
+> This is specific to contributing to Sorbet at Stripe.
+
 There are two ways to run your changes to `sorbet` over pay-server:
 
 1.  Push your Sorbet changes to a branch, and then make a PR to pay-server to
     bump the SHA in [sorbet/sorbet.sha].
 
-    pay-server fetches this SHA, builds it on Stripe infrastructure, and then
-    type checks pay-server with it.
+    On that PR, pay-server will fetch this SHA, build it on Stripe
+    infrastructure, and then type check pay-server with it.
 
 2.  Use the `sorbet/scripts/typecheck_devel` script in pay-server to run a
     version of Sorbet built on your laptop.
@@ -285,17 +304,21 @@ There are two ways to run your changes to `sorbet` over pay-server:
 We write tests by adding files to subfolders of the `test/` directory.
 Individual subfolders are "magic"; each contains specific types of tests.
 We aspire to have our tests be fully reproducible.
-Note that in C++
-> Hash functions are only required to produce the same result for the same input within a single execution of a program.
 
-Thus we expect all user-visible outputs to be explicitly sorted using a
-reliable key.
+> **C++ note**: In C++, hash functions are only required to produce the same
+> result for the same input within a single execution of a program.
+>
+> Thus, we expect all user-visible outputs to be explicitly sorted using a
+> key stable from one run to the next.
+
+There are many ways to test Sorbet, some "better" than others. We've ordered
+them below in order from most preferrable to least preferrable. And we always
+prefer some test to no tests!
 
 ### test_corpus tests
 
-These tests are either called [test_corpus] tests or [testdata] tests based on
-the name of the test harness and folder where the tests are located,
-respectively.
+The first kind of test can be called either [test_corpus] tests or [testdata]
+tests, based on the name of the test harness or the folder containing these tests, respectively.
 
 
 [test_corpus]: test/test_corpus.cc
@@ -490,7 +513,7 @@ This will launch Sorbet under LLDB mode.
 In general,
 
 - to debug a normal build of sorbet?
-  - `lldb bazel-bin/main/sorbet` `--` `<args> ...`
+  - `lldb bazel-bin/main/sorbet -- <args> ...`
 - to debug something in pay-server?
   - See the section on “Local development” using `typecheck_devel`
 - to debug an existing Sorbet process (i.e., LSP)
@@ -518,19 +541,6 @@ using [Docusaurus](https://docusaurus.io/).
 [→ website/README.md](website/README.md)
 
 ^ See here for how to work with the documentation site locally.
-
-
-## Updating sorbet.run
-
-We have an online REPL for Sorbet: <https://sorbet.run>. It's deployed as a
-GitHub pages site, and so the sources lives on github.com. Make sure you've
-cloned it locally:
-
-```
-git clone https://github.com/stripe/sorbet.run ~/stripe/sorbet.run
-```
-
-Run `./tools/scripts/update-sorbet.run.sh` and follow the steps suggested by that script.
 
 
 ## Editor and environment
