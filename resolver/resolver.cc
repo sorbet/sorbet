@@ -1246,6 +1246,16 @@ public:
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
+                case core::Names::revealType()._id:
+                    // This error does not match up with our "upper error levels are super sets
+                    // of errors from lower levels" claim. This is ONLY an error in lower levels.
+                    if (send->loc.file().data(ctx).strictLevel <= core::StrictLevel::Stripe) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
+                            e.setHeader("`{}` can only reveal types in `{}` files (or higher)", "T.reveal_type",
+                                        "# typed: true");
+                        }
+                    }
+                    return send;
                 default:
                     return send;
             }
