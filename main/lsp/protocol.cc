@@ -331,17 +331,17 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 if (msg->mutatesFileContents()) {
                     absl::MutexLock stateLock(&state.mtx);
                     state.mainThreadStatus = MainThreadStatus::MayRunSlowPath;
+                    gs->cancelTypechecking->store(false);
                 }
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequest(move(gs), *msg);
             gs = move(result.gs);
             if (msg->mutatesFileContents() && gs->cancelTypechecking->load() == true) {
-                // Need to re-enqueue message + reset cancelTypechecking.
+                // Typechecking was canceled. Need to re-enqueue message.
                 absl::MutexLock lck(&mtx);
                 guardedState.pendingRequests.push_front(move(msg));
                 mergeFileChanges(guardedState.pendingRequests);
-                gs->cancelTypechecking->store(false);
             } else {
                 for (auto &msg : result.responses) {
                     sendMessage(*msg);
