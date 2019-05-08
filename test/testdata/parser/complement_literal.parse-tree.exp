@@ -1,0 +1,36 @@
+Begin {
+  stmts = [
+    Send {
+      receiver = Integer {
+        val = "10"
+      }
+      method = <U ~>
+      args = [
+      ]
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U x>
+      }
+      rhs = Integer {
+        val = "10"
+      }
+    }
+    Send {
+      receiver = LVar {
+        name = <U x>
+      }
+      method = <U ~>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Float {
+        val = "1.0"
+      }
+      method = <U ~>
+      args = [
+      ]
+    }
+  ]
+}
