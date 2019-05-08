@@ -38,6 +38,38 @@ class <emptyTree><<C <U <root>>>> < ()
           end
         end
       end
+      begin
+        <D <U <assignTemp>> $7> = <U <self>>.<U foo>()
+        if <D <U <assignTemp>> $7>.<U ==>(nil)
+          nil
+        else
+          begin
+            <D <U bar> $8> = <D <U <assignTemp>> $7>
+            <D <U bar> $9> = <D <U bar> $8>.<U bar>()
+            if <D <U bar> $9>
+              <D <U bar> $8>.<U bar=>(5)
+            else
+              <D <U bar> $9>
+            end
+          end
+        end
+      end
+      begin
+        <D <U <assignTemp>> $10> = <U <self>>.<U foo>()
+        if <D <U <assignTemp>> $10>.<U ==>(nil)
+          nil
+        else
+          begin
+            <D <U bar> $11> = <D <U <assignTemp>> $10>
+            <D <U bar> $12> = <D <U bar> $11>.<U bar>()
+            if <D <U bar> $12>
+              <D <U bar> $12>
+            else
+              <D <U bar> $11>.<U bar=>(5)
+            end
+          end
+        end
+      end
     end
   end
 
