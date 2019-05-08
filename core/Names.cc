@@ -34,7 +34,7 @@ unsigned int Name::hash(const GlobalState &gs) const {
     }
 }
 
-string Name::toString(const GlobalState &gs) const {
+string Name::showRaw(const GlobalState &gs) const {
     switch (this->kind) {
         case UTF8:
             return fmt::format("<U {}>", string(raw.utf8.begin(), raw.utf8.end()));
@@ -69,8 +69,26 @@ string Name::toString(const GlobalState &gs) const {
                     kind = "R";
                     break;
             }
-            return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->toString(gs), this->unique.num);
+            return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), this->unique.num);
         }
+        case CONSTANT:
+            return fmt::format("<C {}>", this->cnst.original.showRaw(gs));
+        default:
+            Exception::notImplemented();
+    }
+}
+
+string Name::toString(const GlobalState &gs) const {
+    switch (this->kind) {
+        case UTF8:
+            return string(raw.utf8.begin(), raw.utf8.end());
+        case UNIQUE:
+            if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
+                return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
+                return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
+            }
+            return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
         case CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.toString(gs));
         default:
@@ -93,8 +111,6 @@ string Name::show(const GlobalState &gs) const {
             return this->unique.original.data(gs)->show(gs);
         case CONSTANT:
             return this->cnst.original.show(gs);
-        default:
-            Exception::notImplemented();
     }
 }
 string_view Name::shortName(const GlobalState &gs) const {
@@ -203,6 +219,9 @@ const NameData NameRef::data(const GlobalState &gs) const {
     ENFORCE(exists(), "non existing name");
     enforceCorrectGlobalState(gs);
     return NameData(const_cast<Name &>(gs.names[_id]), gs);
+}
+string NameRef::showRaw(const GlobalState &gs) const {
+    return data(gs)->showRaw(gs);
 }
 string NameRef::toString(const GlobalState &gs) const {
     return data(gs)->toString(gs);

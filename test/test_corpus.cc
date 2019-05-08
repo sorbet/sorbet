@@ -298,7 +298,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     expectation = test.expectations.find("symbol-table-raw");
     if (expectation != test.expectations.end()) {
-        got["symbol-table-raw"] = gs.toStringWithOptions(false, true) + '\n';
+        got["symbol-table-raw"] = gs.showRaw() + '\n';
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
@@ -386,7 +386,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     expectation = test.expectations.find("symbol-table-raw");
     if (expectation != test.expectations.end()) {
-        string table = gs.toStringWithOptions(false, true) + '\n';
+        string table = gs.showRaw() + '\n';
         EXPECT_EQ(got["symbol-table-raw"], table) << " symbol-table-raw should not be mutated by CFG+inference";
     }
 

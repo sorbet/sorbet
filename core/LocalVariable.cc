@@ -38,6 +38,13 @@ bool LocalVariable::operator!=(const LocalVariable &rhs) const {
     return !this->operator==(rhs);
 }
 
+string LocalVariable::showRaw(const GlobalState &gs) const {
+    if (unique == 0) {
+        return this->_name.showRaw(gs);
+    }
+    return fmt::format("{}${}", this->_name.showRaw(gs), to_string(this->unique));
+}
+
 string LocalVariable::toString(const GlobalState &gs) const {
     if (unique == 0) {
         return this->_name.toString(gs);

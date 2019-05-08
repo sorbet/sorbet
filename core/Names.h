@@ -94,6 +94,7 @@ public:
     bool operator!=(const Name &rhs) const;
     bool isClassName(const GlobalState &gs) const;
 
+    std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
     std::string_view shortName(const GlobalState &gs) const;
