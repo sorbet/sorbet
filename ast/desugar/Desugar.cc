@@ -247,6 +247,58 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     return body;
 }
 
+struct OpAsgnScaffolding {
+    core::NameRef temporaryName;
+    InsSeq::STATS_store statementBody;
+    Send::ARGS_store readArgs;
+    Send::ARGS_store assgnArgs;
+};
+
+// Desugaring passes for op-assignments (like += or &&=) will first desugar the LHS, which often results in a send if
+// there's a dot anywhere on the LHS. Consider an expression like `x.y += 1`. We'll want to desugar this to
+//
+//   { $tmp = x.y; x.y = $tmp + 1 }
+//
+// which now involves two (slightly different) sends: the .y() in the first statement, and the .y=() in the second
+// statement. The first one will have as many arguments as the original, while the second will have one more than the
+// original (to allow for the passed value). This function creates both argument lists as well as the instruction block
+// and the temporary variable: how these will be used will differ slightly depending on whether we're desugaring &&=,
+// ||=, or some other op-assign, but the logic contained here will stay in common.
+OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
+    // this is for storing the temporary assignments followed by the final update. In the case that we have other
+    // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
+    // temporary as well, producing a sequence like
+    //
+    //   { $arg = z; $tmp = x.y[$arg]; x.y[$arg] = $tmp + 1 }
+    //
+    // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
+    // temporary assignment and the last for the actual update we're desugaring.
+    InsSeq::STATS_store stats;
+    stats.reserve(s->args.size() + 2);
+    core::NameRef tempRecv =
+        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+    stats.emplace_back(MK::Assign(s->loc, tempRecv, std::move(s->recv)));
+    Send::ARGS_store readArgs;
+    Send::ARGS_store assgnArgs;
+    // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to whatever
+    // we saw on the LHS.
+    readArgs.reserve(s->args.size());
+    // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
+    // here: to accomodate the call to field= instead of just field.
+    assgnArgs.reserve(s->args.size() + 1);
+
+    for (auto &arg : s->args) {
+        core::Loc argLoc = arg->loc;
+        core::NameRef name =
+            dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
+        readArgs.emplace_back(MK::Local(argLoc, name));
+        assgnArgs.emplace_back(MK::Local(argLoc, name));
+    }
+
+    return {tempRecv, std::move(stats), std::move(readArgs), std::move(assgnArgs)};
+}
+
 unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
@@ -440,24 +492,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto arg = node2TreeImpl(dctx, std::move(andAsgn->right));
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
-                    InsSeq::STATS_store stats;
-                    stats.reserve(s->args.size() + 2);
-                    core::NameRef tempRecv =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
-                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, std::move(s->recv)));
-                    Send::ARGS_store readArgs;
-                    Send::ARGS_store assgnArgs;
-                    readArgs.reserve(s->args.size());
-                    assgnArgs.reserve(s->args.size() + 1);
+                    auto [tempRecv, stats, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
 
-                    for (auto &arg : s->args) {
-                        core::Loc argLoc = arg->loc;
-                        core::NameRef name =
-                            dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
-                        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
-                        readArgs.emplace_back(MK::Local(argLoc, name));
-                        assgnArgs.emplace_back(MK::Local(argLoc, name));
-                    }
                     assgnArgs.emplace_back(std::move(arg));
                     auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
                     core::NameRef tempResult =
@@ -482,7 +518,35 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                     unique_ptr<Expression> res = MK::EmptyTree();
                     result.swap(res);
+                } else if (auto i = cast_tree<InsSeq>(recv.get())) {
+                    // The logic below is explained more fully in the OpAsgn case
+                    auto ifExpr = cast_tree<If>(i->expr.get());
+                    if (!ifExpr) {
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                    }
+                    auto s = cast_tree<Send>(ifExpr->elsep.get());
+                    if (!s) {
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                    }
+
+                    auto sendLoc = s->loc;
+                    auto [tempRecv, stats, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
+                    assgnArgs.emplace_back(std::move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                    core::NameRef tempResult =
+                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+                    stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
+
+                    auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
+                                         std::move(assgnArgs), s->flags);
+                    auto elsep = MK::Local(sendLoc, tempResult);
+                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
+                    auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
+                    ifExpr->elsep.swap(wrapped);
+                    result.swap(recv);
+
                 } else {
+                    // the LHS has been desugared to something we haven't expected
                     Exception::notImplemented();
                 }
             },
@@ -491,23 +555,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto arg = node2TreeImpl(dctx, std::move(orAsgn->right));
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
-                    InsSeq::STATS_store stats;
-                    stats.reserve(s->args.size() + 2);
-                    core::NameRef tempRecv =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
-                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, std::move(s->recv)));
-                    Send::ARGS_store readArgs;
-                    Send::ARGS_store assgnArgs;
-                    readArgs.reserve(s->args.size());
-                    assgnArgs.reserve(s->args.size() + 1);
-                    for (auto &arg : s->args) {
-                        core::Loc argLoc = arg->loc;
-                        core::NameRef name =
-                            dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
-                        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
-                        readArgs.emplace_back(MK::Local(argLoc, name));
-                        assgnArgs.emplace_back(MK::Local(argLoc, name));
-                    }
+                    auto [tempRecv, stats, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
                     assgnArgs.emplace_back(std::move(arg));
                     auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
                     core::NameRef tempResult =
@@ -532,7 +580,35 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                     unique_ptr<Expression> res = MK::EmptyTree();
                     result.swap(res);
+                } else if (auto i = cast_tree<InsSeq>(recv.get())) {
+                    // The logic below is explained more fully in the OpAsgn case
+                    auto ifExpr = cast_tree<If>(i->expr.get());
+                    if (!ifExpr) {
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                    }
+                    auto s = cast_tree<Send>(ifExpr->elsep.get());
+                    if (!s) {
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                    }
+
+                    auto sendLoc = s->loc;
+                    auto [tempRecv, stats, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
+                    assgnArgs.emplace_back(std::move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                    core::NameRef tempResult =
+                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+                    stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
+
+                    auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
+                                          std::move(assgnArgs), s->flags);
+                    auto body = MK::Local(sendLoc, tempResult);
+                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
+                    auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
+                    ifExpr->elsep.swap(wrapped);
+                    result.swap(recv);
+
                 } else {
+                    // the LHS has been desugared to something that we haven't expected
                     Exception::notImplemented();
                 }
             },
@@ -541,23 +617,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto rhs = node2TreeImpl(dctx, std::move(opAsgn->right));
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
-                    InsSeq::STATS_store stats;
-                    stats.reserve(s->args.size() + 2);
-                    core::NameRef tempRecv =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
-                    stats.emplace_back(MK::Assign(loc, tempRecv, std::move(s->recv)));
-                    Send::ARGS_store readArgs;
-                    Send::ARGS_store assgnArgs;
-                    readArgs.reserve(s->args.size());
-                    assgnArgs.reserve(s->args.size() + 1);
-                    for (auto &arg : s->args) {
-                        core::Loc argLoc = arg->loc;
-                        core::NameRef name =
-                            dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
-                        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
-                        readArgs.emplace_back(MK::Local(argLoc, name));
-                        assgnArgs.emplace_back(MK::Local(argLoc, name));
-                    }
+                    auto [tempRecv, stats, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
+
                     auto prevValue =
                         MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
                     auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, std::move(rhs));
@@ -578,7 +639,39 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                     unique_ptr<Expression> res = MK::EmptyTree();
                     result.swap(res);
+                } else if (auto i = cast_tree<InsSeq>(recv.get())) {
+                    // if this is an InsSeq, then is probably the result of a safe send (i.e. an expression of the form
+                    // x&.y on the LHS) which means it'll take the rough shape:
+                    //   { $temp = x; if $temp == nil then nil else $temp.y }
+                    // on the LHS. We want to insert the y= into the if-expression at the end, like:
+                    //   { $temp = x; if $temp == nil then nil else { $t2 = $temp.y; $temp.y = $t2 op RHS } }
+                    // that means we first need to find out whether the final expression is an If...
+                    auto ifExpr = cast_tree<If>(i->expr.get());
+                    if (!ifExpr) {
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                    }
+                    // and if so, find out whether the else-case is a send...
+                    auto s = cast_tree<Send>(ifExpr->elsep.get());
+                    if (!s) {
+                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                    }
+                    // and then perform basically the same logic as above for a send, but replacing it within
+                    // the else-case of the if at the end instead
+                    auto sendLoc = s->loc;
+                    auto [tempRecv, stats, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
+                    auto prevValue =
+                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                    auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, std::move(rhs));
+                    assgnArgs.emplace_back(std::move(newValue));
+
+                    auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
+                                        std::move(assgnArgs), s->flags);
+                    auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(res));
+                    ifExpr->elsep.swap(wrapped);
+                    result.swap(recv);
+
                 } else {
+                    // the LHS has been desugared to something we haven't expected
                     Exception::notImplemented();
                 }
             },

@@ -2,6 +2,10 @@
 def test_csend
   foo&.bar
   foo&.bar { |x| x }
+  foo&.bar = 5
+  foo&.bar += 5
+  foo&.bar &&= 5
+  foo&.bar ||= 5
 end
 
 # desugar should not require `nil?` support
