@@ -99,9 +99,27 @@ public:
     void sanityCheck() const;
     void markAsPayload();
 
-    std::string toStringWithOptions(bool showHidden = false, bool useToString = false) const;
+    // These methods are here to make it easier to print the symbol table in lldb.
+    // (don't have to pass remember the default args)
     std::string toString() {
-        return toStringWithOptions();
+        bool showFull = false;
+        bool showRaw = false;
+        return toStringWithOptions(showFull, showRaw);
+    }
+    std::string toStringFull() {
+        bool showFull = true;
+        bool showRaw = false;
+        return toStringWithOptions(showFull, showRaw);
+    }
+    std::string showRaw() {
+        bool showFull = false;
+        bool showRaw = true;
+        return toStringWithOptions(showFull, showRaw);
+    }
+    std::string showRawFull() {
+        bool showFull = true;
+        bool showRaw = true;
+        return toStringWithOptions(showFull, showRaw);
     }
 
     bool hadCriticalError() const;
@@ -199,6 +217,8 @@ private:
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
+
+    std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
