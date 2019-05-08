@@ -100,7 +100,7 @@ public:
     void markAsPayload();
 
     // These methods are here to make it easier to print the symbol table in lldb.
-    // (don't have to pass remember the default args)
+    // (don't have to remember the default args)
     std::string toString() {
         bool showFull = false;
         bool showRaw = false;
