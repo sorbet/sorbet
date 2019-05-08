@@ -6,7 +6,7 @@ subgraph "cluster_::TestIVar#initialize" {
     "bb::TestIVar#initialize_1" [shape = parallelogram];
 
     "bb::TestIVar#initialize_0" [
-        label = "block[id=0]()\l<U @foo>$3: Integer = alias <U @foo>\l<U <self>>: TestIVar = cast(<U <self>>: NilClass, TestIVar);\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Integer) = alias <C <U Integer>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$6: T.class_of(Integer))\l<U <castTemp>>$7: Integer(0) = 0\l<U @foo>$3: Integer = cast(<U <castTemp>>$7: Integer(0), Integer);\l<U <returnMethodTemp>>$2: Integer = <U @foo>$3\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$6: T.class_of(Integer))\l<castTemp>$7: Integer(0) = 0\l@foo$3: Integer = cast(<castTemp>$7: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#initialize_0" -> "bb::TestIVar#initialize_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::TestIVar#test" {
     "bb::TestIVar#test_1" [shape = parallelogram];
 
     "bb::TestIVar#test_0" [
-        label = "block[id=0]()\l<U @foo>$3: Integer = alias <U @foo>\l<U <self>>: TestIVar = cast(<U <self>>: NilClass, TestIVar);\l<U @foo>$3: Integer = nil\l<U <returnMethodTemp>>$2: Integer = <U @foo>$3\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l@foo$3: Integer = nil\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#test_0" -> "bb::TestIVar#test_1" [style="bold"];

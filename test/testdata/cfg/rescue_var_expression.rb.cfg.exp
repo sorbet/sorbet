@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <rescueStartTemp>>$3: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$3: T.untyped\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,42 +18,42 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<U <returnMethodTemp>>$2: NilClass)\l<D <U <rescueTemp>> $2>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$7: T.class_of(Exception) = alias <C <U Exception>>\l<U <isaCheckTemp>>$8: T.untyped = <D <U <rescueTemp>> $2>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$7: T.class_of(Exception))\l<U <isaCheckTemp>>$8: T.untyped\l"
+        label = "block[id=3](<returnMethodTemp>$2: NilClass)\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(Exception) = alias <C Exception>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(Exception))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4](<U <self>>: Object)\l<U <statTemp>>$5: String(\"boop\") = \"boop\"\l<U <returnMethodTemp>>$2: T.noreturn = <U <self>>: Object.<U raise>(<U <statTemp>>$5: String(\"boop\"))\l<U <rescueEndTemp>>$6 = <unanalyzable>\l<U <rescueEndTemp>>$6\l"
+        label = "block[id=4](<self>: Object)\l<statTemp>$5: String(\"boop\") = \"boop\"\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: String(\"boop\"))\l<rescueEndTemp>$6 = <unanalyzable>\l<rescueEndTemp>$6\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_4" -> "bb::Object#foo_6" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6](<U <returnMethodTemp>>$2: NilClass, <U <gotoDeadTemp>>$13: NilClass)\l<U <gotoDeadTemp>>$13\l"
+        label = "block[id=6](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$13: NilClass)\l<gotoDeadTemp>$13\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_8" [
-        label = "block[id=8](<D <U <rescueTemp>> $2>: Exception)\l<U <statTemp>>$11: T.class_of(MyClass) = alias <C <U MyClass>>\l<U <statTemp>>$10: MyClass = <U <statTemp>>$11: T.class_of(MyClass).<U new>()\l<U <statTemp>>$9: Exception = <U <statTemp>>$10: MyClass.<U foo=>(<D <U <rescueTemp>> $2>: Exception)\l<U <returnMethodTemp>>$2: Integer(3) = 3\l<U <gotoDeadTemp>>$13: NilClass\l"
+        label = "block[id=8](<rescueTemp>$2: Exception)\l<statTemp>$11: T.class_of(MyClass) = alias <C MyClass>\l<statTemp>$10: MyClass = <statTemp>$11: T.class_of(MyClass).new()\l<statTemp>$9: Exception = <statTemp>$10: MyClass.foo=(<rescueTemp>$2: Exception)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$13: NilClass\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_9" [
-        label = "block[id=9](<U <returnMethodTemp>>$2: NilClass)\l<U <gotoDeadTemp>>$13: TrueClass(true) = true\l<U <gotoDeadTemp>>$13: TrueClass(true)\l"
+        label = "block[id=9](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10](<U <returnMethodTemp>>$2: Integer(3))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer(3)\l<unconditional>\l"
+        label = "block[id=10](<returnMethodTemp>$2: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];
@@ -66,7 +66,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(MyClass) = alias <C <U MyClass>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(MyClass))\l<U <statTemp>>$9: T.untyped = <U <self>>: T.class_of(<root>).<U foo>()\l<U <statTemp>>$7: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$9: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(MyClass) = alias <C MyClass>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(MyClass))\l<statTemp>$9: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$7: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$9: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -84,7 +84,7 @@ subgraph "cluster_::MyClass#foo=" {
     "bb::MyClass#foo=_1" [shape = parallelogram];
 
     "bb::MyClass#foo=_0" [
-        label = "block[id=0]()\l<U <self>>: MyClass = cast(<U <self>>: NilClass, MyClass);\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: MyClass = cast(<self>: NilClass, MyClass);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::MyClass#foo=_0" -> "bb::MyClass#foo=_1" [style="bold"];

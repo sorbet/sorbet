@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <rescueStartTemp>>$3: T.untyped = <unanalyzable>\l<U <rescueStartTemp>>$3: T.untyped\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,47 +18,47 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<U <returnMethodTemp>>$2: T.nilable(Integer))\l<D <U <rescueTemp>> $2>: T.untyped = <unanalyzable>\l<U <exceptionClassTemp>>$6: T.class_of(StandardError) = alias <C <U StandardError>>\l<U <isaCheckTemp>>$7: T.untyped = <D <U <rescueTemp>> $2>: T.untyped.<U is_a?>(<U <exceptionClassTemp>>$6: T.class_of(StandardError))\l<U <isaCheckTemp>>$7: T.untyped\l"
+        label = "block[id=3](<returnMethodTemp>$2: T.nilable(Integer))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$6: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$7: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$6: T.class_of(StandardError))\l<isaCheckTemp>$7: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_12" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4]()\l<U <returnMethodTemp>>$2: Integer(1) = 1\l<U <ifTemp>>$4: Integer(2) = 2\l<U <ifTemp>>$4: Integer(2)\l"
+        label = "block[id=4]()\l<returnMethodTemp>$2: Integer(1) = 1\l<ifTemp>$4: Integer(2) = 2\l<ifTemp>$4: Integer(2)\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_6" [style="bold"];
     "bb::Object#foo_4" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6]()\l<U <returnMethodTemp>>$2: Integer(3) = 3\l<unconditional>\l"
+        label = "block[id=6]()\l<returnMethodTemp>$2: Integer(3) = 3\l<unconditional>\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="bold"];
     "bb::Object#foo_9" [
-        label = "block[id=9](<U <returnMethodTemp>>$2: T.nilable(Integer), <U <gotoDeadTemp>>$8: NilClass)\l<U <gotoDeadTemp>>$8: NilClass\l"
+        label = "block[id=9](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$8: NilClass)\l<gotoDeadTemp>$8: NilClass\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" -> "bb::Object#foo_13" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10](<U <returnMethodTemp>>$2: Integer(3))\l<U <rescueEndTemp>>$5: T.untyped = <unanalyzable>\l<U <rescueEndTemp>>$5: T.untyped\l"
+        label = "block[id=10](<returnMethodTemp>$2: Integer(3))\l<rescueEndTemp>$5: T.untyped = <unanalyzable>\l<rescueEndTemp>$5: T.untyped\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_10" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_12" [
-        label = "block[id=12](<U <returnMethodTemp>>$2: T.nilable(Integer))\l<U <gotoDeadTemp>>$8: TrueClass(true) = true\l<U <gotoDeadTemp>>$8: TrueClass(true)\l"
+        label = "block[id=12](<returnMethodTemp>$2: T.nilable(Integer))\l<gotoDeadTemp>$8: TrueClass(true) = true\l<gotoDeadTemp>$8: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_12" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_12" -> "bb::Object#foo_13" [style="tapered"];
 
     "bb::Object#foo_13" [
-        label = "block[id=13](<U <returnMethodTemp>>$2: T.nilable(Integer))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=13](<returnMethodTemp>$2: T.nilable(Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_13" -> "bb::Object#foo_1" [style="bold"];

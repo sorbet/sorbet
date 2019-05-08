@@ -6,29 +6,29 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1](<U <self>>)\l<U <statTemp>>$10 = <U <self>>\l<U <statTemp>>$4 = <U <statTemp>>$10.<U bad>()\l<unconditional>\l"
+        label = "block[id=1](<self>)\l<statTemp>$10 = <self>\l<statTemp>$4 = <statTemp>$10.bad()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2](<U <self>>: Object)\louterLoops: 1\l<U <whileTemp>>$3: TrueClass = true\l<U <whileTemp>>$3: TrueClass\l"
+        label = "block[id=2](<self>: Object)\louterLoops: 1\l<whileTemp>$3: TrueClass = true\l<whileTemp>$3: TrueClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<U <returnMethodTemp>>$2 = nil\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2 = nil\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_5" [
-        label = "block[id=5](<U <self>>: Object)\louterLoops: 1\l<U <statTemp>>$5: T.untyped = <U <self>>: Object.<U good>()\l<U <nextTemp>>$8: T.untyped = <U <self>>: Object.<U value>()\l<unconditional>\l"
+        label = "block[id=5](<self>: Object)\louterLoops: 1\l<statTemp>$5: T.untyped = <self>: Object.good()\l<nextTemp>$8: T.untyped = <self>: Object.value()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_2" [style="bold"];

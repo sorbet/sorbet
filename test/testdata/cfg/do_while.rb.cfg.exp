@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -16,79 +16,79 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" [
-        label = "block[id=2](<U <self>>: T.class_of(<root>))\louterLoops: 1\l<U <whileTemp>>$4: TrueClass = true\l<U <whileTemp>>$4: TrueClass\l"
+        label = "block[id=2](<self>: T.class_of(<root>))\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_5" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(<root>))\louterLoops: 1\l<U <statTemp>>$8: Integer(2) = 2\l<D <U forTemp> $2>: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$8: Integer(2))\l<U <statTemp>>$10: FalseClass = false\l<U <ifTemp>>$9: TrueClass = <U <statTemp>>$10: FalseClass.<U !>()\l<U <ifTemp>>$9: TrueClass\l"
+        label = "block[id=5](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$8: Integer(2) = 2\lforTemp$2: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$8: Integer(2))\l<statTemp>$10: FalseClass = false\l<ifTemp>$9: TrueClass = <statTemp>$10: FalseClass.!()\l<ifTemp>$9: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_2" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_6" [
-        label = "block[id=6](<U <self>>: T.class_of(<root>), <D <U forTemp> $2>: NilClass)\louterLoops: 1\l<U <block-break-assign>>$12: NilClass = <D <U forTemp> $2>\l<unconditional>\l"
+        label = "block[id=6](<self>: T.class_of(<root>), forTemp$2: NilClass)\louterLoops: 1\l<block-break-assign>$12: NilClass = forTemp$2\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_6" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
     "bb::<Class:<root>>#<static-init>_8" [
-        label = "block[id=8](<U <self>>: T.class_of(<root>))\louterLoops: 1\l<U <whileTemp>>$14: TrueClass = true\l<U <whileTemp>>$14: TrueClass\l"
+        label = "block[id=8](<self>: T.class_of(<root>))\louterLoops: 1\l<whileTemp>$14: TrueClass = true\l<whileTemp>$14: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_8" -> "bb::<Class:<root>>#<static-init>_11" [style="bold"];
     "bb::<Class:<root>>#<static-init>_8" -> "bb::<Class:<root>>#<static-init>_10" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_10" [
-        label = "block[id=10](<U <self>>: T.class_of(<root>))\l<U x>: Integer(0) = 0\l<unconditional>\l"
+        label = "block[id=10](<self>: T.class_of(<root>))\lx: Integer(0) = 0\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_10" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_11" [
-        label = "block[id=11](<U <self>>: T.class_of(<root>))\louterLoops: 1\l<U <statTemp>>$18: Integer(2) = 2\l<D <U forTemp> $3>: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$18: Integer(2))\l<U <ifTemp>>$19: TrueClass = true\l<U <ifTemp>>$19: TrueClass\l"
+        label = "block[id=11](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$18: Integer(2) = 2\lforTemp$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: Integer(2))\l<ifTemp>$19: TrueClass = true\l<ifTemp>$19: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_11" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];
     "bb::<Class:<root>>#<static-init>_11" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_12" [
-        label = "block[id=12](<U <self>>: T.class_of(<root>), <D <U forTemp> $3>: NilClass)\louterLoops: 1\l<U <block-break-assign>>$21: NilClass = <D <U forTemp> $3>\l<unconditional>\l"
+        label = "block[id=12](<self>: T.class_of(<root>), forTemp$3: NilClass)\louterLoops: 1\l<block-break-assign>$21: NilClass = forTemp$3\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_12" -> "bb::<Class:<root>>#<static-init>_10" [style="bold"];
     "bb::<Class:<root>>#<static-init>_14" [
-        label = "block[id=14](<U <self>>: T.class_of(<root>), <U x>: Integer(0))\louterLoops: 1\l<U <whileTemp>>$24: FalseClass = false\l<U <whileTemp>>$24: FalseClass\l"
+        label = "block[id=14](<self>: T.class_of(<root>), x: Integer(0))\louterLoops: 1\l<whileTemp>$24: FalseClass = false\l<whileTemp>$24: FalseClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_14" -> "bb::<Class:<root>>#<static-init>_17" [style="bold"];
     "bb::<Class:<root>>#<static-init>_14" -> "bb::<Class:<root>>#<static-init>_16" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_16" [
-        label = "block[id=16](<U <self>>: T.class_of(<root>), <U x>: Integer(0))\l<U y>: Integer(0) = 0\l<unconditional>\l"
+        label = "block[id=16](<self>: T.class_of(<root>), x: Integer(0))\ly: Integer(0) = 0\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_16" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];
     "bb::<Class:<root>>#<static-init>_17" [
-        label = "block[id=17](<U <self>>: T.class_of(<root>), <U x>: Integer(0))\louterLoops: 1\l<U <statTemp>>$28 = 2\l<U <statTemp>>$26 = <U <self>>.<U puts>(<U <statTemp>>$28)\l<U x> = 1\l<unconditional>\l"
+        label = "block[id=17](<self>: T.class_of(<root>), x: Integer(0))\louterLoops: 1\l<statTemp>$28 = 2\l<statTemp>$26 = <self>.puts(<statTemp>$28)\lx = 1\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_17" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" [
-        label = "block[id=18](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\louterLoops: 1\l<U <statTemp>>$32: TrueClass = true\l<U <whileTemp>>$31: FalseClass = <U <statTemp>>$32: TrueClass.<U !>()\l<U <whileTemp>>$31: FalseClass\l"
+        label = "block[id=18](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\louterLoops: 1\l<statTemp>$32: TrueClass = true\l<whileTemp>$31: FalseClass = <statTemp>$32: TrueClass.!()\l<whileTemp>$31: FalseClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_21" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_20" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_20" [
-        label = "block[id=20](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\l<U <statTemp>>$37: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U x>: Integer(0), <U y>: Integer(0))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=20](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\l<statTemp>$37: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" [
-        label = "block[id=21](<U <self>>: T.class_of(<root>), <U x>: Integer(0), <U y>: Integer(0))\louterLoops: 1\l<U <statTemp>>$36 = 2\l<U <statTemp>>$34 = <U <self>>.<U puts>(<U <statTemp>>$36)\l<U y> = 1\l<unconditional>\l"
+        label = "block[id=21](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\louterLoops: 1\l<statTemp>$36 = 2\l<statTemp>$34 = <self>.puts(<statTemp>$36)\ly = 1\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_21" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];

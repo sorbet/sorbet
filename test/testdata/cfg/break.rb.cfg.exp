@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <arrayTemp>>$5: Integer(1) = 1\l<U <arrayTemp>>$6: Integer(2) = 2\l<U <magic>>$7: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$4: [Integer(1), Integer(2)] = <U <magic>>$7: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$5: Integer(1), <U <arrayTemp>>$6: Integer(2))\l<U <block-pre-call-temp>>$8: T::Array[U] = <U <statTemp>>$4: [Integer(1), Integer(2)].<U map>()\l<U <selfRestore>>$9: Object = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<arrayTemp>$5: Integer(1) = 1\l<arrayTemp>$6: Integer(2) = 2\l<magic>$7: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$4: [Integer(1), Integer(2)] = <magic>$7: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1), <arrayTemp>$6: Integer(2))\l<block-pre-call-temp>$8: T::Array[U] = <statTemp>$4: [Integer(1), Integer(2)].map()\l<selfRestore>$9: Object = <self>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -16,24 +16,24 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2](<U <self>>: Object, <U <selfRestore>>$9: Object)\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: Object, <selfRestore>$9: Object)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3](<U <selfRestore>>$9: Object)\l<U target>: T::Array[T.noreturn] = Solve<::Object#foo#<block>>\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$9: Object)\ltarget: T::Array[T.noreturn] = Solve<::Object#foo#<block>>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4](<U <selfRestore>>$9: Object, <U target>: T.any(T::Array[T.noreturn], Integer))\l<U <self>>: Object = <U <selfRestore>>$9\l<U <statTemp>>$17: T.class_of(T) = alias <C <U T>>\l<U <returnMethodTemp>>$2: T.any(T::Array[T.noreturn], Integer) = <U <statTemp>>$17: T.class_of(T).<U reveal_type>(<U target>: T.any(T::Array[T.noreturn], Integer))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
+        label = "block[id=4](<selfRestore>$9: Object, target: T.any(T::Array[T.noreturn], Integer))\l<self>: Object = <selfRestore>$9\l<statTemp>$17: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <statTemp>$17: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_5" [
-        label = "block[id=5](<U <self>>: Object, <U <selfRestore>>$9: Object)\louterLoops: 1\l<U <self>>: Object = loadSelf\l<U <blk>>$10: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<U <blk>>$11: Integer(0) = 0\l<U x>$1: Integer = <U <blk>>$10: [Integer].<U []>(<U <blk>>$11: Integer(0))\l<U <block-break-assign>>$16: Integer = <U x>$1\l<U target>: Integer = <U <block-break-assign>>$16\l<unconditional>\l"
+        label = "block[id=5](<self>: Object, <selfRestore>$9: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<blk>$10: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<blk>$11: Integer(0) = 0\lx$1: Integer = <blk>$10: [Integer].[](<blk>$11: Integer(0))\l<block-break-assign>$16: Integer = x$1\ltarget: Integer = <block-break-assign>$16\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_4" [style="bold"];
@@ -46,7 +46,7 @@ subgraph "cluster_::Object#bar" {
     "bb::Object#bar_1" [shape = parallelogram];
 
     "bb::Object#bar_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U <returnMethodTemp>>$2: String(\"foo bar\") = \"foo bar\"\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: String(\"foo bar\")\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnMethodTemp>$2: String(\"foo bar\") = \"foo bar\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String(\"foo bar\")\l<unconditional>\l"
     ];
 
     "bb::Object#bar_0" -> "bb::Object#bar_1" [style="bold"];
@@ -64,7 +64,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.untyped = <U <self>>: T.class_of(<root>).<U foo>()\l<U <statTemp>>$3: NilClass = <U <self>>: T.class_of(<root>).<U puts>(<U <statTemp>>$5: T.untyped)\l<U <block-pre-call-temp>>$9: Sorbet::Private::Static::Void = <U <self>>: T.class_of(<root>).<U sig>()\l<U <selfRestore>>$10: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -74,116 +74,116 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" [
-        label = "block[id=2](<U <self>>: T.class_of(<root>), <U <selfRestore>>$10: T.class_of(<root>))\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: T.class_of(<root>), <selfRestore>$10: T.class_of(<root>))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_5" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$10: T.class_of(<root>))\l<U <statTemp>>$7: Sorbet::Private::Static::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$10\l<U <block-pre-call-temp>>$32: String = <U <self>>: T.class_of(<root>).<U bar>()\l<U <selfRestore>>$33: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$10: T.class_of(<root>))\l<statTemp>$7: Sorbet::Private::Static::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<self>: T.class_of(<root>) = <selfRestore>$10\l<block-pre-call-temp>$32: String = <self>: T.class_of(<root>).bar()\l<selfRestore>$33: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];
     "bb::<Class:<root>>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(<root>), <U <selfRestore>>$10: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <hashTemp>>$17: Symbol(:\"blk\") = :\"blk\"\l<U <statTemp>>$21: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$20: T.untyped = <U <statTemp>>$21: T.class_of(T).<U proc>()\l<U <hashTemp>>$23: Symbol(:\"x\") = :\"x\"\l<U <hashTemp>>$24: T.class_of(Integer) = alias <C <U Integer>>\l<U <magic>>$25: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$22: {x: T.class_of(Integer)} = <U <magic>>$25: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$23: Symbol(:\"x\"), <U <hashTemp>>$24: T.class_of(Integer))\l<U <statTemp>>$19: T.untyped = <U <statTemp>>$20: T.untyped.<U params>(<U <statTemp>>$22: {x: T.class_of(Integer)})\l<U <statTemp>>$26: T.class_of(String) = alias <C <U String>>\l<U <hashTemp>>$18: T.untyped = <U <statTemp>>$19: T.untyped.<U returns>(<U <statTemp>>$26: T.class_of(String))\l<U <magic>>$27: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$16: {blk: T.untyped} = <U <magic>>$27: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$17: Symbol(:\"blk\"), <U <hashTemp>>$18: T.untyped)\l<U <statTemp>>$14: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U params>(<U <statTemp>>$16: {blk: T.untyped})\l<U <statTemp>>$28: T.class_of(String) = alias <C <U String>>\l<U <blockReturnTemp>>$13: T::Private::Methods::DeclBuilder = <U <statTemp>>$14: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$28: T.class_of(String))\l<U <blockReturnTemp>>$29: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <U <blockReturnTemp>>$13: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=5](<self>: T.class_of(<root>), <selfRestore>$10: T.class_of(<root>))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$17: Symbol(:\"blk\") = :\"blk\"\l<statTemp>$21: T.class_of(T) = alias <C T>\l<statTemp>$20: T.untyped = <statTemp>$21: T.class_of(T).proc()\l<hashTemp>$23: Symbol(:\"x\") = :\"x\"\l<hashTemp>$24: T.class_of(Integer) = alias <C Integer>\l<magic>$25: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$22: {x: T.class_of(Integer)} = <magic>$25: T.class_of(<Magic>).<build-hash>(<hashTemp>$23: Symbol(:\"x\"), <hashTemp>$24: T.class_of(Integer))\l<statTemp>$19: T.untyped = <statTemp>$20: T.untyped.params(<statTemp>$22: {x: T.class_of(Integer)})\l<statTemp>$26: T.class_of(String) = alias <C String>\l<hashTemp>$18: T.untyped = <statTemp>$19: T.untyped.returns(<statTemp>$26: T.class_of(String))\l<magic>$27: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$16: {blk: T.untyped} = <magic>$27: T.class_of(<Magic>).<build-hash>(<hashTemp>$17: Symbol(:\"blk\"), <hashTemp>$18: T.untyped)\l<statTemp>$14: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$16: {blk: T.untyped})\l<statTemp>$28: T.class_of(String) = alias <C String>\l<blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <statTemp>$14: T::Private::Methods::DeclBuilder.returns(<statTemp>$28: T.class_of(String))\l<blockReturnTemp>$29: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
     "bb::<Class:<root>>#<static-init>_6" [
-        label = "block[id=6](<U <self>>: T.class_of(<root>), <U <selfRestore>>$33: T.class_of(<root>))\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=6](<self>: T.class_of(<root>), <selfRestore>$33: T.class_of(<root>))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_6" -> "bb::<Class:<root>>#<static-init>_9" [style="bold"];
     "bb::<Class:<root>>#<static-init>_6" -> "bb::<Class:<root>>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_7" [
-        label = "block[id=7](<U <selfRestore>>$33: T.class_of(<root>))\l<U a>: String = Solve<::<Class:<root>>#<static-init>#<block>>\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$33: T.class_of(<root>))\la: String = Solve<::<Class:<root>>#<static-init>#<block>>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_7" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
     "bb::<Class:<root>>#<static-init>_8" [
-        label = "block[id=8](<U <selfRestore>>$33: T.class_of(<root>), <U a>: T.any(String, Integer))\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$33\l<U <statTemp>>$45: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$44: T.any(String, Integer) = <U <statTemp>>$45: T.class_of(T).<U reveal_type>(<U a>: T.any(String, Integer))\l<U <block-pre-call-temp>>$49: String = <U <self>>: T.class_of(<root>).<U bar>()\l<U <selfRestore>>$50: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=8](<selfRestore>$33: T.class_of(<root>), a: T.any(String, Integer))\l<self>: T.class_of(<root>) = <selfRestore>$33\l<statTemp>$45: T.class_of(T) = alias <C T>\l<statTemp>$44: T.any(String, Integer) = <statTemp>$45: T.class_of(T).reveal_type(a: T.any(String, Integer))\l<block-pre-call-temp>$49: String = <self>: T.class_of(<root>).bar()\l<selfRestore>$50: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_8" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];
     "bb::<Class:<root>>#<static-init>_9" [
-        label = "block[id=9](<U <self>>: T.class_of(<root>), <U <selfRestore>>$33: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T.class_of(<root>) = loadSelf\l<U <blk>>$34: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<U <blk>>$35: Integer(0) = 0\l<U x>$2: Integer = <U <blk>>$34: [Integer].<U []>(<U <blk>>$35: Integer(0))\l<U <statTemp>>$40: Integer(5) = 5\l<U <ifTemp>>$38: T::Boolean = <U x>$2: Integer.<U >>(<U <statTemp>>$40: Integer(5))\l<U <ifTemp>>$38: T::Boolean\l"
+        label = "block[id=9](<self>: T.class_of(<root>), <selfRestore>$33: T.class_of(<root>))\louterLoops: 1\l<self>: T.class_of(<root>) = loadSelf\l<blk>$34: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<blk>$35: Integer(0) = 0\lx$2: Integer = <blk>$34: [Integer].[](<blk>$35: Integer(0))\l<statTemp>$40: Integer(5) = 5\l<ifTemp>$38: T::Boolean = x$2: Integer.>(<statTemp>$40: Integer(5))\l<ifTemp>$38: T::Boolean\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_9" -> "bb::<Class:<root>>#<static-init>_10" [style="bold"];
     "bb::<Class:<root>>#<static-init>_9" -> "bb::<Class:<root>>#<static-init>_11" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_10" [
-        label = "block[id=10](<U <selfRestore>>$33: T.class_of(<root>))\louterLoops: 1\l<U <returnTemp>>$41: Integer(10) = 10\l<U <block-break-assign>>$42: Integer(10) = <U <returnTemp>>$41\l<U a>: Integer(10) = <U <block-break-assign>>$42\l<unconditional>\l"
+        label = "block[id=10](<selfRestore>$33: T.class_of(<root>))\louterLoops: 1\l<returnTemp>$41: Integer(10) = 10\l<block-break-assign>$42: Integer(10) = <returnTemp>$41\la: Integer(10) = <block-break-assign>$42\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_10" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
     "bb::<Class:<root>>#<static-init>_11" [
-        label = "block[id=11](<U <self>>: T.class_of(<root>), <U <selfRestore>>$33: T.class_of(<root>))\louterLoops: 1\l<U <blockReturnTemp>>$36: String(\"test\") = \"test\"\l<U <blockReturnTemp>>$43: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <U <blockReturnTemp>>$36: String(\"test\")\l<unconditional>\l"
+        label = "block[id=11](<self>: T.class_of(<root>), <selfRestore>$33: T.class_of(<root>))\louterLoops: 1\l<blockReturnTemp>$36: String(\"test\") = \"test\"\l<blockReturnTemp>$43: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <blockReturnTemp>$36: String(\"test\")\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_11" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];
     "bb::<Class:<root>>#<static-init>_12" [
-        label = "block[id=12](<U <self>>: T.class_of(<root>), <U <selfRestore>>$50: T.class_of(<root>))\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=12](<self>: T.class_of(<root>), <selfRestore>$50: T.class_of(<root>))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_12" -> "bb::<Class:<root>>#<static-init>_15" [style="bold"];
     "bb::<Class:<root>>#<static-init>_12" -> "bb::<Class:<root>>#<static-init>_13" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_13" [
-        label = "block[id=13](<U <selfRestore>>$50: T.class_of(<root>))\l<U b>: String = Solve<::<Class:<root>>#<static-init>#<block>>\l<unconditional>\l"
+        label = "block[id=13](<selfRestore>$50: T.class_of(<root>))\lb: String = Solve<::<Class:<root>>#<static-init>#<block>>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_13" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_14" [
-        label = "block[id=14](<U <selfRestore>>$50: T.class_of(<root>), <U b>: T.nilable(String))\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$50\l<U <statTemp>>$62: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$61: T.nilable(String) = <U <statTemp>>$62: T.class_of(T).<U reveal_type>(<U b>: T.nilable(String))\l<unconditional>\l"
+        label = "block[id=14](<selfRestore>$50: T.class_of(<root>), b: T.nilable(String))\l<self>: T.class_of(<root>) = <selfRestore>$50\l<statTemp>$62: T.class_of(T) = alias <C T>\l<statTemp>$61: T.nilable(String) = <statTemp>$62: T.class_of(T).reveal_type(b: T.nilable(String))\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_14" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];
     "bb::<Class:<root>>#<static-init>_15" [
-        label = "block[id=15](<U <self>>: T.class_of(<root>), <U <selfRestore>>$50: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T.class_of(<root>) = loadSelf\l<U <blk>>$51: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<U <blk>>$52: Integer(0) = 0\l<U x>$3: Integer = <U <blk>>$51: [Integer].<U []>(<U <blk>>$52: Integer(0))\l<U <statTemp>>$57: Integer(5) = 5\l<U <ifTemp>>$55: T::Boolean = <U x>$3: Integer.<U >>(<U <statTemp>>$57: Integer(5))\l<U <ifTemp>>$55: T::Boolean\l"
+        label = "block[id=15](<self>: T.class_of(<root>), <selfRestore>$50: T.class_of(<root>))\louterLoops: 1\l<self>: T.class_of(<root>) = loadSelf\l<blk>$51: [Integer] = load_yield_params(::<Class:<root>>#<static-init>#<block>, <root>.<static-init>#<block>)\l<blk>$52: Integer(0) = 0\lx$3: Integer = <blk>$51: [Integer].[](<blk>$52: Integer(0))\l<statTemp>$57: Integer(5) = 5\l<ifTemp>$55: T::Boolean = x$3: Integer.>(<statTemp>$57: Integer(5))\l<ifTemp>$55: T::Boolean\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_15" -> "bb::<Class:<root>>#<static-init>_16" [style="bold"];
     "bb::<Class:<root>>#<static-init>_15" -> "bb::<Class:<root>>#<static-init>_17" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_16" [
-        label = "block[id=16](<U <selfRestore>>$50: T.class_of(<root>))\louterLoops: 1\l<U <block-break-assign>>$59: NilClass = <U <returnTemp>>$58\l<U b>: NilClass = <U <block-break-assign>>$59\l<unconditional>\l"
+        label = "block[id=16](<selfRestore>$50: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$59: NilClass = <returnTemp>$58\lb: NilClass = <block-break-assign>$59\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_16" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_17" [
-        label = "block[id=17](<U <self>>: T.class_of(<root>), <U <selfRestore>>$50: T.class_of(<root>))\louterLoops: 1\l<U <blockReturnTemp>>$53: String(\"test\") = \"test\"\l<U <blockReturnTemp>>$60: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <U <blockReturnTemp>>$53: String(\"test\")\l<unconditional>\l"
+        label = "block[id=17](<self>: T.class_of(<root>), <selfRestore>$50: T.class_of(<root>))\louterLoops: 1\l<blockReturnTemp>$53: String(\"test\") = \"test\"\l<blockReturnTemp>$60: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <blockReturnTemp>$53: String(\"test\")\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_17" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" [
-        label = "block[id=18]()\louterLoops: 1\l<U <statTemp>>$67: Integer(1) = 1\l<U <statTemp>>$66: String = <U <statTemp>>$67: Integer(1).<U to_s>()\l<U <statTemp>>$68: String(\"\") = \"\"\l<U <whileTemp>>$65: T::Boolean = <U <statTemp>>$66: String.<U ==>(<U <statTemp>>$68: String(\"\"))\l<U <whileTemp>>$65: T::Boolean\l"
+        label = "block[id=18]()\louterLoops: 1\l<statTemp>$67: Integer(1) = 1\l<statTemp>$66: String = <statTemp>$67: Integer(1).to_s()\l<statTemp>$68: String(\"\") = \"\"\l<whileTemp>$65: T::Boolean = <statTemp>$66: String.==(<statTemp>$68: String(\"\"))\l<whileTemp>$65: T::Boolean\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_21" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_19" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_19" [
-        label = "block[id=19]()\l<U c>: NilClass = nil\l<unconditional>\l"
+        label = "block[id=19]()\lc: NilClass = nil\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_19" -> "bb::<Class:<root>>#<static-init>_20" [style="bold"];
     "bb::<Class:<root>>#<static-init>_20" [
-        label = "block[id=20](<U c>: T.nilable(Symbol))\l<U <statTemp>>$77: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$76: T.nilable(Symbol) = <U <statTemp>>$77: T.class_of(T).<U reveal_type>(<U c>: T.nilable(Symbol))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=20](c: T.nilable(Symbol))\l<statTemp>$77: T.class_of(T) = alias <C T>\l<statTemp>$76: T.nilable(Symbol) = <statTemp>$77: T.class_of(T).reveal_type(c: T.nilable(Symbol))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" [
-        label = "block[id=21]()\louterLoops: 1\l<U <statTemp>>$72: Integer(1) = 1\l<U <statTemp>>$71: String = <U <statTemp>>$72: Integer(1).<U to_s>()\l<U <statTemp>>$73: String(\"\") = \"\"\l<U <ifTemp>>$70: T::Boolean = <U <statTemp>>$71: String.<U ==>(<U <statTemp>>$73: String(\"\"))\l<U <ifTemp>>$70: T::Boolean\l"
+        label = "block[id=21]()\louterLoops: 1\l<statTemp>$72: Integer(1) = 1\l<statTemp>$71: String = <statTemp>$72: Integer(1).to_s()\l<statTemp>$73: String(\"\") = \"\"\l<ifTemp>$70: T::Boolean = <statTemp>$71: String.==(<statTemp>$73: String(\"\"))\l<ifTemp>$70: T::Boolean\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_21" -> "bb::<Class:<root>>#<static-init>_22" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" -> "bb::<Class:<root>>#<static-init>_18" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_22" [
-        label = "block[id=22]()\louterLoops: 1\l<U <returnTemp>>$74: Symbol(:\"abc\") = :\"abc\"\l<U <block-break-assign>>$75: Symbol(:\"abc\") = <U <returnTemp>>$74\l<U c>: Symbol(:\"abc\") = <U <block-break-assign>>$75\l<unconditional>\l"
+        label = "block[id=22]()\louterLoops: 1\l<returnTemp>$74: Symbol(:\"abc\") = :\"abc\"\l<block-break-assign>$75: Symbol(:\"abc\") = <returnTemp>$74\lc: Symbol(:\"abc\") = <block-break-assign>$75\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_22" -> "bb::<Class:<root>>#<static-init>_20" [style="bold"];

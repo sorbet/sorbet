@@ -6,7 +6,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_1" [shape = parallelogram];
 
     "bb::Object#f_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U x>: T.any(Concrete, Other) = load_arg(Object#f#x)\l<U <statTemp>>$6: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <ifTemp>>$5: T::Boolean = <U <statTemp>>$6: T.class_of(Concrete).<U ===>(<U x>: T.any(Concrete, Other))\l<U <ifTemp>>$5: T::Boolean\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\lx: T.any(Concrete, Other) = load_arg(Object#f#x)\l<statTemp>$6: T.class_of(Concrete) = alias <C Concrete>\l<ifTemp>$5: T::Boolean = <statTemp>$6: T.class_of(Concrete).===(x: T.any(Concrete, Other))\l<ifTemp>$5: T::Boolean\l"
     ];
 
     "bb::Object#f_0" -> "bb::Object#f_2" [style="bold"];
@@ -18,48 +18,48 @@ subgraph "cluster_::Object#f" {
 
     "bb::Object#f_1" -> "bb::Object#f_1" [style="bold"];
     "bb::Object#f_2" [
-        label = "block[id=2](<U x>: Concrete)\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$10: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$10: T.class_of(Concrete))\l<U <castTemp>>$11: Concrete = <U x>\l<U <statTemp>>$3: Concrete = cast(<U <castTemp>>$11: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=2](x: Concrete)\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(Concrete) = alias <C Concrete>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$10: T.class_of(Concrete))\l<castTemp>$11: Concrete = x\l<statTemp>$3: Concrete = cast(<castTemp>$11: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_2" -> "bb::Object#f_7" [style="bold"];
     "bb::Object#f_3" [
-        label = "block[id=3](<U x>: Other)\l<U <statTemp>>$13: T.class_of(Other) = alias <C <U Other>>\l<U <ifTemp>>$12: T::Boolean = <U <statTemp>>$13: T.class_of(Other).<U ===>(<U x>: Other)\l<U <ifTemp>>$12: T::Boolean\l"
+        label = "block[id=3](x: Other)\l<statTemp>$13: T.class_of(Other) = alias <C Other>\l<ifTemp>$12: T::Boolean = <statTemp>$13: T.class_of(Other).===(x: Other)\l<ifTemp>$12: T::Boolean\l"
     ];
 
     "bb::Object#f_3" -> "bb::Object#f_4" [style="bold"];
     "bb::Object#f_3" -> "bb::Object#f_7" [style="tapered"];
 
     "bb::Object#f_4" [
-        label = "block[id=4](<U x>: Other)\l<U <statTemp>>$16: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$17: T.class_of(Other) = alias <C <U Other>>\l<U <statTemp>>$15: Sorbet::Private::Static::Void = <U <statTemp>>$16: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$17: T.class_of(Other))\l<U <castTemp>>$18: Other = <U x>\l<U <statTemp>>$3: Other = cast(<U <castTemp>>$18: Other, Other);\l<unconditional>\l"
+        label = "block[id=4](x: Other)\l<statTemp>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$17: T.class_of(Other) = alias <C Other>\l<statTemp>$15: Sorbet::Private::Static::Void = <statTemp>$16: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$17: T.class_of(Other))\l<castTemp>$18: Other = x\l<statTemp>$3: Other = cast(<castTemp>$18: Other, Other);\l<unconditional>\l"
     ];
 
     "bb::Object#f_4" -> "bb::Object#f_7" [style="bold"];
     "bb::Object#f_7" [
-        label = "block[id=7](<U x>: T.any(Concrete, Other))\l<U <statTemp>>$22: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <ifTemp>>$20: T::Boolean = <U x>: T.any(Concrete, Other).<U is_a?>(<U <statTemp>>$22: T.class_of(Concrete))\l<U <ifTemp>>$20: T::Boolean\l"
+        label = "block[id=7](x: T.any(Concrete, Other))\l<statTemp>$22: T.class_of(Concrete) = alias <C Concrete>\l<ifTemp>$20: T::Boolean = x: T.any(Concrete, Other).is_a?(<statTemp>$22: T.class_of(Concrete))\l<ifTemp>$20: T::Boolean\l"
     ];
 
     "bb::Object#f_7" -> "bb::Object#f_8" [style="bold"];
     "bb::Object#f_7" -> "bb::Object#f_10" [style="tapered"];
 
     "bb::Object#f_8" [
-        label = "block[id=8](<U x>: Concrete)\l<U <statTemp>>$24: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$25: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$23: Sorbet::Private::Static::Void = <U <statTemp>>$24: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$25: T.class_of(Concrete))\l<U <castTemp>>$26: Concrete = <U x>\l<U <statTemp>>$19: Concrete = cast(<U <castTemp>>$26: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=8](x: Concrete)\l<statTemp>$24: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$25: T.class_of(Concrete) = alias <C Concrete>\l<statTemp>$23: Sorbet::Private::Static::Void = <statTemp>$24: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$25: T.class_of(Concrete))\l<castTemp>$26: Concrete = x\l<statTemp>$19: Concrete = cast(<castTemp>$26: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_8" -> "bb::Object#f_10" [style="bold"];
     "bb::Object#f_10" [
-        label = "block[id=10](<U x>: T.any(Other, Concrete))\l<U <statTemp>>$29: T.class_of(Other) = alias <C <U Other>>\l<U <ifTemp>>$27: T::Boolean = <U x>: T.any(Other, Concrete).<U is_a?>(<U <statTemp>>$29: T.class_of(Other))\l<U <ifTemp>>$27: T::Boolean\l"
+        label = "block[id=10](x: T.any(Other, Concrete))\l<statTemp>$29: T.class_of(Other) = alias <C Other>\l<ifTemp>$27: T::Boolean = x: T.any(Other, Concrete).is_a?(<statTemp>$29: T.class_of(Other))\l<ifTemp>$27: T::Boolean\l"
     ];
 
     "bb::Object#f_10" -> "bb::Object#f_13" [style="bold"];
     "bb::Object#f_10" -> "bb::Object#f_12" [style="tapered"];
 
     "bb::Object#f_12" [
-        label = "block[id=12](<U x>: Concrete)\l<U <statTemp>>$31: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$32: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$30: Sorbet::Private::Static::Void = <U <statTemp>>$31: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$32: T.class_of(Concrete))\l<U <castTemp>>$33: Concrete = <U x>\l<U <returnMethodTemp>>$2: Concrete = cast(<U <castTemp>>$33: Concrete, Concrete);\l<unconditional>\l"
+        label = "block[id=12](x: Concrete)\l<statTemp>$31: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$32: T.class_of(Concrete) = alias <C Concrete>\l<statTemp>$30: Sorbet::Private::Static::Void = <statTemp>$31: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$32: T.class_of(Concrete))\l<castTemp>$33: Concrete = x\l<returnMethodTemp>$2: Concrete = cast(<castTemp>$33: Concrete, Concrete);\l<unconditional>\l"
     ];
 
     "bb::Object#f_12" -> "bb::Object#f_13" [style="bold"];
     "bb::Object#f_13" [
-        label = "block[id=13](<U <returnMethodTemp>>$2: T.nilable(Concrete))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.nilable(Concrete)\l<unconditional>\l"
+        label = "block[id=13](<returnMethodTemp>$2: T.nilable(Concrete))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Concrete)\l<unconditional>\l"
     ];
 
     "bb::Object#f_13" -> "bb::Object#f_1" [style="bold"];
@@ -72,7 +72,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Base)[T.untyped] = alias <C <U Base>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Base)[T.untyped])\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$10: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Concrete))\l<U <statTemp>>$12: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$13: T.class_of(Base)[T.untyped] = alias <C <U Base>>\l<U <statTemp>>$11: Sorbet::Private::Static::Void = <U <statTemp>>$12: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$13: T.class_of(Base)[T.untyped])\l<U <statTemp>>$16: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$17: T.class_of(Other) = alias <C <U Other>>\l<U <statTemp>>$15: Sorbet::Private::Static::Void = <U <statTemp>>$16: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$17: T.class_of(Other))\l<U <block-pre-call-temp>>$20: Sorbet::Private::Static::Void = <U <self>>: T.class_of(<root>).<U sig>()\l<U <selfRestore>>$21: T.class_of(<root>) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Base)[T.untyped] = alias <C Base>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Base)[T.untyped])\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(Concrete) = alias <C Concrete>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$10: T.class_of(Concrete))\l<statTemp>$12: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$13: T.class_of(Base)[T.untyped] = alias <C Base>\l<statTemp>$11: Sorbet::Private::Static::Void = <statTemp>$12: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$13: T.class_of(Base)[T.untyped])\l<statTemp>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$17: T.class_of(Other) = alias <C Other>\l<statTemp>$15: Sorbet::Private::Static::Void = <statTemp>$16: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$17: T.class_of(Other))\l<block-pre-call-temp>$20: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()\l<selfRestore>$21: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -82,19 +82,19 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" [
-        label = "block[id=2](<U <self>>: T.class_of(<root>), <U <selfRestore>>$21: T.class_of(<root>))\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: T.class_of(<root>), <selfRestore>$21: T.class_of(<root>))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_5" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$21: T.class_of(<root>))\l<U <statTemp>>$18: Sorbet::Private::Static::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<U <self>>: T.class_of(<root>) = <U <selfRestore>>$21\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$21: T.class_of(<root>))\l<statTemp>$18: Sorbet::Private::Static::Void = Solve<::<Class:<root>>#<static-init>#<block>>\l<self>: T.class_of(<root>) = <selfRestore>$21\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(<root>), <U <selfRestore>>$21: T.class_of(<root>))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <hashTemp>>$28: Symbol(:\"x\") = :\"x\"\l<U <statTemp>>$30: T.class_of(T) = alias <C <U T>>\l<U <statTemp>>$31: T.class_of(Concrete) = alias <C <U Concrete>>\l<U <statTemp>>$32: T.class_of(Other) = alias <C <U Other>>\l<U <hashTemp>>$29: <Type: T.any(T.class_of(Concrete), Other)> = <U <statTemp>>$30: T.class_of(T).<U any>(<U <statTemp>>$31: T.class_of(Concrete), <U <statTemp>>$32: T.class_of(Other))\l<U <magic>>$33: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$27: {x: <Type: T.any(T.class_of(Concrete), Other)>} = <U <magic>>$33: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$28: Symbol(:\"x\"), <U <hashTemp>>$29: <Type: T.any(T.class_of(Concrete), Other)>)\l<U <statTemp>>$25: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U params>(<U <statTemp>>$27: {x: <Type: T.any(T.class_of(Concrete), Other)>})\l<U <blockReturnTemp>>$24: T::Private::Methods::DeclBuilder = <U <statTemp>>$25: T::Private::Methods::DeclBuilder.<U void>()\l<U <blockReturnTemp>>$34: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <U <blockReturnTemp>>$24: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=5](<self>: T.class_of(<root>), <selfRestore>$21: T.class_of(<root>))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$28: Symbol(:\"x\") = :\"x\"\l<statTemp>$30: T.class_of(T) = alias <C T>\l<statTemp>$31: T.class_of(Concrete) = alias <C Concrete>\l<statTemp>$32: T.class_of(Other) = alias <C Other>\l<hashTemp>$29: <Type: T.any(T.class_of(Concrete), Other)> = <statTemp>$30: T.class_of(T).any(<statTemp>$31: T.class_of(Concrete), <statTemp>$32: T.class_of(Other))\l<magic>$33: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$27: {x: <Type: T.any(T.class_of(Concrete), Other)>} = <magic>$33: T.class_of(<Magic>).<build-hash>(<hashTemp>$28: Symbol(:\"x\"), <hashTemp>$29: <Type: T.any(T.class_of(Concrete), Other)>)\l<statTemp>$25: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$27: {x: <Type: T.any(T.class_of(Concrete), Other)>})\l<blockReturnTemp>$24: T::Private::Methods::DeclBuilder = <statTemp>$25: T::Private::Methods::DeclBuilder.void()\l<blockReturnTemp>$34: T.noreturn = blockreturn<::<Class:<root>>#<static-init>#<block>> <blockReturnTemp>$24: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -107,7 +107,7 @@ subgraph "cluster_::<Class:Concrete>#<static-init>" {
     "bb::<Class:Concrete>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Concrete>#<static-init>_0" [
-        label = "block[id=0]()\l<C <U Klass>>$3: String = alias <C <U Klass>>\l<U <self>>: T.class_of(Concrete) = cast(<U <self>>: NilClass, AppliedType {\l  klass = <S <C <U Concrete>> $1>\l  targs = [\l    <C <U Klass>> = String\l  ]\l});\l<U <hashTemp>>$6: Symbol(:\"fixed\") = :\"fixed\"\l<U <hashTemp>>$7: T.class_of(String) = alias <C <U String>>\l<U <magic>>$8: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$5: {fixed: T.class_of(String)} = <U <magic>>$8: T.class_of(<Magic>).<U <build-hash>>(<U <hashTemp>>$6: Symbol(:\"fixed\"), <U <hashTemp>>$7: T.class_of(String))\l<C <U Klass>>$3: T.untyped = <U <self>>: T.class_of(Concrete).<U type_template>(<U <statTemp>>$5: {fixed: T.class_of(String)})\l<U <returnMethodTemp>>$2: T.untyped = <C <U Klass>>$3\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<C Klass>$3: String = alias <C Klass>\l<self>: T.class_of(Concrete) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Concrete>> $1>\l  targs = [\l    <C <U Klass>> = String\l  ]\l});\l<hashTemp>$6: Symbol(:\"fixed\") = :\"fixed\"\l<hashTemp>$7: T.class_of(String) = alias <C String>\l<magic>$8: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$5: {fixed: T.class_of(String)} = <magic>$8: T.class_of(<Magic>).<build-hash>(<hashTemp>$6: Symbol(:\"fixed\"), <hashTemp>$7: T.class_of(String))\l<C Klass>$3: T.untyped = <self>: T.class_of(Concrete).type_template(<statTemp>$5: {fixed: T.class_of(String)})\l<returnMethodTemp>$2: T.untyped = <C Klass>$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Concrete>#<static-init>_0" -> "bb::<Class:Concrete>#<static-init>_1" [style="bold"];
