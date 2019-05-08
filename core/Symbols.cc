@@ -135,8 +135,11 @@ void printTabs(fmt::memory_buffer &to, int count) {
 SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
 SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
 
-string SymbolRef::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden, bool useToString) const {
-    return dataAllowingNone(gs)->toStringWithTabs(gs, tabs, showHidden, useToString);
+string SymbolRef::showRaw(const GlobalState &gs) const {
+    return dataAllowingNone(gs)->showRaw(gs);
+}
+string SymbolRef::toString(const GlobalState &gs) const {
+    return dataAllowingNone(gs)->toString(gs);
 }
 string SymbolRef::show(const GlobalState &gs) const {
     return dataAllowingNone(gs)->show(gs);
@@ -480,7 +483,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     return false;
 }
 
-string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden, bool useToString) const {
+string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
     fmt::memory_buffer buf;
 
     printTabs(buf, tabs);
@@ -520,7 +523,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         }
     }
 
-    fmt::format_to(buf, "{}{} {}", type, variance, useToString ? this->toStringFullName(gs) : this->showFullName(gs));
+    fmt::format_to(buf, "{}{} {}", type, variance, showRaw ? this->toStringFullName(gs) : this->showFullName(gs));
 
     if (this->isClass() || this->isMethod()) {
         if (this->isMethod()) {
@@ -538,19 +541,19 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
         if (!typeMembers.empty()) {
             fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
                                auto name = symb.data(gs)->name;
-                               return useToString ? name.toString(gs) : name.show(gs);
+                               return showRaw ? name.toString(gs) : name.show(gs);
                            }));
         }
 
         if (this->isClass() && this->superClass().exists()) {
             auto superClass = this->superClass().data(gs);
-            fmt::format_to(buf, " < {}", useToString ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
+            fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
         }
 
         if (this->isClass()) {
             fmt::format_to(buf, " ({})", fmt::map_join(this->mixins(), ", ", [&](auto symb) {
                                auto name = symb.data(gs)->name;
-                               return useToString ? name.toString(gs) : name.show(gs);
+                               return showRaw ? name.toString(gs) : name.show(gs);
                            }));
 
         } else {
@@ -582,24 +585,24 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
     }
     if (this->resultType && !isClass()) {
         fmt::format_to(buf, " -> {}",
-                       useToString ? this->resultType->toStringWithTabs(gs, tabs) : this->resultType->show(gs));
+                       showRaw ? this->resultType->toStringWithTabs(gs, tabs) : this->resultType->show(gs));
     }
     if (!locs_.empty()) {
         fmt::format_to(buf, " @ ");
         if (locs_.size() > 1) {
             fmt::format_to(buf, "({})", fmt::map_join(locs_, ", ", [&](auto loc) {
-                               return useToString ? loc.showRaw(gs) : loc.filePosToString(gs);
+                               return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
                            }));
         } else {
-            fmt::format_to(buf, "{}", useToString ? locs_[0].showRaw(gs) : locs_[0].filePosToString(gs));
+            fmt::format_to(buf, "{}", showRaw ? locs_[0].showRaw(gs) : locs_[0].filePosToString(gs));
         }
     }
 
     if (this->isMethodArgument() || this->isMethod()) {
         if (this->rebind().exists()) {
             fmt::format_to(buf, " rebindTo {}",
-                           useToString ? this->rebind().data(gs)->toStringFullName(gs)
-                                       : this->rebind().data(gs)->showFullName(gs));
+                           showRaw ? this->rebind().data(gs)->toStringFullName(gs)
+                                   : this->rebind().data(gs)->showFullName(gs));
         }
     }
 
@@ -616,7 +619,7 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
                 continue;
             }
 
-            if (!showHidden && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+            if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
                 bool hadPrintableChild = false;
                 for (auto childPair : pair.second.data(gs)->members) {
                     if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
@@ -629,13 +632,13 @@ string Symbol::toStringWithTabs(const GlobalState &gs, int tabs, bool showHidden
                 }
             }
 
-            auto str = pair.second.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
+            auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
             ENFORCE(!str.empty());
             fmt::format_to(buf, "{}", move(str));
         }
     } else {
         for (auto arg : arguments()) {
-            auto str = arg.toStringWithTabs(gs, tabs + 1, showHidden, useToString);
+            auto str = arg.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
             ENFORCE(!str.empty());
             fmt::format_to(buf, "{}", move(str));
         }

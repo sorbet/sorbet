@@ -1007,7 +1007,8 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) {
         }
     } else {
         for (auto &argSym : this->symbol.data(gs)->arguments()) {
-            buf << argSym.data(gs)->toStringWithTabs(gs, tabs + 2);
+            printTabs(buf, tabs + 2);
+            buf << argSym.data(gs)->toString(gs);
         }
     }
     printTabs(buf, tabs + 1);
