@@ -126,7 +126,7 @@ TEST(CoreTest, Substitute) { // NOLINT
     auto other2 = subst.substitute(other1);
     ASSERT_TRUE(other2.exists());
     ASSERT_TRUE(other2.data(gs2)->kind == UTF8);
-    ASSERT_EQ("<U other>", other2.toString(gs2));
+    ASSERT_EQ("<U other>", other2.showRaw(gs2));
 }
 
 TEST(CoreTest, LocTest) { // NOLINT

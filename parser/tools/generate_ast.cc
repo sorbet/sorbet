@@ -274,7 +274,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case Name:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name
-                    << ".data(gs)->toString(gs));" << '\n';
+                    << ".data(gs)->showRaw(gs));" << '\n';
                 break;
             case Node:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = \");\n";

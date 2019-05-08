@@ -86,15 +86,15 @@ Alias::Alias(core::SymbolRef what) : what(what) {
 }
 
 string Ident::toString(core::Context ctx) {
-    return this->what.toString(ctx);
+    return this->what.showRaw(ctx);
 }
 
 string Alias::toString(core::Context ctx) {
-    return fmt::format("alias {}", this->what.data(ctx)->name.data(ctx)->toString(ctx));
+    return fmt::format("alias {}", this->what.data(ctx)->name.data(ctx)->showRaw(ctx));
 }
 
 string Send::toString(core::Context ctx) {
-    return fmt::format("{}.{}({})", this->recv.toString(ctx), this->fun.data(ctx)->toString(ctx),
+    return fmt::format("{}.{}({})", this->recv.toString(ctx), this->fun.data(ctx)->showRaw(ctx),
                        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(ctx); }));
 }
 
@@ -121,8 +121,8 @@ string Cast::toString(core::Context ctx) {
 
 string VariableUseSite::toString(core::Context ctx) const {
     if (this->type) {
-        return fmt::format("{}: {}", this->variable.toString(ctx), this->type->show(ctx));
+        return fmt::format("{}: {}", this->variable.showRaw(ctx), this->type->show(ctx));
     }
-    return this->variable.toString(ctx);
+    return this->variable.showRaw(ctx);
 }
 } // namespace sorbet::cfg

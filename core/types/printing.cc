@@ -281,7 +281,7 @@ string OrType::show(const GlobalState &gs) const {
 }
 
 string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("TypeVar({})", sym.data(gs)->name.toString(gs));
+    return fmt::format("TypeVar({})", sym.data(gs)->name.showRaw(gs));
 }
 
 string TypeVar::show(const GlobalState &gs) const {
@@ -301,7 +301,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
         ++i;
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
-            fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.toString(gs),
+            fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.showRaw(gs),
                            targ->toStringWithTabs(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib

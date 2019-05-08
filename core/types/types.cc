@@ -515,7 +515,7 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
     ENFORCE(asIf.data(ctx)->isClass());
     ENFORCE(what.data(ctx)->isClass());
     ENFORCE(what == asIf || what.data(ctx)->derivesFrom(ctx, asIf) || asIf.data(ctx)->derivesFrom(ctx, what),
-            what.data(ctx)->name.toString(ctx), asIf.data(ctx)->name.toString(ctx));
+            what.data(ctx)->name.showRaw(ctx), asIf.data(ctx)->name.showRaw(ctx));
     InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
@@ -611,7 +611,7 @@ void AppliedType::_sanityCheck(Context ctx) {
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
                 this->klass._id >= Symbols::Proc0()._id && this->klass._id <= Symbols::last_proc()._id,
-            this->klass.data(ctx)->name.toString(ctx));
+            this->klass.data(ctx)->name.showRaw(ctx));
     for (auto &targ : this->targs) {
         targ->sanityCheck(ctx);
     }

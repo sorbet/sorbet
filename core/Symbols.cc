@@ -452,7 +452,7 @@ string Symbol::toStringFullName(const GlobalState &gs) const {
         return fmt::format("{}{}", owner, this->argumentName(gs));
     }
 
-    return fmt::format("{}{}", owner, this->name.toString(gs));
+    return fmt::format("{}{}", owner, this->name.showRaw(gs));
 }
 
 string Symbol::showFullName(const GlobalState &gs) const {
@@ -541,7 +541,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         if (!typeMembers.empty()) {
             fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
                                auto name = symb.data(gs)->name;
-                               return showRaw ? name.toString(gs) : name.show(gs);
+                               return showRaw ? name.showRaw(gs) : name.show(gs);
                            }));
         }
 
@@ -553,7 +553,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         if (this->isClass()) {
             fmt::format_to(buf, " ({})", fmt::map_join(this->mixins(), ", ", [&](auto symb) {
                                auto name = symb.data(gs)->name;
-                               return showRaw ? name.toString(gs) : name.show(gs);
+                               return showRaw ? name.showRaw(gs) : name.show(gs);
                            }));
 
         } else {
@@ -949,7 +949,7 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         auto lhsShort = lhs.first.data(gs)->shortName(gs);
         auto rhsShort = rhs.first.data(gs)->shortName(gs);
         return lhsShort < rhsShort ||
-               (lhsShort == rhsShort && lhs.first.data(gs)->toString(gs) < rhs.first.data(gs)->toString(gs));
+               (lhsShort == rhsShort && lhs.first.data(gs)->showRaw(gs) < rhs.first.data(gs)->showRaw(gs));
     });
     return result;
 }

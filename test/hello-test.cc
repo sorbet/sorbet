@@ -187,7 +187,7 @@ TEST(PayloadTests, CloneSubstitutePayload) {
     }
 
     sorbet::core::GlobalSubstitution subst(*c1, *c2);
-    ASSERT_EQ("<U test new name>", subst.substitute(n1).toString(*c2));
+    ASSERT_EQ("<U test new name>", subst.substitute(n1).showRaw(*c2));
     ASSERT_EQ(c1->symbolsUsed(), c2->symbolsUsed());
     ASSERT_EQ(c1->symbolsUsed(), gs.symbolsUsed());
 }

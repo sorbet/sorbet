@@ -85,8 +85,8 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
 
     auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
     auto fooSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo"));
-    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
-    ASSERT_EQ("<C <U Foo>>", fooSymbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    ASSERT_EQ("<C <U Foo>>", fooSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
 
     auto barType = core::make_type<core::ClassType>(barSymbol);
     auto fooType = core::make_type<core::ClassType>(fooSymbol);
@@ -105,9 +105,9 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
     auto foo1Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo1"));
     auto foo2Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo2"));
-    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
-    ASSERT_EQ("<C <U Foo1>>", foo1Symbol.data(ctx)->name.data(ctx)->toString(ctx));
-    ASSERT_EQ("<C <U Foo2>>", foo2Symbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    ASSERT_EQ("<C <U Foo1>>", foo1Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    ASSERT_EQ("<C <U Foo2>>", foo2Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
 
     auto barType = core::make_type<core::ClassType>(barSymbol);
     auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
@@ -155,9 +155,9 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
     auto foo1Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo1"));
     auto foo2Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo2"));
-    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
-    ASSERT_EQ("<C <U Foo1>>", foo1Symbol.data(ctx)->name.data(ctx)->toString(ctx));
-    ASSERT_EQ("<C <U Foo2>>", foo2Symbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    ASSERT_EQ("<C <U Foo1>>", foo1Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    ASSERT_EQ("<C <U Foo2>>", foo2Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
 
     auto barType = core::make_type<core::ClassType>(barSymbol);
     auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
