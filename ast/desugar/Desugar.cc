@@ -1044,8 +1044,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 int64_t val;
 
                 // complemented literals
-                bool noTilde = integer->val.find("~") == string::npos;
-                const string &withoutTilde = noTilde ? integer->val : absl::StrReplaceAll(integer->val, {{"~", ""}});
+                bool hasTilde = integer->val.find("~") != string::npos;
+                const string &withoutTilde = !hasTilde ? integer->val : absl::StrReplaceAll(integer->val, {{"~", ""}});
 
                 auto underscorePos = withoutTilde.find("_");
                 const string &withoutUnderscores =
@@ -1058,7 +1058,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     }
                 }
 
-                unique_ptr<Expression> res = MK::Int(loc, noTilde ? val : ~val);
+                unique_ptr<Expression> res = MK::Int(loc, hasTilde ? ~val : val);
                 result.swap(res);
             },
             [&](parser::Float *floatNode) {
