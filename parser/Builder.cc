@@ -947,11 +947,11 @@ public:
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
         core::Loc loc = tokLoc(oper).join(receiver->loc);
 
-        // avoid constructing a literal for prefix `~`
+        if (auto *num = parser::cast_node<Integer>(receiver.get())) {
+            return make_unique<Integer>(loc, oper->string() + num->val);
+        }
+
         if (oper->type() != ruby_parser::token_type::tTILDE) {
-            if (auto *num = parser::cast_node<Integer>(receiver.get())) {
-                return make_unique<Integer>(loc, oper->string() + num->val);
-            }
             if (auto *num = parser::cast_node<Float>(receiver.get())) {
                 return make_unique<Float>(loc, oper->string() + num->val);
             }

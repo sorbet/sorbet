@@ -1,12 +1,7 @@
 Begin {
   stmts = [
-    Send {
-      receiver = Integer {
-        val = "10"
-      }
-      method = <U ~>
-      args = [
-      ]
+    Integer {
+      val = "~10"
     }
     Assign {
       lhs = LVarLhs {
