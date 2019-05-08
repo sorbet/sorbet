@@ -111,17 +111,15 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
             auto leftName = cast_tree<Literal>(narg.get())->asString(dctx.ctx);
             auto rightName = cast_tree<Literal>(res.get())->asString(dctx.ctx);
             auto newName = leftName.prepend(dctx.ctx, rightName.show(dctx.ctx));
-            auto nextRes = MK::String(loc, newName);
-            res.reset(nextRes.release());
+            res = MK::String(loc, newName);
         } else if (isStringLit(dctx, res) && isa_tree<EmptyTree>(narg.get())) {
             // no op
         } else if (isa_tree<EmptyTree>(res.get()) && isStringLit(dctx, narg)) {
-            res.reset(narg.release());
+            res = move(narg);
         } else if (isa_tree<EmptyTree>(res.get()) && isa_tree<EmptyTree>(narg.get())) {
             // no op
         } else {
-            auto nextRes = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
-            res.reset(nextRes.release());
+            res = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
         }
     };
     return res;
