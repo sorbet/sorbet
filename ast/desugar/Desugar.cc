@@ -247,6 +247,13 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     return body;
 }
 
+struct OpAsgnScaffolding {
+    core::NameRef temporaryName;
+    InsSeq::STATS_store statementBody;
+    Send::ARGS_store readArgs;
+    Send::ARGS_store assgnArgs;
+};
+
 // Desugaring passes for op-assignments (like += or &&=) will first desugar the LHS, which often results in a send if
 // there's a dot anywhere on the LHS. Consider an expression like `x.y += 1`. We'll want to desugar this to
 //
@@ -257,8 +264,15 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
 // original (to allow for the passed value). This function creates both argument lists as well as the instruction block
 // and the temporary variable: how these will be used will differ slightly depending on whether we're desugaring &&=,
 // ||=, or some other op-assign, but the logic contained here will stay in common.
-std::tuple<core::NameRef, InsSeq::STATS_store, Send::ARGS_store, Send::ARGS_store>
-copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
+OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
+    // this is for storing the temporary assignments followed by the final update. In the case that we have other
+    // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
+    // temporary as well, producing a sequence like
+    //
+    //   { $arg = z; $tmp = x.y[$arg]; x.y[$arg] = $tmp + 1 }
+    //
+    // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
+    // temporary assignment and the last for the actual update we're desugaring.
     InsSeq::STATS_store stats;
     stats.reserve(s->args.size() + 2);
     core::NameRef tempRecv =
@@ -266,7 +280,11 @@ copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     stats.emplace_back(MK::Assign(s->loc, tempRecv, std::move(s->recv)));
     Send::ARGS_store readArgs;
     Send::ARGS_store assgnArgs;
+    // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to whatever
+    // we saw on the LHS.
     readArgs.reserve(s->args.size());
+    // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
+    // here: to accomodate the call to field= instead of just field.
     assgnArgs.reserve(s->args.size() + 1);
 
     for (auto &arg : s->args) {
@@ -278,7 +296,7 @@ copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
         assgnArgs.emplace_back(MK::Local(argLoc, name));
     }
 
-    return std::make_tuple(tempRecv, std::move(stats), std::move(readArgs), std::move(assgnArgs));
+    return {tempRecv, std::move(stats), std::move(readArgs), std::move(assgnArgs)};
 }
 
 unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
