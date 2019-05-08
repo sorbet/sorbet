@@ -156,6 +156,12 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             isImmutable = true;
         }
 
+        // e.g. `computed_by: <name>` where <name> is a Symbol pointing to a class method
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::computedBy())) {
+            auto [cbk, computedByClassMethod] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
+            // ...?
+        }
+
         if (foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
             foreign = move(foreignTree);
@@ -166,7 +172,13 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
-    stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+
+    if (computedByClassMethod) {
+        // TODO instance getter calls class method named by `computed_by`, with `T.unsafe(nil)` as arg
+        stats.emplace_back(mkGet(loc, name, ast::MK::Send(loc, std::move(computedByClassMethod), send->fun, std::move(args))));
+    } else {
+        stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+    }
 
     core::NameRef setName = name.addEq(ctx);
 
