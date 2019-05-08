@@ -52,6 +52,7 @@ public:
     }
 
     std::string showRaw(const GlobalState &gs) const;
+    std::string toString(const GlobalState &gs) const;
     static inline LocalVariable selfVariable() {
         return LocalVariable(Names::selfLocal(), 0);
     }

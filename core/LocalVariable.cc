@@ -45,4 +45,11 @@ string LocalVariable::showRaw(const GlobalState &gs) const {
     return fmt::format("{}${}", this->_name.showRaw(gs), to_string(this->unique));
 }
 
+string LocalVariable::toString(const GlobalState &gs) const {
+    if (unique == 0) {
+        return this->_name.toString(gs);
+    }
+    return fmt::format("{}${}", this->_name.toString(gs), to_string(this->unique));
+}
+
 } // namespace sorbet::core
