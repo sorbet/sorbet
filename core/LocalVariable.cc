@@ -38,7 +38,7 @@ bool LocalVariable::operator!=(const LocalVariable &rhs) const {
     return !this->operator==(rhs);
 }
 
-string LocalVariable::toString(const GlobalState &gs) const {
+string LocalVariable::showRaw(const GlobalState &gs) const {
     if (unique == 0) {
         return this->_name.toString(gs);
     }

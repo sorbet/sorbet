@@ -34,7 +34,7 @@ unsigned int Name::hash(const GlobalState &gs) const {
     }
 }
 
-string Name::toString(const GlobalState &gs) const {
+string Name::showRaw(const GlobalState &gs) const {
     switch (this->kind) {
         case UTF8:
             return fmt::format("<U {}>", string(raw.utf8.begin(), raw.utf8.end()));
@@ -69,10 +69,10 @@ string Name::toString(const GlobalState &gs) const {
                     kind = "R";
                     break;
             }
-            return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->toString(gs), this->unique.num);
+            return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), this->unique.num);
         }
         case CONSTANT:
-            return fmt::format("<C {}>", this->cnst.original.toString(gs));
+            return fmt::format("<C {}>", this->cnst.original.showRaw(gs));
         default:
             Exception::notImplemented();
     }
@@ -204,8 +204,8 @@ const NameData NameRef::data(const GlobalState &gs) const {
     enforceCorrectGlobalState(gs);
     return NameData(const_cast<Name &>(gs.names[_id]), gs);
 }
-string NameRef::toString(const GlobalState &gs) const {
-    return data(gs)->toString(gs);
+string NameRef::showRaw(const GlobalState &gs) const {
+    return data(gs)->showRaw(gs);
 }
 string NameRef::show(const GlobalState &gs) const {
     return data(gs)->show(gs);
