@@ -1,6 +1,6 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::Main)
-  class ::Main<<C <U Main>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.keep_for_ide(::Main)
+  class ::Main<<C Main>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -9,21 +9,21 @@ begin
 
     <emptyTree>
 
-    def <U foo><<M <U foo> $1>>(a, <blk>)
-      <U a>
+    def foo<foo$1>(a, <blk>)
+      a
     end
 
-    def <U foo><<M <U foo> $2>>(a, b, <blk>)
+    def foo<foo$2>(a, b, <blk>)
       <emptyTree>
     end
 
-    def <U foo><<U foo>>(a, b, c, <blk>)
+    def foo<foo>(a, b, c, <blk>)
       <emptyTree>
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
-      <U <self>>.<U sig>() do ||
-        <U <self>>.<U params>({:"a" => ::Integer}).<U returns>(::Integer)
+    def self.<static-init><<static-init>>(<blk>)
+      <self>.sig() do ||
+        <self>.params({:"a" => ::Integer}).returns(::Integer)
       end
     end
   end

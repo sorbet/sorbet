@@ -1,62 +1,62 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def <U baz1><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree><<C <root>>> < ()
+  def baz1<<C <todo sym>>>(&<blk>)
     begin
-      <U a> = "foo"
-      <U b> = <U a>.<U getbyte>(<U a>)
+      a = "foo"
+      b = a.getbyte(a)
     end
   end
 
-  def <U baz2><<C <U <todo sym>>>>(&<U <blk>>)
+  def baz2<<C <todo sym>>>(&<blk>)
     begin
-      <U a> = "foo"
-      <U b> = <U a>.<U getbyte>("foo")
+      a = "foo"
+      b = a.getbyte("foo")
     end
   end
 
-  def <U baz3><<C <U <todo sym>>>>(&<U <blk>>)
-    <U b> = "foo".<U getbyte>("foo")
+  def baz3<<C <todo sym>>>(&<blk>)
+    b = "foo".getbyte("foo")
   end
 
-  def <U baz4><<C <U <todo sym>>>>(&<U <blk>>)
-    <U b> = <U <self>>.<U a>().<U getbyte>("foo")
+  def baz4<<C <todo sym>>>(&<blk>)
+    b = <self>.a().getbyte("foo")
   end
 
-  def <U baz5><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
+  def baz5<<C <todo sym>>>(cond, &<blk>)
     begin
-      if <U cond>
-        <U b> = 1
+      if cond
+        b = 1
       else
-        <U b> = "foo"
+        b = "foo"
       end
-      <U b> = <U b>.<U getbyte>(1)
+      b = b.getbyte(1)
     end
   end
 
-  def <U baz6><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
+  def baz6<<C <todo sym>>>(cond, &<blk>)
     begin
-      if <U cond>
-        <U b> = 1
+      if cond
+        b = 1
       else
-        <U b> = "foo"
+        b = "foo"
       end
-      <U b> = "foo".<U getbyte>(<U b>)
+      b = "foo".getbyte(b)
     end
   end
 
-  def <U baz7><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
+  def baz7<<C <todo sym>>>(cond, &<blk>)
     begin
-      if <U cond>
-        <U b> = 1
+      if cond
+        b = 1
       else
         <emptyTree>
       end
-      <U b> = "foo".<U getbyte>(<U b>)
+      b = "foo".getbyte(b)
     end
   end
 
-  def <U baz8><<C <U <todo sym>>>>(&<U <blk>>)
+  def baz8<<C <todo sym>>>(&<blk>)
     while true
-      <U b> = 1
+      b = 1
     end
   end
 end

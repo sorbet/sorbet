@@ -1,8 +1,8 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+class <emptyTree><<C <root>>> < ()
+  def self.<static-init><<static-init>$3>(<blk>)
     begin
-      Unresolved: Unresolved: <emptyTree>::<C <U Foo>>::<C <U Bar>>.<U baz>(1)
-      Unresolved: Unresolved: <emptyTree>::<C <U Foo>>::<C <U Bar>>.<U baz>(2)
+      Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(1)
+      Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(2)
       <emptyTree>
     end
   end

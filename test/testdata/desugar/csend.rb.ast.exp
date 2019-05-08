@@ -1,71 +1,71 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def <U test_csend><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree><<C <root>>> < ()
+  def test_csend<<C <todo sym>>>(&<blk>)
     begin
       begin
-        <D <U <assignTemp>> $2> = <U <self>>.<U foo>()
-        if <D <U <assignTemp>> $2>.<U ==>(nil)
+        <assignTemp>$2 = <self>.foo()
+        if <assignTemp>$2.==(nil)
           nil
         else
-          <D <U <assignTemp>> $2>.<U bar>()
+          <assignTemp>$2.bar()
         end
       end
       begin
-        <D <U <assignTemp>> $3> = <U <self>>.<U foo>()
-        if <D <U <assignTemp>> $3>.<U ==>(nil)
+        <assignTemp>$3 = <self>.foo()
+        if <assignTemp>$3.==(nil)
           nil
         else
-          <D <U <assignTemp>> $3>.<U bar>() do |<U x>|
-            <U x>
+          <assignTemp>$3.bar() do |x|
+            x
           end
         end
       end
       begin
-        <D <U <assignTemp>> $4> = <U <self>>.<U foo>()
-        if <D <U <assignTemp>> $4>.<U ==>(nil)
+        <assignTemp>$4 = <self>.foo()
+        if <assignTemp>$4.==(nil)
           nil
         else
-          <D <U <assignTemp>> $4>.<U bar=>(5)
+          <assignTemp>$4.bar=(5)
         end
       end
       begin
-        <D <U <assignTemp>> $5> = <U <self>>.<U foo>()
-        if <D <U <assignTemp>> $5>.<U ==>(nil)
+        <assignTemp>$5 = <self>.foo()
+        if <assignTemp>$5.==(nil)
           nil
         else
           begin
-            <D <U bar> $6> = <D <U <assignTemp>> $5>
-            <D <U bar> $6>.<U bar=>(<D <U bar> $6>.<U bar>().<U +>(5))
+            bar$6 = <assignTemp>$5
+            bar$6.bar=(bar$6.bar().+(5))
           end
         end
       end
       begin
-        <D <U <assignTemp>> $7> = <U <self>>.<U foo>()
-        if <D <U <assignTemp>> $7>.<U ==>(nil)
+        <assignTemp>$7 = <self>.foo()
+        if <assignTemp>$7.==(nil)
           nil
         else
           begin
-            <D <U bar> $8> = <D <U <assignTemp>> $7>
-            <D <U bar> $9> = <D <U bar> $8>.<U bar>()
-            if <D <U bar> $9>
-              <D <U bar> $8>.<U bar=>(5)
+            bar$8 = <assignTemp>$7
+            bar$9 = bar$8.bar()
+            if bar$9
+              bar$8.bar=(5)
             else
-              <D <U bar> $9>
+              bar$9
             end
           end
         end
       end
       begin
-        <D <U <assignTemp>> $10> = <U <self>>.<U foo>()
-        if <D <U <assignTemp>> $10>.<U ==>(nil)
+        <assignTemp>$10 = <self>.foo()
+        if <assignTemp>$10.==(nil)
           nil
         else
           begin
-            <D <U bar> $11> = <D <U <assignTemp>> $10>
-            <D <U bar> $12> = <D <U bar> $11>.<U bar>()
-            if <D <U bar> $12>
-              <D <U bar> $12>
+            bar$11 = <assignTemp>$10
+            bar$12 = bar$11.bar()
+            if bar$12
+              bar$12
             else
-              <D <U bar> $11>.<U bar=>(5)
+              bar$11.bar=(5)
             end
           end
         end
@@ -74,28 +74,28 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   begin
-    <D <U <assignTemp>> $2> = <emptyTree>::<C <U BasicObject>>.<U new>()
-    if <D <U <assignTemp>> $2>.<U ==>(nil)
+    <assignTemp>$2 = <emptyTree>::<C BasicObject>.new()
+    if <assignTemp>$2.==(nil)
       nil
     else
-      <D <U <assignTemp>> $2>.<U __id__>()
+      <assignTemp>$2.__id__()
     end
   end
 
-  class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<todo sym>)
-    <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    <U <self>>.<U sig>() do ||
-      <U <self>>.<U params>({:"x" => <emptyTree>::<C <U T>>.<U any>(<emptyTree>::<C <U FalseClass>>, <emptyTree>::<C <U NilClass>>)}).<U returns>(<emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U TrueClass>>))
+    <self>.sig() do ||
+      <self>.params({:"x" => <emptyTree>::<C T>.any(<emptyTree>::<C FalseClass>, <emptyTree>::<C NilClass>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C TrueClass>))
     end
 
-    def <U foo><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
+    def foo<<C <todo sym>>>(x, &<blk>)
       begin
-        <D <U <assignTemp>> $2> = <U x>
-        if <D <U <assignTemp>> $2>.<U ==>(nil)
+        <assignTemp>$2 = x
+        if <assignTemp>$2.==(nil)
           nil
         else
-          <D <U <assignTemp>> $2>.<U |>(true)
+          <assignTemp>$2.|(true)
         end
       end
     end

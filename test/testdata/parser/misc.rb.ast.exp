@@ -1,95 +1,95 @@
-class <emptyTree><<C <U <root>>>> < ()
-  <U <self>>.<U alias_method>(:"afoo", :"bar")
+class <emptyTree><<C <root>>> < ()
+  <self>.alias_method(:"afoo", :"bar")
 
-  <U @iv> = 1
+  @iv = 1
 
-  <U @@cv> = 1
+  @@cv = 1
 
-  <U $gv> = 1
+  $gv = 1
 
   begin
-    <D <U <assignTemp>> $2> = ::<Magic>.<U <expand-splat>>([nil, nil], 2, 0)
-    <U <self>>.<U x>().<U var=>(<D <U <assignTemp>> $2>.<U []>(0))
-    <U y> = <D <U <assignTemp>> $2>.<U []>(1)
-    <D <U <assignTemp>> $2>
+    <assignTemp>$2 = ::<Magic>.<expand-splat>([nil, nil], 2, 0)
+    <self>.x().var=(<assignTemp>$2.[](0))
+    y = <assignTemp>$2.[](1)
+    <assignTemp>$2
   end
 
   begin
-    <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<U <self>>.<U zaaaz>(), 2, 0)
-    <U baaaar> = <D <U <assignTemp>> $3>.<U []>(0)
-    <U naaar> = <D <U <assignTemp>> $3>.<U []>(1)
-    <D <U <assignTemp>> $3>
+    <assignTemp>$3 = ::<Magic>.<expand-splat>(<self>.zaaaz(), 2, 0)
+    baaaar = <assignTemp>$3.[](0)
+    naaar = <assignTemp>$3.[](1)
+    <assignTemp>$3
   end
 
-  <U xaaaaz> = [<U <self>>.<U yayayaya>(), <U <self>>.<U tutututu>()]
+  xaaaaz = [<self>.yayayaya(), <self>.tutututu()]
 
   <emptyTree>
 
   nil
 
   begin
-    <U <self>>.<U a>()
-    <U <self>>.<U b>()
+    <self>.a()
+    <self>.b()
   end
 
-  def <U bfoo><<C <U <todo sym>>>>(&<U x>)
+  def bfoo<<C <todo sym>>>(&x)
     <emptyTree>
   end
 
-  <U <self>>.<U lambda>() do ||
+  <self>.lambda() do ||
     <emptyTree>
   end
 
   begin
-    <D <U <assignTemp>> $4> = <U <self>>.<U x>()
-    if <U y>.<U ===>(<D <U <assignTemp>> $4>)
+    <assignTemp>$4 = <self>.x()
+    if y.===(<assignTemp>$4)
       1
     else
-      <U <self>>.<U z>()
+      <self>.z()
     end
   end
 
   "x"
 
-  1.<U +>(::Kernel.<U Complex>(0, "4"))
+  1.+(::Kernel.Complex(0, "4"))
 
   0.500000
 
-  ::Kernel.<U Complex>(0, "1.5")
+  ::Kernel.Complex(0, "1.5")
 
-  def self.<U classmeth><<C <U <todo sym>>>>(&<U <blk>>)
+  def self.classmeth<<C <todo sym>>>(&<blk>)
     <emptyTree>
   end
 
-  class <U <singleton class>><<C <U <todo sym>>>> < ()
+  class <singleton class><<C <todo sym>>> < ()
     <emptyTree>
   end
 
   begin
-    <D <U ||> $5> = true
-    if <D <U ||> $5>
-      <D <U ||> $5>
+    ||$5 = true
+    if ||$5
+      ||$5
     else
       false
     end
   end
 
-  <U <self>>.<U arr>().<U each>() do |*<D <U forTemp> $6>|
+  <self>.arr().each() do |*forTemp$6|
     begin
       begin
-        <D <U <assignTemp>> $7> = ::<Magic>.<U <expand-splat>>(<D <U forTemp> $6>, 1, 0)
-        <U x> = <D <U <assignTemp>> $7>.<U []>(0)
-        <D <U <assignTemp>> $7>
+        <assignTemp>$7 = ::<Magic>.<expand-splat>(forTemp$6, 1, 0)
+        x = <assignTemp>$7.[](0)
+        <assignTemp>$7
       end
       <emptyTree>
     end
   end
 
-  while 0.<U !=>(1)
+  while 0.!=(1)
     <emptyTree>
   end
 
-  <U x>.<U []=>(1, 0)
+  x.[]=(1, 0)
 
   break(<emptyTree>)
 
@@ -103,15 +103,15 @@ class <emptyTree><<C <U <root>>>> < ()
 
   next([1, 2])
 
-  ::<Magic>.<U defined?>(<emptyTree>::<C <U X>>)
+  ::<Magic>.defined?(<emptyTree>::<C X>)
 
-  <U <self>>.<U super>(ZSuperArgs)
+  <self>.super(ZSuperArgs)
 
-  def <U kwfoo><<C <U <todo sym>>>>(<U x>:, <U y>: = 1, *<U z>:, &<U <blk>>)
+  def kwfoo<<C <todo sym>>>(x:, y: = 1, *z:, &<blk>)
     <emptyTree>
   end
 
-  <U x>.<U to_hash>()
+  x.to_hash()
 
   86
 
@@ -123,19 +123,19 @@ class <emptyTree><<C <U <root>>>> < ()
     nil
   end
 
-  while true.<U !>()
+  while true.!()
     nil
   end
 
-  while true.<U !>()
+  while true.!()
     nil
   end
 
   while true
     begin
-      <D <U forTemp> $8> = <U <self>>.<U puts>(1)
-      if false.<U !>()
-        break(<D <U forTemp> $8>)
+      forTemp$8 = <self>.puts(1)
+      if false.!()
+        break(forTemp$8)
       else
         <emptyTree>
       end
@@ -144,9 +144,9 @@ class <emptyTree><<C <U <root>>>> < ()
 
   while true
     begin
-      <D <U forTemp> $9> = <U <self>>.<U puts>(1)
+      forTemp$9 = <self>.puts(1)
       if true
-        break(<D <U forTemp> $9>)
+        break(forTemp$9)
       else
         <emptyTree>
       end
@@ -154,47 +154,47 @@ class <emptyTree><<C <U <root>>>> < ()
   end
 
   begin
-    <D <U <assignTemp>> $10> = ::<Magic>.<U <expand-splat>>(1, 2, 0)
-    <U a> = <D <U <assignTemp>> $10>.<U []>(0)
+    <assignTemp>$10 = ::<Magic>.<expand-splat>(1, 2, 0)
+    a = <assignTemp>$10.[](0)
     begin
-      <D <U <assignTemp>> $11> = ::<Magic>.<U <expand-splat>>(<D <U <assignTemp>> $10>.<U []>(1), 1, 0)
-      <U x> = <D <U <assignTemp>> $11>.<U []>(0)
-      <D <U <assignTemp>> $11>
+      <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10.[](1), 1, 0)
+      x = <assignTemp>$11.[](0)
+      <assignTemp>$11
     end
-    <D <U <assignTemp>> $10>
+    <assignTemp>$10
   end
 
-  <U 4>
+  4
 
-  def <U optfoo><<C <U <todo sym>>>>(<U x> = 1, *<U y>, &<U <blk>>)
+  def optfoo<<C <todo sym>>>(x = 1, *y, &<blk>)
     <emptyTree>
   end
 
-  {<U x> => <U y>, "foo".<U intern>() => 1}
+  {x => y, "foo".intern() => 1}
 
   <emptyTree>
 
   <emptyTree>
 
-  ::Kernel.<U Rational>("4")
+  ::Kernel.Rational("4")
 
-  ::Kernel.<U Complex>(0, "5")
+  ::Kernel.Complex(0, "5")
 
   <emptyTree>
-rescue <emptyTree>::<C <U E>> => <U x>
+rescue <emptyTree>::<C E> => x
   nil
 
   begin
-    <D <U <assignTemp>> $12> = ::<Magic>.<U <expand-splat>>(<U y>.<U to_a>(), 0, 0)
-    <U x> = <D <U <assignTemp>> $12>.<U slice>(::Range.<U new>(0, -1, false))
-    <D <U <assignTemp>> $12>
+    <assignTemp>$12 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
+    x = <assignTemp>$12.slice(::Range.new(0, -1, false))
+    <assignTemp>$12
   end
 
-  "foo".<U concat>(<U <self>>.<U bar>().<U to_s>()).<U intern>()
+  "foo".concat(<self>.bar().to_s()).intern()
 
   [:"sym"]
 
-  if <U x>
+  if x
     1
   else
     7
@@ -206,21 +206,21 @@ rescue <emptyTree>::<C <U E>> => <U x>
 
   ["a", "b"]
 
-  <U <self>>.<U `>("true")
+  <self>.`("true")
 
-  <U <self>>.<U proc>() do |<U x>|
+  <self>.proc() do |x|
     <emptyTree>
   end
 
-  break(<U <self>>.<U cfoo>(1) do ||
+  break(<self>.cfoo(1) do ||
       <emptyTree>
     end)
 
-  def <U sfoo><<C <U <todo sym>>>>(*<P <U *> $2>, &<U <blk>>)
+  def sfoo<<C <todo sym>>>(**$2, &<blk>)
     <emptyTree>
   end
 
-  def <U ssfoo><<C <U <todo sym>>>>(*<P <U **> $3>:, &<U <blk>>)
+  def ssfoo<<C <todo sym>>>(***$3:, &<blk>)
     <emptyTree>
   end
 end

@@ -1,66 +1,66 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree><<C <root>>> < ()
     <emptyTree>
 
     <emptyTree>
 
-    def <U main><<U main>>(<blk>)
+    def main<main>(<blk>)
       begin
-        <U <self>>.<U puts>(::A.<U newer>())
-        <U <self>>.<U puts>(::B.<U newer>())
-        <U <self>>.<U puts>(::C.<U newerer>())
+        <self>.puts(::A.newer())
+        <self>.puts(::B.newer())
+        <self>.puts(::C.newerer())
       end
     end
 
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::MM)
+          ::Sorbet::Private::Static.keep_for_ide(::MM)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::B)
+          ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::C)
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.keep_for_ide(::C)
+          ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
-        <U <self>>.<U main>()
+        <self>.main()
         <emptyTree>
       end
     end
   end
-  module ::MM<<C <U MM>>> < ()  end
-  class ::A<<C <U A>>> < (::<todo sym>)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  module ::MM<<C MM>> < ()  end
+  class ::A<<C A>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        ::Sorbet::Private::Static.<U keep_for_ide>(::MM)
+        ::Sorbet::Private::Static.keep_for_ide(::MM)
         <emptyTree>
       end
     end
   end
-  class <U <singleton class>><<S <C <U A>> $1>> < (::MM)
-    def <U newer><<U newer>>(<blk>)
-      <U <self>>.<U new>()
+  class <singleton class><<Class:A>> < (::MM)
+    def newer<newer>(<blk>)
+      <self>.new()
     end
   end
-  class ::B<<C <U B>>> < (::<todo sym>)
-    def self.<U newer><<U newer>>(<blk>)
-      <U <self>>.<U new>()
+  class ::B<<C B>> < (::<todo sym>)
+    def self.newer<newer>(<blk>)
+      <self>.new()
     end
   end
-  class ::C<<C <U C>>> < (::A)
+  class ::C<<C C>> < (::A)
     <emptyTree>
   end
-  class <U <singleton class>><<S <C <U C>> $1>> < ()
-    def <U newerer><<U newerer>>(<blk>)
-      <U <self>>.<U newer>()
+  class <singleton class><<Class:C>> < ()
+    def newerer<newerer>(<blk>)
+      <self>.newer()
     end
   end
   <emptyTree>

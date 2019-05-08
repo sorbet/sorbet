@@ -1,23 +1,23 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::Destructure)
-  class ::Destructure<<C <U Destructure>>> < (::<todo sym>)
-    def <U f><<U f>>((x,y), z, <blk>)
+  ::Sorbet::Private::Static.keep_for_ide(::Destructure)
+  class ::Destructure<<C Destructure>> < (::<todo sym>)
+    def f<f>((x,y), z, <blk>)
       begin
         begin
-          <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $2>, 2, 0)
-          <U x> = <D <U <assignTemp>> $3>.<U []>(0)
-          <U y> = <D <U <assignTemp>> $3>.<U []>(1)
-          <D <U <assignTemp>> $3>
+          <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 2, 0)
+          x = <assignTemp>$3.[](0)
+          y = <assignTemp>$3.[](1)
+          <assignTemp>$3
         end
         begin
-          <U x>.<U +>(<U y>)
-          <U <self>>.<U lambda>() do |(a,b)|
+          x.+(y)
+          <self>.lambda() do |(a,b)|
             begin
               begin
-                <D <U <assignTemp>> $5>$1 = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $4>$1, 2, 0)
-                <U a>$1 = <D <U <assignTemp>> $5>$1.<U []>(0)
-                <U b>$1 = <D <U <assignTemp>> $5>$1.<U []>(1)
-                <D <U <assignTemp>> $5>$1
+                <assignTemp>$5$1 = ::<Magic>.<expand-splat>(<destructure>$4$1, 2, 0)
+                a$1 = <assignTemp>$5$1.[](0)
+                b$1 = <assignTemp>$5$1.[](1)
+                <assignTemp>$5$1
               end
               <emptyTree>
             end

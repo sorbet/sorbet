@@ -1,13 +1,13 @@
-class <emptyTree><<C <U <root>>>> < ()
+class <emptyTree><<C <root>>> < ()
   <emptyTree>
 
-  def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
-    <U <self>>.<U foobar>() do ||
+  def self.<static-init><<static-init>$3>(<blk>)
+    <self>.foobar() do ||
       <emptyTree>
     end
   end
 
-  def <U a_method><<U a_method>>(<blk>)
+  def a_method<a_method>(<blk>)
     <emptyTree>
   end
 end

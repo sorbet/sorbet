@@ -1,66 +1,66 @@
-class <emptyTree><<C <U <root>>>> < ()
-  class <emptyTree>::<C <U MyTest>><<C <U <todo sym>>>> < (::<todo sym>)
-    def <U outside_method><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
+    def outside_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
 
-    def <U <test_works outside>><<C <U <todo sym>>>>(&<U <blk>>)
-      <U <self>>.<U outside_method>()
+    def <test_works outside><<C <todo sym>>>(&<blk>)
+      <self>.outside_method()
     end
 
-    class <emptyTree>::<C <U <class_some inner tests>>><<C <U <todo sym>>>> < (<U <self>>)
+    class <emptyTree>::<C <class_some inner tests>><<C <todo sym>>> < (<self>)
       begin
-        def <U inside_method><<C <U <todo sym>>>>(&<U <blk>>)
+        def inside_method<<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
-        def <U <test_works inside>><<C <U <todo sym>>>>(&<U <blk>>)
+        def <test_works inside><<C <todo sym>>>(&<blk>)
           begin
-            <U <self>>.<U outside_method>()
-            <U <self>>.<U inside_method>()
+            <self>.outside_method()
+            <self>.inside_method()
           end
         end
       end
     end
 
-    def <U initialize><<C <U <todo sym>>>>(&<U <blk>>)
-      <U @foo> = <emptyTree>::<C <U T>>.<U let>(3, <emptyTree>::<C <U Integer>>)
+    def initialize<<C <todo sym>>>(&<blk>)
+      @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
 
-    def <U <test_can read foo>><<C <U <todo sym>>>>(&<U <blk>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<U @foo>, <emptyTree>::<C <U Integer>>)
+    def <test_can read foo><<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
     end
 
-    def self.<U random_method><<C <U <todo sym>>>>(&<U <blk>>)
+    def self.random_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
 
-    <U <self>>.<U random_method>() do ||
-      <U @random_method_ivar> = <emptyTree>::<C <U T>>.<U let>(3, <emptyTree>::<C <U Integer>>)
+    <self>.random_method() do ||
+      @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
 
-    class <emptyTree>::<C <U <class_Object>>><<C <U <todo sym>>>> < (<U <self>>)
+    class <emptyTree>::<C <class_Object>><<C <todo sym>>> < (<self>)
       begin
-        def <U <test_Object>><<C <U <todo sym>>>>(&<U <blk>>)
+        def <test_Object><<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
-        def <U <test_Object>><<C <U <todo sym>>>>(&<U <blk>>)
+        def <test_Object><<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
       end
     end
 
-    def self.<U it><<C <U <todo sym>>>>(*<U args>, &<U <blk>>)
+    def self.it<<C <todo sym>>>(*args, &<blk>)
       <emptyTree>
     end
 
-    <U <self>>.<U it>("ignores methods without a block")
+    <self>.it("ignores methods without a block")
 
-    <U <self>>.<U junk>().<U it>("ignores non-self calls") do ||
-      <U <self>>.<U junk>()
+    <self>.junk().it("ignores non-self calls") do ||
+      <self>.junk()
     end
   end
 
-  def <U junk><<C <U <todo sym>>>>(&<U <blk>>)
+  def junk<<C <todo sym>>>(&<blk>)
     <emptyTree>
   end
 end

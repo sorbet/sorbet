@@ -1,21 +1,21 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::A)
-  module ::A<<C <U A>>> < ()
+  ::Sorbet::Private::Static.keep_for_ide(::A)
+  module ::A<<C A>> < ()
     <emptyTree>
 
     <emptyTree>
 
-    def <U Foo><<U Foo>>(<blk>)
+    def Foo<Foo>(<blk>)
       <emptyTree>
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        ::Sorbet::Private::Static.<U keep_for_ide>(::A::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
         <emptyTree>
       end
     end
   end
-  class ::A::Foo<<C <U Foo>>> < (::<todo sym>)  end
+  class ::A::Foo<<C Foo>> < (::<todo sym>)  end
   <emptyTree>
 end

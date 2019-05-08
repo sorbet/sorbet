@@ -1,6 +1,6 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::TestAttr)
-  class ::TestAttr<<C <U TestAttr>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.keep_for_ide(::TestAttr)
+  class ::TestAttr<<C TestAttr>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -19,70 +19,70 @@ begin
 
     <emptyTree>
 
-    def <U initialize><<U initialize>>(<blk>)
+    def initialize<initialize>(<blk>)
       begin
-        <U @v1> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U let>(0, Integer)
+        @v1 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(0, Integer)
         end
-        <U @v2> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
-          T.<U let>("", String)
+        @v2 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.let("", String)
         end
-        <U @v6> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
-          T.<U let>("", String)
+        @v6 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.let("", String)
         end
       end
     end
 
-    def <U v1><<U v1>>(<blk>)
-      <U @v1>
+    def v1<v1>(<blk>)
+      @v1
     end
 
-    def <U v1=><<U v1=>>(v1, <blk>)
-      <U @v1> = <U v1>
+    def v1=<v1=>(v1, <blk>)
+      @v1 = v1
     end
 
-    def <U v2><<U v2>>(<blk>)
-      <U @v2>
+    def v2<v2>(<blk>)
+      @v2
     end
 
-    def <U v2=><<U v2=>>(v2, <blk>)
-      <U @v2> = <U v2>
+    def v2=<v2=>(v2, <blk>)
+      @v2 = v2
     end
 
-    def <U v3><<U v3>>(<blk>)
-      <U @v3>
+    def v3<v3>(<blk>)
+      @v3
     end
 
-    def <U v4=><<U v4=>>(v4, <blk>)
-      <U @v4> = <U v4>
+    def v4=<v4=>(v4, <blk>)
+      @v4 = v4
     end
 
-    def <U v5=><<U v5=>>(v5, <blk>)
-      <U @v5> = <U v5>
+    def v5=<v5=>(v5, <blk>)
+      @v5 = v5
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U void>()
+        <self>.sig() do ||
+          <self>.void()
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U returns>(::Integer)
+        <self>.sig() do ||
+          <self>.returns(::Integer)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U params>({:"v1" => ::Integer}).<U returns>(::Integer)
+        <self>.sig() do ||
+          <self>.params({:"v1" => ::Integer}).returns(::Integer)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U returns>(::String)
+        <self>.sig() do ||
+          <self>.returns(::String)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U params>({:"v2" => ::String}).<U returns>(::String)
+        <self>.sig() do ||
+          <self>.params({:"v2" => ::String}).returns(::String)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U returns>(::String)
+        <self>.sig() do ||
+          <self>.returns(::String)
         end
         <emptyTree>
       end

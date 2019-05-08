@@ -1,22 +1,22 @@
-class <emptyTree><<C <U <root>>>> < ()
-  <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
+class <emptyTree><<C <root>>> < ()
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-  <U <self>>.<U sig>() do ||
-    <U <self>>.<U params>({:"blk" => <emptyTree>::<C <U T>>.<U proc>().<U params>({:"args" => <emptyTree>::<C <U Integer>>}).<U void>()}).<U void>()
+  <self>.sig() do ||
+    <self>.params({:"blk" => <emptyTree>::<C T>.proc().params({:"args" => <emptyTree>::<C Integer>}).void()}).void()
   end
 
-  def <U foo><<C <U <todo sym>>>>(&<U blk>)
+  def foo<<C <todo sym>>>(&blk)
     <emptyTree>
   end
 
-  <U <self>>.<U foo>() do |<D <U <destructure>> $2>|
+  <self>.foo() do |<destructure>$2|
     begin
       begin
-        <D <U <assignTemp>> $3> = ::<Magic>.<U <expand-splat>>(<D <U <destructure>> $2>, 1, 0)
-        <U args> = <D <U <assignTemp>> $3>.<U []>(0)
-        <D <U <assignTemp>> $3>
+        <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 1, 0)
+        args = <assignTemp>$3.[](0)
+        <assignTemp>$3
       end
-      <emptyTree>::<C <U T>>.<U reveal_type>(<U args>)
+      <emptyTree>::<C T>.reveal_type(args)
     end
   end
 end

@@ -1,7 +1,7 @@
-class <emptyTree>::<C <U BlockTest>><<C <U <todo sym>>>> < (::<todo sym>)
-  def <U blockPass><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U foo>(1, 2, 3) do |<U x>, <U y>|
-      <U x>
+class <emptyTree>::<C BlockTest><<C <todo sym>>> < (::<todo sym>)
+  def blockPass<<C <todo sym>>>(&<blk>)
+    <self>.foo(1, 2, 3) do |x, y|
+      x
     end
   end
 end

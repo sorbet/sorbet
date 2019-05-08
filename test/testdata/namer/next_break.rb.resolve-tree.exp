@@ -1,16 +1,16 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::Test)
-  class ::Test<<C <U Test>>> < (::<todo sym>)
-    def <U test_next_break><<U test_next_break>>(<blk>)
-      <U <self>>.<U each>() do ||
+  ::Sorbet::Private::Static.keep_for_ide(::Test)
+  class ::Test<<C Test>> < (::<todo sym>)
+    def test_next_break<test_next_break>(<blk>)
+      <self>.each() do ||
         begin
-          if <U <self>>.<U rand>()
-            next(Unresolved: <emptyTree>::<C <U Foo>>)
+          if <self>.rand()
+            next(Unresolved: <emptyTree>::<C Foo>)
           else
             <emptyTree>
           end
-          if <U <self>>.<U rand>()
-            break(Unresolved: <emptyTree>::<C <U Bar>>)
+          if <self>.rand()
+            break(Unresolved: <emptyTree>::<C Bar>)
           else
             <emptyTree>
           end

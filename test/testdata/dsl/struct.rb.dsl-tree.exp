@@ -1,285 +1,285 @@
-class <emptyTree><<C <U <root>>>> < ()
-  <U <self>>.<U require_relative>("../../t")
+class <emptyTree><<C <root>>> < ()
+  <self>.require_relative("../../t")
 
-  module <emptyTree>::<C <U Foo>><<C <U <todo sym>>>> < ()
-    class <emptyTree>::<C <U Struct>><<C <U <todo sym>>>> < (::<todo sym>)
+  module <emptyTree>::<C Foo><<C <todo sym>>> < ()
+    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<C <U NotStruct>><<C <U <todo sym>>>> < (::<todo sym>)
-    <emptyTree>::<C <U B>> = <emptyTree>::<C <U T>>.<U let>(<emptyTree>::<C <U Foo>>::<C <U Struct>>.<U new>(), <emptyTree>::<C <U Foo>>::<C <U Struct>>)
+  class <emptyTree>::<C NotStruct><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C B> = <emptyTree>::<C T>.let(<emptyTree>::<C Foo>::<C Struct>.new(), <emptyTree>::<C Foo>::<C Struct>)
 
-    <U var> = <emptyTree>::<C <U Struct>>.<U new>(:"foo")
+    var = <emptyTree>::<C Struct>.new(:"foo")
   end
 
-  class <emptyTree>::<C <U RealStruct>><<C <U <todo sym>>>> < (::<todo sym>)
-    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+  class <emptyTree>::<C RealStruct><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def foo=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
+      def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def bar=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U void>()
+      ::Sorbet.sig() do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
-      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
+      def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
       end
     end
 
-    class <emptyTree>::<C <U KeywordInit>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+    class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def foo=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
+      def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def bar=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U void>()
+      ::Sorbet.sig() do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
-      def <U initialize><<C <U <todo sym>>>>(<U foo>: = nil, <U bar>: = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U KeywordInit>>)
-      end
-    end
-  end
-
-  class <emptyTree>::<C <U RealStructDesugar>><<C <U <todo sym>>>> < (::<todo sym>)
-    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (<emptyTree>::<C <U Struct>>)
-      <U <self>>.<U extend>(<emptyTree>::<C <U T>>::<C <U Sig>>)
-
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
-        <emptyTree>
-      end
-
-      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
-        <emptyTree>
-      end
-
-      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
-      end
-
-      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
-      end
-
-      <U <self>>.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => <emptyTree>::<C <U BasicObject>>, :"bar" => <emptyTree>::<C <U BasicObject>>}).<U returns>(<emptyTree>::<C <U A>>)
-      end
-
-      def self.<U new><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
-        <emptyTree>::<C <U T>>.<U cast>(nil, <emptyTree>::<C <U A>>)
+      def initialize<<C <todo sym>>>(foo: = nil, bar: = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C KeywordInit>)
       end
     end
   end
 
-  class <emptyTree>::<C <U TwoStructs>><<C <U <todo sym>>>> < (::<todo sym>)
-    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+  class <emptyTree>::<C RealStructDesugar><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C Struct>)
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
-      end
-
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject}).<U void>()
-      end
-
-      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
-      end
-    end
-
-    class <emptyTree>::<C <U B>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
-
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def foo=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject}).<U void>()
+      def bar=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U B>>)
+      <self>.sig() do ||
+        <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C A>)
+      end
+
+      def self.new<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+        <emptyTree>::<C T>.cast(nil, <emptyTree>::<C A>)
       end
     end
   end
 
-  class <emptyTree>::<C <U AccidentallyStruct>><<C <U <todo sym>>>> < (::<todo sym>)
-    class <emptyTree>::<C <U Struct>><<C <U <todo sym>>>> < (::<todo sym>)
+  class <emptyTree>::<C TwoStructs><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      def foo<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def foo=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
+
+      ::Sorbet.sig() do ||
+        <self>.params({:"foo" => ::BasicObject}).void()
+      end
+
+      def initialize<<C <todo sym>>>(foo = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
+      end
+    end
+
+    class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      def foo<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def foo=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
+
+      ::Sorbet.sig() do ||
+        <self>.params({:"foo" => ::BasicObject}).void()
+      end
+
+      def initialize<<C <todo sym>>>(foo = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C B>)
+      end
+    end
+  end
+
+  class <emptyTree>::<C AccidentallyStruct><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    class <emptyTree>::<C <U A>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+      def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def foo=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
+      def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U bar=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def bar=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).<U void>()
+      ::Sorbet.sig() do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
-      def <U initialize><<C <U <todo sym>>>>(<U foo> = nil, <U bar> = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U A>>)
+      def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
       end
     end
   end
 
-  class <emptyTree>::<C <U MixinStruct>><<C <U <todo sym>>>> < (::<todo sym>)
-    module <emptyTree>::<C <U MyMixin>><<C <U <todo sym>>>> < ()
-      def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+  class <emptyTree>::<C MixinStruct><<C <todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C MyMixin><<C <todo sym>>> < ()
+      def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
     end
 
-    class <emptyTree>::<C <U MyStruct>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <U <self>>.<U include>(<emptyTree>::<C <U MyMixin>>)
+    class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
+      <self>.include(<emptyTree>::<C MyMixin>)
 
-      <U <self>>.<U new>().<U x>()
+      <self>.new().x()
 
-      <U <self>>.<U new>().<U foo>()
+      <self>.new().foo()
 
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
-      def <U x><<C <U <todo sym>>>>(&<U <blk>>)
+      def x<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U x=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"x" => ::BasicObject}).<U void>()
+      ::Sorbet.sig() do ||
+        <self>.params({:"x" => ::BasicObject}).void()
       end
 
-      def <U initialize><<C <U <todo sym>>>>(<U x> = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U MyStruct>>)
+      def initialize<<C <todo sym>>>(x = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyStruct>)
       end
     end
 
-    class <emptyTree>::<C <U MyKeywordInitStruct>><<C <U <todo sym>>>> < (::<root>::<C <U Struct>>)
-      <U <self>>.<U include>(<emptyTree>::<C <U MyMixin>>)
+    class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
+      <self>.include(<emptyTree>::<C MyMixin>)
 
-      <U <self>>.<U new>().<U x>()
+      <self>.new().x()
 
-      <U <self>>.<U new>().<U foo>()
+      <self>.new().foo()
 
-      <U <self>>.<U new>(1, 2)
+      <self>.new(1, 2)
 
-      <U <self>>.<U new>({:"giberish" => 1})
+      <self>.new({:"giberish" => 1})
 
-      <emptyTree>::<C <U Elem>> = <U <self>>.<U type_member>({:"fixed" => ::T.<U untyped>()})
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
-      def <U x><<C <U <todo sym>>>>(&<U <blk>>)
+      def x<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def <U x=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-        <U arg0>
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
       end
 
-      ::Sorbet.<U sig>() do ||
-        <U <self>>.<U params>({:"x" => ::BasicObject}).<U void>()
+      ::Sorbet.sig() do ||
+        <self>.params({:"x" => ::BasicObject}).void()
       end
 
-      def <U initialize><<C <U <todo sym>>>>(<U x>: = nil, &<U <blk>>)
-        ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U MyKeywordInitStruct>>)
+      def initialize<<C <todo sym>>>(x: = nil, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyKeywordInitStruct>)
       end
     end
 
-    <emptyTree>::<C <U MyKeywordInitStruct>>.<U new>(1, 2)
+    <emptyTree>::<C MyKeywordInitStruct>.new(1, 2)
 
-    <emptyTree>::<C <U MyKeywordInitStruct>>.<U new>({:"giberish" => 1})
+    <emptyTree>::<C MyKeywordInitStruct>.new({:"giberish" => 1})
 
-    <emptyTree>::<C <U MyStruct>>.<U new>().<U x>()
+    <emptyTree>::<C MyStruct>.new().x()
 
-    <emptyTree>::<C <U MyStruct>>.<U new>().<U foo>()
+    <emptyTree>::<C MyStruct>.new().foo()
   end
 
-  class <emptyTree>::<C <U BadUsages>><<C <U <todo sym>>>> < (::<todo sym>)
-    <emptyTree>::<C <U A>> = <emptyTree>::<C <U Struct>>.<U new>()
+  class <emptyTree>::<C BadUsages><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C A> = <emptyTree>::<C Struct>.new()
 
-    <emptyTree>::<C <U B>> = <emptyTree>::<C <U Struct>>.<U new>({:"giberish" => 1})
+    <emptyTree>::<C B> = <emptyTree>::<C Struct>.new({:"giberish" => 1})
 
-    <emptyTree>::<C <U C>> = <emptyTree>::<C <U Struct>>.<U new>({:"keyword_init" => true})
+    <emptyTree>::<C C> = <emptyTree>::<C Struct>.new({:"keyword_init" => true})
 
-    <U local> = true
+    local = true
 
-    <emptyTree>::<C <U D>> = <emptyTree>::<C <U Struct>>.<U new>({:"keyword_init" => <U local>})
+    <emptyTree>::<C D> = <emptyTree>::<C Struct>.new({:"keyword_init" => local})
 
-    <emptyTree>::<C <U E>> = <emptyTree>::<C <U Struct>>.<U new>(:"a", {:"keyword_init" => <U local>})
+    <emptyTree>::<C E> = <emptyTree>::<C Struct>.new(:"a", {:"keyword_init" => local})
   end
 
-  class <emptyTree>::<C <U Main>><<C <U <todo sym>>>> < (::<todo sym>)
-    def <U main><<C <U <todo sym>>>>(&<U <blk>>)
+  class <emptyTree>::<C Main><<C <todo sym>>> < (::<todo sym>)
+    def main<<C <todo sym>>>(&<blk>)
       begin
-        <U a> = <emptyTree>::<C <U Struct>>.<U new>(:"foo")
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>, <emptyTree>::<C <U Struct>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(), <emptyTree>::<C <U Struct>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U a>.<U new>(2), <emptyTree>::<C <U Struct>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStruct>>::<C <U A>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U A>>.<U new>(2), <emptyTree>::<C <U RealStruct>>::<C <U A>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>(), <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>({:"foo" => 1}), <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>({:"foo" => 2, :"bar" => 3}), <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>)
-        <emptyTree>::<C <U RealStruct>>::<C <U KeywordInit>>.<U new>(1, 2)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<emptyTree>::<C <U RealStructDesugar>>::<C <U A>>.<U new>(2, 3), <emptyTree>::<C <U RealStructDesugar>>::<C <U A>>)
+        a = <emptyTree>::<C Struct>.new(:"foo")
+        <emptyTree>::<C T>.assert_type!(a, <emptyTree>::<C Struct>)
+        <emptyTree>::<C T>.assert_type!(a.new(), <emptyTree>::<C Struct>)
+        <emptyTree>::<C T>.assert_type!(a.new(2), <emptyTree>::<C Struct>)
+        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C A>.new(2, 3), <emptyTree>::<C RealStruct>::<C A>)
+        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C A>.new(2), <emptyTree>::<C RealStruct>::<C A>)
+        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(), <emptyTree>::<C RealStruct>::<C KeywordInit>)
+        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C KeywordInit>.new({:"foo" => 1}), <emptyTree>::<C RealStruct>::<C KeywordInit>)
+        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C KeywordInit>.new({:"foo" => 2, :"bar" => 3}), <emptyTree>::<C RealStruct>::<C KeywordInit>)
+        <emptyTree>::<C RealStruct>::<C KeywordInit>.new(1, 2)
+        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStructDesugar>::<C A>.new(2, 3), <emptyTree>::<C RealStructDesugar>::<C A>)
       end
     end
   end
 
-  <U <self>>.<U puts>(<emptyTree>::<C <U Main>>.<U new>().<U main>())
+  <self>.puts(<emptyTree>::<C Main>.new().main())
 end

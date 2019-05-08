@@ -1,5 +1,5 @@
-class <emptyTree>::<C <U Examples>><<C <U <todo sym>>>> < (::<todo sym>)
-  def <U i_like_ifs><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree>::<C Examples><<C <todo sym>>> < (::<todo sym>)
+  def i_like_ifs<<C <todo sym>>>(&<blk>)
     if true
       return 1
     else
@@ -7,7 +7,7 @@ class <emptyTree>::<C <U Examples>><<C <U <todo sym>>>> < (::<todo sym>)
     end
   end
 
-  def <U i_like_exps><<C <U <todo sym>>>>(&<U <blk>>)
+  def i_like_exps<<C <todo sym>>>(&<blk>)
     if true
       1
     else
@@ -15,7 +15,7 @@ class <emptyTree>::<C <U Examples>><<C <U <todo sym>>>> < (::<todo sym>)
     end
   end
 
-  def <U return_in_one_branch1><<C <U <todo sym>>>>(&<U <blk>>)
+  def return_in_one_branch1<<C <todo sym>>>(&<blk>)
     if true
       return 1
     else
@@ -23,7 +23,7 @@ class <emptyTree>::<C <U Examples>><<C <U <todo sym>>>> < (::<todo sym>)
     end
   end
 
-  def <U return_in_one_branch2><<C <U <todo sym>>>>(&<U <blk>>)
+  def return_in_one_branch2<<C <todo sym>>>(&<blk>)
     if true
       1
     else
@@ -31,58 +31,58 @@ class <emptyTree>::<C <U Examples>><<C <U <todo sym>>>> < (::<todo sym>)
     end
   end
 
-  def <U variables><<C <U <todo sym>>>>(&<U <blk>>)
+  def variables<<C <todo sym>>>(&<blk>)
     begin
       if true
-        <U a> = 1
+        a = 1
       else
-        <U a> = 2
+        a = 2
       end
       if false
-        <U b> = 1
+        b = 1
       else
-        <U b> = 2
+        b = 2
       end
-      <U a>.<U +>(<U b>)
+      a.+(b)
     end
   end
 
-  def <U variables_and_loop><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
+  def variables_and_loop<<C <todo sym>>>(cond, &<blk>)
     begin
       if true
-        <U a> = 1
+        a = 1
       else
-        <U a> = 2
+        a = 2
       end
       while true
-        if <U cond>
-          <U b> = 1
+        if cond
+          b = 1
         else
-          <U b> = 2
+          b = 2
         end
       end
-      <U b>
+      b
     end
   end
 
-  def <U variables_loop_if><<C <U <todo sym>>>>(<U cond>, &<U <blk>>)
+  def variables_loop_if<<C <todo sym>>>(cond, &<blk>)
     begin
       while true
-        if <U cond>
-          <U b> = 1
+        if cond
+          b = 1
         else
-          <U b> = 2
+          b = 2
         end
       end
-      <U b>
+      b
     end
   end
 
-  def <U take_arguments><<C <U <todo sym>>>>(<U i>, &<U <blk>>)
+  def take_arguments<<C <todo sym>>>(i, &<blk>)
     if false
       2
     else
-      <U i>
+      i
     end
   end
 end

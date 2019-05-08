@@ -1,7 +1,7 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def <U test_lambda><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U lambda>() do |<U x>|
-      <U x>.<U *>(<U x>)
+class <emptyTree><<C <root>>> < ()
+  def test_lambda<<C <todo sym>>>(&<blk>)
+    <self>.lambda() do |x|
+      x.*(x)
     end
   end
 end

@@ -1,21 +1,21 @@
-class <emptyTree><<C <U <root>>>> < ()
+class <emptyTree><<C <root>>> < ()
   {}
 
   {:"a" => "a"}
 
-  <U <self>>.<U x>().<U to_hash>()
+  <self>.x().to_hash()
 
-  <U <self>>.<U x>()
+  <self>.x()
 
-  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>())
+  {:"a" => "a"}.merge(<self>.x().to_hash())
 
-  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>())
+  {:"a" => "a"}.merge(<self>.x().to_hash())
 
-  <U <self>>.<U x>().<U to_hash>().<U merge>({:"a" => "a"})
+  <self>.x().to_hash().merge({:"a" => "a"})
 
-  <U <self>>.<U x>().<U to_hash>().<U merge>({:"a" => "a"})
+  <self>.x().to_hash().merge({:"a" => "a"})
 
-  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>()).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
+  {:"a" => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(<self>.y().to_hash()).merge({:"d" => "d"})
 
-  {:"a" => "a"}.<U merge>(<U <self>>.<U x>().<U to_hash>()).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"b" => "b", :"c" => "c"}).<U merge>(<U <self>>.<U y>().<U to_hash>()).<U merge>({:"d" => "d"})
+  {:"a" => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(<self>.y().to_hash()).merge({:"d" => "d"})
 end

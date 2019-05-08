@@ -1,63 +1,63 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer1)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer1)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::Outer1<<C <U Outer1>>> < (::<todo sym>)  end
-  class ::Outer2<<C <U Outer2>>> < (::<todo sym>)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::Outer1<<C Outer1>> < (::<todo sym>)  end
+  class ::Outer2<<C Outer2>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::C)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::C)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::Inner2)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Other)
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::Inner2)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Other)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::Outer2::C<<C <U C>>> < (::<todo sym>)  end
-  class ::Outer2::Inner1<<C <U Inner1>>> < (::<todo sym>)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::Outer2::C<<C C>> < (::<todo sym>)  end
+  class ::Outer2::Inner1<<C Inner1>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::A)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::A)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Outer2::Inner1::Inner2)
+          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::Outer2::Inner1::A<<C <U A>>> < (::<todo sym>)  end
-  class ::Outer2::Inner1::Inner2<<C <U Inner2>>> < (::<todo sym>)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::Outer2::Inner1::A<<C A>> < (::<todo sym>)  end
+  class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::Outer2::Inner1::A
         ::Outer2::Inner1
@@ -67,15 +67,15 @@ begin
       end
     end
   end
-  class ::Outer2::Inner1::Inner2<<C <U Inner2>>> < (::<todo sym>)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::Outer2::C
-        Unresolved: <emptyTree>::<C <U A>>
+        Unresolved: <emptyTree>::<C A>
         <emptyTree>
       end
     end
   end
-  class ::Outer2::Other<<C <U Other>>> < (::Outer2::Inner1::Inner2)  end
+  class ::Outer2::Other<<C Other>> < (::Outer2::Inner1::Inner2)  end
   <emptyTree>
 end

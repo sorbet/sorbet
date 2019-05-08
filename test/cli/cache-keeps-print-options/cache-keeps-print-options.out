@@ -10,19 +10,19 @@ class ::<root> < ::Object () @ (https://github.com/stripe/sorbet/tree/master/baz
 
 --print=ast is incompatible with --cacheDir. Ignoring cache
 No errors! Great job.
-class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
+class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
 --print=ast is incompatible with --cacheDir. Ignoring cache
 No errors! Great job.
-class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
+class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
 No errors! Great job.
-class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
+class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
 No errors! Great job.
-class <emptyTree>::<C <U CCCCCCCCC>><<C <U <todo sym>>>> < (::<todo sym>)
+class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
   <emptyTree>
 end

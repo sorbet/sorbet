@@ -1,34 +1,34 @@
-class <emptyTree><<C <U <root>>>> < ()
-  module <emptyTree>::<C <U Interface>><<C <U <todo sym>>>> < ()
-    def <U some_method><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree><<C <root>>> < ()
+  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+    def some_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<C <U SomeClass>><<C <U <todo sym>>>> < (::<todo sym>)
-    <U <self>>.<U include>(<emptyTree>::<C <U Interface>>)
+  class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C Interface>)
 
-    def <U other_method><<C <U <todo sym>>>>(&<U <blk>>)
+    def other_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
   end
 
-  class <emptyTree>::<C <U Other>><<C <U <todo sym>>>> < (::<todo sym>)
-    def self.<U wrap_instance><<C <U <todo sym>>>>(<U x>, <U y> = nil, &<U <blk>>)
+  class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
+    def self.wrap_instance<<C <todo sym>>>(x, y = nil, &<blk>)
       <emptyTree>
     end
   end
 
-  def <U testit><<C <U <todo sym>>>>(&<U <blk>>)
+  def testit<<C <todo sym>>>(&<blk>)
     begin
-      <U s> = <emptyTree>::<C <U SomeClass>>.<U new>()
-      <U wrap> = ::T.<U let>(<U s>, <emptyTree>::<C <U Interface>>)
-      <emptyTree>::<C <U T>>.<U assert_type!>(<U wrap>, <emptyTree>::<C <U Interface>>)
-      <U wrap>.<U other_method>()
-      <U wrap>.<U some_method>()
-      <emptyTree>::<C <U Other>>.<U wrap_instance>("hi", "there")
-      <U o> = <emptyTree>::<C <U Other>>
-      <U o>.<U wrap_instance>("hi")
+      s = <emptyTree>::<C SomeClass>.new()
+      wrap = ::T.let(s, <emptyTree>::<C Interface>)
+      <emptyTree>::<C T>.assert_type!(wrap, <emptyTree>::<C Interface>)
+      wrap.other_method()
+      wrap.some_method()
+      <emptyTree>::<C Other>.wrap_instance("hi", "there")
+      o = <emptyTree>::<C Other>
+      o.wrap_instance("hi")
     end
   end
 end

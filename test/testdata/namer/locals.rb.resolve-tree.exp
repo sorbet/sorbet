@@ -1,22 +1,22 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::TestLocals)
-  class ::TestLocals<<C <U TestLocals>>> < (::<todo sym>)
-    def <U method><<U method>>(<blk>)
+  ::Sorbet::Private::Static.keep_for_ide(::TestLocals)
+  class ::TestLocals<<C TestLocals>> < (::<todo sym>)
+    def method<method>(<blk>)
       begin
-        <U a> = 1
-        <U c> = 4
-        <U <self>>.<U proc>() do ||
+        a = 1
+        c = 4
+        <self>.proc() do ||
           begin
-            <U b>$1 = 2
-            <U a>.<U +>(<U b>$1)
-            <U <self>>.<U proc>() do ||
-              <U b>$1.<U +>(<U c>)
+            b$1 = 2
+            a.+(b$1)
+            <self>.proc() do ||
+              b$1.+(c)
             end
           end
         end
-        <U b> = 3
-        <U <self>>.<U proc>() do |a|
-          <U a>$3.<U +>(<U b>$3)
+        b = 3
+        <self>.proc() do |a|
+          a$3.+(b$3)
         end
       end
     end

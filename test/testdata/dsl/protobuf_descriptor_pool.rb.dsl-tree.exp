@@ -1,31 +1,31 @@
-class <emptyTree><<C <U <root>>>> < ()
-  class <emptyTree>::<C <U ProtocMsgClass>><<C <U <todo sym>>>> < ()
-    <emptyTree>::<C <U Google>>::<C <U Protobuf>>::<C <U DescriptorPool>>.<U generated_pool>().<U lookup>("...").<U msgclass>()
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C ProtocMsgClass><<C <todo sym>>> < ()
+    <emptyTree>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 
-    def <U initialize><<C <U <todo sym>>>>(<U arg0> = {}, &<U <blk>>)
+    def initialize<<C <todo sym>>>(arg0 = {}, &<blk>)
       <emptyTree>
     end
   end
 
-  module <emptyTree>::<C <U ProtocMsgClass>>::<C <U ProtocEnumModule>><<C <U <todo sym>>>> < ()
-    <emptyTree>::<C <U Google>>::<C <U Protobuf>>::<C <U DescriptorPool>>.<U generated_pool>().<U lookup>("...").<U enummodule>()
+  module <emptyTree>::<C ProtocMsgClass>::<C ProtocEnumModule><<C <todo sym>>> < ()
+    <emptyTree>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").enummodule()
   end
 
-  class <emptyTree>::<C <U StripeMsgClass>><<C <U <todo sym>>>> < ()
-    ::<root>::<C <U Google>>::<C <U Protobuf>>::<C <U DescriptorPool>>.<U generated_pool>().<U lookup>("...").<U msgclass>()
+  class <emptyTree>::<C StripeMsgClass><<C <todo sym>>> < ()
+    ::<root>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 
-    def <U initialize><<C <U <todo sym>>>>(<U arg0> = {}, &<U <blk>>)
+    def initialize<<C <todo sym>>>(arg0 = {}, &<blk>)
       <emptyTree>
     end
   end
 
-  module <emptyTree>::<C <U StripeMsgClass>>::<C <U StripeEnumModule>><<C <U <todo sym>>>> < ()
-    ::<root>::<C <U Google>>::<C <U Protobuf>>::<C <U DescriptorPool>>.<U generated_pool>().<U lookup>("...").<U enummodule>()
+  module <emptyTree>::<C StripeMsgClass>::<C StripeEnumModule><<C <todo sym>>> < ()
+    ::<root>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").enummodule()
   end
 
-  <emptyTree>::<C <U Skip1>> = <emptyTree>::<C <U Protobuf>>::<C <U DescriptorPool>>.<U generated_pool>().<U lookup>("...").<U msgclass>()
+  <emptyTree>::<C Skip1> = <emptyTree>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 
-  <emptyTree>::<C <U Skip2>> = <U <self>>.<U msgclass>()
+  <emptyTree>::<C Skip2> = <self>.msgclass()
 
-  <emptyTree>::<C <U Skip3>> = <U <self>>.<U enummodule>()
+  <emptyTree>::<C Skip3> = <self>.enummodule()
 end

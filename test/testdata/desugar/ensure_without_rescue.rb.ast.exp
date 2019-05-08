@@ -1,17 +1,17 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def <U main><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U a>()
+class <emptyTree><<C <root>>> < ()
+  def main<<C <todo sym>>>(&<blk>)
+    <self>.a()
   ensure
-    <U <self>>.<U b>()
+    <self>.b()
   end
 
-  def <U a><<C <U <todo sym>>>>(&<U <blk>>)
+  def a<<C <todo sym>>>(&<blk>)
     <emptyTree>
   end
 
-  def <U b><<C <U <todo sym>>>>(&<U <blk>>)
+  def b<<C <todo sym>>>(&<blk>)
     <emptyTree>
   end
 
-  <U <self>>.<U main>()
+  <self>.main()
 end

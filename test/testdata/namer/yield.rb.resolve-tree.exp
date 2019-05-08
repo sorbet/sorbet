@@ -1,17 +1,17 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Main)
+          ::Sorbet::Private::Static.keep_for_ide(::Main)
           <emptyTree>
         end
-        ::Main.<U new>().<U main>()
+        ::Main.new().main()
         <emptyTree>
       end
     end
   end
-  class ::Main<<C <U Main>>> < (::<todo sym>)
+  class ::Main<<C Main>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -22,45 +22,45 @@ begin
 
     <emptyTree>
 
-    def <U yielder><<U yielder>>(<blk>)
+    def yielder<yielder>(<blk>)
       begin
-        <U a> = <U <blk>>.<U call>(1)
-        <U <blk>>.<U call>(<U a>)
+        a = <blk>.call(1)
+        <blk>.call(a)
       end
     end
 
-    def <U blockpass><<U blockpass>>(&blk)
+    def blockpass<blockpass>(&blk)
       begin
-        <U a> = <U blk>.<U call>(1)
-        <U blk>.<U call>(<U a>)
+        a = blk.call(1)
+        blk.call(a)
       end
     end
 
-    def <U mixed><<U mixed>>(&blk)
+    def mixed<mixed>(&blk)
       begin
-        <U a> = <U blk>.<U call>(1)
-        <U blk>.<U call>(<U a>)
+        a = blk.call(1)
+        blk.call(a)
       end
     end
 
-    def <U blockyield><<U blockyield>>(<blk>)
-      <U <self>>.<U yielder>() do |i|
-        <U <blk>>.<U call>(<U i>$1)
+    def blockyield<blockyield>(<blk>)
+      <self>.yielder() do |i|
+        <blk>.call(i$1)
       end
     end
 
-    def <U main><<U main>>(<blk>)
+    def main<main>(<blk>)
       begin
-        <U l> = <U <self>>.<U lambda>() do |x|
+        l = <self>.lambda() do |x|
           begin
-            <U <self>>.<U puts>(<U x>$1)
+            <self>.puts(x$1)
             3
           end
         end
-        ::<Magic>.<U <call-with-block>>(<U <self>>, :"yielder", <U l>)
-        ::<Magic>.<U <call-with-block>>(<U <self>>, :"blockpass", <U l>)
-        ::<Magic>.<U <call-with-block>>(<U <self>>, :"mixed", <U l>)
-        ::<Magic>.<U <call-with-block>>(<U <self>>, :"blockyield", <U l>)
+        ::<Magic>.<call-with-block>(<self>, :"yielder", l)
+        ::<Magic>.<call-with-block>(<self>, :"blockpass", l)
+        ::<Magic>.<call-with-block>(<self>, :"mixed", l)
+        ::<Magic>.<call-with-block>(<self>, :"blockyield", l)
       end
     end
   end

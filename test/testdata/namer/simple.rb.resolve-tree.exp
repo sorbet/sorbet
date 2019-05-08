@@ -1,92 +1,92 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::NormalClass)
+          ::Sorbet::Private::Static.keep_for_ide(::NormalClass)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::ANamespace)
+          ::Sorbet::Private::Static.keep_for_ide(::ANamespace)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::ANamespace::ClassInNamespace)
+          ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ClassInNamespace)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
+          ::Sorbet::Private::Static.keep_for_ide(::Mixin)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::OtherMixin)
+          ::Sorbet::Private::Static.keep_for_ide(::OtherMixin)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Child)
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.keep_for_ide(::Child)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::NormalClass<<C <U NormalClass>>> < (::<todo sym>)
+  class ::NormalClass<<C NormalClass>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
     <emptyTree>
 
-    def <U normal_method><<U normal_method>>(<blk>)
+    def normal_method<normal_method>(<blk>)
       <emptyTree>
     end
 
-    def self.<U normal_static_method><<U normal_static_method>>(<blk>)
+    def self.normal_static_method<normal_static_method>(<blk>)
       <emptyTree>
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::NormalClass::InnerClass)
+          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::NormalClass::InnerModule)
+          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerModule)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::NormalClass::InnerClass<<C <U InnerClass>>> < (::<todo sym>)  end
-  module ::NormalClass::InnerModule<<C <U InnerModule>>> < ()  end
-  module ::ANamespace<<C <U ANamespace>>> < ()
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)  end
+  module ::NormalClass::InnerModule<<C InnerModule>> < ()  end
+  module ::ANamespace<<C ANamespace>> < ()
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        ::Sorbet::Private::Static.<U keep_for_ide>(::ANamespace::ObviousChild)
+        ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ObviousChild)
         <emptyTree>
       end
     end
   end
-  class ::ANamespace::ObviousChild<<C <U ObviousChild>>> < (::<todo sym>)  end
-  class ::ANamespace::ClassInNamespace<<C <U ClassInNamespace>>> < (::<todo sym>)  end
-  class ::Parent<<C <U Parent>>> < (::<todo sym>)  end
-  module ::Mixin<<C <U Mixin>>> < ()  end
-  module ::OtherMixin<<C <U OtherMixin>>> < ()  end
-  class ::Child<<C <U Child>>> < (::Parent, ::Mixin)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)  end
+  class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)  end
+  class ::Parent<<C Parent>> < (::<todo sym>)  end
+  module ::Mixin<<C Mixin>> < ()  end
+  module ::OtherMixin<<C OtherMixin>> < ()  end
+  class ::Child<<C Child>> < (::Parent, ::Mixin)
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        <U <self>>.<U include>(::Mixin) do ||
+        <self>.include(::Mixin) do ||
           <emptyTree>
         end
-        <U <self>>.<U whatever>().<U include>(::OtherMixin)
-        ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
+        <self>.whatever().include(::OtherMixin)
+        ::Sorbet::Private::Static.keep_for_ide(::Mixin)
         <emptyTree>
       end
     end

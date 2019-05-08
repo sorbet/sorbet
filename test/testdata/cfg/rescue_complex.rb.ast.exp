@@ -1,129 +1,129 @@
-class <emptyTree>::<C <U TestRescue>><<C <U <todo sym>>>> < (::<todo sym>)
-  def <U meth><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree>::<C TestRescue><<C <todo sym>>> < (::<todo sym>)
+  def meth<<C <todo sym>>>(&<blk>)
     0
   end
 
-  def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+  def foo<<C <todo sym>>>(&<blk>)
     1
   end
 
-  def <U bar><<C <U <todo sym>>>>(&<U <blk>>)
+  def bar<<C <todo sym>>>(&<blk>)
     2
   end
 
-  def <U baz><<C <U <todo sym>>>>(&<U <blk>>)
+  def baz<<C <todo sym>>>(&<blk>)
     3
   end
 
-  def <U take_arg><<C <U <todo sym>>>>(<U x>, &<U <blk>>)
-    <U x>
+  def take_arg<<C <todo sym>>>(x, &<blk>)
+    x
   end
 
-  def <U initialize><<C <U <todo sym>>>>(&<U <blk>>)
-    <U @ex> = <emptyTree>::<C <U T>>.<U let>(nil, <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U StandardError>>))
+  def initialize<<C <todo sym>>>(&<blk>)
+    @ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
   end
 
-  def <U multiple_rescue><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <D <U <rescueTemp>> $2>
-    <U <self>>.<U baz>()
-  rescue => <D <U <rescueTemp>> $3>
-    <U <self>>.<U bar>()
+  def multiple_rescue<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => <rescueTemp>$2
+    <self>.baz()
+  rescue => <rescueTemp>$3
+    <self>.bar()
   end
 
-  def <U multiple_rescue_classes><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue <emptyTree>::<C <U Foo>>, <emptyTree>::<C <U Bar>> => <U baz>
-    <U baz>
+  def multiple_rescue_classes<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue <emptyTree>::<C Foo>, <emptyTree>::<C Bar> => baz
+    baz
   end
 
-  def <U parse_rescue_ensure><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <D <U <rescueTemp>> $2>
-    <U <self>>.<U baz>()
+  def parse_rescue_ensure<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => <rescueTemp>$2
+    <self>.baz()
   ensure
-    <U <self>>.<U bar>()
+    <self>.bar()
   end
 
-  def <U parse_bug_rescue_empty_else><<C <U <todo sym>>>>(&<U <blk>>)
+  def parse_bug_rescue_empty_else<<C <todo sym>>>(&<blk>)
     <emptyTree>
-  rescue <emptyTree>::<C <U LoadError>> => <D <U <rescueTemp>> $2>
+  rescue <emptyTree>::<C LoadError> => <rescueTemp>$2
     <emptyTree>
   end
 
-  def <U parse_ruby_bug_12686><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U take_arg>(<U <self>>.<U bar>()
-    rescue => <D <U <rescueTemp>> $2>
+  def parse_ruby_bug_12686<<C <todo sym>>>(&<blk>)
+    <self>.take_arg(<self>.bar()
+    rescue => <rescueTemp>$2
       nil)
   end
 
-  def <U parse_rescue_mod><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <D <U <rescueTemp>> $2>
-    <U <self>>.<U bar>()
+  def parse_rescue_mod<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => <rescueTemp>$2
+    <self>.bar()
   end
 
-  def <U parse_resbody_list_var><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue <U <self>>.<U foo>() => <U ex>
-    <U <self>>.<U bar>()
+  def parse_resbody_list_var<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue <self>.foo() => ex
+    <self>.bar()
   end
 
-  def <U parse_rescue_else_ensure><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <D <U <rescueTemp>> $2>
-    <U <self>>.<U baz>()
+  def parse_rescue_else_ensure<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => <rescueTemp>$2
+    <self>.baz()
   else
-    <U <self>>.<U foo>()
+    <self>.foo()
   ensure
-    <U <self>>.<U bar>()
+    <self>.bar()
   end
 
-  def <U parse_rescue><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <D <U <rescueTemp>> $2>
-    <U <self>>.<U foo>()
+  def parse_rescue<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => <rescueTemp>$2
+    <self>.foo()
   end
 
-  def <U parse_resbody_var><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <U ex>
-    <U <self>>.<U bar>()
+  def parse_resbody_var<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => ex
+    <self>.bar()
   end
 
-  def <U parse_resbody_var_1><<C <U <todo sym>>>>(&<U <blk>>)
-    <U <self>>.<U meth>()
-  rescue => <D <U <rescueTemp>> $2>
+  def parse_resbody_var_1<<C <todo sym>>>(&<blk>)
+    <self>.meth()
+  rescue => <rescueTemp>$2
     begin
-      <U @ex> = <D <U <rescueTemp>> $2>
-      <U <self>>.<U bar>()
+      @ex = <rescueTemp>$2
+      <self>.bar()
     end
   end
 
-  def <U parse_rescue_mod_op_assign><<C <U <todo sym>>>>(&<U <blk>>)
-    <U foo> = <U foo>.<U +>(<U <self>>.<U meth>()
-    rescue => <D <U <rescueTemp>> $2>
-      <U <self>>.<U bar>())
+  def parse_rescue_mod_op_assign<<C <todo sym>>>(&<blk>)
+    foo = foo.+(<self>.meth()
+    rescue => <rescueTemp>$2
+      <self>.bar())
   end
 
-  def <U parse_ruby_bug_12402><<C <U <todo sym>>>>(&<U <blk>>)
-    <U foo> = <U <self>>.<U raise>(<U <self>>.<U bar>())
-  rescue => <D <U <rescueTemp>> $2>
+  def parse_ruby_bug_12402<<C <todo sym>>>(&<blk>)
+    foo = <self>.raise(<self>.bar())
+  rescue => <rescueTemp>$2
     nil
   end
 
-  def <U parse_ruby_bug_12402_1><<C <U <todo sym>>>>(&<U <blk>>)
-    <U foo> = <U foo>.<U +>(<U <self>>.<U raise>(<U <self>>.<U bar>())
-    rescue => <D <U <rescueTemp>> $2>
+  def parse_ruby_bug_12402_1<<C <todo sym>>>(&<blk>)
+    foo = foo.+(<self>.raise(<self>.bar())
+    rescue => <rescueTemp>$2
       nil)
   end
 
-  def <U parse_ruby_bug_12402_2><<C <U <todo sym>>>>(&<U <blk>>)
+  def parse_ruby_bug_12402_2<<C <todo sym>>>(&<blk>)
     begin
-      <D <U []> $3> = <U <self>>.<U foo>()
-      <D <U []> $4> = 0
-      <D <U []> $3>.<U []=>(<D <U []> $4>, <D <U []> $3>.<U []>(<D <U []> $4>).<U +>(<U <self>>.<U raise>(<U <self>>.<U bar>())
-        rescue => <D <U <rescueTemp>> $2>
+      []$3 = <self>.foo()
+      []$4 = 0
+      []$3.[]=([]$4, []$3.[]([]$4).+(<self>.raise(<self>.bar())
+        rescue => <rescueTemp>$2
           nil))
     end
   end
