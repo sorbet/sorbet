@@ -33,7 +33,7 @@ enum class MainThreadStatus {
 
 class LSPState final {
 private:
-    /** Trees that have been indexed and can be reused between different runs */
+    /** Trees that have bee gn indexed and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed GUARDED_BY(mtx);
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
     std::vector<unsigned int> globalStateHashes GUARDED_BY(mtx);
@@ -61,8 +61,7 @@ private:
 
     core::FileRef updateFile(const std::shared_ptr<core::File> &file) EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
-    /** Conservatively rerun entire pipeline without caching any trees. If operation is canceled, restores the hash and
-     * file state in oldGlobalStateHashes and oldFiles. */
+    /** Conservatively rerun entire pipeline without caching any trees. */
     TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles)
         EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
@@ -90,7 +89,8 @@ public:
     bool canRunFastPath(UnorderedMap<std::string, std::pair<std::string, bool>> &changes) EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
     /** Typecheck the given files, or all files if specified. Tries to apply conservative heuristics to see if we can
-     * run a fast path. If it cannot, it bails out and runs a slow path */
+     * run a fast path. If it cannot, it bails out and runs a slow path. If slow path is canceled, it backs out any
+     * changes it made to initialGS, open files, and file hashes. */
     TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs,
                                  std::vector<std::shared_ptr<core::File>> &changedFiles,
                                  const UnorderedMap<std::string, bool> &openStatuses, bool allFiles = false)

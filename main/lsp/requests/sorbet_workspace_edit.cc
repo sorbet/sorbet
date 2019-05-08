@@ -91,7 +91,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &cl
 
 bool isFileOpen(LSPState &state, UnorderedMap<string, pair<string, bool>> &updates, string_view path)
     EXCLUSIVE_LOCKS_REQUIRED(state.mtx) {
-    return state.isFileOpen(path) || updates.find(string(path)) != updates.end();
+    return state.isFileOpen(path) || (updates.find(string(path)) != updates.end() && updates[string(path)].second);
 }
 
 void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
