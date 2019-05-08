@@ -1,159 +1,159 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
+  class <emptyTree><<C <root>>> < ()
     <emptyTree>
 
     <emptyTree>
 
-    def <U main><<U main>>(<blk>)
+    def main<main>(<blk>)
       begin
-        <U <self>>.<U puts>(::A.<U a>())
-        <U <self>>.<U puts>(::B.<U b>())
-        <U <self>>.<U puts>(#$c.<U c>())
-        <U <self>>.<U puts>(::D.<U singleton_class>().<U d>())
-        <U <self>>.<U puts>(::E.<U e>())
-        <U <self>>.<U puts>(::F.<U f=>(91))
-        <U <self>>.<U puts>(::G.<U new>().<U wrapper>())
-        <U <self>>.<U puts>(::T.untyped.<U h>())
+        <self>.puts(::A.a())
+        <self>.puts(::B.b())
+        <self>.puts(#$c.c())
+        <self>.puts(::D.singleton_class().d())
+        <self>.puts(::E.e())
+        <self>.puts(::F.f=(91))
+        <self>.puts(::G.new().wrapper())
+        <self>.puts(::T.untyped.h())
       end
     end
 
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::B)
+          ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
-        #$c = ::Object.<U new>()
+        #$c = ::Object.new()
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::D)
-          <emptyTree>
-        end
-        begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::E)
+          ::Sorbet::Private::Static.keep_for_ide(::D)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::F)
+          ::Sorbet::Private::Static.keep_for_ide(::E)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::G)
+          ::Sorbet::Private::Static.keep_for_ide(::F)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::H)
+          ::Sorbet::Private::Static.keep_for_ide(::G)
           <emptyTree>
         end
-        <U <self>>.<U main>()
+        begin
+          ::Sorbet::Private::Static.keep_for_ide(::H)
+          <emptyTree>
+        end
+        <self>.main()
         <emptyTree>
       end
     end
   end
-  class ::A<<C <U A>>> < (::<todo sym>)  end
-  class ::B<<C <U B>>> < (::<todo sym>)
+  class ::A<<C A>> < (::<todo sym>)  end
+  class ::B<<C B>> < (::<todo sym>)
     <emptyTree>
   end
-  class <U <singleton class>><<S <C <U B>> $1>> < ()
-    def <U b><<U b>>(<blk>)
+  class <singleton class><<Class:B>> < ()
+    def b<b>(<blk>)
       "b"
     end
   end
-  class ::D<<C <U D>>> < (::<todo sym>)
+  class ::D<<C D>> < (::<todo sym>)
     <emptyTree>
   end
-  class <U <singleton class>><<S <C <U D>> $1>> < ()
+  class <singleton class><<Class:D>> < ()
     <emptyTree>
   end
-  class <U <singleton class>><<S <S <C <U D>> $1> $1>> < ()
-    def <U d><<U d>>(<blk>)
+  class <singleton class><<Class:<Class:D>>> < ()
+    def d<d>(<blk>)
       "d"
     end
   end
-  class ::E<<C <U E>>> < (::<todo sym>)
+  class ::E<<C E>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
-      <U <self>>.<U wrapper>()
+    def self.<static-init><<static-init>>(<blk>)
+      <self>.wrapper()
     end
   end
-  class <U <singleton class>><<S <C <U E>> $1>> < ()
+  class <singleton class><<Class:E>> < ()
     <emptyTree>
 
-    def <U wrapper><<U wrapper>>(<blk>)
+    def wrapper<wrapper>(<blk>)
       <emptyTree>
     end
 
-    def <U e><<U e>>(<blk>)
+    def e<e>(<blk>)
       "e"
     end
   end
-  class ::F<<C <U F>>> < (::<todo sym>)
+  class ::F<<C F>> < (::<todo sym>)
     <emptyTree>
   end
-  class <U <singleton class>><<S <C <U F>> $1>> < ()
+  class <singleton class><<Class:F>> < ()
     <emptyTree>
 
     <emptyTree>
 
     <emptyTree>
 
-    def <U initialize><<U initialize>>(<blk>)
-      <U @f> = begin
-        ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-        T.<U let>(0, Integer)
+    def initialize<initialize>(<blk>)
+      @f = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+        T.let(0, Integer)
       end
     end
 
-    def <U f=><<U f=>>(f, <blk>)
-      <U @f> = <U f>
+    def f=<f=>(f, <blk>)
+      @f = f
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
-      <U <self>>.<U sig>() do ||
-        <U <self>>.<U params>({:"f" => ::Integer}).<U returns>(::Integer)
+    def self.<static-init><<static-init>>(<blk>)
+      <self>.sig() do ||
+        <self>.params({:"f" => ::Integer}).returns(::Integer)
       end
     end
   end
-  class ::G<<C <U G>>> < (::<todo sym>)
+  class ::G<<C G>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def <U wrapper><<U wrapper>>(<blk>)
+    def wrapper<wrapper>(<blk>)
       begin
         <emptyTree>
-        <U <self>>.<U inner>()
+        <self>.inner()
       end
     end
 
-    def self.<U g><<U g>>(<blk>)
+    def self.g<g>(<blk>)
       "g"
     end
   end
-  class <U <singleton class>><<S <C <U G>> $1>> < ()
-    def <U inner><<U inner>>(<blk>)
-      ::T.<U reveal_type>(<U <self>>)
+  class <singleton class><<Class:G>> < ()
+    def inner<inner>(<blk>)
+      ::T.reveal_type(<self>)
     end
   end
-  class ::H<<C <U H>>> < (::<todo sym>)
+  class ::H<<C H>> < (::<todo sym>)
     <emptyTree>
   end
-  class <U <singleton class>><<S <C <U H>> $1>> < ()
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class <singleton class><<Class:H>> < ()
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        ::Sorbet::Private::Static.<U keep_for_ide>(::<Class:H>::H2)
+        ::Sorbet::Private::Static.keep_for_ide(::<Class:H>::H2)
         <emptyTree>
       end
     end
   end
-  class ::<Class:H>::H2<<C <U H2>>> < (::<todo sym>)
-    def self.<U h><<U h>>(<blk>)
+  class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
+    def self.h<h>(<blk>)
       "h"
     end
   end

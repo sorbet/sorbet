@@ -1,12 +1,12 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::A)
-  class ::A<<C <U A>>> < (::<todo sym>)
-    def <U take_arguments><<U take_arguments>>(a, b, c, d, e, f, &g)
+  ::Sorbet::Private::Static.keep_for_ide(::A)
+  class ::A<<C A>> < (::<todo sym>)
+    def take_arguments<take_arguments>(a, b, c, d, e, f, &g)
       begin
-        [<U a>, <U b>, <U c>, <U d>, <U e>, <U f>, <U g>]
-        <U h> = 1
-        <U <self>>.<U proc>() do |a, b, *c, d:, e:, *f:, &&g|
-          [<U a>$1, <U b>$1, <U c>$1, <U d>$1, <U e>$1, <U f>$1, <U g>$1, <U h>$1]
+        [a, b, c, d, e, f, g]
+        h = 1
+        <self>.proc() do |a, b, *c, d:, e:, *f:, &&g|
+          [a$1, b$1, c$1, d$1, e$1, f$1, g$1, h$1]
         end
       end
     end

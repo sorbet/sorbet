@@ -1,11 +1,11 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::C)
-  class ::C<<C <U C>>> < (::<todo sym>)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  ::Sorbet::Private::Static.keep_for_ide(::C)
+  class ::C<<C C>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
       ::C::L = begin
-        ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U proc>().<U params>({:"x" => ::Integer}).<U returns>(::Integer))
-        T.<U let>(<U <self>>.<U lambda>() do |x|
-          <U x>$1.<U *>(<U x>$1)
+        ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
+        T.let(<self>.lambda() do |x|
+          x$1.*(x$1)
         end, AppliedType {
           klass = <C <U Proc1>>
           targs = [

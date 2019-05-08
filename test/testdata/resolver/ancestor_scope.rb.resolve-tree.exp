@@ -1,51 +1,51 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Other)
+          ::Sorbet::Private::Static.keep_for_ide(::Other)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Test)
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Other)
+          ::Sorbet::Private::Static.keep_for_ide(::Test)
+          ::Sorbet::Private::Static.keep_for_ide(::Other)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Test::Mixin)
-          T.<U assert_type!>(::Test.<U new>(), Test::Mixin)
+          ::Sorbet::Private::Static.keep_for_typechecking(::Test::Mixin)
+          T.assert_type!(::Test.new(), Test::Mixin)
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Test::Other)
-          T.<U assert_type!>(::Test.<U new>(), Test::Other)
+          ::Sorbet::Private::Static.keep_for_typechecking(::Test::Other)
+          T.assert_type!(::Test.new(), Test::Other)
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Other)
-          T.<U assert_type!>(::Test.<U new>(), Other)
+          ::Sorbet::Private::Static.keep_for_typechecking(::Other)
+          T.assert_type!(::Test.new(), Other)
         end
         <emptyTree>
       end
     end
   end
-  class ::Other<<C <U Other>>> < (::<todo sym>)  end
-  class ::Test<<C <U Test>>> < (::Other, ::Test::Mixin, ::Test::Other)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  class ::Other<<C Other>> < (::<todo sym>)  end
+  class ::Test<<C Test>> < (::Other, ::Test::Mixin, ::Test::Other)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Mixin)
+          ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Other)
+          ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
           <emptyTree>
         end
-        ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Mixin)
-        ::Sorbet::Private::Static.<U keep_for_ide>(::Test::Other)
+        ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
+        ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
         <emptyTree>
       end
     end
   end
-  module ::Test::Mixin<<C <U Mixin>>> < ()  end
-  module ::Test::Other<<C <U Other>>> < ()  end
+  module ::Test::Mixin<<C Mixin>> < ()  end
+  module ::Test::Other<<C Other>> < ()  end
   <emptyTree>
 end

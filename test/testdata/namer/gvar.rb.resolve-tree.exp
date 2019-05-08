@@ -1,26 +1,26 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         #$a = 1
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::A<<C <U A>>> < (::<todo sym>)
+  class ::A<<C A>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def <U meth><<U meth>>(<blk>)
+    def meth<meth>(<blk>)
       [#$a, #$b, #$c]
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
         #$b = 2
         #$a

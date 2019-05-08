@@ -1,20 +1,20 @@
-module <emptyTree>::<C <U MyRoutes>><<C <U <todo sym>>>> < ()
-  <U <self>>.<U include>(<emptyTree>::<C <U Sinatra>>::<C <U Base>>)
+module <emptyTree>::<C MyRoutes><<C <todo sym>>> < ()
+  <self>.include(<emptyTree>::<C Sinatra>::<C Base>)
 
-  <U <self>>.<U include>(<emptyTree>::<C <U Helpers>>)
+  <self>.include(<emptyTree>::<C Helpers>)
 
-  def <U <instance_registered>><<C <U <todo sym>>>>(<U app>, &<U <blk>>)
-    <U app>.<U get>("/route/") do ||
+  def <instance_registered><<C <todo sym>>>(app, &<blk>)
+    app.get("/route/") do ||
       begin
-        <U <self>>.<U my_helper>()
-        <U <self>>.<U params>()
-        <U <self>>.<U my_helper>()
+        <self>.my_helper()
+        <self>.params()
+        <self>.my_helper()
       end
     end
   end
 
-  module <emptyTree>::<C <U Helpers>><<C <U <todo sym>>>> < ()
-    def <U my_helper><<C <U <todo sym>>>>(&<U <blk>>)
+  module <emptyTree>::<C Helpers><<C <todo sym>>> < ()
+    def my_helper<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
   end

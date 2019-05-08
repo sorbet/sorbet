@@ -10,7 +10,7 @@ Integer {
 }
 --- parse-tree-json end ---
 --- ast start ---
-class <emptyTree><<C <U <root>>>> < ()
+class <emptyTree><<C <root>>> < ()
   1
 end
 --- ast end ---
@@ -25,7 +25,7 @@ ClassDef{
 }
 --- ast-raw end ---
 --- dsl-tree start ---
-class <emptyTree><<C <U <root>>>> < ()
+class <emptyTree><<C <root>>> < ()
   1
 end
 --- dsl-tree end ---
@@ -54,7 +54,7 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=-e start=1:1 end=1:2}, Loc
 
 --- symbol-table-raw end ---
 --- name-tree start ---
-class <emptyTree><<C <U <root>>>> < ()
+class <emptyTree><<C <root>>> < ()
   1
 end
 --- name-tree end ---
@@ -69,8 +69,8 @@ ClassDef{
 }
 --- name-tree-raw end ---
 --- resolve-tree start ---
-class <emptyTree><<C <U <root>>>> < ()
-  def self.<U <static-init>><<N <U <static-init>> $100>>(<blk>)
+class <emptyTree><<C <root>>> < ()
+  def self.<static-init><<static-init>$100>(<blk>)
     1
   end
 end

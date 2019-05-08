@@ -1,48 +1,48 @@
-class <emptyTree><<C <U <root>>>> < ()
-  class <emptyTree>::<C <U Other>><<C <U <todo sym>>>> < (::<todo sym>)
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  class <emptyTree>::<C <U SomeDataInterface>><<C <U <todo sym>>>> < (::<todo sym>)
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({}).<U returns>(<emptyTree>::<C <U String>>)
+  class <emptyTree>::<C SomeDataInterface><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
     end
 
-    def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"arg0" => <emptyTree>::<C <U String>>}).<U returns>(<emptyTree>::<C <U String>>)
+    ::Sorbet.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
     end
 
-    def <U foo=><<C <U <todo sym>>>>(<U arg0>, &<U <blk>>)
-      ::T.<U cast>(::T.<U unsafe>(nil), <emptyTree>::<C <U String>>)
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(::T.<U nilable>(<emptyTree>::<C <U Other>>))
+    ::Sorbet.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<C Other>))
     end
 
-    def <U foo_><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def foo_<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"opts" => ::T.<U untyped>()}).<U returns>(<emptyTree>::<C <U Other>>)
+    ::Sorbet.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(<emptyTree>::<C Other>)
     end
 
-    def <U foo_!><<C <U <todo sym>>>>(*<U opts>:, &<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def foo_!<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
     end
   end
 
-  def <U test><<C <U <todo sym>>>>(&<U <blk>>)
+  def test<<C <todo sym>>>(&<blk>)
     begin
-      <U di> = <emptyTree>::<C <U SomeDataInterface>>.<U new>()
-      <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo>())
-      <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo_>())
-      <emptyTree>::<C <U T>>.<U reveal_type>(<U di>.<U foo_!>())
+      di = <emptyTree>::<C SomeDataInterface>.new()
+      <emptyTree>::<C T>.reveal_type(di.foo())
+      <emptyTree>::<C T>.reveal_type(di.foo_())
+      <emptyTree>::<C T>.reveal_type(di.foo_!())
     end
   end
 end

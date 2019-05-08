@@ -1,17 +1,17 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def <U foo><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree><<C <root>>> < ()
+  def foo<<C <todo sym>>>(&<blk>)
     begin
-      ::Regexp.<U new>("abc", 0)
-      <emptyTree>::<C <U Regexp>>.<U new>("abc")
-      ::Regexp.<U new>("abc", 0.<U |>(1))
-      <emptyTree>::<C <U Regexp>>.<U new>("abc", <emptyTree>::<C <U Regexp>>::<C <U IGNORECASE>>)
-      ::Regexp.<U new>("abc", 0.<U |>(1).<U |>(2).<U |>(4))
-      <emptyTree>::<C <U Regexp>>.<U new>("abc", 0.<U |>(<emptyTree>::<C <U Regexp>>::<C <U IGNORECASE>>).<U |>(<emptyTree>::<C <U Regexp>>::<C <U EXTENDED>>).<U |>(<emptyTree>::<C <U Regexp>>::<C <U MULTILINE>>))
-      <U a> = "a"
-      <U c> = "c"
-      ::Regexp.<U new>(<U a>.<U to_s>().<U concat>("b").<U concat>(<U c>.<U to_s>()), 0)
-      <emptyTree>::<C <U Regexp>>.<U new>(<U a>.<U +>("b").<U +>(<U c>))
-      ::Regexp.<U new>("abc", 0)
+      ::Regexp.new("abc", 0)
+      <emptyTree>::<C Regexp>.new("abc")
+      ::Regexp.new("abc", 0.|(1))
+      <emptyTree>::<C Regexp>.new("abc", <emptyTree>::<C Regexp>::<C IGNORECASE>)
+      ::Regexp.new("abc", 0.|(1).|(2).|(4))
+      <emptyTree>::<C Regexp>.new("abc", 0.|(<emptyTree>::<C Regexp>::<C IGNORECASE>).|(<emptyTree>::<C Regexp>::<C EXTENDED>).|(<emptyTree>::<C Regexp>::<C MULTILINE>))
+      a = "a"
+      c = "c"
+      ::Regexp.new(a.to_s().concat("b").concat(c.to_s()), 0)
+      <emptyTree>::<C Regexp>.new(a.+("b").+(c))
+      ::Regexp.new("abc", 0)
     end
   end
 end

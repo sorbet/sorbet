@@ -1,103 +1,103 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
+          ::Sorbet::Private::Static.keep_for_ide(::Mixin)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Child)
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.keep_for_ide(::Child)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         ::Alias = ::Parent
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Child1)
-          ::Sorbet::Private::Static.<U keep_for_ide>(::Parent)
+          ::Sorbet::Private::Static.keep_for_ide(::Child1)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  class ::Parent<<C <U Parent>>> < (::<todo sym>)
+  class ::Parent<<C Parent>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
     <emptyTree>
 
-    def <U initialize><<U initialize>>(<blk>)
+    def initialize<initialize>(<blk>)
       begin
-        <U @ivar> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U let>(1, Integer)
+        @ivar = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(1, Integer)
         end
-        <U @ivar2> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U let>(2, Integer)
+        @ivar2 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(2, Integer)
         end
       end
     end
 
-    def <U hi><<U hi>>(<blk>)
+    def hi<hi>(<blk>)
       begin
-        <U @ivar> = 1
-        <U @ivar2>
+        @ivar = 1
+        @ivar2
       end
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
-      <U @@class_var> = begin
-        ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
-        T.<U let>("hi", String)
+    def self.<static-init><<static-init>>(<blk>)
+      @@class_var = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::String)
+        T.let("hi", String)
       end
     end
   end
-  module ::Mixin<<C <U Mixin>>> < ()
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  module ::Mixin<<C Mixin>> < ()
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        <U @@mixin_cvar> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U let>(3, Integer)
+        @@mixin_cvar = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(3, Integer)
         end
-        <U @@mixin_cvar>
+        @@mixin_cvar
         <emptyTree>
       end
     end
   end
-  class ::Child<<C <U Child>>> < (::Parent, ::Mixin)
+  class ::Child<<C Child>> < (::Parent, ::Mixin)
     <emptyTree>
 
     <emptyTree>
 
-    def <U child_method><<U child_method>>(<blk>)
+    def child_method<child_method>(<blk>)
       begin
-        <U @@class_var>
-        <U @@mixin_cvar>
-        <U @ivar2>
-        <U @undefinedivar>
+        @@class_var
+        @@mixin_cvar
+        @ivar2
+        @undefinedivar
       end
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        <U @@class_var>
-        <U @@mixin_cvar>
-        <U @@undefined_cvar>
-        ::Sorbet::Private::Static.<U keep_for_ide>(::Mixin)
+        @@class_var
+        @@mixin_cvar
+        @@undefined_cvar
+        ::Sorbet::Private::Static.keep_for_ide(::Mixin)
         <emptyTree>
       end
     end
   end
-  class ::Child1<<C <U Child1>>> < (::Parent)
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
-      <U @@class_var>
+  class ::Child1<<C Child1>> < (::Parent)
+    def self.<static-init><<static-init>>(<blk>)
+      @@class_var
     end
   end
   <emptyTree>

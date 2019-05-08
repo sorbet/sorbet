@@ -1,51 +1,51 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::TestCasts)
-  class ::TestCasts<<C <U TestCasts>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.keep_for_ide(::TestCasts)
+  class ::TestCasts<<C TestCasts>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def <U untyped><<U untyped>>(<blk>)
+    def untyped<untyped>(<blk>)
       <emptyTree>
     end
 
-    def <U test_casts><<U test_casts>>(<blk>)
+    def test_casts<test_casts>(<blk>)
       begin
-        <U t> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U assert_type!>(<U <self>>.<U untyped>(), Integer)
+        t = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.assert_type!(<self>.untyped(), Integer)
         end
-        <U t>.<U +>(4)
-        <U t1> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U assert_type!>("hi", Integer)
+        t.+(4)
+        t1 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.assert_type!("hi", Integer)
         end
-        <U t1>.<U +>(1)
-        <U s> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
-          T.<U cast>(<U <self>>.<U untyped>(), String)
+        t1.+(1)
+        s = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.cast(<self>.untyped(), String)
         end
-        <U s>.<U +>("hi")
-        <U s> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::String)
-          T.<U cast>(6, String)
+        s.+("hi")
+        s = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.cast(6, String)
         end
-        <U s>.<U +>("hi")
-        <U s>.<U +>(3)
-        <U s> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::Integer)
-          T.<U cast>(6, Integer)
+        s.+("hi")
+        s.+(3)
+        s = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.cast(6, Integer)
         end
-        <U s> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(::T.<U untyped>())
-          T.<U cast>(6, T.untyped)
+        s = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::T.untyped())
+          T.cast(6, T.untyped)
         end
-        <U s> = begin
-          ::Sorbet::Private::Static.<U keep_for_typechecking>(7)
-          T.<U cast>(6, T.untyped)
+        s = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(7)
+          T.cast(6, T.untyped)
         end
-        <U s>.<U +>("hi")
-        <U s>.<U +>(3)
+        s.+("hi")
+        s.+(3)
       end
     end
   end

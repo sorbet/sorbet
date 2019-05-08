@@ -1,28 +1,28 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::TestSig)
-  class ::TestSig<<C <U TestSig>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.keep_for_ide(::TestSig)
+  class ::TestSig<<C TestSig>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
 
-    def <U test_resolve><<U test_resolve>>(<blk>)
+    def test_resolve<test_resolve>(<blk>)
       <emptyTree>
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
-      <U <self>>.<U sig>() do ||
-        <U <self>>.<U returns>(::T2)
+    def self.<static-init><<static-init>>(<blk>)
+      <self>.sig() do ||
+        <self>.returns(::T2)
       end
     end
   end
   <emptyTree>
 end
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $4>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$4>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::T1)
+          ::Sorbet::Private::Static.keep_for_ide(::T1)
           <emptyTree>
         end
         ::T2 = ::T1
@@ -30,6 +30,6 @@ begin
       end
     end
   end
-  class ::T1<<C <U T1>>> < (::<todo sym>)  end
+  class ::T1<<C T1>> < (::<todo sym>)  end
   <emptyTree>
 end

@@ -1,6 +1,6 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::Examples)
-  class ::Examples<<C <U Examples>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.keep_for_ide(::Examples)
+  class ::Examples<<C Examples>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -17,7 +17,7 @@ begin
 
     <emptyTree>
 
-    def <U i_like_ifs><<U i_like_ifs>>(<blk>)
+    def i_like_ifs<i_like_ifs>(<blk>)
       if true
         return 1
       else
@@ -25,7 +25,7 @@ begin
       end
     end
 
-    def <U i_like_exps><<U i_like_exps>>(<blk>)
+    def i_like_exps<i_like_exps>(<blk>)
       if true
         1
       else
@@ -33,7 +33,7 @@ begin
       end
     end
 
-    def <U return_in_one_branch1><<U return_in_one_branch1>>(<blk>)
+    def return_in_one_branch1<return_in_one_branch1>(<blk>)
       if true
         return 1
       else
@@ -41,7 +41,7 @@ begin
       end
     end
 
-    def <U return_in_one_branch2><<U return_in_one_branch2>>(<blk>)
+    def return_in_one_branch2<return_in_one_branch2>(<blk>)
       if true
         1
       else
@@ -49,58 +49,58 @@ begin
       end
     end
 
-    def <U variables><<U variables>>(<blk>)
+    def variables<variables>(<blk>)
       begin
         if true
-          <U a> = 1
+          a = 1
         else
-          <U a> = 2
+          a = 2
         end
         if false
-          <U b> = 1
+          b = 1
         else
-          <U b> = 2
+          b = 2
         end
-        <U a>.<U +>(<U b>)
+        a.+(b)
       end
     end
 
-    def <U variables_and_loop><<U variables_and_loop>>(cond, <blk>)
+    def variables_and_loop<variables_and_loop>(cond, <blk>)
       begin
         if true
-          <U a> = 1
+          a = 1
         else
-          <U a> = 2
+          a = 2
         end
         while true
-          if <U cond>
-            <U b> = 1
+          if cond
+            b = 1
           else
-            <U b> = 2
+            b = 2
           end
         end
-        <U b>
+        b
       end
     end
 
-    def <U variables_loop_if><<U variables_loop_if>>(cond, <blk>)
+    def variables_loop_if<variables_loop_if>(cond, <blk>)
       begin
         while true
-          if <U cond>
-            <U b> = 1
+          if cond
+            b = 1
           else
-            <U b> = 2
+            b = 2
           end
         end
-        <U b>
+        b
       end
     end
 
-    def <U take_arguments><<U take_arguments>>(i, <blk>)
+    def take_arguments<take_arguments>(i, <blk>)
       if false
         2
       else
-        <U i>
+        i
       end
     end
   end

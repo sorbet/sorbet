@@ -1,211 +1,211 @@
-class <emptyTree><<C <U <root>>>> < ()
-  class <emptyTree>::<C <U TestDSLBuilder>><<C <U <todo sym>>>> < (::<todo sym>)
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"opt_string" => <emptyTree>::<C <U String>>}).<U returns>(::NilClass)
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C TestDSLBuilder><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet.sig() do ||
+      <self>.params({:"opt_string" => <emptyTree>::<C String>}).returns(::NilClass)
     end
 
-    def self.<U opt_string><<C <U <todo sym>>>>(<U opt_string>, &<U <blk>>)
+    def self.opt_string<<C <todo sym>>>(opt_string, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def self.<U get_opt_string><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_opt_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def <U opt_string><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def opt_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"opt_int_defaulted" => <emptyTree>::<C <U Integer>>}).<U returns>(::NilClass)
+    ::Sorbet.sig() do ||
+      <self>.params({:"opt_int_defaulted" => <emptyTree>::<C Integer>}).returns(::NilClass)
     end
 
-    def self.<U opt_int_defaulted><<C <U <todo sym>>>>(<U opt_int_defaulted>, &<U <blk>>)
+    def self.opt_int_defaulted<<C <todo sym>>>(opt_int_defaulted, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(<emptyTree>::<C <U Integer>>)
+    ::Sorbet.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.<U get_opt_int_defaulted><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_opt_int_defaulted<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(<emptyTree>::<C <U Integer>>)
+    ::Sorbet.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def <U opt_int_defaulted><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def opt_int_defaulted<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"req_string" => <emptyTree>::<C <U String>>}).<U returns>(::NilClass)
+    ::Sorbet.sig() do ||
+      <self>.params({:"req_string" => <emptyTree>::<C String>}).returns(::NilClass)
     end
 
-    def self.<U req_string><<C <U <todo sym>>>>(<U req_string>, &<U <blk>>)
+    def self.req_string<<C <todo sym>>>(req_string, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
+    ::Sorbet.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
     end
 
-    def self.<U get_req_string><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_req_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
+    ::Sorbet.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
     end
 
-    def <U req_string><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def req_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"implied_string" => <emptyTree>::<C <U String>>}).<U returns>(::NilClass)
+    ::Sorbet.sig() do ||
+      <self>.params({:"implied_string" => <emptyTree>::<C String>}).returns(::NilClass)
     end
 
-    def self.<U implied_string><<C <U <todo sym>>>>(<U implied_string> = ::T.<U untyped>(), &<U <blk>>)
+    def self.implied_string<<C <todo sym>>>(implied_string = ::T.untyped(), &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
+    ::Sorbet.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
     end
 
-    def self.<U get_implied_string><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_implied_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(<emptyTree>::<C <U String>>)
+    ::Sorbet.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
     end
 
-    def <U implied_string><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def implied_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"no_getter" => <emptyTree>::<C <U String>>}).<U returns>(::NilClass)
+    ::Sorbet.sig() do ||
+      <self>.params({:"no_getter" => <emptyTree>::<C String>}).returns(::NilClass)
     end
 
-    def self.<U no_getter><<C <U <todo sym>>>>(<U no_getter>, &<U <blk>>)
+    def self.no_getter<<C <todo sym>>>(no_getter, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def self.<U get_no_setter><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_no_setter<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(<emptyTree>::<C <U String>>))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def <U no_setter><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def no_setter<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    <U <self>>.<U dsl_optional>(:"no_getter_or_setter", <emptyTree>::<C <U String>>, {:"skip_getter" => true, :"skip_setter" => true})
+    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"class_of" => <emptyTree>::<C <U T>>.<U class_of>(<emptyTree>::<C <U Integer>>)}).<U returns>(::NilClass)
+    ::Sorbet.sig() do ||
+      <self>.params({:"class_of" => <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)}).returns(::NilClass)
     end
 
-    def self.<U class_of><<C <U <todo sym>>>>(<U class_of>, &<U <blk>>)
+    def self.class_of<<C <todo sym>>>(class_of, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(<emptyTree>::<C <U T>>.<U class_of>(<emptyTree>::<C <U Integer>>)))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)))
     end
 
-    def self.<U get_class_of><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_class_of<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(<emptyTree>::<C <U T>>.<U class_of>(<emptyTree>::<C <U Integer>>)))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)))
     end
 
-    def <U class_of><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def class_of<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U params>({:"root_const" => ::<root>::<C <U Integer>>}).<U returns>(::NilClass)
+    ::Sorbet.sig() do ||
+      <self>.params({:"root_const" => ::<root>::<C Integer>}).returns(::NilClass)
     end
 
-    def self.<U root_const><<C <U <todo sym>>>>(<U root_const>, &<U <blk>>)
+    def self.root_const<<C <todo sym>>>(root_const, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(::<root>::<C <U Integer>>))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(::<root>::<C Integer>))
     end
 
-    def self.<U get_root_const><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def self.get_root_const<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
 
-    ::Sorbet.<U sig>() do ||
-      <U <self>>.<U returns>(::T.<U nilable>(::<root>::<C <U Integer>>))
+    ::Sorbet.sig() do ||
+      <self>.returns(::T.nilable(::<root>::<C Integer>))
     end
 
-    def <U root_const><<C <U <todo sym>>>>(&<U <blk>>)
-      ::T.<U unsafe>(nil)
+    def root_const<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
     end
   end
 
-  class <emptyTree>::<C <U TestChild>><<C <U <todo sym>>>> < (<emptyTree>::<C <U TestDSLBuilder>>)
-    <U <self>>.<U opt_string>("hi")
+  class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
+    <self>.opt_string("hi")
 
-    <U <self>>.<U get_opt_string>()
+    <self>.get_opt_string()
 
-    <U <self>>.<U opt_string>()
+    <self>.opt_string()
 
-    <U <self>>.<U opt_string>(:"nope")
+    <self>.opt_string(:"nope")
 
-    <U <self>>.<U opt_string>(nil)
+    <self>.opt_string(nil)
 
-    <U <self>>.<U opt_int_defaulted>(17)
+    <self>.opt_int_defaulted(17)
 
-    <U <self>>.<U implied_string>()
+    <self>.implied_string()
 
-    <U <self>>.<U no_getter>("I\'m setting the value")
+    <self>.no_getter("I\'m setting the value")
 
-    <U <self>>.<U get_no_getter>()
+    <self>.get_no_getter()
 
-    <U <self>>.<U class_of>(<emptyTree>::<C <U Integer>>)
+    <self>.class_of(<emptyTree>::<C Integer>)
 
-    <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U get_opt_string>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
+    <emptyTree>::<C T>.assert_type!(<self>.get_opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
 
-    <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U get_opt_string>(), <emptyTree>::<C <U String>>)
+    <emptyTree>::<C T>.assert_type!(<self>.get_opt_string(), <emptyTree>::<C String>)
 
-    <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U get_opt_int_defaulted>(), <emptyTree>::<C <U Integer>>)
+    <emptyTree>::<C T>.assert_type!(<self>.get_opt_int_defaulted(), <emptyTree>::<C Integer>)
 
-    <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U get_req_string>(), <emptyTree>::<C <U String>>)
+    <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
 
-    def <U test_instance_methods><<C <U <todo sym>>>>(&<U <blk>>)
+    def test_instance_methods<<C <todo sym>>>(&<blk>)
       begin
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U opt_string>(), <emptyTree>::<C <U T>>.<U nilable>(<emptyTree>::<C <U String>>))
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U opt_int_defaulted>(), <emptyTree>::<C <U Integer>>)
-        <emptyTree>::<C <U T>>.<U assert_type!>(<U <self>>.<U req_string>(), <emptyTree>::<C <U String>>)
-        <U <self>>.<U no_getter>()
+        <emptyTree>::<C T>.assert_type!(<self>.opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+        <emptyTree>::<C T>.assert_type!(<self>.opt_int_defaulted(), <emptyTree>::<C Integer>)
+        <emptyTree>::<C T>.assert_type!(<self>.req_string(), <emptyTree>::<C String>)
+        <self>.no_getter()
       end
     end
   end

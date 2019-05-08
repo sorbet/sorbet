@@ -1,6 +1,6 @@
 begin
-  ::Sorbet::Private::Static.<U keep_for_ide>(::Test)
-  class ::Test<<C <U Test>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.keep_for_ide(::Test)
+  class ::Test<<C Test>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -11,47 +11,47 @@ begin
 
     <emptyTree>
 
-    def <U foo><<U foo>>(x, <blk>)
+    def foo<foo>(x, <blk>)
       begin
-        T.<U let>(nil, String)
-        <U x>
+        T.let(nil, String)
+        x
       end
     end
 
-    def <U bar><<U bar>>(y, <blk>)
+    def bar<bar>(y, <blk>)
       begin
-        T.<U let>(nil, String)
-        <U y>
+        T.let(nil, String)
+        y
       end
     end
 
-    def <U qux><<U qux>>(z, <blk>)
+    def qux<qux>(z, <blk>)
       begin
-        T.<U let>("", String)
-        <U z>
+        T.let("", String)
+        z
       end
     end
 
-    def <U baz><<U baz>>(w, <blk>)
+    def baz<baz>(w, <blk>)
       begin
-        T.<U let>("", String)
-        <U w>
+        T.let("", String)
+        w
       end
     end
 
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
       begin
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U params>({:"x" => ::String}).<U returns>(::String)
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U params>({:"y" => ::String}).<U returns>(::String)
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U params>({:"z" => ::String}).<U returns>(::String)
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
         end
-        <U <self>>.<U sig>() do ||
-          <U <self>>.<U params>({:"w" => ::String}).<U returns>(::String)
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
         end
         <emptyTree>
       end

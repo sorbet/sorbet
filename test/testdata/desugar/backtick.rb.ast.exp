@@ -1,5 +1,5 @@
-class <emptyTree><<C <U <root>>>> < ()
-  <U <self>>.<U puts>(<U <self>>.<U `>("echo hi"))
+class <emptyTree><<C <root>>> < ()
+  <self>.puts(<self>.`("echo hi"))
 
-  <U <self>>.<U puts>(<U <self>>.<U `>("echo".<U concat>(" hi")))
+  <self>.puts(<self>.`("echo".concat(" hi")))
 end

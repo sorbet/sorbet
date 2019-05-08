@@ -1,14 +1,14 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         ::A$1 = 91
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A$1)
+          ::Sorbet::Private::Static.keep_for_ide(::A$1)
           <emptyTree>
         end
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::B$1)
+          ::Sorbet::Private::Static.keep_for_ide(::B$1)
           <emptyTree>
         end
         ::B = 91
@@ -16,7 +16,7 @@ begin
       end
     end
   end
-  class ::A$1<<C <U A>>> < (::<todo sym>)  end
-  class ::B$1<<M <C <U B>> $1>> < (::<todo sym>)  end
+  class ::A$1<<C A>> < (::<todo sym>)  end
+  class ::B$1<B$1> < (::<todo sym>)  end
   <emptyTree>
 end

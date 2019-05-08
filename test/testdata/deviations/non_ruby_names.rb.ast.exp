@@ -1,10 +1,10 @@
-class <emptyTree><<C <U <root>>>> < ()
-  module <emptyTree>::<C <U B>><<C <U <todo sym>>>> < ()
+class <emptyTree><<C <root>>> < ()
+  module <emptyTree>::<C B><<C <todo sym>>> < ()
     <emptyTree>
   end
 
-  module <emptyTree>::<C <U A>><<C <U <todo sym>>>> < ()
-    class <emptyTree>::<C <U B>>::<C <U C>><<C <U <todo sym>>>> < (::<todo sym>)
+  module <emptyTree>::<C A><<C <todo sym>>> < ()
+    class <emptyTree>::<C B>::<C C><<C <todo sym>>> < (::<todo sym>)
       <emptyTree>
     end
   end

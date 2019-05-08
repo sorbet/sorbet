@@ -1,5 +1,5 @@
-class <emptyTree><<C <U <root>>>> < ()
-  ::<Magic>.<U defined?>(<U <self>>.<U foo>())
+class <emptyTree><<C <root>>> < ()
+  ::<Magic>.defined?(<self>.foo())
 
-  <U <self>>.<U defined_>(<U <self>>.<U foo>())
+  <self>.defined_(<self>.foo())
 end

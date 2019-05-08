@@ -1,20 +1,20 @@
-class <emptyTree><<C <U <root>>>> < ()
-  def <U test_ops><<C <U <todo sym>>>>(&<U <blk>>)
+class <emptyTree><<C <root>>> < ()
+  def test_ops<<C <todo sym>>>(&<blk>)
     begin
       begin
-        <D <U ||> $2> = <U <self>>.<U a>()
-        if <D <U ||> $2>
-          <D <U ||> $2>
+        ||$2 = <self>.a()
+        if ||$2
+          ||$2
         else
-          <U <self>>.<U b>()
+          <self>.b()
         end
       end
       begin
-        <D <U &&> $3> = <U <self>>.<U c>()
-        if <D <U &&> $3>
-          <U <self>>.<U d>()
+        &&$3 = <self>.c()
+        if &&$3
+          <self>.d()
         else
-          <D <U &&> $3>
+          &&$3
         end
       end
     end

@@ -1,9 +1,9 @@
 begin
-  class <emptyTree><<C <U <root>>>> < ()
-    def self.<U <static-init>><<N <U <static-init>> $3>>(<blk>)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$3>(<blk>)
       begin
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A)
+          ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         ::A::B::C
@@ -13,20 +13,20 @@ begin
       end
     end
   end
-  module ::A<<C <U A>>> < ()
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  module ::A<<C A>> < ()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::A::B::C = 1
         begin
-          ::Sorbet::Private::Static.<U keep_for_ide>(::A::B)
+          ::Sorbet::Private::Static.keep_for_ide(::A::B)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  module ::A::B<<C <U B>>> < ()
-    def self.<U <static-init>><<U <static-init>>>(<blk>)
+  module ::A::B<<C B>> < ()
+    def self.<static-init><<static-init>>(<blk>)
       begin
         ::A::B::C
         ::A::B::D = 1
