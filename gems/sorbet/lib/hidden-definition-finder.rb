@@ -22,7 +22,9 @@ class Sorbet::Private::HiddenMethodFinder
   TMP_RBI = TMP_PATH + "reflection.rbi"
   DIFF_RBI = TMP_PATH + "hidden.rbi.tmp"
   RBI_CONSTANTS = TMP_PATH + "reflection.json"
+  RBI_CONSTANTS_ERR = RBI_CONSTANTS + ".err"
   SOURCE_CONSTANTS = TMP_PATH + "from-source.json"
+  SOURCE_CONSTANTS_ERR = SOURCE_CONSTANTS + ".err"
 
   HIDDEN_RBI = PATH + "hidden.rbi"
   ERRORS_RBI = PATH + "errors.txt"
@@ -131,7 +133,6 @@ class Sorbet::Private::HiddenMethodFinder
 
   def write_constants
     puts "Printing your code's symbol table into #{SOURCE_CONSTANTS}"
-    read, write = IO.pipe
     io = IO.popen(
       [
         'srb',
@@ -141,15 +142,14 @@ class Sorbet::Private::HiddenMethodFinder
         '--silence-dev-message',
         '--no-error-count',
       ],
-      err: write
+      err: SOURCE_CONSTANTS_ERR
     )
     File.write(SOURCE_CONSTANTS, io.read)
     io.close
-    raise "Your source can't be read by Sorbet.\nYou can try `srb tc --print=symbol-table-json -vvvv --max-threads 1` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe these errors will help:\n#{read.gets}" if File.read(SOURCE_CONSTANTS).empty?
+    raise "Your source can't be read by Sorbet.\nYou can try `srb tc --print=symbol-table-json -vvvv --max-threads 1` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe these errors will help:\n#{File.read(SOURCE_CONSTANTS_ERR)}" if File.read(SOURCE_CONSTANTS).empty?
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     # Change dir to deal with you having a sorbet/config in your cwd
-    read, write = IO.pipe
     Dir.chdir(TMP_PATH) do
       io = IO.popen(
         [
@@ -170,12 +170,12 @@ class Sorbet::Private::HiddenMethodFinder
           '--no-error-count',
           TMP_RBI,
         ],
-        err: write
+        err: RBI_CONSTANTS_ERR
       )
     end
     File.write(RBI_CONSTANTS, io.read)
     io.close
-    raise "#{TMP_RBI} has unexpected errors:\n#{read.gets}" unless $?.success?
+    raise "#{TMP_RBI} has unexpected errors:\n#{File.read(RBI_CONSTANTS_ERR)}" unless $?.success?
   end
 
   def read_constants
