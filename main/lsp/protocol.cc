@@ -339,8 +339,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             prodCounterInc("lsp.messages.received");
             auto result = processRequest(move(gs), *msg);
             gs = move(result.gs);
-            if (msg->mutatesFileContents() && gs->cancelTypechecking->load() == true) {
-                // Typechecking was canceled. Need to re-enqueue message.
+            if (result.canceled) {
+                // Request was canceled. Need to re-enqueue message.
                 absl::MutexLock lck(&mtx);
                 guardedState.pendingRequests.push_front(move(msg));
                 mergeFileChanges(guardedState.pendingRequests);

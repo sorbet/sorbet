@@ -39,8 +39,10 @@ enum class LSPErrorCodes {
 struct LSPResult {
     std::unique_ptr<core::GlobalState> gs;
     std::vector<std::unique_ptr<LSPMessage>> responses;
+    const bool canceled = false;
 
-    static LSPResult make(std::unique_ptr<core::GlobalState> gs, std::unique_ptr<ResponseMessage> response);
+    static LSPResult make(std::unique_ptr<core::GlobalState> gs, std::unique_ptr<ResponseMessage> response,
+                          bool canceled = false);
 };
 
 class LSPLoop {

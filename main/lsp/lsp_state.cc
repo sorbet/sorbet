@@ -97,7 +97,6 @@ public:
 };
 
 TypecheckRun LSPState::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
-    // ShowOperation slowPathOp(*this, "SlowPath", "Sorbet: Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(mainThreadStatus == MainThreadStatus::NotInitialized ||
             mainThreadStatus == MainThreadStatus::RunningSlowPath);
@@ -372,6 +371,8 @@ TypecheckRun LSPState::runLSPQuery(unique_ptr<core::GlobalState> gs, const core:
     initialGS->lspQuery = gs->lspQuery = q;
 
     auto rv = runTypechecking(move(gs), changedFiles, {}, allFiles);
+    // Should always take fast path. Cannot be canceled.
+    ENFORCE(!rv.canceled);
     rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
     return rv;
 }
