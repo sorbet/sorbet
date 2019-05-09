@@ -880,8 +880,7 @@ core::UsageHash getAllSends(const core::GlobalState &gs, unique_ptr<ast::Express
     return move(collector.acc);
 };
 
-pair<shared_ptr<core::GlobalStateHash>, core::UsageHash> computeFileHash(shared_ptr<core::File> forWhat,
-                                                                         spdlog::logger &logger) {
+core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -902,13 +901,13 @@ pair<shared_ptr<core::GlobalStateHash>, core::UsageHash> computeFileHash(shared_
         if (e->what == core::errors::Parser::ParserError) {
             core::GlobalStateHash invalid;
             invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-            return {make_shared<core::GlobalStateHash>(move(invalid)), {}};
+            return {move(invalid), {}};
         }
     }
     auto allSends = getAllSends(*lgs, single[0].tree);
     pipeline::resolve(*lgs, move(single), emptyOpts, true);
 
-    return {make_shared<core::GlobalStateHash>(lgs->hash()), move(allSends)};
+    return {lgs->hash(), move(allSends)};
 }
 
 } // namespace sorbet::realmain::pipeline

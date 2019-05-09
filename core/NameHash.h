@@ -48,6 +48,11 @@ struct UsageHash {
     std::vector<core::NameHash> usages;
 };
 
+struct FileHash {
+    GlobalStateHash definitions;
+    UsageHash usages;
+};
+
 }; // namespace sorbet::core
 
 #endif // RUBY_TYPER_NAME_HASH_H
