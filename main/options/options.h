@@ -118,6 +118,8 @@ struct Options {
     std::vector<std::string> relativeIgnorePatterns;
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
+    // Disables feature that interrupts a running slow path if new slow path file changes come in.
+    bool lspInterruptSlowPathDisabled;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspGoToDefinitionEnabled;
     bool lspFindReferencesEnabled;

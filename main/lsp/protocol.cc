@@ -246,7 +246,9 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                         absl::MutexLock lck(&mtx); // guards guardedState
                         // Merge with any existing pending watchman file updates.
                         enqueueRequest(logger, guardedState, move(msg), true);
-                        this->maybeCancelSlowPath(guardedState);
+                        if (!state.opts.lspInterruptSlowPathDisabled) {
+                            this->maybeCancelSlowPath(guardedState);
+                        }
                     }
                 },
                 [&guardedState, &mtx](int watchmanExitCode) {
@@ -280,7 +282,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                         if (msg) {
                             const bool mutatesFileContents = msg->mutatesFileContents();
                             enqueueRequest(logger, guardedState, move(msg), true);
-                            if (mutatesFileContents) {
+                            if (mutatesFileContents && !state.opts.lspInterruptSlowPathDisabled) {
                                 this->maybeCancelSlowPath(guardedState);
                             }
                             // Reset span now that we've found a request.
