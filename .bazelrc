@@ -153,6 +153,12 @@ build:lto-linux --config=lto
 # Used to build --stamp build that contains version and build time.
 build --workspace_status_command=tools/buildstamp/get_workspace_status
 
+# By default, we make static builds, but we can also use dynamic linking if asked to.
+# Note that dynamic linging is not fully supported by some of our toolchains and thus it may not always work.
+# Patches are welcome.
+build --define=linkshared=false
+build:shared-libs --define=linkshared=true
+
 # It's useful to be able to write `config_setting` rules for "this is
 # an unsanitized build", but we can't express "copt does not contain
 # -fsanitize". So we set this `--define` and unset it if we're using a

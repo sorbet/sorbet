@@ -42,9 +42,7 @@ config_setting(
 config_setting(
     name = "linkshared",
     values = {
-        "define": "unsanitized=false",
-        "compilation_mode": "fastbuild",
-        "host_cpu": "darwin",
+        "define": "linkshared=true",
     },
 )
 
