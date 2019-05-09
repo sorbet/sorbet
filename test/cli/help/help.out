@@ -73,8 +73,8 @@ Usage:
       --disable-lsp-slow-path-interruptions
                                 Disables LSP feature that attempts to improve
                                 responsiveness by interrupting long
-                                typechecking runs when additional
-                                slow-to-typecheck updates are made to a file.
+                                typechecking runs when additional slow-to-typecheck
+                                updates are made to a file.
       --enable-lsp-hover        Enable experimental LSP feature: Hover
       --enable-lsp-go-to-definition
                                 Enable experimental LSP feature:

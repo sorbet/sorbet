@@ -245,7 +245,6 @@ TypecheckRun LSPState::runTypechecking(unique_ptr<core::GlobalState> gs, vector<
     if (takeFastPath) {
         Timer timeit(logger, "fast_path");
         mainThreadStatus = MainThreadStatus::NotRunningSlowPath;
-        // TODO: Assert not taking fast path with a previously canceled GS.
         if (allFiles) {
             updatedFiles.clear();
             for (int i = 1; i < gs->filesUsed(); i++) {
@@ -297,6 +296,8 @@ TypecheckRun LSPState::runTypechecking(unique_ptr<core::GlobalState> gs, vector<
                     }
                 }
             }
+            // Roll back GS to previous version.
+            rv.gs = move(gs);
         }
         mainThreadStatus = MainThreadStatus::NotRunningSlowPath;
         return rv;
