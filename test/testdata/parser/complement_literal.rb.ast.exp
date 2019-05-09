@@ -1,9 +1,9 @@
-class <emptyTree><<C <U <root>>>> < ()
+class <emptyTree><<C <root>>> < ()
   -11
 
-  <U x> = 10
+  x = 10
 
-  <U x>.<U ~>()
+  x.~()
 
-  1.000000.<U ~>()
+  1.000000.~()
 end
