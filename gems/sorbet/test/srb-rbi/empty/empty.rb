@@ -26,7 +26,7 @@ class Sorbet::Private::Test::Empty < MiniTest::Spec
       Bundler.with_clean_env do
         out = IO.popen(
           {'SRB_YES' => '1'},
-          ['bundle', 'exec', olddir + '/../../../bin/srb-rbi'],
+          [olddir + '/../../../bin/srb-rbi'],
           'r+',
           &:read
         )

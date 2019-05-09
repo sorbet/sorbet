@@ -28,12 +28,13 @@ EOF
 subcommand=$1
 shift
 
+# /path/to/gems/sorbet-0.0.1/bin/srb
+srb_path="${BASH_SOURCE[0]}"
+
 typecheck() {
   # We're using bash string operations here to avoid forking.
   # Using dirname / basename / etc. would mean ~15ms for each call.
 
-  # /path/to/gems/sorbet-0.0.1/bin/srb
-  srb_path="${BASH_SOURCE[0]}"
   # /path/to/gems/sorbet-0.0.1
   without_bin_srb="${srb_path%/bin/srb}"
   # -0.0.1
@@ -47,13 +48,20 @@ typecheck() {
   "${sorbet[0]}" "$@"
 }
 
+# Dynamically computing the path to the srb-rbi script lets this script work
+# the same way in local development and when packaged as a gem. Either:
+#
+# /path/to/gems/sorbet-0.0.1/bin/srb-rbi
+# path/to/bin/srb-rbi
+srb_rbi_path="$srb_path-rbi"
+
 case $subcommand in
   "initialize" | "init")
-    bundle exec srb-rbi
+    "$srb_rbi_path"
     ;;
 
   "rbi")
-    bundle exec srb-rbi "$@"
+    "$srb_rbi_path" "$@"
     ;;
 
   "" | "typecheck" | "tc" | "t")
