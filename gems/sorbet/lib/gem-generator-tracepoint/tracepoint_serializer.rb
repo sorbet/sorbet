@@ -98,7 +98,7 @@ module Sorbet::Private
         files.each_with_object({}) do |(path, defined), gem_class_defs|
           gem = gem_from_location(path)
           if gem.nil?
-            warn("Can't find gem for #{path}")
+            warn("Can't find gem for #{path}") unless path.start_with?(Dir.pwd)
             next
           end
           next if gem[:gem] == 'ruby'
