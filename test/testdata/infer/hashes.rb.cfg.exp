@@ -6,29 +6,29 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_1" [shape = parallelogram];
 
     "bb::Foo#bar_0" [
-        label = "block[id=0]()\l<U <self>>: Foo = cast(<U <self>>: NilClass, Foo);\l<U cond>: T.untyped = load_arg(Foo#bar#cond)\l<U cond>: T.untyped\l"
+        label = "block[id=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\lcond: T.untyped = load_arg(Foo#bar#cond)\lcond: T.untyped\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_2" [style="bold"];
     "bb::Foo#bar_0" -> "bb::Foo#bar_3" [style="tapered"];
 
     "bb::Foo#bar_1" [
-        label = "block[id=1](<U <returnMethodTemp>>$2)\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_1" -> "bb::Foo#bar_1" [style="bold"];
     "bb::Foo#bar_2" [
-        label = "block[id=2]()\l<U <magic>>$5: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U s>: {} = <U <magic>>$5: T.class_of(<Magic>).<U <build-hash>>()\l<unconditional>\l"
+        label = "block[id=2]()\l<magic>$5: T.class_of(<Magic>) = alias <C <Magic>>\ls: {} = <magic>$5: T.class_of(<Magic>).<build-hash>()\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_2" -> "bb::Foo#bar_4" [style="bold"];
     "bb::Foo#bar_3" [
-        label = "block[id=3]()\l<U <magic>>$6: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U s>: {} = <U <magic>>$6: T.class_of(<Magic>).<U <build-hash>>()\l<unconditional>\l"
+        label = "block[id=3]()\l<magic>$6: T.class_of(<Magic>) = alias <C <Magic>>\ls: {} = <magic>$6: T.class_of(<Magic>).<build-hash>()\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_3" -> "bb::Foo#bar_4" [style="bold"];
     "bb::Foo#bar_4" [
-        label = "block[id=4](<U s>: {})\l<U r>: {} = <U s>\l<U <returnMethodTemp>>$2: T.noreturn = return <U r>: {}\l<unconditional>\l"
+        label = "block[id=4](s: {})\lr: {} = s\l<returnMethodTemp>$2: T.noreturn = return r: {}\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_4" -> "bb::Foo#bar_1" [style="bold"];

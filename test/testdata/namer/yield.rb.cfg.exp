@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Main) = alias <C <U Main>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Main))\l<U <statTemp>>$9: T.class_of(Main) = alias <C <U Main>>\l<U <statTemp>>$8: Main = <U <statTemp>>$9: T.class_of(Main).<U new>()\l<U <statTemp>>$7: T.untyped = <U <statTemp>>$8: Main.<U main>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Main) = alias <C Main>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Main))\l<statTemp>$9: T.class_of(Main) = alias <C Main>\l<statTemp>$8: Main = <statTemp>$9: T.class_of(Main).new()\l<statTemp>$7: T.untyped = <statTemp>$8: Main.main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Main#yielder" {
     "bb::Main#yielder_1" [shape = parallelogram];
 
     "bb::Main#yielder_0" [
-        label = "block[id=0]()\l<U <self>>: Main = cast(<U <self>>: NilClass, Main);\l<U <blk>>: T.untyped = load_arg(Main#yielder#<blk>)\l<U <statTemp>>$5: Integer(1) = 1\l<U a>: T.untyped = <U <blk>>: T.untyped.<U call>(<U <statTemp>>$5: Integer(1))\l<U <returnMethodTemp>>$2: T.untyped = <U <blk>>: T.untyped.<U call>(<U a>: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<blk>: T.untyped = load_arg(Main#yielder#<blk>)\l<statTemp>$5: Integer(1) = 1\la: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#yielder_0" -> "bb::Main#yielder_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Main#blockpass" {
     "bb::Main#blockpass_1" [shape = parallelogram];
 
     "bb::Main#blockpass_0" [
-        label = "block[id=0]()\l<U <self>>: Main = cast(<U <self>>: NilClass, Main);\l<U blk>: T.untyped = load_arg(Main#blockpass#&blk)\l<U <statTemp>>$5: Integer(1) = 1\l<U a>: T.untyped = <U blk>: T.untyped.<U call>(<U <statTemp>>$5: Integer(1))\l<U <returnMethodTemp>>$2: T.untyped = <U blk>: T.untyped.<U call>(<U a>: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\lblk: T.untyped = load_arg(Main#blockpass#&blk)\l<statTemp>$5: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockpass_0" -> "bb::Main#blockpass_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Main#mixed" {
     "bb::Main#mixed_1" [shape = parallelogram];
 
     "bb::Main#mixed_0" [
-        label = "block[id=0]()\l<U <self>>: Main = cast(<U <self>>: NilClass, Main);\l<U blk>: T.untyped = load_arg(Main#mixed#&blk)\l<U <statTemp>>$5: Integer(1) = 1\l<U a>: T.untyped = <U blk>: T.untyped.<U call>(<U <statTemp>>$5: Integer(1))\l<U <returnMethodTemp>>$2: T.untyped = <U blk>: T.untyped.<U call>(<U a>: T.untyped)\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\lblk: T.untyped = load_arg(Main#mixed#&blk)\l<statTemp>$5: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#mixed_0" -> "bb::Main#mixed_1" [style="bold"];
@@ -78,7 +78,7 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_1" [shape = parallelogram];
 
     "bb::Main#blockyield_0" [
-        label = "block[id=0]()\l<U <self>>: Main = cast(<U <self>>: NilClass, Main);\l<U <blk>>: T.untyped = load_arg(Main#blockyield#<blk>)\l<U <block-pre-call-temp>>$4: T.untyped = <U <self>>: Main.<U yielder>()\l<U <selfRestore>>$5: Main = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<blk>: T.untyped = load_arg(Main#blockyield#<blk>)\l<block-pre-call-temp>$4: T.untyped = <self>: Main.yielder()\l<selfRestore>$5: Main = <self>\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_0" -> "bb::Main#blockyield_2" [style="bold"];
@@ -88,19 +88,19 @@ subgraph "cluster_::Main#blockyield" {
 
     "bb::Main#blockyield_1" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_2" [
-        label = "block[id=2](<U <self>>: Main, <U <selfRestore>>$5: Main, <U <blk>>: T.untyped)\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: Main, <selfRestore>$5: Main, <blk>: T.untyped)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_5" [style="bold"];
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_3" [style="tapered"];
 
     "bb::Main#blockyield_3" [
-        label = "block[id=3](<U <selfRestore>>$5: Main)\l<U <returnMethodTemp>>$2: T.untyped = Solve<::Main#blockyield#<block>>\l<U <self>>: Main = <U <selfRestore>>$5\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: Main)\l<returnMethodTemp>$2: T.untyped = Solve<::Main#blockyield#<block>>\l<self>: Main = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_5" [
-        label = "block[id=5](<U <self>>: Main, <U <selfRestore>>$5: Main, <U <blk>>: T.untyped)\louterLoops: 1\l<U <self>>: Main = loadSelf\l<U <blk>>$6: T.untyped = load_yield_params(::Main#blockyield#<block>, Main#blockyield#<block>)\l<U <blk>>$7: Integer(0) = 0\l<U i>$1: T.untyped = <U <blk>>$6: T.untyped.<U []>(<U <blk>>$7: Integer(0))\l<U <blockReturnTemp>>$8: T.untyped = <U <blk>>: T.untyped.<U call>(<U i>$1: T.untyped)\l<U <blockReturnTemp>>$11: T.noreturn = blockreturn<::Main#blockyield#<block>> <U <blockReturnTemp>>$8: T.untyped\l<unconditional>\l"
+        label = "block[id=5](<self>: Main, <selfRestore>$5: Main, <blk>: T.untyped)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$6: T.untyped = load_yield_params(::Main#blockyield#<block>, Main#blockyield#<block>)\l<blk>$7: Integer(0) = 0\li$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<::Main#blockyield#<block>> <blockReturnTemp>$8: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_5" -> "bb::Main#blockyield_2" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::Main#main" {
     "bb::Main#main_1" [shape = parallelogram];
 
     "bb::Main#main_0" [
-        label = "block[id=0]()\l<U <self>>: Main = cast(<U <self>>: NilClass, Main);\l<U <block-pre-call-temp>>$5: T.proc.params(arg0: T.untyped).returns(T.untyped) = <U <self>>: Main.<U lambda>()\l<U <selfRestore>>$6: Main = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<block-pre-call-temp>$5: T.proc.params(arg0: T.untyped).returns(T.untyped) = <self>: Main.lambda()\l<selfRestore>$6: Main = <self>\l<unconditional>\l"
     ];
 
     "bb::Main#main_0" -> "bb::Main#main_2" [style="bold"];
@@ -123,19 +123,19 @@ subgraph "cluster_::Main#main" {
 
     "bb::Main#main_1" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_2" [
-        label = "block[id=2](<U <self>>: Main, <U <selfRestore>>$6: Main)\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: Main, <selfRestore>$6: Main)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#main_2" -> "bb::Main#main_5" [style="bold"];
     "bb::Main#main_2" -> "bb::Main#main_3" [style="tapered"];
 
     "bb::Main#main_3" [
-        label = "block[id=3](<U <selfRestore>>$6: Main)\l<U l>: T.proc.params(arg0: T.untyped).returns(T.untyped) = Solve<::Main#main#<block>>\l<U <self>>: Main = <U <selfRestore>>$6\l<U <statTemp>>$15: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$17: Symbol(:\"yielder\") = :\"yielder\"\l<U <statTemp>>$14: T.untyped = <U <statTemp>>$15: T.class_of(<Magic>).<U <call-with-block>>(<U <self>>: Main, <U <statTemp>>$17: Symbol(:\"yielder\"), <U l>: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<U <statTemp>>$20: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$22: Symbol(:\"blockpass\") = :\"blockpass\"\l<U <statTemp>>$19: T.untyped = <U <statTemp>>$20: T.class_of(<Magic>).<U <call-with-block>>(<U <self>>: Main, <U <statTemp>>$22: Symbol(:\"blockpass\"), <U l>: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<U <statTemp>>$25: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$27: Symbol(:\"mixed\") = :\"mixed\"\l<U <statTemp>>$24: T.untyped = <U <statTemp>>$25: T.class_of(<Magic>).<U <call-with-block>>(<U <self>>: Main, <U <statTemp>>$27: Symbol(:\"mixed\"), <U l>: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<U <statTemp>>$29: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$31: Symbol(:\"blockyield\") = :\"blockyield\"\l<U <returnMethodTemp>>$2: T.untyped = <U <statTemp>>$29: T.class_of(<Magic>).<U <call-with-block>>(<U <self>>: Main, <U <statTemp>>$31: Symbol(:\"blockyield\"), <U l>: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$6: Main)\ll: T.proc.params(arg0: T.untyped).returns(T.untyped) = Solve<::Main#main#<block>>\l<self>: Main = <selfRestore>$6\l<statTemp>$15: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$17: Symbol(:\"yielder\") = :\"yielder\"\l<statTemp>$14: T.untyped = <statTemp>$15: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$17: Symbol(:\"yielder\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<statTemp>$20: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$22: Symbol(:\"blockpass\") = :\"blockpass\"\l<statTemp>$19: T.untyped = <statTemp>$20: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$22: Symbol(:\"blockpass\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<statTemp>$25: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$27: Symbol(:\"mixed\") = :\"mixed\"\l<statTemp>$24: T.untyped = <statTemp>$25: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$27: Symbol(:\"mixed\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<statTemp>$29: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$31: Symbol(:\"blockyield\") = :\"blockyield\"\l<returnMethodTemp>$2: T.untyped = <statTemp>$29: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$31: Symbol(:\"blockyield\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_3" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_5" [
-        label = "block[id=5](<U <self>>: Main, <U <selfRestore>>$6: Main)\louterLoops: 1\l<U <self>>: Main = loadSelf\l<U <blk>>$7: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<U <blk>>$8: Integer(0) = 0\l<U x>$1: T.untyped = <U <blk>>$7: T.untyped.<U []>(<U <blk>>$8: Integer(0))\l<U <statTemp>>$10: NilClass = <U <self>>: Main.<U puts>(<U x>$1: T.untyped)\l<U <blockReturnTemp>>$9: Integer(3) = 3\l<U <blockReturnTemp>>$13: T.noreturn = blockreturn<::Main#main#<block>> <U <blockReturnTemp>>$9: Integer(3)\l<unconditional>\l"
+        label = "block[id=5](<self>: Main, <selfRestore>$6: Main)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$7: T.untyped = load_yield_params(::Main#main#<block>, Main#main#<block>)\l<blk>$8: Integer(0) = 0\lx$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<statTemp>$10: NilClass = <self>: Main.puts(x$1: T.untyped)\l<blockReturnTemp>$9: Integer(3) = 3\l<blockReturnTemp>$13: T.noreturn = blockreturn<::Main#main#<block>> <blockReturnTemp>$9: Integer(3)\l<unconditional>\l"
     ];
 
     "bb::Main#main_5" -> "bb::Main#main_2" [style="bold"];

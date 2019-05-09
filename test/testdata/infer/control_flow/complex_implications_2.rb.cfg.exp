@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<U <self>>: Object = cast(<U <self>>: NilClass, Object);\l<U foo>: T.untyped = load_arg(Object#foo#foo)\l<U foo>: T.untyped\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\lfoo: T.untyped = load_arg(Object#foo#foo)\lfoo: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -18,31 +18,31 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2](<U foo>: T.untyped)\l<U <statTemp>>$7: T.class_of(StandardError) = alias <C <U StandardError>>\l<U bar>: T.untyped = <U foo>: T.untyped.<U is_a?>(<U <statTemp>>$7: T.class_of(StandardError))\l<U bar>: T.untyped\l"
+        label = "block[id=2](foo: T.untyped)\l<statTemp>$7: T.class_of(StandardError) = alias <C StandardError>\lbar: T.untyped = foo: T.untyped.is_a?(<statTemp>$7: T.class_of(StandardError))\lbar: T.untyped\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_7" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4](<U foo>: StandardError)\l<U e>: StandardError = <U foo>\l<U err>: StandardError = <U e>\l<unconditional>\l"
+        label = "block[id=4](foo: StandardError)\le: StandardError = foo\lerr: StandardError = e\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_7" [style="bold"];
     "bb::Object#foo_7" [
-        label = "block[id=7](<U err>: T.nilable(StandardError))\l<U junk>: T.nilable(StandardError) = <U err>\l<U err>: T.nilable(StandardError)\l"
+        label = "block[id=7](err: T.nilable(StandardError))\ljunk: T.nilable(StandardError) = err\lerr: T.nilable(StandardError)\l"
     ];
 
     "bb::Object#foo_7" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_7" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_8" [
-        label = "block[id=8]()\l<U <returnMethodTemp>>$2: Integer(1) = 1\l<unconditional>\l"
+        label = "block[id=8]()\l<returnMethodTemp>$2: Integer(1) = 1\l<unconditional>\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_10" [style="bold"];
     "bb::Object#foo_10" [
-        label = "block[id=10](<U <returnMethodTemp>>$2: T.nilable(Integer))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=10](<returnMethodTemp>$2: T.nilable(Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];

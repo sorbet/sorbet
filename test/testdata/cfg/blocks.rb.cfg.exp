@@ -6,7 +6,7 @@ subgraph "cluster_::BlockTest#blockPass" {
     "bb::BlockTest#blockPass_1" [shape = parallelogram];
 
     "bb::BlockTest#blockPass_0" [
-        label = "block[id=0]()\l<U <self>>: BlockTest = cast(<U <self>>: NilClass, BlockTest);\l<U <statTemp>>$4: Integer(1) = 1\l<U <statTemp>>$5: Integer(2) = 2\l<U <statTemp>>$6: Integer(3) = 3\l<U <block-pre-call-temp>>$7: T.untyped = <U <self>>: BlockTest.<U foo>(<U <statTemp>>$4: Integer(1), <U <statTemp>>$5: Integer(2), <U <statTemp>>$6: Integer(3))\l<U <selfRestore>>$8: BlockTest = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: BlockTest = cast(<self>: NilClass, BlockTest);\l<statTemp>$4: Integer(1) = 1\l<statTemp>$5: Integer(2) = 2\l<statTemp>$6: Integer(3) = 3\l<block-pre-call-temp>$7: T.untyped = <self>: BlockTest.foo(<statTemp>$4: Integer(1), <statTemp>$5: Integer(2), <statTemp>$6: Integer(3))\l<selfRestore>$8: BlockTest = <self>\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_0" -> "bb::BlockTest#blockPass_2" [style="bold"];
@@ -16,19 +16,19 @@ subgraph "cluster_::BlockTest#blockPass" {
 
     "bb::BlockTest#blockPass_1" -> "bb::BlockTest#blockPass_1" [style="bold"];
     "bb::BlockTest#blockPass_2" [
-        label = "block[id=2](<U <self>>: BlockTest, <U <selfRestore>>$8: BlockTest)\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: BlockTest, <selfRestore>$8: BlockTest)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_5" [style="bold"];
     "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_3" [style="tapered"];
 
     "bb::BlockTest#blockPass_3" [
-        label = "block[id=3](<U <selfRestore>>$8: BlockTest)\l<U <returnMethodTemp>>$2: T.untyped = Solve<::BlockTest#blockPass#<block>>\l<U <self>>: BlockTest = <U <selfRestore>>$8\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$8: BlockTest)\l<returnMethodTemp>$2: T.untyped = Solve<::BlockTest#blockPass#<block>>\l<self>: BlockTest = <selfRestore>$8\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_3" -> "bb::BlockTest#blockPass_1" [style="bold"];
     "bb::BlockTest#blockPass_5" [
-        label = "block[id=5](<U <self>>: BlockTest, <U <selfRestore>>$8: BlockTest)\louterLoops: 1\l<U <self>>: BlockTest = loadSelf\l<U <blk>>$9: T.untyped = load_yield_params(::BlockTest#blockPass#<block>, BlockTest#blockPass#<block>)\l<U <blk>>$10: Integer(0) = 0\l<U x>$1: T.untyped = <U <blk>>$9: T.untyped.<U []>(<U <blk>>$10: Integer(0))\l<U <blk>>$10: Integer(1) = 1\l<U y>$1: T.untyped = <U <blk>>$9: T.untyped.<U []>(<U <blk>>$10: Integer(1))\l<U <blockReturnTemp>>$11: T.untyped = <U x>$1\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::BlockTest#blockPass#<block>> <U <blockReturnTemp>>$11: T.untyped\l<unconditional>\l"
+        label = "block[id=5](<self>: BlockTest, <selfRestore>$8: BlockTest)\louterLoops: 1\l<self>: BlockTest = loadSelf\l<blk>$9: T.untyped = load_yield_params(::BlockTest#blockPass#<block>, BlockTest#blockPass#<block>)\l<blk>$10: Integer(0) = 0\lx$1: T.untyped = <blk>$9: T.untyped.[](<blk>$10: Integer(0))\l<blk>$10: Integer(1) = 1\ly$1: T.untyped = <blk>$9: T.untyped.[](<blk>$10: Integer(1))\l<blockReturnTemp>$11: T.untyped = x$1\l<blockReturnTemp>$12: T.noreturn = blockreturn<::BlockTest#blockPass#<block>> <blockReturnTemp>$11: T.untyped\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_5" -> "bb::BlockTest#blockPass_2" [style="bold"];

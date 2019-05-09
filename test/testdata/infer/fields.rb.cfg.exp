@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#initialize" {
     "bb::Foo#initialize_1" [shape = parallelogram];
 
     "bb::Foo#initialize_0" [
-        label = "block[id=0]()\l<U @ivar>$3: Integer = alias <U @ivar>\l<U <self>>: Foo = cast(<U <self>>: NilClass, Foo);\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Integer) = alias <C <U Integer>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_typechecking>(<U <statTemp>>$6: T.class_of(Integer))\l<U <castTemp>>$7: Integer(0) = 0\l<U @ivar>$3: Integer = cast(<U <castTemp>>$7: Integer(0), Integer);\l<U <returnMethodTemp>>$2: Integer = <U @ivar>$3\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l@ivar$3: Integer = alias @ivar\l<self>: Foo = cast(<self>: NilClass, Foo);\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$6: T.class_of(Integer))\l<castTemp>$7: Integer(0) = 0\l@ivar$3: Integer = cast(<castTemp>$7: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @ivar$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Foo#initialize_0" -> "bb::Foo#initialize_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#foo" {
     "bb::Foo#foo_1" [shape = parallelogram];
 
     "bb::Foo#foo_0" [
-        label = "block[id=0]()\l<U @ivar>$4: Integer = alias <U @ivar>\l<U <self>>: Foo = cast(<U <self>>: NilClass, Foo);\l<U @ivar>$4: Integer(2) = 2\l<U @ivar>$4: Integer = \"ss\"\l<U <returnMethodTemp>>$2: Integer = <U @ivar>$4\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l@ivar$4: Integer = alias @ivar\l<self>: Foo = cast(<self>: NilClass, Foo);\l@ivar$4: Integer(2) = 2\l@ivar$4: Integer = \"ss\"\l<returnMethodTemp>$2: Integer = @ivar$4\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Foo#foo_0" -> "bb::Foo#foo_1" [style="bold"];

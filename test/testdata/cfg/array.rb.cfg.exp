@@ -6,7 +6,7 @@ subgraph "cluster_::TestArray#an_int" {
     "bb::TestArray#an_int_1" [shape = parallelogram];
 
     "bb::TestArray#an_int_0" [
-        label = "block[id=0]()\l<U <self>>: TestArray = cast(<U <self>>: NilClass, TestArray);\l<U <returnMethodTemp>>$2: Integer(0) = 0\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer(0)\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: Integer(0) = 0\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::TestArray#an_int_0" -> "bb::TestArray#an_int_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::TestArray#a_string" {
     "bb::TestArray#a_string_1" [shape = parallelogram];
 
     "bb::TestArray#a_string_0" [
-        label = "block[id=0]()\l<U <self>>: TestArray = cast(<U <self>>: NilClass, TestArray);\l<U <returnMethodTemp>>$2: String(\"str\") = \"str\"\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: String(\"str\")\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: String(\"str\") = \"str\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String(\"str\")\l<unconditional>\l"
     ];
 
     "bb::TestArray#a_string_0" -> "bb::TestArray#a_string_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::TestArray#test_arrays" {
     "bb::TestArray#test_arrays_1" [shape = parallelogram];
 
     "bb::TestArray#test_arrays_0" [
-        label = "block[id=0]()\l<U <self>>: TestArray = cast(<U <self>>: NilClass, TestArray);\l<U <magic>>$4: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$3: T::Array[T.untyped] = <U <magic>>$4: T.class_of(<Magic>).<U <build-array>>()\l<U <arrayTemp>>$6: Integer(1) = 1\l<U <arrayTemp>>$7: Integer(2) = 2\l<U <magic>>$8: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <statTemp>>$5: [Integer(1), Integer(2)] = <U <magic>>$8: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$6: Integer(1), <U <arrayTemp>>$7: Integer(2))\l<U <arrayTemp>>$9: Integer = <U <self>>: TestArray.<U an_int>()\l<U <arrayTemp>>$11: String = <U <self>>: TestArray.<U a_string>()\l<U <magic>>$14: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <arrayTemp>>$13: T::Array[T.untyped] = <U <magic>>$14: T.class_of(<Magic>).<U <build-array>>()\l<U <magic>>$15: T.class_of(<Magic>) = alias <C <U <Magic>>>\l<U <returnMethodTemp>>$2: [Integer, String, T::Array[T.untyped]] = <U <magic>>$15: T.class_of(<Magic>).<U <build-array>>(<U <arrayTemp>>$9: Integer, <U <arrayTemp>>$11: String, <U <arrayTemp>>$13: T::Array[T.untyped])\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: [Integer, String, T::Array[T.untyped]]\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<magic>$4: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$3: T::Array[T.untyped] = <magic>$4: T.class_of(<Magic>).<build-array>()\l<arrayTemp>$6: Integer(1) = 1\l<arrayTemp>$7: Integer(2) = 2\l<magic>$8: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$5: [Integer(1), Integer(2)] = <magic>$8: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))\l<arrayTemp>$9: Integer = <self>: TestArray.an_int()\l<arrayTemp>$11: String = <self>: TestArray.a_string()\l<magic>$14: T.class_of(<Magic>) = alias <C <Magic>>\l<arrayTemp>$13: T::Array[T.untyped] = <magic>$14: T.class_of(<Magic>).<build-array>()\l<magic>$15: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: [Integer, String, T::Array[T.untyped]] = <magic>$15: T.class_of(<Magic>).<build-array>(<arrayTemp>$9: Integer, <arrayTemp>$11: String, <arrayTemp>$13: T::Array[T.untyped])\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, T::Array[T.untyped]]\l<unconditional>\l"
     ];
 
     "bb::TestArray#test_arrays_0" -> "bb::TestArray#test_arrays_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:TestArray>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(TestArray) = cast(<U <self>>: NilClass, T.class_of(TestArray));\l<U <block-pre-call-temp>>$5: Sorbet::Private::Static::Void = <U <self>>: T.class_of(TestArray).<U sig>()\l<U <selfRestore>>$6: T.class_of(TestArray) = <U <self>>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(TestArray) = cast(<self>: NilClass, T.class_of(TestArray));\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(TestArray).sig()\l<selfRestore>$6: T.class_of(TestArray) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_0" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
@@ -70,36 +70,36 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
 
     "bb::<Class:TestArray>#<static-init>_1" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_2" [
-        label = "block[id=2](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$6: T.class_of(TestArray))\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=2](<self>: T.class_of(TestArray), <selfRestore>$6: T.class_of(TestArray))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_5" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_3" [
-        label = "block[id=3](<U <selfRestore>>$6: T.class_of(TestArray))\l<U <statTemp>>$3: Sorbet::Private::Static::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<U <self>>: T.class_of(TestArray) = <U <selfRestore>>$6\l<U <block-pre-call-temp>>$15: Sorbet::Private::Static::Void = <U <self>>: T.class_of(TestArray).<U sig>()\l<U <selfRestore>>$16: T.class_of(TestArray) = <U <self>>\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$6: T.class_of(TestArray))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<self>: T.class_of(TestArray) = <selfRestore>$6\l<block-pre-call-temp>$15: Sorbet::Private::Static::Void = <self>: T.class_of(TestArray).sig()\l<selfRestore>$16: T.class_of(TestArray) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_5" [
-        label = "block[id=5](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$6: T.class_of(TestArray))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$11: T.class_of(Integer) = alias <C <U Integer>>\l<U <blockReturnTemp>>$9: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$11: T.class_of(Integer))\l<U <blockReturnTemp>>$12: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <U <blockReturnTemp>>$9: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=5](<self>: T.class_of(TestArray), <selfRestore>$6: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<statTemp>$11: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: T.class_of(Integer))\l<blockReturnTemp>$12: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_6" [
-        label = "block[id=6](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$16: T.class_of(TestArray))\louterLoops: 1\l<U <block-call>>: NilClass\l"
+        label = "block[id=6](<self>: T.class_of(TestArray), <selfRestore>$16: T.class_of(TestArray))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_9" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_7" [
-        label = "block[id=7](<U <selfRestore>>$16: T.class_of(TestArray))\l<U <statTemp>>$13: Sorbet::Private::Static::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<U <self>>: T.class_of(TestArray) = <U <selfRestore>>$16\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$16: T.class_of(TestArray))\l<statTemp>$13: Sorbet::Private::Static::Void = Solve<::<Class:TestArray>#<static-init>#<block>>\l<self>: T.class_of(TestArray) = <selfRestore>$16\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_9" [
-        label = "block[id=9](<U <self>>: T.class_of(TestArray), <U <selfRestore>>$16: T.class_of(TestArray))\louterLoops: 1\l<U <self>>: T::Private::Methods::DeclBuilder = loadSelf\l<U <statTemp>>$21: T.class_of(String) = alias <C <U String>>\l<U <blockReturnTemp>>$19: T::Private::Methods::DeclBuilder = <U <self>>: T::Private::Methods::DeclBuilder.<U returns>(<U <statTemp>>$21: T.class_of(String))\l<U <blockReturnTemp>>$22: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <U <blockReturnTemp>>$19: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=9](<self>: T.class_of(TestArray), <selfRestore>$16: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<statTemp>$21: T.class_of(String) = alias <C String>\l<blockReturnTemp>$19: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$21: T.class_of(String))\l<blockReturnTemp>$22: T.noreturn = blockreturn<::<Class:TestArray>#<static-init>#<block>> <blockReturnTemp>$19: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_9" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];

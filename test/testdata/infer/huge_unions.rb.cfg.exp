@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(C1) = alias <C <U C1>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(C1))\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$10: T.class_of(C2) = alias <C <U C2>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(C2))\l<U <statTemp>>$13: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$14: T.class_of(C3) = alias <C <U C3>>\l<U <statTemp>>$12: Sorbet::Private::Static::Void = <U <statTemp>>$13: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$14: T.class_of(C3))\l<U <statTemp>>$17: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$18: T.class_of(C4) = alias <C <U C4>>\l<U <statTemp>>$16: Sorbet::Private::Static::Void = <U <statTemp>>$17: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$18: T.class_of(C4))\l<U <statTemp>>$21: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$22: T.class_of(C5) = alias <C <U C5>>\l<U <statTemp>>$20: Sorbet::Private::Static::Void = <U <statTemp>>$21: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$22: T.class_of(C5))\l<U <statTemp>>$25: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$26: T.class_of(C6) = alias <C <U C6>>\l<U <statTemp>>$24: Sorbet::Private::Static::Void = <U <statTemp>>$25: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$26: T.class_of(C6))\l<U <statTemp>>$29: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$30: T.class_of(C7) = alias <C <U C7>>\l<U <statTemp>>$28: Sorbet::Private::Static::Void = <U <statTemp>>$29: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$30: T.class_of(C7))\l<U <statTemp>>$33: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$34: T.class_of(C8) = alias <C <U C8>>\l<U <statTemp>>$32: Sorbet::Private::Static::Void = <U <statTemp>>$33: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$34: T.class_of(C8))\l<U <statTemp>>$37: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$38: T.class_of(C9) = alias <C <U C9>>\l<U <statTemp>>$36: Sorbet::Private::Static::Void = <U <statTemp>>$37: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$38: T.class_of(C9))\l<U <statTemp>>$41: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$42: T.class_of(C10) = alias <C <U C10>>\l<U <statTemp>>$40: Sorbet::Private::Static::Void = <U <statTemp>>$41: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$42: T.class_of(C10))\l<U <statTemp>>$45: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$46: T.class_of(C11) = alias <C <U C11>>\l<U <statTemp>>$44: Sorbet::Private::Static::Void = <U <statTemp>>$45: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$46: T.class_of(C11))\l<U <statTemp>>$49: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$50: T.class_of(C12) = alias <C <U C12>>\l<U <statTemp>>$48: Sorbet::Private::Static::Void = <U <statTemp>>$49: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$50: T.class_of(C12))\l<U <statTemp>>$53: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$54: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$52: Sorbet::Private::Static::Void = <U <statTemp>>$53: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$54: T.class_of(C13))\l<U <statTemp>>$57: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$58: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$56: Sorbet::Private::Static::Void = <U <statTemp>>$57: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$58: T.class_of(C13))\l<U <statTemp>>$61: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$62: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$60: Sorbet::Private::Static::Void = <U <statTemp>>$61: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$62: T.class_of(C13))\l<U <statTemp>>$65: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$66: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$64: Sorbet::Private::Static::Void = <U <statTemp>>$65: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$66: T.class_of(C13))\l<U <statTemp>>$69: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$70: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$68: Sorbet::Private::Static::Void = <U <statTemp>>$69: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$70: T.class_of(C13))\l<U <statTemp>>$73: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$74: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$72: Sorbet::Private::Static::Void = <U <statTemp>>$73: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$74: T.class_of(C13))\l<U <statTemp>>$77: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$78: T.class_of(C13) = alias <C <U C13>>\l<U <statTemp>>$76: Sorbet::Private::Static::Void = <U <statTemp>>$77: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$78: T.class_of(C13))\l<U <statTemp>>$81: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$82: T.class_of(C14) = alias <C <U C14>>\l<U <statTemp>>$80: Sorbet::Private::Static::Void = <U <statTemp>>$81: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$82: T.class_of(C14))\l<U <statTemp>>$85: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$86: T.class_of(C15) = alias <C <U C15>>\l<U <statTemp>>$84: Sorbet::Private::Static::Void = <U <statTemp>>$85: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$86: T.class_of(C15))\l<U <statTemp>>$89: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$90: T.class_of(C16) = alias <C <U C16>>\l<U <statTemp>>$88: Sorbet::Private::Static::Void = <U <statTemp>>$89: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$90: T.class_of(C16))\l<U <statTemp>>$93: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$94: T.class_of(C17) = alias <C <U C17>>\l<U <statTemp>>$92: Sorbet::Private::Static::Void = <U <statTemp>>$93: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$94: T.class_of(C17))\l<U <statTemp>>$97: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$98: T.class_of(C18) = alias <C <U C18>>\l<U <statTemp>>$96: Sorbet::Private::Static::Void = <U <statTemp>>$97: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$98: T.class_of(C18))\l<U <statTemp>>$101: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$102: T.class_of(C19) = alias <C <U C19>>\l<U <statTemp>>$100: Sorbet::Private::Static::Void = <U <statTemp>>$101: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$102: T.class_of(C19))\l<U <statTemp>>$105: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$106: T.class_of(C20) = alias <C <U C20>>\l<U <statTemp>>$104: Sorbet::Private::Static::Void = <U <statTemp>>$105: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$106: T.class_of(C20))\l<U <statTemp>>$109: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$110: T.class_of(A) = alias <C <U A>>\l<U <statTemp>>$108: Sorbet::Private::Static::Void = <U <statTemp>>$109: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$110: T.class_of(A))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(C1) = alias <C C1>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(C1))\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(C2) = alias <C C2>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$10: T.class_of(C2))\l<statTemp>$13: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$14: T.class_of(C3) = alias <C C3>\l<statTemp>$12: Sorbet::Private::Static::Void = <statTemp>$13: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$14: T.class_of(C3))\l<statTemp>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$18: T.class_of(C4) = alias <C C4>\l<statTemp>$16: Sorbet::Private::Static::Void = <statTemp>$17: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$18: T.class_of(C4))\l<statTemp>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$22: T.class_of(C5) = alias <C C5>\l<statTemp>$20: Sorbet::Private::Static::Void = <statTemp>$21: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$22: T.class_of(C5))\l<statTemp>$25: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$26: T.class_of(C6) = alias <C C6>\l<statTemp>$24: Sorbet::Private::Static::Void = <statTemp>$25: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$26: T.class_of(C6))\l<statTemp>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$30: T.class_of(C7) = alias <C C7>\l<statTemp>$28: Sorbet::Private::Static::Void = <statTemp>$29: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$30: T.class_of(C7))\l<statTemp>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$34: T.class_of(C8) = alias <C C8>\l<statTemp>$32: Sorbet::Private::Static::Void = <statTemp>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$34: T.class_of(C8))\l<statTemp>$37: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$38: T.class_of(C9) = alias <C C9>\l<statTemp>$36: Sorbet::Private::Static::Void = <statTemp>$37: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$38: T.class_of(C9))\l<statTemp>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$42: T.class_of(C10) = alias <C C10>\l<statTemp>$40: Sorbet::Private::Static::Void = <statTemp>$41: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$42: T.class_of(C10))\l<statTemp>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$46: T.class_of(C11) = alias <C C11>\l<statTemp>$44: Sorbet::Private::Static::Void = <statTemp>$45: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$46: T.class_of(C11))\l<statTemp>$49: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$50: T.class_of(C12) = alias <C C12>\l<statTemp>$48: Sorbet::Private::Static::Void = <statTemp>$49: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$50: T.class_of(C12))\l<statTemp>$53: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$54: T.class_of(C13) = alias <C C13>\l<statTemp>$52: Sorbet::Private::Static::Void = <statTemp>$53: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$54: T.class_of(C13))\l<statTemp>$57: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$58: T.class_of(C13) = alias <C C13>\l<statTemp>$56: Sorbet::Private::Static::Void = <statTemp>$57: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$58: T.class_of(C13))\l<statTemp>$61: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$62: T.class_of(C13) = alias <C C13>\l<statTemp>$60: Sorbet::Private::Static::Void = <statTemp>$61: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$62: T.class_of(C13))\l<statTemp>$65: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$66: T.class_of(C13) = alias <C C13>\l<statTemp>$64: Sorbet::Private::Static::Void = <statTemp>$65: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$66: T.class_of(C13))\l<statTemp>$69: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$70: T.class_of(C13) = alias <C C13>\l<statTemp>$68: Sorbet::Private::Static::Void = <statTemp>$69: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$70: T.class_of(C13))\l<statTemp>$73: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$74: T.class_of(C13) = alias <C C13>\l<statTemp>$72: Sorbet::Private::Static::Void = <statTemp>$73: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$74: T.class_of(C13))\l<statTemp>$77: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$78: T.class_of(C13) = alias <C C13>\l<statTemp>$76: Sorbet::Private::Static::Void = <statTemp>$77: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$78: T.class_of(C13))\l<statTemp>$81: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$82: T.class_of(C14) = alias <C C14>\l<statTemp>$80: Sorbet::Private::Static::Void = <statTemp>$81: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$82: T.class_of(C14))\l<statTemp>$85: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$86: T.class_of(C15) = alias <C C15>\l<statTemp>$84: Sorbet::Private::Static::Void = <statTemp>$85: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$86: T.class_of(C15))\l<statTemp>$89: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$90: T.class_of(C16) = alias <C C16>\l<statTemp>$88: Sorbet::Private::Static::Void = <statTemp>$89: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$90: T.class_of(C16))\l<statTemp>$93: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$94: T.class_of(C17) = alias <C C17>\l<statTemp>$92: Sorbet::Private::Static::Void = <statTemp>$93: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$94: T.class_of(C17))\l<statTemp>$97: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$98: T.class_of(C18) = alias <C C18>\l<statTemp>$96: Sorbet::Private::Static::Void = <statTemp>$97: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$98: T.class_of(C18))\l<statTemp>$101: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$102: T.class_of(C19) = alias <C C19>\l<statTemp>$100: Sorbet::Private::Static::Void = <statTemp>$101: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$102: T.class_of(C19))\l<statTemp>$105: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$106: T.class_of(C20) = alias <C C20>\l<statTemp>$104: Sorbet::Private::Static::Void = <statTemp>$105: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$106: T.class_of(C20))\l<statTemp>$109: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$110: T.class_of(A) = alias <C A>\l<statTemp>$108: Sorbet::Private::Static::Void = <statTemp>$109: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$110: T.class_of(A))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -24,257 +24,257 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<Class:A>#send_beta_invitation_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(A) = cast(<U <self>>: NilClass, T.class_of(A));\l<U invite>: T.untyped = load_arg(A.send_beta_invitation#invite)\l<U <statTemp>>$6: Integer(1) = 1\l<U <ifTemp>>$5: T::Boolean = <U <statTemp>>$6: Integer(1).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$5: T::Boolean\l"
+        label = "block[id=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\linvite: T.untyped = load_arg(A.send_beta_invitation#invite)\l<statTemp>$6: Integer(1) = 1\l<ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)\l<ifTemp>$5: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_3" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_1" [
-        label = "block[id=1](<U <returnMethodTemp>>$2)\l<U <finalReturn>> = return <U <returnMethodTemp>>$2\l<unconditional>\l"
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_1" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_2" [
-        label = "block[id=2]()\l<U r>: T.class_of(C1) = alias <C <U C1>>\l<unconditional>\l"
+        label = "block[id=2]()\lr: T.class_of(C1) = alias <C C1>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" [
-        label = "block[id=3](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$9: Integer(2) = 2\l<U <ifTemp>>$8: T::Boolean = <U <statTemp>>$9: Integer(2).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$8: T::Boolean\l"
+        label = "block[id=3](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$9: Integer(2) = 2\l<ifTemp>$8: T::Boolean = <statTemp>$9: Integer(2).===(invite: T.untyped)\l<ifTemp>$8: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_4" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_5" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_4" [
-        label = "block[id=4]()\l<U r>: T.class_of(C2) = alias <C <U C2>>\l<unconditional>\l"
+        label = "block[id=4]()\lr: T.class_of(C2) = alias <C C2>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" [
-        label = "block[id=5](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$12: Integer(3) = 3\l<U <ifTemp>>$11: T::Boolean = <U <statTemp>>$12: Integer(3).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$11: T::Boolean\l"
+        label = "block[id=5](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$12: Integer(3) = 3\l<ifTemp>$11: T::Boolean = <statTemp>$12: Integer(3).===(invite: T.untyped)\l<ifTemp>$11: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_6" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_7" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_6" [
-        label = "block[id=6]()\l<U r>: T.class_of(C3) = alias <C <U C3>>\l<unconditional>\l"
+        label = "block[id=6]()\lr: T.class_of(C3) = alias <C C3>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" [
-        label = "block[id=7](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$15: Integer(4) = 4\l<U <ifTemp>>$14: T::Boolean = <U <statTemp>>$15: Integer(4).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$14: T::Boolean\l"
+        label = "block[id=7](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$15: Integer(4) = 4\l<ifTemp>$14: T::Boolean = <statTemp>$15: Integer(4).===(invite: T.untyped)\l<ifTemp>$14: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_8" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_9" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_8" [
-        label = "block[id=8]()\l<U r>: T.class_of(C4) = alias <C <U C4>>\l<unconditional>\l"
+        label = "block[id=8]()\lr: T.class_of(C4) = alias <C C4>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" [
-        label = "block[id=9](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$18: Integer(5) = 5\l<U <ifTemp>>$17: T::Boolean = <U <statTemp>>$18: Integer(5).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$17: T::Boolean\l"
+        label = "block[id=9](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$18: Integer(5) = 5\l<ifTemp>$17: T::Boolean = <statTemp>$18: Integer(5).===(invite: T.untyped)\l<ifTemp>$17: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_10" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_11" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_10" [
-        label = "block[id=10]()\l<U r>: T.class_of(C5) = alias <C <U C5>>\l<unconditional>\l"
+        label = "block[id=10]()\lr: T.class_of(C5) = alias <C C5>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" [
-        label = "block[id=11](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$21: Integer(6) = 6\l<U <ifTemp>>$20: T::Boolean = <U <statTemp>>$21: Integer(6).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$20: T::Boolean\l"
+        label = "block[id=11](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$21: Integer(6) = 6\l<ifTemp>$20: T::Boolean = <statTemp>$21: Integer(6).===(invite: T.untyped)\l<ifTemp>$20: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_12" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_13" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_12" [
-        label = "block[id=12]()\l<U r>: T.class_of(C6) = alias <C <U C6>>\l<unconditional>\l"
+        label = "block[id=12]()\lr: T.class_of(C6) = alias <C C6>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" [
-        label = "block[id=13](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$24: Integer(7) = 7\l<U <ifTemp>>$23: T::Boolean = <U <statTemp>>$24: Integer(7).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$23: T::Boolean\l"
+        label = "block[id=13](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$24: Integer(7) = 7\l<ifTemp>$23: T::Boolean = <statTemp>$24: Integer(7).===(invite: T.untyped)\l<ifTemp>$23: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_14" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_15" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_14" [
-        label = "block[id=14]()\l<U r>: T.class_of(C7) = alias <C <U C7>>\l<unconditional>\l"
+        label = "block[id=14]()\lr: T.class_of(C7) = alias <C C7>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" [
-        label = "block[id=15](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$27: Integer(8) = 8\l<U <ifTemp>>$26: T::Boolean = <U <statTemp>>$27: Integer(8).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$26: T::Boolean\l"
+        label = "block[id=15](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$27: Integer(8) = 8\l<ifTemp>$26: T::Boolean = <statTemp>$27: Integer(8).===(invite: T.untyped)\l<ifTemp>$26: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_16" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_17" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_16" [
-        label = "block[id=16]()\l<U r>: T.class_of(C8) = alias <C <U C8>>\l<unconditional>\l"
+        label = "block[id=16]()\lr: T.class_of(C8) = alias <C C8>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" [
-        label = "block[id=17](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$30: Integer(9) = 9\l<U <ifTemp>>$29: T::Boolean = <U <statTemp>>$30: Integer(9).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$29: T::Boolean\l"
+        label = "block[id=17](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$30: Integer(9) = 9\l<ifTemp>$29: T::Boolean = <statTemp>$30: Integer(9).===(invite: T.untyped)\l<ifTemp>$29: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_18" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_19" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_18" [
-        label = "block[id=18]()\l<U r>: T.class_of(C9) = alias <C <U C9>>\l<unconditional>\l"
+        label = "block[id=18]()\lr: T.class_of(C9) = alias <C C9>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" [
-        label = "block[id=19](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$33: Integer(10) = 10\l<U <ifTemp>>$32: T::Boolean = <U <statTemp>>$33: Integer(10).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$32: T::Boolean\l"
+        label = "block[id=19](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$33: Integer(10) = 10\l<ifTemp>$32: T::Boolean = <statTemp>$33: Integer(10).===(invite: T.untyped)\l<ifTemp>$32: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_20" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_21" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_20" [
-        label = "block[id=20]()\l<U r>: T.class_of(C10) = alias <C <U C10>>\l<unconditional>\l"
+        label = "block[id=20]()\lr: T.class_of(C10) = alias <C C10>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" [
-        label = "block[id=21](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$36: Integer(11) = 11\l<U <ifTemp>>$35: T::Boolean = <U <statTemp>>$36: Integer(11).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$35: T::Boolean\l"
+        label = "block[id=21](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$36: Integer(11) = 11\l<ifTemp>$35: T::Boolean = <statTemp>$36: Integer(11).===(invite: T.untyped)\l<ifTemp>$35: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_22" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_23" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_22" [
-        label = "block[id=22]()\l<U r>: T.class_of(C11) = alias <C <U C11>>\l<unconditional>\l"
+        label = "block[id=22]()\lr: T.class_of(C11) = alias <C C11>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" [
-        label = "block[id=23](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$39: Integer(12) = 12\l<U <ifTemp>>$38: T::Boolean = <U <statTemp>>$39: Integer(12).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$38: T::Boolean\l"
+        label = "block[id=23](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$39: Integer(12) = 12\l<ifTemp>$38: T::Boolean = <statTemp>$39: Integer(12).===(invite: T.untyped)\l<ifTemp>$38: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_24" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_25" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_24" [
-        label = "block[id=24]()\l<U r>: T.class_of(C12) = alias <C <U C12>>\l<unconditional>\l"
+        label = "block[id=24]()\lr: T.class_of(C12) = alias <C C12>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" [
-        label = "block[id=25](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$42: Integer(13) = 13\l<U <ifTemp>>$41: T::Boolean = <U <statTemp>>$42: Integer(13).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$41: T::Boolean\l"
+        label = "block[id=25](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$42: Integer(13) = 13\l<ifTemp>$41: T::Boolean = <statTemp>$42: Integer(13).===(invite: T.untyped)\l<ifTemp>$41: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_26" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_27" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_26" [
-        label = "block[id=26]()\l<U r>: T.class_of(C13) = alias <C <U C13>>\l<unconditional>\l"
+        label = "block[id=26]()\lr: T.class_of(C13) = alias <C C13>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" [
-        label = "block[id=27](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$45: Integer(14) = 14\l<U <ifTemp>>$44: T::Boolean = <U <statTemp>>$45: Integer(14).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$44: T::Boolean\l"
+        label = "block[id=27](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$45: Integer(14) = 14\l<ifTemp>$44: T::Boolean = <statTemp>$45: Integer(14).===(invite: T.untyped)\l<ifTemp>$44: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_28" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_29" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_28" [
-        label = "block[id=28]()\l<U r>: T.class_of(C14) = alias <C <U C14>>\l<unconditional>\l"
+        label = "block[id=28]()\lr: T.class_of(C14) = alias <C C14>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" [
-        label = "block[id=29](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$48: Integer(15) = 15\l<U <ifTemp>>$47: T::Boolean = <U <statTemp>>$48: Integer(15).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$47: T::Boolean\l"
+        label = "block[id=29](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$48: Integer(15) = 15\l<ifTemp>$47: T::Boolean = <statTemp>$48: Integer(15).===(invite: T.untyped)\l<ifTemp>$47: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_30" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_31" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_30" [
-        label = "block[id=30]()\l<U r>: T.class_of(C15) = alias <C <U C15>>\l<unconditional>\l"
+        label = "block[id=30]()\lr: T.class_of(C15) = alias <C C15>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" [
-        label = "block[id=31](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$51: Integer(16) = 16\l<U <ifTemp>>$50: T::Boolean = <U <statTemp>>$51: Integer(16).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$50: T::Boolean\l"
+        label = "block[id=31](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$51: Integer(16) = 16\l<ifTemp>$50: T::Boolean = <statTemp>$51: Integer(16).===(invite: T.untyped)\l<ifTemp>$50: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_32" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_33" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_32" [
-        label = "block[id=32]()\l<U r>: T.class_of(C16) = alias <C <U C16>>\l<unconditional>\l"
+        label = "block[id=32]()\lr: T.class_of(C16) = alias <C C16>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" [
-        label = "block[id=33](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$54: Integer(17) = 17\l<U <ifTemp>>$53: T::Boolean = <U <statTemp>>$54: Integer(17).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$53: T::Boolean\l"
+        label = "block[id=33](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$54: Integer(17) = 17\l<ifTemp>$53: T::Boolean = <statTemp>$54: Integer(17).===(invite: T.untyped)\l<ifTemp>$53: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_34" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_35" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_34" [
-        label = "block[id=34]()\l<U r>: T.class_of(C17) = alias <C <U C17>>\l<unconditional>\l"
+        label = "block[id=34]()\lr: T.class_of(C17) = alias <C C17>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" [
-        label = "block[id=35](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$57: Integer(18) = 18\l<U <ifTemp>>$56: T::Boolean = <U <statTemp>>$57: Integer(18).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$56: T::Boolean\l"
+        label = "block[id=35](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$57: Integer(18) = 18\l<ifTemp>$56: T::Boolean = <statTemp>$57: Integer(18).===(invite: T.untyped)\l<ifTemp>$56: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_36" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_37" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_36" [
-        label = "block[id=36]()\l<U r>: T.class_of(C18) = alias <C <U C18>>\l<unconditional>\l"
+        label = "block[id=36]()\lr: T.class_of(C18) = alias <C C18>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" [
-        label = "block[id=37](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$60: Integer(19) = 19\l<U <ifTemp>>$59: T::Boolean = <U <statTemp>>$60: Integer(19).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$59: T::Boolean\l"
+        label = "block[id=37](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$60: Integer(19) = 19\l<ifTemp>$59: T::Boolean = <statTemp>$60: Integer(19).===(invite: T.untyped)\l<ifTemp>$59: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_38" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_39" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_38" [
-        label = "block[id=38]()\l<U r>: T.class_of(C19) = alias <C <U C19>>\l<unconditional>\l"
+        label = "block[id=38]()\lr: T.class_of(C19) = alias <C C19>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" [
-        label = "block[id=39](<U <self>>: T.class_of(A), <U invite>: T.untyped)\l<U <statTemp>>$63: Integer(20) = 20\l<U <ifTemp>>$62: T::Boolean = <U <statTemp>>$63: Integer(20).<U ===>(<U invite>: T.untyped)\l<U <ifTemp>>$62: T::Boolean\l"
+        label = "block[id=39](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$63: Integer(20) = 20\l<ifTemp>$62: T::Boolean = <statTemp>$63: Integer(20).===(invite: T.untyped)\l<ifTemp>$62: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_40" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_41" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_40" [
-        label = "block[id=40]()\l<U r>: T.class_of(C20) = alias <C <U C20>>\l<unconditional>\l"
+        label = "block[id=40]()\lr: T.class_of(C20) = alias <C C20>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_40" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_41" [
-        label = "block[id=41](<U <self>>: T.class_of(A))\l<U <statTemp>>$66: String(\"Bla bla bla\") = \"Bla bla bla\"\l<U <statTemp>>$3: T.noreturn = <U <self>>: T.class_of(A).<U raise>(<U <statTemp>>$66: String(\"Bla bla bla\"))\l<unconditional>\l"
+        label = "block[id=41](<self>: T.class_of(A))\l<statTemp>$66: String(\"Bla bla bla\") = \"Bla bla bla\"\l<statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$66: String(\"Bla bla bla\"))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_41" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_61" [
-        label = "block[id=61](<U r>: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)))\l<U s>: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = <U r>\l<U <returnMethodTemp>>$2: T.noreturn = return <U s>: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))\l<unconditional>\l"
+        label = "block[id=61](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)))\ls: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = r\l<returnMethodTemp>$2: T.noreturn = return s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_61" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];

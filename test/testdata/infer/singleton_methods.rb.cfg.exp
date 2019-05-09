@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(<root>) = cast(<U <self>>: NilClass, T.class_of(<root>));\l<U <statTemp>>$5: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$6: T.class_of(Foo) = alias <C <U Foo>>\l<U <statTemp>>$4: Sorbet::Private::Static::Void = <U <statTemp>>$5: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$6: T.class_of(Foo))\l<U <statTemp>>$9: T.class_of(Sorbet::Private::Static) = alias <C <U Static>>\l<U <statTemp>>$10: T.class_of(Bar) = alias <C <U Bar>>\l<U <statTemp>>$8: Sorbet::Private::Static::Void = <U <statTemp>>$9: T.class_of(Sorbet::Private::Static).<U keep_for_ide>(<U <statTemp>>$10: T.class_of(Bar))\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Foo) = alias <C Foo>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Foo))\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(Bar) = alias <C Bar>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$10: T.class_of(Bar))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:Foo>#bar" {
     "bb::<Class:Foo>#bar_1" [shape = parallelogram];
 
     "bb::<Class:Foo>#bar_0" [
-        label = "block[id=0]()\l<U <self>>: T.class_of(Foo) = cast(<U <self>>: NilClass, T.class_of(Foo));\l<U <returnMethodTemp>>$2: Integer(1) = 1\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:Foo>#bar_0" -> "bb::<Class:Foo>#bar_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\l<U <self>>: Bar = cast(<U <self>>: NilClass, Bar);\l<U <statTemp>>$3: T.class_of(Foo) = alias <C <U Foo>>\l<U <returnMethodTemp>>$2: T.untyped = <U <statTemp>>$3: T.class_of(Foo).<U bar>()\l<U <finalReturn>>: T.noreturn = return <U <returnMethodTemp>>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\l<statTemp>$3: T.class_of(Foo) = alias <C Foo>\l<returnMethodTemp>$2: T.untyped = <statTemp>$3: T.class_of(Foo).bar()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
