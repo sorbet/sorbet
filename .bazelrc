@@ -158,7 +158,7 @@ build --workspace_status_command=tools/buildstamp/get_workspace_status
 # Note that dynamic linging is not fully supported by some of our toolchains and thus it may not always work.
 # Patches are welcome.
 build --define=linkshared=false
-build:shared-libs --define=linkshared=true
+build:shared-libs --define=linkshared=true --cxxopt=-fpie --copt=-fpie --linkopt=-fpie
 
 # It's useful to be able to write `config_setting` rules for "this is
 # an unsanitized build", but we can't express "copt does not contain
