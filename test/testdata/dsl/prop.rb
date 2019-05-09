@@ -82,34 +82,28 @@ class EncryptedProp
 end
 
 class ComputingProps
-  const :missing, Integer, computed_by: :compute_missing # error: Method `compute_missing` does not exist on `T.class_of(ComputingProps)`
+  extend T::Sig
 
-  const :num_explicit_ok, Integer, computed_by: :compute_num_explicit_ok
-  sig {params(inputs: T.untyped).returns(Integer)}
-  def self.compute_num_explicit_ok(inputs)
+  const :num_ok, Integer, computed_by: :compute_num_ok
+  sig {params(n: Integer, m: Integer).returns(Integer)}
+  def self.compute_num_ok(n, m)
     10
   end
 
-  const :num_implicit_ok, Integer, computed_by: :compute_num_implicit_ok
-  def self.compute_num_implicit_ok(inputs)
-    15
-  end
-
-  const :num_implicit_wrong, Integer, computed_by: :compute_num_implicit_wrong
-  def self.compute_num_implicit_wrong(inputs)
-    'implied_string' # error: `String` doesn't match computed prop type `Integer`
-  end
+  const :missing, Integer, computed_by: :compute_missing
+                                      # ^^^^^^^^^^^^^^^^ error: Method `compute_missing` does not exist on `T.class_of(ComputingProps)`
 
   const :num_wrong_value, Integer, computed_by: :compute_num_wrong_value
-  sig {params(inputs: T.untyped).returns(Integer)}
+                                              # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Returning value that does not conform to method result type
+  sig {params(inputs: T.untyped).returns(String)}
   def self.compute_num_wrong_value(inputs)
-    'not_an_integer' # error: `String` doesn't match computed prop type `Integer`
+    'not_an_integer'
   end
 
   const :num_wrong_type, Integer, computed_by: :compute_num_wrong_type
-  sig {params(inputs: T.untyped).returns(String)}
+  sig {params(inputs: T.untyped).returns(Integer)}
   def self.compute_num_wrong_type(inputs)
-    'not_an_integer' # error: `String` doesn't match computed prop type `Integer`
+    'not_an_integer' # error: Returning value that does not conform to method result type
   end
 end
 
@@ -176,6 +170,4 @@ def main
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`
     AdvancedODM.new.ifunset = nil # error: does not match expected type
     AdvancedODM.new.ifunset_nilable = nil
-
-    T.reveal_type(ComputingProps.new.num_explicit_ok) # error: Revealed type: `Integer`
 end

@@ -25,6 +25,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     core::NameRef name = core::NameRef::noName();
     core::Loc nameLoc;
 
+    core::NameRef computedByMethodName = core::NameRef::noName();
+    core::Loc computedByMethodNameLoc;
+
     switch (send->fun._id) {
         case core::Names::prop()._id:
             // Nothing special
@@ -150,16 +153,20 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     vector<unique_ptr<ast::Expression>> stats;
 
     // Compute the getters
-
     if (rules) {
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
 
-        // e.g. `computed_by: <name>` where <name> is a Symbol pointing to a class method
+        // e.g. `const :foo, type, computed_by: :method_name`
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::computedBy())) {
-            auto [cbk, computedByClassMethod] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
-            // ...?
+            auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
+            if (auto *lit = ast::cast_tree<ast::Literal>(val.get())) {
+                if (lit->isSymbol(ctx)) {
+                    computedByMethodNameLoc = lit->loc;
+                    computedByMethodName = lit->asSymbol(ctx);
+                }
+            }
         }
 
         if (foreign == nullptr) {
@@ -173,10 +180,18 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
 
-    if (computedByClassMethod) {
-        // TODO instance getter calls class method named by `computed_by`, with `T.unsafe(nil)` as arg
-        stats.emplace_back(mkGet(loc, name, ast::MK::Send(loc, std::move(computedByClassMethod), send->fun, std::move(args))));
+    if (computedByMethodName.exists()) {
+        // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
+        // verify that the method returns the same type as the prop, but ignore the method's argument type(s),
+        // by defining the prop getter as `self.class.compute_foo(*T.unsafe(nil))`.
+        // (Actual runtime behavior is that immutable value is set in constructor, and then retrieved with regular getter.)
+        auto self = ast::MK::Self(loc);
+        auto sendClass = ast::MK::Send0(computedByMethodNameLoc, move(self), core::Names::class_());
+        auto splatUnsafeNil = ast::MK::Splat(computedByMethodNameLoc, ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc)));
+        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, move(sendClass), computedByMethodName, move(splatUnsafeNil));
+        stats.emplace_back(mkGet(nameLoc, name, move(sendComputedMethod)));
     } else {
+        // Default prop getter should return same type as prop
         stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
     }
 
