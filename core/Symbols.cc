@@ -922,6 +922,9 @@ const InlinedVector<Loc, 2> &Symbol::locs() const {
 }
 
 void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
+    if (ref(gs) == Symbols::untyped()) {
+        return;
+    }
     if (!loc.file().exists()) {
         return;
     }
