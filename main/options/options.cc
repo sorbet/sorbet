@@ -241,7 +241,7 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<string>()->default_value("watchman"));
     options.add_options("advanced")("disable-lsp-slow-path-interruptions",
                                     "Disables LSP feature that attempts to improve responsiveness by interrupting long "
-                                    "typechecking runs when further slow-to-typecheck updates are made to a file.");
+                                    "typechecking runs when additional slow-to-typecheck updates are made to a file.");
     options.add_options("advanced")("enable-lsp-hover", "Enable experimental LSP feature: Hover");
     options.add_options("advanced")("enable-lsp-go-to-definition", "Enable experimental LSP feature: Go-to-definition");
     options.add_options("advanced")("enable-lsp-find-references", "Enable experimental LSP feature: Find References");

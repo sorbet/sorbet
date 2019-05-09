@@ -452,54 +452,61 @@ bool mainThreadHasCommittedToAction(LSPState *state) EXCLUSIVE_LOCKS_REQUIRED(st
 }
 
 void LSPLoop::maybeCancelSlowPath(LSPLoop::QueueState &queue) {
-    if (queue.pendingRequests.empty()) {
-        logger->info("Cancel slow path: no pending requests.");
+    int editEventsFound = 0;
+    for (const auto &msg : queue.pendingRequests) {
+        if (msg->mutatesFileContents()) {
+            editEventsFound++;
+        } else if (!msg->isDelayable() && editEventsFound == 0) {
+            logger->info("Cancel slow path: Non-delayable message found before first edit: {}",
+                         msg->isResponse() ? "" : convertLSPMethodToString(msg->method()));
+            return;
+        }
+    }
+
+    if (editEventsFound != 1) {
+        logger->info("Cancel slow path: {} edit events found.", editEventsFound);
         return;
     }
 
-    // Don't do anything if LSP isn't initialized yet.
-    absl::MutexLock stateLock(&state.mtx);
-    if (state.mainThreadStatus == MainThreadStatus::NotInitialized) {
-        logger->info("Cancel slow path: not initialized.");
-        return;
+    // There is only one edit event, and only delayable events are in front of it. Bring it to the front.
+    for (auto it = queue.pendingRequests.begin(); it != queue.pendingRequests.end(); ++it) {
+        if ((*it)->mutatesFileContents()) {
+            auto msg = move(*it);
+            queue.pendingRequests.erase(it);
+            queue.pendingRequests.push_front(move(msg));
+            break;
+        }
     }
 
-    const LSPMessage &front = **queue.pendingRequests.begin();
-    if (front.mutatesFileContents()) {
-        int editEventsFound = 0;
-        for (const auto &msg : queue.pendingRequests) {
-            if (msg->mutatesFileContents()) {
-                editEventsFound++;
-            }
+    {
+        absl::MutexLock stateLock(&state.mtx);
+        if (state.mainThreadStatus == MainThreadStatus::NotInitialized) {
+            logger->info("Cancel slow path: not initialized.");
+            return;
         }
 
-        if (editEventsFound == 1) {
-            if (front.method() != LSPMethod::SorbetWorkspaceEdit) {
-                // Should never happen, but gracefully handle to avoid unexpected breakages.
-                logger->debug("Unable to cancel typechecking: blocked by unexpected method {}.",
-                              convertLSPMethodToString(front.method()));
-                return;
-            }
-            // Wait until main thread has decided if it is running slow path or not.
-            state.mtx.Await(absl::Condition(mainThreadHasCommittedToAction, &state));
-            if (state.mainThreadStatus == MainThreadStatus::RunningSlowPath) {
-                const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(front.asNotification().params);
-                UnorderedMap<string, pair<string, bool>> changes;
-                preprocessSorbetWorkspaceEdits(params->changes, changes);
-                if (!state.canRunFastPath(changes)) {
-                    state.cancelTypechecking();
-                    logger->info("Cancel slow path: Canceled slow path.");
-                } else {
-                    logger->info("Cancel slow path: Changes will run fast path.");
-                }
+        const LSPMessage &front = **queue.pendingRequests.begin();
+        if (front.method() != LSPMethod::SorbetWorkspaceEdit) {
+            // Should never happen, but gracefully handle to avoid unexpected breakages.
+            logger->debug("Unable to cancel typechecking: blocked by unexpected method {}.",
+                          convertLSPMethodToString(front.method()));
+            return;
+        }
+        // Wait until main thread has decided if it is running slow path or not.
+        state.mtx.Await(absl::Condition(mainThreadHasCommittedToAction, &state));
+        if (state.mainThreadStatus == MainThreadStatus::RunningSlowPath) {
+            const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(front.asNotification().params);
+            UnorderedMap<string, pair<string, bool>> changes;
+            preprocessSorbetWorkspaceEdits(params->changes, changes);
+            if (!state.canRunFastPath(changes)) {
+                state.cancelTypechecking();
+                logger->info("Cancel slow path: Canceled slow path.");
             } else {
-                logger->info("Cancel slow path: slow path isn't running");
+                logger->info("Cancel slow path: Changes will run fast path.");
             }
         } else {
-            logger->info("Cancel slow path: {} edit events found", editEventsFound);
+            logger->info("Cancel slow path: slow path isn't running");
         }
-    } else {
-        logger->info("Cancel slow path: Front request doesn't mutate file contents.");
     }
 }
 
