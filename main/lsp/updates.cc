@@ -285,8 +285,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore);
             int id = t.file.id();
             indexed[id] = move(t);
-            updatedIndexed.emplace_back(
-                ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file, indexed[id].sendFuns});
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
         }
 
         auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
