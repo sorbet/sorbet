@@ -115,6 +115,7 @@ build:reduce-intermediate-file-size --copt=-g0 --linkopt=-g0 --cxxopt=-g0 # used
 build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --cxxopt=-Os
 build:reduce-intermediate-file-size --strip=always
 build:reduce-intermediate-file-size --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug --cxxopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
+build:reduce-intermediate-file-size --config=shared-libs
 
 build:buildfarm --curses=no --config=reduce-intermediate-file-size
 test:buildfarm --curses=no --config=reduce-intermediate-file-size
