@@ -63,6 +63,10 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         if (auto e = gs.beginError(data->loc(), core::errors::Resolver::NotATypeVariable)) {
             e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.show(gs));
         }
+        auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
+        my = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
+        my.data(gs)->setFixed();
+        my.data(gs)->resultType = core::Types::untyped(gs, sym);
         return false;
     }
     auto myVariance = data->variance();
