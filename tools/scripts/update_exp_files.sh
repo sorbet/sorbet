@@ -4,7 +4,7 @@ set -e
 COMMAND_FILE=$(mktemp)
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
-echo 'RECORD=1 ruby gems/sorbet/test/srb-rbi/empty/empty.rb > /dev/null' >> "$COMMAND_FILE"
+gems/sorbet/test/snapshot/driver.sh --update
 
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg autogen)
 
