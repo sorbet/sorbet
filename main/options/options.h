@@ -16,7 +16,7 @@ public:
 
 struct Printers {
     bool ParseTree = false;
-    bool ParseTreeJSON = false;
+    bool ParseTreeJson = false;
     bool Desugared = false;
     bool DesugaredRaw = false;
     bool DSLTree = false;
