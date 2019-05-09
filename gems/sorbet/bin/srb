@@ -25,7 +25,7 @@ EOF
   exit 0
 }
 
-command=$1
+subcommand=$1
 shift
 
 typecheck() {
@@ -47,7 +47,7 @@ typecheck() {
   "${sorbet[0]}" "$@"
 }
 
-case $command in
+case $subcommand in
   "initialize" | "init")
     bundle exec srb-rbi
     ;;
@@ -66,7 +66,7 @@ case $command in
     ;;
 
   *)
-    echo "Unknown command \`$command\`"
+    echo "Unknown subcommand \`$subcommand\`"
     help_and_exit
 esac
 
