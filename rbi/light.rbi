@@ -1474,6 +1474,8 @@ class Integer < Numeric
     .returns(Integer)
   end
   def |(arg0); end
+  sig {returns(Integer)}
+  def ~(); end
 end
 class IO < Object
   include File::Constants

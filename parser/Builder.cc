@@ -950,11 +950,14 @@ public:
         if (auto *num = parser::cast_node<Integer>(receiver.get())) {
             return make_unique<Integer>(loc, oper->string() + num->val);
         }
-        if (auto *num = parser::cast_node<Float>(receiver.get())) {
-            return make_unique<Float>(loc, oper->string() + num->val);
-        }
-        if (auto *num = parser::cast_node<Rational>(receiver.get())) {
-            return make_unique<Rational>(loc, oper->string() + num->val);
+
+        if (oper->type() != ruby_parser::token_type::tTILDE) {
+            if (auto *num = parser::cast_node<Float>(receiver.get())) {
+                return make_unique<Float>(loc, oper->string() + num->val);
+            }
+            if (auto *num = parser::cast_node<Rational>(receiver.get())) {
+                return make_unique<Rational>(loc, oper->string() + num->val);
+            }
         }
 
         core::NameRef op;
