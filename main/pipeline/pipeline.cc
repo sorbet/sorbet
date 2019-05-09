@@ -102,7 +102,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     if (print.ParseTree) {
         fmt::print("{}\n", nodes->toStringWithTabs(gs, 0));
     }
-    if (print.ParseTreeJSON) {
+    if (print.ParseTreeJson) {
         fmt::print("{}\n", nodes->toJSON(gs, 0));
     }
     return nodes;

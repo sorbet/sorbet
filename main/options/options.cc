@@ -24,7 +24,7 @@ struct PrintOptions {
 
 const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
-    {"parse-tree-json", &Printers::ParseTreeJSON},
+    {"parse-tree-json", &Printers::ParseTreeJson},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
     {"dsl-tree", &Printers::DSLTree, true},
