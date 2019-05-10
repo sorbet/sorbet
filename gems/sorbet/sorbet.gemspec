@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
     srb tc
 
   For more docs see: https://sorbet.org/docs/adopting
-  }
+}
 
   # TODO this is temporary, to prevent leaking publicly.
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
