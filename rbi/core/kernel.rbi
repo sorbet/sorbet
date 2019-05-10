@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Kernel
   RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
 

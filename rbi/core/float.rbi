@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Float < Numeric
   DIG = T.let(T.unsafe(nil), Integer)
   EPSILON = T.let(T.unsafe(nil), Float)

@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Module < Object
   ARGF = T.let(T.unsafe(nil), Object)
   ARGV = T.let(T.unsafe(nil), Array)

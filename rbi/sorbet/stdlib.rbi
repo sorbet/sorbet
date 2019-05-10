@@ -1,5 +1,5 @@
 # These are extensions to the Ruby language that we added to make the type systems easier
-# typed: strict
+# typed: core
 
 class Struct
   sig do

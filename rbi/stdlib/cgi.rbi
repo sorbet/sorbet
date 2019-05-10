@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class CGI
   include ::CGI::Util

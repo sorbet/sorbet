@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Integer < Numeric
   sig do
     params(

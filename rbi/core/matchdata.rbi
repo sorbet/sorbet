@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class MatchData < Object
   sig do
     params(

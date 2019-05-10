@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class File < IO
   ALT_SEPARATOR = T.let(T.unsafe(nil), NilClass)
   APPEND = T.let(T.unsafe(nil), Integer)

@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Time < Object
   include Comparable
 

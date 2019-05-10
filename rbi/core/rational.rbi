@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Rational < Numeric
   sig do
     params(

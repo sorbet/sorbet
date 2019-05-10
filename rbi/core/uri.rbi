@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Kernel
   sig {params(uri: T.any(URI::Generic, String)).returns(URI::Generic)}
   def URI(uri); end

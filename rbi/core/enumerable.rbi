@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Enumerable
   extend T::Generic
   Elem = type_member(:out)

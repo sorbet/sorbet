@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Pathname < Object
   SAME_PATHS = T.let(T.unsafe(nil), Proc)
   SEPARATOR_LIST = T.let(T.unsafe(nil), String)

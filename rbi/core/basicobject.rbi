@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class BasicObject
   sig {returns(T::Boolean)}
   def !(); end

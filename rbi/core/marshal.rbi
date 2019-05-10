@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Marshal
   MAJOR_VERSION = T.let(T.unsafe(nil), Integer)
   MINOR_VERSION = T.let(T.unsafe(nil), Integer)

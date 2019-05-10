@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Class < Module
   sig {returns(T.untyped)}
   def allocate(); end
