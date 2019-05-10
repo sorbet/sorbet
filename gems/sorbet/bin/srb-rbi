@@ -66,23 +66,25 @@ actions:
     #{cyan("# typed: true")}, depending on how many errors were found in that file.)
 
 "
-    STDOUT.write(emojify("❔", "Would you like to continue? [Y/n] "))
-    if STDIN.isatty
-      begin
-        input = Kernel.gets&.strip
-        if input.nil? || (input != '' && input != 'y' && input != 'Y')
+    if ENV['SRB_YES'] != nil
+      puts "SRB_YES set, continuing"
+    else
+      STDOUT.write(emojify("❔", "Would you like to continue? [Y/n] "))
+      if STDIN.isatty && STDOUT.isatty
+        begin
+          input = Kernel.gets&.strip
+          if input.nil? || (input != '' && input != 'y' && input != 'Y')
+            puts "\nAborting"
+            Kernel.exit(1)
+          end
+        rescue Interrupt
           puts "\nAborting"
           Kernel.exit(1)
         end
-      rescue Interrupt
-        puts "\nAborting"
+      else
+        puts "\nNot running interactivly. Set SRB_YES=1 environment variable to proceed"
         Kernel.exit(1)
       end
-    elsif ENV['SRB_YES']
-      puts "\nSRB_YES set, proceeding"
-    else
-      puts "\nNot running interactivly. Set SRB_YES=1 environment variable to proceed"
-      Kernel.exit(1)
     end
 
     # Create sorbet/config file
