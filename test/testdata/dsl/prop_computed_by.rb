@@ -4,8 +4,8 @@ class ComputingProps
   extend T::Sig
 
   const :num_ok, Integer, computed_by: :compute_num_ok
-  sig {params(n: Integer, m: Integer).returns(Integer)}
-  def self.compute_num_ok(n, m)
+  sig {params(n: Integer).returns(Integer)}
+  def self.compute_num_ok(n)
     10
   end
 

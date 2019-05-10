@@ -185,13 +185,14 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
-        // verify that the method returns the same type as the prop, but ignore the method's argument(s),
-        // by defining the prop getter as `self.class.compute_foo(*T.unsafe(nil))`.
+        // verify that the method returns the same type as the prop,
+        // and takes 1 argument (some kind of struct containing inputs), but ignore the method's argument type,
+        // by defining the prop getter as `self.class.compute_foo(T.unsafe(nil))`.
         // (Actual runtime behavior is that immutable value is set in constructor, and then retrieved with regular getter.)
         auto self = ast::MK::Self(loc);
         auto sendClass = ast::MK::Send0(computedByMethodNameLoc, move(self), core::Names::class_());
         auto unsafeNil = ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc));
-        auto sendComputedMethod = ast::MK::CallWithSplat(computedByMethodNameLoc, move(sendClass), computedByMethodName, move(unsafeNil));
+        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, move(sendClass), computedByMethodName, move(unsafeNil));
         stats.emplace_back(mkGet(nameLoc, name, move(sendComputedMethod)));
     } else {
         // Default prop getter should return same type as prop
