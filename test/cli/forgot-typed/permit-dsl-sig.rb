@@ -1,2 +1,2 @@
-# typed: strict
+# typed: true
 A = Struct.new(:foo)
