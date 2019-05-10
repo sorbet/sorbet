@@ -386,7 +386,7 @@ module Kernel
     params(
         x: BasicObject,
     )
-    .returns(Array)
+    .returns(T::Array[T.untyped])
   end
   def Array(x); end
 
