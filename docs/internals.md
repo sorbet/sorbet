@@ -131,7 +131,7 @@ phase to the next:
     for all the options.
   - When getting started with Sorbet, oftentimes the `***-raw` variants of the
     printing options are more useful, until you get familiar with the codebase.
-- `--stop-after-phase <phase>`
+ - `--stop-after <phase>`
   - Stop Sorbet early
 
 We will discuss individual phases and IRs below.
