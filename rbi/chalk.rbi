@@ -1,5 +1,5 @@
 # The minimal portion of our Chalk::ODM support
-
+# typed: core
 class Chalk::ODM::Mutator
 end
 
