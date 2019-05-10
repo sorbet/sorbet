@@ -131,7 +131,7 @@ module Sorbet::Private
             path = $LOADED_FEATURES.last
             if tp.return_value != true # intentional true check
               next if popped.size == 1 && popped[0][:module].is_a?(LoadError)
-              warn("Unexpected: constants or methods were defined when #{tp.method_id} didn't return true; adding to #{path} instead")
+              # warn("Unexpected: constants or methods were defined when #{tp.method_id} didn't return true; adding to #{path} instead")
             end
 
             # raise 'Unexpected: constants or methods were defined without a file added to $LOADED_FEATURES' if path.nil?

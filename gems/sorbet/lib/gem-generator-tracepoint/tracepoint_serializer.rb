@@ -61,7 +61,7 @@ module Sorbet::Private
                 case item[:type]
                 when :method
                   if !valid_method_name?(item[:method])
-                    warn("Invalid method name: #{klass}.#{item[:method]}")
+                    # warn("Invalid method name: #{klass}.#{item[:method]}")
                     next
                   end
                   if BAD_METHODS.include?([gem[:gem], class_name(klass), item[:method]])
@@ -234,7 +234,7 @@ module Sorbet::Private
 
         # if the name doesn't only contain word characters and ':', or any part doesn't start with a capital, Sorbet doesn't support it
         if name !~ /^[\w:]+$/ || !name.split('::').all? { |part| part =~ /^[A-Z]/ }
-          warn("Invalid class name: #{name}")
+          # warn("Invalid class name: #{name}")
           id = @anonymous_map[Sorbet::Private::RealStdlib.real_object_id(klass)] ||= anonymous_id
           return "InvalidName_#{name.gsub(/[^\w]/, '_').gsub(/0x([0-9a-f]+)/, '0x00')}_#{id}"
         end
