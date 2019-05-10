@@ -385,9 +385,7 @@ public:
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
 
-        if (klass->symbol != core::Symbols::untyped()) {
-            klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
-        }
+        klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
