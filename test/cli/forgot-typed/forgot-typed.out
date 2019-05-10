@@ -2,4 +2,7 @@ test/cli/forgot-typed/forgot-typed.rb:2: To use `sig`, this file must declare an
      2 |sig {void} # error: `sig` in untyped file. Did you mean to put `# typed: true` in this file?
         ^^^^^^^^^^
 Errors: 1
-No errors! Great job.
+test/cli/forgot-typed/permit-dsl-sig.rb:1: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none). If you're not sure which one to use, start with `# typed: false` https://sorbet.org/docs/error-reference#5038
+     1 |A = Struct.new(:foo)
+        ^^^^^^^^^^^^^^^^^^^^
+Errors: 1
