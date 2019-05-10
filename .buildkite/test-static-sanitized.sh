@@ -75,7 +75,7 @@ if grep -q "<details>" "$annotation_path"; then
   cat "$annotation_path" | buildkite-agent annotate --context junit-${platform} --style error --append
 fi
 
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
+find /usr/local/var/bazelcache/build/ -type f -size +17M -exec rm {} \;
 
 if [ "$err" -ne 0 ]; then
     exit "$err"

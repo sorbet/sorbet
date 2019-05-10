@@ -46,4 +46,4 @@ rm -rf _out_
 mkdir -p _out_/webasm
 cp bazel-bin/emscripten/sorbet-wasm.tar _out_/webasm/sorbet-wasm.tar
 
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
+find /usr/local/var/bazelcache/build/ -type f -size +17M -exec rm {} \;

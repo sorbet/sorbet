@@ -68,7 +68,7 @@ if [ "$err" -ne 0 ]; then
     globalErr=$err
 fi
 
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
+find /usr/local/var/bazelcache/build/ -type f -size +17M -exec rm {} \;
 
 if [ "$globalErr" -ne 0 ]; then
     exit $globalErr
