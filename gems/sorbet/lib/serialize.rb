@@ -221,6 +221,10 @@ class Sorbet::Private::Serialize
     #else
       #"  #{const} = ::T.let(nil, ::T.untyped)"
     #end
+    if KEYWORDS.include?(const.to_sym)
+      ret << "# Illegal constant name: #{const}"
+      return
+    end
     "  #{const} = ::T.let(nil, ::T.untyped)"
   end
 
