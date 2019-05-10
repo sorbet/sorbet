@@ -381,11 +381,12 @@ module Kernel
   sig {returns(T::Boolean)}
   def untrusted?(); end
 
+  sig {params(x: NilClass).returns([])}
   sig do
-    type_parameters(:T).params(
-        x: Object,
+    params(
+        x: BasicObject,
     )
-    .returns(T::Array[T.type_parameter(:T)])
+    .returns(Array)
   end
   def Array(x); end
 
