@@ -1,6 +1,6 @@
 # Sorbet logos
 
-TODO(jez) Should we have usage guidelines for our logo?
+TODO(jez) Should we have usage guidelines for our logo? https://jira.corp.stripe.com/browse/CONTRACTS-5396
 
 ## Stickers
 
