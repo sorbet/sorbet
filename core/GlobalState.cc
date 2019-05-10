@@ -1243,7 +1243,7 @@ GlobalStateHash GlobalState::hash() const {
                 continue;
             }
             if (sym.isMethod()) {
-                auto target = methodHashes[NameHash(*this, sym.name.data(*this))];
+                auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
                 target = mix(target, sym.hash(*this));
                 hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
             } else {

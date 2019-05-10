@@ -890,7 +890,13 @@ u4 Symbol::hash(const GlobalState &gs) const {
     }
     for (const auto &e : argumentsOrMixins) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            if (e.data(gs)->isMethodArgument()) {
+                auto resultType = e.data(gs)->resultType;
+                // Use hash of *resultType*, not hash of *argument name*
+                result = mix(result, !resultType ? 0 : resultType->hash(gs));
+            } else {
+                result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            }
         }
     }
     for (const auto &e : typeParams) {

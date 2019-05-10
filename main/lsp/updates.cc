@@ -270,10 +270,12 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                 i++;
                 vector<core::NameHash> intersection;
                 std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.usages.begin(),
-                                      oldHash.usages.usages.end(), intersection.begin());
+                                      oldHash.usages.usages.end(), std::back_inserter(intersection));
                 if (!intersection.empty()) {
-                    logger->debug("Added {} to update set as used a changed method");
-                    subset.emplace_back(core::FileRef(i));
+                    auto ref = core::FileRef(i);
+                    logger->debug("Added {} to update set as used a changed method",
+                                  !ref.exists() ? "" : ref.data(*finalGs).path());
+                    subset.emplace_back(ref);
                 }
             }
         }
