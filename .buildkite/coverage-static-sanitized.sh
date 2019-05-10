@@ -17,10 +17,10 @@ case "${unameOut}" in
 esac
 
 if [[ "linux" == "$platform" ]]; then
-  echo "linux coverage is not supported"
-  exit 1
+  echo "linux coverage supported"
 elif [[ "mac" == "$platform" ]]; then
-  echo "mac is supported"
+  echo "mac coverage is not supported"
+  exit 1
 fi
 
 git checkout .bazelrc
