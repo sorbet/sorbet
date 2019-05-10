@@ -91,6 +91,33 @@ foo(Child) <span class="hljs-comment"># ok</span>
 foo(Grandparent) <span class="hljs-comment"># error</span>
 </code></pre>
 <p><a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Aclass%20Grandparent%3B%20end%0Aclass%20Parent%20%3C%20Grandparent%3B%20end%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(Parent)).void%7D%0Adef%20foo(x)%3B%20end%0A%0A%0Afoo(Parent)%20%23%20ok%0Afoo(Child)%20%23%20ok%0A%0Afoo(Grandparent)%20%23%20error">→ View on sorbet.run</a></p>
+<p>Gotcha: module ancestor chains (<code>include</code>, <code>extend</code>) work in a way many people
+don't expect:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+
+extend T::Sig
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">M</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">include</span> M; <span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> T.class_of(M)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test</span><span class="hljs-params">(x)</span></span>
+  x.foo
+<span class="hljs-keyword">end</span>
+
+
+M.foo                      <span class="hljs-comment"># ok</span>
+M.is_a?(M.singleton_class) <span class="hljs-comment"># =&gt; true</span>
+test(M)                    <span class="hljs-comment"># ok, given above</span>
+
+C.foo                      <span class="hljs-comment"># not ok: this raises a NoMethodError when run</span>
+C.is_a?(M.singleton_class) <span class="hljs-comment"># =&gt; false</span>
+test(C)                    <span class="hljs-comment"># not ok, given above</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aextend%20T%3A%3ASig%0A%0Amodule%20M%0A%20%20def%20self.foo%3B%20end%0Aend%0Aclass%20C%3B%20include%20M%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(M)).void%7D%0Adef%20test(x)%0A%20%20x.foo%0Aend%0A%0A%0AM.foo%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%0AM.is_a%3F(M.singleton_class)%20%23%20%3D%3E%20true%0Atest(M)%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%2C%20given%20above%0A%0AC.foo%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20not%20ok%3A%20this%20raises%20a%20NoMethodError%20when%20run%0AC.is_a%3F(M.singleton_class)%20%23%20%3D%3E%20false%0Atest(C)%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20not%20ok%2C%20given%20above">→
+View on sorbet.run</a></p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/procs"><span class="arrow-prev">← </span><span>Proc Types</span></a><a class="docs-next button" href="/docs/self-type"><span>T.self_type</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
