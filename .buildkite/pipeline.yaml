@@ -50,6 +50,9 @@ steps:
     command: .buildkite/publish.sh
     agents:
       os: linux
+  - wait: ~
+  - block: "Run optional code coverage"
+  - wait: ~
   - label: "Coverage: sorbet-static on Mac"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*
