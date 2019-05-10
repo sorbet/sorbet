@@ -165,6 +165,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                 if (lit->isSymbol(ctx)) {
                     computedByMethodNameLoc = lit->loc;
                     computedByMethodName = lit->asSymbol(ctx);
+                } else {
+                    auto typeSymbol = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
+                    stats.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
                 }
             }
         }
