@@ -1,0 +1,12 @@
+-e:1: `String("Foo")` doesn't match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
+     1 |"Foo" * "Foo"
+        ^^^^^^^^^^^^^
+    https://github.com/stripe/sorbet/tree/master/rbi/core/string.rbi#L15: Method `String#*` has specified `arg0` as `Integer`
+    15 |        arg0: Integer,
+                ^^^^
+  Got String("Foo") originating from:
+    -e:1:
+     1 |"Foo" * "Foo"
+                ^^^^^
+Errors: 1
+No errors! Great job.
