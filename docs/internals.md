@@ -97,26 +97,25 @@ abstractions exist.
 <!-- TODO(jez) Consider talking about GlobalState, Symbols, etc. first -->
 
 IR stands for "internal representation". Each phase either translates from one
-IR to another, or modifies an existing IR.
-
-| Translation Pass | IR                  | Rewrite Pass   |
-| ---------------- | --                  | ------------   |
-|                  | source files        |                |
-| [Parser]         |                     |                |
-|                  | [`parser::Node`]    |                |
-| [Desugar]        |                     |                |
-|                  | [`ast::Expression`] | [DSL]          |
-|                  | [`ast::Expression`] | [Namer] (*)    |
-|                  | [`ast::Expression`] | [Resolver] (*) |
-| [CFG]            |                     |                |
-|                  | [`cfg::CFG`]        | [Infer]        |
-
-This table shows the order of the phases, what IR they operate on, and whether
-they translate from one IR to another or make modifications within the IR they
-were given.
+IR to another, or modifies an existing IR. This table shows the order of the
+phases, what IR they operate on, and whether they translate from one IR to
+another or make modifications within the IR they were given.
 
 > `*`: Even though these passes modify the IR they're given, they have another
 > important job which is to populate GlobalState.
+
+
+|     | Translation Pass                 | IR                  | Rewrite Pass                      |
+| --- | ----------------                 | --                  | ------------                      |
+|     |                                  | source files        |                                   |
+| 1   | [Parser], `-p parse-tree`        |                     |                                   |
+|     |                                  | [`parser::Node`]    |                                   |
+| 2   | [Desugar], `-p ast`              |                     |                                   |
+| 3   |                                  | [`ast::Expression`] | [DSL], `-p dsl-tree`              |
+| 4   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
+| 5   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
+| 6   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
+| 7   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
 When you see links to files below, you should **open the file** and give it a
 quick skim before continuing. Most of the sections below are written like a
@@ -128,6 +127,10 @@ phase to the next:
 
 - `-p, --print <state>`
   - Prints Sorbet's internal state, including any of the IRs.
+  - Only some of the printing options are shown in the table above. See the help
+    for all the options.
+  - When getting started with Sorbet, oftentimes the `***-raw` variants of the
+    printing options are more useful, until you get familiar with the codebase.
 - `--stop-after-phase <phase>`
   - Stop Sorbet early
 
