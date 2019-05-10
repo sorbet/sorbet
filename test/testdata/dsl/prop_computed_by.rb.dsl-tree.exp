@@ -1,0 +1,81 @@
+class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  ::Sorbet.sig() do ||
+    <self>.params({}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def num_ok<<C <todo sym>>>(&<blk>)
+    ::T.assert_type!(<self>.class().compute_num_ok(::T.unsafe(nil)), <emptyTree>::<C Integer>)
+  end
+
+  <self>.sig() do ||
+    <self>.params({:"n" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def self.compute_num_ok<<C <todo sym>>>(n, &<blk>)
+    10
+  end
+
+  ::Sorbet.sig() do ||
+    <self>.params({}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def missing<<C <todo sym>>>(&<blk>)
+    ::T.assert_type!(<self>.class().compute_missing(::T.unsafe(nil)), <emptyTree>::<C Integer>)
+  end
+
+  ::Sorbet.sig() do ||
+    <self>.params({}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def num_wrong_value<<C <todo sym>>>(&<blk>)
+    ::T.assert_type!(<self>.class().compute_num_wrong_value(::T.unsafe(nil)), <emptyTree>::<C Integer>)
+  end
+
+  <self>.sig() do ||
+    <self>.params({:"inputs" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C String>)
+  end
+
+  def self.compute_num_wrong_value<<C <todo sym>>>(inputs, &<blk>)
+    "not_an_integer"
+  end
+
+  ::Sorbet.sig() do ||
+    <self>.params({}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def num_wrong_type<<C <todo sym>>>(&<blk>)
+    ::T.assert_type!(<self>.class().compute_num_wrong_type(::T.unsafe(nil)), <emptyTree>::<C Integer>)
+  end
+
+  <self>.sig() do ||
+    <self>.params({:"inputs" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def self.compute_num_wrong_type<<C <todo sym>>>(inputs, &<blk>)
+    "not_an_integer"
+  end
+
+  ::T.let("not_a_symbol", <emptyTree>::<C Symbol>)
+
+  ::Sorbet.sig() do ||
+    <self>.params({}).returns(<emptyTree>::<C String>)
+  end
+
+  def not_a_symbol<<C <todo sym>>>(&<blk>)
+    ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+  end
+
+  ::Sorbet.sig() do ||
+    <self>.params({}).returns(<emptyTree>::<C Integer>)
+  end
+
+  def num_unknown_type<<C <todo sym>>>(&<blk>)
+    ::T.assert_type!(<self>.class().compute_num_unknown_type(::T.unsafe(nil)), <emptyTree>::<C Integer>)
+  end
+
+  def self.compute_num_unknown_type<<C <todo sym>>>(inputs, &<blk>)
+    <emptyTree>::<C T>.untyped()
+  end
+end
