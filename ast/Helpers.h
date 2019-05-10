@@ -157,8 +157,10 @@ public:
         return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(to_a));
     }
 
-    static std::unique_ptr<Expression> CallWithSplat(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef name, std::unique_ptr<Expression> args) {
-        return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), std::move(recv), MK::Symbol(loc, name), std::move(args));
+    static std::unique_ptr<Expression> CallWithSplat(core::Loc loc, std::unique_ptr<Expression> recv,
+                                                     core::NameRef name, std::unique_ptr<Expression> args) {
+        return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), std::move(recv),
+                     MK::Symbol(loc, name), std::move(args));
     }
 
     static std::unique_ptr<Expression> InsSeq1(core::Loc loc, std::unique_ptr<Expression> stat,

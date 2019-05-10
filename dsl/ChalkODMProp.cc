@@ -167,7 +167,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                     computedByMethodName = lit->asSymbol(ctx);
                 } else {
                     // error that value is not a symbol
-                    auto typeSymbol = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
+                    auto typeSymbol =
+                        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
                     stats.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
                 }
             }
@@ -190,8 +191,10 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
         auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_());
         auto unsafeNil = ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc));
-        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass), computedByMethodName, std::move(unsafeNil));
-        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType.get()));
+        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass),
+                                                 computedByMethodName, std::move(unsafeNil));
+        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
+                                                     ASTUtil::dupType(getType.get()));
         stats.emplace_back(mkGet(loc, name, std::move(assertTypeMatches)));
     } else {
         stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
