@@ -550,20 +550,6 @@ decent if you need to troubleshoot.
 The generated files changes frequently. A good rule of thumb is: any time you
 pull pay-server, you'll need to re-run autogen.
 
-### Make sure `sorbet` is on your PATH
-
-`sorbet` must be on your PATH for the next step. There are plenty of ways to do
-this; here are two:
-
-1.  Make a `~/bin` folder, and add it to your `PATH`.
-    Then make a symlink to sorbet:
-
-    ```
-    cd ~/bin && ln -s ~/stripe/sorbet/bazel-bin/main/sorbet .
-    ```
-
-2.  Add sorbet's `bazel-bin/main` folder directly to your `PATH`.
-
 ### Run `sorbet/scripts/typecheck_devel`
 
 Once you have an optimized build and the file list generated, you can run
