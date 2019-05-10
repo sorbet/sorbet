@@ -1580,7 +1580,12 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Undef *undef) {
-                auto res = unsupportedNode(dctx, undef);
+                Send::ARGS_store args;
+                for (auto &expr : undef->exprs) {
+                    args.emplace_back(node2TreeImpl(dctx, move(expr)));
+                }
+                auto res =
+                    MK::Send(loc, MK::Constant(loc, core::Symbols::Kernel()), core::Names::undef(), std::move(args));
                 result.swap(res);
             },
             [&](parser::Backref *backref) {
