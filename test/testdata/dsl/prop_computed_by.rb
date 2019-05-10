@@ -11,9 +11,10 @@ class ComputingProps
 
   const :missing, Integer, computed_by: :compute_missing
                                       # ^^^^^^^^^^^^^^^^ error: Method `compute_missing` does not exist on `T.class_of(ComputingProps)`
+                                      # ^^^^^^^^^^^^^^^^ error: The typechecker was unable to infer the type of the asserted value
 
   const :num_wrong_value, Integer, computed_by: :compute_num_wrong_value
-                                              # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Returning value that does not conform to method result type
+                                              # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type `Integer`
   sig {params(inputs: T.untyped).returns(String)}
   def self.compute_num_wrong_value(inputs)
     'not_an_integer'
@@ -29,8 +30,8 @@ class ComputingProps
                                           # ^^^^^^^^^^^^^^ error: Argument does not have asserted type `Symbol`
 
   const :num_unknown_type, Integer, computed_by: :compute_num_unknown_type
-                                               # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Returning value that does not conform to method result type
+                                               # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The typechecker was unable to infer the type of the asserted value
   def self.compute_num_unknown_type(inputs)
-    T.untyped(nil)
+    T.untyped
   end
 end
