@@ -27,15 +27,6 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
             bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
             used_vars.insert(bb->bexit.cond.variable);
         }
-        for (auto &bind : bb->exprs) {
-            if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                if (send->fun == core::Names::hardAssert()) {
-                    if (!send->args.empty()) {
-                        used_vars.insert(send->args[0].variable);
-                    }
-                }
-            }
-        }
     }
     bool changed = true;
     while (changed) {
@@ -499,18 +490,6 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         whoKnows.sanityCheck();
 
-    } else if (send->fun == core::Names::hardAssert()) {
-        const auto &recvKlass = send->recv.type;
-        if (!recvKlass->derivesFrom(ctx, core::Symbols::Kernel())) {
-            return;
-        }
-
-        assumeKnowledge(ctx, true, send->args[0].variable, loc, vars);
-        if (this->isDead) {
-            if (auto e = ctx.state.beginError(loc, core::errors::Infer::DeadBranchInferencer)) {
-                e.setHeader("Hard assert is always false");
-            }
-        }
     } else if (send->fun == core::Names::lessThan()) {
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
