@@ -101,6 +101,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/chalk.rbi",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -111,8 +113,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -129,8 +131,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/array.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -139,8 +141,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/basicobject.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -151,8 +153,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/bigdecimal.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -163,14 +165,14 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/class.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/complex.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -181,8 +183,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/csv.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -205,8 +207,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/dir.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -217,20 +219,20 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/enumerable.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/enumerator.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -259,8 +261,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/file.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -277,8 +279,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/float.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -289,8 +291,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/gc.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -301,38 +303,38 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/hash.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/io.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/marshal.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/matchdata.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -349,8 +351,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/module.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -361,20 +363,20 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/numeric.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/object_space.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/pathname.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -385,26 +387,26 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/process.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/random.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/range.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/rational.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -415,8 +417,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/regexp.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -427,20 +429,20 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/set.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/signal.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/string.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -451,8 +453,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/symbol.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -463,14 +465,14 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/time.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/tracepoint.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -487,26 +489,32 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/uri.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/sorbet/builder.rbi",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/sorbet/sig.rbi",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/sorbet/sorbet.rbi",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/sorbet/stdlib.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -523,8 +531,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/cgi.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -619,20 +627,20 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/socket.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/stringio.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tempfile.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -649,8 +657,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tmpdir.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
@@ -661,8 +669,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/webrick.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
+   "sigil": "Core",
+   "strict": "Core",
    "min_error_level": "Max"
   },
   {
