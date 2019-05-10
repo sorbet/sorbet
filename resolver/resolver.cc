@@ -927,7 +927,7 @@ private:
                     if (!lastSigs.empty()) {
                         if (!ctx.permitOverloadDefinitions()) {
                             if (auto e = ctx.state.beginError(lastSigs[0]->loc,
-                                                              core::errors::Resolver::InvalidMethodSignature)) {
+                                                              core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
                                 e.addErrorLine(send->loc, "Type annotation that will be used instead");
                             }
