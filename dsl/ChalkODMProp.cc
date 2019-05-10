@@ -193,7 +193,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_());
         auto unsafeNil = ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc));
         auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass), computedByMethodName, std::move(unsafeNil));
-        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), std::move(getType));
+        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType.get()));
         getterBodyStats.emplace_back(std::move(assertTypeMatches));
     }
 
