@@ -50,10 +50,3 @@ steps:
     command: .buildkite/publish.sh
     agents:
       os: linux
-  - label: "Coverage: sorbet-static on Mac"
-    command: .buildkite/coverage-static-sanitized.sh
-    artifact_paths: _out_/**/*
-    retry:
-      automatic: true
-    agents:
-      os: mac
