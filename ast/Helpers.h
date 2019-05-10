@@ -255,6 +255,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
+        sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
         return sig;
     }
 

@@ -2,3 +2,4 @@ test/cli/forgot-typed/forgot-typed.rb:2: To use `sig`, this file must declare an
      2 |sig {void} # error: `sig` in untyped file. Did you mean to put `# typed: true` in this file?
         ^^^^^^^^^^
 Errors: 1
+No errors! Great job.

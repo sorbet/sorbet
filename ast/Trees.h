@@ -444,6 +444,7 @@ public:
     core::NameRef fun;
 
     static const int PRIVATE_OK = 1 << 0;
+    static const int DSL_SYNTHESIZED = 1 << 1;
     u4 flags = 0;
 
     std::unique_ptr<Expression> recv;
@@ -459,6 +460,10 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+
+    bool isDSLSynthesized() const {
+        return (flags & DSL_SYNTHESIZED) != 0;
+    }
 
 private:
     virtual void _sanityCheck();

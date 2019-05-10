@@ -1,0 +1,1 @@
+A = Struct.new(:foo)
