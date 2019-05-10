@@ -351,6 +351,14 @@ module Kernel
 
   sig do
     params(
+      blk: T.proc.params(x: T.untyped).void
+    )
+    .returns(T.self_type)
+  end
+  def tap(&blk); end
+
+  sig do
+    params(
         method: Symbol,
         args: BasicObject,
     )
