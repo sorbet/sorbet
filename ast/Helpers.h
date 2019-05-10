@@ -303,6 +303,11 @@ public:
         return Send2(loc, T(loc), core::Names::let(), std::move(value), std::move(type));
     }
 
+    static std::unique_ptr<Expression> AssertType(core::Loc loc, std::unique_ptr<Expression> value,
+                                                  std::unique_ptr<Expression> type) {
+        return Send2(loc, T(loc), core::Names::assertType(), std::move(value), std::move(type));
+    }
+
     static std::unique_ptr<Expression> Unsafe(core::Loc loc, std::unique_ptr<Expression> inner) {
         return Send1(loc, T(loc), core::Names::unsafe(), std::move(inner));
     }

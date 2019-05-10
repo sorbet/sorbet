@@ -27,4 +27,10 @@ class ComputingProps
 
   const :not_a_symbol, String, computed_by: 'not_a_symbol'
                                           # ^^^^^^^^^^^^^^ error: Argument does not have asserted type `Symbol`
+
+  const :num_unknown_type, Integer, computed_by: :compute_num_unknown_type
+                                               # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Returning value that does not conform to method result type
+  def self.compute_num_unknown_type(inputs)
+    T.untyped(nil)
+  end
 end

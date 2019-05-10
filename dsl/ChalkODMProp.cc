@@ -166,6 +166,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                     computedByMethodNameLoc = lit->loc;
                     computedByMethodName = lit->asSymbol(ctx);
                 } else {
+                    // error that value is not a symbol
                     auto typeSymbol = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
                     stats.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
                 }
@@ -183,21 +184,23 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
 
+    ast::InsSeq::STATS_store getterBodyStats;
+
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
-        // verify that the method returns the same type as the prop,
-        // and takes 1 argument (some kind of struct containing inputs), but ignore the method's argument type,
-        // by defining the prop getter as `self.class.compute_foo(T.unsafe(nil))`.
-        // (Actual runtime behavior is that immutable value is set in constructor, and then retrieved with regular getter.)
-        auto self = ast::MK::Self(loc);
-        auto sendClass = ast::MK::Send0(computedByMethodNameLoc, move(self), core::Names::class_());
+        // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
+        // by adding `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` to the prop getter.
+        auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_());
         auto unsafeNil = ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc));
-        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, move(sendClass), computedByMethodName, move(unsafeNil));
-        stats.emplace_back(mkGet(nameLoc, name, move(sendComputedMethod)));
-    } else {
-        // Default prop getter should return same type as prop
-        stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass), computedByMethodName, std::move(unsafeNil));
+        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), std::move(getType));
+        getterBodyStats.emplace_back(std::move(assertTypeMatches));
     }
+
+    // Prop getter should return same type as prop
+    auto getterReturnCast = ast::MK::Cast(loc, std::move(getType));
+    auto getterBody = mkGet(loc, name, ast::MK::InsSeq(loc, std::move(getterBodyStats), std::move(getterReturnCast)));
+    stats.emplace_back(std::move(getterBody));
 
     core::NameRef setName = name.addEq(ctx);
 
