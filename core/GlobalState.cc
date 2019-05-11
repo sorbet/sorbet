@@ -238,6 +238,12 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
     ENFORCE(id == Symbols::T_Helpers());
 
+    // SigBuilder magic class
+    id = synthesizeClass(core::Names::Constants::DeclBuilderForProcs());
+    ENFORCE(id == Symbols::DeclBuilderForProcs());
+    id = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::DeclBuilderForProcsSingleton());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Top()] = Symbols::top();
@@ -314,6 +320,41 @@ void GlobalState::initEmpty() {
     arg.data(*this)->resultType = Types::untyped(*this, method);
     arg.data(*this)->setRepeated();
     method.data(*this)->resultType = Types::untyped(*this, method);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+
+    // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
+    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this)->setOptional();
+    arg.data(*this)->resultType = Types::hashOfUntyped();
+    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+
+    // Synthesize <DeclBuilderForProcs>#<bind>(args: T.untyped) =>
+    // DeclBuilderForProcs
+    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::bind());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this)->resultType = Types::untyped(*this, method);
+    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+
+    // Synthesize <DeclBuilderForProcs>#<returns>(args: T.untyped) => DeclBuilderForProcs
+    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::returns());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this)->resultType = Types::untyped(*this, method);
+    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+    arg.data(*this)->setBlockArgument();
+
+    // Synthesize <DeclBuilderForProcs>#<type_parameters>(args: T.untyped) =>
+    // DeclBuilderForProcs
+    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::typeParameters());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this)->resultType = Types::untyped(*this, method);
+    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
     arg.data(*this)->setBlockArgument();
 

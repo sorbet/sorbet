@@ -326,6 +326,9 @@ NameDef names[] = {
     {"Rational", "Rational", true},
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
+    // A magic non user-creatable class for mimicing the decl builder during cfg
+    // construction
+    {"DeclBuilderForProcs", "<DeclBuilderForProcs>", true},
     {"Enumerable", "Enumerable", true},
     {"Set", "Set", true},
     {"Struct", "Struct", true},
