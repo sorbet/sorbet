@@ -892,11 +892,10 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
             if (e.data(gs)->isMethodArgument()) {
                 auto resultType = e.data(gs)->resultType;
-                // Use hash of *resultType*, not hash of *argument name*
+                // Include hash of *resultType*, not hash of *argument name*
                 result = mix(result, !resultType ? 0 : resultType->hash(gs));
-            } else {
-                result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
             }
+            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
         }
     }
     for (const auto &e : typeParams) {
@@ -915,9 +914,13 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
+
     for (const auto &e : argumentsOrMixins) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
+            // Changing name of keyword arg is a shape change.
+            // (N.B.: Is always <arg>/<blk> for positional/block args; renaming one of those is not a shape change.)
             result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            // Changing an argument from e.g. keyword to position-based is a shape change.
             result = mix(result, e.data(gs)->flags);
         }
     }
