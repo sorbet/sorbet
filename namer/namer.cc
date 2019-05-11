@@ -35,6 +35,8 @@ class NameInserter {
                 // emitted via `class << self` blocks
             } else if (ast::isa_tree<ast::EmptyTree>(node.get())) {
                 // ::Foo
+            } else if (node->isSelfReference()) {
+                // self::Foo
             } else {
                 if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
                     e.setHeader("Dynamic constant references are unsupported");
