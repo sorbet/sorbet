@@ -10,6 +10,7 @@ constexpr ErrorClass FloatOutOfRange{3004, StrictLevel::Typed};
 constexpr ErrorClass NoConstantReassignment{3005, StrictLevel::Typed};
 // constexpr ErrorClass SimpleSuperclass{3006, StrictLevel::Typed};
 constexpr ErrorClass UnnamedBlockParameter{3007, StrictLevel::Strict};
+constexpr ErrorClass UndefUsage{3008, StrictLevel::Strict};
 } // namespace sorbet::core::errors::Desugar
 
 #endif
