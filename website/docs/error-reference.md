@@ -429,7 +429,7 @@ bar(ys)
 ```
 
 If it is not possible to refactor the code, the current work around is to use
-replace `*xs` with `*T.unsafe(xs)`:
+`T.unsafe`:
 
 
 ```ruby
@@ -440,7 +440,7 @@ sig {params(xs: Integer).void}
 def foo(*xs); end
 
 xs = Array.new(3) {|i| i}
-foo(*T.unsafe(xs))
+T.unsafe(self).foo(xs)
 # ---------------------------------------------
 ```
 
