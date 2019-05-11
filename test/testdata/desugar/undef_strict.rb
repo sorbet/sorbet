@@ -8,6 +8,7 @@ sig do
 end
 def undef(*arg); end
 
+sig {void}
 def foo
 end
 undef foo # error: Unsuppored method: undef
