@@ -185,6 +185,8 @@ build:ubsan --cxxopt=-DHAS_SANITIZER
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
 build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 test:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 test:sanitize-linux --config=sanitize
 
