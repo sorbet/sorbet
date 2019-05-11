@@ -133,7 +133,7 @@ end
 # ternary
 x ? 1 : 7
 
-undef x, y # error: Unsupported node type `Undef`
+undef x, y
 
 # words
 %w{a b}
