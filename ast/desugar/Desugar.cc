@@ -1581,7 +1581,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::Undef *undef) {
                 if (auto e = dctx.ctx.state.beginError(what->loc, core::errors::Desugar::UndefUsage)) {
-                    e.setHeader("Unsuppored Node: Undef");
+                    e.setHeader("Unsuppored method: undef");
                 }
                 Send::ARGS_store args;
                 for (auto &expr : undef->exprs) {
