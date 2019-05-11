@@ -437,7 +437,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     for (const auto &member : what.members) {
         membersSorted.emplace_back(member.first.id(), member.second._id);
     }
-    fast_sort(membersSorted, [](auto const &lhs, auto const &rhs)->bool{return lhs.first < rhs.first;});
+    fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
 
     for (const auto &member : membersSorted) {
         p.putU4(member.first);
