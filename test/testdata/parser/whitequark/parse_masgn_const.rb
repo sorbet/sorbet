@@ -1,3 +1,3 @@
 # typed: true
 
-self::A, foo = foo # error: Dynamic constant references are unsupported
+self::A, foo = foo
