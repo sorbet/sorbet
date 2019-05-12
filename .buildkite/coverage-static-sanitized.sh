@@ -63,7 +63,7 @@ xargs .buildkite/combine-coverage.sh < _tmp_/reports
 
 .buildkite/codecov-bash -f combined.coverage.txt -X search
 
-find /usr/local/var/bazelcache/build/ -type f -size +17M -exec rm {} \;
+find /usr/local/var/bazelcache/build/ -type f -amin +1440 -exec rm {} \;
 
 if [ "$err" -ne 0 ]; then
     exit "$err"
