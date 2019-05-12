@@ -432,9 +432,16 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         p.putU4(s._id);
     }
     p.putU4(what.members.size());
+    vector<pair<u4, u4>> membersSorted;
+
     for (const auto &member : what.members) {
-        p.putU4(member.first.id());
-        p.putU4(member.second._id);
+        membersSorted.emplace_back(member.first.id(), member.second._id);
+    }
+    fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
+
+    for (const auto &member : membersSorted) {
+        p.putU4(member.first);
+        p.putU4(member.second);
     }
 
     pickle(p, what.resultType.get());
