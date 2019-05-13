@@ -857,9 +857,6 @@ end
 class RangeError < StandardError
 end
 
-class RegexpError < StandardError
-end
-
 class RubyVM::InstructionSequence < Object
 end
 
