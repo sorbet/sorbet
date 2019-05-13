@@ -62,6 +62,7 @@ build:coverage --config=dbg
 build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
 test:coverage --spawn_strategy=standalone
 
+build --define=versioned=false
 build:versioned --workspace_status_command=tools/buildstamp/get_workspace_status --stamp --define=versioned=true
 
 ##
