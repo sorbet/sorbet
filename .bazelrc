@@ -56,7 +56,6 @@ build:dbg --copt=-O0
 build:dbg --cxxopt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
-build:dbg --config=nopie
 
 build:coverage --config=forcedebug
 build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
@@ -70,8 +69,8 @@ build:release-common --define release=true
 build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=debugsymbols
-build:release-common --config=nopie
 build:release-common --stamp
+build:release-common --config=static-libs
 
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
@@ -115,7 +114,6 @@ build:reduce-intermediate-file-size --copt=-g0 --linkopt=-g0 --cxxopt=-g0 # used
 build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --cxxopt=-Os
 build:reduce-intermediate-file-size --strip=always
 build:reduce-intermediate-file-size --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug --cxxopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
-build:reduce-intermediate-file-size --config=shared-libs
 
 build:buildfarm --curses=no --config=reduce-intermediate-file-size
 test:buildfarm --curses=no --config=reduce-intermediate-file-size
@@ -145,7 +143,7 @@ build:forcedebug --cxxopt=-DFORCE_DEBUG
 build:lto --copt=-flto=thin
 build:lto --cxxopt=-flto=thin
 build:lto --linkopt=-flto=thin
-build:lto --config=nopie
+build:lto --config=static-libs
 
 ## flags that substantially increase Clang&LLVMs ability to devirtualize calls
 build:lto-linux --linkopt=-Wl,--icf=all
@@ -154,10 +152,12 @@ build:lto-linux --config=lto
 # Used to build --stamp build that contains version and build time.
 build --workspace_status_command=tools/buildstamp/get_workspace_status
 
-# By default, we make static builds, but we can also use dynamic linking if asked to.
+# By default, we make dynamicly linked builds, while release builds are statically linked.
 # Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
-build --define=linkshared=false
-build:shared-libs --define=linkshared=true --cxxopt=-fPIC --copt=-fPIC --linkopt=-fPIC
+# Still, we try to use it by default as it has lower iteration time in dev
+build --define=linkshared=true --cxxopt=-fPIC --copt=-fPIC --linkopt=-fPIC
+build:static-libs --define=linkshared=false --cxxopt=-fno-PIC --copt=-fno-PIC --linkopt=-fno-PIC
+build:static-libs --linkopt=-fno-pie --copt=-fno-pie --cxxopt=-fno-pie
 
 # It's useful to be able to write `config_setting` rules for "this is
 # an unsanitized build", but we can't express "copt does not contain
@@ -208,10 +208,6 @@ build:debugsymbols --cxxopt=-g3 --cxxopt=-fstandalone-debug --cxxopt=-DDEBUG_SYM
 build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS --linkopt=-glldb
 build:debugsymbols --spawn_strategy=standalone
 build:debugsymbols --genrule_strategy=standalone
-
-build:nopie --linkopt=-fno-pie
-build:nopie --copt=-fno-pie
-build:nopie --cxxopt=-fno-pie
 
 build --strip=never
 
