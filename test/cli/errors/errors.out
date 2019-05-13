@@ -5,8 +5,8 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https:
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L789: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     789 |        arg0: String,
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L858: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     858 |        arg0: String,
                   ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
@@ -52,8 +52,8 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https:
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L789: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     789 |        arg0: String,
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L858: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     858 |        arg0: String,
                   ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
@@ -99,8 +99,8 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https:
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` https://sorbet.org/docs/error-reference#7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L789: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     789 |        arg0: String,
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L858: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     858 |        arg0: String,
                   ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
