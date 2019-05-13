@@ -40,17 +40,17 @@ ClassDef{
 }
 --- dsl-tree-raw end ---
 --- symbol-table start ---
-class ::<root> < ::Object () @ (-e:1, https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://github.com/stripe/sorbet/tree/master/rbi/chalk.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/_root.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/base64.rbi#L1, https://github.com/stripe/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/csv.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/file.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/core/gc.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/gem.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/process.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/random.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/thread.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/core/uri.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/sorbet/sorbet.rbi#L1, https://github.com/stripe/sorbet/tree/master/rbi/sorbet/stdlib.rbi#L4, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/json.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/logger.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/msgpack.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/openssl.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/pp.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/racc.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tsort.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/t.rbi#L2)
+class ::<root> < ::Object () @ (-e:1, https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://github.com/stripe/sorbet/tree/master/rbi/chalk.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/_root.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/file.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/core/gc.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/gem.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/process.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/random.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/core/thread.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/sorbet/sorbet.rbi#L1, https://github.com/stripe/sorbet/tree/master/rbi/sorbet/stdlib.rbi#L4, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/benchmark.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/cgi.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/csv.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/digest.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/fileutils.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/json.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/logger.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/msgpack.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/openssl.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/pp.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/racc.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/set.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/socket.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/timeout.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tmpdir.rbi#L6, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tsort.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/uri.rbi#L2, https://github.com/stripe/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://github.com/stripe/sorbet/tree/master/rbi/t.rbi#L2)
   class ::<Class:<root>> < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
       argument ::<Class:<root>>#<static-init>#<blk><block> @ -e
 
 --- symbol-table end ---
 --- symbol-table-raw start ---
-class <C <U <root>>> < <C <U Object>> () @ (Loc {file=-e start=1:1 end=1:2}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/chalk.rbi start=3:1 end=41:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi start=2:1 end=987:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/_root.rbi start=2:1 end=21:39}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/base64.rbi start=1:1 end=1:1}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/benchmark.rbi start=2:1 end=57:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/csv.rbi start=2:1 end=80:54}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/didyoumean.rbi start=2:1 end=23:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi start=2:1 end=313:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/file.rbi start=2:1 end=798:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/fileutils.rbi start=2:1 end=75:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/fixnum.rbi start=3:1 end=3:17}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/gc.rbi start=2:1 end=61:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/gem.rbi start=2:1 end=133:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/process.rbi start=2:1 end=598:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/random.rbi start=2:1 end=182:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/thread.rbi start=3:1 end=38:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/uri.rbi start=2:1 end=408:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/sorbet/sorbet.rbi start=1:1 end=172:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/sorbet/stdlib.rbi start=4:1 end=42:2}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/cgi.rbi start=3:1 end=509:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/date.rbi start=2:1 end=514:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/digest.rbi start=3:1 end=232:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/erb.rbi start=3:1 end=498:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/json.rbi start=3:1 end=398:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/logger.rbi start=2:1 end=187:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/msgpack.rbi start=6:1 end=560:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi start=6:1 end=5874:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/openssl.rbi start=6:1 end=5328:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/pp.rbi start=2:1 end=87:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/racc.rbi start=2:1 end=35:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/socket.rbi start=3:1 end=1852:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/timeout.rbi start=3:1 end=37:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tmpdir.rbi start=6:1 end=48:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tsort.rbi start=2:1 end=17:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/webrick.rbi start=3:1 end=2363:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/t.rbi start=2:1 end=100:56})
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=-e start=1:1 end=1:2}, Loc {file=https://github.com/stripe/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/chalk.rbi start=3:1 end=41:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi start=2:1 end=987:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/_root.rbi start=2:1 end=21:39}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/didyoumean.rbi start=2:1 end=23:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi start=2:1 end=313:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/file.rbi start=2:1 end=798:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/fixnum.rbi start=3:1 end=3:17}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/gc.rbi start=2:1 end=61:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/gem.rbi start=2:1 end=133:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/process.rbi start=2:1 end=598:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/random.rbi start=2:1 end=182:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/core/thread.rbi start=3:1 end=38:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/sorbet/sorbet.rbi start=1:1 end=172:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/sorbet/stdlib.rbi start=4:1 end=42:2}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/benchmark.rbi start=2:1 end=57:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/cgi.rbi start=3:1 end=509:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/csv.rbi start=2:1 end=80:54}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/date.rbi start=2:1 end=525:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/digest.rbi start=3:1 end=232:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/erb.rbi start=3:1 end=498:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/fileutils.rbi start=2:1 end=75:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/json.rbi start=3:1 end=398:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/logger.rbi start=2:1 end=187:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/msgpack.rbi start=6:1 end=560:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi start=6:1 end=5874:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/openssl.rbi start=6:1 end=5328:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/pp.rbi start=2:1 end=87:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/racc.rbi start=2:1 end=35:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/set.rbi start=2:1 end=338:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/socket.rbi start=3:1 end=1852:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/timeout.rbi start=3:1 end=37:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tmpdir.rbi start=6:1 end=48:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tsort.rbi start=2:1 end=17:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/uri.rbi start=2:1 end=408:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/stdlib/webrick.rbi start=3:1 end=2363:4}, Loc {file=https://github.com/stripe/sorbet/tree/master/rbi/t.rbi start=2:1 end=100:56})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $99> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
-      argument <S <C <U <root>>> $1><N <U <static-init>> $99><blk><block> @ Loc {file=-e start=??? end=???}
+    method <S <C <U <root>>> $1><N <U <static-init>> $96> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
+      argument <S <C <U <root>>> $1><N <U <static-init>> $96><blk><block> @ Loc {file=-e start=??? end=???}
 
 --- symbol-table-raw end ---
 --- name-tree start ---
@@ -70,7 +70,7 @@ ClassDef{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 class <emptyTree><<C <root>>> < ()
-  def self.<static-init><<static-init>$99>(<blk>)
+  def self.<static-init><<static-init>$96>(<blk>)
     1
   end
 end
@@ -83,7 +83,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = self
-      name = <U <static-init>><<N <U <static-init>> $99>>
+      name = <U <static-init>><<N <U <static-init>> $96>>
       args = [Local{
           localVariable = <U <blk>>
         }]
@@ -122,35 +122,13 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/abbrev.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/array.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/base64.rbi",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/basicobject.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/benchmark.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/bigdecimal.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
@@ -180,18 +158,6 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/csv.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/date.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/datetime.rbi",
    "sigil": "Typed",
    "strict": "Typed",
@@ -210,12 +176,6 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/e2mmap.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi",
    "sigil": "Typed",
    "strict": "Typed",
@@ -229,12 +189,6 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/enumerator.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/etc.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
@@ -264,12 +218,6 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/fileutils.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/fixnum.rbi",
    "sigil": "Strict",
    "strict": "Strict",
@@ -277,12 +225,6 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/float.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/forwardable.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
@@ -366,18 +308,6 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/object_space.rbi",
-   "sigil": "Strict",
-   "strict": "Strict",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/pathname.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/proc.rbi",
    "sigil": "Typed",
    "strict": "Typed",
@@ -426,12 +356,6 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/set.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/signal.rbi",
    "sigil": "Typed",
    "strict": "Typed",
@@ -439,12 +363,6 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/string.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/stringscanner.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
@@ -486,12 +404,6 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
-   "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/uri.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/sorbet/builder.rbi",
    "min_error_level": "Max"
   },
@@ -510,7 +422,25 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/abbrev.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/base64.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/benchmark.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/bigdecimal.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
@@ -528,6 +458,12 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/csv.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/date.rbi",
    "sigil": "Strict",
    "strict": "Strict",
@@ -540,9 +476,33 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/e2mmap.rbi",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/erb.rbi",
    "sigil": "Strict",
    "strict": "Strict",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/etc.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/fileutils.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/forwardable.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
    "min_error_level": "Max"
   },
   {
@@ -576,6 +536,12 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/objspace.rbi",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/openssl.rbi",
    "sigil": "Typed",
    "strict": "Typed",
@@ -583,6 +549,12 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/ostruct.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/pathname.rbi",
    "sigil": "Typed",
    "strict": "Typed",
    "min_error_level": "Max"
@@ -630,6 +602,12 @@ ClassDef{
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/stringscanner.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tempfile.rbi",
    "sigil": "Strict",
    "strict": "Strict",
@@ -657,6 +635,12 @@ ClassDef{
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/tsort.rbi",
    "sigil": "Strict",
    "strict": "Strict",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/uri.rbi",
+   "sigil": "Typed",
+   "strict": "Typed",
    "min_error_level": "Max"
   },
   {
