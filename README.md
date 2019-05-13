@@ -417,9 +417,9 @@ If a variable is re-defined, it can be annotated with a version number:
 
 ```ruby
   a = 10
-# ^ a 1
+# ^ def: a 1
   a = 20
-# ^ a 2
+# ^ def: a 2
   b = a + 10
     # ^ usage: a 2
 ```
@@ -438,7 +438,8 @@ be applied in the same update. For example, `foo__bar.1.rbupdate` and `foo__baz.
 simultaneously to update `foo__bar.rb` and `foo__baz.rb`.
 
 Inside `*.rbupdate` files, you can assert that the slow path ran by adding a line with `# assert-slow-path: true`.
-You can assert that the fast path ran on `foo.rb` and `bar.rb` with `#assert-fast-path: foo.rb,bar.rb`.
+You can assert that the fast path ran on `foo__bar.rb` and `foo__baz.rb` with
+`#assert-fast-path: foo__bar.rb,foo__baz.rb`.
 
 ### LSP recorded tests
 
