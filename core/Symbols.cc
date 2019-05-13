@@ -892,7 +892,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
             if (e.data(gs)->isMethodArgument()) {
                 auto resultType = e.data(gs)->resultType;
-                // Include hash of *resultType*, not hash of *argument name*
+                // If an argument's resultType changes, then the sig has changed.
                 result = mix(result, !resultType ? 0 : resultType->hash(gs));
             }
             result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));

@@ -163,7 +163,7 @@ public:
     std::string toString() const override;
 };
 
-// # assert-fast-path: true | file1.rb,file2.rb,...
+// # assert-fast-path: file1.rb,file2.rb,...
 class FastPathAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<FastPathAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
