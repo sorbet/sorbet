@@ -25,6 +25,7 @@ fi
 
 git checkout .bazelrc
 
+# This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
 
 rm -f bazel-*
