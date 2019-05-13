@@ -88,20 +88,21 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
 }
 
 LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
-    if (enableTypecheckInfo) {
-        vector<string> filesTypechecked;
-        for (auto &f : run.filesTypechecked) {
-            filesTypechecked.push_back(string(f.data(*run.gs).path()));
-        }
-        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(filesTypechecked));
-        sendNotification(NotificationMessage("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo)));
-    }
-
     const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
     vector<unique_ptr<LSPMessage>> responses;
+
+    if (enableTypecheckInfo) {
+        vector<string> pathsTypechecked;
+        for (auto &f : filesTypechecked) {
+            pathsTypechecked.push_back(string(f.data(gs).path()));
+        }
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(pathsTypechecked));
+        responses.push_back(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
+    }
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {
