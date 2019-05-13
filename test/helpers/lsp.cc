@@ -110,7 +110,7 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
     return capabilities;
 }
 
-unique_ptr<InitializeParams> makeInitializeParams(string rootPath, string rootUri) {
+unique_ptr<InitializeParams> makeInitializeParams(string rootPath, string rootUri, bool enableTypecheckInfo) {
     auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities();
@@ -123,7 +123,7 @@ unique_ptr<InitializeParams> makeInitializeParams(string rootPath, string rootUr
         make_optional<variant<JSONNullObject, vector<unique_ptr<WorkspaceFolder>>>>(move(workspaceFolders));
 
     auto sorbetInitParams = make_unique<SorbetInitializationOptions>();
-    sorbetInitParams->enableTypecheckInfo = true;
+    sorbetInitParams->enableTypecheckInfo = enableTypecheckInfo;
     initializeParams->initializationOptions = move(sorbetInitParams);
     return initializeParams;
 }
@@ -257,13 +257,13 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
-                                             int &nextId) {
+                                             int &nextId, bool enableTypecheckInfo) {
     // Reset next id.
     nextId = 0;
 
     // Send 'initialize' message.
     {
-        auto initializeParams = makeInitializeParams(string(rootPath), string(rootUri));
+        auto initializeParams = makeInitializeParams(string(rootPath), string(rootUri), enableTypecheckInfo);
         LSPMessage message(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
         auto responses = lspWrapper.getLSPResponsesFor(message);
 
