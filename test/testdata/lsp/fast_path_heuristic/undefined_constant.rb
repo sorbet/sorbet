@@ -1,5 +1,5 @@
 # typed: true
 
 def main
-  A.new.bar(x: 1)
+    1 + 1
 end

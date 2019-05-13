@@ -1,6 +1,0 @@
-# typed: true
-
-def main
-  A.new.bar(1) # error: Missing required keyword argument 
-  # error: Too many arguments provided for method
-end
