@@ -24,6 +24,9 @@ elif [[ "mac" == "$platform" ]]; then
 fi
 
 git checkout .bazelrc
+
+./bazel clean
+
 rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {
@@ -34,6 +37,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcac
 } >> .bazelrc
 
 ./bazel version
+./bazel clean
 
 echo "+++ tests"
 
