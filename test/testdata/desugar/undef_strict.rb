@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 extend T::Sig
 sig do
   params(
@@ -8,4 +8,7 @@ sig do
 end
 def undef(*arg); end
 
-undef foo, :bar, :"foo#{1}"
+sig {void}
+def foo
+end
+undef foo # error: Unsuppored method: undef

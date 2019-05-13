@@ -50,6 +50,7 @@ NameDef names[] = {
     {"backtick", "`"},
     {"slice"},
     {"defined_p", "defined?"},
+    {"undef"},
     {"each"},
 
     // used in CFG for temporaries

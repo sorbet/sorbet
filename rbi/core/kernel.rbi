@@ -769,6 +769,14 @@ module Kernel
 
   sig do
     params(
+        arg: BasicObject,
+    )
+    .void
+  end
+  def undef(*arg); end
+
+  sig do
+    params(
         msg: String,
     )
     .returns(NilClass)
