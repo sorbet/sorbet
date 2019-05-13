@@ -39,7 +39,10 @@ If you are at Stripe, you might also want to see:
   - [Expectation tests](#expectation-tests)
   - [CLI tests](#cli-tests)
   - [LSP tests](#lsp-tests)
-  - [Updating tests](#updating-tests)
+    - [Testing "Find Definition" and "Find All References"](#testing-find-definition-and-find-all-references)
+    - [Testing incremental typechecking](#testing-incremental-typechecking)
+  - [LSP recorded tests](#lsp-recorded-tests)
+    - [Updating tests](#updating-tests)
 - [Running over pay-server locally](#running-over-pay-server-locally)
   - [Build `sorbet`](#build-sorbet)
   - [Set up autogen locally](#set-up-autogen-locally)
@@ -365,6 +368,9 @@ You can run this test with:
 bazel test //test:test_PosTests/testdata/path/to/<name>
 ```
 
+Files that begin with a prefix and `__` will be run together. For example,
+`foo__1.rb` and `foo__2.rb` will be run together as test `foo`.
+
 ### CLI tests
 
 Any folder `<name>` that is added to `test/cli/` becomes a test.
@@ -384,6 +390,62 @@ from the root. In particular, the compiled sorbet binary is available under
 
 ### LSP tests
 
+Most LSP tests are expectation tests with additional LSP-specific annotations.
+They are primarily contained in `test/testdata/lsp`, but all files in `test/testdata`
+are tested in LSP mode. You can run a test `test/testdata/lsp/<name>.rb` like so:
+
+```
+bazel test //test:test_LSPTests/testdata/lsp/<name>
+```
+
+#### Testing "Find Definition" and "Find All References"
+
+LSP tests have access to `def` and `usage` assertions that you can use to annotate definition
+and usage sites for a variable:
+
+```ruby
+  a = 10
+# ^ def: a
+  b = a + 10
+    # ^ usage: a
+```
+
+With these annotations, the test will check that "Find Definition" from the addition will lead to
+`a = 10`, and that "Find All References" from either location will return both the definition and usage.
+
+If a variable is re-defined, it can be annotated with a version number:
+
+```ruby
+  a = 10
+# ^ a 1
+  a = 20
+# ^ a 2
+  b = a + 10
+    # ^ usage: a 2
+```
+
+#### Testing incremental typechecking
+
+In LSP mode, Sorbet runs file updates on a *fast path* or a *slow path*. It checks the structure of the
+file before and after the update to determine if the change is covered under the fast path. If it is,
+it performs further processing to determine the set of files that need to be typechecked.
+
+LSP tests can define file updates in `<name>.<version>.rbupdate` files which contain the contents of `<name>.rb`
+after the update occurs. For example, the file `foo.1.rbupdate` contains the updated contents of `foo.rb`.
+
+If the test contains multiple files by using a `__` suffixed prefix, then all rbupdates with the same version will
+be applied in the same update. For example, `foo__bar.1.rbupdate` and `foo__baz.1.rbupdate` will be applied
+simultaneously to update `foo__bar.rb` and `foo__baz.rb`.
+
+Inside `*.rbupdate` files, you can assert that the slow path ran by adding a line with `# assert-slow-path: true`.
+You can assert that the fast path ran on `foo.rb` and `bar.rb` with `#assert-fast-path: foo.rb,bar.rb`.
+
+### LSP recorded tests
+
+It is possible to record an LSP session and use it as a test. We are attempting to move away from this form of
+testing, as these tests are hard to update and understand. If at all possible, try to add your test case as a
+regular LSP test.
+
 Any folder `<name>` that is added to `test/lsp/` will become a test.
 This folder should contain a file named `<folderName>.rec` that contains a
 recorded LSP session.
@@ -391,7 +453,7 @@ recorded LSP session.
 - Lines that start with "Read:" will be sent to sorbet as input.
 - Lines that start with "Write:" will be expected from sorbet as output.
 
-### Updating tests
+#### Updating tests
 
 Frequently when a test is failing, it's because something inconsequential
 changed in the captured output, rather than there being a bug in your code.
