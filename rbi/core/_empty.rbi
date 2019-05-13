@@ -845,10 +845,6 @@ end
 class NotImplementedError < ScriptError
 end
 
-class Object < BasicObject
-  include Kernel
-end
-
 class ObjectSpace::WeakMap < Object
   include Enumerable
 
