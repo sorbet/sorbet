@@ -7,7 +7,6 @@
 #include "core/ErrorQueue.h"
 #include "core/core.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/json_types.h"
 #include "main/options/options.h"
 #include <chrono>
 #include <deque>
