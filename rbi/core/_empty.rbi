@@ -32,9 +32,6 @@ end
 module Comparable
 end
 
-class Data < Object
-end
-
 class Date::Infinity < Numeric
 end
 

@@ -1542,3 +1542,6 @@ class Class < Module
   end
   def initialize(superclass=_, &blk); end
 end
+
+class Data < Object
+end
