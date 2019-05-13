@@ -42,7 +42,7 @@ If you are at Stripe, you might also want to see:
     - [Testing "Find Definition" and "Find All References"](#testing-find-definition-and-find-all-references)
     - [Testing incremental typechecking](#testing-incremental-typechecking)
   - [LSP recorded tests](#lsp-recorded-tests)
-    - [Updating tests](#updating-tests)
+  - [Updating tests](#updating-tests)
 - [Running over pay-server locally](#running-over-pay-server-locally)
   - [Build `sorbet`](#build-sorbet)
   - [Set up autogen locally](#set-up-autogen-locally)
@@ -53,7 +53,6 @@ If you are at Stripe, you might also want to see:
   - [Debugging](#debugging)
   - [Profiling](#profiling)
 - [Writing docs](#writing-docs)
-- [Updating sorbet.run](#updating-sorbetrun)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
   - [Shell](#shell)
@@ -454,7 +453,7 @@ recorded LSP session.
 - Lines that start with "Read:" will be sent to sorbet as input.
 - Lines that start with "Write:" will be expected from sorbet as output.
 
-#### Updating tests
+### Updating tests
 
 Frequently when a test is failing, it's because something inconsequential
 changed in the captured output, rather than there being a bug in your code.
