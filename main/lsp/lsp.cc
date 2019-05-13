@@ -57,7 +57,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::Typed) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return TypecheckRun{{}, {}, {}, move(gs)};
+        return TypecheckRun{{}, {}, {}, move(gs), true};
     }
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
@@ -88,6 +88,15 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
 }
 
 LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
+    if (enableTypecheckInfo) {
+        vector<string> filesTypechecked;
+        for (auto &f : run.filesTypechecked) {
+            filesTypechecked.push_back(string(f.data(*run.gs).path()));
+        }
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(filesTypechecked));
+        sendNotification(NotificationMessage("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo)));
+    }
+
     const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;

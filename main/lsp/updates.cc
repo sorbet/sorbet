@@ -187,7 +187,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     pipeline::typecheck(finalGs, move(resolved), opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     finalGs->lspTypecheckCount++;
-    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs)};
+    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs), false};
 }
 
 LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
@@ -280,6 +280,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             }
         }
         prodCategoryCounterInc("lsp.updates", "fastpath");
+        logger->debug("Taking fast path");
         ENFORCE(initialGS->errorQueue->isEmpty());
         vector<ast::ParsedFile> updatedIndexed;
         for (auto &f : subset) {
@@ -295,7 +296,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         pipeline::typecheck(finalGs, move(resolved), opts, workers);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
         finalGs->lspTypecheckCount++;
-        return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs)};
+        return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs), true};
     } else {
         return runSlowPath(changedFiles);
     }

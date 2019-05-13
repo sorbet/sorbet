@@ -131,6 +131,8 @@ class LSPLoop {
      * `params.initializationOptions.supportsOperationNotifications` set to `true`.
      */
     bool enableOperationNotifications = false;
+    /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
+    bool enableTypecheckInfo = false;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
@@ -154,6 +156,7 @@ class LSPLoop {
         std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
+        bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
     TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);

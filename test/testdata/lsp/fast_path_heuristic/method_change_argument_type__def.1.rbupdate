@@ -1,0 +1,9 @@
+# typed: true
+# assert-fast-path: method_change_argument_type__def.rb,method_change_argument_type__usage.rb
+
+class A extend T::Sig
+  sig {params(x: String).returns(String)}
+  def bar(x)
+    x
+  end
+end

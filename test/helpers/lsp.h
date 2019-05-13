@@ -14,6 +14,9 @@ std::unique_ptr<InitializeParams> makeInitializeParams(std::string rootPath, std
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
 
+/** Create an LSPMessage containing a textDocument/didChange request. */
+std::unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version);
+
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
 

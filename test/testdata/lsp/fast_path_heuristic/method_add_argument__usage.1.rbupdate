@@ -1,0 +1,5 @@
+# typed: true
+
+def main
+    A.new.bar(1) # error: Not enough arguments provided for method `A#bar`. Expected: `2`, got: `1`
+end

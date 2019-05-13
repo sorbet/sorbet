@@ -1,0 +1,5 @@
+# typed: true
+
+def main
+  A.new.bar(x: 1) # error: Missing required keyword argument `y`
+end
