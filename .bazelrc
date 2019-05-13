@@ -155,8 +155,7 @@ build:lto-linux --config=lto
 build --workspace_status_command=tools/buildstamp/get_workspace_status
 
 # By default, we make static builds, but we can also use dynamic linking if asked to.
-# Note that dynamic linging is not fully supported by some of our toolchains and thus it may not always work.
-# Patches are welcome.
+# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
 build --define=linkshared=false
 build:shared-libs --define=linkshared=true --cxxopt=-fPIC --copt=-fPIC --linkopt=-fPIC
 
