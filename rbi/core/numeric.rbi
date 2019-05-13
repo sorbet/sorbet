@@ -1715,3 +1715,5 @@ class Integer < Numeric
   sig {returns(Integer)}
   def ~(); end
 end
+
+Fixnum = Integer
