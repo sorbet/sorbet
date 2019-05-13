@@ -37,4 +37,5 @@ genrule(
       > "$@"
     """,
     stamp = 1,
+    tags = ["manual"],
 )
