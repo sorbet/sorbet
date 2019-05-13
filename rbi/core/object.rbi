@@ -1,4 +1,5 @@
 # typed: true
+
 class BasicObject
   sig {returns(T::Boolean)}
   def !(); end
@@ -18,6 +19,9 @@ class BasicObject
     .returns(T::Boolean)
   end
   def ==(other); end
+
+  sig {returns(Integer)}
+  def __id__(); end
 
   sig do
     params(
@@ -62,10 +66,9 @@ class BasicObject
     .returns(T.type_parameter(:U))
   end
   def instance_exec(*args, &blk); end
+end
 
-  sig {returns(Integer)}
-  def __id__(); end
-
+class Object < BasicObject
   sig {returns(Integer)}
   def object_id(); end
 end
