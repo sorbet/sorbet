@@ -1,5 +1,6 @@
 # typed: true
-# assert-fast-path: method_add_sig.rb
+# assert-slow-path: true
+# TODO(jvilk): Can this be covered on the fast path?
 
 class A extend T::Sig
   sig {params(x: Integer).returns(String)}
