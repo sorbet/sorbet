@@ -62,6 +62,9 @@ build:coverage --config=forcedebug
 build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
 test:coverage --spawn_strategy=standalone
 
+build --define=versioned=false
+build:versioned --workspace_status_command=tools/buildstamp/get_workspace_status --stamp --define=versioned=true
+
 ##
 ## Configurations used for releases
 ##
@@ -70,8 +73,7 @@ build:release-common --define release=true
 build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=debugsymbols
-build:release-common --config=nopie
-build:release-common --stamp
+build:release-common --config=versioned
 
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
@@ -150,9 +152,6 @@ build:lto --config=nopie
 ## flags that substantially increase Clang&LLVMs ability to devirtualize calls
 build:lto-linux --linkopt=-Wl,--icf=all
 build:lto-linux --config=lto
-
-# Used to build --stamp build that contains version and build time.
-build --workspace_status_command=tools/buildstamp/get_workspace_status
 
 # By default, we make static builds, but we can also use dynamic linking if asked to.
 # Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
@@ -236,7 +235,7 @@ build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=web
 # Use --cpu as a differentiator.
 build:webasm --cpu=webasm --spawn_strategy=standalone --genrule_strategy=standalone --copt=-Oz --cxxopt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0 --cxxopt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
-build:webasm --stamp
+build:webasm --config=versioned
 build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --cxxopt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --cxxopt=--llvm-lto --cxxopt=3 --linkopt=--llvm-lto --linkopt=3

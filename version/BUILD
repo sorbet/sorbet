@@ -15,7 +15,7 @@ cc_library(
 config_setting(
     name = "be-versioned",
     values = {
-        "define": "release=true",
+        "define": "versioned=true",
     },
 )
 
@@ -37,4 +37,5 @@ genrule(
       > "$@"
     """,
     stamp = 1,
+    tags = ["manual"],
 )
