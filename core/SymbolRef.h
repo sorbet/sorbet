@@ -399,7 +399,7 @@ public:
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_SYMBOLS = 200;
+    static constexpr int MAX_SYNTHETIC_SYMBOLS = 300;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
