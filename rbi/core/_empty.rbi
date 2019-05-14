@@ -32,9 +32,6 @@ end
 module Comparable
 end
 
-class Data < Object
-end
-
 class Date::Infinity < Numeric
 end
 
@@ -843,10 +840,6 @@ class NoMethodError < NameError
 end
 
 class NotImplementedError < ScriptError
-end
-
-class Object < BasicObject
-  include Kernel
 end
 
 class ObjectSpace::WeakMap < Object

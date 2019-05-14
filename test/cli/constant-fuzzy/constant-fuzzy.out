@@ -1,8 +1,8 @@
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` https://sorbet.org/docs/error-reference#5002
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L98: Did you mean: `Enumerator::Yielder`?
-    98 |class Enumerator::Yielder < Object
+    https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L95: Did you mean: `Enumerator::Yielder`?
+    95 |class Enumerator::Yielder < Object
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
      3 |class Ripper
@@ -14,8 +14,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://sorbet.org/docs/error-reference#5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L38: Did you mean: `Date`?
-    38 |class Date::Infinity < Numeric
+    https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L35: Did you mean: `Date`?
+    35 |class Date::Infinity < Numeric
               ^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L2: Did you mean: `Integer`?
      2 |class Integer < Numeric
@@ -24,8 +24,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://sorbet.org/docs/error-reference#5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L773: Did you mean: `IO`?
-     773 |class IO::EAGAINWaitReadable < Errno::EAGAIN
+    https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L770: Did you mean: `IO`?
+     770 |class IO::EAGAINWaitReadable < Errno::EAGAIN
                 ^^
     https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
      6 |module Net
