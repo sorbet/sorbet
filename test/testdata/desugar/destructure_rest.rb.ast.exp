@@ -1,0 +1,12 @@
+class <emptyTree><<C <root>>> < ()
+  [].map() do |<destructure>$2|
+    begin
+      begin
+        <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 1, 0)
+        _ = <assignTemp>$3.[](0)
+        <assignTemp>$3
+      end
+      <emptyTree>
+    end
+  end
+end
