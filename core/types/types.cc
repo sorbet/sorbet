@@ -101,6 +101,11 @@ TypePtr Types::classClass() {
     return res;
 }
 
+TypePtr Types::declBuilderForProcsSingletonClass() {
+    static auto res = make_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
+    return res;
+}
+
 TypePtr Types::String() {
     static auto res = make_type<ClassType>(Symbols::String());
     return res;
