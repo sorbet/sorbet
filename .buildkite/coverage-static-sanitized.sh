@@ -9,20 +9,6 @@ fi
 
 echo "--- Pre-setup :bazel:"
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     platform="linux";;
-    Darwin*)    platform="mac";;
-    *)          exit 1
-esac
-
-if [[ "linux" == "$platform" ]]; then
-  echo "linux coverage supported"
-elif [[ "mac" == "$platform" ]]; then
-  echo "mac coverage is not supported"
-  exit 1
-fi
-
 git checkout .bazelrc
 
 # This clean sidesteps a bug in bazel not re-building correct coverage for cached items
