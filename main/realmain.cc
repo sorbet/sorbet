@@ -82,10 +82,10 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::Ignore:
             return core::StrictLevel::None;
-        case core::StrictLevel::Stripe:
+        case core::StrictLevel::False:
             return core::StrictLevel::Ignore;
         case core::StrictLevel::Typed:
-            return core::StrictLevel::Stripe;
+            return core::StrictLevel::False;
         case core::StrictLevel::Strict:
             return core::StrictLevel::Typed;
         case core::StrictLevel::Strong:
@@ -105,7 +105,7 @@ string levelToSigil(core::StrictLevel level) {
             Exception::raise("Should never happen");
         case core::StrictLevel::Ignore:
             return "ignore";
-        case core::StrictLevel::Stripe:
+        case core::StrictLevel::False:
             return "false";
         case core::StrictLevel::Typed:
             return "true";

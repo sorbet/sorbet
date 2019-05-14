@@ -1250,7 +1250,7 @@ public:
                 case core::Names::revealType()._id:
                     // This error does not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
-                    if (send->loc.file().data(ctx).strictLevel <= core::StrictLevel::Stripe) {
+                    if (send->loc.file().data(ctx).strictLevel <= core::StrictLevel::False) {
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
                             e.setHeader("`{}` can only reveal types in `{}` files (or higher)", "T.reveal_type",
                                         "# typed: true");

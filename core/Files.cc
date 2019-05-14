@@ -30,7 +30,7 @@ vector<int> findLineBreaks(string_view s) {
 StrictLevel File::fileSigil(string_view source) {
     /*
      * StrictLevel::None: <none>
-     * StrictLevel::Stripe: # typed: false
+     * StrictLevel::False: # typed: false
      * StrictLevel::Typed: # typed: true
      * StrictLevel::Strict: # typed: strict
      * StrictLevel::String: # typed: strong
@@ -59,7 +59,7 @@ StrictLevel File::fileSigil(string_view source) {
         if (suffix == "ignore") {
             return StrictLevel::Ignore;
         } else if (suffix == "false") {
-            return StrictLevel::Stripe;
+            return StrictLevel::False;
         } else if (suffix == "true") {
             return StrictLevel::Typed;
         } else if (suffix == "strict") {

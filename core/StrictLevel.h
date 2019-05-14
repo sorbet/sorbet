@@ -13,9 +13,8 @@ enum class StrictLevel {
     // Don't even parse this file.
     Ignore = 2,
 
-    // Temporary; A level defined as "whatever Stripe needs it to be right now".
-    // Eventually this will be named "Ruby" and contain even fewer checks.
-    Stripe = 3,
+    // Only errors related to syntax, constant resolution and correctness of sigs are reported.
+    False = 3,
 
     // Normally the first level you transition your files to.
     Typed = 4,

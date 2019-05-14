@@ -319,7 +319,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = fnd->second;
     } else {
         if (fileData.originalSigil == core::StrictLevel::None) {
-            level = core::StrictLevel::Stripe;
+            level = core::StrictLevel::False;
         } else {
             level = fileData.originalSigil;
         }
@@ -333,7 +333,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
     if (gs.runningUnderAutogen) {
         // Autogen stops before infer but needs to see all definitions
-        level = core::StrictLevel::Stripe;
+        level = core::StrictLevel::False;
     }
 
     switch (level) {
@@ -346,7 +346,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         case core::StrictLevel::Internal:
             Exception::raise("Should never happen");
             break;
-        case core::StrictLevel::Stripe:
+        case core::StrictLevel::False:
             prodCounterInc("types.input.files.sigil.none");
             break;
         case core::StrictLevel::Typed:

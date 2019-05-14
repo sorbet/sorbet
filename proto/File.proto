@@ -6,7 +6,7 @@ message File {
     enum StrictLevel {
         None = 0;
         Internal = 1;
-        Stripe = 2;
+        False = 2;
         Ignore = 3;
         Typed = 4;
         Strict = 5;

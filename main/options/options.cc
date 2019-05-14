@@ -66,7 +66,7 @@ core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> l
     if (key == "ignore") {
         return core::StrictLevel::Ignore;
     } else if (key == "false") {
-        return core::StrictLevel::Stripe;
+        return core::StrictLevel::False;
     } else if (key == "true") {
         return core::StrictLevel::Typed;
     } else if (key == "strict") {
