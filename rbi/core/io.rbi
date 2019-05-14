@@ -659,3 +659,35 @@ class IO < Object
   sig {returns(Integer)}
   def to_i(); end
 end
+
+class IO::EAGAINWaitReadable < Errno::EAGAIN
+  include IO::WaitReadable
+  Errno = T.let(nil, Integer)
+end
+
+class IO::EAGAINWaitWritable < Errno::EAGAIN
+  include IO::WaitWritable
+  Errno = T.let(nil, Integer)
+end
+
+class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
+  include IO::WaitReadable
+  Errno = T.let(nil, Integer)
+end
+
+class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
+  include IO::WaitWritable
+  Errno = T.let(nil, Integer)
+end
+
+module IO::WaitReadable
+end
+
+module IO::WaitWritable
+end
+
+class IOError < StandardError
+end
+
+class EOFError < IOError
+end

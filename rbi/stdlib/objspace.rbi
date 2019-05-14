@@ -8,3 +8,10 @@ module ObjectSpace
   def self.each_object(mod=BasicObject, &blk)
   end
 end
+
+class ObjectSpace::WeakMap < Object
+  include Enumerable
+
+  extend T::Generic
+  Elem = type_member(:out)
+end

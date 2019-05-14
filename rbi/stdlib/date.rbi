@@ -1,5 +1,5 @@
 # typed: strict
-class Date::Infinity
+class Date::Infinity < Numeric
   sig {returns(Date::Infinity)}
   def +@(); end
 

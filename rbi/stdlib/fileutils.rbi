@@ -62,10 +62,16 @@ class FileUtils::Entry_ < Object
   S_IF_DOOR = T.let(T.unsafe(nil), Integer)
 end
 
+module FileUtils::LowMethods
+end
+
 module FileUtils::NoWrite
   LOW_METHODS = T.let(T.unsafe(nil), Array)
   METHODS = T.let(T.unsafe(nil), Array)
   OPT_TABLE = T.let(T.unsafe(nil), Hash)
+end
+
+module FileUtils::StreamUtils_
 end
 
 module FileUtils::Verbose

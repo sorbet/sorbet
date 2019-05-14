@@ -180,3 +180,13 @@ module Etc
   SC_XOPEN_UNIX = T.let(T.unsafe(nil), Integer)
   SC_XOPEN_VERSION = T.let(T.unsafe(nil), Integer)
 end
+
+class Etc::Group < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+end
+
+class Etc::Passwd < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+end

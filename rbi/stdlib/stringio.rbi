@@ -433,3 +433,10 @@ class StringIO
   end
   def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 end
+
+class StringIO < Data
+  include Enumerable
+
+  extend T::Generic
+  Elem = type_member(:out, fixed: String)
+end

@@ -1716,4 +1716,10 @@ class Integer < Numeric
   def ~(); end
 end
 
+class FloatDomainError < RangeError
+end
+
+class ZeroDivisionError < StandardError
+end
+
 Fixnum = Integer
