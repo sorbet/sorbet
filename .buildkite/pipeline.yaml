@@ -59,4 +59,4 @@ steps:
     retry:
       automatic: true
     agents:
-      os: linux
+      os: mac
