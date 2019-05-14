@@ -7,7 +7,6 @@
 #include "core/ErrorQueue.h"
 #include "core/core.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/json_types.h"
 #include "main/options/options.h"
 #include <chrono>
 #include <deque>
@@ -81,7 +80,7 @@ class LSPLoop {
     /** Trees that have been indexed and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
-    std::vector<unsigned int> globalStateHashes;
+    std::vector<core::FileHash> globalStateHashes;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
     /** Root of LSP client workspace */
@@ -131,6 +130,8 @@ class LSPLoop {
      * `params.initializationOptions.supportsOperationNotifications` set to `true`.
      */
     bool enableOperationNotifications = false;
+    /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
+    bool enableTypecheckInfo = false;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
@@ -154,6 +155,7 @@ class LSPLoop {
         std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
+        bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
     TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
@@ -163,7 +165,7 @@ class LSPLoop {
 
     LSPResult pushDiagnostics(TypecheckRun filesTypechecked);
 
-    std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
+    std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
                            const std::unique_ptr<core::GlobalState> &currentGs);
 

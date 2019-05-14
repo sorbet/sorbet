@@ -157,6 +157,12 @@ public:
         return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(to_a));
     }
 
+    static std::unique_ptr<Expression> CallWithSplat(core::Loc loc, std::unique_ptr<Expression> recv,
+                                                     core::NameRef name, std::unique_ptr<Expression> args) {
+        return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), std::move(recv),
+                     MK::Symbol(loc, name), std::move(args));
+    }
+
     static std::unique_ptr<Expression> InsSeq1(core::Loc loc, std::unique_ptr<Expression> stat,
                                                std::unique_ptr<Expression> expr) {
         InsSeq::STATS_store stats;
@@ -255,6 +261,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
+        sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
         return sig;
     }
 
@@ -264,6 +271,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(void_));
+        sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
         return sig;
     }
 
@@ -297,6 +305,11 @@ public:
     static std::unique_ptr<Expression> Let(core::Loc loc, std::unique_ptr<Expression> value,
                                            std::unique_ptr<Expression> type) {
         return Send2(loc, T(loc), core::Names::let(), std::move(value), std::move(type));
+    }
+
+    static std::unique_ptr<Expression> AssertType(core::Loc loc, std::unique_ptr<Expression> value,
+                                                  std::unique_ptr<Expression> type) {
+        return Send2(loc, T(loc), core::Names::assertType(), std::move(value), std::move(type));
     }
 
     static std::unique_ptr<Expression> Unsafe(core::Loc loc, std::unique_ptr<Expression> inner) {

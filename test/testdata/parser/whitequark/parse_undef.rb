@@ -1,3 +1,11 @@
 # typed: true
+extend T::Sig
+sig do
+  params(
+      arg: BasicObject,
+  )
+  .void
+end
+def undef(*arg); end
 
-undef foo, :bar, :"foo#{1}" # error: Unsupported node type `Undef`
+undef foo, :bar, :"foo#{1}"

@@ -10,17 +10,6 @@ class LoadError < ScriptError
 end
 class RuntimeError < StandardError
 end
-module Kernel
-  sig do
-    params(
-      predicate: BasicObject,
-      msg: T.nilable(String),
-      opts: T.untyped,
-    )
-    .returns(NilClass)
-  end
-  def hard_assert(predicate, msg=nil, **opts); end
-end
 class Chalk::ODM::Mutator::Private::HashMutator
   extend T::Generic
   K = type_member

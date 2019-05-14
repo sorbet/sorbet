@@ -162,6 +162,7 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::WindowShowMessage:
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::SorbetShowOperation:
+        case LSPMethod::SorbetTypecheckRunInfo:
             return true;
     }
 }

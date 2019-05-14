@@ -927,7 +927,7 @@ private:
                     if (!lastSigs.empty()) {
                         if (!ctx.permitOverloadDefinitions()) {
                             if (auto e = ctx.state.beginError(lastSigs[0]->loc,
-                                                              core::errors::Resolver::InvalidMethodSignature)) {
+                                                              core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
                                 e.addErrorLine(send->loc, "Type annotation that will be used instead");
                             }
@@ -969,7 +969,8 @@ private:
                     prodCounterInc("types.sig.count");
 
                     auto loc = lastSigs[0]->loc;
-                    if (loc.file().data(ctx).originalSigil == core::StrictLevel::None) {
+                    if (loc.file().data(ctx).originalSigil == core::StrictLevel::None &&
+                        !lastSigs.front()->isDSLSynthesized()) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
                             e.setHeader("To use `sig`, this file must declare an explicit `# typed:` sigil (found: "
                                         "none). If you're not sure which one to use, start with `# typed: false`");

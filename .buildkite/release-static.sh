@@ -70,6 +70,7 @@ if [[ "mac" == "$platform" ]]; then
   rbenv exec gem install sorbet-*.gem
   rbenv exec bundle
   rbenv exec bundle exec rake test
+  rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 fi
 popd
 

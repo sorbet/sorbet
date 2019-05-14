@@ -50,6 +50,7 @@ NameDef names[] = {
     {"backtick", "`"},
     {"slice"},
     {"defined_p", "defined?"},
+    {"undef"},
     {"each"},
 
     // used in CFG for temporaries
@@ -163,6 +164,7 @@ NameDef names[] = {
     {"created"},
     {"merchant"},
     {"foreign"},
+    {"computedBy", "computed_by"},
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Mutator", "Mutator", true},
@@ -209,10 +211,6 @@ NameDef names[] = {
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
     // end DSL methods
-
-    // Our own special methods which have special meaning
-    {"hardAssert", "hard_assert"}, // Kernel.hard_assert
-    // end special methods
 
     // The next two names are used as keys in SymbolInfo::members to store
     // pointers up and down the singleton-class hierarchy. If A's singleton

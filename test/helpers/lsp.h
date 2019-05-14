@@ -9,10 +9,14 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
-std::unique_ptr<InitializeParams> makeInitializeParams(std::string rootPath, std::string rootUri);
+std::unique_ptr<InitializeParams> makeInitializeParams(std::string rootPath, std::string rootUri,
+                                                       bool enableTypecheckInfo);
 
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
+
+/** Create an LSPMessage containing a textDocument/didChange request. */
+std::unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
@@ -35,7 +39,8 @@ std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(Notificatio
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>> initializeLSP(std::string_view rootPath, std::string_view rootUri,
-                                                       LSPWrapper &lspWrapper, int &nextId);
+                                                       LSPWrapper &lspWrapper, int &nextId,
+                                                       bool enableTypecheckInfo = false);
 
 } // namespace sorbet::test
 #endif // TEST_HELPERS_LSP_H

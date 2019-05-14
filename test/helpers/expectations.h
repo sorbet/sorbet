@@ -10,6 +10,8 @@ struct Expectations {
     std::string basename;
     std::string testName;
     std::vector<std::string> sourceFiles;
+    // version => [{originalFilename, versionFilePath}, ...]
+    UnorderedMap<int, std::vector<std::pair<std::string, std::string>>> sourceFileUpdates;
     // folder + sourceFile => file
     UnorderedMap<std::string, std::shared_ptr<core::File>> sourceFileContents;
     UnorderedMap<std::string, std::string> expectations;

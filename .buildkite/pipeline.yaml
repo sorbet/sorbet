@@ -44,12 +44,15 @@ steps:
     agents:
       os: linux
   - wait: ~
-  - label: "All tests and builds succeeded"
-    command: .buildkite/all-succeeded.sh
   - label: "Deploy"
     command: .buildkite/publish.sh
     agents:
       os: linux
+  - wait: ~
+  - label: "All tests and builds succeeded"
+    command: .buildkite/all-succeeded.sh
+  - block: "Run optional code coverage"
+  - wait: ~
   - label: "Coverage: sorbet-static on Mac"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*

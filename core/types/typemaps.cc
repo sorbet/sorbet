@@ -417,6 +417,7 @@ TypePtr SelfTypeParam::_instantiate(Context ctx, const InlinedVector<SymbolRef, 
 
 TypePtr LambdaParam::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                   const vector<TypePtr> &targs) {
+    ENFORCE(params.size() == targs.size());
     for (auto &el : params) {
         if (el == this->definition) {
             return targs[&el - &params.front()];

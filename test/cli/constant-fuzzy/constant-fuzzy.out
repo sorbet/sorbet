@@ -30,7 +30,7 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
     https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi#L773: Did you mean: `IO`?
      773 |class IO::EAGAINWaitReadable < Errno::EAGAIN
                 ^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/set.rbi#L2: Did you mean: `Set`?
+    https://github.com/stripe/sorbet/tree/master/rbi/stdlib/set.rbi#L2: Did you mean: `Set`?
      2 |class Set < Object
         ^^^^^^^^^^^^^^^^^^
 

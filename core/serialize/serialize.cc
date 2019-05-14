@@ -223,16 +223,13 @@ void SerializerImpl::pickle(Pickler &p, const File &what) {
     p.putU1((u1)what.sourceType);
     p.putStr(what.path());
     p.putStr(what.source());
-    p.putU4(what.globalStateHash.load());
 }
 
 shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
     auto t = (File::Type)p.getU1();
     auto path = string(p.getStr());
     auto source = string(p.getStr());
-    auto hash = p.getU4();
     auto ret = make_shared<File>(std::move(path), std::move(source), t);
-    ret->setDefinitionHash(hash);
     return ret;
 }
 
@@ -432,9 +429,16 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         p.putU4(s._id);
     }
     p.putU4(what.members.size());
+    vector<pair<u4, u4>> membersSorted;
+
     for (const auto &member : what.members) {
-        p.putU4(member.first.id());
-        p.putU4(member.second._id);
+        membersSorted.emplace_back(member.first.id(), member.second._id);
+    }
+    fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
+
+    for (const auto &member : membersSorted) {
+        p.putU4(member.first);
+        p.putU4(member.second);
     }
 
     pickle(p, what.resultType.get());

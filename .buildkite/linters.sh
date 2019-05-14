@@ -68,7 +68,6 @@ if [ "$err" -ne 0 ]; then
     globalErr=$err
 fi
 
-
 if [ "$globalErr" -ne 0 ]; then
     exit $globalErr
 fi

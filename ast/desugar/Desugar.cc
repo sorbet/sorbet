@@ -107,8 +107,20 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
             auto pieceLoc = narg->loc;
             narg = MK::Send0(pieceLoc, std::move(narg), core::Names::to_s());
         }
-        auto n = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
-        res.reset(n.release());
+        if (isStringLit(dctx, res) && isStringLit(dctx, narg)) {
+            auto leftName = cast_tree<Literal>(narg.get())->asString(dctx.ctx);
+            auto rightName = cast_tree<Literal>(res.get())->asString(dctx.ctx);
+            auto newName = leftName.prepend(dctx.ctx, rightName.show(dctx.ctx));
+            res = MK::String(loc, newName);
+        } else if (isStringLit(dctx, res) && isa_tree<EmptyTree>(narg.get())) {
+            // no op
+        } else if (isa_tree<EmptyTree>(res.get()) && isStringLit(dctx, narg)) {
+            res = move(narg);
+        } else if (isa_tree<EmptyTree>(res.get()) && isa_tree<EmptyTree>(narg.get())) {
+            // no op
+        } else {
+            res = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
+        }
     };
     return res;
 }
@@ -1568,7 +1580,15 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Undef *undef) {
-                auto res = unsupportedNode(dctx, undef);
+                if (auto e = dctx.ctx.state.beginError(what->loc, core::errors::Desugar::UndefUsage)) {
+                    e.setHeader("Unsuppored method: undef");
+                }
+                Send::ARGS_store args;
+                for (auto &expr : undef->exprs) {
+                    args.emplace_back(node2TreeImpl(dctx, move(expr)));
+                }
+                auto res =
+                    MK::Send(loc, MK::Constant(loc, core::Symbols::Kernel()), core::Names::undef(), std::move(args));
                 result.swap(res);
             },
             [&](parser::Backref *backref) {

@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < ()
   <self>.puts(<self>.`("echo hi"))
 
-  <self>.puts(<self>.`("echo".concat(" hi")))
+  <self>.puts(<self>.`("echo hi"))
 end

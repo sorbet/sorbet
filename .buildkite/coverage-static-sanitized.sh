@@ -25,6 +25,7 @@ fi
 
 git checkout .bazelrc
 
+# This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
 
 rm -f bazel-*
@@ -32,8 +33,6 @@ mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcac
 {
   echo 'common --curses=no --color=yes'
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/coverage'
-  echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-  echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
 } >> .bazelrc
 
 ./bazel version

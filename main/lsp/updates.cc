@@ -16,6 +16,7 @@
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
+#include <algorithm> // std::unique, std::distance
 
 using namespace std;
 
@@ -61,9 +62,9 @@ core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     return fref;
 }
 
-vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
+vector<core::FileHash> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
     Timer timeit(logger, "computeStateHashes");
-    vector<unsigned int> res(files.size());
+    vector<core::FileHash> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
         auto copy = i;
@@ -74,10 +75,10 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
     res.resize(files.size());
 
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, unsigned int>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, unsigned int>>>>(files.size());
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
     workers.multiplexJob("lspStateHash", [fileq, resultq, files, logger = this->logger]() {
-        vector<pair<int, unsigned int>> threadResult;
+        vector<pair<int, core::FileHash>> threadResult;
         int processedByThread = 0;
         int job;
         options::Options emptyOpts;
@@ -89,14 +90,11 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     processedByThread++;
 
                     if (!files[job]) {
-                        threadResult.emplace_back(make_pair(job, 0));
+                        threadResult.emplace_back(job, core::FileHash{});
                         continue;
                     }
-                    auto hash = files[job]->getDefinitionHash();
-                    if (!hash.has_value()) {
-                        hash = pipeline::computeFileHash(files[job], *logger);
-                    }
-                    threadResult.emplace_back(make_pair(job, *hash));
+                    auto hash = pipeline::computeFileHash(files[job], *logger);
+                    threadResult.emplace_back(job, move(hash));
                 }
             }
         }
@@ -107,13 +105,13 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
     });
 
     {
-        vector<pair<int, unsigned int>> threadResult;
+        vector<pair<int, core::FileHash>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS, *logger);
              !result.done();
              result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS, *logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
-                    res[a.first] = a.second;
+                    res[a.first] = move(a.second);
                 }
             }
         }
@@ -189,7 +187,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     pipeline::typecheck(finalGs, move(resolved), opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     finalGs->lspTypecheckCount++;
-    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs)};
+    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs), false};
 }
 
 LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
@@ -208,6 +206,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
     auto hashes = computeStateHashes(changedFiles);
     ENFORCE(changedFiles.size() == hashes.size());
     vector<core::FileRef> subset;
+    vector<core::NameHash> changedHashes;
     int i = -1;
     {
         core::UnfreezeFileTable fileTableAccess(*initialGS);
@@ -226,18 +225,33 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                     globalStateHashes[fref.id()] = hashes[i];
                 }
             } else {
-                if (hashes[i] != core::GlobalState::HASH_STATE_INVALID && hashes[i] != globalStateHashes[fref.id()]) {
+                auto &oldHash = globalStateHashes[fref.id()];
+                ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
+                if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
+                    hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
                     logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
                     good = false;
-                    globalStateHashes[fref.id()] = hashes[i];
+                    oldHash = hashes[i];
                 }
                 if (good) {
+                    // TODO: update list of sends in this file, mark all(other) files that had same namerefs that this
+                    // defines for retypechecking
+                    for (auto &p : hashes[i].definitions.methodHashes) {
+                        auto fnd = oldHash.definitions.methodHashes.find(p.first);
+                        ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
+                        if (fnd->second != p.second) {
+                            changedHashes.emplace_back(p.first);
+                        }
+                    }
                     finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
                 }
 
                 subset.emplace_back(fref);
             }
         }
+        fast_sort(changedHashes);
+        changedHashes.resize(
+            std::distance(changedHashes.begin(), std::unique(changedHashes.begin(), changedHashes.end())));
     }
 
     if (good) {
@@ -250,16 +264,30 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                     subset.emplace_back(core::FileRef(i));
                 }
             }
+        } else {
+            int i = -1;
+            for (auto &oldHash : globalStateHashes) {
+                i++;
+                vector<core::NameHash> intersection;
+                std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.usages.begin(),
+                                      oldHash.usages.usages.end(), std::back_inserter(intersection));
+                if (!intersection.empty()) {
+                    auto ref = core::FileRef(i);
+                    logger->debug("Added {} to update set as used a changed method",
+                                  !ref.exists() ? "" : ref.data(*finalGs).path());
+                    subset.emplace_back(ref);
+                }
+            }
         }
-        logger->debug("Taking happy path");
         prodCategoryCounterInc("lsp.updates", "fastpath");
+        logger->debug("Taking fast path");
         ENFORCE(initialGS->errorQueue->isEmpty());
         vector<ast::ParsedFile> updatedIndexed;
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore);
             int id = t.file.id();
             indexed[id] = move(t);
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), t.file});
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
         }
 
         auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
@@ -268,7 +296,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         pipeline::typecheck(finalGs, move(resolved), opts, workers);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
         finalGs->lspTypecheckCount++;
-        return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs)};
+        return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs), true};
     } else {
         return runSlowPath(changedFiles);
     }

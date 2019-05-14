@@ -22,8 +22,7 @@ actions:
 2.  It will add a comment to the top of every file (like # typed: false or
     # typed: true, depending on how many errors were found in that file.)
 
-Would you like to continue? [Y/n] 
-SRB_YES set, proceeding
+SRB_YES set, continuing
 Generating: sorbet/config
 Generating: sorbet/rbi/sorbet-typed/
 Generating: sorbet/rbi/gems/
