@@ -38,7 +38,7 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
                 result.push_back(loc2Location(*gs, defResp->termLoc));
             } else {
                 for (auto &component : resp->getDispatchComponents()) {
-                    if (component.method.exists()) {
+                    if (component.method.exists() && !component.receiver->isUntyped()) {
                         addLocIfExists(*gs, result, component.method.data(*gs)->loc());
                     }
                 }

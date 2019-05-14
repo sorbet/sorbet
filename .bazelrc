@@ -58,7 +58,7 @@ build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
 build:dbg --config=nopie
 
-build:coverage --config=dbg
+build:coverage --config=forcedebug
 build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
 test:coverage --spawn_strategy=standalone
 
@@ -117,6 +117,7 @@ build:reduce-intermediate-file-size --copt=-g0 --linkopt=-g0 --cxxopt=-g0 # used
 build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --cxxopt=-Os
 build:reduce-intermediate-file-size --strip=always
 build:reduce-intermediate-file-size --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug --cxxopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
+build:reduce-intermediate-file-size --config=shared-libs
 
 build:buildfarm --curses=no --config=reduce-intermediate-file-size
 test:buildfarm --curses=no --config=reduce-intermediate-file-size
@@ -152,6 +153,11 @@ build:lto --config=nopie
 build:lto-linux --linkopt=-Wl,--icf=all
 build:lto-linux --config=lto
 
+# By default, we make static builds, but we can also use dynamic linking if asked to.
+# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
+build --define=linkshared=false
+build:shared-libs --define=linkshared=true --cxxopt=-fPIC --copt=-fPIC --linkopt=-fPIC
+
 # It's useful to be able to write `config_setting` rules for "this is
 # an unsanitized build", but we can't express "copt does not contain
 # -fsanitize". So we set this `--define` and unset it if we're using a
@@ -177,6 +183,8 @@ build:ubsan --cxxopt=-DHAS_SANITIZER
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
 build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 test:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 test:sanitize-linux --config=sanitize
 

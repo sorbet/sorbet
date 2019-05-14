@@ -200,7 +200,7 @@ rescue <emptyTree>::<C E> => x
     7
   end
 
-  <emptyTree>
+  ::Kernel.undef(:"x", :"y")
 
   ["a", "b"]
 

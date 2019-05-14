@@ -31,7 +31,6 @@ cc_binary(
     }),
     linkstatic = select({
         "//tools/config:linkshared": 0,
-        "//tools/config:webasm": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],

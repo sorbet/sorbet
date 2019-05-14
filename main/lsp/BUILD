@@ -85,6 +85,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "lsp",
+        "//payload",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],

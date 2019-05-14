@@ -351,6 +351,14 @@ module Kernel
 
   sig do
     params(
+      blk: T.proc.params(x: T.untyped).void
+    )
+    .returns(T.self_type)
+  end
+  def tap(&blk); end
+
+  sig do
+    params(
         method: Symbol,
         args: BasicObject,
     )
@@ -381,11 +389,12 @@ module Kernel
   sig {returns(T::Boolean)}
   def untrusted?(); end
 
+  sig {params(x: NilClass).returns([])}
   sig do
-    type_parameters(:T).params(
-        x: Object,
+    params(
+        x: BasicObject,
     )
-    .returns(T::Array[T.type_parameter(:T)])
+    .returns(T::Array[T.untyped])
   end
   def Array(x); end
 
@@ -757,6 +766,14 @@ module Kernel
     .returns(T.noreturn)
   end
   def throw(tag, obj=nil); end
+
+  sig do
+    params(
+        arg: BasicObject,
+    )
+    .void
+  end
+  def undef(*arg); end
 
   sig do
     params(

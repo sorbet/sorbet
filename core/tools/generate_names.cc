@@ -50,6 +50,7 @@ NameDef names[] = {
     {"backtick", "`"},
     {"slice"},
     {"defined_p", "defined?"},
+    {"undef"},
     {"each"},
 
     // used in CFG for temporaries
@@ -163,6 +164,7 @@ NameDef names[] = {
     {"created"},
     {"merchant"},
     {"foreign"},
+    {"computedBy", "computed_by"},
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Mutator", "Mutator", true},

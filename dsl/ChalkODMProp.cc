@@ -25,6 +25,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     core::NameRef name = core::NameRef::noName();
     core::Loc nameLoc;
 
+    core::NameRef computedByMethodName = core::NameRef::noName();
+    core::Loc computedByMethodNameLoc;
+
     switch (send->fun._id) {
         case core::Names::prop()._id:
             // Nothing special
@@ -150,10 +153,25 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     vector<unique_ptr<ast::Expression>> stats;
 
     // Compute the getters
-
     if (rules) {
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
+        }
+
+        // e.g. `const :foo, type, computed_by: :method_name`
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::computedBy())) {
+            auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
+            if (auto *lit = ast::cast_tree<ast::Literal>(val.get())) {
+                if (lit->isSymbol(ctx)) {
+                    computedByMethodNameLoc = lit->loc;
+                    computedByMethodName = lit->asSymbol(ctx);
+                } else {
+                    // error that value is not a symbol
+                    auto typeSymbol =
+                        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
+                    stats.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
+                }
+            }
         }
 
         if (foreign == nullptr) {
@@ -166,7 +184,21 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
-    stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+
+    if (computedByMethodName.exists()) {
+        // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
+        // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
+        // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
+        auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_());
+        auto unsafeNil = ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc));
+        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass),
+                                                 computedByMethodName, std::move(unsafeNil));
+        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
+                                                     ASTUtil::dupType(getType.get()));
+        stats.emplace_back(mkGet(loc, name, std::move(assertTypeMatches)));
+    } else {
+        stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+    }
 
     core::NameRef setName = name.addEq(ctx);
 

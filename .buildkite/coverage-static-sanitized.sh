@@ -25,6 +25,7 @@ fi
 
 git checkout .bazelrc
 
+# This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
 
 rm -f bazel-*
@@ -32,8 +33,6 @@ mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcac
 {
   echo 'common --curses=no --color=yes'
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/coverage'
-  echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-  echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
 } >> .bazelrc
 
 ./bazel version
@@ -62,8 +61,6 @@ xargs .buildkite/combine-coverage.sh < _tmp_/reports
 ./bazel-sorbet/external/llvm_toolchain/bin/llvm-cov show -instr-profile ./_tmp_/profdata_combined.profdata ./bazel-bin/test/test_corpus_sharded -object ./bazel-bin/main/sorbet > combined.coverage.txt
 
 .buildkite/codecov-bash -f combined.coverage.txt -X search
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
 
 if [ "$err" -ne 0 ]; then
     exit "$err"
