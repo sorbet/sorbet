@@ -146,6 +146,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             if (params->initializationOptions) {
                 auto &initOptions = *params->initializationOptions;
                 enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
+                enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
             }
 
             auto serverCap = make_unique<ServerCapabilities>();

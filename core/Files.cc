@@ -80,8 +80,8 @@ StrictLevel File::fileSigil(string_view source) {
 }
 
 File::File(string &&path_, string &&source_, Type sourceType)
-    : sourceType(sourceType), path_(path_), source_(source_), globalStateHash(GlobalState::HASH_STATE_NOT_COMPUTED),
-      originalSigil(fileSigil(this->source_)), strictLevel(originalSigil) {}
+    : sourceType(sourceType), path_(path_), source_(source_), originalSigil(fileSigil(this->source_)),
+      strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -89,30 +89,8 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType);
     ret->lineBreaks_ = lineBreaks_;
     ret->minErrorLevel_ = minErrorLevel_;
-    ret->globalStateHash = globalStateHash.load();
     ret->strictLevel = strictLevel;
     return ret;
-}
-
-optional<unsigned int> File::getDefinitionHash() const {
-    auto current = globalStateHash.load();
-    if (current != GlobalState::HASH_STATE_NOT_COMPUTED) {
-        return current;
-    }
-    return nullopt;
-}
-
-void File::setDefinitionHash(unsigned int hash) const {
-    auto current = globalStateHash.load();
-    while (true) {
-        if (current != GlobalState::HASH_STATE_NOT_COMPUTED) {
-            ENFORCE(current == hash);
-        } else {
-            if (globalStateHash.compare_exchange_weak(current, hash)) {
-                return;
-            }
-        }
-    }
 }
 
 FileRef::FileRef(unsigned int id) : _id(id) {
