@@ -1497,8 +1497,8 @@ class Class < Module
   sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
 
-  sig {params(superClass: NilClass).returns(Class)}
-  sig {params(superClass: NilClass, blk: T.proc.bind(Class).params(arg0: Class).void).returns(Class)}
+  sig {returns(Class)}
+  sig {params(blk: T.proc.bind(Class).params(arg0: Class).void).returns(Class)}
   sig {type_parameters(:T).params(superClass: T.type_parameter(:T)).returns(T.type_parameter(:T))}
   sig {type_parameters(:T).params(superClass: T.type_parameter(:T), blk: T.proc.bind(Class).params(arg0: Class).void).returns(T.type_parameter(:T))}
   def self.new(superClass = nil, &blk)
