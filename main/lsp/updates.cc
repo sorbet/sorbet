@@ -203,55 +203,60 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
-    auto hashes = computeStateHashes(changedFiles);
-    ENFORCE(changedFiles.size() == hashes.size());
+
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
-    int i = -1;
     {
-        core::UnfreezeFileTable fileTableAccess(*initialGS);
-        for (auto &f : changedFiles) {
-            ++i;
-            if (!f) {
-                continue;
-            }
-            auto wasFiles = initialGS->filesUsed();
-            auto fref = updateFile(f);
-            if (wasFiles != initialGS->filesUsed()) {
-                logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
-                good = false;
-                if (globalStateHashes.size() <= fref.id()) {
-                    globalStateHashes.resize(fref.id() + 1);
-                    globalStateHashes[fref.id()] = hashes[i];
-                }
-            } else {
-                auto &oldHash = globalStateHashes[fref.id()];
-                ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
-                if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
-                    hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-                    logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
-                    good = false;
-                    oldHash = hashes[i];
-                }
-                if (good) {
-                    // TODO: update list of sends in this file, mark all(other) files that had same namerefs that this
-                    // defines for retypechecking
-                    for (auto &p : hashes[i].definitions.methodHashes) {
-                        auto fnd = oldHash.definitions.methodHashes.find(p.first);
-                        ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
-                        if (fnd->second != p.second) {
-                            changedHashes.emplace_back(p.first);
-                        }
-                    }
-                    finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
-                }
+        Timer timeit(logger, "fast_path_decision");
+        auto hashes = computeStateHashes(changedFiles);
+        ENFORCE(changedFiles.size() == hashes.size());
 
-                subset.emplace_back(fref);
+        int i = -1;
+        {
+            core::UnfreezeFileTable fileTableAccess(*initialGS);
+            for (auto &f : changedFiles) {
+                ++i;
+                if (!f) {
+                    continue;
+                }
+                auto wasFiles = initialGS->filesUsed();
+                auto fref = updateFile(f);
+                if (wasFiles != initialGS->filesUsed()) {
+                    logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
+                    good = false;
+                    if (globalStateHashes.size() <= fref.id()) {
+                        globalStateHashes.resize(fref.id() + 1);
+                        globalStateHashes[fref.id()] = hashes[i];
+                    }
+                } else {
+                    auto &oldHash = globalStateHashes[fref.id()];
+                    ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
+                    if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
+                        hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
+                        logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
+                        good = false;
+                        oldHash = hashes[i];
+                    }
+                    if (good) {
+                        // TODO: update list of sends in this file, mark all(other) files that had same namerefs that
+                        // this defines for retypechecking
+                        for (auto &p : hashes[i].definitions.methodHashes) {
+                            auto fnd = oldHash.definitions.methodHashes.find(p.first);
+                            ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
+                            if (fnd->second != p.second) {
+                                changedHashes.emplace_back(p.first);
+                            }
+                        }
+                        finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
+                    }
+
+                    subset.emplace_back(fref);
+                }
             }
+            fast_sort(changedHashes);
+            changedHashes.resize(
+                std::distance(changedHashes.begin(), std::unique(changedHashes.begin(), changedHashes.end())));
         }
-        fast_sort(changedHashes);
-        changedHashes.resize(
-            std::distance(changedHashes.begin(), std::unique(changedHashes.begin(), changedHashes.end())));
     }
 
     if (good) {
