@@ -1502,7 +1502,6 @@ class Class < Module
   sig {type_parameters(:T).params(superClass: T.type_parameter(:T)).returns(T.type_parameter(:T))}
   sig {type_parameters(:T).params(superClass: T.type_parameter(:T), blk: T.proc.bind(Class).params(arg0: Class).void).returns(T.type_parameter(:T))}
   def self.new(superClass = nil, &blk)
-    T.unsafe(nil)
   end
 
   sig do
