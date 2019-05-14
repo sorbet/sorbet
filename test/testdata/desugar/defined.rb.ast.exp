@@ -1,5 +1,3 @@
 class <emptyTree><<C <root>>> < ()
-  ::<Magic>.defined?(<self>.foo())
-
-  <self>.defined_(<self>.foo())
+  ::<Magic>.defined?(nil)
 end
