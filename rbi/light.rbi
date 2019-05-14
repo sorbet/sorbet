@@ -3,8 +3,10 @@
 # This is used in our test suit as well as for fast quick checks.
 # Don't rely on this working anywhere of importance as we will remove and add
 # things at our leisure.
-
+# typed: strong
 class Data < Object
+end
+class ScriptError < Exception
 end
 class LoadError < ScriptError
 end
@@ -27,6 +29,8 @@ class Chalk::ODM::Mutator::Private::ArrayMutator
   sig {params(key: Integer, value: Elem).void}
   def []=(key, value)
   end
+end
+class Chalk::ODM::Document
 end
 class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
   sig {params(options: Hash).returns(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)}
@@ -1526,6 +1530,8 @@ class IO < Object
   def self.select(read_array, write_array=T.unsafe(nil), error_array=T.unsafe(nil), timeout=T.unsafe(nil)); end
   sig {returns(Integer)}
   def to_i(); end
+end
+class UnboundMethod
 end
 module Kernel
   sig do
