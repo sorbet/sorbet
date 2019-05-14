@@ -84,5 +84,3 @@ fi
 
 mkdir -p _out_/$platform
 cp bazel-bin/main/sorbet _out_/$platform/
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
