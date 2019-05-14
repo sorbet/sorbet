@@ -1,5 +1,4 @@
 # typed: true
-# assert-slow-path: true
 
 class A extend T::Sig
   sig {params(x: Integer).returns(String)}
@@ -7,3 +6,4 @@ class A extend T::Sig
     x.to_s
   end
 end
+  

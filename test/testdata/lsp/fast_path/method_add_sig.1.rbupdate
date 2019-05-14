@@ -1,9 +1,9 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: method_add_sig.rb
 
 class A extend T::Sig
   sig {params(x: Integer).returns(String)}
-  def bar(x:)
+  def bar(x)
     x.to_s
   end
 end
