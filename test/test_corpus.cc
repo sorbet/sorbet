@@ -328,7 +328,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).strictLevel < core::StrictLevel::Typed) {
+            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
@@ -357,7 +357,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::Typed) {
+        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
             checkTree();
             CFGCollectorAndTyper collector;
             ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));

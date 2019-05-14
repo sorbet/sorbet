@@ -76,9 +76,9 @@ struct FileIsTypedCase {
 TEST(CoreTest, FileIsTyped) { // NOLINT
     vector<FileIsTypedCase> cases = {
         {"", StrictLevel::None},
-        {"# typed: true", StrictLevel::Typed},
-        {"\n# typed: true\n", StrictLevel::Typed},
-        {"not a typed: sigil\n# typed: true\n", StrictLevel::Typed},
+        {"# typed: true", StrictLevel::True},
+        {"\n# typed: true\n", StrictLevel::True},
+        {"not a typed: sigil\n# typed: true\n", StrictLevel::True},
         {"typed:\n# typed: nonsense\n", StrictLevel::None},
         {"# typed: strict\n", StrictLevel::Strict},
         {"# typed: strong\n", StrictLevel::Strong},

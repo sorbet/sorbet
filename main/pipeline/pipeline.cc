@@ -35,7 +35,7 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::Typed || m->symbol.data(ctx)->isOverloaded()) {
+        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto &print = opts.print;
@@ -349,7 +349,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         case core::StrictLevel::False:
             prodCounterInc("types.input.files.sigil.none");
             break;
-        case core::StrictLevel::Typed:
+        case core::StrictLevel::True:
             prodCounterInc("types.input.files.sigil.typed");
             break;
         case core::StrictLevel::Strict:

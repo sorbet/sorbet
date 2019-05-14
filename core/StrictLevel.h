@@ -16,8 +16,10 @@ enum class StrictLevel {
     // Only errors related to syntax, constant resolution and correctness of sigs are reported.
     False = 3,
 
-    // Normally the first level you transition your files to.
-    Typed = 4,
+    // Things that would normally be called "type errors" are reported.
+    // This includes calling a non-existent method, calling a method with mismatched
+    // argument counts, using variables inconsistently with their types, etc.
+    True = 4,
 
     // Everything must be declared.
     Strict = 5,

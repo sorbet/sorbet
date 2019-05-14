@@ -54,7 +54,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                          move(gs));
     }
 
-    if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::Typed) {
+    if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
         return TypecheckRun{{}, {}, {}, move(gs), true};

@@ -8,7 +8,7 @@ message File {
         Internal = 1;
         False = 2;
         Ignore = 3;
-        Typed = 4;
+        True = 4;
         Strict = 5;
         Strong = 6;
         Max = 7;
