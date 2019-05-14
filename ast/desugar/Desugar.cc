@@ -1557,7 +1557,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::Defined *defined) {
                 auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                     node2TreeImpl(dctx, std::move(defined->value)));
+                                     // Intentionally drop the defined->value since we shouldn't typecheck if it exists
+                                     // or not node2TreeImpl(dctx, std::move(defined->value)));
+                                     MK::Nil(loc));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {

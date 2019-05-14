@@ -71,7 +71,7 @@ next 1
 next 1,2
 
 # defined
-defined?(X) # error: Unable to resolve
+defined?(X)
 
 
 # zsuper
