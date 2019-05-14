@@ -2,6 +2,7 @@
 set -e
 
 COMMAND_FILE=$(mktemp)
+trap 'rm -f "$COMMAND_FILE"' EXIT
 
 echo 'RECORD=1 ruby gems/sorbet/test/srb-rbi/empty/empty.rb > /dev/null' >> "$COMMAND_FILE"
 

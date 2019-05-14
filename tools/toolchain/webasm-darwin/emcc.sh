@@ -43,6 +43,7 @@ OUT_DIR=$(mktemp -dt "emscripten_out-XXXX")
 export OUT_DIR
 EMCC_TEMP_DIR=$(mktemp -dt "emscripten_tmp-XXXX")
 export EMCC_TEMP_DIR
+trap 'rm -f "$EMCC_TEMP_DIR" "$OUT_DIR" "$EM_CACHE" "$BC_RENAME_PREFIX" "$TMPDIR"' EXIT
 # shellcheck disable=SC2089
 # ^^^^ complains that we have literal ' in string, that we _intended_ to have there
 # I didn't find a way to structure it so that it stops complaining.
