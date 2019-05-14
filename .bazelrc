@@ -56,7 +56,6 @@ build:dbg --copt=-O0
 build:dbg --cxxopt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
-build:dbg --config=nopie
 
 build:coverage --config=forcedebug
 build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
@@ -73,6 +72,7 @@ build:release-common --define release=true
 build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=debugsymbols
+build:release-common --config=static-libs
 build:release-common --config=versioned
 
 # harden: mark relocation sections read-only
@@ -147,7 +147,7 @@ build:forcedebug --cxxopt=-DFORCE_DEBUG
 build:lto --copt=-flto=thin
 build:lto --cxxopt=-flto=thin
 build:lto --linkopt=-flto=thin
-build:lto --config=nopie
+build:lto --config=static-libs
 
 ## flags that substantially increase Clang&LLVMs ability to devirtualize calls
 build:lto-linux --linkopt=-Wl,--icf=all
@@ -157,6 +157,13 @@ build:lto-linux --config=lto
 # Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
 build --define=linkshared=false
 build:shared-libs --define=linkshared=true --cxxopt=-fPIC --copt=-fPIC --linkopt=-fPIC
+
+# By default, we make dynamicly linked builds, while release builds are statically linked.
+# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
+# Still, we try to use it by default as it has lower iteration time in dev
+build --define=linkshared=true --cxxopt=-fPIC --copt=-fPIC --linkopt=-fPIC
+build:static-libs --define=linkshared=false --cxxopt=-fno-PIC --copt=-fno-PIC --linkopt=-fno-PIC
+build:static-libs --linkopt=-fno-pie --copt=-fno-pie --cxxopt=-fno-pie
 
 # It's useful to be able to write `config_setting` rules for "this is
 # an unsanitized build", but we can't express "copt does not contain
@@ -207,10 +214,6 @@ build:debugsymbols --cxxopt=-g3 --cxxopt=-fstandalone-debug --cxxopt=-DDEBUG_SYM
 build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS --linkopt=-glldb
 build:debugsymbols --spawn_strategy=standalone
 build:debugsymbols --genrule_strategy=standalone
-
-build:nopie --linkopt=-fno-pie
-build:nopie --copt=-fno-pie
-build:nopie --cxxopt=-fno-pie
 
 build --strip=never
 
