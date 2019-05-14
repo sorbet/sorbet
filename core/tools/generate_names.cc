@@ -362,6 +362,9 @@ NameDef names[] = {
     {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
     {"Helpers", "Helpers", true},
+    {"Net", "Net", true},
+    {"IMAP", "IMAP", true},
+    {"Protocol", "Protocol", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

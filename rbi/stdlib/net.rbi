@@ -3004,7 +3004,7 @@ class Net::HTTPVersionNotSupported < Net::HTTPServerError
 
 end
 
-class Net::IMAP
+class Net::IMAP < Net::Protocol
   include ::OpenSSL::SSL
   include ::OpenSSL
   include ::MonitorMixin

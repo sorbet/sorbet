@@ -244,6 +244,16 @@ void GlobalState::initEmpty() {
     id = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::DeclBuilderForProcsSingleton());
 
+    // Ruby 2.5 Hack
+    id = synthesizeClass(core::Names::Constants::Net(), 0, true);
+    ENFORCE(id == Symbols::Net());
+    id = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::IMAP());
+    Symbols::Net_IMAP().data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::Net_IMAP());
+    id = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::Protocol());
+    ENFORCE(id == Symbols::Net_Protocol());
+    Symbols::Net_Protocol().data(*this)->setIsModule(false);
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Top()] = Symbols::top();

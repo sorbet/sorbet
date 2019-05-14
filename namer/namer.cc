@@ -385,6 +385,13 @@ public:
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
 
+        // In Ruby 2.5 they changed this class to have a different superclass
+        // from 2.4. Since we don't have a good story around versioned ruby rbis
+        // yet, lets just force the superclass regardless of version.
+        if (klass->symbol == core::Symbols::Net_IMAP()) {
+            klass->symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
+        }
+
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
