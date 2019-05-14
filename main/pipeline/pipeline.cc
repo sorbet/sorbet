@@ -347,13 +347,13 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
             Exception::raise("Should never happen");
             break;
         case core::StrictLevel::False:
-            prodCounterInc("types.input.files.sigil.none");
+            prodCounterInc("types.input.files.sigil.false");
             break;
         case core::StrictLevel::True:
-            prodCounterInc("types.input.files.sigil.typed");
+            prodCounterInc("types.input.files.sigil.true");
             break;
         case core::StrictLevel::Strict:
-            prodCounterInc("types.input.files.sigil.strictLevel");
+            prodCounterInc("types.input.files.sigil.strict");
             break;
         case core::StrictLevel::Strong:
             prodCounterInc("types.input.files.sigil.strong");
