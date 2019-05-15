@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 namespace spd = spdlog;
-
+namespace sorbet {
 class WorkerPool {
     int size;
     // Tune queue for small size
@@ -93,5 +93,5 @@ public:
 
     void multiplexJob(std::string_view taskName, Task t);
 };
-
+};     // namespace sorbet
 #endif // SORBET_WORKERPOOL_H

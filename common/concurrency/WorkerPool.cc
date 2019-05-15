@@ -2,6 +2,7 @@
 #include "absl/strings/str_cat.h"
 
 using namespace std;
+namespace sorbet {
 WorkerPool::WorkerPool(int size, const shared_ptr<spd::logger> &logger) : WorkerPool(size, *logger){};
 WorkerPool::WorkerPool(int size, spd::logger &logger) : size(size), logger(logger) {
     logger.debug("Creating {} worker threads", size);
@@ -57,3 +58,5 @@ void WorkerPool::multiplexJob_(WorkerPool::Task_ t) {
         threadQueues[i]->enqueue(t);
     }
 }
+
+}; // namespace sorbet
