@@ -151,7 +151,7 @@ class Sorbet::Private::Static::ENVClass
   end
   def update(key, &blk); end
 end
-Object::ENV = T.let(T.unsafe(nil), Sorbet::Private::Static::ENVClass)
+::ENV = T.let(T.unsafe(nil), Sorbet::Private::Static::ENVClass)
 
 # The magic type that sig {void} returns
 module Sorbet::Private::Static::Void
