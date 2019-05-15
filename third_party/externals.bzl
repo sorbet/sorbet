@@ -103,7 +103,7 @@ def externals():
     new_git_repository(
         name="cxxopts",
         remote="https://github.com/jarro2783/cxxopts.git",
-        commit="3876c0907237e5fa89c5850ed1ee688a3bcb62b3",
+        commit="e34676f73e49eeff30cb101f1c5ba8806fbe6773",
         build_file = "//third_party:cxxopts.BUILD",
     )
 
