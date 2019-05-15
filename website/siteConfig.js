@@ -26,6 +26,7 @@ const siteConfig = {
     {label: 'Docs', doc: 'overview'},
     {label: 'Try it online', href: 'https://sorbet.run'},
     {label: 'Talks', doc: 'talks/talks'},
+    {blog: true, label: 'Blog'},
   ],
 
   customDocsPath: 'website/docs',
