@@ -136,7 +136,7 @@ def included(other)
 end
 ```
 
-Instead of attempting understand this specific pattern, exposes a new construct:
+Instead of attempting understand this specific pattern, Sorbet exposes a new construct:
 `mixes_in_class_methods`. At runtime, it behaves just like the above, but
 statically `srb` will know what class methods are being defined.
 
