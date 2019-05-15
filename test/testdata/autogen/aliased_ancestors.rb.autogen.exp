@@ -73,7 +73,7 @@ requires: []
  scope=[]
  name=[Alias1]
  nesting=[]
- resolved=[Foo]
+ resolved=[Alias1]
  loc=test/testdata/autogen/aliased_ancestors.rb:10
  is_defining_ref=0
 [ref id=6]
@@ -87,7 +87,7 @@ requires: []
  scope=[]
  name=[Alias2]
  nesting=[]
- resolved=[Foo]
+ resolved=[Alias2]
  loc=test/testdata/autogen/aliased_ancestors.rb:12
  is_defining_ref=0
  parent_of=[Child]
