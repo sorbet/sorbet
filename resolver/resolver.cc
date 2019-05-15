@@ -588,8 +588,10 @@ public:
         auto todoClassAliases = std::move(constants.todoClassAliases_);
         auto todoTypeAliases = std::move(constants.todoTypeAliases_);
         bool progress = true;
+        bool first = true; // we need to run at least once to force class aliases and type aliases
 
-        while (!(todo.empty() && todoAncestors.empty()) && progress) {
+        while (first || (!(todo.empty() && todoAncestors.empty()) && progress)) {
+            first = false;
             counterInc("resolve.constants.retries");
             {
                 Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.ancestors");
