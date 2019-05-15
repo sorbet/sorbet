@@ -302,6 +302,24 @@ private:
     }
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
+        core::SymbolRef enclosingTypeMember;
+        core::SymbolRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
+        while (enclosingClass != core::Symbols::root()) {
+            auto typeMembers = enclosingClass.data(ctx)->typeMembers();
+            if (!typeMembers.empty()) {
+                enclosingTypeMember = typeMembers[0];
+                break;
+            }
+            enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
+        }
+        if (enclosingTypeMember.exists()) {
+            if (auto e = ctx.state.beginError(job.rhs->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
+                e.setHeader("Type aliases are not allowed in generic classes");
+                e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
+            }
+            job.lhs.data(ctx)->resultType = core::Types::untyped(ctx, job.lhs);
+            return true;
+        }
         if (isFullyResolved(ctx, job.rhs)) {
             job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
             return true;
@@ -495,30 +513,13 @@ public:
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send != nullptr && send->fun == core::Names::typeAlias() && send->args.size() == 1) {
-            core::SymbolRef enclosingTypeMember;
-            core::SymbolRef enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
-            while (enclosingClass != core::Symbols::root()) {
-                auto typeMembers = enclosingClass.data(ctx)->typeMembers();
-                if (!typeMembers.empty()) {
-                    enclosingTypeMember = typeMembers[0];
-                    break;
-                }
-                enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
-            }
-            if (enclosingTypeMember.exists()) {
-                if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
-                    e.setHeader("Type aliases are not allowed in generic classes");
-                    e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
-                }
-            } else {
-                auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
-                this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
+            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
+            this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 
-                // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
-                // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-                auto item = ResolutionItem{nesting_, id};
-                this->todo_.emplace_back(std::move(item));
-            }
+            // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
+            // we'll still emit a warning when the rhs of a type alias doesn't resolve.
+            auto item = ResolutionItem{nesting_, id};
+            this->todo_.emplace_back(std::move(item));
             return asgn;
         }
 
