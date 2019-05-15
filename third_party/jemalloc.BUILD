@@ -30,9 +30,9 @@ JEMALLOC_BUILD_COMMAND = """
   export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
   export EXTRA_CFLAGS="-stdlib=libc++ $${LTOFLAGS}"
   export EXTRA_CXXFLAGS="$${EXTRA_CFLAGS}"
-  export LDFLAGS="$${LTOFLAGS}"
+  export LDFLAGS="$${LTOFLAGS} $$([ "$$(uname)" = "Linux" ] && echo " -fuse-ld=lld")"
   pushd $$(dirname $(location autogen.sh)) && \
-    ./autogen.sh --without-export --disable-shared --enable-static --disable-libdl && \
+    ./autogen.sh --without-export --disable-shared --enable-static && \
     make build_lib_static -j4  && \
     popd && \
     mv $$(dirname $(location autogen.sh))/lib/libjemalloc.a $(location lib/libjemalloc.a) && \
