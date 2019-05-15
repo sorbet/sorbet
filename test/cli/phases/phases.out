@@ -111,74 +111,74 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/_empty.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/array.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/bigmath.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/complex.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/coverage.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/datetime.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/didyoumean.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/dir.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/encoding.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/enumerable.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/enumerator.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/exception.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -189,8 +189,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/file.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -201,134 +201,134 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/float.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/gc.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/hash.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/io.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/marshal.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/matchdata.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/math.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/method.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/numeric.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/proc.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/process.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/random.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/range.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/rational.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/rbconfig.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/regexp.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/rubyvm.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/signal.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/string.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/symbol.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -339,14 +339,14 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/time.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/core/tracepoint.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -375,32 +375,32 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/abbrev.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/base64.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/benchmark.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/bigdecimal.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/bundler.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -411,8 +411,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/csv.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -441,26 +441,26 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/etc.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/fileutils.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/forwardable.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/json.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -471,8 +471,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/msgpack.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -483,8 +483,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -495,20 +495,20 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/openssl.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/ostruct.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/pathname.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -531,14 +531,14 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/rubygems.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/set.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -561,8 +561,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/stringscanner.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -597,8 +597,8 @@ ClassDef{
   },
   {
    "path": "https://github.com/stripe/sorbet/tree/master/rbi/stdlib/uri.rbi",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   },
   {
@@ -615,8 +615,8 @@ ClassDef{
   },
   {
    "path": "-e",
-   "sigil": "Typed",
-   "strict": "Typed",
+   "sigil": "True",
+   "strict": "True",
    "min_error_level": "Max"
   }
  ]
