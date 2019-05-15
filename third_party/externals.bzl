@@ -62,7 +62,7 @@ def externals():
     new_git_repository(
         name="lizard",
         remote="https://github.com/inikep/lizard.git",
-        commit="02491c71c2e6fd5c10997404df2f18d0fc7afadb",
+        commit="dda3b335e92ecd5caceccc9c577b39dd4e3c9950",
         build_file = "//third_party:lizard.BUILD",
     )
 
