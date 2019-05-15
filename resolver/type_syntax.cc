@@ -666,6 +666,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             } else {
                 corrected = recvi->symbol;
             }
+            corrected = corrected.data(ctx)->dealias(ctx);
 
             if (!corrected.data(ctx)->isClass()) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
