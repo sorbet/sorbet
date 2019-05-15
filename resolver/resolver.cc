@@ -369,7 +369,7 @@ private:
                 return false;
             }
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixin to unresolved type alias");
+                e.setHeader("Superclasses and mixins may not be type aliases");
             }
             resolved = core::Symbols::StubAncestor();
         } else {
