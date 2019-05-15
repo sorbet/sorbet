@@ -885,13 +885,6 @@ module Kernel
 end
 
 class Object < BasicObject
-  include Kernel
-
-  sig {returns(Integer)}
-  def object_id(); end
-end
-
-class Module < Object
   ARGF = T.let(T.unsafe(nil), Object)
   ARGV = T.let(T.unsafe(nil), Array)
   CROSS_COMPILING = T.let(T.unsafe(nil), NilClass)
@@ -912,6 +905,13 @@ class Module < Object
   TOPLEVEL_BINDING = T.let(T.unsafe(nil), Binding)
   TRUE = T.let(T.unsafe(nil), TrueClass)
 
+  include Kernel
+
+  sig {returns(Integer)}
+  def object_id(); end
+end
+
+class Module < Object
   sig {returns(T::Array[Integer])}
   def self.constants(); end
 
