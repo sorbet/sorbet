@@ -18,7 +18,7 @@ begin
         ::Alias = ::Parent
         begin
           ::Sorbet::Private::Static.keep_for_ide(::Child1)
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          ::Sorbet::Private::Static.keep_for_ide(::Alias)
           <emptyTree>
         end
         <emptyTree>
@@ -95,7 +95,7 @@ begin
       end
     end
   end
-  class ::Child1<<C Child1>> < (::Parent)
+  class ::Child1<<C Child1>> < (::Alias)
     def self.<static-init><<static-init>>(<blk>)
       @@class_var
     end
