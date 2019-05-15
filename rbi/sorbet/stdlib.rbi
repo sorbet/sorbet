@@ -34,7 +34,6 @@ end
 # here.
 ::Sorbet::Private::Static::IOLike = T.type_alias(
   T.any(
-    File,
     IO,
     StringIO,
     Tempfile
