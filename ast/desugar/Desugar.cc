@@ -125,6 +125,48 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     return res;
 }
 
+bool isIVarAssign(Expression* stat) {
+    auto assign = cast_tree<Assign>(stat);
+    if (!assign) {
+        return false;
+    }
+    auto ident = cast_tree<UnresolvedIdent>(assign->lhs.get());
+    if (!ident) {
+        return false;
+    }
+    if (ident->kind != UnresolvedIdent::Instance) {
+        return false;
+    }
+    return true;
+}
+
+unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expression> body) {
+    if (!body->loc.file().data(dctx.ctx).isRBI()) {
+        return body;
+    }
+    if (isa_tree<EmptyTree>(body.get())) {
+        return body;
+    } else if (auto inseq = cast_tree<InsSeq>(body.get())) {
+        for (auto &stat : inseq->stats) {
+            if (!isIVarAssign(stat.get())) {
+                if (auto e = dctx.ctx.state.beginError(stat->loc, core::errors::Desugar::CodeInRBI)) {
+                    e.setHeader("RBI methods must not have code");
+                }
+            }
+        }
+        if (!isIVarAssign(inseq->expr.get())) {
+            if (auto e = dctx.ctx.state.beginError(inseq->expr->loc, core::errors::Desugar::CodeInRBI)) {
+                e.setHeader("RBI methods must not have code");
+            }
+        }
+    } else {
+        if (auto e = dctx.ctx.state.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
+            e.setHeader("RBI methods must not have code");
+        }
+    }
+    return body;
+}
+
 unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc declLoc, core::NameRef name,
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
@@ -143,12 +185,7 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
     unique_ptr<Expression> desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
-
-    if (loc.file().data(dctx.ctx).isRBI() && !isa_tree<EmptyTree>(desugaredBody.get())) {
-        if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::CodeInRBI)) {
-            e.setHeader("RBI methods must not have code");
-        }
-    }
+    desugaredBody = validateRBIBody(dctx, move(desugaredBody));
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
     if (isSelf) {
