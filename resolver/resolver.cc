@@ -590,7 +590,7 @@ public:
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
 
-        while (first || (!(todo.empty() && todoAncestors.empty()) && progress)) {
+        while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
             first = false;
             counterInc("resolve.constants.retries");
             {
