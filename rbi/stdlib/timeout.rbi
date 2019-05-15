@@ -21,6 +21,7 @@ class Timeout::Error < RuntimeError
 
   sig { params(msg: T.untyped).void }
   def initialize(msg = nil)
+    @thread = T.let(T.unsafe(nil), T.nilable(Thread))
   end
 
   sig do
