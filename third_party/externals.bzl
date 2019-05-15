@@ -176,7 +176,7 @@ package(default_visibility = ["//visibility:public"])
     new_git_repository(
         name = "com_github_msgpack_msgpack",
         remote = "https://github.com/msgpack/msgpack-c",
-        commit = "b759f5bdf7e4ba59338499e889648e6227042f23",
+        commit = "9389912eaf4358e2ad1621b3995b5b26cd6703f3",
         build_file = "//third_party:msgpack.BUILD",
     )
 
