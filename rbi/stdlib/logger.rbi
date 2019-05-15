@@ -87,10 +87,6 @@ class Logger
     progname: nil, formatter: nil, datetime_format: nil,
     shift_period_suffix: '%Y%m%d'
   )
-    @level = T.let(T.unsafe(nil), T.nilable(Integer))
-    @progname = T.let(T.unsafe(nil), T.nilable(String))
-    @datetime_format = T.let(T.unsafe(nil), T.nilable(String))
-    @formatter = T.let(T.unsafe(nil), T.nilable(FormatterProcType))
   end
 
   sig { params(logdev: T.any(NilClass, String, IO)).returns(T.self_type) }
