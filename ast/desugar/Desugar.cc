@@ -141,11 +141,20 @@ bool isIVarAssign(Expression* stat) {
 }
 
 unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expression> body) {
+    if (!body->loc.exists()) {
+        return body;
+    }
     if (!body->loc.file().data(dctx.ctx).isRBI()) {
         return body;
     }
     if (isa_tree<EmptyTree>(body.get())) {
         return body;
+    } else if (isa_tree<Assign>(body.get())) {
+        if (!isIVarAssign(body.get())) {
+            if (auto e = dctx.ctx.state.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
+                e.setHeader("RBI methods must not have code");
+            }
+        }
     } else if (auto inseq = cast_tree<InsSeq>(body.get())) {
         for (auto &stat : inseq->stats) {
             if (!isIVarAssign(stat.get())) {
