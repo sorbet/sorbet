@@ -184,7 +184,7 @@ methods from the module onto the including class:</p>
   other.extend(<span class="hljs-keyword">self</span>)
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Instead of attempting understand this specific pattern, exposes a new construct:
+<p>Instead of attempting understand this specific pattern, Sorbet exposes a new construct:
 <code>mixes_in_class_methods</code>. At runtime, it behaves just like the above, but
 statically <code>srb</code> will know what class methods are being defined.</p>
 <p>Here's an example:</p>
