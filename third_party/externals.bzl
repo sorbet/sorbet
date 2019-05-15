@@ -183,7 +183,7 @@ package(default_visibility = ["//visibility:public"])
     new_git_repository(
         name = "com_github_d_bahr_crcpp",
         remote = "https://github.com/d-bahr/CRCpp.git",
-        commit = "12df3a15e89aaa3a4b44bb357b15e1f7e20a2608",
+        commit = "534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2",
         build_file = "//third_party:crcpp.BUILD",
     )
 
