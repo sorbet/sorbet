@@ -26,6 +26,7 @@ cc_binary(
         "//namer",
         "//payload:light",
         "//resolver",
+        "//flatten",
         "//test/helpers",
         "@com_google_googletest//:gtest",
         "@cxxopts",
