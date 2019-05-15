@@ -775,7 +775,7 @@ SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
                             "expansion would have been to {}",
                             showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
             }
-            return alias->symbol;
+            return Symbols::untyped();
         }
         return alias->symbol.data(gs)->dealias(gs, depthLimit - 1);
     }
