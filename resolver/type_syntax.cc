@@ -537,7 +537,31 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                     result.type = sym.data(ctx)->externalType(ctx);
                 }
             } else if (sym.data(ctx)->isTypeMember()) {
-                result.type = core::make_type<core::LambdaParam>(sym);
+                bool isTypeTemplate = sym.data(ctx)->owner.data(ctx)->isSingletonClass(ctx);
+
+                // The owner is a method when an annotation within a method
+                // definition is being checked.
+                core::SymbolRef ownerClass;
+                if (ctx.owner.data(ctx)->isMethod()) {
+                    ownerClass = ctx.owner.data(ctx)->owner;
+                } else {
+                    ownerClass = ctx.owner;
+                }
+
+                bool ctxIsSingleton = ownerClass.data(ctx)->isSingletonClass(ctx);
+
+                // Either this is a use of a type_template type and a self
+                // method, or it's a type_member and an instance method.
+                if ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton)) {
+                    result.type = core::make_type<core::LambdaParam>(sym);
+                } else {
+                    if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("`{}` type `{}` used in {} method definition",
+                                    isTypeTemplate ? "type_template" : "type_member", sym.show(ctx),
+                                    ctxIsSingleton ? "a singleton" : "an instance");
+                    }
+                    result.type = core::Types::untypedUntracked();
+                }
             } else if (sym.data(ctx)->isStaticField()) {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));

@@ -789,6 +789,7 @@ private:
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
             auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
+
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx)->resultType = spec->type;
@@ -984,8 +985,16 @@ private:
                     }
                     int i = 0;
 
+                    // process signatures in the context of either the current
+                    // class, or the current singleton class, depending on if
+                    // the current method is a self method.
+                    core::MutableContext sigCtx(ctx);
+                    if (mdef->isSelf()) {
+                        sigCtx.owner = ctx.owner.data(ctx)->singletonClass(ctx);
+                    }
+
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(ctx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
+                        auto sig = TypeSyntax::parseSig(sigCtx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
                                                         mdef->symbol);
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
