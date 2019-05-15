@@ -142,7 +142,13 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
-    auto desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
+    unique_ptr<Expression> desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
+
+    if (loc.file().data(dctx.ctx).isRBI() && !isa_tree<EmptyTree>(desugaredBody.get())) {
+        if (auto e = dctx.ctx.state.beginError(loc, core::errors::Desugar::CodeInRBI)) {
+            e.setHeader("RBI methods must not have code");
+        }
+    }
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
     if (isSelf) {
