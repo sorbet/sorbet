@@ -12,12 +12,14 @@ public:
 
     static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree);
 
-    std::unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, std::unique_ptr<ast::ClassDef> classDef);
+    std::unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx,
+                                                        std::unique_ptr<ast::ClassDef> classDef);
     std::unique_ptr<ast::Expression> addClasses(core::Context ctx, std::unique_ptr<ast::Expression> tree);
     std::unique_ptr<ast::Expression> addMethods(core::Context ctx, std::unique_ptr<ast::Expression> tree);
     ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs);
     std::unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, std::unique_ptr<ast::MethodDef> methodDef);
-    std::unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, std::unique_ptr<ast::MethodDef> methodDef);
+    std::unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx,
+                                                            std::unique_ptr<ast::MethodDef> methodDef);
 
     std::unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, std::unique_ptr<ast::ClassDef> classDef);
     std::unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, std::unique_ptr<ast::ClassDef> classDef);
@@ -29,9 +31,8 @@ public:
     };
 
 private:
-    bool isDefinition(core::Context, const std::unique_ptr<ast::Expression>&);
+    bool isDefinition(core::Context, const std::unique_ptr<ast::Expression> &);
     std::unique_ptr<ast::Expression> extractClassInit(core::Context, std::unique_ptr<ast::ClassDef> &);
-
 
     std::vector<std::unique_ptr<ast::ClassDef>> sortedClasses();
 
@@ -56,6 +57,6 @@ private:
     std::vector<int> classStack;
 };
 
-}
+} // namespace sorbet::flatten
 
 #endif

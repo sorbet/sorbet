@@ -1,8 +1,8 @@
-#include "ast/ast.h"
+#include "flatten/flatten.h"
 #include "ast/Helpers.h"
+#include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "core/core.h"
-#include "flatten/flatten.h"
 
 #include <utility>
 
@@ -36,7 +36,6 @@ bool FlattenWalk::isDefinition(core::Context ctx, const unique_ptr<ast::Expressi
 unique_ptr<ast::Expression> FlattenWalk::extractClassInit(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
     ast::InsSeq::STATS_store inits;
 
-
     for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
         if (isDefinition(ctx, *it)) {
             ++it;
@@ -64,7 +63,8 @@ FlattenWalk::~FlattenWalk() {
     ENFORCE(classStack.empty());
 }
 
-unique_ptr<ast::ClassDef> FlattenWalk::preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+unique_ptr<ast::ClassDef> FlattenWalk::preTransformClassDef(core::MutableContext ctx,
+                                                            unique_ptr<ast::ClassDef> classDef) {
     newMethodSet();
     classStack.emplace_back(classes.size());
     classes.emplace_back();
@@ -124,7 +124,8 @@ unique_ptr<ast::Expression> FlattenWalk::postTransformClassDef(core::Context ctx
     return make_unique<ast::EmptyTree>();
 };
 
-unique_ptr<ast::Expression> FlattenWalk::postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+unique_ptr<ast::Expression> FlattenWalk::postTransformMethodDef(core::Context ctx,
+                                                                unique_ptr<ast::MethodDef> methodDef) {
     auto &methods = curMethodSet();
     ENFORCE(!methods.stack.empty());
     ENFORCE(methods.methods.size() > methods.stack.back());
@@ -227,4 +228,4 @@ void FlattenWalk::popCurMethodSet() {
     methodScopes.pop_back();
 }
 
-}
+} // namespace sorbet::flatten
