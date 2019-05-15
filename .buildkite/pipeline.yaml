@@ -53,7 +53,7 @@ steps:
     command: .buildkite/all-succeeded.sh
   - block: "Run optional code coverage"
   - wait: ~
-  - label: "Coverage: sorbet-static on Mac"
+  - label: "Coverage: sorbet-static"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*
     retry:
