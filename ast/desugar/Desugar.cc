@@ -125,7 +125,7 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     return res;
 }
 
-bool isIVarAssign(Expression* stat) {
+bool isIVarAssign(Expression *stat) {
     auto assign = cast_tree<Assign>(stat);
     if (!assign) {
         return false;
