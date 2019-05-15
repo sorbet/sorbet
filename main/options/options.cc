@@ -18,8 +18,9 @@ using namespace std;
 namespace sorbet::realmain::options {
 struct PrintOptions {
     string option;
-    bool Printers::*flag;
+    PrinterConfig Printers::*config;
     bool supportsCaching = false;
+    bool supportsFileOutput = false;
 };
 
 const vector<PrintOptions> print_options({
@@ -41,8 +42,8 @@ const vector<PrintOptions> print_options({
     {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"missing-constants", &Printers::MissingConstants, true},
     {"cfg", &Printers::CFG, true},
-    {"autogen", &Printers::Autogen, true},
-    {"autogen-msgpack", &Printers::AutogenMsgPack, true},
+    {"autogen", &Printers::Autogen, true, true},
+    {"autogen-msgpack", &Printers::AutogenMsgPack, true, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -331,15 +332,27 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
     }
     vector<string> printOpts = raw["print"].as<vector<string>>();
     for (auto opt : printOpts) {
+        string outPath;
+        auto pos = opt.find(":");
+        if (pos != string::npos) {
+            outPath = opt.substr(pos + 1);
+            opt = opt.substr(0, pos);
+        }
         bool found = false;
         for (auto &known : print_options) {
             if (known.option == opt) {
-                opts.print.*(known.flag) = true;
+                auto &cfg = opts.print.*(known.config);
+                cfg.enabled = true;
+                cfg.outputPath = outPath;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
                         logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
+                }
+                if (!known.supportsFileOutput && outPath.size()) {
+                    logger->error("--print={} does not support file output. Printing to stdout", opt);
+                    cfg.outputPath = "";
                 }
                 found = true;
                 break;
@@ -458,9 +471,10 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        if ((opts.print.Autogen || opts.print.AutogenMsgPack) && (opts.stopAfterPhase != Phase::NAMER)) {
+        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) &&
+            (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
-                          opts.print.AutogenMsgPack ? "-msgpack" : "");
+                          opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
         }
 
@@ -523,7 +537,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.webTraceFile = raw["web-trace-file"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
-            if (!opts.print.AutogenMsgPack) {
+            if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
                 throw EarlyReturnWithCode(1);
             }

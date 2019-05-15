@@ -14,29 +14,34 @@ public:
     const int returnCode;
 };
 
+struct PrinterConfig {
+    bool enabled = false;
+    std::string outputPath;
+};
+
 struct Printers {
-    bool ParseTree = false;
-    bool ParseTreeJson = false;
-    bool Desugared = false;
-    bool DesugaredRaw = false;
-    bool DSLTree = false;
-    bool DSLTreeRaw = false;
-    bool NameTree = false;
-    bool NameTreeRaw = false;
-    bool SymbolTable = false;
-    bool SymbolTableRaw = false;
-    bool SymbolTableJson = false;
-    bool SymbolTableFull = false;
-    bool SymbolTableFullRaw = false;
-    bool FileTableJson = false;
-    bool ResolveTree = false;
-    bool ResolveTreeRaw = false;
-    bool MissingConstants = false;
-    bool CFG = false;
-    bool TypedSource = false;
-    bool Autogen = false;
-    bool AutogenMsgPack = false;
-    bool PluginGeneratedCode = false;
+    PrinterConfig ParseTree;
+    PrinterConfig ParseTreeJson;
+    PrinterConfig Desugared;
+    PrinterConfig DesugaredRaw;
+    PrinterConfig DSLTree;
+    PrinterConfig DSLTreeRaw;
+    PrinterConfig NameTree;
+    PrinterConfig NameTreeRaw;
+    PrinterConfig SymbolTable;
+    PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableJson;
+    PrinterConfig SymbolTableFull;
+    PrinterConfig SymbolTableFullRaw;
+    PrinterConfig FileTableJson;
+    PrinterConfig ResolveTree;
+    PrinterConfig ResolveTreeRaw;
+    PrinterConfig MissingConstants;
+    PrinterConfig CFG;
+    PrinterConfig TypedSource;
+    PrinterConfig Autogen;
+    PrinterConfig AutogenMsgPack;
+    PrinterConfig PluginGeneratedCode;
 };
 
 enum Phase {

@@ -148,10 +148,43 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
+struct SerializedAutogen {
+    // Values are selectively based on print options.
+    string strval;
+    string msgpack;
+};
+
 struct AutogenResult {
     CounterState counters;
-    vector<pair<int, string>> prints;
+    vector<pair<int, SerializedAutogen>> prints;
 };
+
+void emitAutogen(ostream &out, vector<pair<int, SerializedAutogen>> &merged, bool msgpack) {
+    for (auto &elem : merged) {
+        if (msgpack) {
+            out << elem.second.msgpack;
+        } else {
+            out << elem.second.strval;
+        }
+    }
+}
+
+void printAutogenForConfig(const options::PrinterConfig &pc, vector<pair<int, SerializedAutogen>> &merged,
+                           bool msgpack) {
+    if (!pc.enabled) {
+        return;
+    }
+    if (pc.outputPath.size()) {
+        ios_base::openmode mode = ios::trunc;
+        if (msgpack) {
+            mode |= ios::binary;
+        }
+        ofstream out(pc.outputPath, mode);
+        emitAutogen(out, merged, msgpack);
+    } else {
+        emitAutogen(std::cout, merged, msgpack);
+    }
+}
 
 void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &workers,
                 vector<ast::ParsedFile> &indexed) {
@@ -179,14 +212,16 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
                 auto pf = autogen::Autogen::generate(ctx, move(tree));
                 tree = move(pf.tree);
 
-                if (opts.print.Autogen) {
+                SerializedAutogen serialized;
+                if (opts.print.Autogen.enabled) {
                     Timer timeit(logger, "autogenToString");
-                    out.prints.emplace_back(make_pair(idx, pf.toString(ctx)));
+                    serialized.strval = pf.toString(ctx);
                 }
-                if (opts.print.AutogenMsgPack) {
+                if (opts.print.AutogenMsgPack.enabled) {
                     Timer timeit(logger, "autogenToMsgpack");
-                    out.prints.emplace_back(make_pair(idx, pf.toMsgpack(ctx, opts.autogenVersion)));
+                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
                 }
+                out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
 
@@ -195,7 +230,7 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
     });
 
     AutogenResult out;
-    vector<pair<int, string>> merged;
+    vector<pair<int, SerializedAutogen>> merged;
     for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
          res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
         if (!res.gotItem()) {
@@ -205,9 +240,8 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
-    for (auto &elem : merged) {
-        fmt::print("{}", elem.second);
-    }
+    printAutogenForConfig(opts.print.Autogen, merged, false);
+    printAutogenForConfig(opts.print.AutogenMsgPack, merged, true);
 } // namespace sorbet::realmain
 
 int realmain(int argc, char *argv[]) {
@@ -311,7 +345,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen || opts.print.AutogenMsgPack) {
+    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
         gs->runningUnderAutogen = true;
     }
     if (opts.reserveMemKiB > 0) {
