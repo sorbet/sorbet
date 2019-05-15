@@ -118,7 +118,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="febc5ee6a92d0eb7dac1fceaa6c648cf6521b4dc"
+        commit="436ba6c4a0ea3a06eca6e055f9c8d296bf3bae12"
     )
 
     new_git_repository(
