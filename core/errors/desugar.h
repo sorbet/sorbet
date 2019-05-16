@@ -11,7 +11,7 @@ constexpr ErrorClass NoConstantReassignment{3005, StrictLevel::True};
 // constexpr ErrorClass SimpleSuperclass{3006, StrictLevel::True};
 constexpr ErrorClass UnnamedBlockParameter{3007, StrictLevel::Strict};
 constexpr ErrorClass UndefUsage{3008, StrictLevel::Strict};
-constexpr ErrorClass UnsupportedRestArgsDestructure{3009, StrictLevel::Typed};
+constexpr ErrorClass UnsupportedRestArgsDestructure{3009, StrictLevel::True};
 } // namespace sorbet::core::errors::Desugar
 
 #endif
