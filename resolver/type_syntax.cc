@@ -539,14 +539,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             } else if (sym.data(ctx)->isTypeMember()) {
                 bool isTypeTemplate = sym.data(ctx)->owner.data(ctx)->isSingletonClass(ctx);
 
-                // The owner is a method when an annotation within a method
-                // definition is being checked.
-                core::SymbolRef ownerClass;
-                if (ctx.owner.data(ctx)->isMethod()) {
-                    ownerClass = ctx.owner.data(ctx)->owner;
-                } else {
-                    ownerClass = ctx.owner;
-                }
+                core::SymbolRef ownerClass = ctx.owner.data(ctx)->enclosingClass(ctx);
 
                 bool ctxIsSingleton = ownerClass.data(ctx)->isSingletonClass(ctx);
 
