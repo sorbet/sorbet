@@ -22,6 +22,7 @@
 #include "infer/infer.h"
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
+#include "name_locals/name_locals.h"
 #include "parser/parser.h"
 #include "pipeline.h"
 #include "plugin/Plugins.h"
@@ -160,6 +161,13 @@ unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, un
     return dsl::DSL::run(ctx, move(ast));
 }
 
+unique_ptr<ast::Expression> runLocalNamer(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
+
+    Timer timeit(gs.tracer(), "runLocalNamer", {{"file", (string)file.data(gs).path()}});
+    core::MutableContext ctx(gs, core::Symbols::root());
+    return sorbet::name_locals::NameLocals::run(ctx, move(ast));
+}
+
 ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {make_unique<ast::EmptyTree>(), file};
 }
@@ -188,6 +196,10 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             }
             if (!opts.skipDSLPasses) {
                 tree = runDSL(lgs, file, move(tree));
+            }
+            tree = runLocalNamer(lgs, file, move(tree));
+            if (opts.stopAfterPhase == options::Phase::LOCAL_NAMER) {
+                return emptyParsedFile(file);
             }
         }
         if (print.DSLTree.enabled) {
