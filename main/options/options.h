@@ -17,6 +17,8 @@ public:
 struct PrinterConfig {
     bool enabled = false;
     std::string outputPath;
+
+    void print(const std::string_view &contents) const;
 };
 
 struct Printers {

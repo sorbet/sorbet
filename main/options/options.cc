@@ -47,6 +47,14 @@ const vector<PrintOptions> print_options({
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
+void PrinterConfig::print(const string_view &contents) const {
+    if (outputPath.size()) {
+        FileOps::write(outputPath, contents);
+    } else {
+        fmt::print("{}", contents);
+    }
+};
+
 struct StopAfterOptions {
     string option;
     Phase flag;

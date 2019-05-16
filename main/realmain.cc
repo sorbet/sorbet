@@ -159,33 +159,6 @@ struct AutogenResult {
     vector<pair<int, SerializedAutogen>> prints;
 };
 
-void emitAutogen(ostream &out, vector<pair<int, SerializedAutogen>> &merged, bool msgpack) {
-    for (auto &elem : merged) {
-        if (msgpack) {
-            out << elem.second.msgpack;
-        } else {
-            out << elem.second.strval;
-        }
-    }
-}
-
-void printAutogenForConfig(const options::PrinterConfig &pc, vector<pair<int, SerializedAutogen>> &merged,
-                           bool msgpack) {
-    if (!pc.enabled) {
-        return;
-    }
-    if (pc.outputPath.size()) {
-        ios_base::openmode mode = ios::trunc;
-        if (msgpack) {
-            mode |= ios::binary;
-        }
-        ofstream out(pc.outputPath, mode);
-        emitAutogen(out, merged, msgpack);
-    } else {
-        emitAutogen(std::cout, merged, msgpack);
-    }
-}
-
 void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &workers,
                 vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
@@ -240,8 +213,19 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
-    printAutogenForConfig(opts.print.Autogen, merged, false);
-    printAutogenForConfig(opts.print.AutogenMsgPack, merged, true);
+
+    fmt::memory_buffer strbuf;
+    fmt::memory_buffer msgpackbuf;
+    for (auto &elem : merged) {
+        fmt::format_to(strbuf, "{}", elem.second.strval);
+        fmt::format_to(msgpackbuf, "{}", elem.second.msgpack);
+    }
+    if (opts.print.Autogen.enabled) {
+        opts.print.Autogen.print(to_string(strbuf));
+    }
+    if (opts.print.AutogenMsgPack.enabled) {
+        opts.print.AutogenMsgPack.print(to_string(msgpackbuf));
+    }
 } // namespace sorbet::realmain
 
 int realmain(int argc, char *argv[]) {
