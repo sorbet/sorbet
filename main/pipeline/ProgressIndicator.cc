@@ -1,5 +1,5 @@
 #include "ProgressIndicator.h"
-
+#include "common/concurrency/WorkerPool.h"
 #include <utility>
 
 using namespace std;
@@ -7,7 +7,7 @@ using namespace std;
 void ProgressIndicator::reportProgress(int current) {
     ENFORCE(this_thread::get_id() == outputThreadId);
     auto currentTime = getCurrentTimeMillis();
-    if (enabled && (lastReported - currentTime + REPORTING_INTERVAL() <= chrono::seconds{0})) {
+    if (enabled && (lastReported - currentTime + sorbet::WorkerPool::BLOCK_INTERVAL() <= chrono::seconds{0})) {
         lastReported = currentTime;
         progressbar_update(progress.get(), current);
     }

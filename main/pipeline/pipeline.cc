@@ -433,8 +433,8 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
     IndexResult ret;
-    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer()); !result.done();
-         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer())) {
+    for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer()); !result.done();
+         result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
         if (result.gotItem()) {
             counterConsume(move(threadResult.counters));
             if (ret.gs == nullptr) {
@@ -823,9 +823,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
             typecheck_thread_result threadResult;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer());
+                for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
-                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer())) {
+                     result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
                         typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),

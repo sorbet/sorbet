@@ -9,7 +9,6 @@
 #include "main/options/options.h"
 
 namespace sorbet::realmain::pipeline {
-constexpr std::chrono::milliseconds PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          std::unique_ptr<KeyValueStore> &kvstore);
 

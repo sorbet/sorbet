@@ -106,9 +106,8 @@ vector<core::FileHash> LSPLoop::computeStateHashes(const vector<shared_ptr<core:
 
     {
         vector<pair<int, core::FileHash>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS, *logger);
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS, *logger)) {
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), *logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), *logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     res[a.first] = move(a.second);
