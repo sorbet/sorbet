@@ -56,8 +56,7 @@ public:
     bool permitOverloadDefinitions() const;
 
     MutableContext withOwner(SymbolRef sym) const {
-        MutableContext r = MutableContext(state, sym);
-        return r;
+        return MutableContext(state, sym);
     }
 
     void trace(std::string_view msg) const;

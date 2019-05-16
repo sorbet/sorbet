@@ -54,8 +54,7 @@ void MutableContext::trace(string_view msg) const {
 }
 
 Context Context::withOwner(SymbolRef sym) const {
-    Context r = Context(state, sym);
-    return r;
+    return Context(state, sym);
 }
 
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
