@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 // violates our requirements, thus has to go first
+#include "common/Levenstein.h"
 #include "common/common.h"
 
 namespace sorbet::common {
