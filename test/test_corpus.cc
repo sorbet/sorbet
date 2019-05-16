@@ -10,6 +10,7 @@
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
 #include "common/common.h"
+#include "common/FileOps.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
