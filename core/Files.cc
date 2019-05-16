@@ -136,7 +136,9 @@ StrictLevel File::minErrorLevel() const {
 }
 
 bool File::isPayload() const {
-    return sourceType == Type::PayloadGeneration || sourceType == Type::Payload;
+    return sourceType == Type::PayloadGeneration ||
+           sourceType == Type::Payload ||
+           fileSigil(source()) == StrictLevel::Core;
 }
 
 bool File::isRBI() const {
