@@ -76,7 +76,7 @@ def externals():
     new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
-        commit="0ff7ff3ec7b322881fff3bd6d4861fda6e9331d9", # 5.1.0 with some tunning patches
+        commit="b0b3e49a54ec29e32636f4577d9d5a896d67fd20", # 5.2.0
         build_file = "//third_party:jemalloc.BUILD",
     )
 

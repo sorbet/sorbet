@@ -32,7 +32,7 @@ JEMALLOC_BUILD_COMMAND = """
   export EXTRA_CXXFLAGS="$${EXTRA_CFLAGS}"
   export LDFLAGS="$${LTOFLAGS} $$([ "$$(uname)" = "Linux" ] && echo " -fuse-ld=lld")"
   pushd $$(dirname $(location autogen.sh)) && \
-    ./autogen.sh --without-export && \
+    ./autogen.sh --without-export --disable-shared --enable-static && \
     make build_lib_static -j4  && \
     popd && \
     mv $$(dirname $(location autogen.sh))/lib/libjemalloc.a $(location lib/libjemalloc.a) && \
