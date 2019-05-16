@@ -72,6 +72,9 @@ for i in "$@"; do
     elif [[ "$i" =~ ^-march=(.*)$ ]]; then
         # nothing
         continue
+    elif [[ "$i" == "-framework" ]] || [[ "$i" == "Foundation" ]]; then
+        # workaround https://github.com/abseil/abseil-cpp/issues/308
+        continue
     else
         args=("${args[@]}" "$i")
     fi
