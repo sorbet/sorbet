@@ -384,7 +384,7 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
     Timer timeit(logger, "enqueueRequest");
     msg->counter = state.requestCounter++;
     msg->startTracer = timeit.getFlowEdge();
-    msg->timer = make_unique<Timer>(logger, "process_request");
+    msg->timer = make_unique<Timer>(logger, "processing_time");
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {
