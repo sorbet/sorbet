@@ -6,14 +6,12 @@
 namespace sorbet::name_locals {
 
 class NameLocals final {
-
 public:
     static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Expression> expr);
 
     NameLocals() = delete;
-
 };
 
-} // namespace sorbet::namer::local
+} // namespace sorbet::name_locals
 
 #endif
