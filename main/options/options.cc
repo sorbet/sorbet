@@ -48,10 +48,10 @@ const vector<PrintOptions> print_options({
 });
 
 void PrinterConfig::print(const string_view &contents) const {
-    if (outputPath.size()) {
-        FileOps::write(outputPath, contents);
-    } else {
+    if (outputPath.empty()) {
         fmt::print("{}", contents);
+    } else {
+        FileOps::write(outputPath, contents);
     }
 };
 

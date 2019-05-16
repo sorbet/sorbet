@@ -10,7 +10,4 @@ cat autogen.txt
 echo "--- autogen.txt end ---"
 echo
 
-# Check the byte count in msgpack output
-echo "--- autogen.msgpack start ---"
-wc -c autogen.msgpack
-echo "--- autogen.msgpack end ---"
+shasum autogen.msgpack
