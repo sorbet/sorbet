@@ -54,8 +54,7 @@ void MutableContext::trace(string_view msg) const {
 }
 
 Context Context::withOwner(SymbolRef sym) const {
-    Context r = Context(*this);
-    r.owner = sym;
+    Context r = Context(state, sym);
     return r;
 }
 
