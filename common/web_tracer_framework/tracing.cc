@@ -1,4 +1,5 @@
 #include "common/Counters.h"
+#include "common/FileOps.h"
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"

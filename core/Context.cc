@@ -1,4 +1,5 @@
 #include "core/Context.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "core/Hashing.h"
 #include "core/Types.h"

@@ -2,6 +2,7 @@
 #define GENERATE_LSP_MESSAGES_H
 #include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
+#include "common/FileOps.h"
 #include "common/JSON.h"
 #include "common/common.h"
 

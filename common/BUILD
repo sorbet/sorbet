@@ -17,6 +17,7 @@ cc_library(
         "typecase.h",
         "JSON.h",
         "Levenstein.h",
+        "FileOps.h",
     ],
     linkopts = select({
         "//tools/config:linux": ["-lm"],

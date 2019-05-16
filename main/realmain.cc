@@ -3,6 +3,7 @@
 
 #include "absl/debugging/symbolize.h"
 #include "absl/strings/str_cat.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"

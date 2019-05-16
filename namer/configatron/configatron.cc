@@ -2,6 +2,7 @@
 // has to go first as it violates our poisions
 
 #include "absl/strings/match.h"
+#include "common/FileOps.h"
 #include "configatron.h"
 #include <cctype>
 #include <sys/types.h>
