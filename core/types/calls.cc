@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/Symbols.h"

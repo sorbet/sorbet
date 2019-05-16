@@ -272,6 +272,4 @@ template <class Container> inline void fast_sort(Container &container) {
 #include "Exception.h"
 #include "JSON.h"
 #include "Levenstein.h"
-#include "typecase.h"
-
 #endif

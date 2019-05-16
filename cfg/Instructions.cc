@@ -1,5 +1,6 @@
 #include "Instructions.h"
 
+#include "common/typecase.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include <utility>

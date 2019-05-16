@@ -1,7 +1,7 @@
 #include "ast/substitute/substitute.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
-
+#include "common/typecase.h"
 namespace sorbet::ast {
 
 namespace {

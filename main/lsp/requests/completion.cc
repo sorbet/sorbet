@@ -1,5 +1,6 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
