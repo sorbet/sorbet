@@ -18,6 +18,7 @@ public:
      * to find this) */
     static std::vector<ast::ParsedFile> runTreePasses(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
 
+    // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::MutableContext ctx,
                                                               std::vector<ast::ParsedFile> trees, WorkerPool &workers);
 
