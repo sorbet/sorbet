@@ -16,6 +16,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
         return LSPResult::make(move(gs), move(response));
     }
 
+    ShowOperation op(*this, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
