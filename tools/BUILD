@@ -16,6 +16,7 @@ compilation_database(
         "//test/fuzz:fuzz_hover",
         "//test/fuzz:proto",
         "//test/fuzz:fuzz_dash_e",
+        "//test/fuzz:fuzz_dash_e_impl",
         "//test:test_corpus_sharded",
         "//test/helpers:helpers",
         "//test:hello-test",

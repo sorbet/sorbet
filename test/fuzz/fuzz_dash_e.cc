@@ -30,7 +30,7 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
 
     logger->trace("Doing on-start initialization");
 
-    payload::createInitialGlobalState(gs, logger, opts, kvstore);
+    payload::createInitialGlobalState(gs, opts, kvstore);
     return gs;
 }
 
@@ -53,7 +53,7 @@ extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     static const unique_ptr<core::GlobalState> commonGs = buildInitialGlobalState();
-    static WorkerPool workers(0, logger);
+    static unique_ptr<WorkerPool> workers = WorkerPool::create(0, *logger);
     commonGs->trace("starting run");
     unique_ptr<core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }
@@ -67,18 +67,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         file.data(*gs).strictLevel = core::StrictLevel::True;
     }
 
-    indexed = realmain::pipeline::index(gs, {}, inputFiles, opts, workers, kvstore, logger);
-    indexed = realmain::pipeline::resolve(*gs, move(indexed), opts, logger);
+    indexed = realmain::pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+    indexed = realmain::pipeline::resolve(*gs, move(indexed), opts);
     if (stressIncrementalResolver) {
         for (auto &f : indexed) {
-            auto reIndexed = realmain::pipeline::indexOne(opts, *gs, f.file, kvstore, logger);
+            auto reIndexed = realmain::pipeline::indexOne(opts, *gs, f.file, kvstore);
             vector<ast::ParsedFile> toBeReResolved;
             toBeReResolved.emplace_back(move(reIndexed));
-            auto reresolved = realmain::pipeline::incrementalResolve(*gs, move(toBeReResolved), opts, logger);
+            auto reresolved = realmain::pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
             ENFORCE(reresolved.size() == 1);
             f = move(reresolved[0]);
         }
     }
-    indexed = realmain::pipeline::typecheck(gs, move(indexed), opts, workers, logger);
+    indexed = realmain::pipeline::typecheck(gs, move(indexed), opts, *workers);
     return 0;
 }
