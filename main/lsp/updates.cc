@@ -120,7 +120,7 @@ vector<core::FileHash> LSPLoop::computeStateHashes(const vector<shared_ptr<core:
 }
 
 void LSPLoop::reIndexFromFileSystem() {
-    ShowOperation op(*this, "Indexing", "Sorbet: Indexing files...");
+    ShowOperation op(*this, "Indexing", "Indexing files...");
     Timer timeit(logger, "reIndexFromFileSystem");
     indexed.clear();
     vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames);
@@ -156,7 +156,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 }
 
 LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
-    ShowOperation slowPathOp(*this, "SlowPath", "Sorbet: Typechecking...");
+    ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(initialGS->errorQueue->isEmpty());
     prodCategoryCounterInc("lsp.updates", "slowpath");
