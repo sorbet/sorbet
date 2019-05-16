@@ -23,3 +23,6 @@ class StringScanner < Object
   end
   def scan(arg0); end
 end
+
+class StringScanner::Error < StandardError
+end

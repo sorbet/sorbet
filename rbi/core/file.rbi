@@ -796,3 +796,6 @@ class File::Stat < Object
   sig {returns(T::Boolean)}
   def zero?(); end
 end
+
+module FileTest
+end

@@ -20,6 +20,9 @@ class Thread < Object
   def kill; end
 end
 
+class Thread::Backtrace < Object
+end
+
 class Thread::Backtrace::Location
   sig {returns(String)}
   def absolute_path(); end
@@ -35,4 +38,25 @@ class Thread::Backtrace::Location
 
   sig {returns(String)}
   def path(); end
+end
+
+class Thread::ConditionVariable < Object
+end
+
+class Thread::Mutex < Object
+end
+
+class Thread::Queue < Object
+end
+
+class Thread::SizedQueue < Thread::Queue
+end
+
+class ClosedQueueError < StopIteration
+end
+
+class ThreadError < StandardError
+end
+
+class ThreadGroup < Object
 end

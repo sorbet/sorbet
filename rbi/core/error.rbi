@@ -1,98 +1,117 @@
 # typed: true
+class Exception < Object
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(T::Boolean)
+  end
+  def ==(arg0); end
+
+  sig {returns(T::Array[String])}
+  def backtrace(); end
+
+  sig {returns(T::Array[Thread::Backtrace::Location])}
+  def backtrace_locations(); end
+
+  sig {returns(T.nilable(Exception))}
+  def cause(); end
+
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(Exception)
+  end
+  def exception(arg0=T.unsafe(nil)); end
+
+  sig do
+    params(
+        arg0: String,
+    )
+    .void
+  end
+  def initialize(arg0=T.unsafe(nil)); end
+
+  sig {returns(String)}
+  def inspect(); end
+
+  sig {returns(String)}
+  def message(); end
+
+  sig do
+    params(
+        arg0: T.any(String, T::Array[String]),
+    )
+    .returns(T::Array[String])
+  end
+  def set_backtrace(arg0); end
+
+  sig {returns(String)}
+  def to_s(); end
+end
+
 class ArgumentError < StandardError
-end
-
-class Benchmark::Job < Object
-end
-
-class Benchmark::Report < Object
-end
-
-class Binding < Object
-end
-
-class CSV::FieldInfo < Struct
-  extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
-end
-
-class CSV::MalformedCSVError < RuntimeError
-end
-
-class CSV::Table < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class ClosedQueueError < StopIteration
-end
-
-module Comparable
-end
-
-class Date::Infinity < Numeric
-end
-
-class Delegator < BasicObject
-end
-
-class DidYouMean::ClassNameChecker < Object
-end
-
-module DidYouMean::Correctable
-end
-
-class DidYouMean::Formatter < Object
-end
-
-module DidYouMean::Jaro
-end
-
-module DidYouMean::Levenshtein
-end
-
-module DidYouMean::NameErrorCheckers
-end
-
-class DidYouMean::NullChecker < Object
-end
-
-class DidYouMean::SpellChecker < Object
-end
-
-class EOFError < IOError
-end
-
-class Encoding::CompatibilityError < EncodingError
-end
-
-class Encoding::ConverterNotFoundError < EncodingError
-end
-
-class Encoding::InvalidByteSequenceError < EncodingError
-end
-
-class Encoding::UndefinedConversionError < EncodingError
 end
 
 class EncodingError < StandardError
 end
 
-class Enumerator::Generator < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
+class IndexError < StandardError
 end
 
-class Enumerator::Lazy < Enumerator
-  extend T::Generic
-  Elem = type_member(:out)
+class Interrupt < SignalException
 end
 
-class Enumerator::Yielder < Object
+class KeyError < IndexError
+end
+
+class LoadError < ScriptError
+end
+
+class NameError < StandardError
+end
+
+class NoMemoryError < Exception
+end
+
+class NoMethodError < NameError
+end
+
+class NotImplementedError < ScriptError
+end
+
+class RangeError < StandardError
+end
+
+class RuntimeError < StandardError
+end
+
+class ScriptError < Exception
+end
+
+class SecurityError < Exception
+end
+
+class SignalException < Exception
+end
+
+class StandardError < Exception
+end
+
+class SyntaxError < ScriptError
+end
+
+class SystemCallError < StandardError
+end
+
+class SystemExit < Exception
+end
+
+class TypeError < StandardError
+end
+
+module Warning
 end
 
 module Errno
@@ -630,351 +649,3 @@ class Errno::NOERROR < SystemCallError
   Errno = T.let(nil, Integer)
 end
 
-class Etc::Group < Struct
-  extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
-end
-
-class Etc::Passwd < Struct
-  extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
-end
-
-class FiberError < StandardError
-end
-
-module FileTest
-end
-
-module FileUtils::LowMethods
-end
-
-module FileUtils::StreamUtils_
-end
-
-class FloatDomainError < RangeError
-end
-
-class Gem::BasicSpecification < Object
-end
-
-class Gem::CommandLineError < Gem::Exception
-end
-
-class Gem::ConflictError < Gem::LoadError
-end
-
-class Gem::DependencyError < Gem::Exception
-end
-
-class Gem::DependencyRemovalException < Gem::Exception
-end
-
-class Gem::DependencyResolutionError < Gem::DependencyError
-end
-
-module Gem::Deprecate
-end
-
-class Gem::DocumentError < Gem::Exception
-end
-
-class Gem::EndOfYAMLException < Gem::Exception
-end
-
-class Gem::ErrorReason < Object
-end
-
-class Gem::Exception < RuntimeError
-end
-
-class Gem::FilePermissionError < Gem::Exception
-end
-
-class Gem::FormatException < Gem::Exception
-end
-
-class Gem::GemNotFoundException < Gem::Exception
-end
-
-class Gem::GemNotInHomeException < Gem::Exception
-end
-
-class Gem::ImpossibleDependenciesError < Gem::Exception
-end
-
-class Gem::InstallError < Gem::Exception
-end
-
-class Gem::InvalidSpecificationException < Gem::Exception
-end
-
-class Gem::List < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class Gem::LoadError < LoadError
-end
-
-class Gem::MissingSpecError < Gem::LoadError
-end
-
-class Gem::MissingSpecVersionError < Gem::MissingSpecError
-end
-
-class Gem::OperationNotSupportedError < Gem::Exception
-end
-
-class Gem::PathSupport < Object
-end
-
-class Gem::PlatformMismatch < Gem::ErrorReason
-end
-
-class Gem::RemoteError < Gem::Exception
-end
-
-class Gem::RemoteInstallationCancelled < Gem::Exception
-end
-
-class Gem::RemoteInstallationSkipped < Gem::Exception
-end
-
-class Gem::RemoteSourceException < Gem::Exception
-end
-
-class Gem::Requirement::BadRequirementError < ArgumentError
-end
-
-class Gem::RubyVersionMismatch < Gem::Exception
-end
-
-class Gem::SourceFetchProblem < Gem::ErrorReason
-end
-
-class Gem::SpecificGemNotFoundException < Gem::GemNotFoundException
-end
-
-class Gem::SystemExitException < SystemExit
-end
-
-class Gem::UnsatisfiableDependencyError < Gem::DependencyError
-end
-
-class Gem::VerificationError < Gem::Exception
-end
-
-class IO::EAGAINWaitReadable < Errno::EAGAIN
-  include IO::WaitReadable
-  Errno = T.let(nil, Integer)
-end
-
-class IO::EAGAINWaitWritable < Errno::EAGAIN
-  include IO::WaitWritable
-  Errno = T.let(nil, Integer)
-end
-
-class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
-  include IO::WaitReadable
-  Errno = T.let(nil, Integer)
-end
-
-class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
-  include IO::WaitWritable
-  Errno = T.let(nil, Integer)
-end
-
-module IO::WaitReadable
-end
-
-module IO::WaitWritable
-end
-
-class IOError < StandardError
-end
-
-class IndexError < StandardError
-end
-
-class Interrupt < SignalException
-end
-
-class KeyError < IndexError
-end
-
-class LoadError < ScriptError
-end
-
-class LocalJumpError < StandardError
-end
-
-class Math::DomainError < StandardError
-end
-
-class Method < Object
-end
-
-class Monitor < Object
-  include MonitorMixin
-end
-
-module MonitorMixin
-end
-
-class MonitorMixin::ConditionVariable < Object
-end
-
-class MonitorMixin::ConditionVariable::Timeout < Exception
-end
-
-class NameError < StandardError
-end
-
-class NoMemoryError < Exception
-end
-
-class NoMethodError < NameError
-end
-
-class NotImplementedError < ScriptError
-end
-
-class ObjectSpace::WeakMap < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class Process::Tms < Struct
-  extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
-end
-
-class RangeError < StandardError
-end
-
-class RegexpError < StandardError
-end
-
-class RubyVM::InstructionSequence < Object
-end
-
-class RuntimeError < StandardError
-end
-
-class ScriptError < Exception
-end
-
-class SecurityError < Exception
-end
-
-class SignalException < Exception
-end
-
-class SimpleDelegator < Delegator
-end
-
-module SingleForwardable
-end
-
-class SortedSet < Set
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class StandardError < Exception
-end
-
-class StopIteration < IndexError
-end
-
-class StringIO < Data
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out, fixed: String)
-end
-
-class StringScanner::Error < StandardError
-end
-
-class Struct < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
-end
-
-class SyntaxError < ScriptError
-end
-
-class SystemCallError < StandardError
-end
-
-class SystemExit < Exception
-end
-
-class SystemStackError < Exception
-end
-
-class Thread::Backtrace < Object
-end
-
-class Thread::ConditionVariable < Object
-end
-
-class Thread::Mutex < Object
-end
-
-class Thread::Queue < Object
-end
-
-class Thread::SizedQueue < Thread::Queue
-end
-
-class ThreadError < StandardError
-end
-
-class ThreadGroup < Object
-end
-
-class TypeError < StandardError
-end
-
-class URI::BadURIError < URI::Error
-end
-
-class URI::Error < StandardError
-end
-
-module URI::Escape
-end
-
-class URI::InvalidComponentError < URI::Error
-end
-
-class URI::InvalidURIError < URI::Error
-end
-
-class URI::RFC2396_Parser < Object
-  include URI::RFC2396_REGEXP
-end
-
-module URI::RFC2396_REGEXP
-end
-
-module URI::Util
-end
-
-class UncaughtThrowError < ArgumentError
-end
-
-module Warning
-end
-
-class ZeroDivisionError < StandardError
-end

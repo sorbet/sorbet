@@ -1,3 +1,0 @@
-# typed: strict
-
-Fixnum = Integer

@@ -592,6 +592,11 @@ module Process::UID
   def self.eid=(user); end
 end
 
+class Process::Tms < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+end
+
 class Process::Waiter < Thread
   sig {returns(Integer)}
   def pid(); end

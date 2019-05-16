@@ -332,6 +332,11 @@ class Set < Object
   def union(enum); end
 end
 
+class SortedSet < Set
+  extend T::Generic
+  Elem = type_member(:out)
+end
+
 class Array
   sig {returns(Set)}
   def to_set; end

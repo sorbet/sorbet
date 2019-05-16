@@ -77,4 +77,19 @@ class CSV::Row < Object
   Elem = type_member(:out, fixed: T.nilable(String))
 end
 
+class CSV::FieldInfo < Struct
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+end
+
+class CSV::MalformedCSVError < RuntimeError
+end
+
+class CSV::Table < Object
+  include Enumerable
+
+  extend T::Generic
+  Elem = type_member(:out)
+end
+
 def CSV(io=T.unsafe(nil), options=T.unsafe(nil)); end

@@ -87,8 +87,84 @@ module Gem
   def self.default_sources(); end
 end
 
+class Gem::BasicSpecification < Object
+end
+
+class Gem::CommandLineError < Gem::Exception
+end
+
+class Gem::ConflictError < Gem::LoadError
+end
+
 class Gem::Dependency < Object
   TYPES = T.let(T.unsafe(nil), Array)
+end
+
+class Gem::DependencyError < Gem::Exception
+end
+
+class Gem::DependencyRemovalException < Gem::Exception
+end
+
+class Gem::DependencyResolutionError < Gem::DependencyError
+end
+
+module Gem::Deprecate
+end
+
+class Gem::DocumentError < Gem::Exception
+end
+
+class Gem::EndOfYAMLException < Gem::Exception
+end
+
+class Gem::ErrorReason < Object
+end
+
+class Gem::Exception < RuntimeError
+end
+
+class Gem::FilePermissionError < Gem::Exception
+end
+
+class Gem::FormatException < Gem::Exception
+end
+
+class Gem::GemNotFoundException < Gem::Exception
+end
+
+class Gem::GemNotInHomeException < Gem::Exception
+end
+
+class Gem::ImpossibleDependenciesError < Gem::Exception
+end
+
+class Gem::InstallError < Gem::Exception
+end
+
+class Gem::InvalidSpecificationException < Gem::Exception
+end
+
+class Gem::List < Object
+  include Enumerable
+
+  extend T::Generic
+  Elem = type_member(:out)
+end
+
+class Gem::LoadError < LoadError
+end
+
+class Gem::MissingSpecError < Gem::LoadError
+end
+
+class Gem::MissingSpecVersionError < Gem::MissingSpecError
+end
+
+class Gem::OperationNotSupportedError < Gem::Exception
+end
+
+class Gem::PathSupport < Object
 end
 
 class Gem::Platform < Object
@@ -96,11 +172,35 @@ class Gem::Platform < Object
   RUBY = T.let(T.unsafe(nil), String)
 end
 
+class Gem::PlatformMismatch < Gem::ErrorReason
+end
+
+class Gem::RemoteError < Gem::Exception
+end
+
+class Gem::RemoteInstallationCancelled < Gem::Exception
+end
+
+class Gem::RemoteInstallationSkipped < Gem::Exception
+end
+
+class Gem::RemoteSourceException < Gem::Exception
+end
+
 class Gem::Requirement < Object
   OPS = T.let(T.unsafe(nil), Hash)
   PATTERN = T.let(T.unsafe(nil), Regexp)
   PATTERN_RAW = T.let(T.unsafe(nil), String)
   SOURCE_SET_REQUIREMENT = T.let(T.unsafe(nil), Object)
+end
+
+class Gem::Requirement::BadRequirementError < ArgumentError
+end
+
+class Gem::RubyVersionMismatch < Gem::Exception
+end
+
+class Gem::SourceFetchProblem < Gem::ErrorReason
 end
 
 class Gem::Specification < Gem::BasicSpecification
@@ -114,6 +214,9 @@ class Gem::Specification < Gem::BasicSpecification
   VALID_NAME_PATTERN = T.let(T.unsafe(nil), Regexp)
 end
 
+class Gem::SpecificGemNotFoundException < Gem::GemNotFoundException
+end
+
 class Gem::StubSpecification < Gem::BasicSpecification
   OPEN_MODE = T.let(T.unsafe(nil), String)
   PREFIX = T.let(T.unsafe(nil), String)
@@ -123,6 +226,15 @@ class Gem::StubSpecification::StubLine < Object
   NO_EXTENSIONS = T.let(T.unsafe(nil), Array)
   REQUIRE_PATHS = T.let(T.unsafe(nil), Hash)
   REQUIRE_PATH_LIST = T.let(T.unsafe(nil), Hash)
+end
+
+class Gem::SystemExitException < SystemExit
+end
+
+class Gem::UnsatisfiableDependencyError < Gem::DependencyError
+end
+
+class Gem::VerificationError < Gem::Exception
 end
 
 class Gem::Version < Object

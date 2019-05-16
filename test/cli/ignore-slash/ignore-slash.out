@@ -1,8 +1,8 @@
 bar.rb:4: `String("bar.rb")` doesn't match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
      4 |1 + "bar.rb"
         ^^^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L103: Method `Integer#+` has specified `arg0` as `Integer`
-     103 |        arg0: Integer,
+    https://github.com/stripe/sorbet/tree/master/rbi/core/numeric.rbi#L1030: Method `Integer#+` has specified `arg0` as `Integer`
+    1030 |        arg0: Integer,
                   ^^^^
   Got String("bar.rb") originating from:
     bar.rb:4:

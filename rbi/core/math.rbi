@@ -215,3 +215,6 @@ module Math
   end
   def self.tanh(x); end
 end
+
+class Math::DomainError < StandardError
+end
