@@ -35,7 +35,7 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::Typed || m->symbol.data(ctx)->isOverloaded()) {
+        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto &print = opts.print;
@@ -319,7 +319,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = fnd->second;
     } else {
         if (fileData.originalSigil == core::StrictLevel::None) {
-            level = core::StrictLevel::Stripe;
+            level = core::StrictLevel::False;
         } else {
             level = fileData.originalSigil;
         }
@@ -333,7 +333,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
     if (gs.runningUnderAutogen) {
         // Autogen stops before infer but needs to see all definitions
-        level = core::StrictLevel::Stripe;
+        level = core::StrictLevel::False;
     }
 
     switch (level) {
@@ -346,14 +346,14 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         case core::StrictLevel::Internal:
             Exception::raise("Should never happen");
             break;
-        case core::StrictLevel::Stripe:
-            prodCounterInc("types.input.files.sigil.none");
+        case core::StrictLevel::False:
+            prodCounterInc("types.input.files.sigil.false");
             break;
-        case core::StrictLevel::Typed:
-            prodCounterInc("types.input.files.sigil.typed");
+        case core::StrictLevel::True:
+            prodCounterInc("types.input.files.sigil.true");
             break;
         case core::StrictLevel::Strict:
-            prodCounterInc("types.input.files.sigil.strictLevel");
+            prodCounterInc("types.input.files.sigil.strict");
             break;
         case core::StrictLevel::Strong:
             prodCounterInc("types.input.files.sigil.strong");

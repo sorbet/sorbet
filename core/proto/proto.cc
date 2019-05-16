@@ -201,10 +201,10 @@ com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict
             Exception::raise("Should never happen");
         case core::StrictLevel::Ignore:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Ignore;
-        case core::StrictLevel::Stripe:
-            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Stripe;
-        case core::StrictLevel::Typed:
-            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Typed;
+        case core::StrictLevel::False:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_False;
+        case core::StrictLevel::True:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_True;
         case core::StrictLevel::Strict:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Strict;
         case core::StrictLevel::Strong:
