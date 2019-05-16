@@ -143,6 +143,10 @@ bool File::isRBI() const {
     return absl::EndsWith(path(), ".rbi");
 }
 
+bool File::isStdlib() const {
+    return fileSigil(source()) == StrictLevel::Stdlib;
+}
+
 vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != Type::TombStone);
     ENFORCE(this->sourceType != File::NotYetRead);
