@@ -34,14 +34,7 @@ FlowId Timer::getFlowEdge() {
     return this->self;
 }
 
-void Timer::disable() {
-    disabled = true;
-}
-
 Timer::~Timer() {
-    if (disabled) {
-        return;
-    }
     auto clock = chrono::steady_clock::now();
     auto dur = std::chrono::duration<double, std::milli>(clock - start);
     log.debug("{}: {}ms", this->name.str, dur.count());

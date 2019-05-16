@@ -21,15 +21,12 @@ public:
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     ~Timer();
     FlowId getFlowEdge();
-    /** Disable timer and prevent it from reporting a metric on destruction. */
-    void disable();
 
 private:
     spdlog::logger &log;
     ConstExprStr name;
     FlowId prev;
     FlowId self;
-    bool disabled = false;
     std::vector<std::pair<ConstExprStr, std::string>> args;
     const std::chrono::time_point<std::chrono::steady_clock> start;
 };
