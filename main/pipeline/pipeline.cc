@@ -909,7 +909,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     auto allSends = getAllSends(*lgs, single[0].tree);
     pipeline::resolve(*lgs, move(single), emptyOpts, true);
 
-    return {lgs->hash(), move(allSends)};
+    return {move(*lgs->hash()), move(allSends)};
 }
 
 } // namespace sorbet::realmain::pipeline

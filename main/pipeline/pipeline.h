@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "core/NameHash.h"
 #include "main/options/options.h"
 
 namespace sorbet::realmain::pipeline {
