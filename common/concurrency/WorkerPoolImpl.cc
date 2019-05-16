@@ -1,9 +1,18 @@
-#include "common/concurrency/WorkerPool.h"
+#include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
+#include "common/concurrency/WorkerPool.h"
 
 using namespace std;
-WorkerPool::WorkerPool(int size, const shared_ptr<spd::logger> &logger) : WorkerPool(size, *logger){};
-WorkerPool::WorkerPool(int size, spd::logger &logger) : size(size), logger(logger) {
+namespace sorbet {
+unique_ptr<WorkerPool> WorkerPool::create(int size, spd::logger &logger) {
+    return make_unique<WorkerPoolImpl>(size, logger);
+}
+
+WorkerPool::~WorkerPool() {
+    // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
+}
+
+WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : size(size), logger(logger) {
     logger.debug("Creating {} worker threads", size);
     if (sorbet::emscripten_build) {
         ENFORCE(size == 0);
@@ -29,7 +38,7 @@ WorkerPool::WorkerPool(int size, spd::logger &logger) : size(size), logger(logge
     logger.debug("Worker threads created");
 }
 
-WorkerPool::~WorkerPool() {
+WorkerPoolImpl::~WorkerPoolImpl() {
     auto &logger = this->logger;
     multiplexJob_([&logger]() {
         logger.debug("Killing worker thread");
@@ -38,7 +47,7 @@ WorkerPool::~WorkerPool() {
     // join will be called when destructing joinable;
 }
 
-void WorkerPool::multiplexJob(string_view taskName, WorkerPool::Task t) {
+void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
     if (size > 0) {
         multiplexJob_([t{move(t)}, taskName] {
             setCurrentThreadName(taskName);
@@ -51,9 +60,11 @@ void WorkerPool::multiplexJob(string_view taskName, WorkerPool::Task t) {
     }
 }
 
-void WorkerPool::multiplexJob_(WorkerPool::Task_ t) {
+void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
     logger.debug("Multiplexing job");
     for (int i = 0; i < size; i++) {
         threadQueues[i]->enqueue(t);
     }
 }
+
+}; // namespace sorbet
