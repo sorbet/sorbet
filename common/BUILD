@@ -12,12 +12,12 @@ cc_library(
         exclude = ["flycheck_*"],
     ),
     hdrs = [
+        "FileOps.h",
         "FileSystem.h",
-        "common.h",
-        "typecase.h",
         "JSON.h",
         "Levenstein.h",
-        "FileOps.h",
+        "common.h",
+        "typecase.h",
     ],
     linkopts = select({
         "//tools/config:linux": ["-lm"],
