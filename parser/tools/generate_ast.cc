@@ -397,6 +397,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         classfile << "#include \"parser/Node.h\"" << '\n' << '\n';
+        classfile << "#include \"common/JSON.h\"" << '\n' << '\n';
         classfile << "namespace sorbet {" << '\n';
         classfile << "namespace parser {" << '\n';
         for (auto &node : nodes) {
