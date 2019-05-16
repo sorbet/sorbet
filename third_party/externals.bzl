@@ -55,7 +55,7 @@ def externals():
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="3cf4f7c5a030e9a65b842d2e160ffee90df7613d",
+        commit="01950eb7acec78818d68b762efc869bba2420d82",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
