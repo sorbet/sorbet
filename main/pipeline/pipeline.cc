@@ -501,7 +501,8 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            resultq->push(move(threadResult), threadResult.res.trees.size());
+            auto computedTreesCount = threadResult.res.trees.size();
+            resultq->push(move(threadResult), computedTreesCount);
         }
     });
 
