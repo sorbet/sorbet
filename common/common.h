@@ -270,5 +270,4 @@ template <class Container> inline void fast_sort(Container &container) {
 #pragma GCC poison rexec rexec_af
 
 #include "Exception.h"
-#include "Levenstein.h"
 #endif
