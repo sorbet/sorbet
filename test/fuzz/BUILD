@@ -1,8 +1,8 @@
 cc_binary(
     name = "fuzz_dash_e",
+    srcs = ["empty.cc"],
     tags = ["manual"],
     visibility = ["//tools:__pkg__"],
-    srcs = ["empty.cc",],
     deps = [
         "fuzz_dash_e_impl",
     ],
