@@ -272,6 +272,7 @@ class Index extends React.Component {
             <a href="docs/">Docs</a>{" · "}
             <a href="https://sorbet.run">Try it online</a>{" · "}
             <a href="talks/talks">Talks</a>
+            <a href="blog/">Blog</a>
           </p>
         </PageSection>
       </div>
