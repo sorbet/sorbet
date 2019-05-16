@@ -54,7 +54,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         return LSPResult{move(gs), move(responses)};
     }
 
-    // latency metric??
     if (msg.isNotification()) {
         Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         auto &params = msg.asNotification().params;
