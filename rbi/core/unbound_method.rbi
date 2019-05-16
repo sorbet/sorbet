@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 class UnboundMethod
   sig {returns(Integer)}
   def arity; end

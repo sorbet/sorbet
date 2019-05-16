@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 class PrettyPrint
   def self.format(output = nil, maxwidth = nil, newline = nil, genspace = nil); end
   def self.singleline_format(output = nil, maxwidth = nil, newline = nil, genspace = nil); end

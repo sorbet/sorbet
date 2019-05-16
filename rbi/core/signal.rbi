@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 module Signal
   sig {returns(T::Hash[String, Integer])}
   def self.list(); end

@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 class Method < Object
   sig {returns(Proc)}
   def to_proc; end

@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 class Complex < Numeric
   I = T.let(T.unsafe(nil), Complex)
 

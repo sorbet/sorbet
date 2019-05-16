@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 
 module Comparable
   sig { params(other: T.untyped).returns(T::Boolean) }

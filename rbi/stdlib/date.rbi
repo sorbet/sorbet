@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 class Date::Infinity < Numeric
   sig {returns(Date::Infinity)}
   def +@(); end

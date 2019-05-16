@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 module Coverage
   sig {returns(T::Hash[String, T::Array[T.nilable(Integer)]])}
   def self.result(); end

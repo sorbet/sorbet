@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 class Exception < Object
   sig do
     params(

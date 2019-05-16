@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 module Abbrev
   sig do
     params(

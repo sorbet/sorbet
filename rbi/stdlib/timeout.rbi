@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 
 module Timeout
   sig do

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 
 class Ripper
   sig {params(src: String, filename: String, lineno: Integer).returns(T::Array[T.untyped])}
