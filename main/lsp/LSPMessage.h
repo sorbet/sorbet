@@ -55,10 +55,12 @@ public:
     LSPMessage(rapidjson::Document &d);
     LSPMessage(const std::string &json);
 
-    /** A tracer for following LSP message in time traces */
-    FlowId startTracer;
-    /** Used to calculate latency of message processing. */
-    std::optional<std::unique_ptr<Timer>> timer;
+    /** A tracer for following LSP message in time traces. May contain multiple tracers if other messages were merged
+     * into this one.*/
+    std::vector<FlowId> startTracers;
+    /** Used to calculate latency of message processing. May contain multiple timers if other messages were merged into
+     * this one. */
+    std::vector<std::unique_ptr<Timer>> timers;
 
     /** Request counter. */
     int counter;

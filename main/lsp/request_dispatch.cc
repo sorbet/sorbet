@@ -11,6 +11,7 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string
 }
 
 LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
     Timer timeit(logger, "process_request");
     return processRequestInternal(move(gs), msg);
 }
