@@ -988,14 +988,16 @@ private:
                     // process signatures in the context of either the current
                     // class, or the current singleton class, depending on if
                     // the current method is a self method.
-                    core::MutableContext sigCtx(ctx);
+                    core::SymbolRef sigOwner;
                     if (mdef->isSelf()) {
-                        sigCtx.owner = ctx.owner.data(ctx)->singletonClass(ctx);
+                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
+                    } else {
+                        sigOwner = ctx.owner;
                     }
 
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(sigCtx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
-                                                        mdef->symbol);
+                        auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
+                                                        nullptr, true, mdef->symbol);
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<core::SymbolRef> argsToKeep;
