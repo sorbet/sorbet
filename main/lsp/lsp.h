@@ -5,6 +5,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
+#include "core/NameHash.h"
 #include "core/core.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/options/options.h"

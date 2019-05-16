@@ -9,6 +9,7 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "common/FileOps.h"
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"

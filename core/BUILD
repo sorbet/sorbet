@@ -16,6 +16,7 @@ cc_library(
         "Names_gen.cc",
     ],
     hdrs = [
+        "GlobalSubstitution.h",
         "core.h",
     ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]),
     linkstatic = select({

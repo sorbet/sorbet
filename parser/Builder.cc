@@ -1,4 +1,5 @@
 #include "parser/Builder.h"
+#include "common/typecase.h"
 #include "core/Names.h"
 #include "parser/Dedenter.h"
 #include "parser/parser.h"

@@ -1,6 +1,7 @@
 #include "core/Types.h"
 #include "absl/base/casts.h"
 #include "common/common.h"
+#include "common/typecase.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"

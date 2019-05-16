@@ -2,6 +2,7 @@
 #define SORBET_AST_HELPERSS_H
 
 #include "ast/ast.h"
+#include "common/typecase.h"
 #include "core/Names.h"
 
 namespace sorbet::ast {

@@ -1,6 +1,7 @@
 #include "dsl/dsl.h"
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
+#include "common/typecase.h"
 #include "dsl/ChalkODMProp.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"

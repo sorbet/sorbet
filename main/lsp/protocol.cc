@@ -1,5 +1,6 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "lsp.h"

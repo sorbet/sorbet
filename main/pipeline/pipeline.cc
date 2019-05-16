@@ -8,9 +8,11 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
+#include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
@@ -908,7 +910,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     auto allSends = getAllSends(*lgs, single[0].tree);
     pipeline::resolve(*lgs, move(single), emptyOpts, true);
 
-    return {lgs->hash(), move(allSends)};
+    return {move(*lgs->hash()), move(allSends)};
 }
 
 } // namespace sorbet::realmain::pipeline

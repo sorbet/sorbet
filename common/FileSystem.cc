@@ -1,4 +1,5 @@
 #include "common/FileSystem.h"
+#include "common/FileOps.h"
 
 namespace sorbet {
 using namespace std;

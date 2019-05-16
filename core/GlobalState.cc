@@ -2,6 +2,8 @@
 
 #include "common/Timer.h"
 #include "core/Error.h"
+#include "core/Hashing.h"
+#include "core/NameHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/Types.h"
@@ -1283,7 +1285,7 @@ u4 patchHash(u4 hash) {
     return hash;
 }
 
-GlobalStateHash GlobalState::hash() const {
+unique_ptr<GlobalStateHash> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     u4 hierarchyHash = 0;
     UnorderedMap<NameHash, u4> methodHashes;
@@ -1306,11 +1308,11 @@ GlobalStateHash GlobalState::hash() const {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
         }
     }
-    GlobalStateHash result;
+    unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
     for (const auto &e : methodHashes) {
-        result.methodHashes[e.first] = patchHash(e.second);
+        result->methodHashes[e.first] = patchHash(e.second);
     }
-    result.hierarchyHash = patchHash(hierarchyHash);
+    result->hierarchyHash = patchHash(hierarchyHash);
     return result;
 }
 

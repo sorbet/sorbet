@@ -5,9 +5,7 @@
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
-#include "core/Hashing.h"
 #include "core/Loc.h"
-#include "core/NameHash.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/lsp/Query.h"
@@ -22,6 +20,7 @@ class SymbolRef;
 class GlobalSubstitution;
 class ErrorRegion;
 class ErrorQueue;
+struct GlobalStateHash;
 
 namespace serialize {
 class Serializer;
@@ -162,7 +161,7 @@ public:
 
     void trace(std::string_view msg) const;
 
-    GlobalStateHash hash() const;
+    std::unique_ptr<GlobalStateHash> hash() const;
     std::vector<std::shared_ptr<File>> getFiles() const;
 
     // Contains a string to be used as the base of the error URL.

@@ -1,4 +1,5 @@
 #include "environment.h"
+#include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
 #include <algorithm> // find, remove_if
