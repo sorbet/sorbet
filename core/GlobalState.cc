@@ -2,6 +2,7 @@
 
 #include "common/Timer.h"
 #include "core/Error.h"
+#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/Types.h"

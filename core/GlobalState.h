@@ -5,7 +5,6 @@
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
-#include "core/Hashing.h"
 #include "core/Loc.h"
 #include "core/NameHash.h"
 #include "core/Names.h"
