@@ -387,7 +387,7 @@ int realmain(int argc, char *argv[]) {
                     auto file = tree.file;
                     errs.emplace_back(*gs, file);
                 }
-                indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
+                indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), workers);
             }
 
             runAutogen(ctx, opts, *workers, indexed);

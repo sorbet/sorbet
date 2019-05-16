@@ -2,13 +2,15 @@
 #define SORBET_RESOLVER_RESOLVER_H
 
 #include "ast/ast.h"
+#include "common/concurrency/WorkerPool.h"
 #include <memory>
 
 namespace sorbet::resolver {
 
 class Resolver final {
 public:
-    static std::vector<ast::ParsedFile> run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
+    static std::vector<ast::ParsedFile> run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees,
+                                            WorkerPool &workers);
     Resolver() = delete;
 
     /** Only runs tree passes, used for incremental changes that do not affect global state. Assumes that `run` was
@@ -17,7 +19,7 @@ public:
     static std::vector<ast::ParsedFile> runTreePasses(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
 
     static std::vector<ast::ParsedFile> runConstantResolution(core::MutableContext ctx,
-                                                              std::vector<ast::ParsedFile> trees);
+                                                              std::vector<ast::ParsedFile> trees, WorkerPool &workers);
 
 private:
     static void finalizeAncestors(core::GlobalState &gs);

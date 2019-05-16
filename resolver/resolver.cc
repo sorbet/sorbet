@@ -568,25 +568,73 @@ public:
         return depth;
     }
 
-    static vector<ast::ParsedFile> resolveConstants(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
+    struct ResolveWalkResult {
+        vector<ResolutionItem> todo_;
+        vector<AncestorResolutionItem> todoAncestors_;
+        vector<ClassAliasResolutionItem> todoClassAliases_;
+        vector<TypeAliasResolutionItem> todoTypeAliases_;
+        vector<ast::ParsedFile> trees;
+    };
+
+    static vector<ast::ParsedFile> resolveConstants(core::MutableContext ctx, vector<ast::ParsedFile> trees,
+                                                    WorkerPool &workers) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
         core::Context ictx = ctx;
-        ResolveConstantsWalk constants(ictx);
+        auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
+        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+        for (auto &tree : trees) {
+            fileq->push(move(tree), 1);
+        }
+
+        workers.multiplexJob("resolveConstantsWalk", [ictx, fileq, resultq]() {
+            Timer timeit(ictx.state.tracer(), "ResolveConstantsWorker");
+            ResolveConstantsWalk constants(ictx);
+            vector<ast::ParsedFile> partiallyResolvedTrees;
+            ast::ParsedFile job;
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    job.tree = ast::TreeMap::apply(ictx, constants, std::move(job.tree));
+                    partiallyResolvedTrees.emplace_back(move(job));
+                }
+            }
+            if (!partiallyResolvedTrees.empty()) {
+                ResolveWalkResult result{move(constants.todo_), move(constants.todoAncestors_),
+                                         move(constants.todoClassAliases_), move(constants.todoTypeAliases_),
+                                         move(partiallyResolvedTrees)};
+                auto computedTreesCount = result.trees.size();
+                resultq->push(move(result), computedTreesCount);
+            }
+        });
+        trees.clear();
+        vector<ResolutionItem> todo;
+        vector<AncestorResolutionItem> todoAncestors;
+        vector<ClassAliasResolutionItem> todoClassAliases;
+        vector<TypeAliasResolutionItem> todoTypeAliases;
 
         {
-            Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.walk");
-
-            for (auto &tree : trees) {
-                tree.tree = ast::TreeMap::apply(ictx, constants, std::move(tree.tree));
+            ResolveWalkResult threadResult;
+            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer());
+                 !result.done();
+                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer())) {
+                if (result.gotItem()) {
+                    todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
+                                make_move_iterator(threadResult.todo_.end()));
+                    todoAncestors.insert(todoAncestors.end(), make_move_iterator(threadResult.todoAncestors_.begin()),
+                                         make_move_iterator(threadResult.todoAncestors_.end()));
+                    todoClassAliases.insert(todoClassAliases.end(),
+                                            make_move_iterator(threadResult.todoClassAliases_.begin()),
+                                            make_move_iterator(threadResult.todoClassAliases_.end()));
+                    todoTypeAliases.insert(todoTypeAliases.end(),
+                                           make_move_iterator(threadResult.todoTypeAliases_.begin()),
+                                           make_move_iterator(threadResult.todoTypeAliases_.end()));
+                    trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
+                                 make_move_iterator(threadResult.trees.end()));
+                }
             }
         }
 
         Timer timeit1(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point");
 
-        auto todo = std::move(constants.todo_);
-        auto todoAncestors = std::move(constants.todoAncestors_);
-        auto todoClassAliases = std::move(constants.todoClassAliases_);
-        auto todoTypeAliases = std::move(constants.todoTypeAliases_);
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
 
@@ -1652,8 +1700,8 @@ public:
 };
 }; // namespace
 
-vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
+vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
     finalizeAncestors(ctx.state);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     finalizeSymbols(ctx.state);
@@ -1700,7 +1748,8 @@ void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &tr
 }
 
 vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
+    WorkerPool workers(0, ctx.state.tracer());
+    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
@@ -1711,8 +1760,9 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     return trees;
 }
 
-vector<ast::ParsedFile> Resolver::runConstantResolution(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
+vector<ast::ParsedFile> Resolver::runConstantResolution(core::MutableContext ctx, vector<ast::ParsedFile> trees,
+                                                        WorkerPool &workers) {
+    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
     sanityCheck(ctx, trees);
 
     return trees;

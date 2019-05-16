@@ -720,7 +720,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast:
 }
 
 vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                bool skipConfigatron) {
+                                WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(gs, move(what), opts, skipConfigatron);
 
@@ -748,7 +748,7 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
             }
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-            what = resolver::Resolver::run(ctx, move(what));
+            what = resolver::Resolver::run(ctx, move(what), workers);
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
