@@ -323,7 +323,8 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
         if (tryPreMerge(**it, *counts, consecutiveWorkspaceEdits, updatedFiles)) {
             // See which newer requests we can enqueue. We want to merge them *backwards*.
             int firstMergedCounter = (*it)->counter;
-            FlowId firstMergedTimestamp = (*it)->startTracer;
+            FlowId firstMergedTracer = (*it)->startTracer;
+            auto firstMergedTimestamp = (*it)->startTime;
             it = pendingRequests.erase(it);
             int skipped = 0;
             while (it != pendingRequests.end()) {
@@ -342,8 +343,9 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
                 }
             }
             auto mergedMessage = performMerge(updatedFiles, consecutiveWorkspaceEdits, counts);
-            mergedMessage->startTracer = firstMergedTimestamp;
+            mergedMessage->startTracer = firstMergedTracer;
             mergedMessage->counter = firstMergedCounter;
+            mergedMessage->startTime = firstMergedTimestamp;
             // Return to where first message was found.
             it -= skipped;
             // Replace first message with the merged message, and skip back ahead to where we were.
@@ -377,6 +379,7 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
     Timer timeit(logger, "enqueueRequest");
     msg->counter = state.requestCounter++;
     msg->startTracer = timeit.getFlowEdge();
+    msg->startTime = chrono::steady_clock::now();
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {

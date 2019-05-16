@@ -12,7 +12,12 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string
 
 LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     Timer timeit(logger, "process_request");
-    return processRequestInternal(move(gs), msg);
+    auto startTime = msg.startTime;
+    auto rv = processRequestInternal(move(gs), msg);
+    if (startTime) {
+        timingAdd("processing_time", *startTime, chrono::steady_clock::now(), {}, FlowId{0}, msg.startTracer);
+    }
+    return rv;
 }
 
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
@@ -49,6 +54,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         return LSPResult{move(gs), move(responses)};
     }
 
+    // latency metric??
     if (msg.isNotification()) {
         Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         auto &params = msg.asNotification().params;

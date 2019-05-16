@@ -56,6 +56,8 @@ public:
 
     /** A tracer for following LSP message in time traces */
     FlowId startTracer;
+    /** Used to calculate latency of message processing. */
+    std::optional<std::chrono::time_point<std::chrono::steady_clock>> startTime;
 
     /** Request counter. */
     int counter;
