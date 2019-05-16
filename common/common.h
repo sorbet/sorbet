@@ -15,14 +15,10 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include "pdqsort.h"
 #include "spdlog/fmt/fmt.h"
 #include "spdlog/spdlog.h"
-#include <cstring>
-#include <functional>
 #include <stdint.h>
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <typeinfo>
-#include <vector>
 
 #if !defined(NDEBUG)
 // So you can use `cout` when debugging. Not included in production as it is a
