@@ -26,6 +26,12 @@ elif [[ "mac" == "$platform" ]]; then
 fi
 
 git checkout .bazelrc
+
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
 rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {

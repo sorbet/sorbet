@@ -11,6 +11,11 @@ echo "--- Pre-setup :bazel:"
 
 git checkout .bazelrc
 
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
 # This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
 
