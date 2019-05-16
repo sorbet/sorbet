@@ -473,6 +473,10 @@ core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expressio
 TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
                                                         const ParsedSig &sigBeingParsed, bool allowSelfType,
                                                         bool allowRebind, core::SymbolRef untypedBlame) {
+    // Ensure that we only check types from a class context
+    auto ctxOwnerData = ctx.owner.data(ctx);
+    ENFORCE(ctxOwnerData->isClass(), "getResultTypeAndBind wasn't called with a class owner");
+
     ResultType result;
     typecase(
         &expr,
@@ -537,21 +541,46 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                     result.type = sym.data(ctx)->externalType(ctx);
                 }
             } else if (sym.data(ctx)->isTypeMember()) {
-                bool isTypeTemplate = sym.data(ctx)->owner.data(ctx)->isSingletonClass(ctx);
+                auto symData = sym.data(ctx);
+                auto symOwner = symData->owner.data(ctx);
 
-                core::SymbolRef ownerClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+                bool isTypeTemplate = symOwner->isSingletonClass(ctx);
+                bool ctxIsSingleton = ctxOwnerData->isSingletonClass(ctx);
 
-                bool ctxIsSingleton = ownerClass.data(ctx)->isSingletonClass(ctx);
+                // Check if we're processing a type within the class that
+                // defines this type member by comparing the singleton class of
+                // the context, and the singleton class of the type member's
+                // owner.
+                core::SymbolRef symOwnerSingleton =
+                    isTypeTemplate ? symOwner->ref(ctx) : symOwner->lookupSingletonClass(ctx);
+                core::SymbolRef ctxSingleton = ctxIsSingleton ? ctx.owner : ctxOwnerData->lookupSingletonClass(ctx);
+                bool usedOnSourceClass = symOwnerSingleton == ctxSingleton;
 
-                // Either this is a use of a type_template type and a self
-                // method, or it's a type_member and an instance method.
-                if ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton)) {
+                // For this to be a valid use of a member or template type, this
+                // must:
+                //
+                // 1. be used in the context of the class that defines it
+                // 2. if it's a type_template type, be used in a singleton
+                //    method
+                // 3. if it's a type_member type, be used in an instance method
+                if (usedOnSourceClass && ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton))) {
                     result.type = core::make_type<core::LambdaParam>(sym);
                 } else {
                     if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                        e.setHeader("`{}` type `{}` used in {} method definition",
-                                    isTypeTemplate ? "type_template" : "type_member", sym.show(ctx),
-                                    ctxIsSingleton ? "a singleton" : "an instance");
+                        string typeSource = isTypeTemplate ? "type_template" : "type_member";
+                        string typeStr = sym.show(ctx);
+
+                        if (usedOnSourceClass) {
+                            if (ctxIsSingleton) {
+                                e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
+                                            typeStr);
+                            } else {
+                                e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
+                                            typeStr);
+                            }
+                        } else {
+                            e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
+                        }
                     }
                     result.type = core::Types::untypedUntracked();
                 }
@@ -724,8 +753,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
         },
         [&](ast::Local *slf) {
             if (slf->isSelfReference()) {
-                core::SymbolRef klass = ctx.owner.data(ctx)->enclosingClass(ctx);
-                result.type = klass.data(ctx)->selfType(ctx);
+                result.type = ctxOwnerData->selfType(ctx);
             } else {
                 if (auto e = ctx.state.beginError(slf->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unsupported type syntax");
