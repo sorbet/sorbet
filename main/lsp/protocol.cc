@@ -324,7 +324,7 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
             // See which newer requests we can enqueue. We want to merge them *backwards*.
             int firstMergedCounter = (*it)->counter;
             FlowId firstMergedTracer = (*it)->startTracer;
-            auto firstMergedTimestamp = (*it)->startTime;
+            auto firstMergedTimer = move((*it)->timer);
             it = pendingRequests.erase(it);
             int skipped = 0;
             while (it != pendingRequests.end()) {
@@ -334,6 +334,11 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
                     break;
                 }
                 if (didMerge) {
+                    // Prevent merged message's timer from reporting a metric.
+                    auto &timer = (*it)->timer;
+                    if (timer) {
+                        (*timer)->disable();
+                    }
                     // Advances mergeWith to next item.
                     it = pendingRequests.erase(it);
                     requestsMergedCounter++;
@@ -345,7 +350,7 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
             auto mergedMessage = performMerge(updatedFiles, consecutiveWorkspaceEdits, counts);
             mergedMessage->startTracer = firstMergedTracer;
             mergedMessage->counter = firstMergedCounter;
-            mergedMessage->startTime = firstMergedTimestamp;
+            mergedMessage->timer = move(firstMergedTimer);
             // Return to where first message was found.
             it -= skipped;
             // Replace first message with the merged message, and skip back ahead to where we were.
@@ -379,7 +384,7 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
     Timer timeit(logger, "enqueueRequest");
     msg->counter = state.requestCounter++;
     msg->startTracer = timeit.getFlowEdge();
-    msg->startTime = chrono::steady_clock::now();
+    msg->timer = make_unique<Timer>(logger, "process_request");
 
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {
