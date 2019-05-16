@@ -48,7 +48,7 @@ editor.rb:10: Method `greet` does not exist on `Hello`
           ^^^^^^^^^^^^^^^
 ```
 
-And 63% of call sites[[3](http://#3)] are calling methods with type signatures allowing us to find mismatches in the types of parameters or returns:
+And 63% of call sites[[3](http://#3)] are calling methods with type signatures allowing us to find mismatches in the types of parameters or return values:
 
 ```Ruby
 # typed: true
@@ -148,7 +148,7 @@ def my_id=(new_value); end
 
 ### Supporting the existing Ruby ecosystem
 
-Sorbet will support all of the [types](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148) [that](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148) [Matz announced](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148) for the Ruby 3 release. We’re working with Matz and the Ruby core team to understand their goals with types in Ruby 3 and share what we’ve learned so far.
+Sorbet will support all of the [types](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148) [that](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148) [Matz announced](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148) for the Ruby 3 release. In fact, we’re part of the working group (with Matz and the Ruby core team) that is collaborating on the goals and design of Ruby 3 types; and we've been sharing everything we’ve learned from Sorbet.
 
 Coinbase has built [sorbet-typed](https://github.com/sorbet/sorbet-typed/), a central repository for sharing type definitions for existing Ruby gems. This enables types for the existing ecosystem of gems we all rely on.
 
