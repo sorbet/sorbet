@@ -12,6 +12,7 @@
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
+#include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
