@@ -44,6 +44,7 @@ else
   echo "Nothing to update"
 fi
 popd
+rm -rf sorbet.run
 
 echo "--- releasing stripe.dev/sorbet"
 git fetch origin gh-pages
@@ -85,6 +86,7 @@ if [ -z "$dryrun" ]; then
     git push origin gh-pages
 fi
 popd
+rm -rf sorbet-repo
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)
