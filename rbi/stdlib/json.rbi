@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 
 module JSON
   FAST_STATE_PROTOTYPE = ::T.let(nil, ::T.untyped)

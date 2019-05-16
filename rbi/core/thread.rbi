@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class Thread < Object
   sig {returns(Thread)}

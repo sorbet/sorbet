@@ -1,3 +1,4 @@
+# typed: core
 module Sorbet::Private::Static
   sig do
     params(

@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class StringScanner < Object
   sig do
     params(

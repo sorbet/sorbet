@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 module Mutex_m
   def self.append_features(cl); end
   def self.define_aliases(cl); end

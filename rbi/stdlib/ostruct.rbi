@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 
 class OpenStruct
   InspectKey = ::T.let(nil, ::T.untyped)

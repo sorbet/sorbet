@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Process
   CLOCK_BOOTTIME = T.let(T.unsafe(nil), Integer)
   CLOCK_BOOTTIME_ALARM = T.let(T.unsafe(nil), Integer)

@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Numeric < Object
   include Comparable
 

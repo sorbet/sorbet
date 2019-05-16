@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Random < Object
   include Random::Formatter
 

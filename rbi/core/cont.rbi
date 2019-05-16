@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class Fiber < Object
   sig {returns(Fiber)}

@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 
 module Bundler
   sig {returns(::T.untyped)}

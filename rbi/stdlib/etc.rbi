@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Etc
   CS_GNU_LIBC_VERSION = T.let(T.unsafe(nil), Integer)
   CS_GNU_LIBPTHREAD_VERSION = T.let(T.unsafe(nil), Integer)

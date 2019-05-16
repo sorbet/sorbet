@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Method < Object
   sig {returns(Proc)}
   def to_proc; end

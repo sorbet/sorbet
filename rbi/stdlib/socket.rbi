@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class Addrinfo < Data
   sig {returns(::T.untyped)}

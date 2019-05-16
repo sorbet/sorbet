@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class Tempfile < File
   extend T::Sig

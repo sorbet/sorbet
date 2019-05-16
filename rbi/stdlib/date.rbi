@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 class Date::Infinity < Numeric
   sig {returns(Date::Infinity)}
   def +@(); end

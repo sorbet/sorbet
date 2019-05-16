@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Abbrev
   sig do
     params(

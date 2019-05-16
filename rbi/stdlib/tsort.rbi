@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 module TSort
   def self.each_strongly_connected_component(each_node, each_child); end
   def self.each_strongly_connected_component_from(node, each_child, id_map = nil, stack = nil); end

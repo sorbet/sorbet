@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.

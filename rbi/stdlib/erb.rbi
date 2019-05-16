@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class ERB
   Revision = ::T.let(nil, ::T.untyped)

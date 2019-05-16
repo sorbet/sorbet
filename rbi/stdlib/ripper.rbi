@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 class Ripper
   sig {params(src: String, filename: String, lineno: Integer).returns(T::Array[T.untyped])}

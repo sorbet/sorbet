@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Proc < Object
   sig {returns(Integer)}
   def arity(); end

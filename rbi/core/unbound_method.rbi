@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 class UnboundMethod
   sig {returns(Integer)}
   def arity; end

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 module Digest
   REQUIRE_MUTEX = ::T.let(nil, ::T.untyped)

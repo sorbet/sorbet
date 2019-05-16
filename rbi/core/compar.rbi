@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 
 module Comparable
   sig { params(other: T.untyped).returns(T::Boolean) }

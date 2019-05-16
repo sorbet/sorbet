@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 module ObjectSpace
   sig {params(object_id: Integer).returns(T.untyped)}
   def self._id2ref(object_id); end

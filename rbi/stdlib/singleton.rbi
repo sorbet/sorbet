@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 module Singleton
   module SingletonClassMethods

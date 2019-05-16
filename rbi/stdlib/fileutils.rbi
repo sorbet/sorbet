@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module FileUtils
   LOW_METHODS = T.let(T.unsafe(nil), Array)
   METHODS = T.let(T.unsafe(nil), Array)

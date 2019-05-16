@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 class Time
   sig do
     params(

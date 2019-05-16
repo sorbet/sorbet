@@ -3,7 +3,7 @@
 # This is used in our test suit as well as for fast quick checks.
 # Don't rely on this working anywhere of importance as we will remove and add
 # things at our leisure.
-# typed: strong
+# typed: core
 class Data < Object
 end
 class ScriptError < Exception

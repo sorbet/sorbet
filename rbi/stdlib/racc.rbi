@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 class Racc::Parser
   def _racc_do_parse_c(arg0, arg1); end
   def _racc_do_parse_rb(arg, in_debug); end

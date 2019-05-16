@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 
 module WEBrick
   CR = T.let(nil, T.untyped)

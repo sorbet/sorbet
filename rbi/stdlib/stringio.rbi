@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 class StringIO
   include Enumerable
   extend T::Generic

@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Exception < Object
   sig do
     params(

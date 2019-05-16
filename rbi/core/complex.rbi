@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 class Complex < Numeric
   I = T.let(T.unsafe(nil), Complex)
 

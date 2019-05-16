@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Signal
   sig {returns(T::Hash[String, Integer])}
   def self.list(); end

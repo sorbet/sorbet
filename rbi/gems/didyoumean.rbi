@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module DidYouMean
   IGNORED_CALLERS = T.let(T.unsafe(nil), Array)
   SPELL_CHECKERS = T.let(T.unsafe(nil), Hash)

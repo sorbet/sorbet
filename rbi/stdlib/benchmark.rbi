@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Benchmark
   BENCHMARK_VERSION = T.let(T.unsafe(nil), String)
   CAPTION = T.let(T.unsafe(nil), String)

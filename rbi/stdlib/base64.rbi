@@ -1,4 +1,4 @@
-# typed: true
+# typed: core
 module Base64
   sig do
     params(

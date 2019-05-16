@@ -1,4 +1,4 @@
-# typed: strict
+# typed: core
 class Configatron
   class Store < BasicObject
     sig {params(name: T.any(Symbol, String)).returns(T::Boolean)}
