@@ -13,7 +13,7 @@ class MutableContext;
 class Context {
 public:
     const GlobalState &state;
-    SymbolRef owner;
+    const SymbolRef owner;
 
     operator const GlobalState &() const noexcept {
         return state;
@@ -34,7 +34,7 @@ CheckSize(Context, 16, 8);
 class MutableContext final {
 public:
     GlobalState &state;
-    SymbolRef owner;
+    const SymbolRef owner;
     operator GlobalState &() {
         return state;
     }
@@ -56,9 +56,7 @@ public:
     bool permitOverloadDefinitions() const;
 
     MutableContext withOwner(SymbolRef sym) const {
-        MutableContext r = MutableContext(*this);
-        r.owner = sym;
-        return r;
+        return MutableContext(state, sym);
     }
 
     void trace(std::string_view msg) const;
