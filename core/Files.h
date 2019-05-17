@@ -35,6 +35,10 @@ public:
         return _id < rhs._id;
     }
 
+    bool operator>(const FileRef &rhs) const {
+        return _id > rhs._id;
+    }
+
     inline u2 id() const {
         return _id;
     }
