@@ -789,6 +789,7 @@ private:
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
             auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
+
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx)->resultType = spec->type;
@@ -903,14 +904,18 @@ private:
 
     void processInSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> &seq) {
         InlinedVector<ast::Send *, 1> lastSigs;
+
+        // Explicitly check in the contxt of the class, not <static-init>
+        auto classCtx = ctx.withOwner(ctx.owner.data(ctx)->enclosingClass(ctx));
+
         for (auto &stat : seq->stats) {
-            processStatement(ctx, stat, lastSigs);
+            processStatement(classCtx, stat, lastSigs);
         }
         if (!ast::isa_tree<ast::EmptyTree>(seq->expr.get())) {
-            processStatement(ctx, seq->expr, lastSigs);
+            processStatement(classCtx, seq->expr, lastSigs);
         }
 
-        processLeftoverSigs(ctx, lastSigs);
+        processLeftoverSigs(classCtx, lastSigs);
 
         auto toRemove = remove_if(seq->stats.begin(), seq->stats.end(),
                                   [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
@@ -984,9 +989,19 @@ private:
                     }
                     int i = 0;
 
+                    // process signatures in the context of either the current
+                    // class, or the current singleton class, depending on if
+                    // the current method is a self method.
+                    core::SymbolRef sigOwner;
+                    if (mdef->isSelf()) {
+                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
+                    } else {
+                        sigOwner = ctx.owner;
+                    }
+
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(ctx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
-                                                        mdef->symbol);
+                        auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
+                                                        nullptr, true, mdef->symbol);
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<core::SymbolRef> argsToKeep;
@@ -1240,10 +1255,15 @@ public:
                         return send;
                     }
 
+                    // Compute the containing class when translating the type,
+                    // as there's a very good chance this has been called from a
+                    // method context.
+                    core::SymbolRef ownerClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
-                    auto type =
-                        TypeSyntax::getResultType(ctx, *(send->args[1]), emptySig, false, core::Symbols::noSymbol());
+                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig, false,
+                                                          core::Symbols::noSymbol());
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
