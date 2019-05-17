@@ -1,6 +1,7 @@
 // have to be included first as they violate our poisons
 #include "cfg/proto/proto.h"
 
+#include "common/typecase.h"
 #include "core/proto/proto.h"
 
 using namespace std;
