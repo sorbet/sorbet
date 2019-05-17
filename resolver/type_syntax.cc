@@ -552,7 +552,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 // the context, and the singleton class of the type member's
                 // owner.
                 core::SymbolRef symOwnerSingleton =
-                    isTypeTemplate ? symOwner->ref(ctx) : symOwner->lookupSingletonClass(ctx);
+                    isTypeTemplate ? symData->owner : symOwner->lookupSingletonClass(ctx);
                 core::SymbolRef ctxSingleton = ctxIsSingleton ? ctx.owner : ctxOwnerData->lookupSingletonClass(ctx);
                 bool usedOnSourceClass = symOwnerSingleton == ctxSingleton;
 
