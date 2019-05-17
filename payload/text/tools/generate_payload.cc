@@ -19,7 +19,19 @@ string sourceName2funcName(string sourceName) {
     return sourceName;
 }
 
+string sorbetVersion(string defaultVersion) {
+    string version;
+    if (sorbet::Version::isReleaseBuild) {
+        version = sorbet::Version::build_scm_revision;
+    } else {
+        version = defaultVersion;
+    }
+    return version;
+}
+
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
+    string version = sorbetVersion("master");
+
     out << "#include<string_view>" << '\n' << "#include<vector>\nusing namespace std;\n";
     out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
@@ -29,12 +41,6 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "vector<pair<string_view, string_view> > all() {" << '\n';
     out << "  vector<pair<string_view, string_view> > result;" << '\n';
     for (auto &file : sourceFiles) {
-        string version;
-        if (sorbet::Version::isReleaseBuild) {
-            version = sorbet::Version::build_scm_revision;
-        } else {
-            version = "master";
-        }
         string permalink = "https://github.com/stripe/sorbet/tree/" + version + "/" + file;
         out << "  result.emplace_back(make_pair<string_view, string_view>(\"" + absl::CEscape(permalink) + "\"sv, " +
                    sourceName2funcName(file) + "()));"
