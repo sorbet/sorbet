@@ -42,7 +42,7 @@ class CSV < Object
         str: String,
         options: T::Hash[Symbol, T.untyped],
     )
-    .returns(T::Array[T.nilable(String)])
+    .returns(T.nilable(T::Array[T.nilable(String)]))
   end
   def self.parse_line(str, options=T.unsafe(nil)); end
 
