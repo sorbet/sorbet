@@ -36,6 +36,15 @@ class Foo
   def self.invalid(arg)
     arg
   end
+
+  # Two dangling sigs that refer to the template/member variables
+  sig {returns(Not_A_Self_Type)}
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`. No method def following it
+
+
+  sig {returns(Self_Type_Member)}
+             # ^^^^^^^^^^^^^^^^ error: `type_template` type `T.class_of(Foo)::Self_Type_Member` used in an instance method definition
 end
 
 class FooChild < Foo # error: must be declared again
