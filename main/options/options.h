@@ -14,11 +14,29 @@ public:
     const int returnCode;
 };
 
-struct PrinterConfig {
+class PrinterConfig {
+public:
     bool enabled = false;
     std::string outputPath;
 
-    void print(const std::string_view &contents) const;
+    void print(const std::string_view &contents);
+    template <typename... Args> void fmt(const std::string &msg, const Args &... args) {
+        print(fmt::format(msg, args...));
+    }
+    void flush();
+
+    PrinterConfig();
+    PrinterConfig(const PrinterConfig &) = default;
+    PrinterConfig(PrinterConfig &&) = default;
+    PrinterConfig &operator=(const PrinterConfig &) = default;
+    PrinterConfig &operator=(PrinterConfig &&) = default;
+
+private:
+    struct GuardedState {
+        fmt::memory_buffer buf;
+        absl::Mutex mutex;
+    };
+    std::shared_ptr<GuardedState> state;
 };
 
 struct Printers {
@@ -44,6 +62,9 @@ struct Printers {
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig PluginGeneratedCode;
+    // Ensure everything here is in PrinterConfig::printers().
+
+    std::vector<std::reference_wrapper<PrinterConfig>> printers();
 };
 
 enum Phase {
@@ -140,18 +161,22 @@ struct Options {
 
     std::shared_ptr<FileSystem> fs = std::make_shared<OSFileSystem>();
 
+    void flushPrinters();
+
     Options() = default;
 
     Options(const Options &) = delete;
 
     Options(Options &&) = default;
 
-    const Options &operator=(const Options &) = delete;
+    Options &operator=(const Options &) = delete;
 
-    const Options &operator=(Options &&) = delete;
+    Options &operator=(Options &&) = delete;
 };
 
 void readOptions(Options &, int argc, char *argv[],
                  std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+
+void flushPrinters(Options &);
 } // namespace sorbet::realmain::options
 #endif // RUBY_TYPER_OPTIONS_H

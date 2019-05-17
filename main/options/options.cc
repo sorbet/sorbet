@@ -47,13 +47,50 @@ const vector<PrintOptions> print_options({
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
-void PrinterConfig::print(const string_view &contents) const {
+PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
+
+void PrinterConfig::print(const string_view &contents) {
     if (outputPath.empty()) {
         fmt::print("{}", contents);
     } else {
-        FileOps::write(outputPath, contents);
+        absl::MutexLock lck(&state->mutex);
+        fmt::format_to(state->buf, "{}", contents);
     }
 };
+
+void PrinterConfig::flush() {
+    if (!enabled || outputPath.empty()) {
+        return;
+    }
+    absl::MutexLock lck(&state->mutex);
+    FileOps::write(outputPath, to_string(state->buf));
+};
+
+vector<reference_wrapper<PrinterConfig>> Printers::printers() {
+    return vector<reference_wrapper<PrinterConfig>>({
+        ParseTree,
+        ParseTreeJson,
+        Desugared,
+        DesugaredRaw,
+        DSLTree,
+        DSLTreeRaw,
+        SymbolTable,
+        SymbolTableRaw,
+        SymbolTableJson,
+        SymbolTableFull,
+        SymbolTableFullRaw,
+        NameTree,
+        NameTreeRaw,
+        FileTableJson,
+        ResolveTree,
+        ResolveTreeRaw,
+        MissingConstants,
+        CFG,
+        Autogen,
+        AutogenMsgPack,
+        PluginGeneratedCode,
+    });
+}
 
 struct StopAfterOptions {
     string option;
@@ -400,6 +437,12 @@ string_view stripTrailingSlashes(string_view path) {
         path = path.substr(0, path.length() - 1);
     }
     return path;
+}
+
+void Options::flushPrinters() {
+    for (PrinterConfig &cfg : print.printers()) {
+        cfg.flush();
+    }
 }
 
 void readOptions(Options &opts, int argc, char *argv[],
