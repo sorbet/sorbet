@@ -385,7 +385,7 @@ class Date
   def self.jisx0301(*arg0); end
 end
 
-class DateTime
+class DateTime < Date
   sig {returns(T.untyped)}
   def min(); end
 
