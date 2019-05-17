@@ -1,0 +1,3 @@
+[submodule "rbi/sorbet-typed"]
+	path = rbi/sorbet-typed
+	url = git@github.com:sorbet/sorbet-typed.git
