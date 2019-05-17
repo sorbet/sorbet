@@ -50,7 +50,8 @@ void processSource(core::GlobalState &cb, string str) {
     tree = namer::Namer::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
-    resolver::Resolver::run(ctx, move(trees));
+    auto workers = make_unique<WorkerPool>(0, logger);
+    resolver::Resolver::run(ctx, move(trees), *workers);
 }
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
