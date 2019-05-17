@@ -29,6 +29,15 @@ string sorbetVersion(string defaultVersion) {
     return version;
 }
 
+string filePath2Github(string file, string branch) {
+    const char prefix[] = "rbi/sorbet-typed/lib/";
+    if (file.rfind(prefix, 0) != 0) {
+        return "https://github.com/stripe/sorbet/tree/" + branch + "/" + file;
+    }
+    file = file.substr(std::strlen(prefix));
+    return "https://github.com/sorbet/sorbet-typed/tree/" + branch + "/lib/" + file;
+}
+
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
     string version = sorbetVersion("master");
 
@@ -41,7 +50,7 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "vector<pair<string_view, string_view> > all() {" << '\n';
     out << "  vector<pair<string_view, string_view> > result;" << '\n';
     for (auto &file : sourceFiles) {
-        string permalink = "https://github.com/stripe/sorbet/tree/" + version + "/" + file;
+        string permalink = filePath2Github(file, version);
         out << "  result.emplace_back(make_pair<string_view, string_view>(\"" + absl::CEscape(permalink) + "\"sv, " +
                    sourceName2funcName(file) + "()));"
             << '\n';
@@ -50,6 +59,7 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
 
     out << "}}};" << '\n';
 }
+
 
 int main(int argc, char **argv) {
     // emit header file
