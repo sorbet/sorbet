@@ -1,8 +1,16 @@
 filegroup(
     name = "rbi",
     srcs = glob(
-        ["**/*.rbi"],
-        exclude = ["light.rbi"],
+        [
+            "sorbet-typed/lib/core/all/**/*.rbi",
+            "sorbet-typed/lib/stdlib/all/**/*.rbi",
+            "sorbet-typed/lib/sorbet/all/**/*.rbi",
+            "sorbet-typed/lib/bundler/all/**/*.rbi",
+            "sorbet-typed/lib/chalk/all/**/*.rbi",
+            "sorbet-typed/lib/configatron/all/**/*.rbi",
+            "sorbet-typed/lib/didyoumean/all/**/*.rbi",
+            "sorbet-typed/lib/msgpack/all/**/*.rbi",
+        ],
     ) + [":generate_procs_rbi"],
     visibility = ["//visibility:public"],
 )
