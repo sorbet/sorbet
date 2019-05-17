@@ -1,7 +1,5 @@
 # typed: true
-class Object < BasicObject
-  RUBY_VERSION = T.let(T.unsafe(nil), String)
-end
+RUBY_VERSION = T.let(T.unsafe(nil), String)
 
 class A
   def bar
