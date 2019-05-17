@@ -576,6 +576,22 @@ public:
         vector<ast::ParsedFile> trees;
     };
 
+    static bool locCompare(core::Loc lhs, core::Loc rhs) {
+        if (lhs.file() < rhs.file()) {
+            return true;
+        }
+        if (lhs.file() > rhs.file()) {
+            return false;
+        }
+        if (lhs.beginPos() < rhs.beginPos()) {
+            return true;
+        }
+        if (lhs.beginPos() > rhs.beginPos()) {
+            return false;
+        }
+        return lhs.endPos() < rhs.endPos();
+    }
+
     static vector<ast::ParsedFile> resolveConstants(core::MutableContext ctx, vector<ast::ParsedFile> trees,
                                                     WorkerPool &workers) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
@@ -632,6 +648,18 @@ public:
                 }
             }
         }
+
+        fast_sort(todo,
+                  [](const auto &lhs, const auto &rhs) -> bool { return locCompare(lhs.out->loc, rhs.out->loc); });
+        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool {
+            return locCompare(lhs.ancestor->loc, rhs.ancestor->loc);
+        });
+        fast_sort(todoClassAliases,
+                  [](const auto &lhs, const auto &rhs) -> bool { return locCompare(lhs.rhs->loc, rhs.rhs->loc); });
+        fast_sort(todoTypeAliases,
+                  [](const auto &lhs, const auto &rhs) -> bool { return locCompare(lhs.rhs->loc, rhs.rhs->loc); });
+        fast_sort(trees,
+                  [](const auto &lhs, const auto &rhs) -> bool { return locCompare(lhs.tree->loc, rhs.tree->loc); });
 
         Timer timeit1(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point");
 
