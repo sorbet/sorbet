@@ -19,8 +19,8 @@ public:
     bool enabled = false;
     std::string outputPath;
 
-    void print(const std::string_view &contents);
-    template <typename... Args> void fmt(const std::string &msg, const Args &... args) {
+    void print(const std::string_view &contents) const;
+    template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
         print(fmt::format(msg, args...));
     }
     void flush();

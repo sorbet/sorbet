@@ -49,7 +49,7 @@ const vector<PrintOptions> print_options({
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
-void PrinterConfig::print(const string_view &contents) {
+void PrinterConfig::print(const string_view &contents) const {
     if (outputPath.empty()) {
         fmt::print("{}", contents);
     } else {

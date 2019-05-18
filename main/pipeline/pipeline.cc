@@ -46,7 +46,7 @@ public:
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (print.CFG.enabled) {
-            fmt::print("{}\n\n", cfg->toString(ctx));
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
         return m;
     }
@@ -100,10 +100,10 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
         nodes = parser::Parser::run(gs, file);
     }
     if (print.ParseTree.enabled) {
-        fmt::print("{}\n", nodes->toStringWithTabs(gs, 0));
+        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
     }
     if (print.ParseTreeJson.enabled) {
-        fmt::print("{}\n", nodes->toJSON(gs, 0));
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
     }
     return nodes;
 }
@@ -119,10 +119,10 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
     if (print.Desugared.enabled) {
-        fmt::print("{}\n", ast->toStringWithTabs(gs, 0));
+        print.Desugared.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
     if (print.DesugaredRaw.enabled) {
-        fmt::print("{}\n", ast->showRaw(gs));
+        print.DesugaredRaw.fmt("{}\n", ast->showRaw(gs));
     }
     return ast;
 }
@@ -166,10 +166,10 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             }
         }
         if (print.DSLTree.enabled) {
-            fmt::print("{}\n", tree->toStringWithTabs(lgs, 0));
+            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
         }
         if (print.DSLTreeRaw.enabled) {
-            fmt::print("{}\n", tree->showRaw(lgs));
+            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return emptyParsedFile(file);
@@ -227,10 +227,10 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             }
         }
         if (print.DSLTree.enabled) {
-            fmt::print("{}\n", tree->toStringWithTabs(gs, 0));
+            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
         }
         if (print.DSLTreeRaw.enabled) {
-            fmt::print("{}\n", tree->showRaw(gs));
+            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return emptyPluginFile(file);
@@ -625,7 +625,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", (string)f.data(ctx).path()}});
     try {
         if (opts.print.CFG.enabled) {
-            fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
+            opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
         CFGCollectorAndTyper collector(opts);
         {
@@ -633,7 +633,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
         }
         if (opts.print.CFG.enabled) {
-            fmt::print("}}\n\n");
+            opts.print.CFG.fmt("}}\n\n");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -705,14 +705,14 @@ public:
     }
 };
 
-vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast::ParsedFile> what) {
+vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts, vector<ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
     core::MutableContext ctx(gs, core::Symbols::root());
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
         resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
     }
-    fmt::print("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
+    opts.print.MissingConstants.fmt("{}\n", fmt::join(walk.unresolvedConstants, "\n")); // TODO
     return what;
 }
 
@@ -723,10 +723,10 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
-                fmt::print("{}\n", named.tree->toStringWithTabs(gs, 0));
+                opts.print.NameTree.fmt("{}\n", named.tree->toStringWithTabs(gs, 0));
             }
             if (opts.print.NameTreeRaw.enabled) {
-                fmt::print("{}\n", named.tree->showRaw(gs));
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree->showRaw(gs));
             }
         }
 
@@ -757,15 +757,15 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
-                fmt::print("{}\n", resolved.tree->toString(gs));
+                opts.print.ResolveTree.fmt("{}\n", resolved.tree->toString(gs));
             }
             if (opts.print.ResolveTreeRaw.enabled) {
-                fmt::print("{}\n", resolved.tree->showRaw(gs));
+                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree->showRaw(gs));
             }
         }
     }
     if (opts.print.MissingConstants.enabled) {
-        what = printMissingConstants(gs, move(what));
+        what = printMissingConstants(gs, opts, move(what));
     }
     return what;
 }
@@ -835,27 +835,27 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         }
 
         if (opts.print.SymbolTable.enabled) {
-            fmt::print("{}\n", gs->toString());
+            opts.print.SymbolTable.fmt("{}\n", gs->toString());
         }
         if (opts.print.SymbolTableRaw.enabled) {
-            fmt::print("{}\n", gs->showRaw());
+            opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
         }
         if (opts.print.SymbolTableJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root());
-            core::Proto::toJSON(root, cout);
+            core::Proto::toJSON(root, cout); // TODO
         }
         if (opts.print.SymbolTableFull.enabled) {
-            fmt::print("{}\n", gs->toStringFull());
+            opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
         }
         if (opts.print.SymbolTableFullRaw.enabled) {
-            fmt::print("{}\n", gs->showRawFull());
+            opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
         }
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
-            core::Proto::toJSON(files, cout);
+            core::Proto::toJSON(files, cout); // TODO
         }
         if (opts.print.PluginGeneratedCode.enabled) {
-            plugin::Plugins::dumpPluginGeneratedFiles(*gs);
+            plugin::Plugins::dumpPluginGeneratedFiles(*gs); // TODO
         }
 
         return typecheck_result;
