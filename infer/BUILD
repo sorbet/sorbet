@@ -44,7 +44,6 @@ cc_test(
         "//dsl",
         "//namer",
         "//resolver",
-        "//flatten",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],

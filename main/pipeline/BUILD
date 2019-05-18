@@ -26,7 +26,6 @@ cc_library(
         "//core/proto",
         "//core/serialize",
         "//dsl",
-        "//flatten",
         "//infer",
         "//main/options",
         "//namer",

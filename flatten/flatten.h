@@ -1,7 +1,7 @@
-#include "ast/ast.h"
+#ifndef SORBET_FLATTEN_H
+#define SORBET_FLATTEN_H
 
-#ifndef SORBET_STEVE_FLATTEN_H
-#define SORBET_STEVE_FLATTEN_H
+#include "ast/ast.h"
 
 namespace sorbet::flatten {
 
@@ -12,8 +12,6 @@ public:
 
     static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree);
 
-    std::unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx,
-                                                        std::unique_ptr<ast::ClassDef> classDef);
     std::unique_ptr<ast::Expression> addClasses(core::Context ctx, std::unique_ptr<ast::Expression> tree);
     std::unique_ptr<ast::Expression> addMethods(core::Context ctx, std::unique_ptr<ast::Expression> tree);
     ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs);
@@ -21,7 +19,8 @@ public:
     std::unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx,
                                                             std::unique_ptr<ast::MethodDef> methodDef);
 
-    std::unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, std::unique_ptr<ast::ClassDef> classDef);
+    std::unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx,
+                                                        std::unique_ptr<ast::ClassDef> classDef);
     std::unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, std::unique_ptr<ast::ClassDef> classDef);
 
     struct Methods {
