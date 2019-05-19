@@ -18,5 +18,6 @@ cc_library(
         "//ast/treemap",
         "//common",
         "//core",
+        "//main/options",
     ],
 )

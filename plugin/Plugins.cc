@@ -4,7 +4,7 @@ using namespace std;
 
 namespace sorbet::plugin {
 
-void Plugins::dumpPluginGeneratedFiles(const core::GlobalState &gs) {
+void Plugins::dumpPluginGeneratedFiles(const core::GlobalState &gs, const realmain::options::PrinterConfig &pc) {
     vector<core::FileRef> refs;
     for (int i = 1; i < gs.filesUsed(); i++) {
         if (core::FileRef(i).data(gs).pluginGenerated) {
@@ -17,8 +17,8 @@ void Plugins::dumpPluginGeneratedFiles(const core::GlobalState &gs) {
 
     for (auto ref : refs) {
         const core::File &file = ref.data(gs);
-        fmt::print("# Path: \"{}\":\n", file.path());
-        fmt::print("{}\n", file.source());
+        pc.fmt("# Path: \"{}\":\n", file.path());
+        pc.fmt("{}\n", file.source());
     }
 }
 

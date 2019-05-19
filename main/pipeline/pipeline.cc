@@ -855,7 +855,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             core::Proto::toJSON(files, cout); // TODO
         }
         if (opts.print.PluginGeneratedCode.enabled) {
-            plugin::Plugins::dumpPluginGeneratedFiles(*gs); // TODO
+            plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 
         return typecheck_result;
