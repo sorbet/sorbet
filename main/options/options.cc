@@ -20,7 +20,6 @@ struct PrintOptions {
     string option;
     PrinterConfig Printers::*config;
     bool supportsCaching = false;
-    bool supportsFileOutput = false;
 };
 
 const vector<PrintOptions> print_options({
@@ -42,8 +41,8 @@ const vector<PrintOptions> print_options({
     {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"missing-constants", &Printers::MissingConstants, true},
     {"cfg", &Printers::CFG, true},
-    {"autogen", &Printers::Autogen, true, true},
-    {"autogen-msgpack", &Printers::AutogenMsgPack, true, true},
+    {"autogen", &Printers::Autogen, true},
+    {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -394,10 +393,6 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                         logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
-                }
-                if (!known.supportsFileOutput && outPath.size()) {
-                    logger->error("--print={} does not support file output. Printing to stdout", opt);
-                    cfg.outputPath = "";
                 }
                 found = true;
                 break;

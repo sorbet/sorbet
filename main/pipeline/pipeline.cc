@@ -1,5 +1,6 @@
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
+#include <sstream>
 
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
@@ -705,14 +706,15 @@ public:
     }
 };
 
-vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts, vector<ast::ParsedFile> what) {
+vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
+                                              vector<ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
     core::MutableContext ctx(gs, core::Symbols::root());
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
         resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
     }
-    opts.print.MissingConstants.fmt("{}\n", fmt::join(walk.unresolvedConstants, "\n")); // TODO
+    opts.print.MissingConstants.fmt("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
     return what;
 }
 
@@ -842,7 +844,13 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         }
         if (opts.print.SymbolTableJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root());
-            core::Proto::toJSON(root, cout); // TODO
+            if (opts.print.SymbolTableJson.outputPath.empty()) {
+                core::Proto::toJSON(root, cout);
+            } else {
+                stringstream buf;
+                core::Proto::toJSON(root, buf);
+                opts.print.SymbolTableJson.print(buf.str());
+            }
         }
         if (opts.print.SymbolTableFull.enabled) {
             opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
@@ -852,7 +860,13 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         }
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
-            core::Proto::toJSON(files, cout); // TODO
+            if (opts.print.FileTableJson.outputPath.empty()) {
+                core::Proto::toJSON(files, cout);
+            } else {
+                stringstream buf;
+                core::Proto::toJSON(files, buf);
+                opts.print.FileTableJson.print(buf.str());
+            }
         }
         if (opts.print.PluginGeneratedCode.enabled) {
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
