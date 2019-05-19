@@ -33,7 +33,11 @@ struct Printers {
     bool ResolveTreeRaw = false;
     bool MissingConstants = false;
     bool CFG = false;
+    // cfg-json format outputs a JSON object for each CFG, separated by newlines.
+    // See https://en.wikipedia.org/wiki/JSON_streaming#Concatenated_JSON
     bool CFGJson = false;
+    // cfg-proto format outputs a binary MultiCFG for export to other tools.
+    // See CFG.proto for details
     bool CFGProto = false;
     bool TypedSource = false;
     bool Autogen = false;
