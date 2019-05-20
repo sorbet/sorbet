@@ -16,7 +16,6 @@ class LocalNameInserter {
         core::LocalVariable local;
         core::Loc loc;
         unique_ptr<ast::Reference> expr;
-        bool shadow;
     };
 
     // Map through the reference structure, naming the locals, and preserving
@@ -51,7 +50,6 @@ class LocalNameInserter {
             [&](ast::ShadowArg *shadow) {
                 named = nameArg(ctx, move(shadow->expr));
                 named.expr = make_unique<ast::ShadowArg>(arg->loc, move(named.expr));
-                named.shadow = true;
             },
             [&](ast::Local *local) {
                 named.name = local->localVariable._name;

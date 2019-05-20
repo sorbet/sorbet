@@ -74,6 +74,7 @@ class NameInserter {
     struct ParsedArg {
         core::NameRef name;
         core::Loc loc;
+        core::LocalVariable local;
         unique_ptr<ast::Expression> default_;
         bool keyword = false;
         bool block = false;
@@ -85,11 +86,7 @@ class NameInserter {
         ParsedArg parsedArg;
 
         typecase(
-            arg.get(),
-            [&](ast::UnresolvedIdent *nm) {
-                parsedArg.name = nm->name;
-                parsedArg.loc = nm->loc;
-            },
+            arg.get(), [&](ast::UnresolvedIdent *nm) { Exception::raise("Unexpected unresolved name in arg!"); },
             [&](ast::RestArg *rest) {
                 parsedArg = parseArg(ctx, move(rest->expr));
                 parsedArg.repeated = true;
@@ -111,11 +108,11 @@ class NameInserter {
                 parsedArg.shadow = true;
             },
             [&](ast::Local *local) {
-                // Namer replaces args with locals, so to make namer idempotent,
-                // we need to be able to handle Locals here.
+                parsedArg.local = local->localVariable;
                 parsedArg.name = local->localVariable._name;
                 parsedArg.loc = local->loc;
             });
+
         return parsedArg;
     }
 
@@ -124,10 +121,10 @@ class NameInserter {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
             core::SymbolRef sym = ctx.owner.data(ctx)->arguments()[pos];
-            core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
-            auto localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
+            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
             return make_pair(sym, move(localExpr));
         }
+
         core::NameRef name;
         if (parsedArg.keyword) {
             name = parsedArg.name;
@@ -137,8 +134,7 @@ class NameInserter {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
-        core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
-        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
+        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
         core::SymbolData data = sym.data(ctx);
         if (parsedArg.default_) {
@@ -154,6 +150,7 @@ class NameInserter {
         if (parsedArg.repeated) {
             data->setRepeated();
         }
+
         return make_pair(sym, move(localExpr));
     }
 
@@ -425,13 +422,6 @@ public:
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 
-    core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {
-        if (!ctx.owner.data(ctx)->isBlockSymbol(ctx)) {
-            return core::LocalVariable(name, 0);
-        }
-        return core::LocalVariable(name, scopeStack.back().localId);
-    }
-
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ParsedArg> parsedArgs) {
         ast::MethodDef::ARGS_store args;
         bool inShadows = false;
@@ -450,10 +440,7 @@ public:
         for (auto &arg : parsedArgs) {
             i++;
             auto name = arg.name;
-
-            // reinvent the same names for the args that were picked by
-            // `name_locals`
-            auto localVariable = enterLocal(ctx, name);
+            auto localVariable = arg.local;
 
             if (arg.shadow) {
                 inShadows = true;
