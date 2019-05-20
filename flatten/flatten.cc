@@ -10,13 +10,15 @@ using namespace std;
 
 namespace sorbet::flatten {
 
-unique_ptr<ast::Expression> FlattenWalk::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
-    FlattenWalk flatten;
-    tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
-    tree = flatten.addClasses(ctx, std::move(tree));
-    tree = flatten.addMethods(ctx, std::move(tree));
+vector<ast::ParsedFile> FlattenWalk::run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
+    for (auto &tree : trees) {
+        FlattenWalk flatten;
+        tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+        tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
+        tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
+    }
 
-    return tree;
+    return trees;
 }
 
 bool FlattenWalk::isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
