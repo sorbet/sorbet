@@ -317,17 +317,18 @@ Please take a moment to explore our documentation at
 James Iry [@jamesiry](https://twitter.com/jamesiry) on behalf of the Sorbet team
 (current and former)
 
-- Dmitry [](https://twitter.com/darkdimius)Petrashko [@darkdimius](https://twitter.com/darkdimius)
+- Dmitry Petrashko [@darkdimius](https://twitter.com/darkdimius)
 - Paul Tarjan [@ptarjan](https://twitter.com/ptarjan)
 - John Vilk [@jvilk](https://github.com/jvilk)
 - Jake Zimmerman [@jez](https://github.com/jez)
 - Neil Parikh [@neilparikh](https://github.com/neilparikh)
 - Russell Davis [@_russelldavis](https://twitter.com/_russelldavis)
 - Nelson Elhage [@nelhage](https://twitter.com/nelhage)
+
 ## Footnotes
 
 <a name="1"></a>[1] We also use plenty of of other languages including Go for infrastructure tasks, Scala for data wrangling, and JavaScript for client-side work.
 
-<a name="2"></a>[2] [](https://sorbet.run)[sorbet.run](https://sorbet.run) also works on mobile devices but does not offer all the code navigation and exploration features of the desktop version.
+<a name="2"></a>[2] [sorbet.run](https://sorbet.run) also works on mobile devices but does not offer all the code navigation and exploration features of the desktop version.
 
 <a name="3"></a>[3] A call site is just a single location in a codebase that will result in a call to function or method when run. We don’t use the term *method calls* because that can also mean a call at runtime. For example, `foo.bar` might exist at only one call site in your code, but if it’s in a loop it might result in 0, 1, or $$n$$ method calls at runtime.
