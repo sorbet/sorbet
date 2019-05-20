@@ -8,9 +8,7 @@
 
 namespace sorbet::method_checks {
 
-void validateOverriding(core::GlobalState &gs, core::SymbolRef method);
-void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, std::vector<core::SymbolRef>> &abstractCache,
-                      core::SymbolRef sym);
+void validateSymbols(core::GlobalState &gs);
 
 } // namespace sorbet::method_checks
 

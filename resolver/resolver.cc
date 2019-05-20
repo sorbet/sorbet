@@ -8,6 +8,7 @@
 #include "core/StrictLevel.h"
 #include "core/core.h"
 #include "flatten/flatten.h"
+#include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
@@ -1503,7 +1504,7 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     finalizeSymbols(ctx.state);
     trees = resolveSigs(ctx, std::move(trees));
-    validateSymbols(ctx.state);
+    method_checks::validateSymbols(ctx.state);
     sanityCheck(ctx, trees);
 
     return trees;

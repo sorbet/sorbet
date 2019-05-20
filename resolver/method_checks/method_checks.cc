@@ -226,4 +226,24 @@ void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vecto
     }
 }
 
+
+void validateSymbols(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "Resolver::validateSymbols");
+    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
+
+    for (int i = 1; i < gs.symbolsUsed(); ++i) {
+        auto sym = core::SymbolRef(&gs, i);
+        if (!sym.data(gs)->loc().exists() || sym.data(gs)->loc().file().data(gs).isPayload()) {
+            continue;
+        }
+        if (sym.data(gs)->isClass()) {
+            validateAbstract(gs, abstractCache, sym);
+        }
+        if (sym.data(gs)->isMethod() && !sym.data(gs)->isBlockSymbol(gs)) {
+            validateOverriding(gs, sym);
+        }
+    }
+}
+
+
 } // namespace sorbet::method_checks

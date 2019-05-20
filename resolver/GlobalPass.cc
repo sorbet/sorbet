@@ -2,7 +2,6 @@
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
-#include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 
 #include "absl/algorithm/container.h"
@@ -379,24 +378,6 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         auto sym = core::SymbolRef(&gs, i);
         if (sym.data(gs)->isClass()) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
-        }
-    }
-}
-
-void Resolver::validateSymbols(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "Resolver::validateSymbols");
-    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
-
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, i);
-        if (!sym.data(gs)->loc().exists() || sym.data(gs)->loc().file().data(gs).isPayload()) {
-            continue;
-        }
-        if (sym.data(gs)->isClass()) {
-            sorbet::method_checks::validateAbstract(gs, abstractCache, sym);
-        }
-        if (sym.data(gs)->isMethod() && !sym.data(gs)->isBlockSymbol(gs)) {
-            sorbet::method_checks::validateOverriding(gs, sym);
         }
     }
 }
