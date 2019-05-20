@@ -11,3 +11,7 @@ echo "--- autogen.txt end ---"
 echo
 
 shasum autogen.msgpack
+
+echo
+# Do not allow a print option to use inconsistent paths
+main/sorbet --silence-dev-message -p cfg -p cfg:out -e '1' 2>&1

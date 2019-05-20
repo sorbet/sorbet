@@ -66,3 +66,5 @@ requires: []
 --- autogen.txt end ---
 
 9022334ba198d9ea50ee7e05b1c299618f96fbec  autogen.msgpack
+
+--print=cfg specified multiple times with inconsistent output options

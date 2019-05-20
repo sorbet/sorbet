@@ -386,6 +386,10 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
         for (auto &known : print_options) {
             if (known.option == opt) {
                 auto &cfg = opts.print.*(known.config);
+                if (cfg.enabled && cfg.outputPath != outPath) {
+                    logger->error("--print={} specified multiple times with inconsistent output options", opt);
+                    throw EarlyReturnWithCode(1);
+                }
                 cfg.enabled = true;
                 cfg.outputPath = outPath;
                 if (!known.supportsCaching) {
