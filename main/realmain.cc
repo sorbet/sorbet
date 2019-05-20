@@ -392,7 +392,7 @@ int realmain(int argc, char *argv[]) {
 
             runAutogen(ctx, opts, *workers, indexed);
         } else {
-            indexed = pipeline::resolve(*gs, move(indexed), opts);
+            indexed = pipeline::resolve(*gs, move(indexed), opts, *workers);
             if (opts.stressIncrementalResolver) {
                 for (auto &f : indexed) {
                     auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore);

@@ -23,7 +23,7 @@ std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::
                                    std::unique_ptr<KeyValueStore> &kvstore);
 
 std::vector<ast::ParsedFile> resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                     const options::Options &opts, bool skipConfigatron = false);
+                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
 
 std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 const options::Options &opts);

@@ -175,7 +175,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     }
 
     auto finalGs = initialGS->deepCopy(true);
-    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, skipConfigatron);
+    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, workers, skipConfigatron);
     tryApplyDefLocSaver(*finalGs, resolved);
     tryApplyLocalVarSaver(*finalGs, resolved);
     vector<core::FileRef> affectedFiles;

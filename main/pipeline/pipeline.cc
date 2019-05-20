@@ -908,7 +908,8 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
         }
     }
     auto allSends = getAllSends(*lgs, single[0].tree);
-    pipeline::resolve(*lgs, move(single), emptyOpts, true);
+    auto workers = WorkerPool::create(0, lgs->tracer());
+    pipeline::resolve(*lgs, move(single), emptyOpts, *workers, true);
 
     return {move(*lgs->hash()), move(allSends)};
 }
