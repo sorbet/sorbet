@@ -6,6 +6,7 @@
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
 #include "common/Random.h"
+#include "common/typecase.h"
 #include "core/Names.h"
 
 using namespace std;
@@ -88,6 +89,87 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     }
 
     return symbolProto;
+}
+
+com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, const LiteralType &lit) {
+    com::stripe::rubytyper::Type::Literal proto;
+
+    switch (lit.literalKind) {
+        case LiteralType::LiteralTypeKind::Integer:
+            proto.set_kind(com::stripe::rubytyper::Type::Literal::INTEGER);
+            proto.set_integer(lit.value);
+            break;
+        case LiteralType::LiteralTypeKind::String:
+            proto.set_kind(com::stripe::rubytyper::Type::Literal::STRING);
+            proto.set_string(NameRef(gs, lit.value).show(gs));
+            break;
+        case LiteralType::LiteralTypeKind::Symbol:
+            proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
+            proto.set_symbol(NameRef(gs, lit.value).show(gs));
+            break;
+        case LiteralType::LiteralTypeKind::True:
+            proto.set_kind(com::stripe::rubytyper::Type::Literal::TRUE);
+            proto.set_bool_(true);
+            break;
+        case LiteralType::LiteralTypeKind::False:
+            proto.set_kind(com::stripe::rubytyper::Type::Literal::FALSE);
+            proto.set_bool_(false);
+            break;
+        case LiteralType::LiteralTypeKind::Float:
+            proto.set_kind(com::stripe::rubytyper::Type::Literal::FLOAT);
+            proto.set_float_(lit.floatval);
+            break;
+    }
+    return proto;
+}
+
+com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, TypePtr typ) {
+    com::stripe::rubytyper::Type proto;
+    typecase(
+        typ.get(),
+        [&](ClassType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::CLASS);
+            proto.set_class_full_name(t->symbol.show(gs));
+        },
+        [&](AndType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::AND);
+            *proto.mutable_and_()->mutable_left() = toProto(gs, t->left);
+            *proto.mutable_and_()->mutable_right() = toProto(gs, t->right);
+        },
+        [&](OrType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::OR);
+            *proto.mutable_or_()->mutable_left() = toProto(gs, t->left);
+            *proto.mutable_or_()->mutable_right() = toProto(gs, t->right);
+        },
+        [&](AppliedType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::APPLIED);
+            proto.mutable_applied()->set_symbol_full_name(t->klass.show(gs));
+            for (auto a : t->targs) {
+                *proto.mutable_applied()->add_type_args() = toProto(gs, a);
+            }
+        },
+        [&](ShapeType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::SHAPE);
+            for (auto k : t->keys) {
+                *proto.mutable_shape()->add_keys() = toProto(gs, k);
+            }
+            for (auto v : t->values) {
+                *proto.mutable_shape()->add_values() = toProto(gs, v);
+            }
+        },
+        [&](LiteralType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::LITERAL);
+            *proto.mutable_literal() = toProto(gs, *t);
+        },
+        [&](TupleType *t) {
+            proto.set_kind(com::stripe::rubytyper::Type::TUPLE);
+            for (auto e : t->elems) {
+                *proto.mutable_tuple()->add_elems() = toProto(gs, e);
+            }
+        },
+        // TODO later: add more types
+        [&](Type *t) { proto.set_kind(com::stripe::rubytyper::Type::UNKNOWN); });
+    return proto;
 }
 
 com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {

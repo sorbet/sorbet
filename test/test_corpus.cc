@@ -2,6 +2,9 @@
 #include <cxxopts.hpp>
 // has to go first as it violates are requirements
 
+// has to go first, as it violates poisons
+#include "core/proto/proto.h"
+
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
@@ -9,6 +12,7 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "core/Error.h"
@@ -86,14 +90,14 @@ public:
 
 class CFGCollectorAndTyper {
 public:
-    vector<string> cfgs;
+    vector<unique_ptr<cfg::CFG>> cfgs;
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
-        cfgs.emplace_back(cfg->toString(ctx));
+        cfgs.push_back(move(cfg));
         return m;
     }
 };
@@ -101,7 +105,7 @@ public:
 UnorderedSet<string> knownPasses = {"parse-tree", "parse-tree-json", "ast",          "ast-raw",
                                     "dsl-tree",   "dsl-tree-raw",    "symbol-table", "symbol-table-raw",
                                     "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw",
-                                    "cfg",        "autogen"};
+                                    "cfg",        "cfg-json",        "autogen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -335,26 +339,37 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
             }
         };
-        // CFG
 
-        expectation = test.expectations.find("cfg");
-        if (expectation != test.expectations.end()) {
+        // CFG
+        auto expCfg = test.expectations.find("cfg");
+        auto expCfgJson = test.expectations.find("cfg-json");
+        if (expCfg != test.expectations.end() || expCfgJson != test.expectations.end()) {
             checkTree();
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
             auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             resolvedTree.tree.reset();
 
-            stringstream dot;
-            dot << "digraph \"" << rbName << "\" {" << '\n';
-            for (auto &cfg : collector.cfgs) {
-                dot << cfg << '\n' << '\n';
+            if (expCfg != test.expectations.end()) {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->toString(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n' << '\n';
+                got["cfg"].append(dot.str());
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
-            dot << "}" << '\n' << '\n';
-            got["cfg"].append(dot.str());
 
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            if (expCfgJson != test.expectations.end()) {
+                for (auto &cfg : collector.cfgs) {
+                    auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+                    got["cfg-json"].append(core::Proto::toJSON(proto));
+                }
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            }
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer

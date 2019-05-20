@@ -17,7 +17,7 @@ def cli_test(path):
             "{}/*.input".format(name),
             "{}/sorbet/*".format(name),
             "{}/**/file_with_no_dot".format(name),
-        ]) + ["//main:sorbet"]
+        ]) + ["//main:sorbet", "@com_google_protobuf//:protoc", "//proto:protos"],
     )
 
     output = path.replace('.sh', '.out')

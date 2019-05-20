@@ -8,6 +8,7 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -49,6 +50,15 @@ public:
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (print.CFG) {
             fmt::print("{}\n\n", cfg->toString(ctx));
+        }
+        if (print.CFGJson || print.CFGProto) {
+            auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+            if (print.CFGJson) {
+                core::Proto::toJSON(proto, cout);
+            } else {
+                // The proto wire format allows simply concatenating repeated message fields
+                cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
+            }
         }
         return m;
     }
