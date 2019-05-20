@@ -11,90 +11,56 @@ namespace sorbet::name_locals {
 class LocalNameInserter {
     friend class NameLocals;
 
-    struct ParsedArg {
+    struct NamedArg {
         core::NameRef name;
+        core::LocalVariable local;
         core::Loc loc;
-        unique_ptr<ast::Expression> default_;
-        bool keyword = false;
-        bool block = false;
-        bool repeated = false;
-        bool shadow = false;
+        unique_ptr<ast::Reference> expr;
+        bool shadow;
     };
 
-    ParsedArg parseArg(core::MutableContext ctx, unique_ptr<ast::Reference> arg) {
-        ParsedArg parsedArg;
+    // Map through the reference structure, naming the locals, and preserving
+    // the outer structure for the namer proper.
+    NamedArg nameArg(core::MutableContext ctx, unique_ptr<ast::Reference> arg) {
+        NamedArg named;
 
         typecase(
             arg.get(),
             [&](ast::UnresolvedIdent *nm) {
-                parsedArg.name = nm->name;
-                parsedArg.loc = nm->loc;
+                named.name = nm->name;
+                named.local = enterLocal(ctx, named.name);
+                named.loc = arg->loc;
+                named.expr = make_unique<ast::Local>(arg->loc, named.local);
             },
             [&](ast::RestArg *rest) {
-                parsedArg = parseArg(ctx, move(rest->expr));
-                parsedArg.repeated = true;
+                named = nameArg(ctx, move(rest->expr));
+                named.expr = make_unique<ast::RestArg>(arg->loc, move(named.expr));
             },
             [&](ast::KeywordArg *kw) {
-                parsedArg = parseArg(ctx, move(kw->expr));
-                parsedArg.keyword = true;
+                named = nameArg(ctx, move(kw->expr));
+                named.expr = make_unique<ast::KeywordArg>(arg->loc, move(named.expr));
             },
             [&](ast::OptionalArg *opt) {
-                parsedArg = parseArg(ctx, move(opt->expr));
-                parsedArg.default_ = move(opt->default_);
+                named = nameArg(ctx, move(opt->expr));
+                named.expr = make_unique<ast::OptionalArg>(arg->loc, move(named.expr), move(opt->default_));
             },
             [&](ast::BlockArg *blk) {
-                parsedArg = parseArg(ctx, move(blk->expr));
-                parsedArg.block = true;
+                named = nameArg(ctx, move(blk->expr));
+                named.expr = make_unique<ast::BlockArg>(arg->loc, move(named.expr));
             },
             [&](ast::ShadowArg *shadow) {
-                parsedArg = parseArg(ctx, move(shadow->expr));
-                parsedArg.shadow = true;
+                named = nameArg(ctx, move(shadow->expr));
+                named.expr = make_unique<ast::ShadowArg>(arg->loc, move(named.expr));
+                named.shadow = true;
             },
             [&](ast::Local *local) {
-                // Namer replaces args with locals, so to make namer idempotent,
-                // we need to be able to handle Locals here.
-                parsedArg.name = local->localVariable._name;
-                parsedArg.loc = local->loc;
+                named.name = local->localVariable._name;
+                named.local = enterLocal(ctx, named.name);
+                named.loc = arg->loc;
+                named.expr = make_unique<ast::Local>(local->loc, named.local);
             });
-        return parsedArg;
-    }
 
-    pair<core::SymbolRef, unique_ptr<ast::Expression>> arg2Symbol(core::MutableContext ctx, int pos,
-                                                                  ParsedArg parsedArg) {
-        if (pos < ctx.owner.data(ctx)->arguments().size()) {
-            // TODO: check that flags match;
-            core::SymbolRef sym = ctx.owner.data(ctx)->arguments()[pos];
-            core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
-            auto localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
-            return make_pair(sym, move(localExpr));
-        }
-        core::NameRef name;
-        if (parsedArg.keyword) {
-            name = parsedArg.name;
-        } else if (parsedArg.block) {
-            name = core::Names::blkArg();
-        } else {
-            name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
-        }
-        core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
-        core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
-        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
-
-        core::SymbolData data = sym.data(ctx);
-        if (parsedArg.default_) {
-            data->setOptional();
-            localExpr = make_unique<ast::OptionalArg>(parsedArg.loc, move(localExpr), move(parsedArg.default_));
-        }
-        if (parsedArg.keyword) {
-            data->setKeyword();
-        }
-        if (parsedArg.block) {
-            data->setBlockArgument();
-        }
-        if (parsedArg.repeated) {
-            data->setRepeated();
-        }
-        return make_pair(sym, move(localExpr));
+        return named;
     }
 
     struct LocalFrame {
@@ -149,52 +115,13 @@ class LocalNameInserter {
         return core::LocalVariable(name, scopeStack.back().localId);
     }
 
-    // Allow stub symbols created to hold intrinsics to be filled in
-    // with real types from code
-    bool isIntrinsic(core::Context ctx, core::SymbolRef sym) {
-        auto data = sym.data(ctx);
-        return data->intrinsic != nullptr && data->resultType == nullptr;
-    }
-
-    ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ParsedArg> parsedArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<NamedArg> namedArgs) {
         ast::MethodDef::ARGS_store args;
-        bool inShadows = false;
-        bool intrinsic = isIntrinsic(ctx, ctx.owner);
-        bool swapArgs = intrinsic && (ctx.owner.data(ctx)->arguments().size() == 1);
-        core::SymbolRef swappedArg;
-        if (swapArgs) {
-            // When we're filling in an intrinsic method, we want to overwrite the block arg that used
-            // to exist with the block arg that we got from desugaring the method def in the RBI files.
-            ENFORCE(ctx.owner.data(ctx)->arguments()[0].data(ctx)->isBlockArgument());
-            swappedArg = ctx.owner.data(ctx)->arguments()[0];
-            ctx.owner.data(ctx)->arguments().clear();
-        }
 
-        int i = -1;
-        for (auto &arg : parsedArgs) {
-            i++;
-            auto name = arg.name;
-            auto localVariable = enterLocal(ctx, name);
-
-            if (arg.shadow) {
-                inShadows = true;
-                auto localExpr = make_unique<ast::Local>(arg.loc, localVariable);
-                args.emplace_back(move(localExpr));
-            } else {
-                ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
-                if (swapArgs && arg.block) {
-                    // see commnent on if (swapArgs) above
-                    ctx.owner.data(ctx)->arguments().emplace_back(swappedArg);
-                }
-                auto pair = arg2Symbol(ctx, i, move(arg));
-                core::SymbolRef sym = pair.first;
-                args.emplace_back(move(pair.second));
-                ENFORCE(i < ctx.owner.data(ctx)->arguments().size());
-                ENFORCE(swapArgs || (ctx.owner.data(ctx)->arguments()[i] == sym));
-            }
-
-            scopeStack.back().locals[name] = localVariable;
-            scopeStack.back().args.emplace_back(localVariable);
+        for (auto &named : namedArgs) {
+            args.emplace_back(move(named.expr));
+            scopeStack.back().locals[named.name] = named.local;
+            scopeStack.back().args.emplace_back(named.local);
         }
 
         return args;
@@ -207,72 +134,6 @@ class LocalNameInserter {
             owner = core::Symbols::Object();
         }
         return owner;
-    }
-
-    bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
-        auto sym = ctx.owner.data(ctx)->dealias(ctx);
-        if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
-            if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                if (sym != ctx.owner) {
-                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
-                    // Eventually we should be more principled about how we report this.
-                    e.setHeader(
-                        "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                        ctx.owner.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                    e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
-                    e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
-                } else {
-                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
-                    // Eventually we should be more principled about how we report this.
-                    e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-            }
-            return false;
-        }
-        for (int i = 0; i < parsedArgs.size(); i++) {
-            auto &methodArg = parsedArgs[i];
-            auto symArg = sym.data(ctx)->arguments()[i].data(ctx);
-
-            if (symArg->isKeyword() != methodArg.keyword) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isKeyword", symArg->isKeyword(), methodArg.keyword);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-                return false;
-            }
-            if (symArg->isBlockArgument() != methodArg.block) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isBlock", symArg->isBlockArgument(), methodArg.block);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-                return false;
-            }
-            if (symArg->isRepeated() != methodArg.repeated) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isRepeated", symArg->isRepeated(), methodArg.repeated);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-                return false;
-            }
-            if (symArg->isKeyword() && symArg->name != methodArg.name) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.name.show(ctx));
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-                return false;
-            }
-        }
-
-        return true;
     }
 
 public:
@@ -289,16 +150,7 @@ public:
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         enterClassOrMethod();
 
-        core::SymbolRef owner = methodOwner(ctx);
-
-        if (method->isSelf()) {
-            if (owner.data(ctx)->isClass()) {
-                owner = owner.data(ctx)->singletonClass(ctx);
-            }
-        }
-        ENFORCE(owner.data(ctx)->isClass());
-
-        vector<ParsedArg> parsedArgs;
+        vector<NamedArg> namedArgs;
         for (auto &arg : method->args) {
             auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
             if (!refExp) {
@@ -306,40 +158,15 @@ public:
             }
             unique_ptr<ast::Reference> refExpImpl(refExp);
             arg.release();
-            parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
+            namedArgs.emplace_back(nameArg(ctx, move(refExpImpl)));
         }
 
-        auto sym = owner.data(ctx)->findMemberNoDealias(ctx, method->name);
-        if (sym.exists()) {
-            if (method->declLoc == sym.data(ctx)->loc()) {
-                // TODO remove if the paramsMatch is perfect
-                // Reparsing the same file
-                method->symbol = sym;
-                method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
-                return method;
-            }
-            if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), method->declLoc, parsedArgs)) {
-                sym.data(ctx)->addLoc(ctx, method->declLoc);
-            } else {
-                ctx.state.mangleRenameSymbol(sym, method->name);
-            }
-        }
-        method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
-        method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
-        method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
-        if (method->isDSLSynthesized()) {
-            method->symbol.data(ctx)->setDSLSynthesized();
-        }
+        method->args = fillInArgs(ctx.withOwner(method->symbol), move(namedArgs));
         return method;
     }
 
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         exitScope();
-        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
-                method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
-        // Not all information is unfortunately available in the symbol. Original argument names aren't.
-        // method->args.clear();
         return method;
     }
 
@@ -374,7 +201,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        vector<ParsedArg> parsedArgs;
+        vector<NamedArg> namedArgs;
         for (auto &arg : blk->args) {
             auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
             if (!refExp) {
@@ -382,9 +209,9 @@ public:
             }
             unique_ptr<ast::Reference> refExpImpl(refExp);
             arg.release();
-            parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
+            namedArgs.emplace_back(nameArg(ctx, move(refExpImpl)));
         }
-        blk->args = fillInArgs(ctx.withOwner(blk->symbol), move(parsedArgs));
+        blk->args = fillInArgs(ctx.withOwner(blk->symbol), move(namedArgs));
 
         return blk;
     }
