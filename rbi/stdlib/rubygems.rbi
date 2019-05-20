@@ -242,4 +242,12 @@ class Gem::Version < Object
 
   ANCHORED_VERSION_PATTERN = T.let(T.unsafe(nil), Regexp)
   VERSION_PATTERN = T.let(T.unsafe(nil), String)
+
+  sig do
+    params(
+      version: String,
+    )
+    .void
+  end
+  def initialize(version); end
 end
