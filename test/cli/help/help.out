@@ -115,7 +115,7 @@ Usage:
                                 name-tree-raw, file-table-json, resolve-tree,
                                 resolve-tree-raw, missing-constants, cfg,
                                 cfg-json, cfg-proto, autogen, autogen-msgpack,
-                                plugin-generated-code]
+                                autogen-classlist, plugin-generated-code]
       --stop-after phase        Stop After: [init, parser, desugarer, dsl,
                                 local-vars, namer, resolver, cfg, inferencer]
                                 (default: inferencer)

@@ -46,6 +46,7 @@ const vector<PrintOptions> print_options({
     {"cfg-proto", &Printers::CFGProto, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
+    {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -92,6 +93,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         CFGProto,
         Autogen,
         AutogenMsgPack,
+        AutogenClasslist,
         PluginGeneratedCode,
     });
 }
@@ -538,7 +540,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) &&
+        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) &&
             (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
                           opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");

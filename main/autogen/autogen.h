@@ -81,6 +81,7 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
+    void classlist(core::Context ctx, std::vector<std::string> &out);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef def);

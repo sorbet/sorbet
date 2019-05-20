@@ -313,7 +313,7 @@ public:
         Exception::raise("Should never happen");
     }
 
-    inline bool isClassModuleSet() {
+    inline bool isClassModuleSet() const {
         ENFORCE(isClass());
         return flags & (Symbol::Flags::CLASS_MODULE | Symbol::Flags::CLASS_CLASS);
     }
