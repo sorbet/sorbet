@@ -43,7 +43,7 @@ Today, every CI build of the main repository is checked by Sorbet. In 100% of
 our production Ruby files, we catch problems with missing constants such as
 class names:
 
-```Ruby
+```ruby
 class Hello
 end
 def main
@@ -60,7 +60,7 @@ In 82% of our production Ruby files, we prevent calls to methods that don’t
 exist and discover situations where a method is called with too many or too few
 parameters:
 
-```Ruby
+```ruby
 # typed: true
 class Hello
   def greeting
@@ -80,7 +80,7 @@ editor.rb:10: Method `greet` does not exist on `Hello`
 And 63% of call sites[^call-site] are calling methods with type signatures
 allowing us to find mismatches in the types of parameters or return values:
 
-```Ruby
+```ruby
 # typed: true
 class Hello
   extend T::Sig
@@ -182,7 +182,7 @@ attribute my_id, :integer
 …can conceptually expand into something that Sorbet sees as a typed interface
 like:
 
-```Ruby
+```ruby
 sig {returns(T.nilable(Integer))}
 def my_id; end
 
