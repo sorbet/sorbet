@@ -104,9 +104,9 @@ There’s more integration work to do and features to build, but so far work has
 already paid off in the number bugs prevented. The feedback from Stripe
 developers has already been largely positive:
 
-![](/img/testimonial_once_every_never.png)
+![Testimonial from Sorbet user](/img/testimonial_once_every_never.png)
 
-![](/img/testimonial_pair_programming.png)
+![Testimonial from Sorbet user](/img/testimonial_pair_programming.png)
 
 ## Where Sorbet is going
 
@@ -260,17 +260,17 @@ open source it. Here’s a quick walkthrough of some of its features.
 
 Error squiggles details behind the error on hover:
 
-![](/img/editor_error_squiggles.gif)
+![Editor integration screenshot](/img/editor_error_squiggles.gif)
 
 
 Go to definition uses Sorbet’s type information and is more accurate than simply
 relying on strings:
 
-![](/img/editor_go_to_definition.gif)
+![Editor integration screenshot](/img/editor_go_to_definition.gif)
 
 Autocomplete and inline documentation:
 
-![](/img/editor_autocomplete.gif)
+![Editor integration screenshot](/img/editor_autocomplete.gif)
 
 
 Sorbet’s editor integration uses Microsoft’s Language Server Protocol, which
@@ -279,7 +279,7 @@ example, Sourcegraph has a prototype of a browser plugin that allows developers
 to get rich information within GitHub. Here’s what it looks like when integrated
 with Sorbet:
 
-![](/img/sourcegraph_github.gif)
+![Sorbet Sourcegraph integration](/img/sourcegraph_github.gif)
 
 ## Collaborators
 
