@@ -24,6 +24,6 @@ cc_library(
         "//ast/treemap",
         "//core",
         "//flatten",
-        "//method_checks",
+        "//resolver/method_checks",
     ],
 )

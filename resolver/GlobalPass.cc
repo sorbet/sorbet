@@ -2,7 +2,7 @@
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
-#include "method_checks/method_checks.h"
+#include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 
 #include "absl/algorithm/container.h"
