@@ -12,6 +12,10 @@ two things are true: 1) we need all the tooling help we can get to understand
 and modify that much code, and 2) a total rewrite in a statically typed language
 would be a massive undertaking.
 
+[^languages]: We also use plenty of of other languages including Go for
+infrastructure tasks, Scala for data wrangling, and JavaScript for client-side
+work.
+
 With that in mind, in October 2017 a small team of engineers conceived of
 building Sorbet, a gradual static type system for Ruby. Static type systems look
 for certain classes of potential errors without running your code. A gradual
@@ -32,6 +36,10 @@ ready to share it with the rest of the Ruby community as open source. We’ve al
 begun beta testing an editor integration which you can play with at
 [sorbet.run] (if you’re on a desktop browser[^mobile]). You can read more about
 how Sorbet works in our [documentation](/docs/overview).
+
+[^mobile]: [sorbet.run] also works on mobile devices but
+does not offer all the code navigation and exploration features of the desktop
+version.
 
 
 ## Where Sorbet is now
@@ -105,6 +113,12 @@ editor.rb:12: Symbol(:"foo") doesn't match String for argument name
     12 |  Hello.new.greeting(:foo)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 ```
+
+[^call-site]: A call site is just a single location in a codebase that will
+result in a call to function or method when run. We don’t use the term *method
+calls* because that can also mean a call at runtime. For example, `foo.bar`
+might exist at only one call site in your code, but if it’s in a loop it might
+result in 0, 1, or `n` method calls at runtime.
 
 There’s more integration work to do and features to build, but so far work has
 already paid off in the number bugs prevented. The feedback from Stripe
@@ -331,19 +345,6 @@ James Iry [@jamesiry](https://twitter.com/jamesiry) on behalf of the Sorbet team
 - Russell Davis ([@_russelldavis](https://twitter.com/_russelldavis))
 - Nelson Elhage ([@nelhage](https://twitter.com/nelhage))
 
-[^languages]: We also use plenty of of other languages including Go for
-infrastructure tasks, Scala for data wrangling, and JavaScript for client-side
-work.
-
-[^mobile]: [sorbet.run] also works on mobile devices but
-does not offer all the code navigation and exploration features of the desktop
-version.
-
-[^call-site]: A call site is just a single location in a codebase that will
-result in a call to function or method when run. We don’t use the term *method
-calls* because that can also mean a call at runtime. For example, `foo.bar`
-might exist at only one call site in your code, but if it’s in a loop it might
-result in 0, 1, or `n` method calls at runtime.
 
 [sorbet-typed]: https://github.com/sorbet/sorbet-typed
 [sorbet.org]: https://sorbet.org
