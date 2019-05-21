@@ -26,8 +26,8 @@ for certain classes of potential errors without running your code. A gradual
 static type system allows you to gradually add static typing, leaving some parts
 of your code purely dynamically typed. Other examples of gradual static type
 systems that have been added onto existing dynamically typed languages are
-<a href="https://flow.org/">Flow</a> and <a href="https://www.typescriptlang.org/">TypeScript</a> for Javascript, and <a href="https://hacklang.org/">Hack</a> for PHP. In this post, we'd
-like to give a brief update about what we've been working on, and where we're
+<a href="https://flow.org/">Flow</a> and <a href="https://www.typescriptlang.org/">TypeScript</a> for Javascript, and <a href="https://hacklang.org/">Hack</a> for PHP. In this post, we’d
+like to give a brief update about what we’ve been working on, and where we’re
 going next.</p>
 <hr class="footnotes-sep">
 <section class="footnotes">
