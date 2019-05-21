@@ -72,6 +72,7 @@ unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spd::logger> &logger, int 
 
     string json = buffer.substr(0, length);
     buffer.erase(0, length);
+    logger->debug("Read: {}\n", json);
     return LSPMessage::fromClient(json);
 }
 
