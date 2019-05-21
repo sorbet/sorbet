@@ -106,7 +106,7 @@ const vector<StopAfterOptions> stop_after_options({
     {"parser", Phase::PARSER},
     {"desugarer", Phase::DESUGARER},
     {"dsl", Phase::DSL},
-    {"local-namer", Phase::LOCAL_NAMER},
+    {"local-vars", Phase::LOCAL_VARS},
     {"namer", Phase::NAMER},
     {"resolver", Phase::RESOLVER},
     {"cfg", Phase::CFG},

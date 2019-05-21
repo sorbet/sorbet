@@ -117,8 +117,8 @@ Usage:
                                 cfg-json, cfg-proto, autogen, autogen-msgpack,
                                 plugin-generated-code]
       --stop-after phase        Stop After: [init, parser, desugarer, dsl,
-                                namer, resolver, cfg, inferencer] (default:
-                                inferencer)
+                                local-vars, namer, resolver, cfg, inferencer]
+                                (default: inferencer)
       --no-stdlib               Do not load included rbi files for stdlib
       --skip-dsl-passes         Do not run DSL passess
       --wait-for-dbg            Wait for debugger on start

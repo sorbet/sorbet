@@ -78,7 +78,7 @@ enum Phase {
     PARSER,
     DESUGARER,
     DSL,
-    LOCAL_NAMER,
+    LOCAL_VARS,
     NAMER,
     RESOLVER,
     CFG,
