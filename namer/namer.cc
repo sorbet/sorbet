@@ -170,15 +170,12 @@ class NameInserter {
     }
 
     struct LocalFrame {
-        bool moduleFunctionActive;
+        bool moduleFunctionActive = false;
     };
 
-    LocalFrame &enterBlock() {
-        return scopeStack.emplace_back();
-    }
-
-    LocalFrame &enterClassOrMethod() {
-        return scopeStack.emplace_back();
+    LocalFrame &enterScope() {
+        auto &frame = scopeStack.emplace_back();
+        return frame;
     }
 
     void exitScope() {
@@ -316,7 +313,7 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        enterClassOrMethod();
+        enterScope();
         return klass;
     }
 
@@ -581,7 +578,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterClassOrMethod();
+        enterScope();
 
         core::SymbolRef owner = methodOwner(ctx);
 
@@ -647,7 +644,7 @@ public:
                                         ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
                                                                   ++(owner.data(ctx)->uniqueCounter)));
 
-        enterBlock();
+        enterScope();
 
         blk->args = fillInArgs(ctx.withOwner(blk->symbol), parseArgs(ctx, blk->args));
 
@@ -884,7 +881,7 @@ public:
 
 private:
     NameInserter() {
-        enterBlock();
+        enterScope();
     }
 };
 
