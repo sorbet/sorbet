@@ -22,11 +22,15 @@ for certain classes of potential errors without running your code. A gradual
 static type system allows you to gradually add static typing, leaving some parts
 of your code purely dynamically typed. Other examples of gradual static type
 systems that have been added onto existing dynamically typed languages are
-[Flow] and [TypeScript] for Javascript, and [Hack] for PHP.
+[Flow] and [TypeScript] for Javascript, and [Hack] for PHP. In this post, we'd
+like to give a brief update about what we've been working on, and where we're
+going next.
 
 [Flow]: https://flow.org/
 [TypeScript]: https://www.typescriptlang.org/
 [Hack]: https://hacklang.org/
+
+<!--truncate-->
 
 Sorbet has come a long way since its original design, thanks in no small part to
 some very helpful collaborators. We now run Sorbet’s type checking as a part of
