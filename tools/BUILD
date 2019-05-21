@@ -60,6 +60,7 @@ compilation_database(
         "//payload/binary:binary",
         "//namer/configatron:configatron",
         "//namer:namer",
+        "//local_vars:local_vars",
         "//infer:infer",
         "//main/options:options",
         "//third_party/licences:licences",
