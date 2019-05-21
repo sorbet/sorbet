@@ -6,7 +6,7 @@
 
               ga('create', 'UA-119877071-2', 'auto');
               ga('send', 'pageview');
-            </script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="blog"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class=""><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class=""><a href="/docs/talks/talks" target="_self">Talks</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Recent Posts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Recent Posts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/blog/2019/05/16/State-of-Sorbet-May-2019">State of Sorbet May 2019</a></li></ul></div></div></section></div><script>
+            </script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="blog"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class=""><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class=""><a href="/docs/talks/talks" target="_self">Talks</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Recent Posts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Recent Posts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/blog/2019/05/16/state-of-sorbet-may-2019">State of Sorbet May 2019</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -56,170 +56,31 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="posts"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2019/05/16/State-of-Sorbet-May-2019">State of Sorbet May 2019</a></h1><p class="post-meta">May 16, 2019</p><div class="authorBlock"></div></header><article class="post-content"><div><span><p>Stripe uses Ruby extensively[<a href="#1">1</a>]. It’s the main language we use to build the business logic behind our APIs, and our Ruby codebase is on the order of millions of lines of code. At that scale and with our expected rapid growth rate two things are true: 1) we need all the tooling help we can get to understand and modify that much code, and 2) a total rewrite in a statically typed language would be a massive undertaking.</p>
-<p>With that in mind, in October 2017 a small team of engineers conceived of building Sorbet, a gradual static type system for Ruby. Static type systems look for certain classes of potential errors without running your code. A gradual static type system allows you to gradually add static typing, leaving some parts of your code purely dynamically typed. Other examples of gradual static type systems that have been added onto existing dynamically typed languages are <a href="https://flow.org/">Flow</a> and <a href="https://www.typescriptlang.org/">Type</a><a href="https://www.typescriptlang.org/">Script</a> for Javascript; and <a href="https://hacklang.org/">Hack</a> for PHP.</p>
-<p>Sorbet has come a long way since its original design, thanks in no small part to some very helpful collaborators. We now run Sorbet’s type checking as a part of every build in Stripe’s Ruby codebase, and our developers have come to rely on its feedback. Having proven out Sorbet’s value internally, we’re now getting ready to share it with the rest of the Ruby community as open source. We’ve also begun beta testing an editor integration which you can play with at <a href="https://sorbet.run">sorbet.run</a> (if you’re on a desktop browser[<a href="#2">2</a>]). You can read more about how Sorbet works in our <a href="http://sorbet.org/docs/overview">documentation</a>.</p>
-<h2><a class="anchor" aria-hidden="true" id="where-sorbet-is-now"></a><a href="#where-sorbet-is-now" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Where Sorbet is now</h2>
-<p>It took about eight months to build and test Sorbet by deeply typing a handful of isolated components. We focused equally on building Sorbet and using it to type-check real code. After finalizing the basics, we spent seven months incorporating it across our entire main Ruby repository. All that work has resulted in real impact for Stripe.</p>
-<p>Today, every CI build of the main repository is checked by Sorbet. In 100% of our production Ruby files, we catch problems with missing constants such as class names:</p>
-<pre><code class="hljs css language-Ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Hello</span></span>
-<span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span></span>
-  Helo.new
-<span class="hljs-keyword">end</span>
-</code></pre>
-<pre><code class="hljs css language-plaintext">editor.rb:6: Unable to resolve constant `Helo` 
-     6 |  Helo.new
-          ^^^^
-</code></pre>
-<p>In 82% of our production Ruby files, we prevent calls to methods that don’t exist and discover situations where a method is called with too many or too few parameters:</p>
-<pre><code class="hljs css language-Ruby"><span class="hljs-comment"># typed: true</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Hello</span></span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">greeting</span></span>
-    <span class="hljs-string">'Hello, world'</span>
-  <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span></span>
-  Hello.new.greet
-<span class="hljs-keyword">end</span>
-</code></pre>
-<pre><code class="hljs css language-plaintext">editor.rb:10: Method `greet` does not exist on `Hello`
-    10 |  Hello.new.greet
-          ^^^^^^^^^^^^^^^
-</code></pre>
-<p>And 63% of call sites[<a href="#3">3</a>] are calling methods with type signatures allowing us to find mismatches in the types of parameters or return values:</p>
-<pre><code class="hljs css language-Ruby"><span class="hljs-comment"># typed: true</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Hello</span></span>
-  extend T::Sig
-    
-  sig {params(<span class="hljs-symbol">name:</span> String).void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">greeting</span><span class="hljs-params">(name)</span></span>
-    <span class="hljs-string">'Hello, <span class="hljs-subst">#{name}</span>'</span>
-  <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span></span>
-  Hello.new.greeting(<span class="hljs-symbol">:foo</span>)
-<span class="hljs-keyword">end</span>
-</code></pre>
-<pre><code class="hljs css language-plaintext">editor.rb:12: Symbol(:"foo") doesn't match String for argument name 
-    12 |  Hello.new.greeting(:foo)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
-</code></pre>
-<p>There’s more integration work to do and features to build, but so far work has already paid off in the number bugs prevented. The feedback from Stripe developers has already been largely positive:</p>
-<p><img src="/img/testimonial_once_every_never.png" alt=""></p>
-<p><img src="/img/testimonial_pair_programming.png" alt=""></p>
-<h2><a class="anchor" aria-hidden="true" id="where-sorbet-is-going"></a><a href="#where-sorbet-is-going" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Where Sorbet is going</h2>
-<h3><a class="anchor" aria-hidden="true" id="open-sourcing-sorbet"></a><a href="#open-sourcing-sorbet" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Open sourcing Sorbet</h3>
-<p>We expect to open source Sorbet this summer. We’re working with a small set of early users and contributors (including teams at Coinbase and Shopify) and gathering feedback. We’ve been productionizing Sorbet and building tools to automate some of the lessons we learned as we rolled it out to Stripe’s codebase. We’ve also published our documentation and offered a beta program signup to get early feedback at <a href="https://sorbet.org">sorbet.org</a>.</p>
-<p>A natural question might be <em>why not open source now?</em> Given the strong feelings that people have around static type systems and the effort required to integrate static types, we don’t want rough edges in developer experience to accidentally drive people away from the idea entirely. Developer experience is as crucial to a type system’s acceptance as its design and we want to make Sorbet’s experience great by investing in tooling and debugging before its first release.</p>
-<p>On the tooling front we’ve packaged our binaries into gems:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Gemfile</span>
-gem <span class="hljs-string">'sorbet'</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
-gem <span class="hljs-string">'sorbet-runtime'</span>
-</code></pre>
-<p>The <code>sorbet</code> gem holds the <code>srb</code> executable, while the <code>sorbet-runtime</code> gem holds <code>sig</code> and other Ruby code.</p>
-<p><code>srb init</code> will prepare an existing project for Sorbet by creating a <code>sorbet</code> subdirectory with metadata about your project:</p>
-<pre><code class="hljs css language-bash">❯ srb init
-...
-</code></pre>
-<pre><code class="hljs css language-plaintext">sorbet/
-│ # Default options to passed to sorbet on every run
-├── config
-└── rbi/
-    │ # Community-written type definition files for your gems
-    ├── sorbet-typed/
-    │ # Autogenerated type definitions for your gems
-    ├── gems/
-    │ # Things defined when run, but hidden statically
-    ├── hidden-definitions/
-    │ # Constants which were still missing
-    └── todo.rbi
-</code></pre>
-<p>The <code>srb</code> command with no arguments runs the type checker over your project. For example, as part of a build script:</p>
-<pre><code class="hljs css language-bash">❯ srb
-No errors! Great job
-</code></pre>
-<p>For more details see the <a href="https://sorbet.org/docs/cli">CLI documentation</a>.</p>
-<p>Shopify has contributed the ability to write Ruby plugins that give type signatures for DSLs based on metaprogramming. For example, with the right plugin something like:</p>
-<pre><code class="hljs css language-ruby">attribute my_id, <span class="hljs-symbol">:integer</span>
-</code></pre>
-<p>…can conceptually expand into something that Sorbet sees as a typed interface like:</p>
-<pre><code class="hljs css language-Ruby">sig {returns(T.nilable(Integer))}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">my_id</span>;</span> <span class="hljs-keyword">end</span>
-    
-sig {returns(T::Boolean)}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">my_id?</span>;</span> <span class="hljs-keyword">end</span>
-    
-sig {params(<span class="hljs-symbol">new_value:</span> T.nilable(Integer)).void}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">my_id=</span><span class="hljs-params">(new_value)</span></span>; <span class="hljs-keyword">end</span>
-</code></pre>
-<h3><a class="anchor" aria-hidden="true" id="supporting-the-existing-ruby-ecosystem"></a><a href="#supporting-the-existing-ruby-ecosystem" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Supporting the existing Ruby ecosystem</h3>
-<p>Sorbet will support all of the <a href="https://www.youtube.com/watch?v=cmOt9HhszCI&amp;feature=youtu.be&amp;t=2148">types</a> <a href="https://www.youtube.com/watch?v=cmOt9HhszCI&amp;feature=youtu.be&amp;t=2148">that</a> <a href="https://www.youtube.com/watch?v=cmOt9HhszCI&amp;feature=youtu.be&amp;t=2148">Matz announced</a> for the Ruby 3 release. In fact, we’re part of the working group (with Matz and the Ruby core team) that is collaborating on the goals and design of Ruby 3 types; and we've been sharing everything we’ve learned from Sorbet.</p>
-<p>Coinbase has built <a href="https://github.com/sorbet/sorbet-typed/">sorbet-typed</a>, a central repository for sharing type definitions for existing Ruby gems. This enables types for the existing ecosystem of gems we all rely on.</p>
-<p>The single most common dependency for Ruby projects is Rails. Although Stripe doesn’t use Rails, we know it’s a staple in the Ruby community and users need type definitions for the framework to adopt Sorbet. To that end, we’ve created the <a href="https://github.com/sorbet/sorbet-typed/">sorbet-typed</a> gems for Rails.</p>
-<p>A new sample Rails project:</p>
-<pre><code class="hljs css language-bash">❯ rails new blog
-...
-❯ srb init
-...
-❯ git grep -h typed: | sort | uniq -c
-    2 <span class="hljs-comment"># typed: false</span>
-  120 <span class="hljs-comment"># typed: true</span>
-</code></pre>
-<p>RubyGems.org</p>
-<pre><code class="hljs css language-bash">❯ srb init
-...
-❯ git grep -h typed: | sort | uniq -c
-  189 <span class="hljs-comment"># typed: false</span>
-  265 <span class="hljs-comment"># typed: true</span>
-</code></pre>
-<p>GitLab</p>
-<pre><code class="hljs css language-bash">❯ srb init
-...
-❯ git grep -h typed: | sort | uniq -c
-    47 <span class="hljs-comment"># typed: ignore</span>
-  6516 <span class="hljs-comment"># typed: false</span>
-  1579 <span class="hljs-comment"># typed: true</span>
-</code></pre>
-<p>It’s worth mentioning that even with <code># typed: false</code> Sorbet will still find invalid constants such as misspelled class names. Only the small number of  <code># typed: ignore</code> files are getting nothing from Sorbet.</p>
-<h3><a class="anchor" aria-hidden="true" id="editor-integration"></a><a href="#editor-integration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Editor integration</h3>
-<p>We’ve built a beta integration with VS Code, which you can use in a desktop browser<a href="#2">[2]</a> at <a href="https://sorbet.run">sorbet.run</a>. As we stabilize our editor integration we plan to roll it out to Stripe's engineering team and eventually open source it. Here’s a quick walkthrough of some of its features.</p>
-<p>Error squiggles details behind the error on hover:</p>
-<p><img src="/img/editor_error_squiggles.gif" alt=""></p>
-<p>Go to definition uses Sorbet’s type information and is more accurate than simply relying on strings:</p>
-<p><img src="/img/editor_go_to_definition.gif" alt=""></p>
-<p>Autocomplete and inline documentation:</p>
-<p><img src="/img/editor_autocomplete.gif" alt=""></p>
-<p>Sorbet’s editor integration uses Microsoft’s Language Server Protocol, which means other editors and tools will also be able to integrate with it. For example, Sourcegraph has a prototype of a browser plugin that allows developers to get rich information within GitHub. Here’s what it looks like when integrated with Sorbet:</p>
-<p><img src="/img/sourcegraph_github.gif" alt=""></p>
-<h2><a class="anchor" aria-hidden="true" id="collaborators"></a><a href="#collaborators" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collaborators</h2>
-<p>We’re indebted to several people and groups who have helped us get where we are:</p>
-<ul>
-<li>Jeff Foster at Tufts University and his students have been working on RDL. We based our initial type annotations for the Ruby standard library on theirs.</li>
-<li>Our initial Ruby parser was from @charliesome at GitHub.</li>
-<li>Coinbase has contributed code to Sorbet and created <a href="https://github.com/sorbet/sorbet-typed/">sorbet-typed</a>, a central repository for sharing type definitions for Ruby gems.</li>
-<li>Shopify has had several contributions including a mechanism for adding types to DSLs that result from metaprogramming.</li>
-<li>Sourcegraph has built a code exploration browser plugin for GitHub and used Sorbet as one of their integrations.</li>
-</ul>
-<p>In addition to code and tool contributions we’ve had many fruitful conversations that helped shape our thinking. Our thanks go out to @soutaro, author of Steep; @mame, who is working on a Type profiler; and of course our favorite BDFL @matz.</p>
-<h2><a class="anchor" aria-hidden="true" id="wrapping-up"></a><a href="#wrapping-up" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wrapping up</h2>
-<p>Sorbet has matured a lot since its first conception and a host of fantastic contributors and collaborators have helped significantly. We’ve proven Sorbet’s usefulness within Stripe. With just a bit more developer experience polish we’ll be ready to share it with the rest of the Ruby community as open source. With ongoing work to integrate with editors and other tools we expect the benefits of Sorbet to become even greater.</p>
-<p>Please take a moment to explore our documentation at <a href="https://sorbet.org">sorbet.org</a> and play with Sorbet at <a href="https://sorbet.run">sorbet.run</a>.</p>
-<p>James Iry <a href="https://twitter.com/jamesiry">@jamesiry</a> on behalf of the Sorbet team (current and former)</p>
-<ul>
-<li>Dmitry <a href="https://twitter.com/darkdimius"></a>Petrashko <a href="https://twitter.com/darkdimius">@darkdimius</a></li>
-<li>Paul Tarjan <a href="https://twitter.com/ptarjan">@ptarjan</a></li>
-<li>John Vilk <a href="https://github.com/jvilk">@jvilk</a></li>
-<li>Jake Zimmerman <a href="https://github.com/jez">@jez</a></li>
-<li>Neil Parikh <a href="https://github.com/neilparikh">@neilparikh</a></li>
-<li>Russell Davis <a href="https://twitter.com/_russelldavis">@_russelldavis</a></li>
-<li>Nelson Elhage <a href="https://twitter.com/nelhage">@nelhage</a></li>
-</ul>
-<h2><a class="anchor" aria-hidden="true" id="footnotes"></a><a href="#footnotes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Footnotes</h2>
-<p><a name="1"></a>[1] We also use plenty of of other languages including Go for infrastructure tasks, Scala for data wrangling, and JavaScript for client-side work.</p>
-<p><a name="2"></a>[2] <a href="https://sorbet.run"></a><a href="https://sorbet.run">sorbet.run</a> also works on mobile devices but does not offer all the code navigation and exploration features of the desktop version.</p>
-<p><a name="3"></a>[3] A call site is just a single location in a codebase that will result in a call to function or method when run. We don’t use the term <em>method calls</em> because that can also mean a call at runtime. For example, <code>foo.bar</code> might exist at only one call site in your code, but if it’s in a loop it might result in 0, 1, or $$n$$ method calls at runtime.</p>
-</span></div></article></div><div class="docs-prevnext"></div></div></div></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="posts"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2019/05/16/state-of-sorbet-may-2019">State of Sorbet May 2019</a></h1><p class="post-meta">May 16, 2019</p><div class="authorBlock"><p class="post-authorName"><a href="https://twitter.com/jamesiry" target="_blank" rel="noreferrer noopener">James Iry</a></p></div></header><article class="post-content"><div><span><p>Stripe uses Ruby extensively<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>. It’s the main language we use to build
+the business logic behind our APIs, and our Ruby codebase is on the order of
+millions of lines of code. At that scale and with our expected rapid growth rate
+two things are true: 1) we need all the tooling help we can get to understand
+and modify that much code, and 2) a total rewrite in a statically typed language
+would be a massive undertaking.</p>
+<p>With that in mind, in October 2017 a small team of engineers conceived of
+building Sorbet, a gradual static type system for Ruby. Static type systems look
+for certain classes of potential errors without running your code. A gradual
+static type system allows you to gradually add static typing, leaving some parts
+of your code purely dynamically typed. Other examples of gradual static type
+systems that have been added onto existing dynamically typed languages are
+<a href="https://flow.org/">Flow</a> and <a href="https://www.typescriptlang.org/">TypeScript</a> for Javascript, and <a href="https://hacklang.org/">Hack</a> for PHP. In this post, we'd
+like to give a brief update about what we've been working on, and where we're
+going next.</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1"  class="footnote-item"><p>We also use plenty of of other languages including Go for
+infrastructure tasks, Scala for data wrangling, and JavaScript for client-side
+work. <a href="#fnref1" class="footnote-backref">↩</a></p>
+</li>
+</ol>
+</section>
+</span></div><div class="read-more"><a class="button" href="/blog/2019/05/16/state-of-sorbet-may-2019">Read More</a></div></article></div><div class="docs-prevnext"></div></div></div></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
