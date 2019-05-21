@@ -46,10 +46,12 @@ fi
 popd
 rm -rf sorbet.run
 
-echo "--- releasing stripe.dev/sorbet"
+echo "--- releasing sorbet.org"
 git fetch origin gh-pages
 current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
+# Remove all tracked files, but leave untracked files (like _out_) untouched
+git rm -rf '*'
 tar -xjf _out_/website/website.tar.bz2 .
 git add .
 git reset HEAD _out_
@@ -68,7 +70,7 @@ else
 fi
 git checkout -f "$current_rev"
 
-echo "--- releasing stripe.dev/sorbet-repo"
+echo "--- releasing stripe.dev/sorbet-repo (gem repo)"
 rm -rf sorbet-repo
 git clone git@github.com:stripe/sorbet-repo.git
 pushd sorbet-repo
