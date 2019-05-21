@@ -1,6 +1,8 @@
 ---
 id: state-of-sorbet-may-2019
 title: State of Sorbet May 2019
+author: James Iry
+authorURL: https://twitter.com/jamesiry
 ---
 
 Stripe uses Ruby extensively[^languages]. It’s the main language we use to build
