@@ -16,9 +16,11 @@ for certain classes of potential errors without running your code. A gradual
 static type system allows you to gradually add static typing, leaving some parts
 of your code purely dynamically typed. Other examples of gradual static type
 systems that have been added onto existing dynamically typed languages are
-[Flow](https://flow.org/) and
-[Type](https://www.typescriptlang.org/)[Script](https://www.typescriptlang.org/)
-for Javascript; and [Hack](https://hacklang.org/) for PHP.
+[Flow] and [TypeScript] for Javascript, and [Hack] for PHP.
+
+[Flow]: https://flow.org/
+[TypeScript]: https://www.typescriptlang.org/
+[Hack]: https://hacklang.org/
 
 Sorbet has come a long way since its original design, thanks in no small part to
 some very helpful collaborators. We now run Sorbet’s type checking as a part of
@@ -26,9 +28,8 @@ every build in Stripe’s Ruby codebase, and our developers have come to rely on
 its feedback. Having proven out Sorbet’s value internally, we’re now getting
 ready to share it with the rest of the Ruby community as open source. We’ve also
 begun beta testing an editor integration which you can play with at
-[sorbet.run](https://sorbet.run) (if you’re on a desktop browser[^mobile]). You
-can read more about how Sorbet works in our
-[documentation](http://sorbet.org/docs/overview).
+[sorbet.run] (if you’re on a desktop browser[^mobile]). You can read more about
+how Sorbet works in our [documentation](/docs/overview).
 
 
 ## Where Sorbet is now
@@ -196,23 +197,21 @@ def my_id=(new_value); end
 
 ### Supporting the existing Ruby ecosystem
 
-Sorbet will support all of the
-[types](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148)
-[that](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148)
-[Matz
-announced](https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148)
-for the Ruby 3 release. In fact, we’re part of the working group (with Matz and
-the Ruby core team) that is collaborating on the goals and design of Ruby 3
-types; and we've been sharing everything we’ve learned from Sorbet.
+Sorbet will support all of the [types that Matz announced] for the Ruby 3
+release. In fact, we’re part of the working group (with Matz and the Ruby core
+team) that is collaborating on the goals and design of Ruby 3 types, and we've
+been sharing everything we’ve learned from Sorbet.
 
-Coinbase has built [sorbet-typed](https://github.com/sorbet/sorbet-typed/), a
-central repository for sharing type definitions for existing Ruby gems. This
-enables types for the existing ecosystem of gems we all rely on.
+[types that Matz announced]: https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148
+
+Coinbase has built [sorbet-typed], a central repository for sharing type
+definitions for existing Ruby gems. This enables types for the existing
+ecosystem of gems we all rely on.
 
 The single most common dependency for Ruby projects is Rails. Although Stripe
 doesn’t use Rails, we know it’s a staple in the Ruby community and users need
 type definitions for the framework to adopt Sorbet. To that end, we’ve created
-the [sorbet-typed](https://github.com/sorbet/sorbet-typed/) gems for Rails.
+the [sorbet-typed] gems for Rails.
 
 A new sample Rails project:
 
@@ -254,14 +253,13 @@ typed: ignore` files are getting nothing from Sorbet.
 ### Editor integration
 
 We’ve built a beta integration with VS Code, which you can use in a desktop
-browser[^mobile] at [sorbet.run](https://sorbet.run). As we stabilize our editor
-integration we plan to roll it out to Stripe's engineering team and eventually
-open source it. Here’s a quick walkthrough of some of its features.
+browser[^mobile] at [sorbet.run]. As we stabilize our editor integration we plan
+to roll it out to Stripe's engineering team and eventually open source it.
+Here’s a quick walkthrough of some of its features.
 
 Error squiggles details behind the error on hover:
 
 ![Editor integration screenshot](/img/editor_error_squiggles.gif)
-
 
 Go to definition uses Sorbet’s type information and is more accurate than simply
 relying on strings:
@@ -271,7 +269,6 @@ relying on strings:
 Autocomplete and inline documentation:
 
 ![Editor integration screenshot](/img/editor_autocomplete.gif)
-
 
 Sorbet’s editor integration uses Microsoft’s Language Server Protocol, which
 means other editors and tools will also be able to integrate with it. For
@@ -288,18 +285,23 @@ We’re indebted to several people and groups who have helped us get where we ar
 
 - Jeff Foster at Tufts University and his students have been working on RDL. We
   based our initial type annotations for the Ruby standard library on theirs.
-- Our initial Ruby parser was from @charliesome at GitHub.
-- Coinbase has contributed code to Sorbet and created
-  [sorbet-typed](https://github.com/sorbet/sorbet-typed/), a central repository
-  for sharing type definitions for Ruby gems.
+- Our initial Ruby parser was from [@charliesome] at GitHub.
+- Coinbase has contributed code to Sorbet and created [sorbet-typed], a central
+  repository for sharing type definitions for Ruby gems.
 - Shopify has had several contributions including a mechanism for adding types
   to DSLs that result from metaprogramming.
 - Sourcegraph has built a code exploration browser plugin for GitHub and used
   Sorbet as one of their integrations.
 
 In addition to code and tool contributions we’ve had many fruitful conversations
-that helped shape our thinking. Our thanks go out to @soutaro, author of Steep;
-@mame, who is working on a Type profiler; and of course our favorite BDFL @matz.
+that helped shape our thinking. Our thanks go out to [@soutaro], author of Steep;
+[@mame], who is working on a Type profiler; and of course our favorite BDFL
+[@matz].
+
+[@charliesome]: https://github.com/charliesome
+[@soutaro]: https://github.com/soutaro
+[@mame]: https://github.com/mame
+[@matz]: https://github.com/matz
 
 ## Wrapping up
 
@@ -310,26 +312,25 @@ be ready to share it with the rest of the Ruby community as open source. With
 ongoing work to integrate with editors and other tools we expect the benefits of
 Sorbet to become even greater.
 
-Please take a moment to explore our documentation at
-[sorbet.org](https://sorbet.org) and play with Sorbet at
-[sorbet.run](https://sorbet.run).
+Please take a moment to explore our documentation at [sorbet.org] and play with
+Sorbet at [sorbet.run].
 
 James Iry [@jamesiry](https://twitter.com/jamesiry) on behalf of the Sorbet team
-(current and former)
+(current and former):
 
-- Dmitry Petrashko [@darkdimius](https://twitter.com/darkdimius)
-- Paul Tarjan [@ptarjan](https://twitter.com/ptarjan)
-- John Vilk [@jvilk](https://github.com/jvilk)
-- Jake Zimmerman [@jez](https://github.com/jez)
-- Neil Parikh [@neilparikh](https://github.com/neilparikh)
-- Russell Davis [@_russelldavis](https://twitter.com/_russelldavis)
-- Nelson Elhage [@nelhage](https://twitter.com/nelhage)
+- Dmitry Petrashko ([@darkdimius](https://twitter.com/darkdimius))
+- Paul Tarjan ([@ptarjan](https://twitter.com/ptarjan))
+- John Vilk ([@jvilk](https://github.com/jvilk))
+- Jake Zimmerman ([@jez](https://github.com/jez))
+- Neil Parikh ([@neilparikh](https://github.com/neilparikh))
+- Russell Davis ([@_russelldavis](https://twitter.com/_russelldavis))
+- Nelson Elhage ([@nelhage](https://twitter.com/nelhage))
 
 [^languages]: We also use plenty of of other languages including Go for
 infrastructure tasks, Scala for data wrangling, and JavaScript for client-side
 work.
 
-[^mobile]: [sorbet.run](https://sorbet.run) also works on mobile devices but
+[^mobile]: [sorbet.run] also works on mobile devices but
 does not offer all the code navigation and exploration features of the desktop
 version.
 
@@ -338,3 +339,7 @@ result in a call to function or method when run. We don’t use the term *method
 calls* because that can also mean a call at runtime. For example, `foo.bar`
 might exist at only one call site in your code, but if it’s in a loop it might
 result in 0, 1, or `n` method calls at runtime.
+
+[sorbet-typed]: https://github.com/sorbet/sorbet-typed
+[sorbet.org]: https://sorbet.org
+[sorbet.run]: https://sorbet.run
