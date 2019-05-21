@@ -1517,7 +1517,7 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<a
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
     }
 
-    return flatten::FlattenWalk::run(ctx, std::move(trees));
+    return flatten::run(ctx, std::move(trees));
 }
 
 vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
