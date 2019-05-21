@@ -863,7 +863,7 @@ private:
                 arg.data(ctx)->resultType = core::Types::untyped(ctx, arg);
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
                 bool isBlkArg = arg.data(ctx)->name == core::Names::blkArg();
-                if (!isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
+                if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.data(ctx)->loc(),
                                                       core::errors::Resolver::InvalidMethodSignature)) {
