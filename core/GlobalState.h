@@ -87,7 +87,7 @@ public:
     static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                     const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
-    FileRef findFileByPath(std::string_view path);
+    FileRef findFileByPath(std::string_view path) const;
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;

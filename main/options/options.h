@@ -76,7 +76,7 @@ struct Printers {
     // TODO: check this for all output formats
     bool enabled(core::FileRef file) const;
     void addPaths(const std::vector<std::string> &paths);
-    void resolvePaths(std::shared_ptr<spdlog::logger> logger, core::GlobalState &gs);
+    void resolvePaths(std::shared_ptr<spdlog::logger> logger, const core::GlobalState &gs);
 
 private:
     UnorderedSet<std::string> inputPaths;

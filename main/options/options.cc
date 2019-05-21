@@ -105,7 +105,7 @@ void Printers::addPaths(const std::vector<std::string> &paths) {
     copy(paths.begin(), paths.end(), inserter(inputPaths, inputPaths.begin()));
 }
 
-void Printers::resolvePaths(shared_ptr<spdlog::logger> logger, core::GlobalState &gs) {
+void Printers::resolvePaths(shared_ptr<spdlog::logger> logger, const core::GlobalState &gs) {
     for (auto const &path : inputPaths) {
         auto file = gs.findFileByPath(path);
         if (!file.exists()) {
