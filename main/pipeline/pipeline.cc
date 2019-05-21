@@ -49,7 +49,7 @@ public:
             return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
-        if (print.CFG.enabled) {
+        if (print.enabled(m->loc.file()) && print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
         if (print.CFGJson.enabled || print.CFGProto.enabled) {
@@ -650,7 +650,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", (string)f.data(ctx).path()}});
     try {
-        if (opts.print.CFG.enabled) {
+        if (opts.print.enabled(f) && opts.print.CFG.enabled) {
             opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
         CFGCollectorAndTyper collector(opts);
@@ -658,7 +658,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
         }
-        if (opts.print.CFG.enabled) {
+        if (opts.print.enabled(f) && opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
         }
     } catch (SorbetException &) {

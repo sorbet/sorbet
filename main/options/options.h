@@ -2,6 +2,7 @@
 #define RUBY_TYPER_OPTIONS_H
 #include "common/FileSystem.h"
 #include "common/common.h"
+#include "core/Files.h"
 #include "core/StrictLevel.h"
 #include "spdlog/spdlog.h"
 
@@ -71,6 +72,15 @@ struct Printers {
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
+
+    // TODO: check this for all output formats
+    bool enabled(core::FileRef file) const;
+    void addPaths(const std::vector<std::string> &paths);
+    void resolvePaths(std::shared_ptr<spdlog::logger> logger, core::GlobalState &gs);
+
+private:
+    UnorderedSet<std::string> inputPaths;
+    UnorderedSet<core::FileRef> inputFiles;
 };
 
 enum Phase {

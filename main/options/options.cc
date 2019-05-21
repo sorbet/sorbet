@@ -5,6 +5,7 @@
 
 #include "common/FileOps.h"
 #include "core/Error.h"
+#include "core/GlobalState.h"
 #include "core/errors/infer.h"
 #include "main/options/FileFlatMapper.h"
 #include "main/options/options.h"
@@ -94,6 +95,26 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenMsgPack,
         PluginGeneratedCode,
     });
+}
+
+bool Printers::enabled(core::FileRef file) const {
+    return inputFiles.empty() || inputFiles.contains(file);
+}
+
+void Printers::addPaths(const std::vector<std::string> &paths) {
+    copy(paths.begin(), paths.end(), inserter(inputPaths, inputPaths.begin()));
+}
+
+void Printers::resolvePaths(shared_ptr<spdlog::logger> logger, core::GlobalState &gs) {
+    for (auto const &path : inputPaths) {
+        auto file = gs.findFileByPath(path);
+        if (!file.exists()) {
+            // TODO: test this
+            logger->error("--print-file {} not found in input files", path);
+            throw EarlyReturnWithCode(1);
+        }
+        inputFiles.emplace(move(file));
+    }
 }
 
 struct StopAfterOptions {
@@ -319,6 +340,8 @@ cxxopts::Options buildOptions() {
                                     "url-base");
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("print-file", "Input file for which to print, multiple allowed",
+                               cxxopts::value<vector<string>>(), "file");
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
@@ -381,46 +404,55 @@ cxxopts::Options buildOptions() {
 }
 
 bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog::logger> logger) {
-    if (raw.count("print") == 0) {
-        return true;
-    }
-    vector<string> printOpts = raw["print"].as<vector<string>>();
-    for (auto opt : printOpts) {
-        string outPath;
-        auto pos = opt.find(":");
-        if (pos != string::npos) {
-            outPath = opt.substr(pos + 1);
-            opt = opt.substr(0, pos);
-        }
-        bool found = false;
-        for (auto &known : print_options) {
-            if (known.option == opt) {
-                auto &cfg = opts.print.*(known.config);
-                if (cfg.enabled && cfg.outputPath != outPath) {
-                    logger->error("--print={} specified multiple times with inconsistent output options", opt);
-                    throw EarlyReturnWithCode(1);
-                }
-                cfg.enabled = true;
-                cfg.outputPath = outPath;
-                if (!known.supportsCaching) {
-                    if (!opts.cacheDir.empty()) {
-                        logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
-                        opts.cacheDir = "";
-                    }
-                }
-                found = true;
-                break;
+    if (raw.count("print") > 0) {
+        vector<string> printOpts = raw["print"].as<vector<string>>();
+        for (auto opt : printOpts) {
+            string outPath;
+            auto pos = opt.find(":");
+            if (pos != string::npos) {
+                outPath = opt.substr(pos + 1);
+                opt = opt.substr(0, pos);
             }
-        }
-        if (!found) {
-            vector<string_view> allOptions;
+            bool found = false;
             for (auto &known : print_options) {
-                allOptions.emplace_back(known.option);
+                if (known.option == opt) {
+                    auto &cfg = opts.print.*(known.config);
+                    if (cfg.enabled && cfg.outputPath != outPath) {
+                        logger->error("--print={} specified multiple times with inconsistent output options", opt);
+                        throw EarlyReturnWithCode(1);
+                    }
+                    cfg.enabled = true;
+                    cfg.outputPath = outPath;
+                    if (!known.supportsCaching) {
+                        if (!opts.cacheDir.empty()) {
+                            logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
+                            opts.cacheDir = "";
+                        }
+                    }
+                    found = true;
+                    break;
+                }
             }
-            logger->error("Unknown --print option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
+            if (!found) {
+                vector<string_view> allOptions;
+                for (auto &known : print_options) {
+                    allOptions.emplace_back(known.option);
+                }
+                logger->error("Unknown --print option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
+                return false;
+            }
+        }
+    }
+
+    if (raw.count("print-file") > 0) {
+        if (raw.count("print") == 0) {
+            // TODO: test this
+            logger->error("--print-file requires a --print option to be specified");
             return false;
         }
+        opts.print.addPaths(raw["print-file"].as<vector<string>>());
     }
+
     return true;
 }
 

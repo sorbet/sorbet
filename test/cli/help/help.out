@@ -116,6 +116,8 @@ Usage:
                                 resolve-tree-raw, missing-constants, cfg,
                                 cfg-json, cfg-proto, autogen, autogen-msgpack,
                                 plugin-generated-code]
+      --print-file file         Input file for which to print, multiple
+                                allowed
       --stop-after phase        Stop After: [init, parser, desugarer, dsl,
                                 namer, resolver, cfg, inferencer] (default:
                                 inferencer)

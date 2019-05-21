@@ -359,7 +359,10 @@ int realmain(int argc, char *argv[]) {
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
-        { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
+        {
+            inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
+            opts.print.resolvePaths(logger, *gs);
+        }
 
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
