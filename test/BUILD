@@ -23,7 +23,7 @@ cc_binary(
         "//infer",
         "//main/autogen",
         "//main/lsp",
-        "//name_locals",
+        "//local_vars",
         "//namer",
         "//payload:light",
         "//resolver",

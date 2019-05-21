@@ -1,5 +1,5 @@
 cc_library(
-    name = "name_locals",
+    name = "local_vars",
     srcs = glob(
         ["*.cc"],
         exclude = [
@@ -8,7 +8,7 @@ cc_library(
         ],
     ),
     hdrs = [
-        "name_locals.h",
+        "local_vars.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,

@@ -20,7 +20,7 @@
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
-#include "name_locals/name_locals.h"
+#include "local_vars/local_vars.h"
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -164,7 +164,7 @@ unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, un
 unique_ptr<ast::Expression> runLocalNamer(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
     Timer timeit(gs.tracer(), "runLocalNamer", {{"file", (string)file.data(gs).path()}});
     core::MutableContext ctx(gs, core::Symbols::root());
-    return sorbet::name_locals::NameLocals::run(ctx, move(ast));
+    return sorbet::local_vars::LocalVars::run(ctx, move(ast));
 }
 
 ast::ParsedFile emptyParsedFile(core::FileRef file) {

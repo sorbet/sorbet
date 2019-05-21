@@ -35,6 +35,6 @@ cc_library(
         "//payload/text",
         "//plugin",
         "//resolver",
-        "//name_locals",
+        "//local_vars",
     ],
 )

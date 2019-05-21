@@ -20,8 +20,8 @@
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
+#include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
-#include "name_locals/name_locals.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
@@ -249,7 +249,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         ast::ParsedFile namedTree;
         {
             auto localNamed = testSerialize(
-                gs, ast::ParsedFile{name_locals::NameLocals::run(ctx, move(dslUnwound.tree)), dslUnwound.file});
+                gs, ast::ParsedFile{local_vars::LocalVars::run(ctx, move(dslUnwound.tree)), dslUnwound.file});
 
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols

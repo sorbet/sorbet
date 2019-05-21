@@ -1,4 +1,4 @@
-#include "name_locals.h"
+#include "local_vars.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
 #include "core/core.h"
@@ -6,10 +6,10 @@
 
 using namespace std;
 
-namespace sorbet::name_locals {
+namespace sorbet::local_vars {
 
 class LocalNameInserter {
-    friend class NameLocals;
+    friend class LocalVars;
 
     struct NamedArg {
         core::NameRef name;
@@ -241,9 +241,9 @@ private:
     }
 };
 
-unique_ptr<ast::Expression> NameLocals::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> LocalVars::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     LocalNameInserter localNameInserter;
     return ast::TreeMap::apply(ctx, localNameInserter, move(tree));
 }
 
-} // namespace sorbet::name_locals
+} // namespace sorbet::local_vars
