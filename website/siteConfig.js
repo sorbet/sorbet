@@ -45,6 +45,11 @@ const siteConfig = {
     secondaryColor: '#4f4397', // --sorbet-purple-2
   },
 
+  markdownOptions: {
+    typographer: true,
+    quotes: '“”‘’',
+  },
+
   // Custom fonts for website
   // fonts: {
   //   myFont: [
