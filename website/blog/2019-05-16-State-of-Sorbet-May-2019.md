@@ -53,6 +53,7 @@ def main
   Helo.new
 end
 ```
+
 ```plaintext
 editor.rb:6: Unable to resolve constant `Helo`
      6 |  Helo.new
@@ -74,6 +75,7 @@ def main
   Hello.new.greet
 end
 ```
+
 ```plaintext
 editor.rb:10: Method `greet` does not exist on `Hello`
     10 |  Hello.new.greet
@@ -97,6 +99,7 @@ def main
   Hello.new.greeting(:foo)
 end
 ```
+
 ```plaintext
 editor.rb:12: Symbol(:"foo") doesn't match String for argument name
     12 |  Hello.new.greeting(:foo)
@@ -143,7 +146,7 @@ holds `sig` and other Ruby code.
 `srb init` will prepare an existing project for Sorbet by creating a `sorbet`
 subdirectory with metadata about your project:
 
-```bash
+```plaintext
 ❯ srb init
 ...
 ```
@@ -167,7 +170,7 @@ sorbet/
 The `srb` command with no arguments runs the type checker over your project. For
 example, as part of a build script:
 
-```bash
+```plaintext
 ❯ srb
 No errors! Great job
 ```
@@ -217,7 +220,7 @@ the [sorbet-typed] gems for Rails.
 
 A new sample Rails project:
 
-```bash
+```plaintext
 ❯ rails new blog
 ...
 ❯ srb init
@@ -227,9 +230,9 @@ A new sample Rails project:
   120 # typed: true
 ```
 
-RubyGems.org
+RubyGems.org:
 
-```bash
+```plaintext
 ❯ srb init
 ...
 ❯ git grep -h typed: | sort | uniq -c
@@ -237,9 +240,9 @@ RubyGems.org
   265 # typed: true
 ```
 
-GitLab
+GitLab:
 
-```bash
+```plaintext
 ❯ srb init
 ...
 ❯ git grep -h typed: | sort | uniq -c
