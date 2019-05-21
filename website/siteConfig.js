@@ -10,6 +10,7 @@ const siteConfig = {
   title: 'Sorbet',
   tagline: 'A static type checker for Ruby',
   url: 'https://sorbet.org',
+  cname: 'sorbet.org',
   baseUrl: '/',
   editUrl: 'https://github.com/stripe/sorbet/edit/master/website/docs/',
 
