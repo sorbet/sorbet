@@ -5,7 +5,7 @@ author: James Iry
 authorURL: https://twitter.com/jamesiry
 ---
 
-Stripe uses Ruby extensively[^languages]. It’s the main language we use to build
+Stripe uses Ruby extensively[^languages]. It's the main language we use to build
 the business logic behind our APIs, and our Ruby codebase is on the order of
 millions of lines of code. At that scale and with our expected rapid growth rate
 two things are true: 1) we need all the tooling help we can get to understand
@@ -33,12 +33,12 @@ going next.
 <!--truncate-->
 
 Sorbet has come a long way since its original design, thanks in no small part to
-some very helpful collaborators. We now run Sorbet’s type checking as a part of
-every build in Stripe’s Ruby codebase, and our developers have come to rely on
-its feedback. Having proven out Sorbet’s value internally, we’re now getting
-ready to share it with the rest of the Ruby community as open source. We’ve also
+some very helpful collaborators. We now run Sorbet's type checking as a part of
+every build in Stripe's Ruby codebase, and our developers have come to rely on
+its feedback. Having proven out Sorbet's value internally, we're now getting
+ready to share it with the rest of the Ruby community as open source. We've also
 begun beta testing an editor integration which you can play with at
-[sorbet.run] (if you’re on a desktop browser[^mobile]). You can read more about
+[sorbet.run] (if you're on a desktop browser[^mobile]). You can read more about
 how Sorbet works in our [documentation](/docs/overview).
 
 [^mobile]: [sorbet.run] also works on mobile devices but
@@ -72,7 +72,7 @@ editor.rb:6: Unable to resolve constant `Helo`
           ^^^^
 ```
 
-In 82% of our production Ruby files, we prevent calls to methods that don’t
+In 82% of our production Ruby files, we prevent calls to methods that don't
 exist and discover situations where a method is called with too many or too few
 parameters:
 
@@ -119,12 +119,12 @@ editor.rb:12: Symbol(:"foo") doesn't match String for argument name
 ```
 
 [^call-site]: A call site is just a single location in a codebase that will
-result in a call to function or method when run. We don’t use the term *method
+result in a call to function or method when run. We don't use the term *method
 calls* because that can also mean a call at runtime. For example, `foo.bar`
-might exist at only one call site in your code, but if it’s in a loop it might
+might exist at only one call site in your code, but if it's in a loop it might
 result in 0, 1, or `n` method calls at runtime.
 
-There’s more integration work to do and features to build, but so far work has
+There's more integration work to do and features to build, but so far work has
 already paid off in the number bugs prevented. The feedback from Stripe
 developers has already been largely positive:
 
@@ -136,21 +136,21 @@ developers has already been largely positive:
 
 ### Open sourcing Sorbet
 
-We expect to open source Sorbet this summer. We’re working with a small set of
+We expect to open source Sorbet this summer. We're working with a small set of
 early users and contributors (including teams at Coinbase and Shopify) and
-gathering feedback. We’ve been productionizing Sorbet and building tools to
-automate some of the lessons we learned as we rolled it out to Stripe’s
-codebase. We’ve also published our documentation and offered a beta program
+gathering feedback. We've been productionizing Sorbet and building tools to
+automate some of the lessons we learned as we rolled it out to Stripe's
+codebase. We've also published our documentation and offered a beta program
 signup to get early feedback at [sorbet.org](https://sorbet.org).
 
 A natural question might be *why not open source now?* Given the strong feelings
 that people have around static type systems and the effort required to integrate
-static types, we don’t want rough edges in developer experience to accidentally
+static types, we don't want rough edges in developer experience to accidentally
 drive people away from the idea entirely. Developer experience is as crucial to
-a type system’s acceptance as its design and we want to make Sorbet’s experience
+a type system's acceptance as its design and we want to make Sorbet's experience
 great by investing in tooling and debugging before its first release.
 
-On the tooling front we’ve packaged our binaries into gems:
+On the tooling front we've packaged our binaries into gems:
 
 ```ruby
 # Gemfile
@@ -221,9 +221,9 @@ def my_id=(new_value); end
 ### Supporting the existing Ruby ecosystem
 
 Sorbet will support all of the [types that Matz announced] for the Ruby 3
-release. In fact, we’re part of the working group (with Matz and the Ruby core
+release. In fact, we're part of the working group (with Matz and the Ruby core
 team) that is collaborating on the goals and design of Ruby 3 types, and we've
-been sharing everything we’ve learned from Sorbet.
+been sharing everything we've learned from Sorbet.
 
 [types that Matz announced]: https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148
 
@@ -232,8 +232,8 @@ definitions for existing Ruby gems. This enables types for the existing
 ecosystem of gems we all rely on.
 
 The single most common dependency for Ruby projects is Rails. Although Stripe
-doesn’t use Rails, we know it’s a staple in the Ruby community and users need
-type definitions for the framework to adopt Sorbet. To that end, we’ve created
+doesn't use Rails, we know it's a staple in the Ruby community and users need
+type definitions for the framework to adopt Sorbet. To that end, we've created
 the [sorbet-typed] gems for Rails.
 
 A new sample Rails project:
@@ -269,22 +269,22 @@ GitLab:
   1579 # typed: true
 ```
 
-It’s worth mentioning that even with `# typed: false` Sorbet will still find
+It's worth mentioning that even with `# typed: false` Sorbet will still find
 invalid constants such as misspelled class names. Only the small number of  `#
 typed: ignore` files are getting nothing from Sorbet.
 
 ### Editor integration
 
-We’ve built a beta integration with VS Code, which you can use in a desktop
+We've built a beta integration with VS Code, which you can use in a desktop
 browser[^mobile] at [sorbet.run]. As we stabilize our editor integration we plan
 to roll it out to Stripe's engineering team and eventually open source it.
-Here’s a quick walkthrough of some of its features.
+Here's a quick walkthrough of some of its features.
 
 Error squiggles details behind the error on hover:
 
 ![Editor integration screenshot](/img/editor_error_squiggles.gif)
 
-Go to definition uses Sorbet’s type information and is more accurate than simply
+Go to definition uses Sorbet's type information and is more accurate than simply
 relying on strings:
 
 ![Editor integration screenshot](/img/editor_go_to_definition.gif)
@@ -293,17 +293,17 @@ Autocomplete and inline documentation:
 
 ![Editor integration screenshot](/img/editor_autocomplete.gif)
 
-Sorbet’s editor integration uses Microsoft’s Language Server Protocol, which
+Sorbet's editor integration uses Microsoft's Language Server Protocol, which
 means other editors and tools will also be able to integrate with it. For
 example, Sourcegraph has a prototype of a browser plugin that allows developers
-to get rich information within GitHub. Here’s what it looks like when integrated
+to get rich information within GitHub. Here's what it looks like when integrated
 with Sorbet:
 
 ![Sorbet Sourcegraph integration](/img/sourcegraph_github.gif)
 
 ## Collaborators
 
-We’re indebted to several people and groups who have helped us get where we are:
+We're indebted to several people and groups who have helped us get where we are:
 
 
 - Jeff Foster at Tufts University and his students have been working on RDL. We
@@ -316,7 +316,7 @@ We’re indebted to several people and groups who have helped us get where we ar
 - Sourcegraph has built a code exploration browser plugin for GitHub and used
   Sorbet as one of their integrations.
 
-In addition to code and tool contributions we’ve had many fruitful conversations
+In addition to code and tool contributions we've had many fruitful conversations
 that helped shape our thinking. Our thanks go out to [@soutaro], author of Steep;
 [@mame], who is working on a Type profiler; and of course our favorite BDFL
 [@matz].
@@ -329,8 +329,8 @@ that helped shape our thinking. Our thanks go out to [@soutaro], author of Steep
 ## Wrapping up
 
 Sorbet has matured a lot since its first conception and a host of fantastic
-contributors and collaborators have helped significantly. We’ve proven Sorbet’s
-usefulness within Stripe. With just a bit more developer experience polish we’ll
+contributors and collaborators have helped significantly. We've proven Sorbet's
+usefulness within Stripe. With just a bit more developer experience polish we'll
 be ready to share it with the rest of the Ruby community as open source. With
 ongoing work to integrate with editors and other tools we expect the benefits of
 Sorbet to become even greater.
