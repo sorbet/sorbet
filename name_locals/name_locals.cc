@@ -61,6 +61,21 @@ class LocalNameInserter {
         return named;
     }
 
+    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
+        vector<NamedArg> namedArgs;
+        for (auto &arg : methodArgs) {
+            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
+            if (!refExp) {
+                Exception::raise("Must be a reference!");
+            }
+            unique_ptr<ast::Reference> refExpImpl(refExp);
+            arg.release();
+            namedArgs.emplace_back(nameArg(ctx, move(refExpImpl)));
+        }
+
+        return namedArgs;
+    }
+
     struct LocalFrame {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<core::LocalVariable> args;
@@ -69,16 +84,18 @@ class LocalNameInserter {
     };
 
     LocalFrame &enterBlock() {
-        scopeStack.emplace_back().localId = blockCounter;
+        auto &frame = scopeStack.emplace_back();
+        frame.localId = blockCounter;
         ++blockCounter;
-        return scopeStack.back();
+        return frame;
     }
 
     LocalFrame &enterClassOrMethod() {
-        scopeStack.emplace_back().localId = 0;
-        scopeStack.back().oldBlockCounter = blockCounter;
+        auto &frame = scopeStack.emplace_back();
+        frame.localId = 0;
+        frame.oldBlockCounter = blockCounter;
         blockCounter = 1;
-        return scopeStack.back();
+        return frame;
     }
 
     void exitScope() {
@@ -113,11 +130,14 @@ class LocalNameInserter {
         return core::LocalVariable(name, scopeStack.back().localId);
     }
 
+    // Enter names from arguments into the current frame, building a new
+    // argument list back up for the original context.
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<NamedArg> namedArgs) {
         ast::MethodDef::ARGS_store args;
 
         for (auto &named : namedArgs) {
             args.emplace_back(move(named.expr));
+            auto frame = scopeStack.back();
             scopeStack.back().locals[named.name] = named.local;
             scopeStack.back().args.emplace_back(named.local);
         }
@@ -148,17 +168,7 @@ public:
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         enterClassOrMethod();
 
-        vector<NamedArg> namedArgs;
-        for (auto &arg : method->args) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
-            if (!refExp) {
-                Exception::raise("Must be a reference!");
-            }
-            unique_ptr<ast::Reference> refExpImpl(refExp);
-            arg.release();
-            namedArgs.emplace_back(nameArg(ctx, move(refExpImpl)));
-        }
-
+        auto namedArgs = nameArgs(ctx, method->args);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(namedArgs));
         return method;
     }
@@ -199,16 +209,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        vector<NamedArg> namedArgs;
-        for (auto &arg : blk->args) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
-            if (!refExp) {
-                Exception::raise("Must be a reference!");
-            }
-            unique_ptr<ast::Reference> refExpImpl(refExp);
-            arg.release();
-            namedArgs.emplace_back(nameArg(ctx, move(refExpImpl)));
-        }
+        auto namedArgs = nameArgs(ctx, blk->args);
         blk->args = fillInArgs(ctx.withOwner(blk->symbol), move(namedArgs));
 
         return blk;
