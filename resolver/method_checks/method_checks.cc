@@ -226,7 +226,6 @@ void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vecto
     }
 }
 
-
 void validateSymbols(core::GlobalState &gs) {
     Timer timeit(gs.tracer(), "Resolver::validateSymbols");
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
@@ -244,6 +243,5 @@ void validateSymbols(core::GlobalState &gs) {
         }
     }
 }
-
 
 } // namespace sorbet::method_checks

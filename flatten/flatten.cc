@@ -254,4 +254,3 @@ vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> tr
 }
 
 } // namespace sorbet::flatten
-
