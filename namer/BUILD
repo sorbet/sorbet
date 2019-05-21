@@ -40,6 +40,7 @@ cc_test(
         "//ast/desugar",
         "//dsl",
         "//parser",
+        "//local_vars",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],

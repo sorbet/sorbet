@@ -7,6 +7,7 @@
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
+#include "local_vars/local_vars.h"
 #include "namer/namer.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -56,9 +57,10 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto ctx = getCtx();
     auto tree = hello_world(ctx);
     {
+        auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree.tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        namer::Namer::run(ctx, move(tree));
+        namer::Namer::run(ctx, ast::ParsedFile{move(localTree), tree.file});
     }
 
     const auto &objectScope = core::Symbols::Object().data(ctx);
@@ -79,9 +81,10 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto tree = hello_world(ctx);
     ast::ParsedFile newtree;
     {
+        auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree.tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        newtree = namer::Namer::run(ctx, move(tree));
+        newtree = namer::Namer::run(ctx, ast::ParsedFile{move(localTree), tree.file});
     }
     auto staticInit = 1;
     auto staticInitBlockArg = 1;
@@ -100,9 +103,10 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; end; end");
     {
+        auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree.tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        namer::Namer::run(ctx, move(tree));
+        namer::Namer::run(ctx, ast::ParsedFile{move(localTree), tree.file});
     }
     const auto &rootScope =
         core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
@@ -117,9 +121,10 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
     {
+        auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree.tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        namer::Namer::run(ctx, move(tree));
+        namer::Namer::run(ctx, ast::ParsedFile{move(localTree), tree.file});
     }
     const auto &rootScope =
         core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
