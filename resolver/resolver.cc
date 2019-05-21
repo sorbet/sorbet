@@ -7,7 +7,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
-#include "flatten/flatten.h"
+#include "resolver/flatten/flatten.h"
 #include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"

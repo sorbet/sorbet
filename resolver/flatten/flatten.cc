@@ -1,4 +1,4 @@
-#include "flatten/flatten.h"
+#include "resolver/flatten/flatten.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
