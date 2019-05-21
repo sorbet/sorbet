@@ -53,6 +53,8 @@ compilation_database(
         "//payload:interface",
         "//main/pipeline:pipeline",
         "//resolver:resolver",
+        "//resolver/method_checks:method_checks",
+        "//flatten:flatten",
         "//plugin:plugin",
         "//payload/text:text",
         "//payload/binary:binary",
