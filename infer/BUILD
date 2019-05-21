@@ -43,6 +43,7 @@ cc_test(
         "//cfg",
         "//dsl",
         "//namer",
+        "//local_vars",
         "//resolver",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
