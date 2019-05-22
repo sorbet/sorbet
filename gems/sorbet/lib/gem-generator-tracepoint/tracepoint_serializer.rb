@@ -38,9 +38,7 @@ module Sorbet::Private
       def serialize(output_dir)
         gem_class_defs = preprocess(@files)
 
-        if !gem_class_defs.empty?
-          FileUtils.mkdir_p(output_dir)
-        end
+        FileUtils.mkdir_p(output_dir) unless gem_class_defs.empty?
 
         gem_class_defs.each do |gem, klass_ids|
           File.open("#{File.join(output_dir, gem[:gem])}.rbi", 'w') do |f|
