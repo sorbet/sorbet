@@ -113,11 +113,15 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
     - `brew install bazel autoconf coreutils parallel`
 
-2. Build Sorbet
+2.  Make an empty `.bazelrc.local` file
+
+    - `touch .bazelrc.local`
+
+3.  Build Sorbet
 
     - `bazel build //main:sorbet --config=dbg`
 
-3. Run Sorbet!
+4.  Run Sorbet!
 
     - `bazel-bin/main/sorbet -e "42 + 'hello'"`
 
@@ -629,6 +633,16 @@ commands to create a `./.bazelrc` and cache folder:
 echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
 echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
 mkdir -p "$HOME/.cache/sorbet/bazel-cache"
+```
+
+### Multiple git worktrees
+
+Sometimes it can be nice to have [multiple working trees] in Git. This allows
+you to have multiple active checkouts Sorbet, sharing the same `.git/` folder.
+To set up a new worktree with Sorbet:
+
+```shell
+tools/scripts/make_worktree.sh <worktree_name>
 ```
 
 ### Shell
