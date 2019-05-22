@@ -14,35 +14,63 @@ public:
     const int returnCode;
 };
 
+class PrinterConfig {
+public:
+    bool enabled = false;
+    std::string outputPath;
+
+    void print(const std::string_view &contents) const;
+    template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
+        print(fmt::format(msg, args...));
+    }
+    void flush();
+
+    PrinterConfig();
+    PrinterConfig(const PrinterConfig &) = default;
+    PrinterConfig(PrinterConfig &&) = default;
+    PrinterConfig &operator=(const PrinterConfig &) = default;
+    PrinterConfig &operator=(PrinterConfig &&) = default;
+
+private:
+    struct GuardedState {
+        fmt::memory_buffer buf;
+        absl::Mutex mutex;
+    };
+    std::shared_ptr<GuardedState> state;
+};
+
 struct Printers {
-    bool ParseTree = false;
-    bool ParseTreeJson = false;
-    bool Desugared = false;
-    bool DesugaredRaw = false;
-    bool DSLTree = false;
-    bool DSLTreeRaw = false;
-    bool NameTree = false;
-    bool NameTreeRaw = false;
-    bool SymbolTable = false;
-    bool SymbolTableRaw = false;
-    bool SymbolTableJson = false;
-    bool SymbolTableFull = false;
-    bool SymbolTableFullRaw = false;
-    bool FileTableJson = false;
-    bool ResolveTree = false;
-    bool ResolveTreeRaw = false;
-    bool MissingConstants = false;
-    bool CFG = false;
+    PrinterConfig ParseTree;
+    PrinterConfig ParseTreeJson;
+    PrinterConfig Desugared;
+    PrinterConfig DesugaredRaw;
+    PrinterConfig DSLTree;
+    PrinterConfig DSLTreeRaw;
+    PrinterConfig NameTree;
+    PrinterConfig NameTreeRaw;
+    PrinterConfig SymbolTable;
+    PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableJson;
+    PrinterConfig SymbolTableFull;
+    PrinterConfig SymbolTableFullRaw;
+    PrinterConfig FileTableJson;
+    PrinterConfig ResolveTree;
+    PrinterConfig ResolveTreeRaw;
+    PrinterConfig MissingConstants;
+    PrinterConfig CFG;
     // cfg-json format outputs a JSON object for each CFG, separated by newlines.
     // See https://en.wikipedia.org/wiki/JSON_streaming#Concatenated_JSON
-    bool CFGJson = false;
+    PrinterConfig CFGJson;
     // cfg-proto format outputs a binary MultiCFG for export to other tools.
     // See CFG.proto for details
-    bool CFGProto = false;
-    bool TypedSource = false;
-    bool Autogen = false;
-    bool AutogenMsgPack = false;
-    bool PluginGeneratedCode = false;
+    PrinterConfig CFGProto;
+    PrinterConfig TypedSource;
+    PrinterConfig Autogen;
+    PrinterConfig AutogenMsgPack;
+    PrinterConfig PluginGeneratedCode;
+    // Ensure everything here is in PrinterConfig::printers().
+
+    std::vector<std::reference_wrapper<PrinterConfig>> printers();
 };
 
 enum Phase {
@@ -139,18 +167,22 @@ struct Options {
 
     std::shared_ptr<FileSystem> fs = std::make_shared<OSFileSystem>();
 
+    void flushPrinters();
+
     Options() = default;
 
     Options(const Options &) = delete;
 
     Options(Options &&) = default;
 
-    const Options &operator=(const Options &) = delete;
+    Options &operator=(const Options &) = delete;
 
-    const Options &operator=(Options &&) = delete;
+    Options &operator=(Options &&) = delete;
 };
 
 void readOptions(Options &, int argc, char *argv[],
                  std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+
+void flushPrinters(Options &);
 } // namespace sorbet::realmain::options
 #endif // RUBY_TYPER_OPTIONS_H

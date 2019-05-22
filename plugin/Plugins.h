@@ -3,12 +3,13 @@
 
 #include "common/common.h"
 #include "core/GlobalState.h"
+#include "main/options/options.h"
 
 namespace sorbet::plugin {
 
 class Plugins final {
 public:
-    static void dumpPluginGeneratedFiles(const core::GlobalState &gs);
+    static void dumpPluginGeneratedFiles(const core::GlobalState &gs, const realmain::options::PrinterConfig &pc);
     Plugins() = delete;
 };
 

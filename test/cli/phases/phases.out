@@ -792,3 +792,4 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
  ]
 }
 --- cfg-json end ---
+--- checking diff ---

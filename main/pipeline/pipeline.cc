@@ -1,5 +1,6 @@
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
+#include <sstream>
 
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
@@ -48,16 +49,28 @@ public:
             return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
-        if (print.CFG) {
-            fmt::print("{}\n\n", cfg->toString(ctx));
+        if (print.CFG.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
-        if (print.CFGJson || print.CFGProto) {
+        if (print.CFGJson.enabled || print.CFGProto.enabled) {
             auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-            if (print.CFGJson) {
-                core::Proto::toJSON(proto, cout);
+            if (print.CFGJson.enabled) {
+                if (print.CFGJson.outputPath.empty()) {
+                    core::Proto::toJSON(proto, cout);
+                } else {
+                    stringstream buf;
+                    core::Proto::toJSON(proto, buf);
+                    print.CFGJson.print(buf.str());
+                }
             } else {
                 // The proto wire format allows simply concatenating repeated message fields
-                cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
+                if (print.CFGProto.outputPath.empty()) {
+                    cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
+                } else {
+                    stringstream buf;
+                    cfg::Proto::toMulti(proto).SerializeToOstream(&buf);
+                    print.CFGProto.print(buf.str());
+                }
             }
         }
         return m;
@@ -111,11 +124,11 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         nodes = parser::Parser::run(gs, file);
     }
-    if (print.ParseTree) {
-        fmt::print("{}\n", nodes->toStringWithTabs(gs, 0));
+    if (print.ParseTree.enabled) {
+        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
     }
-    if (print.ParseTreeJson) {
-        fmt::print("{}\n", nodes->toJSON(gs, 0));
+    if (print.ParseTreeJson.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
     }
     return nodes;
 }
@@ -130,11 +143,11 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
-    if (print.Desugared) {
-        fmt::print("{}\n", ast->toStringWithTabs(gs, 0));
+    if (print.Desugared.enabled) {
+        print.Desugared.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
-    if (print.DesugaredRaw) {
-        fmt::print("{}\n", ast->showRaw(gs));
+    if (print.DesugaredRaw.enabled) {
+        print.DesugaredRaw.fmt("{}\n", ast->showRaw(gs));
     }
     return ast;
 }
@@ -177,11 +190,11 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 tree = runDSL(lgs, file, move(tree));
             }
         }
-        if (print.DSLTree) {
-            fmt::print("{}\n", tree->toStringWithTabs(lgs, 0));
+        if (print.DSLTree.enabled) {
+            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
         }
-        if (print.DSLTreeRaw) {
-            fmt::print("{}\n", tree->showRaw(lgs));
+        if (print.DSLTreeRaw.enabled) {
+            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return emptyParsedFile(file);
@@ -238,11 +251,11 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 tree = runDSL(gs, file, move(tree));
             }
         }
-        if (print.DSLTree) {
-            fmt::print("{}\n", tree->toStringWithTabs(gs, 0));
+        if (print.DSLTree.enabled) {
+            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
         }
-        if (print.DSLTreeRaw) {
-            fmt::print("{}\n", tree->showRaw(gs));
+        if (print.DSLTreeRaw.enabled) {
+            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return emptyPluginFile(file);
@@ -637,16 +650,16 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", (string)f.data(ctx).path()}});
     try {
-        if (opts.print.CFG) {
-            fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
+        if (opts.print.CFG.enabled) {
+            opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
         CFGCollectorAndTyper collector(opts);
         {
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
         }
-        if (opts.print.CFG) {
-            fmt::print("}}\n\n");
+        if (opts.print.CFG.enabled) {
+            opts.print.CFG.fmt("}}\n\n");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -718,14 +731,15 @@ public:
     }
 };
 
-vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast::ParsedFile> what) {
+vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
+                                              vector<ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
     core::MutableContext ctx(gs, core::Symbols::root());
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
         resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
     }
-    fmt::print("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
+    opts.print.MissingConstants.fmt("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
     return what;
 }
 
@@ -735,11 +749,11 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
         what = name(gs, move(what), opts, skipConfigatron);
 
         for (auto &named : what) {
-            if (opts.print.NameTree) {
-                fmt::print("{}\n", named.tree->toStringWithTabs(gs, 0));
+            if (opts.print.NameTree.enabled) {
+                opts.print.NameTree.fmt("{}\n", named.tree->toStringWithTabs(gs, 0));
             }
-            if (opts.print.NameTreeRaw) {
-                fmt::print("{}\n", named.tree->showRaw(gs));
+            if (opts.print.NameTreeRaw.enabled) {
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree->showRaw(gs));
             }
         }
 
@@ -767,18 +781,18 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
         }
     }
     gs.errorQueue->flushErrors();
-    if (opts.print.ResolveTree || opts.print.ResolveTreeRaw) {
+    if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
-            if (opts.print.ResolveTree) {
-                fmt::print("{}\n", resolved.tree->toString(gs));
+            if (opts.print.ResolveTree.enabled) {
+                opts.print.ResolveTree.fmt("{}\n", resolved.tree->toString(gs));
             }
-            if (opts.print.ResolveTreeRaw) {
-                fmt::print("{}\n", resolved.tree->showRaw(gs));
+            if (opts.print.ResolveTreeRaw.enabled) {
+                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree->showRaw(gs));
             }
         }
     }
-    if (opts.print.MissingConstants) {
-        what = printMissingConstants(gs, move(what));
+    if (opts.print.MissingConstants.enabled) {
+        what = printMissingConstants(gs, opts, move(what));
     }
     return what;
 }
@@ -847,28 +861,40 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             }
         }
 
-        if (opts.print.SymbolTable) {
-            fmt::print("{}\n", gs->toString());
+        if (opts.print.SymbolTable.enabled) {
+            opts.print.SymbolTable.fmt("{}\n", gs->toString());
         }
-        if (opts.print.SymbolTableRaw) {
-            fmt::print("{}\n", gs->showRaw());
+        if (opts.print.SymbolTableRaw.enabled) {
+            opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
         }
-        if (opts.print.SymbolTableJson) {
+        if (opts.print.SymbolTableJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root());
-            core::Proto::toJSON(root, cout);
+            if (opts.print.SymbolTableJson.outputPath.empty()) {
+                core::Proto::toJSON(root, cout);
+            } else {
+                stringstream buf;
+                core::Proto::toJSON(root, buf);
+                opts.print.SymbolTableJson.print(buf.str());
+            }
         }
-        if (opts.print.SymbolTableFull) {
-            fmt::print("{}\n", gs->toStringFull());
+        if (opts.print.SymbolTableFull.enabled) {
+            opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
         }
-        if (opts.print.SymbolTableFullRaw) {
-            fmt::print("{}\n", gs->showRawFull());
+        if (opts.print.SymbolTableFullRaw.enabled) {
+            opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
         }
-        if (opts.print.FileTableJson) {
+        if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
-            core::Proto::toJSON(files, cout);
+            if (opts.print.FileTableJson.outputPath.empty()) {
+                core::Proto::toJSON(files, cout);
+            } else {
+                stringstream buf;
+                core::Proto::toJSON(files, buf);
+                opts.print.FileTableJson.print(buf.str());
+            }
         }
-        if (opts.print.PluginGeneratedCode) {
-            plugin::Plugins::dumpPluginGeneratedFiles(*gs);
+        if (opts.print.PluginGeneratedCode.enabled) {
+            plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 
         return typecheck_result;

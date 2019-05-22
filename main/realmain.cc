@@ -150,12 +150,16 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
 }
 
 struct AutogenResult {
+    struct Serialized {
+        // Selectively populated based on print options
+        string strval;
+        string msgpack;
+    };
     CounterState counters;
-    vector<pair<int, string>> prints;
+    vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &workers,
-                vector<ast::ParsedFile> &indexed) {
+void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -180,14 +184,16 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
                 auto pf = autogen::Autogen::generate(ctx, move(tree));
                 tree = move(pf.tree);
 
-                if (opts.print.Autogen) {
+                AutogenResult::Serialized serialized;
+                if (opts.print.Autogen.enabled) {
                     Timer timeit(logger, "autogenToString");
-                    out.prints.emplace_back(make_pair(idx, pf.toString(ctx)));
+                    serialized.strval = pf.toString(ctx);
                 }
-                if (opts.print.AutogenMsgPack) {
+                if (opts.print.AutogenMsgPack.enabled) {
                     Timer timeit(logger, "autogenToMsgpack");
-                    out.prints.emplace_back(make_pair(idx, pf.toMsgpack(ctx, opts.autogenVersion)));
+                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
                 }
+                out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
 
@@ -196,7 +202,7 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
     });
 
     AutogenResult out;
-    vector<pair<int, string>> merged;
+    vector<pair<int, AutogenResult::Serialized>> merged;
     for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
          res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
         if (!res.gotItem()) {
@@ -206,8 +212,14 @@ void runAutogen(core::Context ctx, const options::Options &opts, WorkerPool &wor
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
+
     for (auto &elem : merged) {
-        fmt::print("{}", elem.second);
+        if (opts.print.Autogen.enabled) {
+            opts.print.Autogen.print(elem.second.strval);
+        }
+        if (opts.print.AutogenMsgPack.enabled) {
+            opts.print.AutogenMsgPack.print(elem.second.msgpack);
+        }
     }
 } // namespace sorbet::realmain
 
@@ -312,7 +324,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen || opts.print.AutogenMsgPack) {
+    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
         gs->runningUnderAutogen = true;
     }
     if (opts.reserveMemKiB > 0) {
@@ -515,6 +527,8 @@ int realmain(int argc, char *argv[]) {
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
     }
+
+    opts.flushPrinters();
 
     if (!sorbet::emscripten_build) {
         // Let it go: leak memory so that we don't need to call destructors

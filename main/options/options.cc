@@ -3,6 +3,7 @@
 #include "yaml-cpp/yaml.h"
 #include <cxxopts.hpp>
 
+#include "common/FileOps.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/FileFlatMapper.h"
@@ -18,7 +19,7 @@ using namespace std;
 namespace sorbet::realmain::options {
 struct PrintOptions {
     string option;
-    bool Printers::*flag;
+    PrinterConfig Printers::*config;
     bool supportsCaching = false;
 };
 
@@ -47,6 +48,53 @@ const vector<PrintOptions> print_options({
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
+
+PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
+
+void PrinterConfig::print(const string_view &contents) const {
+    if (outputPath.empty()) {
+        fmt::print("{}", contents);
+    } else {
+        absl::MutexLock lck(&state->mutex);
+        fmt::format_to(state->buf, "{}", contents);
+    }
+};
+
+void PrinterConfig::flush() {
+    if (!enabled || outputPath.empty()) {
+        return;
+    }
+    absl::MutexLock lck(&state->mutex);
+    FileOps::write(outputPath, to_string(state->buf));
+};
+
+vector<reference_wrapper<PrinterConfig>> Printers::printers() {
+    return vector<reference_wrapper<PrinterConfig>>({
+        ParseTree,
+        ParseTreeJson,
+        Desugared,
+        DesugaredRaw,
+        DSLTree,
+        DSLTreeRaw,
+        SymbolTable,
+        SymbolTableRaw,
+        SymbolTableJson,
+        SymbolTableFull,
+        SymbolTableFullRaw,
+        NameTree,
+        NameTreeRaw,
+        FileTableJson,
+        ResolveTree,
+        ResolveTreeRaw,
+        MissingConstants,
+        CFG,
+        CFGJson,
+        CFGProto,
+        Autogen,
+        AutogenMsgPack,
+        PluginGeneratedCode,
+    });
+}
 
 struct StopAfterOptions {
     string option;
@@ -338,10 +386,22 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
     }
     vector<string> printOpts = raw["print"].as<vector<string>>();
     for (auto opt : printOpts) {
+        string outPath;
+        auto pos = opt.find(":");
+        if (pos != string::npos) {
+            outPath = opt.substr(pos + 1);
+            opt = opt.substr(0, pos);
+        }
         bool found = false;
         for (auto &known : print_options) {
             if (known.option == opt) {
-                opts.print.*(known.flag) = true;
+                auto &cfg = opts.print.*(known.config);
+                if (cfg.enabled && cfg.outputPath != outPath) {
+                    logger->error("--print={} specified multiple times with inconsistent output options", opt);
+                    throw EarlyReturnWithCode(1);
+                }
+                cfg.enabled = true;
+                cfg.outputPath = outPath;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
                         logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
@@ -386,6 +446,12 @@ string_view stripTrailingSlashes(string_view path) {
         path = path.substr(0, path.length() - 1);
     }
     return path;
+}
+
+void Options::flushPrinters() {
+    for (PrinterConfig &cfg : print.printers()) {
+        cfg.flush();
+    }
 }
 
 void readOptions(Options &opts, int argc, char *argv[],
@@ -469,9 +535,10 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        if ((opts.print.Autogen || opts.print.AutogenMsgPack) && (opts.stopAfterPhase != Phase::NAMER)) {
+        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) &&
+            (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
-                          opts.print.AutogenMsgPack ? "-msgpack" : "");
+                          opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
         }
 
@@ -534,7 +601,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.webTraceFile = raw["web-trace-file"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
-            if (!opts.print.AutogenMsgPack) {
+            if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
                 throw EarlyReturnWithCode(1);
             }
