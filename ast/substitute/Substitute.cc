@@ -32,10 +32,11 @@ private:
                 arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
                 [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *opt) { arg = opt->expr.get(); },
                 [&](ShadowArg *opt) { arg = opt->expr.get(); },
-                [&](UnresolvedIdent *nm) {
-                    nm->name = subst.substitute(nm->name);
+                [&](Local *local) {
+                    local->localVariable._name = subst.substitute(local->localVariable._name);
                     arg = nullptr;
-                });
+                },
+                [&](UnresolvedIdent *nm) { Exception::raise("UnresolvedIdent remaining after local_vars"); });
         }
         return argp;
     }
