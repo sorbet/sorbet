@@ -20,11 +20,6 @@ class ProgressIndicator {
     }
 
 public:
-    static inline constexpr std::chrono::milliseconds REPORTING_INTERVAL() {
-        using namespace std::chrono_literals;
-        return 250ms;
-    };
-
     ProgressIndicator(bool enabled, std::string name, int progressExpected);
 
     ~ProgressIndicator();

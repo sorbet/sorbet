@@ -51,7 +51,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         realmain::options::Options emptyOpts;
         auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
         auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
-        realmain::pipeline::resolve(*gs, move(indexed), emptyOpts); // result is thrown away
+        realmain::pipeline::resolve(*gs, move(indexed), emptyOpts, *workers); // result is thrown away
     } else {
         Timer timeit(gs->tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);

@@ -143,9 +143,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     core::GlobalState gs(errorQueue);
+    auto workers = WorkerPool::create(0, gs.tracer());
     core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
     core::MutableContext ctx(gs, core::Symbols::root());
-
     // Parser
     vector<core::FileRef> files;
     {
@@ -275,7 +275,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             core::UnfreezeNameTable nameTableAccess(gs);
             core::UnfreezeSymbolTable symbolAccess(gs);
 
-            trees = resolver::Resolver::runConstantResolution(ctx, move(trees));
+            trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
         }
 
         for (auto &tree : trees) {
@@ -289,7 +289,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     } else {
         core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = resolver::Resolver::run(ctx, move(trees));
+        trees = resolver::Resolver::run(ctx, move(trees), *workers);
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }

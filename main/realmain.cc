@@ -387,12 +387,12 @@ int realmain(int argc, char *argv[]) {
                     auto file = tree.file;
                     errs.emplace_back(*gs, file);
                 }
-                indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
+                indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), *workers);
             }
 
             runAutogen(ctx, opts, *workers, indexed);
         } else {
-            indexed = pipeline::resolve(*gs, move(indexed), opts);
+            indexed = pipeline::resolve(*gs, move(indexed), opts, *workers);
             if (opts.stressIncrementalResolver) {
                 for (auto &f : indexed) {
                     auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore);

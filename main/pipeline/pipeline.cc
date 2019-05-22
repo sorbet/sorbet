@@ -443,8 +443,8 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
     IndexResult ret;
-    for (auto result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer()); !result.done();
-         result = input->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, cgs->tracer())) {
+    for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer()); !result.done();
+         result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
         if (result.gotItem()) {
             counterConsume(move(threadResult.counters));
             if (ret.gs == nullptr) {
@@ -730,7 +730,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, vector<ast:
 }
 
 vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                bool skipConfigatron) {
+                                WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(gs, move(what), opts, skipConfigatron);
 
@@ -758,7 +758,7 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
             }
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-            what = resolver::Resolver::run(ctx, move(what));
+            what = resolver::Resolver::run(ctx, move(what), workers);
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -833,9 +833,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
             typecheck_thread_result threadResult;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer());
+                for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
-                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS, gs->tracer())) {
+                     result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
                         typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
@@ -918,7 +918,8 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
         }
     }
     auto allSends = getAllSends(*lgs, single[0].tree);
-    pipeline::resolve(*lgs, move(single), emptyOpts, true);
+    auto workers = WorkerPool::create(0, lgs->tracer());
+    pipeline::resolve(*lgs, move(single), emptyOpts, *workers, true);
 
     return {move(*lgs->hash()), move(allSends)};
 }
