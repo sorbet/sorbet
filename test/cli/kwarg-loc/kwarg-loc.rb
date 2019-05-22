@@ -21,3 +21,25 @@ foo(
   e: 1,
   f: 1,
 )
+
+sig do
+  params(
+    a: Integer,
+    b: Integer,
+    c: Integer,
+    d: Integer,
+    e: Integer,
+    f: Integer,
+  )
+    .void
+end
+def bar(a, b, c, d, e, f); end
+
+bar(
+  1,
+  1,
+  1,
+  "1",
+  1,
+  1,
+)
