@@ -201,7 +201,7 @@ class Sorbet::Private::Serialize
 
   def ancestor_has_method(method, klass)
     return false if !klass.is_a?(Class)
-    ancestor = klass.ancestors.find do |ancestor|
+    first_ancestor = klass.ancestors.find do |ancestor|
       next if ancestor == klass
       begin
         ancestor.instance_method(method.name)
@@ -209,8 +209,8 @@ class Sorbet::Private::Serialize
         nil
       end
     end
-    return false unless ancestor
-    ancestor.instance_method(method.name).parameters == method.parameters
+    return false unless first_ancestor
+    first_ancestor.instance_method(method.name).parameters == method.parameters
   end
 
   def constant(const, value)
