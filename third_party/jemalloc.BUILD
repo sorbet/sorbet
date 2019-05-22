@@ -55,6 +55,9 @@ genrule(
             "**/*.sub",
             "**/install-sh",
         ],
+        exclude = [
+        "include/jemalloc/jemalloc.h",
+        ],
     ),
     outs = [
         "lib/libjemalloc.a",
