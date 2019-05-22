@@ -4,7 +4,8 @@ set -e
 COMMAND_FILE=$(mktemp)
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
-gems/sorbet/test/snapshot/driver.sh --update
+# TODO(JEZ) Make this faster and better so we can uncomment this
+# gems/sorbet/test/snapshot/driver.sh --update
 
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg autogen)
 
