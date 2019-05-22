@@ -7,7 +7,7 @@ namespace sorbet::local_vars {
 
 class LocalVars final {
 public:
-    static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Expression> expr);
+    static ast::ParsedFile run(core::MutableContext ctx, ast::ParsedFile tree);
 
     LocalVars() = delete;
 };

@@ -258,9 +258,10 @@ private:
     }
 };
 
-unique_ptr<ast::Expression> LocalVars::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+ast::ParsedFile LocalVars::run(core::MutableContext ctx, ast::ParsedFile tree) {
     LocalNameInserter localNameInserter;
-    return ast::TreeMap::apply(ctx, localNameInserter, move(tree));
+    tree.tree = ast::TreeMap::apply(ctx, localNameInserter, move(tree.tree));
+    return tree;
 }
 
 } // namespace sorbet::local_vars

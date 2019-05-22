@@ -248,8 +248,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         // Namer
         ast::ParsedFile namedTree;
         {
-            auto localNamed = testSerialize(
-                gs, ast::ParsedFile{local_vars::LocalVars::run(ctx, move(dslUnwound.tree)), dslUnwound.file});
+            auto localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
 
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols

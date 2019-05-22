@@ -48,7 +48,7 @@ void processSource(core::GlobalState &cb, string str) {
     auto fileId = ast->loc.file();
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
     tree.tree = dsl::DSL::run(ctx, move(tree.tree));
-    tree.tree = local_vars::LocalVars::run(ctx, move(tree.tree));
+    tree = local_vars::LocalVars::run(ctx, move(tree));
     tree = namer::Namer::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
