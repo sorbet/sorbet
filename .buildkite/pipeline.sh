@@ -15,12 +15,16 @@ if [[ "$BUILDKITE_PULL_REQUEST_REPO" == "git://github.com/stripe/sorbet.git" ]];
 fi
 
 if [[ -n "${CLEAN_BUILD-}" ]]; then
-    sed -e '/Run optional code coverage/{N;d;}' .buildkite/pipeline.yaml
+    tmpfile=$(mktemp)
+    sed -e '/Run optional code coverage/{N;d;}' .buildkite/pipeline.yaml > "$tmpfile"
+    mv "$tmpfile" .buildkite/pipeline.yaml
 fi
 
 if [[ "${whitelisted}" -ne 1 ]] ; then
+    tmpfile=$(mktemp)
    (echo -e "steps:\\n  - block: \":key: Needs contributor approval!\"\\n  - wait: ~\\n";
-    grep -v "steps:" .buildkite/pipeline.yaml ) | buildkite-agent pipeline upload
-else
-  buildkite-agent pipeline upload
+    grep -v "steps:" .buildkite/pipeline.yaml ) > "$tmpfile"
+    mv "$tmpfile" .buildkite/pipeline.yaml
 fi
+
+buildkite-agent pipeline upload
