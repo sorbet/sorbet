@@ -1,0 +1,21 @@
+kwarg-loc.rb:16: `String("1")` doesn't match `Integer` for argument `d` https://sorbet.org/docs/error-reference#7002
+    16 |foo(
+    17 |  a: 1,
+    18 |  b: 1,
+    19 |  c: 1,
+    20 |  d: "1",
+    21 |  e: 1,
+    22 |  f: 1,
+    23 |)
+    kwarg-loc.rb:8: Method `Object#foo` has specified `d` as `Integer`
+     8 |    d: Integer,
+            ^
+  Got String("1") originating from:
+    kwarg-loc.rb:17:
+    17 |  a: 1,
+    18 |  b: 1,
+    19 |  c: 1,
+    20 |  d: "1",
+    21 |  e: 1,
+    22 |  f: 1,
+Errors: 1
