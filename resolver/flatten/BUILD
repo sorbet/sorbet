@@ -1,5 +1,5 @@
 cc_library(
-    name = "resolver",
+    name = "flatten",
     srcs = glob(
         [
             "*.cc",
@@ -11,7 +11,7 @@ cc_library(
         ],
     ),
     hdrs = [
-        "resolver.h",
+        "flatten.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -23,7 +23,5 @@ cc_library(
         "//ast/desugar",
         "//ast/treemap",
         "//core",
-        "//resolver/flatten",
-        "//resolver/method_checks",
     ],
 )
