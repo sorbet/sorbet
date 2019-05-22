@@ -826,6 +826,9 @@ private:
         }
         if (sig.seen.generated) {
             method.data(ctx)->setHasGeneratedSig();
+        } else {
+            // HasGeneratedSig can be already set in incremental runs. Make sure we update it.
+            method.data(ctx)->unsetHasGeneratedSig();
         }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->setGenericMethod();
