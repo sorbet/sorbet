@@ -72,7 +72,6 @@ class NameInserter {
     }
 
     struct ParsedArg {
-        core::NameRef name;
         core::Loc loc;
         core::LocalVariable local;
         unique_ptr<ast::Expression> default_;
@@ -109,7 +108,6 @@ class NameInserter {
             },
             [&](ast::Local *local) {
                 parsedArg.local = local->localVariable;
-                parsedArg.name = local->localVariable._name;
                 parsedArg.loc = local->loc;
             });
 
@@ -142,7 +140,7 @@ class NameInserter {
 
         core::NameRef name;
         if (parsedArg.keyword) {
-            name = parsedArg.name;
+            name = parsedArg.local._name;
         } else if (parsedArg.block) {
             name = core::Names::blkArg();
         } else {
@@ -564,10 +562,10 @@ public:
                 }
                 return false;
             }
-            if (symArg->isKeyword() && symArg->name != methodArg.name) {
+            if (symArg->isKeyword() && symArg->name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.name.show(ctx));
+                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;
