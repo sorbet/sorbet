@@ -44,6 +44,12 @@ steps:
     agents:
       os: linux
   - wait: ~
+    # TODO(jez) Test on linux
+  - label: "Test: sorbet gem on Mac"
+    command: .buildkite/test-srb.sh
+    agents:
+      os: mac
+  - wait: ~
   - label: "Deploy"
     command: .buildkite/publish.sh
     agents:

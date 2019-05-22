@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s dotglob
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
+root_dir="$PWD"
+
+# shellcheck disable=SC1091
+source "test/snapshot/logging.sh"
+
+# ----- Option parsing -----
+
+usage() {
+  echo
+  echo "Usage:"
+  echo "  $0 <test_dir> [options]"
+  echo
+  echo "Arguments:"
+  echo "  <test_dir>   relative path of the snapshot to test"
+  echo
+  echo "Options:"
+  echo "  --verbose    be more verbose than just whether it errored"
+  echo "  --update     if there is a failure, update the expected file(s) and keep going"
+}
+
+if [[ $# -lt 1 ]]; then
+  error "Missing test."
+  usage
+  exit 1
+elif [[ "$1" =~ test/snapshot/partial* ]]; then
+  test_dir="$1"
+  is_partial=1
+elif [[ "$1" =~ test/snapshot/total* ]]; then
+  test_dir="$1"
+  is_partial=
+else
+  error "Expected test_dir to match test/snapshot/(total|partial)/*. Got: $3"
+  usage
+  exit 1
+fi
+shift
+
+VERBOSE=
+UPDATE=
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --verbose)
+      VERBOSE="--verbose"
+      shift
+      ;;
+    --update)
+      UPDATE="--update"
+      shift
+      ;;
+    -*)
+      echo
+      error "Unrecognized option: '$1'"
+      usage
+      exit 1
+      ;;
+    *)
+      echo
+      error "Unrecognized positional arg: '$1'"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+
+# ----- Stage the test sandbox directory -----
+
+info "Running test:  $0 $test_dir $VERBOSE $UPDATE"
+
+actual="$(mktemp -d)"
+
+if [ -n "$VERBOSE" ]; then
+  info "PWD:       $PWD"
+  info "test_dir:  $test_dir"
+  info "actual:    $actual"
+fi
+
+sorbet_static_exe="$root_dir/../sorbet-static/libexec/sorbet"
+if ! [ -x "$sorbet_static_exe" ]; then
+  error "├─ could not find a sorbet-static executable."
+  warn  "├─ If you are trying to run the tests locally, consider either symlinking"
+  warn  "└─ or copying bazel-bin/main/sorbet to gems/sorbet-static/libexec/sorbet"
+  exit 1
+fi
+
+if ! [ -d "$test_dir" ]; then
+  error "└─ test_dir doesn't exist: $test_dir"
+  exit 1
+fi
+
+if ! [ -d "$test_dir/src" ]; then
+  error "└─ each test must have a src/ dirctory: $test_dir/src"
+  exit 1
+fi
+
+if ! [ -f "$test_dir/src/Gemfile" ]; then
+  error "└─ each test must have src/Gemfile: $test_dir/src/Gemfile"
+  exit 1
+fi
+
+if ! [ -d "$test_dir/expected" ]; then
+  error "├─ each test must have an expected/ directory: $test_dir/expected"
+
+  if [ -z "$is_partial" ]; then
+    if [ -z "$UPDATE" ]; then
+      warn "└─ re-run with --update to create it."
+      exit 1
+    else
+      warn "├─ creating $test_dir/expected"
+      mkdir "$test_dir/expected"
+    fi
+  else
+    warn "└─ If you are trying to create a new partial test, it's easiest to create a new"
+    warn "   empty total test, run with --update, and then convert it to a partial test."
+    exit 1
+  fi
+fi
+
+# TODO: make these files recordable
+if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
+  error "├─ hidden-definitions are not currently testable."
+
+  if [ -z "$UPDATE" ]; then
+    warn "└─ please remove: $test_dir/expected/sorbet/rbi/hidden-definitions"
+    exit 1
+  else
+    warn "├─ removing: $test_dir/expected/sorbet/rbi/hidden-definitions"
+    rm -rf "$test_dir/expected/sorbet/rbi/hidden-definitions"
+  fi
+fi
+
+cp -r "$test_dir/src"/* "$actual"
+
+
+# ----- Run the test in the sandbox -----
+
+(
+  # Only cd because srb needs to be in the same folder as the Gemfile.
+  # This script should still to refer to all files with absolute paths.
+  cd "$actual"
+
+  SRB_YES=1 "$root_dir/bin/srb" init | \
+    sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
+    > "$actual/out.log"
+)
+
+
+# ----- Check out.log -----
+
+if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
+  if ! diff -u "$test_dir/expected/out.log" "$actual/out.log"; then
+    error "├─ expected out.log did not match actual out.log"
+
+    if [ -z "$UPDATE" ]; then
+      error "└─ see output above."
+      exit 1
+    else
+      warn "├─ updating expected/out.log"
+      cp "$actual/out.log" "$test_dir/expected/out.log"
+    fi
+  fi
+fi
+
+# ----- Check sorbet/ -----
+
+# FIXME: Removing hidden-definitions in actual to hide them from diff output.
+rm -rf "$actual/sorbet/rbi/hidden-definitions"
+
+if [ -z "$is_partial" ]; then
+  if ! diff -ur "$test_dir/expected/sorbet" "$actual/sorbet"; then
+    error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
+
+    if [ -z "$UPDATE" ]; then
+      error "└─ see output above."
+      exit 1
+    else
+      warn "├─ updating expected/sorbet (total):"
+      rm -rf "$test_dir/expected/sorbet"
+      cp -r "$actual/sorbet" "$test_dir/expected"
+    fi
+  fi
+elif [ -d "$test_dir/expected/sorbet" ]; then
+  set +e
+  diff -ur "$test_dir/expected/sorbet" "$actual/sorbet" | \
+    grep -vF "Only in $actual" \
+    > "$actual/partial-diff.log"
+  set -e
+
+  # File exists and is non-empty
+  if [ -s "$actual/partial-diff.log" ]; then
+    cat "$actual/partial-diff.log"
+    error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
+
+    if [ -z "$UPDATE" ]; then
+      error "└─ see output above."
+      exit 1
+    else
+      warn "├─ updating expected/sorbet (partial):"
+
+      find "$test_dir/expected/sorbet" -print0 | while IFS= read -r -d '' expected_path; do
+        path_suffix="${expected_path#$test_dir/expected/sorbet}"
+        actual_path="$actual/sorbet$path_suffix"
+
+        # Only ever update existing files, never grow this partial snapshot.
+        if [ -d "$expected_path" ]; then
+          if ! [ -d "$actual_path" ]; then
+            rm -rfv "$expected_path"
+          fi
+        else
+          if [ -f "$actual_path" ]; then
+            cp -v "$actual_path" "$expected_path"
+          else
+            rm -fv "$expected_path"
+          fi
+        fi
+      done
+    fi
+  fi
+fi
+
+rm -rf "$actual"
+
+success "└─ test passed."

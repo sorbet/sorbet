@@ -17,7 +17,7 @@ class Sorbet::Private::TodoRBI
 
     IO.popen(
       [
-        'srb',
+        File.realpath("#{__dir__}/../bin/srb"),
         'tc',
         '--print=missing-constants',
         '--stdout-hup-hack',

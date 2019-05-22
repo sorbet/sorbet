@@ -38,7 +38,7 @@ module Sorbet::Private
       def serialize(output_dir)
         gem_class_defs = preprocess(@files)
 
-        FileUtils.mkdir_p(output_dir)
+        FileUtils.mkdir_p(output_dir) unless gem_class_defs.empty?
 
         gem_class_defs.each do |gem, klass_ids|
           File.open("#{File.join(output_dir, gem[:gem])}.rbi", 'w') do |f|
@@ -102,6 +102,10 @@ module Sorbet::Private
             next
           end
           next if gem[:gem] == 'ruby'
+          # We're currently ignoring bundler, because we can't easily pin
+          # everyone to the same version of bundler in tests and in CI.
+          # There is an RBI for bundler in sorbet-typed.
+          next if gem[:gem] == 'bundler'
 
           gem_class_defs[gem] ||= {}
           defined.each do |item|
