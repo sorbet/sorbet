@@ -1,6 +1,6 @@
 # typed: strict
 # disable-fast-path: true
-class A # error: Type `Elem` declared by parent `Enumerable` must be declared again
+class A # error: Type `Elem` declared by parent `Enumerable` must be re-declared in `A`
   include Enumerable
   extend T::Sig
 
