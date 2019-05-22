@@ -383,7 +383,7 @@ private:
                 return false;
             }
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins may only use simple aliases to classes like `{}`", "A = Integer");
+                e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
             }
             resolved = core::Symbols::StubAncestor();
         }

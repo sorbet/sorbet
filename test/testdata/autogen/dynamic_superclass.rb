@@ -5,5 +5,5 @@ A = Class.new
 # resolve it because we replace `A` with `StubModule` and we would
 # interpret B as unresolved.
 
-class B < A # error: Superclasses and mixins may only use simple aliases to classes like `A = Integer`
+class B < A # error: Superclasses and mixins may only use class aliases like `A = Integer`
 end
