@@ -10,9 +10,9 @@ class Sorbet::Private::RequireEverything
   # Goes through the most common ways to require all your userland code
   def self.require_everything
     patch_kernel
-    is_rails = load_rails
+    load_rails
     load_bundler # this comes second since some rails projects fail `Bundler.require' before rails is loaded
-    require_all_files if !is_rails
+    require_all_files
   end
 
   def self.load_rails
