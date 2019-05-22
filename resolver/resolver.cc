@@ -828,6 +828,7 @@ private:
             method.data(ctx)->setHasGeneratedSig();
         } else {
             // HasGeneratedSig can be already set in incremental runs. Make sure we update it.
+            // TODO: In future, enforce that the previous LOC was a tombstone if we're actually unsetting generated sig.
             method.data(ctx)->unsetHasGeneratedSig();
         }
         if (!sig.typeArgs.empty()) {
