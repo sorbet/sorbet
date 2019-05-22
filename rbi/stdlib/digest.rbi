@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 
 module Digest
   REQUIRE_MUTEX = ::T.let(nil, ::T.untyped)

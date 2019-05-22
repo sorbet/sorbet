@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 class Regexp < Object
   EXTENDED = T.let(T.unsafe(nil), Integer)
   FIXEDENCODING = T.let(T.unsafe(nil), Integer)

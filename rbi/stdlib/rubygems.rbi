@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 module Gem
   DEFAULT_HOST = T.let(T.unsafe(nil), String)
   GEM_DEP_FILES = T.let(T.unsafe(nil), Array)

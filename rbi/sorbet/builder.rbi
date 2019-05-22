@@ -1,3 +1,4 @@
+# typed: __STDLIB_INTERNAL
 class T::Private::Methods::DeclBuilder
   sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def type_parameters(*params); end

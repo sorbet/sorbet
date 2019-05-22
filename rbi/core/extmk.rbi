@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 module RbConfig
   CONFIG = T.let(T.unsafe(nil), Hash)
   DESTDIR = T.let(T.unsafe(nil), String)

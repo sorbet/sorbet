@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 
 class Delegator < BasicObject
 end

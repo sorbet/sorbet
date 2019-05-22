@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 
 class ERB
   Revision = ::T.let(nil, ::T.untyped)

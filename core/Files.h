@@ -82,6 +82,7 @@ public:
 
     bool isPayload() const;
     bool isRBI() const;
+    bool isStdlib() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType);
     File(File &&other) = delete;

@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 
 module JSON
   FAST_STATE_PROTOTYPE = ::T.let(nil, ::T.untyped)

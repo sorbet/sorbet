@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 class Proc < Object
   sig {returns(Integer)}
   def arity(); end

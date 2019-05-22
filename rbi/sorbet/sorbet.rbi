@@ -1,3 +1,4 @@
+# typed: __STDLIB_INTERNAL
 module Sorbet::Private::Static
   sig do
     params(

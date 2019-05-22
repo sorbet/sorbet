@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 class StringIO
   include Enumerable
   extend T::Generic

@@ -1,4 +1,4 @@
-# typed: true
+# typed: __STDLIB_INTERNAL
 
 class BasicObject
   sig {returns(T::Boolean)}

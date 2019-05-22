@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 
 module WEBrick
   CR = T.let(nil, T.untyped)

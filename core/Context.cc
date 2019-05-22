@@ -32,7 +32,8 @@ bool Context::permitOverloadDefinitions() const {
     for (auto loc : owner.data(*this)->locs()) {
         auto &file = loc.file().data(*this);
         constexpr string_view whitelistedTest = "overloads_test.rb"sv;
-        if ((file.isPayload() && owner != Symbols::root()) || FileOps::getFileName(file.path()) == whitelistedTest) {
+        if (((file.isPayload() || file.isStdlib()) && owner != Symbols::root()) ||
+            FileOps::getFileName(file.path()) == whitelistedTest) {
             return true;
         }
     }

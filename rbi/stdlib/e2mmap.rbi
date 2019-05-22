@@ -1,4 +1,4 @@
-# typed: strict
+# typed: __STDLIB_INTERNAL
 
 module Exception2MessageMapper
   sig {params(err: Exception, rest: T.untyped).void}
