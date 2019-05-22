@@ -211,7 +211,7 @@ end
 ### `T.cast`
 
 `T.unsafe` is maximally unsafe. It forces Sorbet to forget all type information
-statically—sometimes this is more power than we need. For example, sometimes
+statically---sometimes this is more power than we need. For example, sometimes
 we the programmer are aware of an invariant in the code that isn't currently
 expressed in the type system:
 

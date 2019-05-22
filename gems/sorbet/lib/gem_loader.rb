@@ -200,9 +200,14 @@ class Sorbet::Private::GemLoader
     'roo' => proc do
       my_require 'roo'
       [
-        Roo::Excel,
         Roo::Spreadsheet,
       ]
+      version = Bundler.load.specs['roo'][0].stub.version
+      if !Gem::Requirement.create('2.0.0').satisfied_by?(version)
+        [
+          Roo::Excel,
+        ]
+      end
     end,
     'rack-protection' => proc do
       my_require 'rack-protection'

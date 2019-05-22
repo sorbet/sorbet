@@ -9,22 +9,14 @@ fi
 
 echo "--- Pre-setup :bazel:"
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     platform="linux";;
-    Darwin*)    platform="mac";;
-    *)          exit 1
-esac
-
-if [[ "linux" == "$platform" ]]; then
-  echo "linux coverage is not supported"
-  exit 1
-elif [[ "mac" == "$platform" ]]; then
-  echo "mac is supported"
-fi
-
 git checkout .bazelrc
 
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
+# This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
 
 rm -f bazel-*
@@ -60,8 +52,6 @@ xargs .buildkite/combine-coverage.sh < _tmp_/reports
 ./bazel-sorbet/external/llvm_toolchain/bin/llvm-cov show -instr-profile ./_tmp_/profdata_combined.profdata ./bazel-bin/test/test_corpus_sharded -object ./bazel-bin/main/sorbet > combined.coverage.txt
 
 .buildkite/codecov-bash -f combined.coverage.txt -X search
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
 
 if [ "$err" -ne 0 ]; then
     exit "$err"

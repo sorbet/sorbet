@@ -1,0 +1,10 @@
+test/cli/top-level/top-level.rb:2: Unable to resolve constant `ARGW` https://sorbet.org/docs/error-reference#5002
+     2 |ARGW
+        ^^^^
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L1614: Did you mean: `ARGV`?
+    1614 |::ARGV = T.let(T.unsafe(nil), Array)
+          ^^^^^^
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L1613: Did you mean: `ARGF`?
+    1613 |::ARGF = T.let(T.unsafe(nil), Object)
+          ^^^^^^
+Errors: 1

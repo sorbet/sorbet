@@ -3,6 +3,7 @@
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
 #include "common/Timer.h"
+#include "common/typecase.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
@@ -223,16 +224,13 @@ void SerializerImpl::pickle(Pickler &p, const File &what) {
     p.putU1((u1)what.sourceType);
     p.putStr(what.path());
     p.putStr(what.source());
-    p.putU4(what.globalStateHash.load());
 }
 
 shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
     auto t = (File::Type)p.getU1();
     auto path = string(p.getStr());
     auto source = string(p.getStr());
-    auto hash = p.getU4();
     auto ret = make_shared<File>(std::move(path), std::move(source), t);
-    ret->setDefinitionHash(hash);
     return ret;
 }
 

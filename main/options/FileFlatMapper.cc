@@ -1,5 +1,6 @@
 #include "FileFlatMapper.h"
 #include "absl/strings/str_split.h"
+#include "common/FileOps.h"
 #include "common/common.h"
 #include "options.h"
 

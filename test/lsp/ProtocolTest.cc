@@ -207,7 +207,7 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
     vector<shared_ptr<ErrorAssertion>> errorAssertions;
     for (auto e : expected) {
         auto range = RangeAssertion::makeRange(e.line);
-        errorAssertions.push_back(ErrorAssertion::make(e.path, range, e.line, e.message));
+        errorAssertions.push_back(ErrorAssertion::make(e.path, range, e.line, e.message, "error"));
     }
 
     // Use same logic as main test runner.

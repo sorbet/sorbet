@@ -2,28 +2,28 @@ No errors! Great job.
 test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` https://sorbet.org/docs/error-reference#7003
      7 |a.prop = 7
         ^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L633: Did you mean: `Kernel#proc`?
-     633 |  def proc(&blk); end
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L710: Did you mean: `Kernel#proc`?
+     710 |  def proc(&blk); end
             ^^^^^^^^^^^^^^
 
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://sorbet.org/docs/error-reference#7003
      8 |a.prop
         ^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L633: Did you mean: `Kernel#proc`?
-     633 |  def proc(&blk); end
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L710: Did you mean: `Kernel#proc`?
+     710 |  def proc(&blk); end
             ^^^^^^^^^^^^^^
 Errors: 2
 test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` https://sorbet.org/docs/error-reference#7003
      7 |a.prop = 7
         ^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L633: Did you mean: `Kernel#proc`?
-     633 |  def proc(&blk); end
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L710: Did you mean: `Kernel#proc`?
+     710 |  def proc(&blk); end
             ^^^^^^^^^^^^^^
 
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://sorbet.org/docs/error-reference#7003
      8 |a.prop
         ^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/kernel.rbi#L633: Did you mean: `Kernel#proc`?
-     633 |  def proc(&blk); end
+    https://github.com/stripe/sorbet/tree/master/rbi/core/object.rbi#L710: Did you mean: `Kernel#proc`?
+     710 |  def proc(&blk); end
             ^^^^^^^^^^^^^^
 Errors: 2

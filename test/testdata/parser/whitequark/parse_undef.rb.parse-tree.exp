@@ -1,20 +1,81 @@
-Undef {
-  exprs = [
-    Symbol {
-      val = <U foo>
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U extend>
+      args = [
+        Const {
+          scope = Const {
+            scope = NULL
+            name = <C <U T>>
+          }
+          name = <C <U Sig>>
+        }
+      ]
     }
-    Symbol {
-      val = <U bar>
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U sig>
+        args = [
+        ]
+      }
+      args = NULL
+      body = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U params>
+          args = [
+            Hash {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U arg>
+                  }
+                  value = Const {
+                    scope = NULL
+                    name = <C <U BasicObject>>
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        method = <U void>
+        args = [
+        ]
+      }
     }
-    DSymbol {
-      nodes = [
-        String {
+    DefMethod {
+      name = <U undef>
+      args = Args {
+        args = [
+          Restarg {
+            name = <U arg>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Undef {
+      exprs = [
+        Symbol {
           val = <U foo>
         }
-        Begin {
-          stmts = [
-            Integer {
-              val = "1"
+        Symbol {
+          val = <U bar>
+        }
+        DSymbol {
+          nodes = [
+            String {
+              val = <U foo>
+            }
+            Begin {
+              stmts = [
+                Integer {
+                  val = "1"
+                }
+              ]
             }
           ]
         }

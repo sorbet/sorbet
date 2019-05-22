@@ -311,3 +311,15 @@ class Encoding::Converter < Data
   XML_ATTR_QUOTE_DECORATOR = T.let(T.unsafe(nil), Integer)
   XML_TEXT_DECORATOR = T.let(T.unsafe(nil), Integer)
 end
+
+class Encoding::CompatibilityError < EncodingError
+end
+
+class Encoding::ConverterNotFoundError < EncodingError
+end
+
+class Encoding::InvalidByteSequenceError < EncodingError
+end
+
+class Encoding::UndefinedConversionError < EncodingError
+end

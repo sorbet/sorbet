@@ -58,6 +58,12 @@ struct Printers {
     PrinterConfig ResolveTreeRaw;
     PrinterConfig MissingConstants;
     PrinterConfig CFG;
+    // cfg-json format outputs a JSON object for each CFG, separated by newlines.
+    // See https://en.wikipedia.org/wiki/JSON_streaming#Concatenated_JSON
+    PrinterConfig CFGJson;
+    // cfg-proto format outputs a binary MultiCFG for export to other tools.
+    // See CFG.proto for details
+    PrinterConfig CFGProto;
     PrinterConfig TypedSource;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;

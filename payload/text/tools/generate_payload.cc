@@ -1,3 +1,4 @@
+#include "common/FileOps.h"
 #include "common/common.h"
 #include <algorithm>
 #include <fstream>

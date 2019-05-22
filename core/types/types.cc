@@ -1,6 +1,7 @@
 #include "core/Types.h"
 #include "absl/base/casts.h"
 #include "common/common.h"
+#include "common/typecase.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -98,6 +99,11 @@ TypePtr Types::procClass() {
 
 TypePtr Types::classClass() {
     static auto res = make_type<ClassType>(Symbols::Class());
+    return res;
+}
+
+TypePtr Types::declBuilderForProcsSingletonClass() {
+    static auto res = make_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
     return res;
 }
 

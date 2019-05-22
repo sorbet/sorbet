@@ -134,6 +134,15 @@ module URI
   def self.decode(*arg); end
 end
 
+class URI::BadURIError < URI::Error
+end
+
+class URI::Error < StandardError
+end
+
+module URI::Escape
+end
+
 class URI::FTP < URI::Generic
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
@@ -263,6 +272,12 @@ class URI::HTTPS < URI::HTTP
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
 end
 
+class URI::InvalidComponentError < URI::Error
+end
+
+class URI::InvalidURIError < URI::Error
+end
+
 class URI::LDAP < URI::Generic
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
@@ -366,6 +381,9 @@ class URI::MailTo < URI::Generic
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
 end
 
+module URI::RFC2396_REGEXP
+end
+
 module URI::RFC2396_REGEXP::PATTERN
   ABS_PATH = T.let(T.unsafe(nil), String)
   ABS_URI = T.let(T.unsafe(nil), String)
@@ -403,6 +421,13 @@ module URI::RFC2396_REGEXP::PATTERN
   X_REL_URI = T.let(T.unsafe(nil), String)
 end
 
+class URI::RFC2396_Parser < Object
+  include URI::RFC2396_REGEXP
+end
+
 class URI::RFC3986_Parser < Object
   RFC3986_URI = T.let(T.unsafe(nil), Regexp)
+end
+
+module URI::Util
 end

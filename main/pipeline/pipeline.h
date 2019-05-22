@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "core/NameHash.h"
 #include "main/options/options.h"
 
 namespace sorbet::realmain::pipeline {
@@ -35,7 +36,8 @@ std::vector<ast::ParsedFile> typecheck(std::unique_ptr<core::GlobalState> &gs, s
                                        const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
-unsigned int computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger);
+
+core::FileHash computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

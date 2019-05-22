@@ -3,6 +3,7 @@
 
 #include "absl/debugging/symbolize.h"
 #include "absl/strings/str_cat.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
@@ -82,12 +83,12 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::Ignore:
             return core::StrictLevel::None;
-        case core::StrictLevel::Stripe:
+        case core::StrictLevel::False:
             return core::StrictLevel::Ignore;
-        case core::StrictLevel::Typed:
-            return core::StrictLevel::Stripe;
+        case core::StrictLevel::True:
+            return core::StrictLevel::False;
         case core::StrictLevel::Strict:
-            return core::StrictLevel::Typed;
+            return core::StrictLevel::True;
         case core::StrictLevel::Strong:
             return core::StrictLevel::Strict;
         case core::StrictLevel::Max:
@@ -105,9 +106,9 @@ string levelToSigil(core::StrictLevel level) {
             Exception::raise("Should never happen");
         case core::StrictLevel::Ignore:
             return "ignore";
-        case core::StrictLevel::Stripe:
+        case core::StrictLevel::False:
             return "false";
-        case core::StrictLevel::Typed:
+        case core::StrictLevel::True:
             return "true";
         case core::StrictLevel::Strict:
             return "strict";
@@ -299,7 +300,7 @@ int realmain(int argc, char *argv[]) {
                          "or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.\n");
         }
     }
-    WorkerPool workers(opts.threads, logger);
+    unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
@@ -351,7 +352,7 @@ int realmain(int argc, char *argv[]) {
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
-        lsp::LSPLoop loop(move(gs), opts, logger, workers, STDIN_FILENO, cout);
+        lsp::LSPLoop loop(move(gs), opts, logger, *workers, STDIN_FILENO, cout);
         gs = loop.runLSP();
     } else {
         Timer timeall(logger, "wall_time");
@@ -376,7 +377,7 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        { indexed = pipeline::index(gs, inputFiles, opts, workers, kvstore); }
+        { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
         payload::retainGlobalState(gs, opts, kvstore);
 
@@ -401,7 +402,7 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
             }
 
-            runAutogen(ctx, opts, workers, indexed);
+            runAutogen(ctx, opts, *workers, indexed);
         } else {
             indexed = pipeline::resolve(*gs, move(indexed), opts);
             if (opts.stressIncrementalResolver) {
@@ -414,7 +415,7 @@ int realmain(int argc, char *argv[]) {
                     f = move(reresolved[0]);
                 }
             }
-            indexed = pipeline::typecheck(gs, move(indexed), opts, workers);
+            indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);
         }
 
         if (opts.suggestTyped) {

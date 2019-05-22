@@ -1,0 +1,7 @@
+# typed: true
+# assert-fast-path: undefined_constant.rb
+
+def main
+  UnknownSymbol # error: Unable to resolve constant `UnknownSymbol`
+  1 + 1
+end

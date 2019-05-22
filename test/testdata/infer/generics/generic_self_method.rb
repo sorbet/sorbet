@@ -6,7 +6,9 @@ class Identity
   Ty = type_member
 
   sig {params(x: Ty).returns(Ty)}
-  def self.call(x) # error: Expression does not have a fully-defined type
+               # ^^ error: `type_member` type `Identity::Ty` used in a singleton method definition
+                           # ^^ error: `type_member` type `Identity::Ty` used in a singleton method definition
+  def self.call(x)
     x
   end
 end

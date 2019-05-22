@@ -71,7 +71,7 @@ next 1
 next 1,2
 
 # defined
-defined?(X) # error: Unable to resolve
+defined?(X)
 
 
 # zsuper
@@ -133,7 +133,7 @@ end
 # ternary
 x ? 1 : 7
 
-undef x, y # error: Unsupported node type `Undef`
+undef x, y
 
 # words
 %w{a b}

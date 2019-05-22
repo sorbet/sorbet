@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+
+class A extend T::Sig
+  sig {params(x: Integer, y: Integer).returns(String)}
+  def bar(x, y)
+    (x + y).to_s
+  end
+end

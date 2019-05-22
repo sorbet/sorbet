@@ -10,7 +10,9 @@ class T2
   extend T::Sig
 
   sig {params(x: T1::Ty).returns(T1::Ty)}
-  def f(x) # error: Expression does not have a fully-defined type
+               # ^^^^^^ error: `type_member` type `T1::Ty` used outside of the class definition
+                               # ^^^^^^ error: `type_member` type `T1::Ty` used outside of the class definition
+  def f(x)
     x
   end
 end

@@ -1,4 +1,5 @@
 #include "absl/strings/match.h"
+#include "common/FileOps.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 

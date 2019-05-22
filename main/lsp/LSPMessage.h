@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPMESSAGE_H
 
 #include "common/Counters.h"
+#include "common/Timer.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
 #include <chrono>
@@ -54,8 +55,12 @@ public:
     LSPMessage(rapidjson::Document &d);
     LSPMessage(const std::string &json);
 
-    /** A tracer for following LSP message in time traces */
-    FlowId startTracer;
+    /** A tracer for following LSP message in time traces. May contain multiple tracers if other messages were merged
+     * into this one.*/
+    std::vector<FlowId> startTracers;
+    /** Used to calculate latency of message processing. May contain multiple timers if other messages were merged into
+     * this one. */
+    std::vector<std::unique_ptr<Timer>> timers;
 
     /** Request counter. */
     int counter;

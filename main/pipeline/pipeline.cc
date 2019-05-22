@@ -9,9 +9,12 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "cfg/proto/proto.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
+#include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
@@ -36,7 +39,7 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::Typed || m->symbol.data(ctx)->isOverloaded()) {
+        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto &print = opts.print;
@@ -48,6 +51,15 @@ public:
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
+        }
+        if (print.CFGJson || print.CFGProto) {
+            auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+            if (print.CFGJson) {
+                core::Proto::toJSON(proto, cout);
+            } else {
+                // The proto wire format allows simply concatenating repeated message fields
+                cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
+            }
         }
         return m;
     }
@@ -320,7 +332,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = fnd->second;
     } else {
         if (fileData.originalSigil == core::StrictLevel::None) {
-            level = core::StrictLevel::Stripe;
+            level = core::StrictLevel::False;
         } else {
             level = fileData.originalSigil;
         }
@@ -334,7 +346,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
     if (gs.runningUnderAutogen) {
         // Autogen stops before infer but needs to see all definitions
-        level = core::StrictLevel::Stripe;
+        level = core::StrictLevel::False;
     }
 
     switch (level) {
@@ -347,14 +359,14 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         case core::StrictLevel::Internal:
             Exception::raise("Should never happen");
             break;
-        case core::StrictLevel::Stripe:
-            prodCounterInc("types.input.files.sigil.none");
+        case core::StrictLevel::False:
+            prodCounterInc("types.input.files.sigil.false");
             break;
-        case core::StrictLevel::Typed:
-            prodCounterInc("types.input.files.sigil.typed");
+        case core::StrictLevel::True:
+            prodCounterInc("types.input.files.sigil.true");
             break;
         case core::StrictLevel::Strict:
-            prodCounterInc("types.input.files.sigil.strictLevel");
+            prodCounterInc("types.input.files.sigil.strict");
             break;
         case core::StrictLevel::Strong:
             prodCounterInc("types.input.files.sigil.strong");
@@ -502,7 +514,8 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            resultq->push(move(threadResult), threadResult.res.trees.size());
+            auto computedTreesCount = threadResult.res.trees.size();
+            resultq->push(move(threadResult), computedTreesCount);
         }
     });
 
@@ -876,7 +889,25 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
     }
 }
 
-unsigned int computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+class AllSendsCollector {
+public:
+    core::UsageHash acc;
+    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
+        acc.usages.emplace_back(ctx.state, original->fun.data(ctx));
+        return original;
+    }
+};
+
+core::UsageHash getAllSends(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
+    AllSendsCollector collector;
+    tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), collector, move(tree));
+    fast_sort(collector.acc.usages);
+    collector.acc.usages.resize(std::distance(collector.acc.usages.begin(),
+                                              std::unique(collector.acc.usages.begin(), collector.acc.usages.end())));
+    return move(collector.acc);
+};
+
+core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -895,12 +926,15 @@ unsigned int computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &log
     auto errs = lgs->errorQueue->drainAllErrors();
     for (auto &e : errs) {
         if (e->what == core::errors::Parser::ParserError) {
-            return core::GlobalState::HASH_STATE_INVALID;
+            core::GlobalStateHash invalid;
+            invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
+            return {move(invalid), {}};
         }
     }
+    auto allSends = getAllSends(*lgs, single[0].tree);
     pipeline::resolve(*lgs, move(single), emptyOpts, true);
 
-    return lgs->hash();
+    return {move(*lgs->hash()), move(allSends)};
 }
 
 } // namespace sorbet::realmain::pipeline

@@ -107,7 +107,7 @@ LSPMessage::RawLSPMessage fromJSON(const std::string &json) {
     return fromJSONValue(d);
 }
 
-LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)), startTracer{0} {}
+LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)) {}
 
 LSPMessage::LSPMessage(rapidjson::Document &d) : LSPMessage::LSPMessage(fromJSONValue(d)) {}
 
@@ -162,6 +162,7 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::WindowShowMessage:
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::SorbetShowOperation:
+        case LSPMethod::SorbetTypecheckRunInfo:
             return true;
     }
 }

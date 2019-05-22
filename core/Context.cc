@@ -1,10 +1,11 @@
 #include "core/Context.h"
+#include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/common.h"
+#include "core/GlobalSubstitution.h"
 #include "core/Hashing.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
-
-#include "common/common.h"
 #include <algorithm>
 #include <string>
 
@@ -54,9 +55,7 @@ void MutableContext::trace(string_view msg) const {
 }
 
 Context Context::withOwner(SymbolRef sym) const {
-    Context r = Context(*this);
-    r.owner = sym;
-    return r;
+    return Context(state, sym);
 }
 
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,

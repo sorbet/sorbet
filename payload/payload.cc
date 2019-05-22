@@ -49,8 +49,8 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
             }
         }
         realmain::options::Options emptyOpts;
-        WorkerPool workers(emptyOpts.threads, gs->tracer());
-        auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, workers, kvstore);
+        auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
+        auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
         realmain::pipeline::resolve(*gs, move(indexed), emptyOpts); // result is thrown away
     } else {
         Timer timeit(gs->tracer(), "read_global_state.binary");
@@ -60,15 +60,6 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
 
 void retainGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
                        unique_ptr<KeyValueStore> &kvstore) {
-    if (!options.storeState.empty()) {
-        auto files = gs->getFiles();
-        for (const auto &f : files) {
-            if (f && f->sourceType != core::File::Type::TombStone && !f->getDefinitionHash().has_value()) {
-                f->setDefinitionHash(realmain::pipeline::computeFileHash(f, gs->tracer()));
-            }
-        }
-    }
-
     if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
         Timer timeit(gs->tracer(), "write_global_state.kvstore");
         kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));

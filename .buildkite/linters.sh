@@ -10,6 +10,12 @@ fi
 echo "--- Pre-setup :bazel:"
 
 git checkout .bazelrc
+
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
 rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/linters /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {
@@ -67,8 +73,6 @@ if [ "$err" -ne 0 ]; then
     buildkite-agent annotate --context tools/scripts/lint_sh.sh --style error --append < lint_sh
     globalErr=$err
 fi
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
 
 if [ "$globalErr" -ne 0 ]; then
     exit $globalErr

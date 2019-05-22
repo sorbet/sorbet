@@ -125,6 +125,57 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     return res;
 }
 
+bool isIVarAssign(Expression *stat) {
+    auto assign = cast_tree<Assign>(stat);
+    if (!assign) {
+        return false;
+    }
+    auto ident = cast_tree<UnresolvedIdent>(assign->lhs.get());
+    if (!ident) {
+        return false;
+    }
+    if (ident->kind != UnresolvedIdent::Instance) {
+        return false;
+    }
+    return true;
+}
+
+unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expression> body) {
+    if (!body->loc.exists()) {
+        return body;
+    }
+    if (!body->loc.file().data(dctx.ctx).isRBI()) {
+        return body;
+    }
+    if (isa_tree<EmptyTree>(body.get())) {
+        return body;
+    } else if (isa_tree<Assign>(body.get())) {
+        if (!isIVarAssign(body.get())) {
+            if (auto e = dctx.ctx.state.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
+                e.setHeader("RBI methods must not have code");
+            }
+        }
+    } else if (auto inseq = cast_tree<InsSeq>(body.get())) {
+        for (auto &stat : inseq->stats) {
+            if (!isIVarAssign(stat.get())) {
+                if (auto e = dctx.ctx.state.beginError(stat->loc, core::errors::Desugar::CodeInRBI)) {
+                    e.setHeader("RBI methods must not have code");
+                }
+            }
+        }
+        if (!isIVarAssign(inseq->expr.get())) {
+            if (auto e = dctx.ctx.state.beginError(inseq->expr->loc, core::errors::Desugar::CodeInRBI)) {
+                e.setHeader("RBI methods must not have code");
+            }
+        }
+    } else {
+        if (auto e = dctx.ctx.state.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
+            e.setHeader("RBI methods must not have code");
+        }
+    }
+    return body;
+}
+
 unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc declLoc, core::NameRef name,
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
@@ -142,7 +193,8 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
-    auto desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
+    unique_ptr<Expression> desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
+    desugaredBody = validateRBIBody(dctx, move(desugaredBody));
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
     if (isSelf) {
@@ -220,7 +272,8 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
             } else {
                 unique_ptr<Expression> lh = node2TreeImpl(dctx, std::move(c));
                 if (auto restArg = ast::cast_tree<ast::RestArg>(lh.get())) {
-                    if (auto e = dctx.ctx.state.beginError(lh->loc, core::errors::Desugar::UnsupportedNode)) {
+                    if (auto e =
+                            dctx.ctx.state.beginError(lh->loc, core::errors::Desugar::UnsupportedRestArgsDestructure)) {
                         e.setHeader("Unsupported rest args in destructure");
                     }
                     lh = move(restArg->expr);
@@ -1557,7 +1610,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::Defined *defined) {
                 auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                     node2TreeImpl(dctx, std::move(defined->value)));
+                                     // Intentionally drop the defined->value since we shouldn't typecheck if it exists
+                                     // or not node2TreeImpl(dctx, std::move(defined->value)));
+                                     MK::Nil(loc));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {
@@ -1580,7 +1635,15 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Undef *undef) {
-                auto res = unsupportedNode(dctx, undef);
+                if (auto e = dctx.ctx.state.beginError(what->loc, core::errors::Desugar::UndefUsage)) {
+                    e.setHeader("Unsuppored method: undef");
+                }
+                Send::ARGS_store args;
+                for (auto &expr : undef->exprs) {
+                    args.emplace_back(node2TreeImpl(dctx, move(expr)));
+                }
+                auto res =
+                    MK::Send(loc, MK::Constant(loc, core::Symbols::Kernel()), core::Names::undef(), std::move(args));
                 result.swap(res);
             },
             [&](parser::Backref *backref) {

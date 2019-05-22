@@ -103,6 +103,7 @@ public:
     static TypePtr hashOfUntyped();
     static TypePtr procClass();
     static TypePtr classClass();
+    static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
 
     static TypePtr dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass);

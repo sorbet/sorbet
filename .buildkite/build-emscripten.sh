@@ -26,6 +26,12 @@ elif [[ "mac" == "$platform" ]]; then
 fi
 
 git checkout .bazelrc
+
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
 rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {
@@ -45,5 +51,3 @@ tools/scripts/update-sorbet.run.sh
 rm -rf _out_
 mkdir -p _out_/webasm
 cp bazel-bin/emscripten/sorbet-wasm.tar _out_/webasm/sorbet-wasm.tar
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;

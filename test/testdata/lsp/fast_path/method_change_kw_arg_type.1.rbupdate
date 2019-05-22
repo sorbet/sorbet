@@ -1,0 +1,9 @@
+# typed: true
+# assert-fast-path: method_change_kw_arg_type.rb
+
+class A extend T::Sig
+  sig {params(x: Float).returns(String)}
+  def bar(x:)
+    x.to_s
+  end
+end

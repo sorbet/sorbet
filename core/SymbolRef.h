@@ -357,6 +357,26 @@ public:
         return SymbolRef(nullptr, 71);
     }
 
+    static SymbolRef DeclBuilderForProcs() {
+        return SymbolRef(nullptr, 72);
+    }
+
+    static SymbolRef DeclBuilderForProcsSingleton() {
+        return SymbolRef(nullptr, 73);
+    }
+
+    static SymbolRef Net() {
+        return SymbolRef(nullptr, 74);
+    }
+
+    static SymbolRef Net_IMAP() {
+        return SymbolRef(nullptr, 75);
+    }
+
+    static SymbolRef Net_Protocol() {
+        return SymbolRef(nullptr, 76);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
@@ -379,7 +399,7 @@ public:
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_SYMBOLS = 200;
+    static constexpr int MAX_SYNTHETIC_SYMBOLS = 300;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

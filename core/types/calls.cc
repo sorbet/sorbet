@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -964,6 +965,14 @@ public:
     }
 } T_nilable;
 
+class T_proc : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // NOTE: real validation done during infer
+        return Types::declBuilderForProcsSingletonClass();
+    }
+} T_proc;
+
 class Object_class : public IntrinsicMethod {
 public:
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
@@ -1501,6 +1510,38 @@ public:
     }
 } Magic_callWithSplatAndBlock;
 
+class DeclBuilderForProcs_void : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // NOTE: real validation done in infer
+        return Types::declBuilderForProcsSingletonClass();
+    }
+} DeclBuilderForProcs_void;
+
+class DeclBuilderForProcs_returns : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // NOTE: real validation done in infer
+        return Types::declBuilderForProcsSingletonClass();
+    }
+} DeclBuilderForProcs_returns;
+
+class DeclBuilderForProcs_params : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // NOTE: real validation done in infer
+        return Types::declBuilderForProcsSingletonClass();
+    }
+} DeclBuilderForProcs_params;
+
+class DeclBuilderForProcs_bind : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        // NOTE: real validation done in infer
+        return Types::declBuilderForProcsSingletonClass();
+    }
+} DeclBuilderForProcs_bind;
+
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
@@ -1782,6 +1823,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), true, Names::nilable(), &T_nilable},
     {Symbols::T(), true, Names::revealType(), &T_revealType},
 
+    {Symbols::T(), true, Names::proc(), &T_proc},
+
     {Symbols::T_Generic(), false, Names::squareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::T_Array(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
@@ -1801,6 +1844,11 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::MagicSingleton(), false, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::MagicSingleton(), false, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::MagicSingleton(), false, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+
+    {Symbols::DeclBuilderForProcsSingleton(), false, Names::void_(), &DeclBuilderForProcs_void},
+    {Symbols::DeclBuilderForProcsSingleton(), false, Names::returns(), &DeclBuilderForProcs_returns},
+    {Symbols::DeclBuilderForProcsSingleton(), false, Names::params(), &DeclBuilderForProcs_params},
+    {Symbols::DeclBuilderForProcsSingleton(), false, Names::bind(), &DeclBuilderForProcs_bind},
 
     {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), false, Names::first(), &Tuple_first},

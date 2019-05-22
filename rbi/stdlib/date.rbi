@@ -1,5 +1,5 @@
 # typed: strict
-class Date::Infinity
+class Date::Infinity < Numeric
   sig {returns(Date::Infinity)}
   def +@(); end
 
@@ -385,7 +385,7 @@ class Date
   def self.jisx0301(*arg0); end
 end
 
-class DateTime
+class DateTime < Date
   sig {returns(T.untyped)}
   def min(); end
 

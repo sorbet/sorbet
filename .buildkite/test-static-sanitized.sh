@@ -27,6 +27,12 @@ fi
 echo will run with $CONFIG_OPTS
 
 git checkout .bazelrc
+
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
 rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/test-pr /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {
@@ -74,8 +80,6 @@ if grep -q "<details>" "$annotation_path"; then
   # shellcheck disable=SC2002
   cat "$annotation_path" | buildkite-agent annotate --context junit-${platform} --style error --append
 fi
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;
 
 if [ "$err" -ne 0 ]; then
     exit "$err"

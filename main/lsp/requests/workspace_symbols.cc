@@ -32,6 +32,7 @@ LSPResult LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, cons
 
     vector<unique_ptr<SymbolInformation>> result;
     string_view searchString = params.query;
+    ShowOperation op(*this, "WorkspaceSymbols", fmt::format("Searching for symbol `{}`...", searchString));
 
     for (u4 idx = 1; idx < gs->symbolsUsed(); idx++) {
         core::SymbolRef ref(gs.get(), idx);

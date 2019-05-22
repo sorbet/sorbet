@@ -26,6 +26,7 @@ const siteConfig = {
     {label: 'Docs', doc: 'overview'},
     {label: 'Try it online', href: 'https://sorbet.run'},
     {label: 'Talks', doc: 'talks/talks'},
+    {blog: true, label: 'Blog'},
   ],
 
   customDocsPath: 'website/docs',
@@ -42,6 +43,11 @@ const siteConfig = {
   colors: {
     primaryColor:   '#4f4397', // --sorbet-purple-2
     secondaryColor: '#4f4397', // --sorbet-purple-2
+  },
+
+  markdownOptions: {
+    typographer: true,
+    quotes: '“”‘’',
   },
 
   // Custom fonts for website

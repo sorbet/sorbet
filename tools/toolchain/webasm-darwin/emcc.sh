@@ -43,6 +43,7 @@ OUT_DIR=$(mktemp -dt "emscripten_out-XXXX")
 export OUT_DIR
 EMCC_TEMP_DIR=$(mktemp -dt "emscripten_tmp-XXXX")
 export EMCC_TEMP_DIR
+trap 'rm -rf "$EMCC_TEMP_DIR" "$OUT_DIR" "$EM_CACHE" "$BC_RENAME_PREFIX"' EXIT
 # shellcheck disable=SC2089
 # ^^^^ complains that we have literal ' in string, that we _intended_ to have there
 # I didn't find a way to structure it so that it stops complaining.
@@ -71,6 +72,9 @@ for i in "$@"; do
         args=("${args[@]}" "$link_name")
     elif [[ "$i" =~ ^-march=(.*)$ ]]; then
         # nothing
+        continue
+    elif [[ "$i" == "-framework" ]] || [[ "$i" == "Foundation" ]]; then
+        # workaround https://github.com/abseil/abseil-cpp/issues/308
         continue
     else
         args=("${args[@]}" "$i")

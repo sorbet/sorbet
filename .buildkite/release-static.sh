@@ -28,6 +28,12 @@ fi
 echo will run with $CONFIG_OPTS
 
 git checkout .bazelrc
+
+function finish {
+  ./bazel shutdown
+}
+trap finish EXIT
+
 rm -f bazel-*
 mkdir -p /usr/local/var/bazelcache/output-bases/release /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {
@@ -84,5 +90,3 @@ fi
 
 mkdir -p _out_/$platform
 cp bazel-bin/main/sorbet _out_/$platform/
-
-find /usr/local/var/bazelcache/build/ -type f -size +70M -exec rm {} \;

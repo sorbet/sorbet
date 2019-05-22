@@ -1208,6 +1208,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeObject("SorbetInitializationOptions",
                    {
                        makeField("supportsOperationNotifications", makeOptional(JSONBool)),
+                       makeField("enableTypecheckInfo", makeOptional(JSONBool)),
                    },
                    classTypes);
     auto InitializeParams =
@@ -1286,6 +1287,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 },
                                                 classTypes);
 
+    auto SorbetTypecheckRunInfo = makeObject("SorbetTypecheckRunInfo",
+                                             {
+                                                 makeField("tookFastPath", JSONBool),
+                                                 makeField("filesTypechecked", makeArray(JSONString)),
+                                             },
+                                             classTypes);
+
     /* Core LSPMessage objects */
     // N.B.: Only contains LSP methods that Sorbet actually cares about.
     // All others are ignored.
@@ -1314,6 +1322,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "sorbet/showOperation",
                                      "sorbet/error",
                                      "sorbet/workspaceEdit",
+                                     "sorbet/typecheckRunInfo",
                                  },
                                  enumTypes);
 
@@ -1384,6 +1393,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
+                                                {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
                                             });
     auto NotificationMessage = makeObject("NotificationMessage",
                                           {makeField("jsonrpc", JSONRPCConstant), makeField("method", LSPMethod),

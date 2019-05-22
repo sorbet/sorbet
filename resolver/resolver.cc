@@ -302,6 +302,24 @@ private:
     }
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
+        core::SymbolRef enclosingTypeMember;
+        core::SymbolRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
+        while (enclosingClass != core::Symbols::root()) {
+            auto typeMembers = enclosingClass.data(ctx)->typeMembers();
+            if (!typeMembers.empty()) {
+                enclosingTypeMember = typeMembers[0];
+                break;
+            }
+            enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
+        }
+        if (enclosingTypeMember.exists()) {
+            if (auto e = ctx.state.beginError(job.rhs->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
+                e.setHeader("Type aliases are not allowed in generic classes");
+                e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
+            }
+            job.lhs.data(ctx)->resultType = core::Types::untyped(ctx, job.lhs);
+            return true;
+        }
         if (isFullyResolved(ctx, job.rhs)) {
             job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
             return true;
@@ -351,7 +369,7 @@ private:
                 return false;
             }
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixin to unresolved type alias");
+                e.setHeader("Superclasses and mixins may not be type aliases");
             }
             resolved = core::Symbols::StubAncestor();
         } else {
@@ -396,7 +414,7 @@ private:
         return true;
     }
 
-    void transformAncestor(core::MutableContext ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
+    void transformAncestor(core::Context ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
                            bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor.get())) {
             unique_ptr<ast::UnresolvedConstantLit> inner(constScope);
@@ -439,22 +457,18 @@ private:
             ENFORCE(false, "Namer should have not allowed this");
         }
 
-        if (resolveAncestorJob(ctx, job, false)) {
-            categoryCounterInc("resolve.constants.ancestor", "firstpass");
-        } else {
-            todoAncestors_.emplace_back(std::move(job));
-        }
+        todoAncestors_.emplace_back(std::move(job));
     }
 
 public:
-    ResolveConstantsWalk(core::MutableContext ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
+    ResolveConstantsWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         nesting_ = make_unique<Nesting>(std::move(nesting_), original->symbol);
         return original;
     }
 
-    unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
+    unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::Context ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> c) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(c->scope.get())) {
             unique_ptr<ast::UnresolvedConstantLit> inner(constScope);
@@ -472,7 +486,7 @@ public:
         return out;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
+    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         core::SymbolRef klass = original->symbol;
 
         for (auto &ancst : original->ancestors) {
@@ -481,8 +495,9 @@ public:
             transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isSuperclass);
         }
 
-        auto singleton = klass.data(ctx)->singletonClass(ctx);
+        auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
         for (auto &ancst : original->singletonAncestors) {
+            ENFORCE(singleton.exists());
             transformAncestor(ctx.withOwner(klass), singleton, ancst);
         }
 
@@ -490,7 +505,7 @@ public:
         return original;
     }
 
-    unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
+    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (id == nullptr || !id->symbol.dataAllowingNone(ctx)->isStaticField()) {
             return asgn;
@@ -498,40 +513,13 @@ public:
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send != nullptr && send->fun == core::Names::typeAlias() && send->args.size() == 1) {
-            core::SymbolRef enclosingTypeMember;
-            core::SymbolRef enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
-            while (enclosingClass != core::Symbols::root()) {
-                auto typeMembers = enclosingClass.data(ctx)->typeMembers();
-                if (!typeMembers.empty()) {
-                    enclosingTypeMember = typeMembers[0];
-                    break;
-                }
-                enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
-            }
-            if (enclosingTypeMember.exists()) {
-                if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
-                    e.setHeader("Type aliases are not allowed in generic classes");
-                    e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
-                    auto sym = id->symbol;
-                    sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
-                }
-            } else {
-                auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
-                if (resolveTypeAliasJob(ctx, typeAliasItem)) {
-                    categoryCounterInc("resolve.constants.typealiases", "firstpass");
-                } else {
-                    this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
-                }
+            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
+            this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 
-                // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
-                // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-                auto item = ResolutionItem{nesting_, id};
-                if (resolveJob(ctx, item)) {
-                    categoryCounterInc("resolve.constants.typealiases", "firstpass");
-                } else {
-                    this->todo_.emplace_back(std::move(item));
-                }
-            }
+            // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
+            // we'll still emit a warning when the rhs of a type alias doesn't resolve.
+            auto item = ResolutionItem{nesting_, id};
+            this->todo_.emplace_back(std::move(item));
             return asgn;
         }
 
@@ -542,13 +530,9 @@ public:
 
         auto item = ClassAliasResolutionItem{id->symbol, rhs};
 
-        if (resolveClassAliasJob(ctx, item)) {
-            categoryCounterInc("resolve.constants.aliases", "firstpass");
-        } else {
-            // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
-            // We may be able to get some perf by using this
-            this->todoClassAliases_.emplace_back(std::move(item));
-        }
+        // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
+        // We may be able to get some perf by using this
+        this->todoClassAliases_.emplace_back(std::move(item));
         return asgn;
     }
 
@@ -586,13 +570,14 @@ public:
 
     static vector<ast::ParsedFile> resolveConstants(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
-        ResolveConstantsWalk constants(ctx);
+        core::Context ictx = ctx;
+        ResolveConstantsWalk constants(ictx);
 
         {
             Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.walk");
 
             for (auto &tree : trees) {
-                tree.tree = ast::TreeMap::apply(ctx, constants, std::move(tree.tree));
+                tree.tree = ast::TreeMap::apply(ictx, constants, std::move(tree.tree));
             }
         }
 
@@ -603,8 +588,10 @@ public:
         auto todoClassAliases = std::move(constants.todoClassAliases_);
         auto todoTypeAliases = std::move(constants.todoTypeAliases_);
         bool progress = true;
+        bool first = true; // we need to run at least once to force class aliases and type aliases
 
-        while (!(todo.empty() && todoAncestors.empty()) && progress) {
+        while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
+            first = false;
             counterInc("resolve.constants.retries");
             {
                 Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.ancestors");
@@ -789,6 +776,7 @@ private:
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
             auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
+
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx)->resultType = spec->type;
@@ -903,14 +891,18 @@ private:
 
     void processInSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> &seq) {
         InlinedVector<ast::Send *, 1> lastSigs;
+
+        // Explicitly check in the contxt of the class, not <static-init>
+        auto classCtx = ctx.withOwner(ctx.owner.data(ctx)->enclosingClass(ctx));
+
         for (auto &stat : seq->stats) {
-            processStatement(ctx, stat, lastSigs);
+            processStatement(classCtx, stat, lastSigs);
         }
         if (!ast::isa_tree<ast::EmptyTree>(seq->expr.get())) {
-            processStatement(ctx, seq->expr, lastSigs);
+            processStatement(classCtx, seq->expr, lastSigs);
         }
 
-        processLeftoverSigs(ctx, lastSigs);
+        processLeftoverSigs(classCtx, lastSigs);
 
         auto toRemove = remove_if(seq->stats.begin(), seq->stats.end(),
                                   [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
@@ -984,9 +976,19 @@ private:
                     }
                     int i = 0;
 
+                    // process signatures in the context of either the current
+                    // class, or the current singleton class, depending on if
+                    // the current method is a self method.
+                    core::SymbolRef sigOwner;
+                    if (mdef->isSelf()) {
+                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
+                    } else {
+                        sigOwner = ctx.owner;
+                    }
+
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(ctx, ast::cast_tree<ast::Send>(lastSigs[i]), nullptr, true,
-                                                        mdef->symbol);
+                        auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
+                                                        nullptr, true, mdef->symbol);
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<core::SymbolRef> argsToKeep;
@@ -1240,17 +1242,22 @@ public:
                         return send;
                     }
 
+                    // Compute the containing class when translating the type,
+                    // as there's a very good chance this has been called from a
+                    // method context.
+                    core::SymbolRef ownerClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
-                    auto type =
-                        TypeSyntax::getResultType(ctx, *(send->args[1]), emptySig, false, core::Symbols::noSymbol());
+                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig, false,
+                                                          core::Symbols::noSymbol());
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
                 case core::Names::revealType()._id:
                     // This error does not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
-                    if (send->loc.file().data(ctx).strictLevel <= core::StrictLevel::Stripe) {
+                    if (send->loc.file().data(ctx).strictLevel <= core::StrictLevel::False) {
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
                             e.setHeader("`{}` can only reveal types in `{}` files (or higher)", "T.reveal_type",
                                         "# typed: true");

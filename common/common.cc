@@ -1,5 +1,6 @@
 #include "common/common.h"
 #include "common/Exception.h"
+#include "common/FileOps.h"
 #include "os/os.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <array>

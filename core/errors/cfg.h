@@ -3,7 +3,7 @@
 #include "core/Error.h"
 
 namespace sorbet::core::errors::CFG {
-constexpr ErrorClass NoNextScope{6001, StrictLevel::Stripe};
+constexpr ErrorClass NoNextScope{6001, StrictLevel::False};
 constexpr ErrorClass UndeclaredVariable{6002, StrictLevel::Strict};
 } // namespace sorbet::core::errors::CFG
 #endif

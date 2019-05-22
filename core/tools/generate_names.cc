@@ -50,6 +50,7 @@ NameDef names[] = {
     {"backtick", "`"},
     {"slice"},
     {"defined_p", "defined?"},
+    {"undef"},
     {"each"},
 
     // used in CFG for temporaries
@@ -325,6 +326,9 @@ NameDef names[] = {
     {"Rational", "Rational", true},
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
+    // A magic non user-creatable class for mimicing the decl builder during cfg
+    // construction
+    {"DeclBuilderForProcs", "<DeclBuilderForProcs>", true},
     {"Enumerable", "Enumerable", true},
     {"Set", "Set", true},
     {"Struct", "Struct", true},
@@ -358,6 +362,9 @@ NameDef names[] = {
     {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
     {"Helpers", "Helpers", true},
+    {"Net", "Net", true},
+    {"IMAP", "IMAP", true},
+    {"Protocol", "Protocol", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

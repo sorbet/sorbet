@@ -82,7 +82,8 @@ public:
 class ErrorAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<ErrorAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                                int assertionLine, std::string_view assertionContents);
+                                                int assertionLine, std::string_view assertionContents,
+                                                std::string_view assertionType);
 
     /**
      * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
@@ -106,7 +107,8 @@ public:
 class DefAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<DefAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                              int assertionLine, std::string_view assertionContents);
+                                              int assertionLine, std::string_view assertionContents,
+                                              std::string_view assertionType);
 
     const std::string symbol;
     const int version;
@@ -124,7 +126,8 @@ public:
 class UsageAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<UsageAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                                int assertionLine, std::string_view assertionContents);
+                                                int assertionLine, std::string_view assertionContents,
+                                                std::string_view assertionType);
 
     static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                       LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string_view symbol,
@@ -141,16 +144,40 @@ public:
 };
 
 // # disable-fast-path: true
-class DisableFastPath final : public RangeAssertion {
+// # assert-slow-path: true
+class BooleanPropertyAssertion final : public RangeAssertion {
 public:
-    static std::shared_ptr<DisableFastPath> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                                 int assertionLine, std::string_view assertionContents);
+    static std::shared_ptr<BooleanPropertyAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                          int assertionLine, std::string_view assertionContents,
+                                                          std::string_view assertionType);
 
-    static bool getValue(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+    static std::optional<bool> getValue(std::string_view type,
+                                        const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
+    const std::string assertionType;
     const bool value;
 
-    DisableFastPath(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, bool value);
+    BooleanPropertyAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, bool value,
+                             std::string_view assertionType);
+
+    std::string toString() const override;
+};
+
+// # assert-fast-path: file1.rb,file2.rb,...
+class FastPathAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<FastPathAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                   int assertionLine, std::string_view assertionContents,
+                                                   std::string_view assertionType);
+    static std::optional<std::shared_ptr<FastPathAssertion>>
+    get(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
+    FastPathAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                      std::optional<std::vector<std::string>> expectedFiles);
+
+    const std::optional<std::vector<std::string>> expectedFiles;
+
+    void check(SorbetTypecheckRunInfo &info, std::string_view folder, int updateVersion, std::string_view errorPrefix);
 
     std::string toString() const override;
 };

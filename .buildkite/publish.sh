@@ -44,11 +44,14 @@ else
   echo "Nothing to update"
 fi
 popd
+rm -rf sorbet.run
 
-echo "--- releasing stripe.dev/sorbet"
+echo "--- releasing sorbet.org"
 git fetch origin gh-pages
 current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
+# Remove all tracked files, but leave untracked files (like _out_) untouched
+git rm -rf '*'
 tar -xjf _out_/website/website.tar.bz2 .
 git add .
 git reset HEAD _out_
@@ -67,7 +70,7 @@ else
 fi
 git checkout -f "$current_rev"
 
-echo "--- releasing stripe.dev/sorbet-repo"
+echo "--- releasing stripe.dev/sorbet-repo (gem repo)"
 rm -rf sorbet-repo
 git clone git@github.com:stripe/sorbet-repo.git
 pushd sorbet-repo
@@ -85,6 +88,7 @@ if [ -z "$dryrun" ]; then
     git push origin gh-pages
 fi
 popd
+rm -rf sorbet-repo
 
 echo "--- making a github release"
 git_commit_count=$(git rev-list --count HEAD)

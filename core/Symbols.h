@@ -13,6 +13,7 @@
 namespace sorbet::core {
 class Symbol;
 class GlobalState;
+struct GlobalStateHash;
 class Type;
 class MutableContext;
 class Context;
@@ -108,7 +109,8 @@ public:
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
-    unsigned int hash(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
+    u4 methodShapeHash(const GlobalState &gs) const;
 
     inline InlinedVector<SymbolRef, 4> &arguments() {
         ENFORCE(!isClass());

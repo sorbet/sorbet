@@ -2,6 +2,9 @@
 #include <cxxopts.hpp>
 // has to go first as it violates are requirements
 
+// has to go first, as it violates poisons
+#include "core/proto/proto.h"
+
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
@@ -9,6 +12,8 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "cfg/proto/proto.h"
+#include "common/FileOps.h"
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
@@ -85,14 +90,14 @@ public:
 
 class CFGCollectorAndTyper {
 public:
-    vector<string> cfgs;
+    vector<unique_ptr<cfg::CFG>> cfgs;
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
-        cfgs.emplace_back(cfg->toString(ctx));
+        cfgs.push_back(move(cfg));
         return m;
     }
 };
@@ -100,7 +105,7 @@ public:
 UnorderedSet<string> knownPasses = {"parse-tree", "parse-tree-json", "ast",          "ast-raw",
                                     "dsl-tree",   "dsl-tree-raw",    "symbol-table", "symbol-table-raw",
                                     "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw",
-                                    "cfg",        "autogen"};
+                                    "cfg",        "cfg-json",        "autogen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -328,36 +333,47 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).strictLevel < core::StrictLevel::Typed) {
+            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
             }
         };
-        // CFG
 
-        expectation = test.expectations.find("cfg");
-        if (expectation != test.expectations.end()) {
+        // CFG
+        auto expCfg = test.expectations.find("cfg");
+        auto expCfgJson = test.expectations.find("cfg-json");
+        if (expCfg != test.expectations.end() || expCfgJson != test.expectations.end()) {
             checkTree();
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
             auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             resolvedTree.tree.reset();
 
-            stringstream dot;
-            dot << "digraph \"" << rbName << "\" {" << '\n';
-            for (auto &cfg : collector.cfgs) {
-                dot << cfg << '\n' << '\n';
+            if (expCfg != test.expectations.end()) {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->toString(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n' << '\n';
+                got["cfg"].append(dot.str());
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
-            dot << "}" << '\n' << '\n';
-            got["cfg"].append(dot.str());
 
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            if (expCfgJson != test.expectations.end()) {
+                for (auto &cfg : collector.cfgs) {
+                    auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+                    got["cfg-json"].append(core::Proto::toJSON(proto));
+                }
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            }
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::Typed) {
+        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
             checkTree();
             CFGCollectorAndTyper collector;
             ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
@@ -411,6 +427,43 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     TEST_COUT << "errors OK" << '\n';
 }
 
+bool isTestMessage(const LSPMessage &msg) {
+    return msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo;
+}
+
+// "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens
+// on the client side." Only keep the newest diagnostics for a file.
+void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFileUris,
+                       vector<unique_ptr<LSPMessage>> &responses,
+                       map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
+    for (auto &response : responses) {
+        if (isTestMessage(*response)) {
+            continue;
+        }
+        if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
+            auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
+            ASSERT_TRUE(maybeDiagnosticParams.has_value());
+            auto &diagnosticParams = *maybeDiagnosticParams;
+            auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+            EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+                << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+
+            // Will explicitly overwrite older diagnostics that are irrelevant.
+            diagnostics[filename] = move(diagnosticParams->diagnostics);
+        }
+    }
+}
+
+int countNonTestMessages(const vector<unique_ptr<LSPMessage>> &msgs) {
+    int count = 0;
+    for (auto &m : msgs) {
+        if (!isTestMessage(*m)) {
+            count++;
+        }
+    }
+    return count;
+}
+
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -423,8 +476,9 @@ TEST_P(LSPTest, All) {
 
     // Perform initialize / initialized handshake.
     {
-        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
-        EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
+        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true);
+        EXPECT_EQ(0, countNonTestMessages(initializedResponses))
+            << "Should not receive any response to 'initialized' message.";
     }
 
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
@@ -434,68 +488,34 @@ TEST_P(LSPTest, All) {
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
             auto responses = lspWrapper->getLSPResponsesFor(
                 LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
-            EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
+            EXPECT_EQ(0, countNonTestMessages(responses))
+                << "Should not receive any response to opening an empty file.";
         }
     }
 
+    // filename => diagnostics for file (persist for fast path tests)
+    map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+
     // Tell LSP that the new files now have the contents from the test files on disk.
     {
-        vector<unique_ptr<LSPMessage>> allResponses;
         bool slowPathPassed = true;
-        bool skipFastPath = DisableFastPath::getValue(assertions);
+        bool skipFastPath = BooleanPropertyAssertion::getValue("disable-fast-path", assertions).value_or(false);
+        vector<string> errorPrefixes = {"", "[After running fast path] "};
         // Run changes through LSP twice: The first time is a slow path, the second time is a fast path.
         // Surfaces errors that occur due to differences in how slow and fast paths run.
         // Skip the second iteration if slow path fails to avoid printing out duplicate errors.
-        for (int i = 0; i < 2 && slowPathPassed; i++) {
-            std::string errorPrefix = "";
-            if (i == 1) {
-                if (skipFastPath) {
-                    break;
-                }
-                errorPrefix = "[After running fast path] ";
-            }
-
+        for (int i = 0; i < (skipFastPath ? 1 : 2) && slowPathPassed; i++) {
             vector<unique_ptr<LSPMessage>> updates;
             for (auto &filename : filenames) {
-                auto textDoc = make_unique<VersionedTextDocumentIdentifier>(testFileUris[filename], 2);
                 auto textDocContents = test.sourceFileContents[filename]->source();
-                auto text = string(textDocContents.begin(), textDocContents.end());
-
-                auto textDocChange = make_unique<TextDocumentContentChangeEvent>(text);
-                vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
-                textChanges.push_back(move(textDocChange));
-
-                auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
-                auto didChangeNotif =
-                    make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
-                updates.push_back(make_unique<LSPMessage>(move(didChangeNotif)));
+                updates.push_back(makeDidChange(testFileUris[filename],
+                                                string(textDocContents.begin(), textDocContents.end()), 2 + i));
             }
             auto responses = lspWrapper->getLSPResponsesFor(updates);
-            allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
-                                make_move_iterator(responses.end()));
-
-            // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens
-            // on the client side." Prune irrelevant diagnostics, and only keep the newest diagnostics for a file.
-            // filename => diagnostics for file
-            map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
-            {
-                for (auto &response : allResponses) {
-                    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
-                        auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
-                        ASSERT_TRUE(maybeDiagnosticParams.has_value());
-                        auto &diagnosticParams = *maybeDiagnosticParams;
-                        auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
-                        EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
-                            << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
-
-                        // Will explicitly overwrite older diagnostics that are irrelevant.
-                        diagnostics[filename] = move(diagnosticParams->diagnostics);
-                    }
-                }
-            }
+            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
-                test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
-            if (!slowPathPassed && i == 1) {
+                test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
+            if (i == 2) {
                 ADD_FAILURE() << "Note: To disable fast path tests, add `# disable-fast-path: true` to the file.";
             }
         }
@@ -567,7 +587,78 @@ TEST_P(LSPTest, All) {
             }
         }
     }
-}
+
+    // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
+    {
+        // sourceFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
+        // Sort by version.
+        vector<int> sortedUpdates;
+        const int baseVersion = 4;
+        for (auto &update : test.sourceFileUpdates) {
+            sortedUpdates.push_back(update.first);
+        }
+        fast_sort(sortedUpdates);
+
+        // Apply updates in order.
+        for (auto version : sortedUpdates) {
+            auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
+            auto &updates = test.sourceFileUpdates[version];
+            vector<unique_ptr<LSPMessage>> lspUpdates;
+            UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
+
+            for (auto &update : updates) {
+                auto originalFile = test.folder + update.first;
+                auto updateFile = test.folder + update.second;
+                auto fileContents = FileOps::read(updateFile);
+                lspUpdates.push_back(makeDidChange(testFileUris[originalFile], fileContents, baseVersion + version));
+                updatesAndContents[originalFile] =
+                    make_shared<core::File>(string(originalFile), move(fileContents), core::File::Type::Normal);
+            }
+            auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
+            auto assertFastPath = FastPathAssertion::get(assertions);
+            auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
+            auto responses = lspWrapper->getLSPResponsesFor(lspUpdates);
+            bool foundTypecheckRunInfo = false;
+
+            for (auto &r : responses) {
+                if (r->isNotification()) {
+                    if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
+                        foundTypecheckRunInfo = true;
+                        auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
+                        if (assertSlowPath.value_or(false)) {
+                            EXPECT_EQ(params->tookFastPath, false)
+                                << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
+                        }
+                        if (assertFastPath.has_value()) {
+                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                        }
+                    } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
+                        ADD_FAILURE() << errorPrefix
+                                      << fmt::format("Unexpected message response to file update of type {}:\n{}",
+                                                     convertLSPMethodToString(r->method()), r->toJSON());
+                    }
+                } else {
+                    ADD_FAILURE() << errorPrefix
+                                  << fmt::format("Unexpected message response to file update:\n{}", r->toJSON());
+                }
+            }
+
+            if (!foundTypecheckRunInfo) {
+                ADD_FAILURE() << errorPrefix << "Sorbet did not send expected typechecking metadata.";
+            }
+
+            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+
+            const bool passed = ErrorAssertion::checkAll(
+                updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+
+            if (!passed) {
+                // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
+                break;
+            }
+        }
+    }
+} // namespace sorbet::test
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 INSTANTIATE_TEST_CASE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
@@ -623,7 +714,7 @@ string rbFile2BaseTestName(string rbFileName) {
 vector<Expectations> listDir(const char *name) {
     vector<Expectations> result;
 
-    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".exp"}, false, {}, {});
+    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbupdate", ".exp"}, false, {}, {});
     const int prefixLen = strnlen(name, 1024) + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
@@ -656,6 +747,17 @@ vector<Expectations> listDir(const char *name) {
                 string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
                 current.expectations[kind] = s;
             }
+        } else if (absl::EndsWith(s, ".rbupdate")) {
+            if (absl::StartsWith(s, current.basename)) {
+                // Should be `.[number].rbupdate`
+                auto pos = s.rfind('.', s.length() - 10);
+                if (pos != string::npos) {
+                    int version = stoi(s.substr(pos + 1, s.length() - 9));
+                    current.sourceFileUpdates[version].push_back(make_pair(absl::StrCat(s.substr(0, pos), ".rb"), s));
+                } else {
+                    cout << "Ignoring " << s << ": No version number provided (expected .[number].rbupdate).\n";
+                }
+            }
         }
     }
     if (!current.basename.empty()) {
@@ -683,7 +785,6 @@ vector<Expectations> getInputs(string singleTest) {
     }
     auto scan = listDir(parentDir.c_str());
     auto lookingFor = rbFile2BaseTestName(singleTest);
-    cout << lookingFor;
     for (Expectations &f : scan) {
         if (f.testName == lookingFor) {
             for (auto &file : f.sourceFiles) {

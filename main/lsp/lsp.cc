@@ -1,6 +1,7 @@
 #include "main/lsp/lsp.h"
 #include "common/Timer.h"
 #include "common/statsd/statsd.h"
+#include "common/typecase.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
@@ -54,10 +55,10 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                          move(gs));
     }
 
-    if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::Typed) {
+    if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return TypecheckRun{{}, {}, {}, move(gs)};
+        return TypecheckRun{{}, {}, {}, move(gs), true};
     }
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
@@ -93,6 +94,16 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
     vector<unique_ptr<LSPMessage>> responses;
+
+    if (enableTypecheckInfo) {
+        vector<string> pathsTypechecked;
+        for (auto &f : filesTypechecked) {
+            pathsTypechecked.push_back(string(f.data(gs).path()));
+        }
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(pathsTypechecked));
+        responses.push_back(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
+    }
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {

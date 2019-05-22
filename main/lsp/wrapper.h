@@ -5,7 +5,6 @@
 // has to come before the next spdlog include. This comment stops formatter from reordering them
 #include "lsp.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/json_types.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <sstream>
 #include <string_view>

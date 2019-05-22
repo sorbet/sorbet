@@ -16,12 +16,15 @@ const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+):[ ]+(.*)$");
 const regex whitespaceRegex("^[ ]*$");
 
 // Maps assertion comment names to their constructors.
-const UnorderedMap<string, function<shared_ptr<RangeAssertion>(string_view, unique_ptr<Range> &, int, string_view)>>
+const UnorderedMap<
+    string, function<shared_ptr<RangeAssertion>(string_view, unique_ptr<Range> &, int, string_view, string_view)>>
     assertionConstructors = {
         {"error", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
         {"def", DefAssertion::make},
-        {"disable-fast-path", DisableFastPath::make},
+        {"disable-fast-path", BooleanPropertyAssertion::make},
+        {"assert-fast-path", FastPathAssertion::make},
+        {"assert-slow-path", BooleanPropertyAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -152,7 +155,7 @@ ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, i
     : RangeAssertion(filename, range, assertionLine), message(message) {}
 
 shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                string_view assertionContents) {
+                                                string_view assertionContents, string_view assertionType) {
     return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents);
 }
 
@@ -256,7 +259,8 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
 
             const auto &findConstructor = assertionConstructors.find(assertionType);
             if (findConstructor != assertionConstructors.end()) {
-                assertions.push_back(findConstructor->second(filename, range, lineNum, assertionContents));
+                assertions.push_back(
+                    findConstructor->second(filename, range, lineNum, assertionContents, assertionType));
             } else if (ignoredAssertionLabels.find(assertionType) == ignoredAssertionLabels.end()) {
                 ADD_FAILURE_AT(filename.c_str(), lineNum + 1)
                     << fmt::format("Found unrecognized assertion of type `{}`. Expected one of {{{}}}.\nIf this is a "
@@ -318,7 +322,7 @@ DefAssertion::DefAssertion(string_view filename, unique_ptr<Range> &range, int a
     : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version) {}
 
 shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                            string_view assertionContents) {
+                                            string_view assertionContents, string_view assertionType) {
     auto symbolAndVersion = getSymbolAndVersion(assertionContents);
     return make_shared<DefAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
@@ -507,7 +511,7 @@ UsageAssertion::UsageAssertion(string_view filename, unique_ptr<Range> &range, i
     : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version) {}
 
 shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                string_view assertionContents) {
+                                                string_view assertionContents, string_view assertionType) {
     auto symbolAndVersion = getSymbolAndVersion(assertionContents);
     return make_shared<UsageAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
@@ -657,25 +661,81 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
     return success;
 }
 
-shared_ptr<DisableFastPath> DisableFastPath::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                  string_view assertionContents) {
-    return make_shared<DisableFastPath>(filename, range, assertionLine, assertionContents == "true");
+shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    return make_shared<BooleanPropertyAssertion>(filename, range, assertionLine, assertionContents == "true",
+                                                 assertionType);
 }
 
-bool DisableFastPath::getValue(const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+optional<bool> BooleanPropertyAssertion::getValue(string_view type,
+                                                  const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+    EXPECT_NE(assertionConstructors.find(string(type)), assertionConstructors.end())
+        << "Unrecognized boolean property assertion: " << type;
     for (auto &assertion : assertions) {
-        if (auto disableFastPath = dynamic_pointer_cast<DisableFastPath>(assertion)) {
-            return disableFastPath->value;
+        if (auto boolAssertion = dynamic_pointer_cast<BooleanPropertyAssertion>(assertion)) {
+            return boolAssertion->value;
         }
     }
-    return false;
+    return nullopt;
 }
 
-DisableFastPath::DisableFastPath(string_view filename, unique_ptr<Range> &range, int assertionLine, bool value)
-    : RangeAssertion(filename, range, assertionLine), value(value){};
+BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   bool value, string_view assertionType)
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
 
-string DisableFastPath::toString() const {
-    return fmt::format("disable-fast-path: {}", value);
+string BooleanPropertyAssertion::toString() const {
+    return fmt::format("{}: {}", assertionType, value);
+}
+
+shared_ptr<FastPathAssertion> FastPathAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                      string_view assertionContents, string_view assertionType) {
+    optional<vector<string>> expectedFiles;
+    if (assertionContents.size() > 0) {
+        expectedFiles = absl::StrSplit(assertionContents, ',');
+        fast_sort(*expectedFiles);
+    }
+    return make_shared<FastPathAssertion>(filename, range, assertionLine, std::move(expectedFiles));
+}
+
+optional<shared_ptr<FastPathAssertion>> FastPathAssertion::get(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    for (auto &assertion : assertions) {
+        if (auto fastPathAssertion = dynamic_pointer_cast<FastPathAssertion>(assertion)) {
+            return fastPathAssertion;
+        }
+    }
+    return nullopt;
+}
+
+FastPathAssertion::FastPathAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                     optional<vector<string>> expectedFiles)
+    : RangeAssertion(filename, range, assertionLine), expectedFiles(move(expectedFiles)) {}
+
+void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, int updateVersion,
+                              string_view errorPrefix) {
+    string updateFile = fmt::format("{}.{}.rbupdate", filename.substr(0, -3), updateVersion);
+    if (!info.tookFastPath) {
+        ADD_FAILURE_AT(updateFile.c_str(), assertionLine)
+            << errorPrefix << "Expected file update to take fast path, but it took the slow path.";
+    }
+    if (expectedFiles.has_value()) {
+        vector<string> expectedFilePaths;
+        for (auto &f : *expectedFiles) {
+            expectedFilePaths.push_back(absl::StrCat(folder, f));
+        }
+        fast_sort(info.filesTypechecked);
+        vector<string> unTypecheckedFiles;
+        set_difference(expectedFilePaths.begin(), expectedFilePaths.end(), info.filesTypechecked.begin(),
+                       info.filesTypechecked.end(), back_inserter(unTypecheckedFiles));
+        for (auto &f : unTypecheckedFiles) {
+            ADD_FAILURE_AT(updateFile.c_str(), assertionLine)
+                << errorPrefix << fmt::format("Expected file update to cause {} to also be typechecked.", f);
+        }
+    }
+}
+
+std::string FastPathAssertion::toString() const {
+    return fmt::format("FastPathAssertion: {}", expectedFiles ? fmt::format("{}", fmt::join(*expectedFiles, ",")) : "");
 }
 
 } // namespace sorbet::test

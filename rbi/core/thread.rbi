@@ -20,19 +20,43 @@ class Thread < Object
   def kill; end
 end
 
+class Thread::Backtrace < Object
+end
+
 class Thread::Backtrace::Location
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def absolute_path(); end
 
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def base_label(); end
 
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def label(); end
 
   sig {returns(Integer)}
   def lineno(); end
 
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def path(); end
+end
+
+class Thread::ConditionVariable < Object
+end
+
+class Thread::Mutex < Object
+end
+
+class Thread::Queue < Object
+end
+
+class Thread::SizedQueue < Thread::Queue
+end
+
+class ClosedQueueError < StopIteration
+end
+
+class ThreadError < StandardError
+end
+
+class ThreadGroup < Object
 end

@@ -55,14 +55,14 @@ def externals():
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="3cf4f7c5a030e9a65b842d2e160ffee90df7613d",
+        commit="01950eb7acec78818d68b762efc869bba2420d82",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
     new_git_repository(
         name="lizard",
         remote="https://github.com/inikep/lizard.git",
-        commit="02491c71c2e6fd5c10997404df2f18d0fc7afadb",
+        commit="dda3b335e92ecd5caceccc9c577b39dd4e3c9950",
         build_file = "//third_party:lizard.BUILD",
     )
 
@@ -76,7 +76,7 @@ def externals():
     new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
-        commit="0ff7ff3ec7b322881fff3bd6d4861fda6e9331d9", # 5.1.0 with some tunning patches
+        commit="b0b3e49a54ec29e32636f4577d9d5a896d67fd20", # 5.2.0
         build_file = "//third_party:jemalloc.BUILD",
     )
 
@@ -103,7 +103,7 @@ def externals():
     new_git_repository(
         name="cxxopts",
         remote="https://github.com/jarro2783/cxxopts.git",
-        commit="3876c0907237e5fa89c5850ed1ee688a3bcb62b3",
+        commit="e34676f73e49eeff30cb101f1c5ba8806fbe6773",
         build_file = "//third_party:cxxopts.BUILD",
     )
 
@@ -118,7 +118,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="febc5ee6a92d0eb7dac1fceaa6c648cf6521b4dc"
+        commit="436ba6c4a0ea3a06eca6e055f9c8d296bf3bae12"
     )
 
     new_git_repository(
@@ -176,14 +176,14 @@ package(default_visibility = ["//visibility:public"])
     new_git_repository(
         name = "com_github_msgpack_msgpack",
         remote = "https://github.com/msgpack/msgpack-c",
-        commit = "b759f5bdf7e4ba59338499e889648e6227042f23",
+        commit = "9389912eaf4358e2ad1621b3995b5b26cd6703f3",
         build_file = "//third_party:msgpack.BUILD",
     )
 
     new_git_repository(
         name = "com_github_d_bahr_crcpp",
         remote = "https://github.com/d-bahr/CRCpp.git",
-        commit = "12df3a15e89aaa3a4b44bb357b15e1f7e20a2608",
+        commit = "534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2",
         build_file = "//third_party:crcpp.BUILD",
     )
 

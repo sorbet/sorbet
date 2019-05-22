@@ -54,7 +54,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &mess
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
                              bool disableFastPath) {
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
-    workers = make_unique<WorkerPool>(0, logger);
+    workers = WorkerPool::create(0, *logger);
     // N.B.: stdin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to disable configatron.
     lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), STDIN_FILENO, lspOstream, true,

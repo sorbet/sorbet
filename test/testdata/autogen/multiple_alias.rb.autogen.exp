@@ -73,7 +73,7 @@ requires: []
  scope=[]
  name=[Foo]
  nesting=[]
- resolved=[Bar]
+ resolved=[Foo]
  loc=test/testdata/autogen/multiple_alias.rb:6
  is_defining_ref=0
 [ref id=6]
@@ -87,7 +87,7 @@ requires: []
  scope=[]
  name=[Baz]
  nesting=[]
- resolved=[Bar]
+ resolved=[Baz]
  loc=test/testdata/autogen/multiple_alias.rb:7
  is_defining_ref=0
 [ref id=8]

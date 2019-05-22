@@ -3,8 +3,10 @@
 # This is used in our test suit as well as for fast quick checks.
 # Don't rely on this working anywhere of importance as we will remove and add
 # things at our leisure.
-
+# typed: strong
 class Data < Object
+end
+class ScriptError < Exception
 end
 class LoadError < ScriptError
 end
@@ -27,6 +29,8 @@ class Chalk::ODM::Mutator::Private::ArrayMutator
   sig {params(key: Integer, value: Elem).void}
   def []=(key, value)
   end
+end
+class Chalk::ODM::Document
 end
 class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
   sig {params(options: Hash).returns(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)}
@@ -88,7 +92,6 @@ class Tempfile < File
 end
 ::Sorbet::Private::Static::IOLike = T.type_alias(
   T.any(
-    File,
     IO,
     StringIO,
     Tempfile
@@ -148,6 +151,7 @@ module T
   def self.cast(value, type, checked: true); end
   sig {params(type: T.untyped).returns(BasicObject)}
   def self.nilable(type); end
+  sig {returns(T::Private::Methods::DeclBuilder)}
   def self.proc; end
   def self.class_of(klass); end
   def self.noreturn; end
@@ -642,6 +646,12 @@ class Class < Module
   def allocate(); end
   sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
+  sig {returns(Class)}
+  sig {params(blk: T.proc.bind(Class).params(arg0: Class).void).returns(Class)}
+  sig {type_parameters(:T).params(superClass: T.type_parameter(:T)).returns(T.type_parameter(:T))}
+  sig {type_parameters(:T).params(superClass: T.type_parameter(:T), blk: T.proc.bind(Class).params(arg0: Class).void).returns(T.type_parameter(:T))}
+  def self.new(superClass = nil, &blk)
+  end
   sig {returns(T.nilable(String))}
   def name(); end
   sig {returns(T.nilable(Class))}
@@ -1525,6 +1535,8 @@ class IO < Object
   def self.select(read_array, write_array=T.unsafe(nil), error_array=T.unsafe(nil), timeout=T.unsafe(nil)); end
   sig {returns(Integer)}
   def to_i(); end
+end
+class UnboundMethod
 end
 module Kernel
   sig do

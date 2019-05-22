@@ -1,4 +1,5 @@
 #include "ast/Trees.h"
+#include "common/typecase.h"
 #include "core/Symbols.h"
 #include <sstream>
 #include <utility>
