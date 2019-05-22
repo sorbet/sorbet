@@ -52,13 +52,25 @@ public:
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
-        if (print.CFGJson || print.CFGProto) {
+        if (print.CFGJson.enabled || print.CFGProto.enabled) {
             auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-            if (print.CFGJson) {
-                core::Proto::toJSON(proto, cout);
+            if (print.CFGJson.enabled) {
+                if (print.CFGJson.outputPath.empty()) {
+                    core::Proto::toJSON(proto, cout);
+                } else {
+                    stringstream buf;
+                    core::Proto::toJSON(proto, buf);
+                    print.CFGJson.print(buf.str());
+                }
             } else {
                 // The proto wire format allows simply concatenating repeated message fields
-                cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
+                if (print.CFGProto.outputPath.empty()) {
+                    cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
+                } else {
+                    stringstream buf;
+                    cfg::Proto::toMulti(proto).SerializeToOstream(&buf);
+                    print.CFGProto.print(buf.str());
+                }
             }
         }
         return m;

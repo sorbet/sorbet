@@ -3,6 +3,7 @@
 #include "yaml-cpp/yaml.h"
 #include <cxxopts.hpp>
 
+#include "common/FileOps.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/FileFlatMapper.h"
@@ -87,6 +88,8 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ResolveTreeRaw,
         MissingConstants,
         CFG,
+        CFGJson,
+        CFGProto,
         Autogen,
         AutogenMsgPack,
         PluginGeneratedCode,
