@@ -469,44 +469,52 @@ class Sorbet::Private::GemLoader
       my_require 'html_truncator'
     end,
     'actionpack' => proc do
+      my_require 'actionpack'
       [
         ActionController::Base,
         ActionDispatch::SystemTestCase,
       ]
     end,
     'actionmailer' => proc do
+      my_require 'actionmailer'
       [
         ActionMailer::Base,
         ActionMailer::MessageDelivery,
       ]
     end,
     'activejob' => proc do
+      my_require 'activejob'
       [
         ActiveJob::Base,
       ]
     end,
     'activerecord' => proc do
+      my_require 'activerecord'
       [
         ActiveRecord::Schema,
         ActiveRecord::Migration::Current,
       ]
     end,
     'actionview' => proc do
+      my_require 'actionview'
       [
         ActionView::TestCase,
       ]
     end,
     'rdoc' => proc do
+      my_require 'rdoc'
       [
         RDoc::Options,
       ]
     end,
     'paul_revere' => proc do
+      my_require 'paul_revere'
       [
         Announcement,
       ]
     end,
     'clearance' => proc do
+      my_require 'clearance'
       [
         ClearanceMailer,
       ]
@@ -546,7 +554,17 @@ class Sorbet::Private::GemLoader
     require 'bundler/setup'
     Bundler.require
 
-    Bundler.load.specs.sort_by(&:name).each do |gemspec|
+    # Do not load gems in Gemfile where require is false
+    deps = Bundler.load.dependencies.reject { |dep| dep.autorequire && dep.autorequire.empty? }
+    specs = deps.flat_map do |dep|
+      begin
+        dep.to_specs
+      rescue Gem::MissingSpecError
+        []
+      end
+    end.to_set
+
+    specs.sort_by(&:name).each do |gemspec|
       begin
         require_gem(gemspec.name)
       rescue LoadError
