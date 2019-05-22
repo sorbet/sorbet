@@ -241,15 +241,20 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value("watchman"));
-    options.add_options("advanced")("enable-lsp-hover", "Enable experimental LSP feature: Hover");
-    options.add_options("advanced")("enable-lsp-go-to-definition", "Enable experimental LSP feature: Go-to-definition");
-    options.add_options("advanced")("enable-lsp-find-references", "Enable experimental LSP feature: Find References");
-    options.add_options("advanced")("enable-lsp-autocomplete", "Enable experimental LSP feature: Autocomplete");
-    options.add_options("advanced")("enable-lsp-workspace-symbols",
+    options.add_options("advanced")("enable-experimental-lsp-hover", "Enable experimental LSP feature: Hover");
+    options.add_options("advanced")("enable-experimental-lsp-go-to-definition",
+                                    "Enable experimental LSP feature: Go-to-definition");
+    options.add_options("advanced")("enable-experimental-lsp-find-references",
+                                    "Enable experimental LSP feature: Find References");
+    options.add_options("advanced")("enable-experimental-lsp-autocomplete",
+                                    "Enable experimental LSP feature: Autocomplete");
+    options.add_options("advanced")("enable-experimental-lsp-workspace-symbols",
                                     "Enable experimental LSP feature: Workspace Symbols");
-    options.add_options("advanced")("enable-lsp-document-symbol", "Enable experimental LSP feature: Document Symbol");
-    options.add_options("advanced")("enable-lsp-signature-help", "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-lsp-all", "Enable every experimental LSP feature.");
+    options.add_options("advanced")("enable-experimental-lsp-document-symbol",
+                                    "Enable experimental LSP feature: Document Symbol");
+    options.add_options("advanced")("enable-experimental-lsp-signature-help",
+                                    "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
     options.add_options("advanced")(
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
@@ -435,14 +440,18 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
         }
 
-        bool enableAllLSPFeatures = raw["enable-lsp-all"].as<bool>();
-        opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-lsp-autocomplete"].as<bool>();
-        opts.lspGoToDefinitionEnabled = enableAllLSPFeatures || raw["enable-lsp-go-to-definition"].as<bool>();
-        opts.lspFindReferencesEnabled = enableAllLSPFeatures || raw["enable-lsp-find-references"].as<bool>();
-        opts.lspWorkspaceSymbolsEnabled = enableAllLSPFeatures || raw["enable-lsp-workspace-symbols"].as<bool>();
-        opts.lspDocumentSymbolEnabled = enableAllLSPFeatures || raw["enable-lsp-document-symbol"].as<bool>();
-        opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-lsp-signature-help"].as<bool>();
-        opts.lspHoverEnabled = enableAllLSPFeatures || raw["enable-lsp-hover"].as<bool>();
+        bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
+        opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
+        opts.lspGoToDefinitionEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-definition"].as<bool>();
+        opts.lspFindReferencesEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-find-references"].as<bool>();
+        opts.lspWorkspaceSymbolsEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
+        opts.lspDocumentSymbolEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
+        opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.lspHoverEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-hover"].as<bool>();
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {
