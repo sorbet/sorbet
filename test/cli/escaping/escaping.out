@@ -1,5 +1,5 @@
-test/cli/escaping/escaping.rb:9: `String("\n")` doesn't match `Integer` for argument `a` https://sorbet.org/docs/error-reference#7002
-     9 |foo( #error: `String("\n")` doesn't match
+test/cli/escaping/escaping.rb:9: `String("\n")` does not match `Integer` for argument `a` https://sorbet.org/docs/error-reference#7002
+     9 |foo( #error: `String("\n")` does not match
     10 |'
     11 |'
     12 |)

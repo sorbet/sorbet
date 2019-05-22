@@ -1,5 +1,5 @@
 # typed: true
 
 def main
-  A.new.bar(1) # error: doesn't match `String`
+  A.new.bar(1) # error: does not match `String`
 end

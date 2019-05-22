@@ -19,7 +19,7 @@ class Main
     end
 
     def main
-        int("string") # error: `String("string")` doesn't match `Integer` for argument `a`
+        int("string") # error: `String("string")` does not match `Integer` for argument `a`
 
         foo = Object.new
         # T.assert_type!(foo, 3) # commented-out-error: 3

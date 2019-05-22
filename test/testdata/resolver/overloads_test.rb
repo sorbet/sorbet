@@ -12,5 +12,5 @@ def f(s); end
 
 f(0) 
 f('')
-f(:s)  # error: doesn't match `Integer` for argument `s`
-f(0.0) # error: doesn't match `Integer` for argument `s`
+f(:s)  # error: does not match `Integer` for argument `s`
+f(0.0) # error: does not match `Integer` for argument `s`

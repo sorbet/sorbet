@@ -5,8 +5,8 @@
 				   V = type_member
            def explain_for(which)
              self["explain_#{which}"] || self[:"explain_#{which}"]
-#            ^^^^^^^^^^^^^^^^^^^^^^^^ error: `String` doesn't match `QueryProfile::V` for argument `arg0`
-#                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Symbol` doesn't match `QueryProfile::V` for argument `arg0`
+#            ^^^^^^^^^^^^^^^^^^^^^^^^ error: `String` does not match `QueryProfile::V` for argument `arg0`
+#                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Symbol` does not match `QueryProfile::V` for argument `arg0`
            end
          end
 
@@ -23,7 +23,7 @@ class Child < Parent
   A = type_member
   def foo(which)
     self["foo"] || self["bar"]
-#   ^^^^^^^^^^^ error: `String("foo")` doesn't match `Child::A` for argument `k`
-#                  ^^^^^^^^^^^ error: `String("bar")` doesn't match `Child::A` for argument `k`
+#   ^^^^^^^^^^^ error: `String("foo")` does not match `Child::A` for argument `k`
+#                  ^^^^^^^^^^^ error: `String("bar")` does not match `Child::A` for argument `k`
   end
 end

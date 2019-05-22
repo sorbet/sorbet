@@ -1,4 +1,4 @@
-test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` doesn't match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
+test/cli/error-blacklist/error-blacklist.rb:3: `String("1")` does not match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
      3 |1 + "1"
         ^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/numeric.rbi#L1030: Method `Integer#+` has specified `arg0` as `Integer`

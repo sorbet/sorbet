@@ -12,4 +12,4 @@ BigDecimal('0.5').round
 BigDecimal('0.5').round(1)
 BigDecimal('0.5').round(1, BigDecimal::ROUND_HALF_EVEN)
 BigDecimal('0.5').round(1, :up)
-BigDecimal('0.5').round(1, 'up') # error: `String("up")` doesn't match `T.any(Integer, Symbol)` for argument `mode`
+BigDecimal('0.5').round(1, 'up') # error: `String("up")` does not match `T.any(Integer, Symbol)` for argument `mode`

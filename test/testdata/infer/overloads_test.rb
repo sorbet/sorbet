@@ -75,10 +75,10 @@ class Foo
     T.assert_type!(h.overloaded("s"), String)
     T.assert_type!(h.overloaded(Exception.new), NilClass)
     T.assert_type!(h.overloaded(self.class), Symbol)
-    h.overloaded(1) # error: `Integer(1)` doesn't match `String` for argument `_`
+    h.overloaded(1) # error: `Integer(1)` does not match `String` for argument `_`
                     # should ask for string
-    h.overloaded("1", 2) # error: `String("1")` doesn't match `Class` for argument `_`
-  # ^^^^^^^^^^^^^^^^^^^^ error: `Integer(2)` doesn't match `String` for argument `_1`
+    h.overloaded("1", 2) # error: `String("1")` does not match `Class` for argument `_`
+  # ^^^^^^^^^^^^^^^^^^^^ error: `Integer(2)` does not match `String` for argument `_1`
 
     g = OverloadAndGenerics[Integer].new
     T.assert_type!(g.overloaded("hi"), String)
