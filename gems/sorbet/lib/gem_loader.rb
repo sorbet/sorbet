@@ -511,6 +511,12 @@ class Sorbet::Private::GemLoader
         ClearanceMailer,
       ]
     end,
+    'webmock' => proc do
+      my_require 'webmock'
+      WebMock.singleton_class.send(:define_method, :enable!) do
+        puts "\nWebMock.enable! is incompatible with Sorbet. Please don't unconditionally do it on requiring this file."
+      end
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
