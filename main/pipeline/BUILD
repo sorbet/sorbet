@@ -27,6 +27,7 @@ cc_library(
         "//core/serialize",
         "//dsl",
         "//infer",
+        "//local_vars",
         "//main/options",
         "//namer",
         "//namer/configatron",
@@ -35,6 +36,5 @@ cc_library(
         "//payload/text",
         "//plugin",
         "//resolver",
-        "//local_vars",
     ],
 )
