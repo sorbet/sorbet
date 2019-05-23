@@ -44,7 +44,7 @@ class TestArgs
     kwarg(1, b: 2)
     kwarg(1, b: 2, c: 3) # error: Unrecognized keyword argument `c`
     kwarg(1, {}) # error: Missing required keyword argument `b`
-    kwarg(1, b: "hi") # error: `String("hi")` doesn't match `Integer` for argument `b`
+    kwarg(1, b: "hi") # error: `String("hi")` does not match `Integer` for argument `b`
     kwarg(1, any)
     kwarg(1, a_hash) # error: Passing a hash where the specific keys are unknown
   end
@@ -61,11 +61,11 @@ class TestArgs
   def call_repeated
     repeated
     repeated(1, 2, 3)
-    repeated(1, "hi") # error: `String("hi")` doesn't match `Integer` for argument `x`
+    repeated(1, "hi") # error: `String("hi")` does not match `Integer` for argument `x`
 
     # We error on each incorrect argument
-    repeated("hi", "there") # error: `String("hi")` doesn't match `Integer` for argument `x`
-  # ^^^^^^^^^^^^^^^^^^^^^^^ error: `String("there")` doesn't match `Integer` for argument `x`
+    repeated("hi", "there") # error: `String("hi")` does not match `Integer` for argument `x`
+  # ^^^^^^^^^^^^^^^^^^^^^^^ error: `String("there")` does not match `Integer` for argument `x`
   end
 
   sig do

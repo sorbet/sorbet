@@ -69,10 +69,10 @@ end
 
 class BadUsages
   A = Struct.new # error: Not enough arguments provided for method `Struct#initialize`. Expected: `1+`, got: `0`
-  B = Struct.new(giberish: 1) # error: `{giberish: Integer(1)}` doesn't match `T.any(Symbol, String)` for argument `arg0`
-  C = Struct.new(keyword_init: true) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
+  B = Struct.new(giberish: 1) # error: `{giberish: Integer(1)}` does not match `T.any(Symbol, String)` for argument `arg0`
+  C = Struct.new(keyword_init: true) # error: `{keyword_init: TrueClass}` does not match `T.any(Symbol, String)` for argument `arg0`
   local = true
-  D = Struct.new(keyword_init: local) # error: `{keyword_init: TrueClass}` doesn't match `T.any(Symbol, String)` for argument `arg0`
+  D = Struct.new(keyword_init: local) # error: `{keyword_init: TrueClass}` does not match `T.any(Symbol, String)` for argument `arg0`
   E = Struct.new(:a, keyword_init: local) # we run too early in to be able to support this
 end
 

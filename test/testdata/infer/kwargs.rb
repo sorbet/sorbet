@@ -12,5 +12,5 @@ class A
 end
 
 # Each repeated argument is checked as element type
-A.foo(x: 1, y: 2, z: '') # error: `String("")` doesn't match `Integer` for argument `kwargs`
+A.foo(x: 1, y: 2, z: '') # error: `String("")` does not match `Integer` for argument `kwargs`
 A.foo(x: 1, y: 2, z: 3)

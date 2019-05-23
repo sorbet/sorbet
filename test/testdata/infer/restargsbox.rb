@@ -13,5 +13,5 @@ class A
 end
 
 # Each repeated argument is checked as element type
-A[Integer].new.foo(1, 2, '') # error: `String("")` doesn't match `Integer` for argument `xs`
+A[Integer].new.foo(1, 2, '') # error: `String("")` does not match `Integer` for argument `xs`
 A[Integer].new.foo(1, 2, 3)

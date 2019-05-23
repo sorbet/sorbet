@@ -1,5 +1,5 @@
 # typed: true
 
 def main
-    A.new.bar(1) + "hello" # error: doesn't match `Integer`
+    A.new.bar(1) + "hello" # error: does not match `Integer`
 end
