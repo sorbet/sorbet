@@ -11,6 +11,7 @@
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
+#include "resolver/flatten/flatten.h"
 #include "spdlog/spdlog.h"
 // has to come before the next one. This comment stops formatter from reordering them
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -54,6 +55,7 @@ void processSource(core::GlobalState &cb, string str) {
     trees.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
     resolver::Resolver::run(ctx, move(trees), *workers);
+    trees = flatten::run(ctx, move(trees), *workers);
 }
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT

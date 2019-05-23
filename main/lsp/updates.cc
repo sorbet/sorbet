@@ -305,7 +305,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
         }
 
-        auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
+        auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts, workers);
         tryApplyDefLocSaver(*finalGs, resolved);
         tryApplyLocalVarSaver(*finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers);

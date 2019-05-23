@@ -45,6 +45,7 @@ cc_test(
         "//local_vars",
         "//namer",
         "//resolver",
+        "//resolver/flatten",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],

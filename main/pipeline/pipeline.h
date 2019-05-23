@@ -26,7 +26,7 @@ std::vector<ast::ParsedFile> resolve(std::unique_ptr<core::GlobalState> &gs, std
                                      const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
 
 std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                                const options::Options &opts);
+                                                const options::Options &opts, WorkerPool &workers);
 
 std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                   const options::Options &opts, bool skipConfigatron = false);

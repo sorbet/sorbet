@@ -287,7 +287,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 }
 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                           const options::Options &opts) {
+                                           const options::Options &opts, WorkerPool &workers) {
     try {
         int i = 0;
         Timer timeit(gs.tracer(), "incremental_naming");
@@ -324,6 +324,8 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
+
+    what = flatten::run(core::Context(gs, core::Symbols::root()), std::move(what), workers);
 
     return what;
 }

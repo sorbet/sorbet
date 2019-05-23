@@ -29,7 +29,6 @@ namespace {
  *
  * - ResolveConstantsWalk
  * - ResolveSignaturesWalk
- * - FlattenWalk
  *
  * There are also other important parts of resolver found elsewhere in the
  * resolver/ package (GlobalPass, type_syntax). Below we describe

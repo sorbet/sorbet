@@ -422,6 +422,7 @@ int realmain(int argc, char *argv[]) {
 
             runAutogen(ctx, opts, *workers, indexed);
         } else {
+
             indexed = pipeline::resolve(gs, move(indexed), opts, *workers);
             indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);
         }
