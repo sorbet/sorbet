@@ -57,7 +57,7 @@ public:
         ENFORCE(classStack.empty());
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         newMethodSet();
         classStack.emplace_back(classes.size());
         classes.emplace_back();
@@ -74,9 +74,9 @@ public:
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.staticInitForFile(inits->loc);
+            sym = ctx.state.lookupStaticInitForFile(inits->loc);
         } else {
-            sym = ctx.state.staticInitForClass(classDef->symbol, inits->loc);
+            sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
