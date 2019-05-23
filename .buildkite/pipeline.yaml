@@ -15,6 +15,7 @@ steps:
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: linux
+  - wait: ~
   - label: ":mac: build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
@@ -25,7 +26,6 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - wait: ~
   - label: ":mac: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
