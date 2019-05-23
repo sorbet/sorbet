@@ -20,15 +20,15 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "[mac] test-and-build-sorbet-runtime-gem.sh"
-    command: .buildkite/test-and-build-sorbet-runtime-gem.sh
+  - label: "[mac] build-sorbet-runtime.sh"
+    command: .buildkite/build-sorbet-runtime.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
   - wait: ~
-  - label: "[mac] build-sorbet-and-sorbet-static-gems.sh"
+  - label: "[mac] build-sorbet-and-sorbet-static.sh"
+    command: .buildkite/build-sorbet-and-sorbet-static.sh
     artifact_paths: _out_/**/*
-    command: .buildkite/build-sorbet-and-sorbet-static-gems.sh
     agents:
       os: mac
   - label: "[mac] build-emscripten.sh"
@@ -36,9 +36,9 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "[linux] build-sorbet-and-sorbet-static-gems.sh"
+  - label: "[linux] build-sorbet-and-sorbet-static.sh"
+    command: .buildkite/build-sorbet-and-sorbet-static.sh
     artifact_paths: _out_/**/*
-    command: .buildkite/build-sorbet-and-sorbet-static-gems.sh
     agents:
       os: linux
   - wait: ~
