@@ -158,6 +158,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
+        vector<autogen::NamedDefinition> defs;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -201,6 +202,11 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     Timer timeit(logger, "autogenClasslist");
                     pf.classlist(ctx, serialized.classlist);
                 }
+                for (auto &def : pf.defs) {
+                    // TODO weird empty defs appearing
+                    serialized.defs.emplace_back(pf.toNamed(ctx, def.id));
+                }
+
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
@@ -221,14 +227,35 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
-    for (auto &elem : merged) {
-        if (opts.print.Autogen.enabled) {
-            opts.print.Autogen.print(elem.second.strval);
-        }
-        if (opts.print.AutogenMsgPack.enabled) {
-            opts.print.AutogenMsgPack.print(elem.second.msgpack);
+    autogen::DefTree root;
+    autogen::AutoloaderConfig autoloaderCfg;
+    {
+        Timer timeit(logger, "autogenAutoloaderDefTree");
+        for (auto &elem : merged) {
+            if (opts.print.Autogen.enabled) {
+                opts.print.Autogen.print(elem.second.strval);
+            }
+            if (opts.print.AutogenMsgPack.enabled) {
+                opts.print.AutogenMsgPack.print(elem.second.msgpack);
+            }
+            auto &defs = elem.second.defs;
+            for (auto &def : defs) {
+                if (def.def.id.id() == 0) {
+                    continue; // TODO what's going on with these
+                }
+                root.addDef(ctx, autoloaderCfg, def);
+            }
         }
     }
+    {
+        Timer timeit(logger, "autogenAutoloaderPrune");
+        root.prune(ctx, autoloaderCfg);
+    }
+    if (opts.print.AutogenAutoloader.enabled) {
+        Timer timeit(logger, "autogenAutoloaderWrite");
+        root.writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
+    }
+
     if (opts.print.AutogenClasslist.enabled) {
         Timer timeit(logger, "autogenClasslistPrint");
         vector<string> mergedClasslist;
@@ -343,7 +370,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) {
+    if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
     if (opts.censorRawLocsWithinPayload) {
