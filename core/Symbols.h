@@ -461,6 +461,11 @@ public:
         flags |= Symbol::Flags::METHOD_GENERATED_SIG;
     }
 
+    inline void unsetHasGeneratedSig() {
+        ENFORCE(isMethod());
+        flags &= ~Symbol::Flags::METHOD_GENERATED_SIG;
+    }
+
     inline void setBlockArgument() {
         ENFORCE(isMethodArgument());
         flags |= Symbol::Flags::ARGUMENT_BLOCK;

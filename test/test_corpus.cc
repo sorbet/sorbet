@@ -687,12 +687,18 @@ bool compareNames(string_view left, string_view right) {
         return left < right;
     }
 
-    // If the base names match, compare by reverse order on extension, so that
-    // .exp comes after .rb.
+    // If the base names match, make files with the ".rb" extension come before all others.
+    // The remaining files will be sorted by reverse order on extension.
     auto lext = FileOps::getExtension(left);
     auto rext = FileOps::getExtension(right);
     if (lext != rext) {
-        return rext < lext;
+        if (lext == "rb") {
+            return true;
+        } else if (rext == "rb") {
+            return false;
+        } else {
+            return rext < lext;
+        }
     }
 
     // Sort multi-part tests
