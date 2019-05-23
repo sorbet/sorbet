@@ -1559,9 +1559,7 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
     method_checks::validateSymbols(ctx.state);
     sanityCheck(ctx, trees);
 
-    for (auto &t : trees) {
-        t = flatten::run(ctx, std::move(t));
-    }
+    trees = flatten::run(ctx, std::move(trees), workers);
 
     return trees;
 }
