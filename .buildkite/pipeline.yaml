@@ -3,44 +3,44 @@
 #  - we use macs for development thus we want to make sure all scripts run there
 
 steps:
-  # - label: "[linux] linters.sh"
-  #   command: .buildkite/linters.sh
-  #   agents:
-  #     os: linux
+  - label: "[linux] linters.sh"
+    command: .buildkite/linters.sh
+    agents:
+      os: linux
   - label: "[mac] test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: mac
-  # - label: "[linux] test-static-sanitized.sh"
-  #   command: .buildkite/test-static-sanitized.sh
-  #   agents:
-  #     os: linux
-  # - label: "[mac] build-website.sh"
-  #   command: .buildkite/build-website.sh
-  #   artifact_paths: _out_/**/*
-  #   agents:
-  #     os: mac
-  # - label: "[mac] build-sorbet-runtime.sh"
-  #   command: .buildkite/build-sorbet-runtime.sh
-  #   artifact_paths: _out_/**/*
-  #   agents:
-  #     os: mac
+  - label: "[linux] test-static-sanitized.sh"
+    command: .buildkite/test-static-sanitized.sh
+    agents:
+      os: linux
+  - label: "[mac] build-website.sh"
+    command: .buildkite/build-website.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: "[mac] build-sorbet-runtime.sh"
+    command: .buildkite/build-sorbet-runtime.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
   - wait: ~
   - label: "[mac] build-sorbet-and-sorbet-static.sh"
     command: .buildkite/build-sorbet-and-sorbet-static.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  # - label: "[mac] build-emscripten.sh"
-  #   command: .buildkite/build-emscripten.sh
-  #   artifact_paths: _out_/**/*
-  #   agents:
-  #     os: mac
-  # - label: "[linux] build-sorbet-and-sorbet-static.sh"
-  #   command: .buildkite/build-sorbet-and-sorbet-static.sh
-  #   artifact_paths: _out_/**/*
-  #   agents:
-  #     os: linux
+  - label: "[mac] build-emscripten.sh"
+    command: .buildkite/build-emscripten.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: mac
+  - label: "[linux] build-sorbet-and-sorbet-static.sh"
+    command: .buildkite/build-sorbet-and-sorbet-static.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: linux
   - wait: ~
     # TODO(jez) Test on linux
   - label: "[mac] test-sorbet-gem.sh"
