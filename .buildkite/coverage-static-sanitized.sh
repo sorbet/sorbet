@@ -47,11 +47,11 @@ touch _tmp_/reports
 done
 
 rm -rf ./_tmp_/profdata_combined.profdata
-xargs .buildkite/combine-coverage.sh < _tmp_/reports
+xargs .buildkite/tools/combine-coverage.sh < _tmp_/reports
 
 ./bazel-sorbet/external/llvm_toolchain/bin/llvm-cov show -instr-profile ./_tmp_/profdata_combined.profdata ./bazel-bin/test/test_corpus_sharded -object ./bazel-bin/main/sorbet > combined.coverage.txt
 
-.buildkite/codecov-bash -f combined.coverage.txt -X search
+.buildkite/tools/codecov-bash -f combined.coverage.txt -X search
 
 if [ "$err" -ne 0 ]; then
     exit "$err"

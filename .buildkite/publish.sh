@@ -128,6 +128,6 @@ source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
 end
 \`\`\`"
 if [ -z "$dryrun" ]; then
-    echo "$release_notes" | ../.buildkite/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
+    echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
 fi
 popd
