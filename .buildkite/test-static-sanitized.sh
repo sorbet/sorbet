@@ -71,7 +71,7 @@ function cleanup {
 trap cleanup EXIT
 
 
-.buildkite/annotate.rb _tmp_/log/junit > "$annotation_path"
+.buildkite/tools/annotate.rb _tmp_/log/junit > "$annotation_path"
 
 cat "$annotation_path"
 
