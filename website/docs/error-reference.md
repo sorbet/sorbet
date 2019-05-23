@@ -154,6 +154,39 @@ constants through ancestors (both mixins or superclasses).
     Parent::MY_CONST   # ok
     ```
 
+## 5014
+
+Given code like this:
+
+```ruby
+# typed: true
+class Parent
+  extend T::Generic
+  Foo = type_member
+end
+
+class Child < Parent
+  extend T::Generic
+end
+```
+
+We need to change our code to redeclare the type member in the child class too:
+
+```ruby
+# typed: true
+class Parent
+  extend T::Generic
+  Foo = type_member
+end
+
+class Child < Parent
+  extend T::Generic
+  Foo = type_member
+end
+```
+
+The same thing holds for type templates.
+
 ## 5028
 
 In `# typed: strict` files, Sorbet requires that all constants are annotated
@@ -185,6 +218,12 @@ B = T.type_alias(A)
 (Why? This is due to design tradeoffs to enforce stronger internal invariants.
 Basically, Sorbet can emit more reliable warnings when users declare their
 intent to create a new type alias.)
+
+## 5036
+
+See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
+to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
+reported in `# typed: strict`).
 
 ## 6002
 

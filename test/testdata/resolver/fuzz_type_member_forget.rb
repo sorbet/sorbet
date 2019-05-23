@@ -5,7 +5,7 @@ class Parent
   TParent = type_member
 end
 
-class DifferentArityChild < Parent # error: Type `TParent` declared by parent `Parent` must be declared again
+class DifferentArityChild < Parent # error: Type `TParent` declared by parent `Parent` must be re-declared in `DifferentArityChild`
   TChild = type_member(fixed: String)
 end
 

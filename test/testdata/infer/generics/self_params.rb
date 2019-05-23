@@ -47,7 +47,7 @@ class Foo
              # ^^^^^^^^^^^^^^^^ error: `type_template` type `T.class_of(Foo)::Self_Type_Member` used in an instance method definition
 end
 
-class FooChild < Foo # error: must be declared again
+class FooChild < Foo # error: must be re-declared
   Self_Type_Member = type_template(fixed: String)
 end
 

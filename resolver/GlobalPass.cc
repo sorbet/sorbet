@@ -50,8 +50,9 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
                 ? core::errors::Resolver::EnumerableParentTypeNotDeclared
                 : core::errors::Resolver::ParentTypeNotDeclared;
         if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
-            e.setHeader("Type `{}` declared by parent `{}` must be declared again", name.show(gs),
-                        parent.data(gs)->show(gs));
+            e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
+                        parent.data(gs)->show(gs), sym.data(gs)->show(gs));
+            e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
         }
         my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
         my.data(gs)->setFixed();
