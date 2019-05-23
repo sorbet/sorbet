@@ -2,8 +2,8 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "core/core.h"
 #include "common/concurrency/WorkerPool.h"
+#include "core/core.h"
 
 #include <utility>
 
@@ -83,7 +83,6 @@ optional<core::Loc> extractClassInitLoc(core::Context ctx, unique_ptr<ast::Class
 
 class FlattenWalk {
 private:
-
 public:
     FlattenWalk() {
         newMethodSet();
@@ -287,19 +286,18 @@ vector<ast::ParsedFile> run(core::Context ctx, vector<ast::ParsedFile> trees, Wo
     }
 
     workers.multiplexJob("FlattenWalk", [ctx, fileq, resultq]() {
-                                            Timer timeit(ctx.state.tracer(), "FlattenWalkWorker");
-                                            ast::ParsedFile job;
-                                            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                                                if (result.gotItem()) {
-                                                    FlattenWalk flatten;
-                                                    job.tree = ast::TreeMap::apply(ctx, flatten, std::move(job.tree));
-                                                    job.tree = flatten.addClasses(ctx, std::move(job.tree));
-                                                    job.tree = flatten.addMethods(ctx, std::move(job.tree));
-                                                    resultq->push(move(job), 1);
-                                                }
-                                            }
-
-                                        });
+        Timer timeit(ctx.state.tracer(), "FlattenWalkWorker");
+        ast::ParsedFile job;
+        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            if (result.gotItem()) {
+                FlattenWalk flatten;
+                job.tree = ast::TreeMap::apply(ctx, flatten, std::move(job.tree));
+                job.tree = flatten.addClasses(ctx, std::move(job.tree));
+                job.tree = flatten.addMethods(ctx, std::move(job.tree));
+                resultq->push(move(job), 1);
+            }
+        }
+    });
 
     trees.clear();
     {
