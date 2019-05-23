@@ -21,6 +21,7 @@ cc_binary(
         "//core",
         "//dsl",
         "//infer",
+        "//local_vars",
         "//main/autogen",
         "//main/lsp",
         "//namer",

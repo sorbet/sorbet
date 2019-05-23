@@ -42,6 +42,7 @@ cc_test(
         "//ast/desugar",
         "//cfg",
         "//dsl",
+        "//local_vars",
         "//namer",
         "//resolver",
         "@com_google_googletest//:gtest",

@@ -32,10 +32,11 @@ private:
                 arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
                 [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *opt) { arg = opt->expr.get(); },
                 [&](ShadowArg *opt) { arg = opt->expr.get(); },
-                [&](UnresolvedIdent *nm) {
-                    nm->name = subst.substitute(nm->name);
+                [&](Local *local) {
+                    local->localVariable._name = subst.substitute(local->localVariable._name);
                     arg = nullptr;
-                });
+                },
+                [&](UnresolvedIdent *nm) { Exception::raise("UnresolvedIdent remaining after local_vars"); });
         }
         return argp;
     }
@@ -70,6 +71,11 @@ public:
                                                         unique_ptr<UnresolvedIdent> original) {
         original->name = subst.substitute(original->name);
         return original;
+    }
+
+    unique_ptr<Expression> postTransformLocal(core::MutableContext ctx, unique_ptr<Local> local) {
+        local->localVariable._name = subst.substitute(local->localVariable._name);
+        return local;
     }
 
     unique_ptr<Send> preTransformSend(core::MutableContext ctx, unique_ptr<Send> original) {

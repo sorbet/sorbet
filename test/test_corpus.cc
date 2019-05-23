@@ -20,6 +20,7 @@
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
+#include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -247,9 +248,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         // Namer
         ast::ParsedFile namedTree;
         {
+            auto localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
+
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(dslUnwound)));
+            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(localNamed)));
         }
 
         expectation = test.expectations.find("name-tree");

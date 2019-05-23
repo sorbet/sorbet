@@ -20,6 +20,7 @@
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
+#include "local_vars/local_vars.h"
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -160,6 +161,12 @@ unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, un
     return dsl::DSL::run(ctx, move(ast));
 }
 
+ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
+    Timer timeit(gs.tracer(), "runLocalVars", {{"file", (string)tree.file.data(gs).path()}});
+    core::MutableContext ctx(gs, core::Symbols::root());
+    return sorbet::local_vars::LocalVars::run(ctx, move(tree));
+}
+
 ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {make_unique<ast::EmptyTree>(), file};
 }
@@ -188,6 +195,10 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             }
             if (!opts.skipDSLPasses) {
                 tree = runDSL(lgs, file, move(tree));
+            }
+            tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
+            if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
+                return emptyParsedFile(file);
             }
         }
         if (print.DSLTree.enabled) {
@@ -249,6 +260,11 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             }
             if (!opts.skipDSLPasses) {
                 tree = runDSL(gs, file, move(tree));
+            }
+
+            tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
+            if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
+                return emptyPluginFile(file);
             }
         }
         if (print.DSLTree.enabled) {

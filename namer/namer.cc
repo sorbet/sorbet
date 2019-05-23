@@ -72,8 +72,8 @@ class NameInserter {
     }
 
     struct ParsedArg {
-        core::NameRef name;
         core::Loc loc;
+        core::LocalVariable local;
         unique_ptr<ast::Expression> default_;
         bool keyword = false;
         bool block = false;
@@ -85,11 +85,7 @@ class NameInserter {
         ParsedArg parsedArg;
 
         typecase(
-            arg.get(),
-            [&](ast::UnresolvedIdent *nm) {
-                parsedArg.name = nm->name;
-                parsedArg.loc = nm->loc;
-            },
+            arg.get(), [&](ast::UnresolvedIdent *nm) { Exception::raise("Unexpected unresolved name in arg!"); },
             [&](ast::RestArg *rest) {
                 parsedArg = parseArg(ctx, move(rest->expr));
                 parsedArg.repeated = true;
@@ -111,12 +107,26 @@ class NameInserter {
                 parsedArg.shadow = true;
             },
             [&](ast::Local *local) {
-                // Namer replaces args with locals, so to make namer idempotent,
-                // we need to be able to handle Locals here.
-                parsedArg.name = local->localVariable._name;
+                parsedArg.local = local->localVariable;
                 parsedArg.loc = local->loc;
             });
+
         return parsedArg;
+    }
+
+    vector<ParsedArg> parseArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &args) {
+        vector<ParsedArg> parsedArgs;
+        for (auto &arg : args) {
+            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
+            if (!refExp) {
+                Exception::raise("Must be a reference!");
+            }
+            unique_ptr<ast::Reference> refExpImpl(refExp);
+            arg.release();
+            parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
+        }
+
+        return parsedArgs;
     }
 
     pair<core::SymbolRef, unique_ptr<ast::Expression>> arg2Symbol(core::MutableContext ctx, int pos,
@@ -124,21 +134,20 @@ class NameInserter {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
             core::SymbolRef sym = ctx.owner.data(ctx)->arguments()[pos];
-            core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
-            auto localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
+            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
             return make_pair(sym, move(localExpr));
         }
+
         core::NameRef name;
         if (parsedArg.keyword) {
-            name = parsedArg.name;
+            name = parsedArg.local._name;
         } else if (parsedArg.block) {
             name = core::Names::blkArg();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
-        core::LocalVariable localVariable = enterLocal(ctx, parsedArg.name);
-        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, localVariable);
+        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
         core::SymbolData data = sym.data(ctx);
         if (parsedArg.default_) {
@@ -154,54 +163,24 @@ class NameInserter {
         if (parsedArg.repeated) {
             data->setRepeated();
         }
+
         return make_pair(sym, move(localExpr));
     }
 
     struct LocalFrame {
-        UnorderedMap<core::NameRef, core::LocalVariable> locals;
-        vector<core::LocalVariable> args;
-        bool moduleFunctionActive;
-        u4 localId;
-        std::optional<u4> oldBlockCounter;
+        bool moduleFunctionActive = false;
     };
 
-    LocalFrame &enterBlock() {
-        scopeStack.emplace_back().localId = blockCounter;
-        ++blockCounter;
-        return scopeStack.back();
-    }
-
-    LocalFrame &enterClassOrMethod() {
-        scopeStack.emplace_back().localId = 0;
-        scopeStack.back().oldBlockCounter = blockCounter;
-        blockCounter = 1;
-        return scopeStack.back();
+    LocalFrame &enterScope() {
+        auto &frame = scopeStack.emplace_back();
+        return frame;
     }
 
     void exitScope() {
-        auto &oldScopeCounter = scopeStack.back().oldBlockCounter;
-        if (oldScopeCounter) {
-            blockCounter = *oldScopeCounter;
-        }
         scopeStack.pop_back();
     }
 
     vector<LocalFrame> scopeStack;
-    // The purpose of this counter is to ensure that every block within a method/class has a unique scope id.
-    // For example, a possible assignment of ids is the following:
-    //
-    // [].map { # $0 }
-    // class A
-    //   [].each { # $0 }
-    //   [].map { # $1 }
-    // end
-    // [].each { # $1 }
-    // def foo
-    //   [].each { # $0 }
-    //   [].map { # $1 }
-    // end
-    // [].each { # $2 }
-    u4 blockCounter;
 
     bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
@@ -332,7 +311,7 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        enterClassOrMethod();
+        enterScope();
         return klass;
     }
 
@@ -425,13 +404,6 @@ public:
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 
-    core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {
-        if (!ctx.owner.data(ctx)->isBlockSymbol(ctx)) {
-            return core::LocalVariable(name, 0);
-        }
-        return core::LocalVariable(name, scopeStack.back().localId);
-    }
-
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ParsedArg> parsedArgs) {
         ast::MethodDef::ARGS_store args;
         bool inShadows = false;
@@ -449,8 +421,7 @@ public:
         int i = -1;
         for (auto &arg : parsedArgs) {
             i++;
-            auto name = arg.name;
-            auto localVariable = enterLocal(ctx, name);
+            auto localVariable = arg.local;
 
             if (arg.shadow) {
                 inShadows = true;
@@ -458,38 +429,23 @@ public:
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
+
                 if (swapArgs && arg.block) {
                     // see commnent on if (swapArgs) above
                     ctx.owner.data(ctx)->arguments().emplace_back(swappedArg);
                 }
-                auto pair = arg2Symbol(ctx, i, move(arg));
-                core::SymbolRef sym = pair.first;
-                args.emplace_back(move(pair.second));
+
+                auto [sym, expr] = arg2Symbol(ctx, i, move(arg));
+                args.emplace_back(move(expr));
                 ENFORCE(i < ctx.owner.data(ctx)->arguments().size());
                 ENFORCE(swapArgs || (ctx.owner.data(ctx)->arguments()[i] == sym));
             }
-
-            scopeStack.back().locals[name] = localVariable;
-            scopeStack.back().args.emplace_back(localVariable);
         }
 
         return args;
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
-            original->args.clear();
-            core::SymbolRef method = ctx.owner.data(ctx)->enclosingMethod(ctx);
-            if (method.data(ctx)->isMethod()) {
-                for (auto arg : scopeStack.back().args) {
-                    original->args.emplace_back(make_unique<ast::Local>(original->loc, arg));
-                }
-            } else {
-                if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
-                    e.setHeader("`{}` outside of method", "super");
-                }
-            }
-        }
         ast::MethodDef *mdef;
         if (original->args.size() == 1 && (mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) != nullptr) {
             switch (original->fun._id) {
@@ -606,10 +562,10 @@ public:
                 }
                 return false;
             }
-            if (symArg->isKeyword() && symArg->name != methodArg.name) {
+            if (symArg->isKeyword() && symArg->name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.name.show(ctx));
+                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;
@@ -620,7 +576,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterClassOrMethod();
+        enterScope();
 
         core::SymbolRef owner = methodOwner(ctx);
 
@@ -631,16 +587,7 @@ public:
         }
         ENFORCE(owner.data(ctx)->isClass());
 
-        vector<ParsedArg> parsedArgs;
-        for (auto &arg : method->args) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
-            if (!refExp) {
-                Exception::raise("Must be a reference!");
-            }
-            unique_ptr<ast::Reference> refExpImpl(refExp);
-            arg.release();
-            parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
-        }
+        auto parsedArgs = parseArgs(ctx, method->args);
 
         auto sym = owner.data(ctx)->findMemberNoDealias(ctx, method->name);
         if (sym.exists()) {
@@ -695,29 +642,9 @@ public:
                                         ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
                                                                   ++(owner.data(ctx)->uniqueCounter)));
 
-        auto outerArgs = scopeStack.back().args;
-        auto &frame = enterBlock();
-        frame.args = std::move(outerArgs);
-        auto &parent = *(scopeStack.end() - 2);
+        enterScope();
 
-        // We inherit our parent's locals
-        for (auto &binding : parent.locals) {
-            frame.locals.insert(binding);
-        }
-
-        // If any of our arguments shadow our parent, fillInArgs will overwrite
-        // them in `frame.locals`
-        vector<ParsedArg> parsedArgs;
-        for (auto &arg : blk->args) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
-            if (!refExp) {
-                Exception::raise("Must be a reference!");
-            }
-            unique_ptr<ast::Reference> refExpImpl(refExp);
-            arg.release();
-            parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
-        }
-        blk->args = fillInArgs(ctx.withOwner(blk->symbol), move(parsedArgs));
+        blk->args = fillInArgs(ctx.withOwner(blk->symbol), parseArgs(ctx, blk->args));
 
         return blk;
     }
@@ -729,26 +656,17 @@ public:
 
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
                                                              unique_ptr<ast::UnresolvedIdent> nm) {
-        switch (nm->kind) {
-            case ast::UnresolvedIdent::Local: {
-                auto &frame = scopeStack.back();
-                core::LocalVariable &cur = frame.locals[nm->name];
-                if (!cur.exists()) {
-                    cur = enterLocal(ctx, nm->name);
-                    frame.locals[nm->name] = cur;
-                }
-                return make_unique<ast::Local>(nm->loc, cur);
+        ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");
+
+        if (nm->kind == ast::UnresolvedIdent::Global) {
+            core::SymbolData root = core::Symbols::root().data(ctx);
+            core::SymbolRef sym = root->findMember(ctx, nm->name);
+            if (!sym.exists()) {
+                sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
             }
-            case ast::UnresolvedIdent::Global: {
-                core::SymbolData root = core::Symbols::root().data(ctx);
-                core::SymbolRef sym = root->findMember(ctx, nm->name);
-                if (!sym.exists()) {
-                    sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
-                }
-                return make_unique<ast::Field>(nm->loc, sym);
-            }
-            default:
-                return nm;
+            return make_unique<ast::Field>(nm->loc, sym);
+        } else {
+            return nm;
         }
     }
 
@@ -961,8 +879,7 @@ public:
 
 private:
     NameInserter() {
-        blockCounter = 0;
-        enterBlock();
+        enterScope();
     }
 };
 

@@ -39,6 +39,7 @@ cc_test(
         "namer",
         "//ast/desugar",
         "//dsl",
+        "//local_vars",
         "//parser",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
