@@ -1,6 +1,13 @@
 # typed: true
-class Foo2 < A # error: Unable to resolve constant `A`
+
+class A
+end
+
+class B
+end
+
+class Foo2 < A
   def branch
-    1 + "stuff"
+    1 + "stuff" # error: does not match `Integer`
   end
 end

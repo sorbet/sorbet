@@ -9,6 +9,6 @@ class A
 end
 
 def main
-  A.new.bar("91")
+  A.new.bar(10)
        # ^ hover: sig {params(x: Integer).returns(String)}
 end
