@@ -88,12 +88,13 @@ if [ -z "${SRB_SORBET_EXE:-}" ]; then
 fi
 export SRB_SORBET_EXE
 
+if ! [ -f "$SRB_SORBET_EXE" ]; then
+  error "└─ could not find sorbet executable ($SRB_SORBET_EXE)"
+  exit 1
+fi
+
 if ! [ -x "$SRB_SORBET_EXE" ]; then
-  error "├─ could not find main/sorbet executable in bazel-bin."
-  if [ -n "$VERBOSE" ]; then
-    error "├─ SRB_SORBET_EXE=$SRB_SORBET_EXE"
-  fi
-  warn  "└─ Has sorbet already been built? Is it executable?"
+  error "└─ sorbet executable has wrong permissions ($SRB_SORBET_EXE)"
   exit 1
 fi
 
