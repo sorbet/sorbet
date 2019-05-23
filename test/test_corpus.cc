@@ -25,6 +25,7 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
+#include "resolver/flatten/flatten.h"
 #include "resolver/resolver.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -294,6 +295,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
         trees = resolver::Resolver::run(ctx, move(trees), *workers);
+        trees = flatten::run(ctx, move(trees), *workers);
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }

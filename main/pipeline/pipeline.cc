@@ -27,6 +27,7 @@
 #include "pipeline.h"
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
+#include "resolver/flatten/flatten.h"
 #include "resolver/resolver.h"
 
 using namespace std;
@@ -807,6 +808,8 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
+    core::Context ctx(gs, core::Symbols::root());
+    what = flatten::run(ctx, std::move(what), workers);
     gs->errorQueue->flushErrors();
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
