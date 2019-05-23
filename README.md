@@ -40,6 +40,7 @@ If you are at Stripe, you might also want to see:
   - [CLI tests](#cli-tests)
   - [LSP tests](#lsp-tests)
     - [Testing "Find Definition" and "Find All References"](#testing-find-definition-and-find-all-references)
+    - [Testing hover](#testing-hover)
     - [Testing incremental typechecking](#testing-incremental-typechecking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
@@ -421,6 +422,15 @@ If a variable is re-defined, it can be annotated with a version number:
 # ^ def: a 2
   b = a + 10
     # ^ usage: a 2
+```
+
+#### Testing hover
+
+LSP tests can also assert the contents of hover responses with `hover` assertions:
+
+```ruby
+  a = 10
+# ^ hover: Integer(10)
 ```
 
 #### Testing incremental typechecking
