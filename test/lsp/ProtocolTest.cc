@@ -188,8 +188,9 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
             if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
                 // Will explicitly overwrite older diagnostics that are irrelevant.
                 // TODO: Have a better way of copying.
-                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] =
-                    move(PublishDiagnosticsParams::fromJSON((*diagnosticParams)->toJSON())->diagnostics);
+                rapidjson::MemoryPoolAllocator<> alloc;
+                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move(
+                    PublishDiagnosticsParams::fromJSONValue(*(*diagnosticParams)->toJSONValue(alloc))->diagnostics);
             }
         }
     }
