@@ -360,6 +360,18 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         ASSERT_FALSE(respMsg.error.has_value());
         auto locations = extractLocations(respMsg);
 
+        if (this->symbol == "(nothing)") {
+            // Special case: Nothing should be defined here.
+            for (auto &location : locations) {
+                ADD_FAILURE_AT(filename.c_str(), line + 1) << fmt::format(
+                    "Sorbet returned a definition for a location that we expected no definition for. For "
+                    "location:\n{}\nFound definition:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, ""));
+            }
+            return;
+        }
+
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
                 "Sorbet did not find a definition for location that references symbol `{}`.\nExpected definition "
@@ -424,6 +436,20 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
         auto locations = extractLocations(respMsg);
+        if (symbol == "(nothing)") {
+            // Special case: This location should not report usages of anything.
+            for (auto &foundLocation : locations) {
+                auto actualFilePath = uriToFilePath(uriPrefix, foundLocation->uri);
+                ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
+                    "Sorbet returned references for a location that should not report references.\nGiven location "
+                    "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation),
+                                            *foundLocation->range, ""));
+            }
+            return;
+        }
+
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });

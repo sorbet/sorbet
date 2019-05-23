@@ -424,6 +424,13 @@ If a variable is re-defined, it can be annotated with a version number:
     # ^ usage: a 2
 ```
 
+If a location should not report any definition or usage, then use the magic label `(nothing)`:
+
+```ruby
+    a = 10
+# ^ def: (nothing)
+```
+
 #### Testing hover
 
 LSP tests can also assert the contents of hover responses with `hover` assertions:
@@ -431,6 +438,13 @@ LSP tests can also assert the contents of hover responses with `hover` assertion
 ```ruby
   a = 10
 # ^ hover: Integer(10)
+```
+
+If a location should report the empty string, use the special label `(empty)`:
+
+```ruby
+     a = 10
+# ^ hover: (empty)
 ```
 
 #### Testing incremental typechecking
