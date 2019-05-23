@@ -182,5 +182,27 @@ public:
     std::string toString() const override;
 };
 
+// # ^ hover: foo
+class HoverAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<HoverAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                int assertionLine, std::string_view assertionContents,
+                                                std::string_view assertionType);
+    /** Checks all HoverAssertions within the assertion vector. Skips over non-hover assertions.*/
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+
+    HoverAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                   std::string_view message);
+
+    const std::string message;
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+
+    std::string toString() const override;
+};
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_POSITION_ASSERTIONS_H

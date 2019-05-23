@@ -25,6 +25,7 @@ const UnorderedMap<
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
+        {"hover", HoverAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -669,7 +670,7 @@ shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view 
 }
 
 optional<bool> BooleanPropertyAssertion::getValue(string_view type,
-                                                  const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+                                                  const vector<shared_ptr<RangeAssertion>> &assertions) {
     EXPECT_NE(assertionConstructors.find(string(type)), assertionConstructors.end())
         << "Unrecognized boolean property assertion: " << type;
     for (auto &assertion : assertions) {
@@ -734,8 +735,68 @@ void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, 
     }
 }
 
-std::string FastPathAssertion::toString() const {
+string FastPathAssertion::toString() const {
     return fmt::format("FastPathAssertion: {}", expectedFiles ? fmt::format("{}", fmt::join(*expectedFiles, ",")) : "");
+}
+
+shared_ptr<HoverAssertion> HoverAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                string_view assertionContents, string_view assertionType) {
+    return make_shared<HoverAssertion>(filename, range, assertionLine, assertionContents);
+}
+HoverAssertion::HoverAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(string(message)) {}
+
+void HoverAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                              const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                              LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<HoverAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+        }
+    }
+}
+
+// Retrieve contents of a Hover response as a string.
+string hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResult) {
+    if (auto nullResp = get_if<JSONNullObject>(&hoverResult)) {
+        return "null";
+    } else {
+        auto &hover = get<unique_ptr<Hover>>(hoverResult);
+        auto value = hover->contents->value;
+        if (value == "") {
+            return "(empty)";
+        }
+        return value;
+    }
+}
+
+void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+                           int &nextId, string_view uriPrefix, string errorPrefix) {
+    auto uri = filePathToUri(uriPrefix, filename);
+    auto pos = make_unique<TextDocumentPositionParams>(
+        make_unique<TextDocumentIdentifier>(uri), make_unique<Position>(range->start->line, range->start->character));
+    auto id = nextId++;
+    auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
+    auto responses = wrapper.getLSPResponsesFor(msg);
+    ASSERT_EQ(responses.size(), 1);
+    auto &responseMsg = responses.at(0);
+    ASSERT_TRUE(responseMsg->isResponse());
+    auto &response = responseMsg->asResponse();
+    ASSERT_TRUE(response.result.has_value());
+    auto &hoverResponse = get<variant<JSONNullObject, unique_ptr<Hover>>>(*response.result);
+    auto hoverContents = hoverToString(hoverResponse);
+
+    if (hoverContents.find(this->message) == string::npos) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
+            << fmt::format("{}Expected hover contents:\n{}\nFound hover contents:\n{}", errorPrefix,
+                           prettyPrintRangeComment(sourceLine, *range, toString()),
+                           prettyPrintRangeComment(sourceLine, *range, fmt::format("hover: {}", hoverContents)));
+    }
+}
+
+string HoverAssertion::toString() const {
+    return fmt::format("hover: {}", message);
 }
 
 } // namespace sorbet::test

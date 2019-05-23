@@ -138,7 +138,11 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(gs), ")");
     vector<string> typeAndArgNames;
 
+    string generatedString = "";
     if (method.data(gs)->isMethod()) {
+        if (method.data(gs)->hasGeneratedSig()) {
+            generatedString = "generated.";
+        }
         for (auto &argSym : method.data(gs)->arguments()) {
             // Don't display synthetic arguments (like blk).
             if (!argSym.data(gs)->isSyntheticBlockArgument()) {
@@ -149,9 +153,10 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     }
 
     if (typeAndArgNames.size() == 0) {
-        return fmt::format("sig {{{}}}", methodReturnType);
+        return fmt::format("sig {{{}{}}}", generatedString, methodReturnType);
     } else {
-        return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
+        return fmt::format("sig {{{}params({}).{}}}", generatedString, fmt::join(typeAndArgNames, ", "),
+                           methodReturnType);
     }
 }
 

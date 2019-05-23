@@ -588,6 +588,9 @@ TEST_P(LSPTest, All) {
         }
     }
 
+    // Hover assertions
+    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
         // sourceFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
@@ -656,6 +659,9 @@ TEST_P(LSPTest, All) {
                 // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
                 break;
             }
+
+            // Check any new HoverAssertions in the updates.
+            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId, rootUri);
         }
     }
 } // namespace sorbet::test
