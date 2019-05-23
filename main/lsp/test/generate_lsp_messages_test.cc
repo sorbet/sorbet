@@ -11,6 +11,16 @@ namespace sorbet::realmain::lsp::test {
 
 template <typename T> using ParseTestLambda = function<void(std::unique_ptr<T> &)>;
 
+template <typename T> unique_ptr<T> fromJSON(const string &jsonStr) {
+    rapidjson::MemoryPoolAllocator<> alloc;
+    rapidjson::Document d(&alloc);
+    d.Parse(jsonStr);
+    if (!d.IsObject()) {
+        throw JSONTypeError("document root", "object", d);
+    }
+    return T::fromJSONValue(d.GetObject(), "root");
+};
+
 /**
  * Using jsonStr, creates two versions of the same document:
  * - One created by parsing jsonStr.
@@ -19,9 +29,9 @@ template <typename T> using ParseTestLambda = function<void(std::unique_ptr<T> &
  * passes on the parsed and re-parsed document.
  */
 template <typename T> void parseTest(const string &jsonStr, ParseTestLambda<T> lambda) {
-    auto original = T::fromJSON(jsonStr);
+    auto original = fromJSON<T>(jsonStr);
     lambda(original);
-    auto reparsed = T::fromJSON(original->toJSON());
+    auto reparsed = fromJSON<T>(original->toJSON());
     lambda(reparsed);
 };
 
@@ -37,17 +47,17 @@ TEST(GenerateLSPMessagesTest, Object) {
     });
 
     // Throws when missing a field.
-    ASSERT_THROW(Range::fromJSON("{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2}}"),
+    ASSERT_THROW(fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2}}"),
                  MissingFieldError);
     // Throws when not an object.
-    ASSERT_THROW(Range::fromJSON("4"), JSONTypeError);
+    ASSERT_THROW(fromJSON<Range>("4"), JSONTypeError);
     // Throws when field does not contain a number
     ASSERT_THROW(
-        Range::fromJSON("{\"start\": {\"line\": 0, \"character\": true}, \"end\": {\"line\": 2, \"character\": 3}}"),
+        fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": true}, \"end\": {\"line\": 2, \"character\": 3}}"),
         JSONTypeError);
     // Throws when field contains a double, not an int.
     ASSERT_THROW(
-        Range::fromJSON("{\"start\": {\"line\": 0, \"character\": 1.1}, \"end\": {\"line\": 2, \"character\": 3}}"),
+        fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": 1.1}, \"end\": {\"line\": 2, \"character\": 3}}"),
         JSONTypeError);
 
     // Serialization: Throws if sub-objects are not initialized.
@@ -61,7 +71,7 @@ TEST(GenerateLSPMessagesTest, StringField) {
                         [&expectedText](auto &textEdit) -> void { ASSERT_EQ(textEdit->newText, expectedText); });
 
     // Throws when not a string
-    ASSERT_THROW(TextEdit::fromJSON(fmt::format("{{\"range\": {}, \"newText\": 4.0}}", SAMPLE_RANGE)), JSONTypeError);
+    ASSERT_THROW(fromJSON<TextEdit>(fmt::format("{{\"range\": {}, \"newText\": 4.0}}", SAMPLE_RANGE)), JSONTypeError);
 }
 
 TEST(GenerateLSPMessagesTest, StringEnumField) {
@@ -70,9 +80,9 @@ TEST(GenerateLSPMessagesTest, StringEnumField) {
                              [](auto &markupContent) -> void { ASSERT_EQ(markupContent->kind, MarkupKind::Markdown); });
 
     // Throws when not a valid enum.
-    ASSERT_THROW(MarkupContent::fromJSON("{\"kind\": \"foobar\", \"value\": \"Hello\"}"), InvalidStringEnumError);
+    ASSERT_THROW(fromJSON<MarkupContent>("{\"kind\": \"foobar\", \"value\": \"Hello\"}"), InvalidStringEnumError);
     // Throws when not a string.
-    ASSERT_THROW(MarkupContent::fromJSON("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<MarkupContent>("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
 
     // Create a C++ object with an invalid enum value and try to serialize.
     auto markupContent = make_unique<MarkupContent>((MarkupKind)1000, "hello");
@@ -101,7 +111,7 @@ TEST(GenerateLSPMessagesTest, OptionalField) {
     });
 
     // Throws when not the correct type.
-    ASSERT_THROW(CreateOrRenameFileOptions::fromJSON("{\"overwrite\": 4}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<CreateOrRenameFileOptions>("{\"overwrite\": 4}"), JSONTypeError);
 }
 
 struct ExceptionThrower {
@@ -136,13 +146,13 @@ TEST(GenerateLSPMessagesTest, VariantField) {
     });
 
     // Throws when missing.
-    ASSERT_THROW(CancelParams::fromJSON("{}"), MissingFieldError);
+    ASSERT_THROW(fromJSON<CancelParams>("{}"), MissingFieldError);
 
     // Throws when not the correct type.
-    ASSERT_THROW(CancelParams::fromJSON("{\"id\": true}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<CancelParams>("{\"id\": true}"), JSONTypeError);
 
     // Int types cannot be doubles.
-    ASSERT_THROW(CancelParams::fromJSON("{\"id\": 4.1}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<CancelParams>("{\"id\": 4.1}"), JSONTypeError);
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
@@ -159,9 +169,9 @@ TEST(GenerateLSPMessagesTest, StringConstant) {
                           [](auto &createFile) -> void { ASSERT_EQ(createFile->kind, "create"); });
 
     // Throws when not the correct constant.
-    ASSERT_THROW(CreateFile::fromJSON("{\"kind\": \"delete\", \"uri\": \"file://foo\"}"), JSONConstantError);
+    ASSERT_THROW(fromJSON<CreateFile>("{\"kind\": \"delete\", \"uri\": \"file://foo\"}"), JSONConstantError);
     // Throws when not a string.
-    ASSERT_THROW(CreateFile::fromJSON("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<CreateFile>("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
 
     // Throws during serialization if not set to proper constant value.
     auto createFile = make_unique<CreateFile>("delete", "file://foo");
@@ -181,10 +191,10 @@ TEST(GenerateLSPMessagesTest, JSONArray) {
     });
 
     // Throws when not an array.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": {}}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": {}}"), JSONTypeError);
 
     // Throws when a member of array has an invalid type.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
 }
 
 TEST(GenerateLSPMessagesTest, IntEnums) {
@@ -200,10 +210,10 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
         });
 
     // Throws if enum is out of valid range.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2,-1,10]}"), InvalidEnumValueError);
+    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2,-1,10]}"), InvalidEnumValueError);
 
     // Throws if enum is not the right type.
-    ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2.1]}"), JSONTypeError);
+    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2.1]}"), JSONTypeError);
 
     // Throws during serialization if enum is out of valid range.
     auto symbolKind = make_unique<SymbolKindOptions>();
