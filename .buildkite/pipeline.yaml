@@ -3,54 +3,52 @@
 #  - we use macs for development thus we want to make sure all scripts run there
 
 steps:
-  - label: "Linters"
+  - label: "[linux] linters.sh"
     command: .buildkite/linters.sh
     agents:
       os: linux
-  - label: "Test: sorbet-static on Mac"
+  - label: "[mac] test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
-    artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "Test: sorbet-static on Linux"
+  - label: "[linux] test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
-    artifact_paths: _out_/**/*
     agents:
       os: linux
-  - label: "Website"
+  - label: "[mac] build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "Test: sorbet-runtime"
-    command: .buildkite/test-and-build-ruby-runtime.sh
+  - label: "[mac] test-and-build-sorbet-runtime-gem.sh"
+    command: .buildkite/test-and-build-sorbet-runtime-gem.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
   - wait: ~
-  - label: "Release build: static on Mac"
+  - label: "[mac] build-sorbet-and-sorbet-static.sh"
     artifact_paths: _out_/**/*
-    command: .buildkite/release-static.sh
+    command: .buildkite/build-sorbet-and-sorbet-static.sh
     agents:
       os: mac
-  - label: "Release build: static on WebAsm"
+  - label: "[mac] build-emscripten.sh"
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: "Release build: static on Linux"
+  - label: "[linux] build-sorbet-and-sorbet-static-gems.sh"
     artifact_paths: _out_/**/*
-    command: .buildkite/release-static.sh
+    command: .buildkite/build-sorbet-and-sorbet-static-gems.sh
     agents:
       os: linux
   - wait: ~
     # TODO(jez) Test on linux
-  - label: "Test: sorbet gem on Mac"
-    command: .buildkite/test-srb.sh
+  - label: "[mac] test-sorbet-gem.sh"
+    command: .buildkite/test-sorbet-gem.sh
     agents:
       os: mac
   - wait: ~
-  - label: "Deploy"
+  - label: "[linux] publish.sh"
     command: .buildkite/publish.sh
     agents:
       os: linux
@@ -59,7 +57,7 @@ steps:
     command: .buildkite/all-succeeded.sh
   - block: "Run optional code coverage"
   - wait: ~
-  - label: "Coverage: sorbet-static"
+  - label: "[mac] coverage-static-sanitized.sh"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*
     retry:
