@@ -113,11 +113,11 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
     - `brew install bazel autoconf coreutils parallel`
 
-2. Build Sorbet
+2.  Build Sorbet
 
     - `bazel build //main:sorbet --config=dbg`
 
-3. Run Sorbet!
+3.  Run Sorbet!
 
     - `bazel-bin/main/sorbet -e "42 + 'hello'"`
 
@@ -621,14 +621,24 @@ using [Docusaurus](https://docusaurus.io/).
 
 Bazel supports having a persistent cache of previous build results so that
 rebuilds for the same input files are fast. To enable this feature, run these
-commands to create a `./.bazelrc` and cache folder:
+commands to create a `./.bazelrc.local` and cache folder:
 
 ```shell
-# The .bazelrc will live in the sorbet repo so it doesn't interfere with other
-# bazel-based repos you have.
-echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
-echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
+# The .bazelrc.local will live in the sorbet repo so it doesn't interfere with
+# other bazel-based repos you have.
+echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
+echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
 mkdir -p "$HOME/.cache/sorbet/bazel-cache"
+```
+
+### Multiple git worktrees
+
+Sometimes it can be nice to have [multiple working trees] in Git. This allows
+you to have multiple active checkouts Sorbet, sharing the same `.git/` folder.
+To set up a new worktree with Sorbet:
+
+```shell
+tools/scripts/make_worktree.sh <worktree_name>
 ```
 
 ### Shell

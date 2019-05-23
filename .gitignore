@@ -1,4 +1,5 @@
 /bazel-*
+/.bazelrc.local
 /compile_commands.json
 /.gdb_history
 /tags
