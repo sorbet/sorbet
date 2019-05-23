@@ -1324,7 +1324,18 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
+
         nestedBlockCounts.pop_back();
+
+        // make sure we've added a static init symbol so we have it ready for later
+        if (auto loc = flatten::extractClassInitLoc(ctx, original)) {
+            if (original->symbol == core::Symbols::root()) {
+                ctx.state.staticInitForFile(*loc);
+            } else {
+                ctx.state.staticInitForClass(original->symbol, *loc);
+            }
+        }
+
         return original;
     }
 
@@ -1548,6 +1559,10 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
     method_checks::validateSymbols(ctx.state);
     sanityCheck(ctx, trees);
 
+    for (auto &t : trees) {
+        t = flatten::run(ctx, std::move(t));
+    }
+
     return trees;
 }
 
@@ -1558,7 +1573,7 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<a
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
     }
 
-    return flatten::run(ctx, std::move(trees));
+    return trees;
 }
 
 vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContext ctx, vector<ast::ParsedFile> trees) {

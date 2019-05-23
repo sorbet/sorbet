@@ -10,42 +10,78 @@ using namespace std;
 
 namespace sorbet::flatten {
 
+// return true if the expression in question is either a method definition, a class definition, or an assignment to a
+// constant; false otherwise.
+bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
+    if (ast::isa_tree<ast::MethodDef>(what.get())) {
+        return true;
+    }
+    if (ast::isa_tree<ast::ClassDef>(what.get())) {
+        return true;
+    }
+
+    if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
+        return ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+    }
+    return false;
+}
+
+// pull all the non-definitions (i.e. anything that's not a method definition, a class definition, or a constant
+// defintion) from a class or file into their own instruction sequence (or, if there is only one, simply move it out of
+// the class body and return it.)
+unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
+    ast::InsSeq::STATS_store inits;
+
+    for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
+        if (isDefinition(ctx, *it)) {
+            ++it;
+            continue;
+        }
+        inits.emplace_back(std::move(*it));
+        it = klass->rhs.erase(it);
+    }
+
+    if (inits.empty()) {
+        return nullptr;
+    }
+    if (inits.size() == 1) {
+        return std::move(inits.front());
+    }
+    return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
+}
+
+// this replicates the logic in extractClassInit but confined only to the relevant locations. We use this to figure out
+// the symbol location for the <static-init> symbol, which is created in advance of this pass (as this pass otherwise
+// needs only immutable access to the context).
+//
+// We return an optional (instead of, say, Loc::none()) when there are no statements because we can't rely on every
+// statement contained in the class body to have a valid location at this point. This way, we can distinguish between
+// nullopt (i.e. there were no statements in the class body) and a non-existant location (which might be because one of
+// the statements contained a non-existant location already.)
+optional<core::Loc> extractClassInitLoc(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
+    int stmtCount = 0;
+    core::Loc initLoc = core::Loc::none(klass->loc.file());
+
+    for (auto it = klass->rhs.begin(); it != klass->rhs.end(); ++it) {
+        // if things are definitions, don't count them
+        if (!isDefinition(ctx, *it)) {
+            // if they aren't definitions, then increment the statement count and note their location
+            stmtCount += 1;
+            initLoc = (*it)->loc;
+        }
+    }
+
+    if (stmtCount == 0) {
+        return {};
+    } else if (stmtCount == 1) {
+        return initLoc;
+    } else {
+        return klass->declLoc;
+    }
+}
+
 class FlattenWalk {
 private:
-    bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
-        if (ast::isa_tree<ast::MethodDef>(what.get())) {
-            return true;
-        }
-        if (ast::isa_tree<ast::ClassDef>(what.get())) {
-            return true;
-        }
-
-        if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
-            return ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
-        }
-        return false;
-    }
-
-    unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
-        ast::InsSeq::STATS_store inits;
-
-        for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
-            if (isDefinition(ctx, *it)) {
-                ++it;
-                continue;
-            }
-            inits.emplace_back(std::move(*it));
-            it = klass->rhs.erase(it);
-        }
-
-        if (inits.empty()) {
-            return nullptr;
-        }
-        if (inits.size() == 1) {
-            return std::move(inits.front());
-        }
-        return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
-    }
 
 public:
     FlattenWalk() {
@@ -242,15 +278,13 @@ private:
     vector<int> classStack;
 };
 
-vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    for (auto &tree : trees) {
-        FlattenWalk flatten;
-        tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
-        tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
-        tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
-    }
+ast::ParsedFile run(core::Context ctx, ast::ParsedFile tree) {
+    FlattenWalk flatten;
+    tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+    tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
+    tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
 
-    return trees;
+    return tree;
 }
 
 } // namespace sorbet::flatten
