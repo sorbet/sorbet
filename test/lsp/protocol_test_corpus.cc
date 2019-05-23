@@ -298,11 +298,44 @@ TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     assertDiagnostics(initializeLSP(), {});
 }
 
-// Monaco doesn't send a root URI.
-TEST_F(ProtocolTest, EmptyRootUri) {
+// Some clients send an empty string for the root uri.
+TEST_F(ProtocolTest, EmptyRootUriInitialization) {
     // Manually reset rootUri before initializing.
     rootUri = "";
     assertDiagnostics(initializeLSP(), {});
+
+    // Manually construct an openFile with text that has a typechecking error.
+    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
+        "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
+    auto diagnostics = send(LSPMessage(move(didOpenNotif)));
+
+    // Check the response for the expected URI.
+    EXPECT_EQ(diagnostics.size(), 1);
+    auto &msg = diagnostics.at(0);
+    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
+        // Will fail test if this does not parse.
+        if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
+            EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
+        }
+    }
+}
+
+// Monaco sends null for the root URI.
+TEST_F(ProtocolTest, MonacoInitialization) {
+    // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
+    rootUri = "";
+    auto params = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
+                                              makeInitializeParams(JSONNullObject(), JSONNullObject(), false));
+    auto responses = send(LSPMessage(move(params)));
+    ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
+    auto &respMsg = responses.at(0);
+    EXPECT_TRUE(respMsg->isResponse());
+    auto &resp = respMsg->asResponse();
+    EXPECT_EQ(resp.requestMethod, LSPMethod::Initialize);
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
+                                                                       make_unique<InitializedParams>()))),
+                      {});
 
     // Manually construct an openFile with text that has a typechecking error.
     auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(

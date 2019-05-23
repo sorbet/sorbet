@@ -110,13 +110,18 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
     return capabilities;
 }
 
-unique_ptr<InitializeParams> makeInitializeParams(string rootPath, string rootUri, bool enableTypecheckInfo) {
+unique_ptr<InitializeParams> makeInitializeParams(variant<string, JSONNullObject> rootPath,
+                                                  variant<string, JSONNullObject> rootUri, bool enableTypecheckInfo) {
     auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities();
     initializeParams->trace = TraceKind::Off;
 
-    auto workspaceFolder = make_unique<WorkspaceFolder>(rootUri, "pay-server");
+    string stringRootUri = "";
+    if (auto str = get_if<string>(&rootUri)) {
+        stringRootUri = *str;
+    }
+    auto workspaceFolder = make_unique<WorkspaceFolder>(stringRootUri, "pay-server");
     vector<unique_ptr<WorkspaceFolder>> workspaceFolders;
     workspaceFolders.push_back(move(workspaceFolder));
     initializeParams->workspaceFolders =
