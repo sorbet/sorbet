@@ -19,7 +19,7 @@ class Sorbet::Private::RequireEverything
     return unless rails?
     begin
       require 'rails'
-    rescue
+    rescue LoadError
       return false
     end
     require './config/application'
@@ -33,7 +33,7 @@ class Sorbet::Private::RequireEverything
     return unless File.exist?('Gemfile')
     begin
       require 'bundler'
-    rescue
+    rescue LoadError
       return
     end
     Sorbet::Private::GemLoader.require_all_gems
