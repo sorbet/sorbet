@@ -20,9 +20,13 @@ class BigFoo; extend T::Sig
     end
   end
                         
-  sig {params(num1: Integer, num2: String).returns(Integer)}
+  sig {generated.params(num1: Integer, num2: String).returns(Integer)}
   def self.bar(num1, num2)
     4 + num1 + num2.to_i
+  end
+
+  sig {generated.void}
+  def self.baz
   end
 
   sig {params(arg: String).returns(String)}
@@ -39,4 +43,11 @@ class BigFoo; extend T::Sig
     end
     s.to_s
   end
+end
+
+def main
+  BigFoo.bar(10, "hello")
+        # ^ hover: sig {generated.params(num1: Integer, num2: String).returns(Integer)}
+  BigFoo.baz
+        # ^ hover: sig {generated.void}
 end
