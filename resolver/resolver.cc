@@ -388,10 +388,18 @@ private:
             resolved = core::Symbols::StubAncestor();
         }
 
-        if (resolved == job.klass || resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
+        if (resolved == job.klass) {
+            if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
+                e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
+                e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
+            }
+            resolved = core::Symbols::StubAncestor();
+        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx)->show(ctx), resolved.data(ctx)->show(ctx));
+                e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
+                e.addErrorLine(resolved.data(ctx)->loc(), "Other definition");
             }
             resolved = core::Symbols::StubAncestor();
         }
