@@ -26,8 +26,8 @@ steps:
     agents:
       os: mac
   - wait: ~
-  - label: ":mac: build-sorbet-and-sorbet-static.sh"
-    command: .buildkite/build-sorbet-and-sorbet-static.sh
+  - label: ":mac: build-static-release.sh"
+    command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
@@ -36,8 +36,8 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux: build-sorbet-and-sorbet-static.sh"
-    command: .buildkite/build-sorbet-and-sorbet-static.sh
+  - label: ":linux: build-static-release.sh"
+    command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
     agents:
       os: linux
