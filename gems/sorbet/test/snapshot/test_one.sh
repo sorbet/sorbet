@@ -81,11 +81,20 @@ if [ -n "$VERBOSE" ]; then
   info "actual:    $actual"
 fi
 
-sorbet_static_exe="$root_dir/../sorbet-static/libexec/sorbet"
-if ! [ -x "$sorbet_static_exe" ]; then
-  error "├─ could not find a sorbet-static executable."
-  warn  "├─ If you are trying to run the tests locally, consider either symlinking"
-  warn  "└─ or copying bazel-bin/main/sorbet to gems/sorbet-static/libexec/sorbet"
+srb="$root_dir/bin/srb"
+
+if [ -z "${SRB_SORBET_EXE:-}" ]; then
+  SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"
+fi
+export SRB_SORBET_EXE
+
+if ! [ -f "$SRB_SORBET_EXE" ]; then
+  error "└─ could not find sorbet executable ($SRB_SORBET_EXE)"
+  exit 1
+fi
+
+if ! [ -x "$SRB_SORBET_EXE" ]; then
+  error "└─ sorbet executable has wrong permissions ($SRB_SORBET_EXE)"
   exit 1
 fi
 
@@ -141,11 +150,11 @@ cp -r "$test_dir/src"/* "$actual"
 # ----- Run the test in the sandbox -----
 
 (
-  # Only cd because srb needs to be in the same folder as the Gemfile.
-  # This script should still to refer to all files with absolute paths.
+  # Only cd because `srb init` needs to be run from the folder with a Gemfile,
+  # not because this test driver needs to refer to files with relative paths.
   cd "$actual"
 
-  SRB_YES=1 "$root_dir/bin/srb" init | \
+  SRB_YES=1 "$srb" init | \
     sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
     > "$actual/out.log"
 )

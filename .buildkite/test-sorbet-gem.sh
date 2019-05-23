@@ -14,9 +14,9 @@ esac
 
 buildkite-agent artifact download "_out_/$platform/sorbet" .
 
-mkdir -p gems/sorbet-static/libexec
-mv "_out_/$platform/sorbet" gems/sorbet-static/libexec
-chmod +x gems/sorbet-static/libexec/sorbet
+SRB_SORBET_EXE="$(realpath "_out_/$platform/sorbet")"
+export SRB_SORBET_EXE
+chmod +x "$SRB_SORBET_EXE"
 
 echo "--- setup :ruby:"
 

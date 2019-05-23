@@ -32,20 +32,24 @@ shift
 srb_path="${BASH_SOURCE[0]}"
 
 typecheck() {
-  # We're using bash string operations here to avoid forking.
-  # Using dirname / basename / etc. would mean ~15ms for each call.
+  if [ -n "$SRB_SORBET_EXE" ]; then
+    "$SRB_SORBET_EXE" "$@"
+  else
+    # We're using bash string operations here to avoid forking.
+    # Using dirname / basename / etc. would mean ~15ms for each call.
 
-  # /path/to/gems/sorbet-0.0.1
-  without_bin_srb="${srb_path%/bin/srb}"
-  # -0.0.1
-  version_suffix="${without_bin_srb##*/sorbet}"
-  # /path/to/gems
-  gems_path="${without_bin_srb%/sorbet*}"
-  # /path/to/gems/sorbet-static-0.0.1-darwin-17/libexec/sorbet
-  # (assumes people only have one platform-depdendent gem installed per version)
-  sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
+    # /path/to/gems/sorbet-0.0.1
+    without_bin_srb="${srb_path%/bin/srb}"
+    # -0.0.1
+    version_suffix="${without_bin_srb##*/sorbet}"
+    # /path/to/gems
+    gems_path="${without_bin_srb%/sorbet*}"
+    # /path/to/gems/sorbet-static-0.0.1-darwin-17/libexec/sorbet
+    # (assumes people only have one platform-depdendent gem installed per version)
+    sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
 
-  "${sorbet[0]}" "$@"
+    "${sorbet[0]}" "$@"
+  fi
 }
 
 # Dynamically computing the path to the srb-rbi script lets this script work
