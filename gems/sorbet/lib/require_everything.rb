@@ -17,11 +17,6 @@ class Sorbet::Private::RequireEverything
 
   def self.load_rails
     return unless rails?
-    begin
-      require 'rails'
-    rescue LoadError
-      return false
-    end
     require './config/application'
     rails = Object.const_get(:Rails)
     rails.application.require_environment!
@@ -114,6 +109,12 @@ class Sorbet::Private::RequireEverything
   end
 
   def self.rails?
-    File.exist?('config/application.rb')
+    return false unless File.exist?('config/application.rb')
+    begin
+      require 'rails'
+    rescue LoadError
+      return false
+    end
+    true
   end
 end
