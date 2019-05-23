@@ -298,6 +298,15 @@ TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     assertDiagnostics(initializeLSP(), {});
 }
 
+TEST_F(ProtocolTest, InitializeAndShutdown) {
+    assertDiagnostics(initializeLSP(), {});
+    auto resp = send(LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Shutdown, JSONNullObject())));
+    ASSERT_EQ(resp.size(), 1) << "Expected a single response to shutdown request.";
+    auto &r = resp.at(0)->asResponse();
+    ASSERT_EQ(r.requestMethod, LSPMethod::Shutdown);
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()))), {});
+}
+
 // Some clients send an empty string for the root uri.
 TEST_F(ProtocolTest, EmptyRootUriInitialization) {
     // Manually reset rootUri before initializing.
