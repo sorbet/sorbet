@@ -125,7 +125,14 @@ class Sorbet::Private::Serialize
       next if !comparable?(value)
       [const_sym, value]
     end
-    constants_serialized = constants.compact.sort.uniq.map do |const_sym, value|
+    constants_sorted = constants.compact.sort do |a, b|
+      spaceship = a <=> b
+      if spaceship.nil?
+        spaceship = Sorbet::Private::RealStdlib.real_spaceship(a, b)
+      end
+      spaceship
+    end
+    constants_serialized = constants_sorted.uniq.map do |const_sym, value|
       constant(const_sym, value)
     end
     ret << constants_serialized.join("\n")
