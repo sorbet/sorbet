@@ -83,7 +83,7 @@ fi
 
 srb="$root_dir/bin/srb"
 
-if [ -z "$SRB_SORBET_EXE" ]; then
+if [ -z "${SRB_SORBET_EXE:-}" ]; then
   SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"
 fi
 export SRB_SORBET_EXE
