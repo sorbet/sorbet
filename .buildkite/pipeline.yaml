@@ -26,9 +26,9 @@ steps:
     agents:
       os: mac
   - wait: ~
-  - label: "[mac] build-sorbet-and-sorbet-static.sh"
+  - label: "[mac] build-sorbet-and-sorbet-static-gems.sh"
     artifact_paths: _out_/**/*
-    command: .buildkite/build-sorbet-and-sorbet-static.sh
+    command: .buildkite/build-sorbet-and-sorbet-static-gems.sh
     agents:
       os: mac
   - label: "[mac] build-emscripten.sh"
