@@ -1,0 +1,11 @@
+GEM
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (= 2.0.1)
+
+BUNDLED WITH
+   2.0.1
