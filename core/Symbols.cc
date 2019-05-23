@@ -271,6 +271,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
+            } else {
+                auto attached = attachedClass(gs);
+                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                if (sym.symbol.exists()) {
+                    res.emplace_back(sym);
+                }
             }
         }
         auto shortName = name.data(gs)->shortName(gs);
