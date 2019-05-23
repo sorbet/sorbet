@@ -113,15 +113,11 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
     - `brew install bazel autoconf coreutils parallel`
 
-2.  Make an empty `.bazelrc.local` file
-
-    - `touch .bazelrc.local`
-
-3.  Build Sorbet
+2.  Build Sorbet
 
     - `bazel build //main:sorbet --config=dbg`
 
-4.  Run Sorbet!
+3.  Run Sorbet!
 
     - `bazel-bin/main/sorbet -e "42 + 'hello'"`
 
