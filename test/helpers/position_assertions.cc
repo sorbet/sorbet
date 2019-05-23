@@ -328,10 +328,13 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
     return make_shared<DefAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
 
-vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
+vector<unique_ptr<Location>> extractLocations(ResponseMessage &respMsg) {
     auto &result = *(respMsg.result);
     auto &locationsOrNull = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(result);
-    return get<vector<unique_ptr<Location>>>(locationsOrNull);
+    if (auto isNull = get_if<JSONNullObject>(&locationsOrNull)) {
+        return vector<unique_ptr<Location>>();
+    }
+    return move(get<vector<unique_ptr<Location>>>(locationsOrNull));
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
@@ -355,7 +358,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         auto &respMsg = responses.at(0)->asResponse();
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
-        auto &locations = extractLocations(respMsg);
+        auto locations = extractLocations(respMsg);
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -420,7 +423,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         auto &respMsg = responses.at(0)->asResponse();
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
-        auto &locations = extractLocations(respMsg);
+        auto locations = extractLocations(respMsg);
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });
