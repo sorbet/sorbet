@@ -8,10 +8,10 @@ end
 
 class Sorbet::Private::RequireEverything
   # Goes through the most common ways to require all your userland code
-  def self.require_everything
+  def self.require_everything(pause = -> (&blk) {blk.call})
     patch_kernel
     load_rails
-    load_bundler # this comes second since some rails projects fail `Bundler.require' before rails is loaded
+    load_bundler(pause) # this comes second since some rails projects fail `Bundler.require' before rails is loaded
     require_all_files
   end
 
@@ -24,12 +24,15 @@ class Sorbet::Private::RequireEverything
     true
   end
 
-  def self.load_bundler
+  def self.load_bundler(pause)
     return unless File.exist?('Gemfile')
-    begin
-      require 'bundler'
-    rescue LoadError
-      return
+    return unless pause.call do
+      begin
+        require 'bundler'
+        true
+      rescue LoadError
+        false
+      end
     end
     Sorbet::Private::GemLoader.require_all_gems
   end

@@ -102,10 +102,6 @@ module Sorbet::Private
             next
           end
           next if gem[:gem] == 'ruby'
-          # We're currently ignoring bundler, because we can't easily pin
-          # everyone to the same version of bundler in tests and in CI.
-          # There is an RBI for bundler in sorbet-typed.
-          next if gem[:gem] == 'bundler'
 
           gem_class_defs[gem] ||= {}
           defined.each do |item|
