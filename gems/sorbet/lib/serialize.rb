@@ -125,7 +125,7 @@ class Sorbet::Private::Serialize
       next if !comparable?(value)
       [const_sym, value]
     end
-    constants_serialized = constants.compact.uniq.sort.map do |const_sym, value|
+    constants_serialized = constants.compact.sort.uniq.map do |const_sym, value|
       constant(const_sym, value)
     end
     ret << constants_serialized.join("\n")
