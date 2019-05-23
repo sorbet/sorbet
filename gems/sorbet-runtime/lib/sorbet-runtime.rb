@@ -96,3 +96,5 @@ require_relative 'types/props/pretty_printable'
 require_relative 'types/props/serializable'
 require_relative 'types/props/type_validation'
 require_relative 'types/struct'
+
+require_relative 'types/compatibility_patches'
