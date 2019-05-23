@@ -621,13 +621,13 @@ using [Docusaurus](https://docusaurus.io/).
 
 Bazel supports having a persistent cache of previous build results so that
 rebuilds for the same input files are fast. To enable this feature, run these
-commands to create a `./.bazelrc` and cache folder:
+commands to create a `./.bazelrc.local` and cache folder:
 
 ```shell
-# The .bazelrc will live in the sorbet repo so it doesn't interfere with other
-# bazel-based repos you have.
-echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
-echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
+# The .bazelrc.local will live in the sorbet repo so it doesn't interfere with
+# other bazel-based repos you have.
+echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
+echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
 mkdir -p "$HOME/.cache/sorbet/bazel-cache"
 ```
 
