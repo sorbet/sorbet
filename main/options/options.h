@@ -72,10 +72,12 @@ struct Printers {
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
+    PrinterConfig AutogenAutoloader;
     PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
+    bool isAutogen() const;
 };
 
 enum Phase {

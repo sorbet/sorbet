@@ -52,6 +52,7 @@ const vector<PrintOptions> print_options({
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
+    {"autogen-autoloader", &Printers::AutogenAutoloader, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -72,7 +73,9 @@ void PrinterConfig::flush() {
         return;
     }
     absl::MutexLock lck(&state->mutex);
-    FileOps::write(outputPath, to_string(state->buf));
+    if (state->buf.size() > 0) {
+        FileOps::write(outputPath, to_string(state->buf));
+    }
 };
 
 vector<reference_wrapper<PrinterConfig>> Printers::printers() {
@@ -104,8 +107,13 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         Autogen,
         AutogenMsgPack,
         AutogenClasslist,
+        AutogenAutoloader,
         PluginGeneratedCode,
     });
+}
+
+bool Printers::isAutogen() const {
+    return Autogen.enabled || AutogenMsgPack.enabled || AutogenClasslist.enabled || AutogenAutoloader.enabled;
 }
 
 struct StopAfterOptions {
@@ -435,6 +443,10 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                         opts.cacheDir = "";
                     }
                 }
+                if (opt == "autogen-autoloader" && outPath.empty()) { // TODO cleanup
+                    logger->error("--print={} requires an output path to be specified", opt);
+                    throw EarlyReturnWithCode(1);
+                }
                 found = true;
                 break;
             }
@@ -597,8 +609,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) &&
-            (opts.stopAfterPhase != Phase::NAMER)) {
+        if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
                           opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
