@@ -218,9 +218,12 @@ void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vecto
 
         auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
         if (!mem.exists()) {
-            if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
-                e.setHeader("Missing definition for abstract method `{}`", proto.data(gs)->show(gs));
-                e.addErrorLine(proto.data(gs)->loc(), "defined here");
+            for (auto loc : sym.data(gs)->locs()) {
+                if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
+                    e.setHeader("Missing definition for abstract method `{}`", proto.data(gs)->show(gs));
+                    e.addErrorLine(proto.data(gs)->loc(), "defined here");
+                    break;
+                }
             }
         }
     }

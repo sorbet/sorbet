@@ -1,0 +1,14 @@
+test/cli/missing-abstract/implementation.rb:2: Missing definition for abstract method `Interface#foo` https://sorbet.org/docs/error-reference#5023
+     2 |class Impl
+        ^^^^^^^^^^
+    test/cli/missing-abstract/interface.rb:8: defined here
+     8 |  def foo
+          ^^^^^^^
+Errors: 1
+test/cli/missing-abstract/implementation.rb:2: Missing definition for abstract method `Interface#foo` https://sorbet.org/docs/error-reference#5023
+     2 |class Impl
+        ^^^^^^^^^^
+    test/cli/missing-abstract/interface.rb:8: defined here
+     8 |  def foo
+          ^^^^^^^
+Errors: 1
