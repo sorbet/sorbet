@@ -278,40 +278,24 @@ private:
     vector<int> classStack;
 };
 
-vector<ast::ParsedFile> run(core::Context ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    auto resultq = make_shared<BlockingBoundedQueue<ast::ParsedFile>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+vector<ast::ParsedFile> run(core::Context ctx, vector<ast::ParsedFile> trees, WorkerPool &_workers) {
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
-    }
-
-    workers.multiplexJob("FlattenWalk", [ctx, fileq, resultq]() {
-        Timer timeit(ctx.state.tracer(), "FlattenWalkWorker");
-        ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-            if (result.gotItem()) {
-                FlattenWalk flatten;
-                job.tree = ast::TreeMap::apply(ctx, flatten, std::move(job.tree));
-                job.tree = flatten.addClasses(ctx, std::move(job.tree));
-                job.tree = flatten.addMethods(ctx, std::move(job.tree));
-                resultq->push(move(job), 1);
-            }
-        }
-    });
-
-    trees.clear();
-    {
-        ast::ParsedFile threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer())) {
-            if (result.gotItem()) {
-                trees.push_back(std::move(threadResult));
-            }
-        }
+        FlattenWalk flatten;
+        tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+        tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
+        tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
     }
 
     return trees;
+}
+
+ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
+    FlattenWalk flatten;
+    tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+    tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
+    tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
+
+    return tree;
 }
 
 } // namespace sorbet::flatten

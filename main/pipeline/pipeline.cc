@@ -660,6 +660,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
+
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
         return result;
     }
@@ -811,7 +812,11 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
     }
     core::Context ctx(gs, core::Symbols::root());
-    what = flatten::run(ctx, std::move(what), workers);
+
+    for (auto &tree : what) {
+        tree = flatten::runOne(ctx, std::move(tree));
+    }
+
     gs->errorQueue->flushErrors();
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
@@ -826,6 +831,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
     if (opts.print.MissingConstants.enabled) {
         what = printMissingConstants(*gs, opts, move(what));
     }
+
     return what;
 }
 
