@@ -52,7 +52,7 @@ public:
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
-        if (print.CFGJson.enabled || print.CFGProto.enabled) {
+        if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
             auto proto = cfg::Proto::toProto(ctx.state, *cfg);
             if (print.CFGJson.enabled) {
                 if (print.CFGJson.outputPath.empty()) {

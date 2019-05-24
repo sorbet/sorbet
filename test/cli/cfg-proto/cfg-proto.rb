@@ -1,7 +1,11 @@
 # typed: true
 
-def foo
-end
+class C
+  include T::CFGExport
 
-def bar
+  def foo
+  end
+
+  def bar
+  end
 end

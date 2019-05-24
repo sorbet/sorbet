@@ -246,5 +246,7 @@ module T
       T::Types::TypedSet.new(type)
     end
   end
+
+  module CFGExport; end
 end
 # rubocop:enable PrisonGuard/UseOpusTypesShortcut
