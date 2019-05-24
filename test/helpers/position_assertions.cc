@@ -331,13 +331,14 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
     return make_shared<DefAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
 }
 
-vector<unique_ptr<Location>> extractLocations(ResponseMessage &respMsg) {
+vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
+    static vector<unique_ptr<Location>> empty;
     auto &result = *(respMsg.result);
     auto &locationsOrNull = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(result);
     if (auto isNull = get_if<JSONNullObject>(&locationsOrNull)) {
-        return vector<unique_ptr<Location>>();
+        return empty;
     }
-    return move(get<vector<unique_ptr<Location>>>(locationsOrNull));
+    return get<vector<unique_ptr<Location>>>(locationsOrNull);
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
@@ -361,7 +362,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         auto &respMsg = responses.at(0)->asResponse();
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
-        auto locations = extractLocations(respMsg);
+        auto &locations = extractLocations(respMsg);
 
         if (this->symbol == NOTHING_LABEL) {
             // Special case: Nothing should be defined here.
@@ -438,7 +439,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         auto &respMsg = responses.at(0)->asResponse();
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
-        auto locations = extractLocations(respMsg);
+        auto &locations = extractLocations(respMsg);
         if (symbol == NOTHING_LABEL) {
             // Special case: This location should not report usages of anything.
             for (auto &foundLocation : locations) {
