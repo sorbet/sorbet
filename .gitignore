@@ -7,6 +7,7 @@
 # CI puts a checkout here for testing.
 /pay-server
 
+.idea/
 .vscode/
 
 /website/lib/core/metadata.js
