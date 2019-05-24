@@ -156,7 +156,20 @@ cp -r "$test_dir/src"/* "$actual"
   # not because this test driver needs to refer to files with relative paths.
   cd "$actual"
 
-  bundle install
+  if ! bundle install > "$actual/bundle-install.log" 2>&1; then
+    if [ -z "$VERBOSE" ]; then
+      error "└─ 'bundle install' failed. Re-run with --verbose for more."
+    else
+      cat "$actual/bundle-install.log"
+      error "└─ 'bundle install' failed. See output above."
+    fi
+    exit 1
+  fi
+  if [ -n "$VERBOSE" ]; then
+    cat "$actual/bundle-install.log"
+  fi
+  rm -f "$actual/bundle-install.log"
+
   if ! SRB_YES=1 bundle exec "$srb" init | \
       sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
       > "$actual/out.log" \
