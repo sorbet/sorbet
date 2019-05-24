@@ -77,9 +77,9 @@ class Sorbet::Private::Serialize
       end
       ret << "  include ::#{ancestor_name}\n"
     end
-    klass.singleton_class.ancestors.each do |ancestor|
-      next if ancestor == klass.singleton_class
-      break if ancestor == superclass&.singleton_class
+    Sorbet::Private::RealStdlib.real_singleton_class(klass).ancestors.each do |ancestor|
+      next if ancestor == Sorbet::Private::RealStdlib.real_singleton_class(klass)
+      break if superclass && ancestor == Sorbet::Private::RealStdlib.real_singleton_class(superclass)
       break if ancestor == Module
       break if ancestor == Object
       ancestor_name = constant_cache.name_by_class(ancestor)
@@ -168,7 +168,7 @@ class Sorbet::Private::Serialize
         next
       end
       next if blacklisted_method(method)
-      next if ancestor_has_method(method, klass.singleton_class)
+      next if ancestor_has_method(method, Sorbet::Private::RealStdlib.real_singleton_class(klass))
       serialize_method(method, true)
     end
     ret << methods.join("\n")
