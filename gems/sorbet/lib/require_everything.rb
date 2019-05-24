@@ -29,7 +29,7 @@ class Sorbet::Private::RequireEverything
 
     begin
       if pause_tracepoints
-        Tracepoint.disable_tracepoints
+        Sorbet::Private::GemGeneratorTracepoint::Tracer.disable_tracepoints
       end
 
       require 'bundler'
@@ -37,7 +37,7 @@ class Sorbet::Private::RequireEverything
       return
     ensure
       if pause_tracepoints
-        Tracepoint.enable_tracepoints
+        Sorbet::Private::GemGeneratorTracepoint::Tracer.enable_tracepoints
       end
     end
 
