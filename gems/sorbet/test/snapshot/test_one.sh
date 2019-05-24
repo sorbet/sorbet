@@ -169,9 +169,24 @@ cp -r "$test_dir/src"/* "$actual"
   cd "$actual"
 
   bundle install
-  SRB_YES=1 bundle exec "$srb" init | \
-    sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
-    > "$actual/out.log"
+  if ! SRB_YES=1 bundle exec "$srb" init | \
+      sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
+      > "$actual/out.log" \
+      2> "$actual/err.log"; then
+    error "├─ srb init failed."
+    if [ -z "$VERBOSE" ]; then
+      error "├─ stdout: $actual/out.log"
+      error "├─ stderr: $actual/err.log"
+      error "└─ (or re-run with --verbose)"
+    else
+      error "├─ stdout ($actual/out.log):"
+      cat "$actual/out.log"
+      error "├─ stderr ($actual/err.log):"
+      cat "$actual/err.log"
+      error "└─ (end stderr)"
+    fi
+    exit 1
+  fi
 )
 
 
@@ -191,6 +206,22 @@ if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
   fi
 fi
 
+# ----- Check err.log -----
+
+if [ -z "$is_partial" ] || [ -f "$test_dir/expected/err.log" ]; then
+  if ! diff -u "$test_dir/expected/err.log" "$actual/err.log"; then
+    error "├─ expected err.log did not match actual err.log"
+
+    if [ -z "$UPDATE" ]; then
+      error "└─ see output above."
+      exit 1
+    else
+      warn "├─ updating expected/err.log"
+      cp "$actual/err.log" "$test_dir/expected/err.log"
+    fi
+  fi
+fi
+
 # ----- Check sorbet/ -----
 
 # FIXME: Removing hidden-definitions in actual to hide them from diff output.
@@ -201,7 +232,7 @@ if [ -z "$is_partial" ]; then
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
     if [ -z "$UPDATE" ]; then
-      error "└─ see output above."
+      error "└─ see output above. Run with --update to fix."
       exit 1
     else
       warn "├─ updating expected/sorbet (total):"
