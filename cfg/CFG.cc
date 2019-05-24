@@ -186,9 +186,7 @@ Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction
 
 bool CFG::shouldExport(const core::GlobalState &gs) const {
     // Only export CFGs whose owner mixes in T::CFGExport
-    auto owner = symbol.data(gs)->owner;
-    const auto &mixins = owner.dataAllowingNone(gs)->mixins();
-    return find(mixins.begin(), mixins.end(), core::Symbols::T_CFGExport()) != mixins.end();
+    return symbol.data(gs)->owner.dataAllowingNone(gs)->derivesFrom(gs, core::Symbols::T_CFGExport());
 }
 
 } // namespace sorbet::cfg
