@@ -9,9 +9,9 @@
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
     <rights>© 2019 Stripe</rights>
     <entry>
-        <title type="html"><![CDATA[State of Sorbet May 2019]]></title>
-        <id>https://sorbet.org/blog/2019/05/16/state-of-sorbet-may-2019.html</id>
-        <link href="https://sorbet.org/blog/2019/05/16/state-of-sorbet-may-2019.html">
+        <title type="html"><![CDATA[State of Sorbet Spring 2019]]></title>
+        <id>https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html</id>
+        <link href="https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html">
         </link>
         <updated>2019-05-16T06:00:00Z</updated>
         <summary type="html"><![CDATA[<p>Stripe uses Ruby extensively<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>. It’s the main language we use to build

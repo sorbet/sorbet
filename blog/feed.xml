@@ -14,9 +14,9 @@
         </image>
         <copyright>© 2019 Stripe</copyright>
         <item>
-            <title><![CDATA[State of Sorbet May 2019]]></title>
-            <link>https://sorbet.org/blog/2019/05/16/state-of-sorbet-may-2019.html</link>
-            <guid>https://sorbet.org/blog/2019/05/16/state-of-sorbet-may-2019.html</guid>
+            <title><![CDATA[State of Sorbet Spring 2019]]></title>
+            <link>https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html</link>
+            <guid>https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html</guid>
             <pubDate>Thu, 16 May 2019 06:00:00 GMT</pubDate>
             <description><![CDATA[<p>Stripe uses Ruby extensively<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>. It’s the main language we use to build
 the business logic behind our APIs, and our Ruby codebase is on the order of
