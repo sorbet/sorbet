@@ -196,6 +196,7 @@ class Sorbet::Private::Serialize
 
   def valid_method_name(name)
     return true if SPECIAL_METHOD_NAMES.include?(name)
+    return false if name =~ /^\d/
     name =~ /^[[:word:]]+[?!=]?$/
   end
 
