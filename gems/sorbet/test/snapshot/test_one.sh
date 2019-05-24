@@ -154,6 +154,7 @@ cp -r "$test_dir/src"/* "$actual"
   # not because this test driver needs to refer to files with relative paths.
   cd "$actual"
 
+  bundle install
   SRB_YES=1 bundle exec "$srb" init | \
     sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
     > "$actual/out.log"
