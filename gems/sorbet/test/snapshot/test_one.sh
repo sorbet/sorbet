@@ -76,9 +76,9 @@ info "Running test:  $0 $test_dir $VERBOSE $UPDATE"
 actual="$(mktemp -d)"
 
 if [ -n "$VERBOSE" ]; then
-  info "PWD:       $PWD"
-  info "test_dir:  $test_dir"
-  info "actual:    $actual"
+  info "├─ PWD:       $PWD"
+  info "├─ test_dir:  $test_dir"
+  info "├─ actual:    $actual"
 fi
 
 srb="$root_dir/bin/srb"
@@ -111,6 +111,20 @@ fi
 if ! [ -f "$test_dir/src/Gemfile" ]; then
   error "└─ each test must have src/Gemfile: $test_dir/src/Gemfile"
   exit 1
+fi
+
+if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
+  error "├─ each test must have src/Gemfile.lock: $test_dir/src/Gemfile.lock"
+  if [ -z "$UPDATE" ]; then
+    warn "└─ re-run with --update to create it."
+    exit 1
+  else
+    warn "└─ running 'bundle install' to create it"
+    (
+      cd "$test_dir/src"
+      bundle install
+    )
+  fi
 fi
 
 if ! [ -d "$test_dir/expected" ]; then
