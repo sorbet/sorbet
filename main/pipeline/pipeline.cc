@@ -325,8 +325,6 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
         }
     }
 
-    what = flatten::run(core::Context(gs, core::Symbols::root()), std::move(what), workers);
-
     return what;
 }
 
@@ -661,6 +659,8 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
 
+    // resolved = flatten::runOne(ctx, move(resolved));
+
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
         return result;
     }
@@ -811,11 +811,6 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
-    core::Context ctx(gs, core::Symbols::root());
-
-    for (auto &tree : what) {
-        tree = flatten::runOne(ctx, std::move(tree));
-    }
 
     gs->errorQueue->flushErrors();
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
@@ -831,6 +826,8 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
     if (opts.print.MissingConstants.enabled) {
         what = printMissingConstants(*gs, opts, move(what));
     }
+    core::Context ctx(gs, core::Symbols::root());
+    what = flatten::run(ctx, move(what), workers);
 
     return what;
 }
@@ -851,6 +848,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         }
 
         core::Context ctx(*gs, core::Symbols::root());
+
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }

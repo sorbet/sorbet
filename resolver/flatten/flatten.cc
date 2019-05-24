@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include <iostream>
+
 using namespace std;
 
 namespace sorbet::flatten {
@@ -18,6 +20,9 @@ bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
         return true;
     }
     if (ast::isa_tree<ast::ClassDef>(what.get())) {
+        return true;
+    }
+    if (ast::isa_tree<ast::EmptyTree>(what.get())) {
         return true;
     }
 
@@ -102,6 +107,9 @@ public:
         if (inits == nullptr) {
             return classDef;
         }
+
+        // std::cerr << "inits are at " << inits->loc.file().id() << std::endl;
+        // std::cerr << "init is " << inits->toString(ctx) << std::endl;
 
         core::SymbolRef sym;
         if (classDef->symbol == core::Symbols::root()) {
@@ -290,10 +298,13 @@ vector<ast::ParsedFile> run(core::Context ctx, vector<ast::ParsedFile> trees, Wo
 }
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
+    // std::cerr << "~~~~" << std::endl << tree.tree->toString(ctx) << std::endl;
+    // std::cerr << "calling flatten on tree with file id " << tree.tree->loc.file().id() << std::endl;
     FlattenWalk flatten;
     tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
     tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
     tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
+    // std::cerr << "++++" << std::endl << tree.tree->toString(ctx) << std::endl;
 
     return tree;
 }

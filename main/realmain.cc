@@ -23,6 +23,8 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
 
+#include "resolver/flatten/flatten.h"
+
 #include <csignal>
 #include <poll.h>
 
@@ -422,7 +424,6 @@ int realmain(int argc, char *argv[]) {
 
             runAutogen(ctx, opts, *workers, indexed);
         } else {
-
             indexed = pipeline::resolve(gs, move(indexed), opts, *workers);
             indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);
         }
