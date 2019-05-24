@@ -127,24 +127,6 @@ if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
   fi
 fi
 
-if ! [ -d "$test_dir/expected" ]; then
-  error "├─ each test must have an expected/ directory: $test_dir/expected"
-
-  if [ -z "$is_partial" ]; then
-    if [ -z "$UPDATE" ]; then
-      warn "└─ re-run with --update to create it."
-      exit 1
-    else
-      warn "├─ creating $test_dir/expected"
-      mkdir "$test_dir/expected"
-    fi
-  else
-    warn "└─ If you are trying to create a new partial test, it's easiest to create a new"
-    warn "   empty total test, run with --update, and then convert it to a partial test."
-    exit 1
-  fi
-fi
-
 # TODO: make these files recordable
 if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
   error "├─ hidden-definitions are not currently testable."
@@ -186,6 +168,7 @@ if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
       exit 1
     else
       warn "├─ updating expected/out.log"
+      mkdir -p "$test_dir/expected"
       cp "$actual/out.log" "$test_dir/expected/out.log"
     fi
   fi
@@ -196,7 +179,7 @@ fi
 # FIXME: Removing hidden-definitions in actual to hide them from diff output.
 rm -rf "$actual/sorbet/rbi/hidden-definitions"
 
-if [ -z "$is_partial" ]; then
+diff_total() {
   if ! diff -ur "$test_dir/expected/sorbet" "$actual/sorbet"; then
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
@@ -209,7 +192,9 @@ if [ -z "$is_partial" ]; then
       cp -r "$actual/sorbet" "$test_dir/expected"
     fi
   fi
-elif [ -d "$test_dir/expected/sorbet" ]; then
+}
+
+diff_partial() {
   set +e
   diff -ur "$test_dir/expected/sorbet" "$actual/sorbet" | \
     grep -vF "Only in $actual" \
@@ -246,6 +231,20 @@ elif [ -d "$test_dir/expected/sorbet" ]; then
       done
     fi
   fi
+}
+
+if [ -z "$is_partial" ]; then
+  diff_total
+elif [ -d "$test_dir/expected" ]; then
+  diff_partial
+elif [ -n "$UPDATE" ]; then
+  warn "├─ treating empty partial test as total for the sake of updating."
+  warn "├─ Feel free to delete files in this snapshot that you don't want."
+  diff_total
+else
+  # It's fine for a partial test to not have an expected dir.
+  # It means the test only cares about the exit code of srb init.
+  true
 fi
 
 rm -rf "$actual"
