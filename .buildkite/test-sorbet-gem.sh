@@ -31,6 +31,6 @@ echo "+++ tests"
 
 # TODO(jez) test/snapshot/driver.sh is not currently capable of testing the actual gem.
 # This currently tests that local development isn't broken.
-test/snapshot/driver.sh
+test/snapshot/driver.sh --verbose
 
 popd
