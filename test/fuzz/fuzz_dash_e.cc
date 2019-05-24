@@ -12,15 +12,17 @@ namespace spd = spdlog;
 auto logger = spdlog::stdout_logger_mt("console");
 auto typeErrorsConsole = spdlog::stdout_logger_mt("typeErrorsConsole");
 
-const realmain::options::Options opts = [] {
+realmain::options::Options createDefaultOptions(bool stressIncrementalResolver) {
     realmain::options::Options opts;
+    opts.stressIncrementalResolver = stressIncrementalResolver;
     // you can set up options here
     return opts;
-}();
+};
+
+unique_ptr<const realmain::options::Options> opts =
+    make_unique<const realmain::options::Options>(createDefaultOptions(false));
 
 unique_ptr<KeyValueStore> kvstore;
-
-bool stressIncrementalResolver = false;
 
 unique_ptr<core::GlobalState> buildInitialGlobalState() {
     typeErrorsConsole->set_level(spd::level::critical);
@@ -30,7 +32,7 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
 
     logger->trace("Doing on-start initialization");
 
-    payload::createInitialGlobalState(gs, opts, kvstore);
+    payload::createInitialGlobalState(gs, *opts, kvstore);
     return gs;
 }
 
@@ -41,11 +43,11 @@ extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
     // thus we do it manually
     for (int i = 0; i < *argc; i++) {
         if (string((*argv)[i]) == "--stress-incremental-resolver") {
-            stressIncrementalResolver = true;
+            opts = make_unique<const realmain::options::Options>(createDefaultOptions(true));
         }
     }
 
-    if (stressIncrementalResolver) {
+    if (opts->stressIncrementalResolver) {
         logger->critical("Enabling incremental resolver");
     }
     return 0;
@@ -67,8 +69,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         file.data(*gs).strictLevel = core::StrictLevel::True;
     }
 
-    indexed = realmain::pipeline::index(gs, inputFiles, opts, *workers, kvstore);
-    indexed = realmain::pipeline::resolve(*gs, move(indexed), opts, *workers);
-    indexed = realmain::pipeline::typecheck(gs, move(indexed), opts, *workers);
+    indexed = realmain::pipeline::index(gs, inputFiles, *opts, *workers, kvstore);
+    indexed = realmain::pipeline::resolve(*gs, move(indexed), *opts, *workers);
+    indexed = realmain::pipeline::typecheck(gs, move(indexed), *opts, *workers);
     return 0;
 }
