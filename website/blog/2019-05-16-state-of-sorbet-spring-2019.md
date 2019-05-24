@@ -1,6 +1,6 @@
 ---
-id: state-of-sorbet-may-2019
-title: State of Sorbet May 2019
+id: state-of-sorbet-spring-2019
+title: State of Sorbet Spring 2019
 author: James Iry
 authorURL: https://twitter.com/jamesiry
 ---
