@@ -65,16 +65,9 @@ module Sorbet::Private
       Sorbet.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
       def self.trace
         start
-        yield method(:pause_tracepoints)
+        yield
         finish
         trace_results
-      end
-
-      Sorbet.sig {params(blk: T.proc.void).void}
-      def self.pause_tracepoints(&blk)
-        disable_tracepoints
-        yield
-        enable_tracepoints
       end
 
       Sorbet.sig {void}

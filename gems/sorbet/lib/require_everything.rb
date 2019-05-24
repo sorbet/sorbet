@@ -8,7 +8,7 @@ end
 
 class Sorbet::Private::RequireEverything
   # Goes through the most common ways to require all your userland code
-  def self.require_everything(pause_tracepoints = -> (&blk) {blk.call})
+  def self.require_everything(pause_tracepoints: false)
     patch_kernel
     load_rails
     load_bundler(pause_tracepoints) # this comes second since some rails projects fail `Bundler.require' before rails is loaded
@@ -26,14 +26,21 @@ class Sorbet::Private::RequireEverything
 
   def self.load_bundler(pause_tracepoints)
     return unless File.exist?('Gemfile')
-    return unless pause_tracepoints.call do
-      begin
-        require 'bundler'
-        true
-      rescue LoadError
-        false
+
+    begin
+      if pause_tracepoints
+        Tracepoint.disable_tracepoints
+      end
+
+      require 'bundler'
+    rescue LoadError
+      return
+    ensure
+      if pause_tracepoints
+        Tracepoint.enable_tracepoints
       end
     end
+
     Sorbet::Private::GemLoader.require_all_gems
   end
 

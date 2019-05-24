@@ -35,8 +35,8 @@ module Sorbet::Private
 
     Sorbet.sig {params(output_dir: String).void}
     def self.main(output_dir = OUTPUT)
-      trace_results = Tracer.trace do |pause_tracepoints|
-        Sorbet::Private::RequireEverything.require_everything(pause_tracepoints)
+      trace_results = Tracer.trace
+        Sorbet::Private::RequireEverything.require_everything(pause_tracepoints: true)
       end
 
       FileUtils.rm_r(output_dir) if Dir.exist?(output_dir)
