@@ -56,22 +56,12 @@ public:
         if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
             auto proto = cfg::Proto::toProto(ctx.state, *cfg);
             if (print.CFGJson.enabled) {
-                if (print.CFGJson.outputPath.empty()) {
-                    core::Proto::toJSON(proto, cout);
-                } else {
-                    stringstream buf;
-                    core::Proto::toJSON(proto, buf);
-                    print.CFGJson.print(buf.str());
-                }
+                string buf = core::Proto::toJSON(proto);
+                print.CFGJson.print(buf);
             } else {
                 // The proto wire format allows simply concatenating repeated message fields
-                if (print.CFGProto.outputPath.empty()) {
-                    cfg::Proto::toMulti(proto).SerializeToOstream(&cout);
-                } else {
-                    stringstream buf;
-                    cfg::Proto::toMulti(proto).SerializeToOstream(&buf);
-                    print.CFGProto.print(buf.str());
-                }
+                string buf = cfg::Proto::toMulti(proto).SerializeAsString();
+                print.CFGProto.print(buf);
             }
         }
         return m;
