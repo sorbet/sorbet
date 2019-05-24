@@ -15,8 +15,6 @@
 #include "absl/strings/str_split.h"
 #include "core/errors/infer.h"
 
-#include <iostream>
-
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
 template class std::unique_ptr<sorbet::core::GlobalState>;
@@ -1344,11 +1342,6 @@ SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
 }
 
 SymbolRef GlobalState::staticInitForFile(Loc loc) {
-    // if (loc.exists()) {
-    //     std::cerr << "creating: file id is " << loc.file().id() << std::endl;
-    // } else {
-    //     std::cerr << "creating: non-existant location; file id is " << loc.file().id() << std::endl;
-    // }
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
@@ -1361,15 +1354,8 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
 }
 
 SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
-    // if (loc.exists()) {
-    //     std::cerr << "file id is " << loc.file().id() << std::endl;
-    // } else {
-    //     std::cerr << "non-existant location; file id is " << loc.file().id() << std::endl;
-    // }
     auto nm = getNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
-    // std::cerr << "got name" << std::endl;
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
-    // std::cerr << "got ref" << std::endl;
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
     return ref;
 }

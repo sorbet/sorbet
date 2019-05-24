@@ -10,6 +10,7 @@
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
+#include "flattener/flatten.h"
 
 using namespace std;
 
@@ -308,6 +309,8 @@ public:
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
 
+
+
         // In Ruby 2.5 they changed this class to have a different superclass
         // from 2.4. Since we don't have a good story around versioned ruby rbis
         // yet, lets just force the superclass regardless of version.
@@ -344,6 +347,16 @@ public:
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }
+
+        // make sure we've added a static init symbol so we have it ready for the flatten pass later
+        if (auto loc = flatten::extractClassInitLoc(ctx, klass)) {
+            if (klass->symbol == core::Symbols::root()) {
+                ctx.state.staticInitForFile(*loc);
+            } else {
+                ctx.state.staticInitForClass(klass->symbol, *loc);
+            }
+        }
+
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 

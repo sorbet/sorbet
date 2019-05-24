@@ -54,7 +54,7 @@ compilation_database(
         "//main/pipeline:pipeline",
         "//resolver:resolver",
         "//resolver/method_checks:method_checks",
-        "//resolver/flatten:flatten",
+        "//flattener:flattener",
         "//plugin:plugin",
         "//payload/text:text",
         "//payload/binary:binary",

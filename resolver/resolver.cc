@@ -7,7 +7,6 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
-#include "resolver/flatten/flatten.h"
 #include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
@@ -1323,8 +1322,6 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
-
-        nestedBlockCounts.pop_back();
 
         // make sure we've added a static init symbol so we have it ready for later
         if (auto loc = flatten::extractClassInitLoc(ctx, original)) {

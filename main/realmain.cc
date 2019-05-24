@@ -23,8 +23,6 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
 
-#include "resolver/flatten/flatten.h"
-
 #include <csignal>
 #include <poll.h>
 

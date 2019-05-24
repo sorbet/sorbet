@@ -7,10 +7,10 @@
 #include "core/Names.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
+#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
-#include "resolver/flatten/flatten.h"
 #include "resolver/resolver.h"
 #include "spdlog/spdlog.h"
 // has to come before the next one. This comment stops formatter from reordering them

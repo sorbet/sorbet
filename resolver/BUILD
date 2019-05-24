@@ -23,7 +23,6 @@ cc_library(
         "//ast/desugar",
         "//ast/treemap",
         "//core",
-        "//resolver/flatten",
         "//resolver/method_checks",
     ],
 )

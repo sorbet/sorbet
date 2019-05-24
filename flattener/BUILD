@@ -1,5 +1,5 @@
 cc_library(
-    name = "flatten",
+    name = "flattener",
     srcs = glob(
         [
             "*.cc",
