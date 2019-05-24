@@ -440,11 +440,11 @@ LSP tests can also assert the contents of hover responses with `hover` assertion
 # ^ hover: Integer(10)
 ```
 
-If a location should report the empty string, use the special label `(empty)`:
+If a location should report the empty string, use the special label `(nothing)`:
 
 ```ruby
      a = 10
-# ^ hover: (empty)
+# ^ hover: (nothing)
 ```
 
 #### Testing incremental typechecking

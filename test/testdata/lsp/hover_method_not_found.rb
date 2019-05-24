@@ -16,4 +16,4 @@ end
 
 foo = Foo.new
 foo.something # error: Method `something` does not exist on `Foo`
-      # ^ hover: (empty)
+      # ^ hover: (nothing)
