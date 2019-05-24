@@ -265,6 +265,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
         } else {
+            // For the error when you use a instance method but wanted the
+            // singleton one
             auto singleton = lookupSingletonClass(gs);
             if (singleton.exists()) {
                 sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
@@ -272,6 +274,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                     res.emplace_back(sym);
                 }
             } else {
+                // For the error when you use a singleton method but wanted the
+                // instance one
                 auto attached = attachedClass(gs);
                 sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
                 if (sym.symbol.exists()) {
