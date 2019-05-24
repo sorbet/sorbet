@@ -109,8 +109,14 @@ if ! [ -d "$test_dir/src" ]; then
 fi
 
 if ! [ -f "$test_dir/src/Gemfile" ]; then
-  error "└─ each test must have src/Gemfile: $test_dir/src/Gemfile"
-  exit 1
+  error "├─ each test must have src/Gemfile: $test_dir/src/Gemfile"
+  if [ -z "$UPDATE" ]; then
+    warn "└─ re-run with --update to create it."
+    exit 1
+  else
+    warn "└─ creating empty Gemfile"
+    touch "$test_dir/src/Gemfile"
+  fi
 fi
 
 if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
