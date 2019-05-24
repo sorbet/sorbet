@@ -184,4 +184,9 @@ string BasicBlock::toString(core::Context ctx) {
 Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 
+bool CFG::shouldExport(const core::GlobalState &gs) const {
+    // Only export CFGs whose owner mixes in T::CFGExport
+    return symbol.data(gs)->owner.dataAllowingNone(gs)->derivesFrom(gs, core::Symbols::T_CFGExport());
+}
+
 } // namespace sorbet::cfg

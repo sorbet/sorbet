@@ -4,11 +4,11 @@
   "path": "test/testdata/cfg/math.rb",
   "position": {
    "start": {
-    "line": 6,
+    "line": 7,
     "column": 3
    },
    "end": {
-    "line": 6,
+    "line": 7,
     "column": 35
    }
   }
@@ -87,11 +87,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 6,
+        "line": 7,
         "column": 3
        },
        "end": {
-        "line": 12,
+        "line": 13,
         "column": 6
        }
       }
@@ -122,11 +122,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 6,
+        "line": 7,
         "column": 22
        },
        "end": {
-        "line": 6,
+        "line": 7,
         "column": 28
        }
       }
@@ -148,11 +148,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 6,
+        "line": 7,
         "column": 30
        },
        "end": {
-        "line": 6,
+        "line": 7,
         "column": 31
        }
       }
@@ -174,11 +174,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 6,
+        "line": 7,
         "column": 33
        },
        "end": {
-        "line": 6,
+        "line": 7,
         "column": 34
        }
       }
@@ -208,11 +208,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 7,
+       "line": 8,
        "column": 8
       },
       "end": {
-       "line": 7,
+       "line": 8,
        "column": 14
       }
      }
@@ -270,11 +270,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 8,
+        "line": 9,
         "column": 7
        },
        "end": {
-        "line": 8,
+        "line": 9,
         "column": 12
        }
       }
@@ -288,11 +288,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 7,
+       "line": 8,
        "column": 5
       },
       "end": {
-       "line": 11,
+       "line": 12,
        "column": 8
       }
      }
@@ -336,11 +336,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 10,
+        "line": 11,
         "column": 7
        },
        "end": {
-        "line": 10,
+        "line": 11,
         "column": 12
        }
       }
@@ -354,11 +354,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 7,
+       "line": 8,
        "column": 5
       },
       "end": {
-       "line": 11,
+       "line": 12,
        "column": 8
       }
      }
@@ -390,11 +390,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 6,
+        "line": 7,
         "column": 3
        },
        "end": {
-        "line": 12,
+        "line": 13,
         "column": 6
        }
       }
@@ -408,11 +408,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 6,
+       "line": 7,
        "column": 3
       },
       "end": {
-       "line": 12,
+       "line": 13,
        "column": 6
       }
      }
@@ -427,11 +427,11 @@
   "path": "test/testdata/cfg/math.rb",
   "position": {
    "start": {
-    "line": 5,
+    "line": 6,
     "column": 3
    },
    "end": {
-    "line": 5,
+    "line": 6,
     "column": 76
    }
   }
@@ -472,11 +472,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -508,11 +508,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -548,11 +548,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 5,
+       "line": 6,
        "column": 3
       },
       "end": {
-       "line": 5,
+       "line": 6,
        "column": 76
       }
      }
@@ -589,11 +589,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 5,
+       "line": 6,
        "column": 3
       },
       "end": {
-       "line": 5,
+       "line": 6,
        "column": 76
       }
      }
@@ -616,11 +616,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -644,11 +644,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -676,11 +676,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -694,11 +694,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 5,
+       "line": 6,
        "column": 3
       },
       "end": {
-       "line": 5,
+       "line": 6,
        "column": 76
       }
      }
@@ -721,11 +721,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -756,11 +756,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 15
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 21
        }
       }
@@ -782,11 +782,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 23
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 24
        }
       }
@@ -805,11 +805,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 23
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 33
        }
       }
@@ -840,11 +840,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 35
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 36
        }
       }
@@ -866,11 +866,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 38
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 45
        }
       }
@@ -901,11 +901,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 47
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 48
        }
       }
@@ -927,11 +927,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 50
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 57
        }
       }
@@ -1067,11 +1067,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 15
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 57
        }
       }
@@ -1146,11 +1146,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 8
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 58
        }
       }
@@ -1172,11 +1172,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 67
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 74
        }
       }
@@ -1216,11 +1216,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 8
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 75
        }
       }
@@ -1239,11 +1239,11 @@
       "path": "test/testdata/cfg/math.rb",
       "position": {
        "start": {
-        "line": 5,
+        "line": 6,
         "column": 3
        },
        "end": {
-        "line": 5,
+        "line": 6,
         "column": 76
        }
       }
@@ -1257,11 +1257,11 @@
      "path": "test/testdata/cfg/math.rb",
      "position": {
       "start": {
-       "line": 5,
+       "line": 6,
        "column": 3
       },
       "end": {
-       "line": 5,
+       "line": 6,
        "column": 76
       }
      }

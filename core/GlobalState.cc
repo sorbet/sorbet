@@ -256,6 +256,10 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Net_Protocol());
     Symbols::Net_Protocol().data(*this)->setIsModule(false);
 
+    // A magic symbol to cause CFGs to be exported
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::CFGExport());
+    ENFORCE(id == Symbols::T_CFGExport());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Top()] = Symbols::top();

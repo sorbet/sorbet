@@ -122,6 +122,9 @@ public:
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 
+    // Should this CFG be exported?
+    bool shouldExport(const core::GlobalState &gs) const;
+
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops);

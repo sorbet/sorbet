@@ -246,5 +246,8 @@ module T
       T::Types::TypedSet.new(type)
     end
   end
+
+  # When mixed into a module, indicates that Sorbet may export the CFG for methods in that module
+  module CFGExport; end
 end
 # rubocop:enable PrisonGuard/UseOpusTypesShortcut
