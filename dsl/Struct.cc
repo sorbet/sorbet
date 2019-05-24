@@ -24,6 +24,10 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     return ast::MK::UnresolvedConstant(node->loc, std::move(newScope), cnst->cnst);
 }
 
+static unique_ptr<ast::Expression> structInitConstant(core::Loc loc) {
+    return ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::StructInitModule());
+}
+
 static bool isKeywordInitKey(const core::GlobalState &gs, ast::Expression *node) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
@@ -128,9 +132,17 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                                            ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
     }
 
-    body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
-    body.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                      ast::MK::Cast(loc, dupName(asgn->lhs.get())), ast::MethodDef::DSLSynthesized));
+    // Include a module that only contains #initialize to allow overriding #initialize with a different signature in the
+    // generated class
+    ast::ClassDef::RHS_store initModuleBody;
+    initModuleBody.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
+    initModuleBody.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(newArgs),
+                                                ast::MK::Cast(loc, dupName(asgn->lhs.get())),
+                                                ast::MethodDef::DSLSynthesized));
+    body.emplace_back(make_unique<ast::ClassDef>(loc, loc, core::Symbols::todo(), structInitConstant(loc),
+                                                 ast::ClassDef::ANCESTORS_store(), std::move(initModuleBody),
+                                                 ast::ClassDefKind::Module));
+    body.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::include(), structInitConstant(loc)));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),

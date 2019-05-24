@@ -190,6 +190,7 @@ NameDef names[] = {
     {"helpers"},
 
     {"keywordInit", "keyword_init"},
+    {"StructInitModule", "_InitializeModule", true},
 
     {"DB", "DB", true},
     {"Model", "Model", true},

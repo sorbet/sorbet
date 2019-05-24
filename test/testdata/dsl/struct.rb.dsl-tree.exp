@@ -33,13 +33,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
 
     class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -61,13 +65,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(foo: = nil, bar: = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C KeywordInit>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(foo: = nil, bar: = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C KeywordInit>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
   end
 
@@ -113,13 +121,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"foo" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"foo" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(foo = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
 
     class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -133,13 +145,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"foo" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"foo" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(foo = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C B>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C B>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
   end
 
@@ -167,13 +183,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C A>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
   end
 
@@ -201,13 +221,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"x" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"x" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(x = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyStruct>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(x = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyStruct>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
 
     class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -231,13 +255,17 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
-        <self>.params({:"x" => ::BasicObject}).void()
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"x" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(x: = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyKeywordInitStruct>)
+        end
       end
 
-      def initialize<<C <todo sym>>>(x: = nil, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyKeywordInitStruct>)
-      end
+      <self>.include(<emptyTree>::<C _InitializeModule>)
     end
 
     <emptyTree>::<C MyKeywordInitStruct>.new(1, 2)
@@ -247,6 +275,124 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C MyStruct>.new().x()
 
     <emptyTree>::<C MyStruct>.new().foo()
+  end
+
+  class <emptyTree>::<C OverrideInitialize><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C Reopen><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      def x<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
+
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"x" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(x = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C Reopen>)
+        end
+      end
+
+      <self>.include(<emptyTree>::<C _InitializeModule>)
+    end
+
+    class <emptyTree>::<C Reopen><<C <todo sym>>> < (::<todo sym>)
+      def initialize<<C <todo sym>>>(x, cats:, &<blk>)
+        <self>.super(x)
+      end
+    end
+
+    class <emptyTree>::<C Block><<C <todo sym>>> < (::<root>::<C Struct>)
+      def initialize<<C <todo sym>>>(x, cats:, &<blk>)
+        <self>.super(x)
+      end
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      def x<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
+
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"x" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(x = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C Block>)
+        end
+      end
+
+      <self>.include(<emptyTree>::<C _InitializeModule>)
+    end
+
+    class <emptyTree>::<C ReopenKeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      def x<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
+
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"x" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(x: = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C ReopenKeywordInit>)
+        end
+      end
+
+      <self>.include(<emptyTree>::<C _InitializeModule>)
+    end
+
+    class <emptyTree>::<C ReopenKeywordInit><<C <todo sym>>> < (::<todo sym>)
+      def initialize<<C <todo sym>>>(x, cats:, &<blk>)
+        <self>.super({:"x" => x})
+      end
+    end
+
+    class <emptyTree>::<C BlockKeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
+      def initialize<<C <todo sym>>>(x, cats:, &<blk>)
+        <self>.super({:"x" => x})
+      end
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      def x<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
+
+      module <emptyTree>::<C _InitializeModule><<C <todo sym>>> < ()
+        ::Sorbet.sig() do ||
+          <self>.params({:"x" => ::BasicObject}).void()
+        end
+
+        def initialize<<C <todo sym>>>(x: = nil, &<blk>)
+          ::T.cast(::T.unsafe(nil), <emptyTree>::<C BlockKeywordInit>)
+        end
+      end
+
+      <self>.include(<emptyTree>::<C _InitializeModule>)
+    end
   end
 
   class <emptyTree>::<C BadUsages><<C <todo sym>>> < (::<todo sym>)

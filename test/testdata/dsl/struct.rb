@@ -57,14 +57,42 @@ class MixinStruct
     include MyMixin
     self.new.x
     self.new.foo
-    self.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
-    self.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+    self.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct::_InitializeModule#initialize`. Expected: `0`, got: `2`
+    self.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct::_InitializeModule#initialize`
   end
 
-  MyKeywordInitStruct.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
-  MyKeywordInitStruct.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+  MyKeywordInitStruct.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct::_InitializeModule#initialize`. Expected: `0`, got: `2`
+  MyKeywordInitStruct.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct::_InitializeModule#initialize`
   MyStruct.new.x
   MyStruct.new.foo
+end
+
+class OverrideInitialize
+  Reopen = Struct.new(:x)
+  class Reopen
+    def initialize(x, cats:)
+      super(x)
+    end
+  end
+
+  Block = Struct.new(:x) do
+    def initialize(x, cats:)
+      super(x)
+    end
+  end
+
+  ReopenKeywordInit = Struct.new(:x, keyword_init: true)
+  class ReopenKeywordInit
+    def initialize(x, cats:)
+      super(x: x)
+    end
+  end
+
+  BlockKeywordInit = Struct.new(:x, keyword_init: true) do
+    def initialize(x, cats:)
+      super(x: x)
+    end
+  end
 end
 
 class BadUsages
@@ -93,7 +121,7 @@ class Main
         T.assert_type!(RealStruct::KeywordInit.new, RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 1), RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 2, bar: 3), RealStruct::KeywordInit)
-        RealStruct::KeywordInit.new(1, 2) # error: Too many arguments provided for method `RealStruct::KeywordInit#initialize`. Expected: `0`, got: `2`
+        RealStruct::KeywordInit.new(1, 2) # error: Too many arguments provided for method `RealStruct::KeywordInit::_InitializeModule#initialize`. Expected: `0`, got: `2`
 
         T.assert_type!(RealStructDesugar::A.new(2, 3), RealStructDesugar::A)
     end
