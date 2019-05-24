@@ -41,4 +41,9 @@ module Sorbet::Private::RealStdlib
     @real_singleton_class ||= Object.instance_method(:singleton_class)
     @real_singleton_class.bind(obj).call
   end
+
+  def self.real_spaceship(obj, arg)
+    @real_spaceship ||= Object.instance_method(:<=>)
+    @real_spaceship.bind(obj).call(arg)
+  end
 end
