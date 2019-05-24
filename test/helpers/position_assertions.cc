@@ -31,6 +31,9 @@ const UnorderedMap<
 // Ignore any comments that have these labels (e.g. `# typed: true`).
 const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error"};
 
+constexpr string_view NOTHING_LABEL = "(nothing)"sv;
+constexpr string_view NULL_LABEL = "null"sv;
+
 // Compares the two positions. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are
 // equivalent.
 int positionComparison(const Position &a, const Position &b) {
@@ -329,8 +332,12 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
 }
 
 vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
+    static vector<unique_ptr<Location>> empty;
     auto &result = *(respMsg.result);
     auto &locationsOrNull = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(result);
+    if (auto isNull = get_if<JSONNullObject>(&locationsOrNull)) {
+        return empty;
+    }
     return get<vector<unique_ptr<Location>>>(locationsOrNull);
 }
 
@@ -356,6 +363,18 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
         auto &locations = extractLocations(respMsg);
+
+        if (this->symbol == NOTHING_LABEL) {
+            // Special case: Nothing should be defined here.
+            for (auto &location : locations) {
+                ADD_FAILURE_AT(filename.c_str(), line + 1) << fmt::format(
+                    "Sorbet returned a definition for a location that we expected no definition for. For "
+                    "location:\n{}\nFound definition:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, ""));
+            }
+            return;
+        }
 
         if (locations.size() == 0) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
@@ -421,6 +440,20 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         ASSERT_TRUE(respMsg.result.has_value());
         ASSERT_FALSE(respMsg.error.has_value());
         auto &locations = extractLocations(respMsg);
+        if (symbol == NOTHING_LABEL) {
+            // Special case: This location should not report usages of anything.
+            for (auto &foundLocation : locations) {
+                auto actualFilePath = uriToFilePath(uriPrefix, foundLocation->uri);
+                ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
+                    "Sorbet returned references for a location that should not report references.\nGiven location "
+                    "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation),
+                                            *foundLocation->range, ""));
+            }
+            return;
+        }
+
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
             return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
         });
@@ -757,14 +790,14 @@ void HoverAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertio
 }
 
 // Retrieve contents of a Hover response as a string.
-string hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResult) {
+string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResult) {
     if (auto nullResp = get_if<JSONNullObject>(&hoverResult)) {
-        return "null";
+        return NULL_LABEL;
     } else {
         auto &hover = get<unique_ptr<Hover>>(hoverResult);
-        auto value = hover->contents->value;
-        if (value == "") {
-            return "(empty)";
+        string_view value = hover->contents->value;
+        if (value.size() == 0) {
+            return NOTHING_LABEL;
         }
         return value;
     }

@@ -3,6 +3,7 @@
 
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include "main/lsp/wrapper.h"
 #include "test/helpers/expectations.h"
 
 namespace sorbet::test {

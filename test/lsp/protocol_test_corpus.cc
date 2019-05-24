@@ -43,30 +43,6 @@ TEST_F(ProtocolTest, AddFileJoiningRequests) {
     assertDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
 }
 
-// Purposefully makes a change to a file that causes the slow path to trigger.
-TEST_F(ProtocolTest, CacheInvalidation1) {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
-
-    ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "does not match `Integer`"};
-    assertDiagnostics(
-        send(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
-        {yolo1Diagnostic});
-
-    ExpectedDiagnostic yolo2Diagnostic1 = {"yolo2.rb", 3, "does not match `Integer`"};
-    ExpectedDiagnostic yolo2Diagnostic2a = {"yolo2.rb", 1, "Unable to resolve constant `A`"};
-    assertDiagnostics(
-        send(*openFile("yolo2.rb", "# typed: true\nclass Foo2 < A\n  def branch\n    1 + \"stuff\"\n  end\nend\n")),
-        {yolo1Diagnostic, yolo2Diagnostic1, yolo2Diagnostic2a});
-
-    // Trigger slow path by changing Foo2's superclass in yolo2.rb
-    ExpectedDiagnostic yolo2Diagnostic2b = {"yolo2.rb", 1, "Unable to resolve constant `B`"};
-    assertDiagnostics(
-        send(
-            *changeFile("yolo2.rb", "# typed: true\nclass Foo2 < B\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
-        {yolo1Diagnostic, yolo2Diagnostic1, yolo2Diagnostic2b});
-}
-
 // Cancels requests before they are processed, and ensures that they are actually not processed.
 TEST_F(ProtocolTest, Cancellation) {
     assertDiagnostics(initializeLSP(), {});
@@ -122,16 +98,6 @@ TEST_F(ProtocolTest, DefinitionError) {
     auto &result = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*(respMsg.result));
     auto &array = get<vector<unique_ptr<Location>>>(result);
     ASSERT_EQ(array.size(), 0);
-}
-
-// Tests that Sorbet LSP removes diagnostics from future responses when they are fixed.
-TEST_F(ProtocolTest, FixErrors) {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(
-        send(*openFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n")),
-        {{"yolo1.rb", 3, "does not match `Integer`"}});
-    assertDiagnostics(
-        send(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + 2\n  end\nend\n", 2)), {});
 }
 
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
@@ -298,11 +264,53 @@ TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     assertDiagnostics(initializeLSP(), {});
 }
 
-// Monaco doesn't send a root URI.
-TEST_F(ProtocolTest, EmptyRootUri) {
+TEST_F(ProtocolTest, InitializeAndShutdown) {
+    assertDiagnostics(initializeLSP(), {});
+    auto resp = send(LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Shutdown, JSONNullObject())));
+    ASSERT_EQ(resp.size(), 1) << "Expected a single response to shutdown request.";
+    auto &r = resp.at(0)->asResponse();
+    ASSERT_EQ(r.requestMethod, LSPMethod::Shutdown);
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()))), {});
+}
+
+// Some clients send an empty string for the root uri.
+TEST_F(ProtocolTest, EmptyRootUriInitialization) {
     // Manually reset rootUri before initializing.
     rootUri = "";
     assertDiagnostics(initializeLSP(), {});
+
+    // Manually construct an openFile with text that has a typechecking error.
+    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
+        "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
+    auto diagnostics = send(LSPMessage(move(didOpenNotif)));
+
+    // Check the response for the expected URI.
+    EXPECT_EQ(diagnostics.size(), 1);
+    auto &msg = diagnostics.at(0);
+    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
+        // Will fail test if this does not parse.
+        if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
+            EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
+        }
+    }
+}
+
+// Monaco sends null for the root URI.
+TEST_F(ProtocolTest, MonacoInitialization) {
+    // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
+    rootUri = "";
+    auto params = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
+                                              makeInitializeParams(JSONNullObject(), JSONNullObject(), false));
+    auto responses = send(LSPMessage(move(params)));
+    ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
+    auto &respMsg = responses.at(0);
+    EXPECT_TRUE(respMsg->isResponse());
+    auto &resp = respMsg->asResponse();
+    EXPECT_EQ(resp.requestMethod, LSPMethod::Initialize);
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
+                                                                       make_unique<InitializedParams>()))),
+                      {});
 
     // Manually construct an openFile with text that has a typechecking error.
     auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
@@ -334,34 +342,6 @@ TEST_F(ProtocolTest, CompletionOnNonClass) {
         make_unique<RequestMessage>("2.0", 100, LSPMethod::TextDocumentCompletion, move(completionParams));
     // We don't care about the result. We just care that Sorbet didn't die due to an ENFORCE failure.
     send(LSPMessage(move(completionReq)));
-}
-
-// Hides synthetic, internal arguments when sending hover results to client.
-TEST_F(ProtocolTest, HidesSyntheticArgumentsOnHover) {
-    assertDiagnostics(initializeLSP(), {});
-
-    // There will be diagnostics, but we don't care about them.
-    send(*openFile("yolo1.rb",
-                   "# typed: true\nclass A\n  extend T::Sig\n\n  sig {params(x: Integer).returns(String)}\n "
-                   " def bar(x)\n    x.to_s\n  end\nend\n\ndef main\n  A.new.bar(\"91\")\nend"));
-
-    // TODO: Make this nicer once we have good hover helpers.
-    auto hoverParams = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("yolo1.rb")),
-                                                               make_unique<Position>(11, 9));
-    auto hoverReq = make_unique<RequestMessage>("2.0", 100, LSPMethod::TextDocumentHover, move(hoverParams));
-
-    auto responses = send(LSPMessage(move(hoverReq)));
-    EXPECT_EQ(responses.size(), 1);
-    if (responses.size() == 1) {
-        auto &result = responses.at(0);
-        EXPECT_TRUE(result->isResponse());
-        auto &response = result->asResponse();
-        EXPECT_TRUE(response.result);
-        auto &hoverOrNull = get<std::variant<JSONNullObject, std::unique_ptr<Hover>>>(*response.result);
-        auto &hover = get<std::unique_ptr<Hover>>(hoverOrNull);
-        auto &content = hover->contents;
-        EXPECT_EQ(content->value, "sig {params(x: Integer).returns(String)}");
-    }
 }
 
 // Ensures that unrecognized notifications are ignored.
