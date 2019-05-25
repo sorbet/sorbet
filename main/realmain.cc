@@ -407,16 +407,6 @@ int realmain(int argc, char *argv[]) {
             runAutogen(ctx, opts, *workers, indexed);
         } else {
             indexed = pipeline::resolve(*gs, move(indexed), opts, *workers);
-            if (opts.stressIncrementalResolver) {
-                for (auto &f : indexed) {
-                    auto reIndexed = pipeline::indexOne(opts, *gs, f.file, kvstore);
-                    vector<ast::ParsedFile> toBeReResolved;
-                    toBeReResolved.emplace_back(move(reIndexed));
-                    auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
-                    ENFORCE(reresolved.size() == 1);
-                    f = move(reresolved[0]);
-                }
-            }
             indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);
         }
 
