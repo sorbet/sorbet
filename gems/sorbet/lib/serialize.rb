@@ -132,7 +132,14 @@ class Sorbet::Private::Serialize
       end
       spaceship
     end
-    constants_serialized = constants_sorted.uniq.map do |const_sym, value|
+    constants_uniq = constants_sorted.uniq do |const_sym, value|
+      hash = value.hash
+      if !Sorbet::Private::RealStdlib.real_is_a?(value, Integer)
+        hash = Sorbet::Private::RealStdlib.real_hash(value)
+      end
+      [const_sym, hash].hash
+    end
+    constants_serialized = constants_uniq.map do |const_sym, value|
       constant(const_sym, value)
     end
     ret << constants_serialized.join("\n")

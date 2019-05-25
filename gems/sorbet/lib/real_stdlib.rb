@@ -46,4 +46,9 @@ module Sorbet::Private::RealStdlib
     @real_spaceship ||= Object.instance_method(:<=>)
     @real_spaceship.bind(obj).call(arg)
   end
+
+  def self.real_hash(o)
+    @real_hash ||= Object.instance_method(:hash)
+    @real_hash.bind(o).call
+  end
 end
