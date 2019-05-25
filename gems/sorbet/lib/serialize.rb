@@ -125,19 +125,11 @@ class Sorbet::Private::Serialize
       next if !comparable?(value)
       [const_sym, value]
     end
-    constants_sorted = constants.compact.sort do |a, b|
-      spaceship = a <=> b
-      if spaceship.nil?
-        spaceship = Sorbet::Private::RealStdlib.real_spaceship(a, b)
-      end
-      spaceship
+    constants_sorted = constants.compact.sort_by do |const_sym, _value|
+      const_sym
     end
-    constants_uniq = constants_sorted.uniq do |const_sym, value|
-      hash = value.hash
-      if !Sorbet::Private::RealStdlib.real_is_a?(value, Integer)
-        hash = Sorbet::Private::RealStdlib.real_hash(value)
-      end
-      [const_sym, hash].hash
+    constants_uniq = constants_sorted.uniq do |const_sym, _value|
+      const_sym.hash
     end
     constants_serialized = constants_uniq.map do |const_sym, value|
       constant(const_sym, value)
