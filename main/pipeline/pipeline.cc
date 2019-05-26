@@ -752,17 +752,17 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     return what;
 }
 
-vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                WorkerPool &workers, bool skipConfigatron) {
+vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
-        what = name(gs, move(what), opts, skipConfigatron);
+        what = name(*gs, move(what), opts, skipConfigatron);
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree->toStringWithTabs(gs, 0));
+                opts.print.NameTree.fmt("{}\n", named.tree->toStringWithTabs(*gs, 0));
             }
             if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree->showRaw(gs));
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree->showRaw(*gs));
             }
         }
 
@@ -770,49 +770,49 @@ vector<ast::ParsedFile> resolve(core::GlobalState &gs, vector<ast::ParsedFile> w
             return what;
         }
 
-        core::MutableContext ctx(gs, core::Symbols::root());
+        core::MutableContext ctx(*gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
-            Timer timeit(gs.tracer(), "resolving");
+            Timer timeit(gs->tracer(), "resolving");
             vector<core::ErrorRegion> errs;
             for (auto &tree : what) {
                 auto file = tree.file;
-                errs.emplace_back(gs, file);
+                errs.emplace_back(*gs, file);
             }
-            core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-            core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+            core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what), workers);
         }
         if (opts.stressIncrementalResolver) {
             for (auto &f : what) {
                 unique_ptr<KeyValueStore> kvstore;
-                auto reIndexed = indexOne(opts, gs, f.file, kvstore);
+                auto reIndexed = indexOne(opts, *gs, f.file, kvstore);
                 vector<ast::ParsedFile> toBeReResolved;
                 toBeReResolved.emplace_back(move(reIndexed));
-                auto reresolved = pipeline::incrementalResolve(gs, move(toBeReResolved), opts);
+                auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
                 ENFORCE(reresolved.size() == 1);
                 f = move(reresolved[0]);
             }
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+        if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
-    gs.errorQueue->flushErrors();
+    gs->errorQueue->flushErrors();
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
-                opts.print.ResolveTree.fmt("{}\n", resolved.tree->toString(gs));
+                opts.print.ResolveTree.fmt("{}\n", resolved.tree->toString(*gs));
             }
             if (opts.print.ResolveTreeRaw.enabled) {
-                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree->showRaw(gs));
+                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree->showRaw(*gs));
             }
         }
     }
     if (opts.print.MissingConstants.enabled) {
-        what = printMissingConstants(gs, opts, move(what));
+        what = printMissingConstants(*gs, opts, move(what));
     }
     return what;
 }
@@ -942,7 +942,7 @@ core::UsageHash getAllSends(const core::GlobalState &gs, unique_ptr<ast::Express
 core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
-    shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
+    unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
     lgs->initEmpty();
     lgs->errorQueue->ignoreFlushes = true;
     lgs->silenceErrors = true;
@@ -965,7 +965,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     }
     auto allSends = getAllSends(*lgs, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
-    pipeline::resolve(*lgs, move(single), emptyOpts, *workers, true);
+    pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
 
     return {move(*lgs->hash()), move(allSends)};
 }
