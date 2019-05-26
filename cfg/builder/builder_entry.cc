@@ -46,9 +46,13 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn(), 0);
 
-    auto rvLoc = cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())
-                     ? md.loc
-                     : cont->exprs.back().loc;
+    auto rvLoc = md.loc;
+    if (!cont->exprs.empty() && isa_instruction<LoadArg>(cont->exprs.back().value.get())) {
+        rvLoc = cont->exprs.back().loc;
+    } else if (!cont->backEdges.empty()) {
+        rvLoc = cont->backEdges.back()->bexit.loc;
+    }
+
     synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
