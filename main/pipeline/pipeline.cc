@@ -778,6 +778,54 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     return what;
 }
 
+class DefinionLinesBlacklistEnforcer {
+    core::FileRef file;
+    int prohibitedLinesStart;
+    int prohibitedLinesEnd;
+
+public:
+    DefinionLinesBlacklistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
+        : file(file), prohibitedLinesStart(prohibitedLinesStart), prohibitedLinesEnd(prohibitedLinesEnd) {
+        ENFORCE(prohibitedLinesStart < prohibitedLinesEnd);
+        ENFORCE(file.exists());
+    };
+
+    bool isWhiteListed(core::Context ctx, core::SymbolRef sym) {
+        // allow <static-init> and others
+        return false;
+    }
+
+    void checkLoc(core::Context ctx, core::Loc loc) {
+        auto detailStart = core::Loc::offset2Pos(file.data(ctx), loc.beginPos());
+        auto detailEnd = core::Loc::offset2Pos(file.data(ctx), loc.endPos());
+        ENFORCE(!(detailStart.line >= prohibitedLinesStart && detailEnd.line <= prohibitedLinesEnd));
+    }
+
+    void checkSym(core::Context ctx, core::SymbolRef sym) {
+        if (isWhiteListed(ctx, sym)) {
+            return;
+        }
+        ENFORCE(prohibitedLinesStart < prohibitedLinesEnd);
+        checkLoc(ctx, sym.data(ctx)->loc());
+    }
+
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+        checkSym(ctx, original->symbol);
+        return original;
+    }
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        checkSym(ctx, original->symbol);
+        return original;
+    }
+};
+
+ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
+                                                        int prohibitedLinesStart, int prohibitedLinesEnd) {
+    DefinionLinesBlacklistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
+    what.tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), enforcer, move(what.tree));
+    return what;
+}
+
 vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                 const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
@@ -811,13 +859,18 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
         if (opts.stressIncrementalResolver) {
             for (auto &f : what) {
+                int prohibitedLines = f.file.data(*gs).source().size();
+                auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
+                auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
+                                                       f.file.data(*gs).sourceType);
+                gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
                 unique_ptr<KeyValueStore> kvstore;
                 auto reIndexed = indexOne(opts, *gs, f.file, kvstore);
                 vector<ast::ParsedFile> toBeReResolved;
                 toBeReResolved.emplace_back(move(reIndexed));
                 auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
                 ENFORCE(reresolved.size() == 1);
-                f = move(reresolved[0]);
+                f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
             }
         }
     } catch (SorbetException &) {
