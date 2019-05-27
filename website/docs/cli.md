@@ -4,11 +4,20 @@ title: Command Line Reference
 ---
 
 Sorbet has a wealth of command line options; we'll only be covering a subset of
-the available options here. For the full set of available options, check the
-help at the command line.
+them here. For the full set of available options, check the help at the command
+line:
 
-In particular, this doc specifically covers the command line interface to the
-`srb tc` subcommand. For information about `srb rbi`, see [RBI files](rbi.md).
+```bash
+# to learn about available srb subcommands
+❯ srb --help
+
+# for options that Sorbet uses when typechecking
+❯ srb tc --help
+```
+
+In this doc, we'll cover **only** the command line interface to the
+`srb tc` subcommand. For information about `srb init` and `srb rbi`, see [RBI
+files](rbi.md).
 
 ## Config file
 
