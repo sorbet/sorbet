@@ -2,10 +2,12 @@
 
 set -euo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
+pushd "$(dirname "${BASH_SOURCE[0]}")/../.." &> /dev/null
+root_dir="$(realpath "$PWD")"
+popd &> /dev/null
 
-# shellcheck disable=SC1091
-source "test/snapshot/logging.sh"
+# shellcheck disable=SC1090
+source "$root_dir/test/snapshot/logging.sh"
 
 # ----- Option parsing -----
 
@@ -59,11 +61,16 @@ fi
 passing_tests=()
 failing_tests=()
 
-for test_dir in test/snapshot/{partial,total}/*; do
-  if test/snapshot/test_one.sh "$test_dir" $VERBOSE $UPDATE; then
-    passing_tests+=("test/snapshot/test_one.sh $test_dir $VERBOSE $UPDATE")
+for test_dir in "$root_dir/test/snapshot"/{partial,total}/*; do
+  test_exe="$root_dir/test/snapshot/test_one.sh"
+
+  relative_test_exe="$(realpath --relative-to="$PWD" "$test_exe")"
+  relative_test_dir="$(realpath --relative-to="$PWD" "$test_dir")"
+
+  if "$test_exe" "$test_dir" $VERBOSE $UPDATE; then
+    passing_tests+=("$relative_test_exe $relative_test_dir $VERBOSE $UPDATE")
   else
-    failing_tests+=("test/snapshot/test_one.sh $test_dir $VERBOSE $UPDATE")
+    failing_tests+=("$relative_test_exe $relative_test_dir $VERBOSE $UPDATE")
   fi
 done
 

@@ -3,11 +3,12 @@
 set -euo pipefail
 shopt -s dotglob
 
-cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
-root_dir="$PWD"
+pushd "$(dirname "${BASH_SOURCE[0]}")/../.." &> /dev/null
+root_dir="$(realpath "$PWD")"
+popd &> /dev/null
 
-# shellcheck disable=SC1091
-source "test/snapshot/logging.sh"
+# shellcheck disable=SC1090
+source "$root_dir/test/snapshot/logging.sh"
 
 # ----- Option parsing -----
 
@@ -17,7 +18,7 @@ usage() {
   echo "  $0 <test_dir> [options]"
   echo
   echo "Arguments:"
-  echo "  <test_dir>   relative path of the snapshot to test"
+  echo "  <test_dir>   path to the snapshot to test"
   echo
   echo "Options:"
   echo "  --verbose    be more verbose than just whether it errored"
@@ -28,18 +29,28 @@ if [[ $# -lt 1 ]]; then
   error "Missing test."
   usage
   exit 1
-elif [[ "$1" =~ test/snapshot/partial* ]]; then
-  test_dir="$1"
+elif ! [ -d "$1" ]; then
+  error "test_dir doesn't exist: $1"
+  exit 1
+else
+  # $1 might be either absolute or relative. For example, driver.sh always uses
+  # absolute paths, but we always print relative paths to re-run a single test.
+  relative_test_dir="$(realpath --relative-to="$PWD" "$1")"
+  test_dir="$(realpath "$1")"
+fi
+shift
+
+if [[ "$test_dir" =~ $root_dir/test/snapshot/partial* ]]; then
   is_partial=1
-elif [[ "$1" =~ test/snapshot/total* ]]; then
-  test_dir="$1"
+elif [[ "$test_dir" =~ $root_dir/test/snapshot/total* ]]; then
   is_partial=
 else
-  error "Expected test_dir to match test/snapshot/(total|partial)/*. Got: $3"
+  error "Could not determine whether partial or total."
+  error "Expected: $root_dir/test/snapshot/(total|partial)/*"
+  error "Got:      $test_dir"
   usage
   exit 1
 fi
-shift
 
 VERBOSE=
 UPDATE=
@@ -71,7 +82,8 @@ done
 
 # ----- Stage the test sandbox directory -----
 
-info "Running test:  $0 $test_dir $VERBOSE $UPDATE"
+relative_test_exe="$(realpath --relative-to="$PWD" "$0")"
+info "Running test:  $relative_test_exe $relative_test_dir $VERBOSE $UPDATE"
 
 actual="$(mktemp -d)"
 
@@ -95,11 +107,6 @@ fi
 
 if ! [ -x "$SRB_SORBET_EXE" ]; then
   error "└─ sorbet executable has wrong permissions ($SRB_SORBET_EXE)"
-  exit 1
-fi
-
-if ! [ -d "$test_dir" ]; then
-  error "└─ test_dir doesn't exist: $test_dir"
   exit 1
 fi
 
