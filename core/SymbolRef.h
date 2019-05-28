@@ -235,147 +235,153 @@ public:
         return SymbolRef(nullptr, 41);
     }
 
-    // Used to mark the presence of an ancestor that we were unable to
-    // statically resolve to a class or module
-    static SymbolRef StubAncestor() {
+    // Used to mark the presence of an mixin that we were unable to
+    // statically resolve to a module
+    static SymbolRef StubMixin() {
         return SymbolRef(nullptr, 42);
     }
 
-    static SymbolRef T_Enumerable() {
+    // Used to mark the presence of a superclass that we were unable to
+    // statically resolve to a class
+    static SymbolRef StubSuperClass() {
         return SymbolRef(nullptr, 43);
     }
 
-    static SymbolRef T_Range() {
+    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 44);
     }
 
-    static SymbolRef T_Set() {
+    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 45);
     }
 
-    static SymbolRef Configatron() {
+    static SymbolRef T_Set() {
         return SymbolRef(nullptr, 46);
     }
 
-    static SymbolRef Configatron_Store() {
+    static SymbolRef Configatron() {
         return SymbolRef(nullptr, 47);
     }
 
-    static SymbolRef Configatron_RootStore() {
+    static SymbolRef Configatron_Store() {
         return SymbolRef(nullptr, 48);
     }
 
-    static SymbolRef void_() {
+    static SymbolRef Configatron_RootStore() {
         return SymbolRef(nullptr, 49);
+    }
+
+    static SymbolRef void_() {
+        return SymbolRef(nullptr, 50);
     }
 
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 50);
+        return SymbolRef(nullptr, 51);
     }
 
     static SymbolRef Chalk() {
-        return SymbolRef(nullptr, 51);
-    }
-    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 52);
     }
-
-    static SymbolRef Chalk_Tools_Accessible() {
+    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 53);
     }
 
-    static SymbolRef T_Generic() {
+    static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 54);
     }
 
-    static SymbolRef Tuple() {
+    static SymbolRef T_Generic() {
         return SymbolRef(nullptr, 55);
     }
 
-    static SymbolRef Shape() {
+    static SymbolRef Tuple() {
         return SymbolRef(nullptr, 56);
     }
 
-    static SymbolRef Subclasses() {
+    static SymbolRef Shape() {
         return SymbolRef(nullptr, 57);
     }
 
-    static SymbolRef Sorbet_Private_Static_ImplicitModuleSuperClass() {
+    static SymbolRef Subclasses() {
         return SymbolRef(nullptr, 58);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference() {
+    static SymbolRef Sorbet_Private_Static_ImplicitModuleSuperClass() {
         return SymbolRef(nullptr, 59);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference() {
         return SymbolRef(nullptr, 60);
+    }
+
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+        return SymbolRef(nullptr, 61);
     }
 
     static SymbolRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
-        return SymbolRef(nullptr, 61);
-    }
-
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 62);
     }
 
-    static SymbolRef T_Sig() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 63);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub() {
+    static SymbolRef T_Sig() {
         return SymbolRef(nullptr, 64);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
+    static SymbolRef Magic_undeclaredFieldStub() {
         return SymbolRef(nullptr, 65);
     }
 
-    static SymbolRef T_Helpers() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
         return SymbolRef(nullptr, 66);
     }
 
-    static SymbolRef DeclBuilderForProcs() {
+    static SymbolRef T_Helpers() {
         return SymbolRef(nullptr, 67);
     }
 
-    static SymbolRef DeclBuilderForProcsSingleton() {
+    static SymbolRef DeclBuilderForProcs() {
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef Net() {
+    static SymbolRef DeclBuilderForProcsSingleton() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef Net_IMAP() {
+    static SymbolRef Net() {
         return SymbolRef(nullptr, 70);
     }
 
-    static SymbolRef Net_Protocol() {
+    static SymbolRef Net_IMAP() {
         return SymbolRef(nullptr, 71);
     }
 
-    static SymbolRef T_CFGExport() {
+    static SymbolRef Net_Protocol() {
         return SymbolRef(nullptr, 72);
     }
 
-    static SymbolRef T_Sig_WithoutRuntime() {
+    static SymbolRef T_CFGExport() {
         return SymbolRef(nullptr, 73);
     }
 
-    static SymbolRef Enumerator() {
+    static SymbolRef T_Sig_WithoutRuntime() {
         return SymbolRef(nullptr, 74);
     }
 
-    static SymbolRef T_Enumerator() {
+    static SymbolRef Enumerator() {
         return SymbolRef(nullptr, 75);
     }
 
-    static SymbolRef T_Struct() {
+    static SymbolRef T_Enumerator() {
         return SymbolRef(nullptr, 76);
+    }
+
+    static SymbolRef T_Struct() {
+        return SymbolRef(nullptr, 77);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
