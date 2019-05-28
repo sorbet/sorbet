@@ -347,13 +347,11 @@ public:
         }
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
-        auto loc = klass->loc; //flatten::extractClassInitLoc(ctx, klass)) {
-            if (klass->symbol == core::Symbols::root()) {
-                ctx.state.staticInitForFile(loc);
-            } else {
-                ctx.state.staticInitForClass(klass->symbol, loc);
-            }
-            // }
+        if (klass->symbol == core::Symbols::root()) {
+            ctx.state.staticInitForFile(klass->loc);
+        } else {
+            ctx.state.staticInitForClass(klass->symbol, klass->loc);
+        }
 
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
