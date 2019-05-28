@@ -7,8 +7,6 @@
 namespace sorbet::flatten {
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile trees);
-std::vector<ast::ParsedFile> run(core::Context ctx, std::vector<ast::ParsedFile> trees, WorkerPool &workers);
-std::optional<core::Loc> extractClassInitLoc(core::Context ctx, std::unique_ptr<ast::ClassDef> &klass);
 
 } // namespace sorbet::flatten
 

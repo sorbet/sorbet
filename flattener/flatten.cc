@@ -54,36 +54,6 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
 }
 
-// this replicates the logic in extractClassInit but confined only to the relevant locations. We use this to figure out
-// the symbol location for the <static-init> symbol, which is created in advance of this pass (as this pass otherwise
-// needs only immutable access to the context).
-//
-// We return an optional (instead of, say, Loc::none()) when there are no statements because we can't rely on every
-// statement contained in the class body to have a valid location at this point. This way, we can distinguish between
-// nullopt (i.e. there were no statements in the class body) and a non-existant location (which might be because one of
-// the statements contained a non-existant location already.)
-optional<core::Loc> extractClassInitLoc(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
-    int stmtCount = 0;
-    core::Loc initLoc = core::Loc::none(klass->loc.file());
-
-    for (auto it = klass->rhs.begin(); it != klass->rhs.end(); ++it) {
-        // if things are definitions, don't count them
-        if (!isDefinition(ctx, *it)) {
-            // if they aren't definitions, then increment the statement count and note their location
-            stmtCount += 1;
-            initLoc = (*it)->loc;
-        }
-    }
-
-    if (stmtCount == 0) {
-        return {};
-    } else if (stmtCount == 1) {
-        return initLoc;
-    } else {
-        return klass->declLoc;
-    }
-}
-
 class FlattenWalk {
 private:
 public:
@@ -280,17 +250,6 @@ private:
     vector<unique_ptr<ast::ClassDef>> classes;
     vector<int> classStack;
 };
-
-vector<ast::ParsedFile> run(core::Context ctx, vector<ast::ParsedFile> trees, WorkerPool &_workers) {
-    for (auto &tree : trees) {
-        FlattenWalk flatten;
-        tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
-        tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
-        tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
-    }
-
-    return trees;
-}
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     FlattenWalk flatten;
