@@ -189,68 +189,79 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs), false};
 }
 
-LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
-                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+bool LSPLoop::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles,
+                              const vector<core::FileHash> &hashes) const {
     if (disableFastPath) {
         logger->debug("Taking sad path because happy path is disabled.");
-        return runSlowPath(changedFiles);
+        return false;
     }
+    logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
 
+    ENFORCE(changedFiles.size() == hashes.size());
+    int i = -1;
+    {
+        for (auto &f : changedFiles) {
+            ++i;
+            ENFORCE(f);
+            auto fref = initialGS->findFileByPath(f->path());
+            if (!fref.exists()) {
+                logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
+                return false;
+            } else {
+                auto &oldHash = globalStateHashes[fref.id()];
+                ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
+                if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
+                    hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
+                    logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
+                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     auto finalGs = move(gs);
     // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(finalGs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
-    bool good = true;
 
+    bool takeFastPath = false;
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
     {
         Timer timeit(logger, "fast_path_decision");
         auto hashes = computeStateHashes(changedFiles);
         ENFORCE(changedFiles.size() == hashes.size());
+        takeFastPath = canTakeFastPath(changedFiles, hashes);
 
         int i = -1;
         {
             core::UnfreezeFileTable fileTableAccess(*initialGS);
             for (auto &f : changedFiles) {
                 ++i;
-                if (!f) {
-                    continue;
-                }
-                auto wasFiles = initialGS->filesUsed();
                 auto fref = updateFile(f);
-                if (wasFiles != initialGS->filesUsed()) {
-                    logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
-                    good = false;
-                    if (globalStateHashes.size() <= fref.id()) {
-                        globalStateHashes.resize(fref.id() + 1);
-                        globalStateHashes[fref.id()] = hashes[i];
-                    }
-                } else {
+                if (globalStateHashes.size() <= fref.id()) {
+                    // New file
+                    ENFORCE(!takeFastPath);
+                    globalStateHashes.resize(fref.id() + 1);
+                } else if (takeFastPath) {
+                    // Existing file on fast path
                     auto &oldHash = globalStateHashes[fref.id()];
-                    ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
-                    if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
-                        hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-                        logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
-                        good = false;
-                        oldHash = hashes[i];
-                    }
-                    if (good) {
-                        // TODO: update list of sends in this file, mark all(other) files that had same namerefs that
-                        // this defines for retypechecking
-                        for (auto &p : hashes[i].definitions.methodHashes) {
-                            auto fnd = oldHash.definitions.methodHashes.find(p.first);
-                            ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
-                            if (fnd->second != p.second) {
-                                changedHashes.emplace_back(p.first);
-                            }
+                    for (auto &p : hashes[i].definitions.methodHashes) {
+                        auto fnd = oldHash.definitions.methodHashes.find(p.first);
+                        ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
+                        if (fnd->second != p.second) {
+                            changedHashes.emplace_back(p.first);
                         }
-                        finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
                     }
-
+                    finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
                     subset.emplace_back(fref);
                 }
+                globalStateHashes[fref.id()] = hashes[i];
             }
             fast_sort(changedHashes);
             changedHashes.resize(
@@ -258,7 +269,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         }
     }
 
-    if (good) {
+    if (takeFastPath) {
         Timer timeit(logger, "fast_path");
         if (allFiles) {
             subset.clear();
