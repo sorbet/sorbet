@@ -189,7 +189,8 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs), false};
 }
 
-bool LSPLoop::canRunFastPath(const vector<shared_ptr<core::File>> &changedFiles, const vector<core::FileHash> &hashes) {
+bool LSPLoop::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles,
+                              const vector<core::FileHash> &hashes) const {
     if (disableFastPath) {
         logger->debug("Taking sad path because happy path is disabled.");
         return false;
@@ -235,7 +236,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         Timer timeit(logger, "fast_path_decision");
         auto hashes = computeStateHashes(changedFiles);
         ENFORCE(changedFiles.size() == hashes.size());
-        takeFastPath = canRunFastPath(changedFiles, hashes);
+        takeFastPath = canTakeFastPath(changedFiles, hashes);
 
         int i = -1;
         {
@@ -250,8 +251,6 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                 } else if (takeFastPath) {
                     // Existing file on fast path
                     auto &oldHash = globalStateHashes[fref.id()];
-                    // TODO: update list of sends in this file, mark all(other) files that had same namerefs that
-                    // this defines for retypechecking
                     for (auto &p : hashes[i].definitions.methodHashes) {
                         auto fnd = oldHash.definitions.methodHashes.find(p.first);
                         ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
