@@ -331,6 +331,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
+        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
                 auto path = file.data(ctx).path();
