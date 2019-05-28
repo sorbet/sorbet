@@ -919,6 +919,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.PluginGeneratedCode.enabled) {
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
+        cout.flush();
 
         return typecheck_result;
     }
