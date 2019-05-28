@@ -652,6 +652,18 @@ alias sb="bazel build //main:sorbet --config=dbg"
 alias st="bazel test //... --config=dbg --test_output=errors"
 ```
 
+You might also want to put built versions of Sorbet on your path, to make it
+easier to call them system wide. It's up to you whether and how to do this, but
+here are two suggestions:
+
+1.  Make a `~/bin` folder, add it to your `PATH`, then make a symlink:
+
+    ```
+    cd ~/bin && ln -s ~/stripe/sorbet/bazel-bin/main/sorbet .
+    ```
+
+2.  Add sorbet's `bazel-bin/main` folder directly to your `PATH`.
+
 ### Formatting files
 
 We ensure that C++ files are formatted with `clang-format` and that Bazel BUILD
