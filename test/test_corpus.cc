@@ -274,6 +274,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         trees.emplace_back(move(namedTree));
     }
 
+    bool run_flatten = false;
     auto expectation = test.expectations.find("autogen");
     if (expectation != test.expectations.end()) {
         {
@@ -297,6 +298,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         trees = resolver::Resolver::run(ctx, move(trees), *workers);
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        run_flatten = true;
     }
 
     expectation = test.expectations.find("symbol-table");
@@ -331,7 +333,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
-        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+        if (run_flatten) {
+            resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+        }
+
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
                 auto path = file.data(ctx).path();
