@@ -32,6 +32,12 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
+      it "passes validation for BasicObject" do
+        type = T::Utils.coerce(BasicObject)
+        msg = type.error_message_for_obj(BasicObject.new)
+        assert_nil(msg)
+      end
+
       it "fails a validation with a different type" do
         msg = @type.error_message_for_obj("1")
         assert_equal("Expected type Integer, got type String with value \"1\"", msg)
