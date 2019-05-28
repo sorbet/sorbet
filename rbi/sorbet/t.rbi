@@ -102,4 +102,9 @@ end
 module T::CFGExport
 end
 
+class T::Struct
+  def prop(name, type, rules={}); end
+  def const(name, type, rules={}); end
+end
+
 T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
