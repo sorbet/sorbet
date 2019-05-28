@@ -49,7 +49,6 @@ If you are at Stripe, you might also want to see:
   - [Set up autogen locally](#set-up-autogen-locally)
   - [Make sure `sorbet` is on your PATH](#make-sure-sorbet-is-on-your-path)
   - [Run `sorbet/scripts/typecheck_devel`](#run-sorbetscriptstypecheck_devel)
-- [C++ conventions](#c-conventions)
 - [Debugging and profiling](#debugging-and-profiling)
   - [Debugging](#debugging)
   - [Profiling](#profiling)
