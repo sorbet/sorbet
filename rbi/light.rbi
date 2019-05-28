@@ -196,6 +196,10 @@ end
 module T::Enumerable
   def self.[](type); end
 end
+class T::Struct
+  def prop(name, type, rules={}); end
+  def const(name, type, rules={}); end
+end
 T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
 module Comparable
 end
