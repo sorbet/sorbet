@@ -1,4 +1,3 @@
-No errors! Great job.
 class ::<root> ()
   field #$global @ test/cli/stop-after-namer/stop-after-namer.rb:7
   class ::A < ::<todo sym> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
@@ -12,3 +11,4 @@ class ::<root> ()
       argument ::<Class:A>#singleton_method#singleton_method_arg<> @ test/cli/stop-after-namer/stop-after-namer.rb:10
       argument ::<Class:A>#singleton_method#<blk><block> @ test/cli/stop-after-namer/stop-after-namer.rb
 
+No errors! Great job.
