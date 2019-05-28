@@ -1,20 +1,4 @@
 class <emptyTree><<C <root>>> < ()
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
   def baz1<baz1>(<blk>)
     begin
       a = "foo"

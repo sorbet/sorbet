@@ -1,26 +1,15 @@
-begin
-  class <emptyTree><<C <root>>> < ()
-    def self.<static-init><<static-init>$3>(<blk>)
-      begin
-        begin
-          ::Sorbet::Private::Static.keep_for_ide(::Foo)
-          <emptyTree>
-        end
-        Unresolved: <emptyTree>::<C Bar>
-        Unresolved: ::Foo::<C Bar>
-        <emptyTree>
-      end
-    end
+class <emptyTree><<C <root>>> < ()
+  begin
+    ::Sorbet::Private::Static.keep_for_ide(::Foo)
+    module ::Foo<<C Foo>> < ()    end
   end
-  module ::Foo<<C Foo>> < ()  end
-  <emptyTree>
+
+  Unresolved: <emptyTree>::<C Bar>
+
+  Unresolved: ::Foo::<C Bar>
 end
 class <emptyTree><<C <root>>> < ()
-  def self.<static-init><<static-init>$4>(<blk>)
-    begin
-      Unresolved: <emptyTree>::<C Bar>
-      Unresolved: ::Foo::<C Bar>
-      <emptyTree>
-    end
-  end
+  Unresolved: <emptyTree>::<C Bar>
+
+  Unresolved: ::Foo::<C Bar>
 end

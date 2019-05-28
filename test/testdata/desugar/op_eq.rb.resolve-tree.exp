@@ -1,16 +1,6 @@
 begin
   ::Sorbet::Private::Static.keep_for_ide(::OpEq)
   class ::OpEq<<C OpEq>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     def b<b>(<blk>)
       <emptyTree>
     end
@@ -82,5 +72,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

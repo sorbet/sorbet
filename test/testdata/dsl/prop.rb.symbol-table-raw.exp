@@ -343,9 +343,11 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/dsl/prop.rb 
       argument <S <C <U EncryptedProp>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
   class <C <U ForeignClass>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=34:1 end=34:19}
   class <S <C <U ForeignClass>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=34:7 end=34:19}
+    method <S <C <U ForeignClass>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=34:1 end=35:4}
+      argument <S <C <U ForeignClass>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
   class <C <U NotAODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=2:14}
   class <S <C <U NotAODM>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/dsl/prop.rb start=2:7 end=2:14}
-    method <S <C <U NotAODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=2:14}
+    method <S <C <U NotAODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=21:4}
       argument <S <C <U NotAODM>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <S <C <U NotAODM>> $1><U prop> (args, <blk>) @ Loc {file=test/testdata/dsl/prop.rb start=3:5 end=3:25}
       argument <S <C <U NotAODM>> $1><U prop>args<repeated> @ Loc {file=test/testdata/dsl/prop.rb start=3:20 end=3:24}

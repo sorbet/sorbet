@@ -1,22 +1,6 @@
 begin
   ::Sorbet::Private::Static.keep_for_ide(::Examples)
   class ::Examples<<C Examples>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     def i_like_ifs<i_like_ifs>(<blk>)
       if true
         return 1
@@ -104,5 +88,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

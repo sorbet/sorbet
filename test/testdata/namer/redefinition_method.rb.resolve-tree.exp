@@ -1,13 +1,9 @@
 begin
   ::Sorbet::Private::Static.keep_for_ide(::Main)
   class ::Main<<C Main>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    <self>.sig() do ||
+      <self>.params({:"a" => ::Integer}).returns(::Integer)
+    end
 
     def foo<foo$1>(a, <blk>)
       a
@@ -20,12 +16,5 @@ begin
     def foo<foo>(a, b, c, <blk>)
       <emptyTree>
     end
-
-    def self.<static-init><<static-init>>(<blk>)
-      <self>.sig() do ||
-        <self>.params({:"a" => ::Integer}).returns(::Integer)
-      end
-    end
   end
-  <emptyTree>
 end

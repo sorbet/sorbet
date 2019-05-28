@@ -1,28 +1,16 @@
-begin
-  class <emptyTree><<C <root>>> < ()
-    def self.<static-init><<static-init>$3>(<blk>)
-      begin
-        begin
-          ::Sorbet::Private::Static.keep_for_ide(::B)
-          <emptyTree>
-        end
-        begin
-          ::Sorbet::Private::Static.keep_for_ide(::A)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
-    end
+class <emptyTree><<C <root>>> < ()
+  begin
+    ::Sorbet::Private::Static.keep_for_ide(::B)
+    module ::B<<C B>> < ()    end
   end
-  module ::B<<C B>> < ()  end
-  module ::A<<C A>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+
+  begin
+    ::Sorbet::Private::Static.keep_for_ide(::A)
+    module ::A<<C A>> < ()
       begin
         ::Sorbet::Private::Static.keep_for_ide(::A::B::C)
-        <emptyTree>
+        class ::A::B::C<<C C>> < (::<todo sym>)        end
       end
     end
   end
-  class ::A::B::C<<C C>> < (::<todo sym>)  end
-  <emptyTree>
 end

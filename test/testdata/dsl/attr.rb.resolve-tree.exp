@@ -1,23 +1,9 @@
 begin
   ::Sorbet::Private::Static.keep_for_ide(::TestAttr)
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    <self>.sig() do ||
+      <self>.void()
+    end
 
     def initialize<initialize>(<blk>)
       begin
@@ -36,20 +22,40 @@ begin
       end
     end
 
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
     def v1<v1>(<blk>)
       @v1
+    end
+
+    <self>.sig() do ||
+      <self>.params({:"v1" => ::Integer}).returns(::Integer)
     end
 
     def v1=<v1=>(v1, <blk>)
       @v1 = v1
     end
 
+    <self>.sig() do ||
+      <self>.returns(::String)
+    end
+
     def v2<v2>(<blk>)
       @v2
     end
 
+    <self>.sig() do ||
+      <self>.params({:"v2" => ::String}).returns(::String)
+    end
+
     def v2=<v2=>(v2, <blk>)
       @v2 = v2
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::String)
     end
 
     def v3<v3>(<blk>)
@@ -63,30 +69,5 @@ begin
     def v5=<v5=>(v5, <blk>)
       @v5 = v5
     end
-
-    def self.<static-init><<static-init>>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.void()
-        end
-        <self>.sig() do ||
-          <self>.returns(::Integer)
-        end
-        <self>.sig() do ||
-          <self>.params({:"v1" => ::Integer}).returns(::Integer)
-        end
-        <self>.sig() do ||
-          <self>.returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"v2" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.returns(::String)
-        end
-        <emptyTree>
-      end
-    end
   end
-  <emptyTree>
 end

@@ -1,13 +1,7 @@
 class <emptyTree><<C <root>>> < ()
-  <emptyTree>
-
-  def self.<static-init><<static-init>$3>(<blk>)
-    <self>.foobar() do ||
+  <self>.foobar() do ||
+    def a_method<a_method>(<blk>)
       <emptyTree>
     end
-  end
-
-  def a_method<a_method>(<blk>)
-    <emptyTree>
   end
 end
