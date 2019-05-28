@@ -525,6 +525,10 @@ class Sorbet::Private::GemLoader
         puts "\nWebMock.enable! is incompatible with Sorbet. Please don't unconditionally do it on requiring this file."
       end
     end,
+    'codecov' => proc do
+      my_require 'simplecov'
+      my_require 'codecov'
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
@@ -552,7 +556,6 @@ class Sorbet::Private::GemLoader
 
   def self.require_all_gems
     require 'bundler/setup'
-    Bundler.require
 
     # Do not load gems in Gemfile where require is false
     deps = Bundler.load.dependencies.reject { |dep| dep.autorequire && dep.autorequire.empty? }
@@ -570,6 +573,7 @@ class Sorbet::Private::GemLoader
       rescue LoadError
       end
     end
+    Bundler.require
   end
 end
 # rubocop:enable PrisonGuard/AutogenLoaderPreamble
