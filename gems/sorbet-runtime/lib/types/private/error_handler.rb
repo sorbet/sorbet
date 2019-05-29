@@ -122,7 +122,7 @@ module T::Private::ErrorHandler
       begin
         raise TypeError.new(error_message)
       rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Private::ErrorHandler.handle_type_error(e)
+        T::Private::ErrorHandler.handle_inline_type_error(e)
       end
     end
   end
