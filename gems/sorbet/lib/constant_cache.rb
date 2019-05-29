@@ -98,6 +98,8 @@ class Sorbet::Private::ConstantLookupCache
 
   private def dfs_module(mod, prefix, ret, owner)
     raise "error #{prefix}: #{mod} is not a module" if !mod.is_a?(Module)
+    name = Sorbet::Private::RealStdlib.real_name(mod)
+    return if name == 'RSpec::ExampleGroups' # These are all anonymous classes and will be quadratic in the number of classes to name them. We also know they don't have any hidden definitions
     begin
       constants = Sorbet::Private::RealStdlib.real_constants(mod)
     rescue TypeError
@@ -119,10 +121,10 @@ class Sorbet::Private::ConstantLookupCache
         begin
           nested_constant = mod.const_get(nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
         rescue LoadError
-          puts "Failed to load #{mod.name}::#{nested}"
+          puts "Failed to load #{name}::#{nested}"
           next
         rescue NameError
-          puts "Failed to load #{mod.name}::#{nested}"
+          puts "Failed to load #{name}::#{nested}"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
           # Did you mean?  YARD::Parser::Ruby::Legacy::RipperParser
