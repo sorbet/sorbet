@@ -604,6 +604,7 @@ In general,
 
 - to debug a normal build of sorbet?
   - `lldb bazel-bin/main/sorbet -- <args> ...`
+  - (Consider using `--config=static-libs` for better debug symbols)
 - to debug something in pay-server?
   - See the section on “Local development” using `typecheck_devel`
 - to debug an existing Sorbet process (i.e., LSP)
