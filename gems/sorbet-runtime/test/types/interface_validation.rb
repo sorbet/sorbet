@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-# typed: ignore
-require_relative '../../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
 class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
   it "succeeds when all methods are declared as abstract" do
     base = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -14,6 +13,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
     end
 
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
       include base
@@ -27,6 +27,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
 
   it "raises an error if an interface has a method without a type signature" do
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -45,6 +46,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
 
   it "raises an error if an interface has a method with a non-abstract type signature" do
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -67,6 +69,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       def bad; end
     end
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
       include mixin
@@ -84,6 +87,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
 
   it "raises an error if an interface has a private method" do
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -103,6 +107,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
 
   it "raises an error if an interface has a protected method" do
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -119,6 +124,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
 
   it "allows void methods in interfaces" do
     base = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -127,6 +133,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
     end
 
     Module.new do
+      extend T::Sig
       extend T::Helpers
       include base
 
@@ -139,6 +146,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
 
   it "raises an error if a void method has an incompatible implementation" do
     base = Module.new do
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -147,6 +155,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
     end
 
     mod = Module.new do
+      extend T::Sig
       extend T::Helpers
       include base
 

@@ -4,6 +4,8 @@
 module T::Types
   # validates that the provided value is within a given set/enum
   class Enum < Base
+    extend T::Sig
+
     attr_reader :values
 
     # TODO Ideally Hash would not be accepted but there are a lot of uses with prop enum.

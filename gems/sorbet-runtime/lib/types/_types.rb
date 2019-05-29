@@ -195,7 +195,7 @@ module T
       raise TypeError.new(msg) if arg.nil?
       arg
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-      T::Private::ErrorHandler.handle_type_error(e)
+      T::Private::ErrorHandler.handle_inline_type_error(e)
       arg
     end
   end
@@ -244,5 +244,8 @@ module T
       T::Types::TypedSet.new(type)
     end
   end
+
+  # When mixed into a module, indicates that Sorbet may export the CFG for methods in that module
+  module CFGExport; end
 end
 # rubocop:enable PrisonGuard/UseOpusTypesShortcut

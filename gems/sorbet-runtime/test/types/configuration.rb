@@ -1,12 +1,11 @@
 # frozen_string_literal: true
-# typed: false
-require_relative '../../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
 module Opus::Types::Test
   class ConfigurationTest < Critic::Unit::UnitTest
     before do
       @mod = Module.new do
+        extend T::Sig
         # Make it public for testing only
         public_class_method :sig
       end
@@ -16,7 +15,7 @@ module Opus::Types::Test
       def self.receive(*); end
     end
 
-    describe 'type_error_handler' do
+    describe 'inline_type_error_handler' do
       describe 'when in default state' do
         it 'T.must raises an error' do
           assert_raises(TypeError) do
@@ -33,13 +32,13 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.type_error_handler = lambda do |*args|
+          T::Configuration.inline_type_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.type_error_handler = nil
+          T::Configuration.inline_type_error_handler = nil
         end
 
         it 'handles a T.must error' do
@@ -58,7 +57,7 @@ module Opus::Types::Test
       end
     end
 
-    describe 'sig_decl_error_handler' do
+    describe 'sig_builder_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
           @mod.sig {generated.returns(Symbol).checked(:always)}
@@ -77,16 +76,16 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.sig_decl_error_handler = lambda do |*args|
+          T::Configuration.sig_builder_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.sig_decl_error_handler = nil
+          T::Configuration.sig_builder_error_handler = nil
         end
 
-        it 'handles a sig declaration error' do
+        it 'handles a sig builder error' do
           CustomReceiver.expects(:receive).once.with do |error, location|
             error.message == "You can't use .checked with .generated." &&
               error.is_a?(T::Private::Methods::DeclBuilder::BuilderError) &&
@@ -101,7 +100,7 @@ module Opus::Types::Test
       end
     end
 
-    describe 'sig_build_error_handler' do
+    describe 'sig_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
           @mod.sig {override.returns(Symbol)}
@@ -120,13 +119,13 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.sig_build_error_handler = lambda do |*args|
+          T::Configuration.sig_validation_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.sig_build_error_handler = nil
+          T::Configuration.sig_validation_error_handler = nil
         end
 
         it 'handles a sig build error' do
@@ -148,7 +147,7 @@ module Opus::Types::Test
       end
     end
 
-    describe 'sig_error_handler' do
+    describe 'call_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
           @mod.sig {params(a: String).returns(Symbol)}
@@ -167,13 +166,13 @@ module Opus::Types::Test
 
       describe 'when overridden' do
         before do
-          T::Configuration.sig_error_handler = lambda do |*args|
+          T::Configuration.call_validation_error_handler = lambda do |*args|
             CustomReceiver.receive(*args)
           end
         end
 
         after do
-          T::Configuration.sig_error_handler = nil
+          T::Configuration.call_validation_error_handler = nil
         end
 
         it 'handles a sig error' do

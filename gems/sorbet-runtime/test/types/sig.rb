@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-# typed: false
-require_relative '../../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
 class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
   it 'works on a class' do
     klass = Class.new do
+      extend T::Sig
       sig {returns(Symbol)}
       def foo
         :foo
@@ -16,6 +15,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
 
   it 'works on a module' do
     mod = Module.new do
+      extend T::Sig
       sig {returns(Symbol)}
       def self.foo
         :foo
@@ -26,6 +26,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
 
   it 'does not work an instance ' do
     klass = Class.new do
+      extend T::Sig
       def foo
         sig {void}
       end

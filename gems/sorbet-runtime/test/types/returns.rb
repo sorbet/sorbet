@@ -1,11 +1,10 @@
 # frozen_string_literal: true
-# typed: false
-require_relative '../../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
 module Opus::Types::Test
   class ReturnsTest < Critic::Unit::UnitTest
     class TestReturns
+      extend T::Sig
       extend T::Generic
 
       sig {returns(T.noreturn)}

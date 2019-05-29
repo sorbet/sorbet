@@ -1,7 +1,5 @@
 # frozen_string_literal: true
-# typed: false
-require_relative '../../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
 module Opus::Types::Test
   class TypesTest < Critic::Unit::UnitTest
@@ -208,7 +206,7 @@ module Opus::Types::Test
         value = [true]
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Array[Integer], " \
-                         "got T::Array[T.any(TrueClass, FalseClass)]"
+                         "got T::Array[T::Boolean]"
         assert_equal(expected_error, msg)
       end
 
@@ -412,7 +410,7 @@ module Opus::Types::Test
         value = [true]
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerable[Integer], " \
-                         "got T::Array[T.any(TrueClass, FalseClass)]"
+                         "got T::Array[T::Boolean]"
         assert_equal(expected_error, msg)
       end
 
@@ -491,6 +489,7 @@ module Opus::Types::Test
     end
 
     module TestInterface1
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -498,6 +497,7 @@ module Opus::Types::Test
     end
 
     module TestInterface2
+      extend T::Sig
       extend T::Helpers
       interface!
 
@@ -902,6 +902,7 @@ module Opus::Types::Test
     end
 
     module TestGeneric1
+      extend T::Sig
       extend T::Generic
 
       Elem = type_member
@@ -912,6 +913,7 @@ module Opus::Types::Test
     end
 
     class TestGeneric2
+      extend T::Sig
       extend T::Generic
 
       Elem1 = type_member
@@ -923,6 +925,7 @@ module Opus::Types::Test
     end
 
     class GenericSingleton
+      extend T::Sig
       extend T::Generic
 
       SingletonTP = type_template

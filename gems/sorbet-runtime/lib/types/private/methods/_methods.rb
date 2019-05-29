@@ -179,7 +179,7 @@ module T::Private::Methods
       begin
         run_builder(declaration_block)
       rescue DeclBuilder::BuilderError => e
-        T::Private::ErrorHandler.handle_sig_decl_error(e, declaration_block.loc)
+        T::Private::ErrorHandler.handle_sig_builder_error(e, declaration_block.loc)
         nil
       end
 
@@ -235,7 +235,7 @@ module T::Private::Methods
       super_method = original_method&.super_method
       super_signature = signature_for_method(super_method) if super_method
 
-      T::Private::ErrorHandler.handle_sig_build_error(
+      T::Private::ErrorHandler.handle_sig_validation_error(
         e,
         method: original_method,
         declaration: current_declaration,
