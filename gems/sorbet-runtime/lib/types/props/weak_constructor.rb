@@ -23,6 +23,7 @@ module T::Props::WeakConstructor
       decorator.prop_set(self, p, val, rules)
     end
 
+
     unless expected_keys.empty?
       raise ArgumentError.new("#{@class}: Unrecognized properties in #with_props: #{expected_keys.keys.join(', ')}")
     end

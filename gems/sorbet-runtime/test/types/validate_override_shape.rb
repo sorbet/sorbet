@@ -1,10 +1,11 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: false
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 module Opus::Types::Test
   class ValidateOverrideShapeTest < Critic::Unit::UnitTest
     class Base
-      extend T::Sig
       sig do
         overridable
         .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
@@ -15,7 +16,6 @@ module Opus::Types::Test
 
     it "succeeds if the override matches the shape" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
@@ -28,7 +28,6 @@ module Opus::Types::Test
 
     it "succeeds if the override has additional optional args and kwargs" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, opt2: Object, kwreq: Object, kwopt: Object, kwopt2: Object, blk: Proc)
@@ -41,7 +40,6 @@ module Opus::Types::Test
 
     it "succeeds if the override makes required parameters optional" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
@@ -54,7 +52,6 @@ module Opus::Types::Test
 
     it "raises if the override is missing a block arg" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, kwreq: Object, kwopt: Object)
@@ -77,7 +74,6 @@ module Opus::Types::Test
 
     it "raises if the override is missing positional args" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, kwreq: Object, kwopt: Object, blk: Proc)
@@ -100,7 +96,6 @@ module Opus::Types::Test
 
     it "raises if the override has extra required args" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
@@ -123,7 +118,6 @@ module Opus::Types::Test
 
     it "raises if the override is missing keyword args" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, kwreq: Object, blk: Proc)
@@ -146,7 +140,6 @@ module Opus::Types::Test
 
     it "raises if the override has extra required keyword args" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override
           .params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
@@ -169,7 +162,6 @@ module Opus::Types::Test
 
     it "succeeds if the override allows it" do
       klass = Class.new(Base) do
-        extend T::Sig
         sig do
           override(allow_incompatible: true)
           .returns(Object)

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: false
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
   module AbstractMixin
-    extend T::Sig
     extend T::Helpers
     abstract!
 
@@ -18,7 +19,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       end
 
       mod = Module.new do
-        extend T::Sig
         extend T::Helpers
         include mixin
         sig {override.returns(Object)}
@@ -33,14 +33,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "succeeds when overriding an .override method with .override" do
       mixin = Module.new do
-        extend T::Sig
         extend T::Helpers
         sig {override.returns(Object)}
         def self.name; 'foo'; end
       end
 
       mod = Module.new do
-        extend T::Sig
         extend T::Helpers
         extend mixin
         sig {override.returns(Object)}
@@ -52,14 +50,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "succeeds when overriding an .overridable with .override" do
       mixin = Module.new do
-        extend T::Sig
         extend T::Helpers
         sig {overridable.returns(Object)}
         def foo; end
       end
 
       mod = Module.new do
-        extend T::Sig
         extend T::Helpers
         include mixin
         sig {override.returns(Object)}
@@ -74,7 +70,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "succeeds when overriding an .overridable.implementation method with .override" do
       mixin = Module.new do
-        extend T::Sig
         include AbstractMixin
         extend T::Helpers
         sig {implementation.overridable.returns(Object)}
@@ -82,7 +77,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       end
 
       mod = Module.new do
-        extend T::Sig
         include mixin
         extend T::Helpers
         sig {override.returns(Object)}
@@ -97,14 +91,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "raises when overriding a standard method with .override" do
       parent = Class.new do
-        extend T::Sig
         extend T::Helpers
         sig {returns(Object)}
         def foo; end
       end
 
       klass = Class.new(parent) do
-        extend T::Sig
         extend T::Helpers
         sig {override.returns(Object)}
         def foo; end
@@ -123,7 +115,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "raises when overriding an abstract method with .override" do
       klass = Class.new do
-        extend T::Sig
         extend T::Helpers
         include AbstractMixin
         sig {override.returns(Object)}
@@ -143,7 +134,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "raises when overriding an implementation method with .override" do
       parent = Class.new do
-        extend T::Sig
         extend T::Helpers
         include AbstractMixin
         sig {implementation.returns(Object)}
@@ -151,7 +141,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       end
 
       klass = Class.new(parent) do
-        extend T::Sig
         sig {override.returns(Object)}
         def foo; end
       end
@@ -173,7 +162,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       end
 
       klass = Class.new(parent) do
-        extend T::Sig
         extend T::Helpers
         sig {returns(Object)}
         def foo; end
@@ -184,14 +172,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "succeeds when overriding a standard method with bare sig" do
       parent = Class.new do
-        extend T::Sig
         extend T::Helpers
         sig {returns(Object)}
         def foo; end
       end
 
       klass = Class.new(parent) do
-        extend T::Sig
         extend T::Helpers
         sig {returns(Object)}
         def foo; end
@@ -202,7 +188,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "raises when overriding an abstract method with a bare sig" do
       klass = Class.new do
-        extend T::Sig
         extend T::Helpers
         include AbstractMixin
         sig {returns(Object)}
@@ -222,14 +207,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "raises when overriding an .overridable method with .implementation" do
       parent = Class.new do
-        extend T::Sig
         extend T::Helpers
         sig {overridable.returns(Object)}
         def foo; end
       end
 
       klass = Class.new(parent) do
-        extend T::Sig
         sig {implementation.returns(Object)}
         def foo; end
       end
@@ -249,7 +232,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
   describe "without a super method" do
     it "raises when using .override with no override" do
       klass = Class.new do
-        extend T::Sig
         extend T::Helpers
         sig {override.returns(Object)}
         def foo; end
@@ -267,7 +249,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     it "raises when using .implementation_method on a non-override" do
       klass = Class.new do
-        extend T::Sig
         extend T::Helpers
         sig {implementation.returns(Object)}
         def foo; end

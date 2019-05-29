@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: ignore
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 module Opus::Types::Test
   class BuilderSyntaxTest < Critic::Unit::UnitTest
@@ -12,7 +14,6 @@ module Opus::Types::Test
       # Hoist to assert afterwards.
       builder = nil
       mod = Module.new do
-        extend T::Sig
         sig do
           builder = params(x: Integer).returns(String)
         end
@@ -39,7 +40,6 @@ module Opus::Types::Test
         builders = {}
 
         Base = Class.new do
-          extend T::Sig
           sig do
             builders[:abstract] = void.abstract
           end
@@ -52,7 +52,6 @@ module Opus::Types::Test
         end
 
         Child1 = Class.new(Base) do
-          extend T::Sig
           sig do
             builders[:implementation] = void.implementation
           end
@@ -65,7 +64,6 @@ module Opus::Types::Test
         end
 
         Child2 = Class.new(Base) do
-          extend T::Sig
           sig do
             builders[:implementation_overridable] = void.implementation.overridable
           end
@@ -73,7 +71,6 @@ module Opus::Types::Test
         end
 
         Child3 = Class.new(Base) do
-          extend T::Sig
           sig do
             builders[:overridable_implementation] = void.overridable.implementation
           end
@@ -121,7 +118,6 @@ module Opus::Types::Test
         name = (["sig"] + seq).join(".")
         it name do
           cls = Class.new do
-            extend T::Sig
             # abstract/overridable/etc only work on instance-level methods
             sig do
               builder = void
@@ -144,7 +140,6 @@ module Opus::Types::Test
         it 'raises RuntimeError with invalid level' do
           err = assert_raises(ArgumentError) do
             mod = Module.new do
-              extend T::Sig
               sig {void.checked(true)}
               def self.test_method; end
             end
@@ -154,7 +149,6 @@ module Opus::Types::Test
 
           assert_raises(ArgumentError) do
             mod = Module.new do
-              extend T::Sig
               sig {void.checked(false)}
               def self.test_method; end
             end
@@ -163,7 +157,6 @@ module Opus::Types::Test
 
           assert_raises(ArgumentError) do
             mod = Module.new do
-              extend T::Sig
               sig {void.checked(:foo)}
               def self.test_method; end
             end
@@ -172,7 +165,6 @@ module Opus::Types::Test
 
           builder = nil
           mod = Module.new do
-            extend T::Sig
             sig do
               builder = void.checked(:always)
             end
@@ -193,7 +185,6 @@ module Opus::Types::Test
 
           it '`always` is checked' do
             mod = Module.new do
-              extend T::Sig
               sig do
                 params({x: Integer})
                 .returns(String)
@@ -209,7 +200,6 @@ module Opus::Types::Test
 
           it '`never` is not checked' do
             mod = Module.new do
-              extend T::Sig
               sig do
                 params({x: Integer})
                 .returns(String)
@@ -223,7 +213,6 @@ module Opus::Types::Test
 
           def make_mod
             Module.new do
-              extend T::Sig
               sig do
                 params({x: Integer})
                 .returns(String)
@@ -261,7 +250,6 @@ module Opus::Types::Test
       it 'forbids multiple .returns calls' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).returns(Integer)}
             def self.foo; end; foo
           end
@@ -272,7 +260,6 @@ module Opus::Types::Test
       it 'forbids multiple .checked calls' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).checked(:always).checked(:always)}
             def self.foo; end; foo
           end
@@ -283,7 +270,6 @@ module Opus::Types::Test
       it 'forbids multiple .soft calls' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).soft(notify: 'me').soft(notify: 'you')}
             def self.foo; end; foo
           end
@@ -294,7 +280,6 @@ module Opus::Types::Test
       it 'forbids .soft and then .checked' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).soft(notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
@@ -305,7 +290,6 @@ module Opus::Types::Test
       it 'forbids .checked and then .soft' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).soft(notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
@@ -316,7 +300,6 @@ module Opus::Types::Test
       it 'forbids empty notify' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).soft(notify: '')}
             def self.foo; end; foo
           end
@@ -327,7 +310,6 @@ module Opus::Types::Test
       it 'forbids unpassed notify' do
         ex = assert_raises(ArgumentError) do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).soft}
             def self.foo; end; foo
           end
@@ -338,7 +320,6 @@ module Opus::Types::Test
       it 'forbids .generated and then .checked' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {generated.returns(Integer).checked(:never)}
             def self.foo; end; foo
           end
@@ -349,7 +330,6 @@ module Opus::Types::Test
       it 'forbids .generated and then .soft' do
         ex = assert_raises do
           Class.new do
-            extend T::Sig
             sig {generated.returns(Integer).soft(notify: '')}
             def self.foo; end; foo
           end
@@ -360,7 +340,6 @@ module Opus::Types::Test
       it 'disallows return then void' do
         e = assert_raises(ArgumentError) do
           Class.new do
-            extend T::Sig
             sig {returns(Integer).void}
             def self.foo; end; foo
           end
@@ -371,7 +350,6 @@ module Opus::Types::Test
       it 'disallows void then return' do
         e = assert_raises(ArgumentError) do
           Class.new do
-            extend T::Sig
             sig {void.returns(Integer)} # rubocop:disable PrisonGuard/SigBuilderOrder
             def self.foo; end; foo
           end
@@ -383,7 +361,6 @@ module Opus::Types::Test
     describe 'type_parameters' do
       it 'allows well formed decls' do
         mod = Module.new do
-          extend T::Sig
           sig do
             type_parameters(:U)
             .params(
@@ -408,7 +385,6 @@ module Opus::Types::Test
       it 'disallows non-symbols in type_parameters' do
         e = assert_raises(ArgumentError) do
           Class.new do
-            extend T::Sig
             sig {type_parameters(3)}
             def self.foo; end; foo
           end
@@ -420,7 +396,6 @@ module Opus::Types::Test
     it 'includes line numbers in errors' do
       line = nil
       klass = Class.new do
-        extend T::Sig
           line = __LINE__; sig {params(x: Integer)}
           def f(x); end
       end

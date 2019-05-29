@@ -8,10 +8,10 @@ module T::Private::Methods::SignatureValidation
   def self.validate(signature)
     if signature.method_name == :initialize && signature.method.owner.is_a?(Class)
       # Constructors are special. They look like overrides in terms of a super_method existing,
-      # but in practice, you never call them polymorphically. Conceptually, they're standard
+      # but in practice, you never call them polymorphically. Conceptually, they're static
       # methods (this is consistent with how they're treated in other languages, e.g. Java)
       if signature.mode != Modes.standard
-        raise "Constructor methods should always be declared using `sig`."
+        raise "`sig`s on `initialize` should not use `override`"
       end
       return
     end

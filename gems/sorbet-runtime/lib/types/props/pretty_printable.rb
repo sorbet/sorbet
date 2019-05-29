@@ -16,7 +16,6 @@ module T::Props::PrettyPrintable
   end
 
   module DecoratorMethods
-    extend T::Sig
 
     sig {returns(T::Array[Symbol])}
     def valid_props

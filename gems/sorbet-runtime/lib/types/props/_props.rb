@@ -17,7 +17,6 @@ module T::Props
   #####
 
   module ClassMethods
-    extend T::Sig
     extend T::Helpers
 
     def props; decorator.props; end
