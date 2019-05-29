@@ -101,7 +101,7 @@ class Sorbet::Private::RequireEverything
     rails = Object.const_get(:Rails)
     load_paths = rails.application.send(:_all_load_paths)
     load_paths.each do |path|
-      excluded_paths += Dir.glob("#{Dir.pwd}/#{path}/**/*.rb")
+      excluded_paths += Dir.glob("#{path}/**/*.rb")
     end
 
     # Exclude initializers, as they have already been run by rails and
