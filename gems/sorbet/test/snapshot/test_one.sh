@@ -10,6 +10,27 @@ popd &> /dev/null
 # shellcheck disable=SC1090
 source "$root_dir/test/snapshot/logging.sh"
 
+# ----- Helper functions -----
+
+wrap_verbose() {
+  out_log="$(mktemp)"
+  # shellcheck disable=SC2064
+  trap "rm -f '$out_log'" EXIT
+
+  if ! "$@" > "$out_log" 2>&1; then
+    if [ -z "$VERBOSE" ]; then
+      error "└─ '$*' failed. Re-run with --verbose for more."
+    else
+      cat "$out_log"
+      error "└─ '$*' failed. See output above."
+    fi
+    exit 1
+  fi
+  if [ -n "$VERBOSE" ]; then
+    cat "$out_log"
+  fi
+}
+
 # ----- Option parsing -----
 
 usage() {
@@ -163,19 +184,23 @@ cp -r "$test_dir/src"/* "$actual"
   # not because this test driver needs to refer to files with relative paths.
   cd "$actual"
 
-  if ! bundle install > "$actual/bundle-install.log" 2>&1; then
-    if [ -z "$VERBOSE" ]; then
-      error "└─ 'bundle install' failed. Re-run with --verbose for more."
+  # Install what's installed in the Gemfile.lock (ignoring Gemfile)
+  wrap_verbose bundle install
+
+  # Make sure what's in the Gemfile matches what's in the Gemfile.lock
+  # (running this in the sandbox, because this will update the Gemfile.lock)
+  wrap_verbose bundle check
+  if ! diff -u "$test_dir/src/Gemfile.lock" "$actual/Gemfile.lock"; then
+    error "├─ expected Gemfile.lock did not match actual Gemfile.lock"
+
+    if [ -z "$UPDATE" ]; then
+      error "└─ see output above."
+      exit 1
     else
-      cat "$actual/bundle-install.log"
-      error "└─ 'bundle install' failed. See output above."
+      warn "└─ updating Gemfile.lock"
+      cp "$actual/Gemfile.lock" "$test_dir/src/Gemfile.lock"
     fi
-    exit 1
   fi
-  if [ -n "$VERBOSE" ]; then
-    cat "$actual/bundle-install.log"
-  fi
-  rm -f "$actual/bundle-install.log"
 
   if ! SRB_YES=1 bundle exec "$srb" init | \
       sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
@@ -197,7 +222,6 @@ cp -r "$test_dir/src"/* "$actual"
   fi
 )
 
-
 # ----- Check out.log -----
 
 if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
@@ -208,7 +232,7 @@ if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "├─ updating expected/out.log"
+      warn "└─ updating expected/out.log"
       mkdir -p "$test_dir/expected"
       cp "$actual/out.log" "$test_dir/expected/out.log"
     fi
@@ -225,7 +249,7 @@ if [ -z "$is_partial" ] || [ -f "$test_dir/expected/err.log" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "├─ updating expected/err.log"
+      warn "└─ updating expected/err.log"
       cp "$actual/err.log" "$test_dir/expected/err.log"
     fi
   fi
@@ -295,7 +319,7 @@ if [ -z "$is_partial" ]; then
 elif [ -d "$test_dir/expected" ]; then
   diff_partial
 elif [ -n "$UPDATE" ]; then
-  warn "├─ treating empty partial test as total for the sake of updating."
+  warn "├─ Treating empty partial test as total for the sake of updating."
   warn "├─ Feel free to delete files in this snapshot that you don't want."
   diff_total
 else
