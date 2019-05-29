@@ -3343,6 +3343,9 @@ module Bundler::GemHelpers
 end
 
 class Bundler::GemHelpers::PlatformMatch < Struct
+  extend T::Generic
+  Elem = type_member(fixed: T.untyped)
+
   EXACT_MATCH = ::T.let(nil, ::T.untyped)
   WORST_MATCH = ::T.let(nil, ::T.untyped)
 
