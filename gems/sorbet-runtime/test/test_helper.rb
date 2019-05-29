@@ -29,10 +29,10 @@ module Critic::Extensions::TypeExt
   end
 end
 
-module Chalk; end
-module Chalk::Log; end
-module Chalk::Log::CLevels; end
-class Chalk::Log::CLevels::Sheddable; end
+module Opus; end
+module Opus::Log; end
+module Opus::Log::CLevels; end
+class Opus::Log::CLevels::Sheddable; end
 
 module Chalk::Tools; end
 module Chalk::Tools::RedactionUtils
@@ -62,7 +62,6 @@ Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias(T.any(
   [T.enum([:replace]), String],
 ))
 
-module Opus; end
 module Opus::Types; end
 module Opus::Types::Test; end
 class Opus::Types::Test::TypesTest < Critic::Unit::UnitTest; end
@@ -91,6 +90,7 @@ module Opus::Error
   end
 end
 
+
 module Opus::Log
   def self.info(*); end
 end
@@ -106,5 +106,24 @@ end
 module Opus::Sys
   def self.testing?
     true
+  end
+end
+module Opus::Ownership; end
+module Opus::HashUtils
+  def self.recursive_stringify_keys(h)
+    _recursive_stringify_keys(h)
+  end
+  def self._recursive_stringify_keys(obj)
+    if obj.is_a?(Hash)
+      new_obj = obj.class.new
+      obj.each do |k, v|
+        new_obj[k.to_s] = _recursive_stringify_keys(v)
+      end
+    elsif obj.is_a?(Array)
+      new_obj = obj.map {|v| _recursive_stringify_keys(v)}
+    else
+      new_obj = obj
+    end
+    new_obj
   end
 end
