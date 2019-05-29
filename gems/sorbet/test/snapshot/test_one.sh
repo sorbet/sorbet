@@ -202,10 +202,10 @@ cp -r "$test_dir/src"/* "$actual"
     fi
   fi
 
-  if ! SRB_YES=1 bundle exec "$srb" init | \
+  # note: redirects stderr before the pipe
+  if ! SRB_YES=1 bundle exec "$srb" init 2> "$actual/err.log" | \
       sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
-      > "$actual/out.log" \
-      2> "$actual/err.log"; then
+      > "$actual/out.log"; then
     error "├─ srb init failed."
     if [ -z "$VERBOSE" ]; then
       error "├─ stdout: $actual/out.log"
