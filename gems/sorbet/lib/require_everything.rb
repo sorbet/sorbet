@@ -9,6 +9,8 @@ end
 class Sorbet::Private::RequireEverything
   # Goes through the most common ways to require all your userland code
   def self.require_everything
+    return if @already_ran
+    @already_ran = true
     patch_kernel
     load_rails
     load_bundler # this comes second since some rails projects fail `Bundler.require' before rails is loaded
