@@ -17,7 +17,7 @@ module T::Types
 
     # @override Base
     def valid?(obj)
-      @raw_type === obj
+      obj.is_a?(@raw_type)
     end
 
     # @override Base
