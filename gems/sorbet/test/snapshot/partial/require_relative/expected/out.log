@@ -26,7 +26,7 @@ SRB_YES set, continuing
 Generating: sorbet/config
 Generating: sorbet/rbi/sorbet-typed/
 Generating: sorbet/rbi/gems/
-[1/1] require_relative /private/var/folders/b0/43zg3s114tb1rcdfflfftg7m0000gn/T/tmp.GikRFYYoIW/foo.rb
+[1/1] require_relative './foo.rb'
 Generating: sorbet/rbi/hidden-definitions/
 Requiring all of your code
 Naming all Modules
