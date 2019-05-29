@@ -69,14 +69,17 @@ class Sorbet::Private::RequireEverything
     end
 
     if STDOUT.isatty
-      print "\r"
+      # Clear the require_relative output when we're done requiring.
+      print "\r\033[K"
     end
   end
 
   def self.my_require(path, numerator, denominator)
     message = "[#{numerator}/#{denominator}] require_relative #{path}"
     if STDOUT.isatty
-      print "\r#{message}"
+      # Carriage return to reset cursor, ANSI escape code to clear current line.
+      # (In case the new message is shorter than the old message.)
+      print "\r\033[K#{message}"
     else
       puts message
     end
