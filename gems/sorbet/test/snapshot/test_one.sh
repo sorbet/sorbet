@@ -316,7 +316,7 @@ diff_partial() {
 
 if [ -z "$is_partial" ]; then
   diff_total
-elif [ -d "$test_dir/expected" ]; then
+elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
 elif [ -n "$UPDATE" ]; then
   warn "├─ Treating empty partial test as total for the sake of updating."
