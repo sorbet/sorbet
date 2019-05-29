@@ -153,8 +153,12 @@ below). There are many options you can pass when building `sorbet`:
   - (Included by `--config=dbg`) debugging symbols, and nothing else.
 - `--config=forcedebug`
   - Use more memory, but report even more sanity checks.
+- `--config=static-libs`
+  - Forcibly use static linking (Sorbet defaults to dynamic linking for faster
+    build times).
+  - Sorbet already uses this option in release builds (see below).
 - `--config=release-mac` and `--config=release-linux`
-  - Exact set of options that we ship to our users.
+  - Exact release configuration that we ship to our users.
 
 Independently of providing or omitting any of the above flags, you can turn on
 optimizations for any build:

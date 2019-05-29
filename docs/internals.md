@@ -62,6 +62,7 @@ sorbet
 ├── ast
 │   └── desugar
 ├── dsl
+├── local_vars
 ├── namer
 ├── resolver
 ├── cfg
@@ -111,11 +112,12 @@ another or make modifications within the IR they were given.
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
 | 2   | [Desugar], `-p ast`              |                     |                                   |
-| 3   |                                  | [`ast::Expression`] | [DSL], `-p dsl-tree`              |
-| 4   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
-| 5   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
-| 6   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
-| 7   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
+| 3   |                                  | [`ast::Expression`] | [DSL]                             |
+| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p dsl-tree`        |
+| 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
+| 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
+| 7   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
+| 8   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
 When you see links to files below, you should **open the file** and give it a
 quick skim before continuing. Most of the sections below are written like a
@@ -202,6 +204,12 @@ convenient to call into other phases of Sorbet, but instead we've reimplemented
 functionality in the DSL pass. This keeps the surface area of the API we'll have
 to present to plugins in the future small.
 
+
+### LocalVars
+
+TODO(jez) This needs to be documented more fully.
+
+Creates `ast::Local`s from `ast::UnresolvedIdent`s.
 
 ### Namer
 
@@ -600,6 +608,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 [parser]: #parser
 [desugar]: #desugar
 [dsl]: #dsl
+[localvars]: #localvars
 [namer]: #namer
 [resolver]: #resolver
 [cfg]: #cfg
