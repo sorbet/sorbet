@@ -26,7 +26,6 @@ SRB_YES set, continuing
 Generating: sorbet/config
 Generating: sorbet/rbi/sorbet-typed/
 Generating: sorbet/rbi/gems/
-
 Generating: sorbet/rbi/hidden-definitions/
 Requiring all of your code
 Naming all Modules

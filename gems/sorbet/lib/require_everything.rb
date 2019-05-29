@@ -67,11 +67,19 @@ class Sorbet::Private::RequireEverything
       rescue
       end
     end
-    puts
+
+    if STDOUT.isatty
+      print "\r"
+    end
   end
 
   def self.my_require(path, numerator, denominator)
-    print "\r[#{numerator}/#{denominator}] require_relative #{path}"
+    message = "[#{numerator}/#{denominator}] require_relative #{path}"
+    if STDOUT.isatty
+      print "\r#{message}"
+    else
+      puts message
+    end
     require_relative path
   end
 
