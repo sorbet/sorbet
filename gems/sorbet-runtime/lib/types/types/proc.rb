@@ -29,8 +29,8 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      obj.is_a?(::Proc)
+    def ===(obj)
+      ::Proc === obj
     end
 
     # @override Base

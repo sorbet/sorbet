@@ -18,14 +18,14 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
+    def ===(obj)
       return false unless obj.is_a?(Enumerable)
       case obj
       when Array
         begin
           it = 0
           while it < obj.count
-            return false unless @type.valid?(obj[it])
+            return false unless @type === obj[it]
             it += 1
           end
           return true
@@ -38,15 +38,15 @@ module T::Types
         value_type = types[1]
         obj.each_pair do |key, val|
           # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
-          # iterate over a [key, value] array, so we can't juse use the @type.valid?(v)
-          return false if !key_type.valid?(key) || !value_type.valid?(val)
+          # iterate over a [key, value] array, so we can't juse use the @type === v
+          return false if !(key_type === key) || !(value_type === val)
         end
         return true
       when Range
-        @type.valid?(obj.first) && @type.valid?(obj.last)
+        @type === obj.first && @type === obj.last
       when Set
         obj.each do |item|
-          return false unless @type.valid?(item)
+          return false unless @type === item
         end
 
         return true

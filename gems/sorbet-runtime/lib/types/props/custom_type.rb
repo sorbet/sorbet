@@ -15,8 +15,7 @@ module T::Props
     end
 
     # Alias for consistent interface with T::Types::Base
-    def valid?(value)
-      raise
+    def ===(value)
       instance?(value)
     end
 

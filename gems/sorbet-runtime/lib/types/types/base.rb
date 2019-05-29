@@ -15,7 +15,7 @@ module T::Types
       end
     end
 
-    def valid?(obj)
+    def ===(obj)
       raise NotImplementedError
     end
 
@@ -114,7 +114,7 @@ module T::Types
     end
 
     def error_message_for_obj(obj)
-      if valid?(obj)
+      if self === obj
         nil
       else
         "Expected type #{self.name}, got #{describe_obj(obj)}"

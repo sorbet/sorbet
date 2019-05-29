@@ -18,8 +18,8 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      obj.is_a?(Hash) && super
+    def ===(obj)
+      Hash === obj && super
     end
 
     def new(*args, &blk) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride

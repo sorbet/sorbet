@@ -35,7 +35,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       extend T::Props::CustomType
 
       def self.instance?(value)
-        value.is_a?(String)
+        value.is_a?(self)
       end
 
       def self.deserialize(value)

@@ -13,7 +13,7 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
+    def ===(obj)
       false
     end
 

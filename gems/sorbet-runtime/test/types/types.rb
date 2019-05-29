@@ -249,7 +249,7 @@ module Opus::Types::Test
         assert_equal(expected_error, msg)
       end
 
-      it 'is covariant for the type_member for valid?' do
+      it 'is covariant for the type_member for ===' do
         type = T::Array[Numeric]
         value = [3]
         # In the static type system. This would be:

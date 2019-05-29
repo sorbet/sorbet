@@ -131,7 +131,7 @@ class T::Props::Decorator
   sig {params(prop: Symbol, val: T.untyped, rules: Rules).void.checked(:never)}
   private def check_prop_type(prop, val, rules=prop_rules(prop))
     type = rules.fetch(:type_object)
-    unless type.valid?(val)
+    unless type === val
       raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
         "(instance of #{val.class}) - need a #{type}")
     end

@@ -11,7 +11,7 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
+    def ===(obj)
       obj.is_a?(Range) && super
     end
 

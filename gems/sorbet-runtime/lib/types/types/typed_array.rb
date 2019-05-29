@@ -9,8 +9,8 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      obj.is_a?(Array) && super
+    def ===(obj)
+      Array === obj && super
     end
 
     def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride

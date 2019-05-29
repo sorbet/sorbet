@@ -18,9 +18,9 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      obj.is_a?(Array) && obj.length == @types.length &&
-        obj.zip(@types).all? {|item, type| type.valid?(item)}
+    def ===(obj)
+      (Array === obj) && obj.length == @types.length &&
+        obj.zip(@types).all? {|item, type| type === item}
     end
 
     # @override Base

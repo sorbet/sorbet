@@ -22,7 +22,7 @@ class T::Private::Types::Void < T::Types::Base
   end
 
   # @override Base
-  def valid?(obj)
+  def ===(obj)
     raise ERROR_MESSAGE
   end
 

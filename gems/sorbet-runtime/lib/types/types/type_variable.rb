@@ -16,7 +16,7 @@ module T::Types
       @variance = variance
     end
 
-    def valid?(obj)
+    def ===(obj)
       true
     end
 

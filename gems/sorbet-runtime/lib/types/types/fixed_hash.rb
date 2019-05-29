@@ -17,11 +17,11 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      return false unless obj.is_a?(Hash)
+    def ===(obj)
+      return false unless Hash === obj
 
       @types.each do |key, type|
-        return false unless type.valid?(obj[key])
+        return false unless type === obj[key]
       end
 
       obj.each_key do |key|

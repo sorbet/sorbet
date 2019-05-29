@@ -16,8 +16,8 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      obj.is_a?(Module) && obj <= @type
+    def ===(obj)
+      Module === obj && obj <= @type
     end
 
     # @override Base

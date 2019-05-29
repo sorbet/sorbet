@@ -8,7 +8,7 @@ module T::Types
       @name = name
     end
 
-    def valid?(obj)
+    def ===(obj)
       true
     end
 

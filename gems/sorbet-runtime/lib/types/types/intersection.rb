@@ -23,8 +23,8 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
-      @types.all? {|type| type.valid?(obj)}
+    def ===(obj)
+      @types.all? {|type| type === obj}
     end
 
     # @override Base
