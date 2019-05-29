@@ -225,6 +225,7 @@ module T::Private::Methods
 
       names.each do |name|
         raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
+        name.is_a?(Symbol)
       end
 
       if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)

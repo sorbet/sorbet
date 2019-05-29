@@ -239,4 +239,62 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_match(/You can only specify one of `raise_on_nil_write` and `notify_on_nil_write`/, ex.message)
     end
   end
+
+  class WithModel1 < T::Struct
+    prop :foo, String
+    prop :bar, T.nilable(Integer)
+  end
+
+  class WithModel2 < T::Struct
+    prop :f1, String
+    prop :f2, T.nilable(WithModel1)
+  end
+
+  describe 'with function' do
+    it 'with simple fields' do
+      a = WithModel1.new(foo: 'foo')
+      b = a.with(bar: 10)
+
+      assert_equal('foo', a.foo)
+      assert_nil(a.bar)
+      assert_equal('foo', b.foo)
+      assert_equal(10, b.bar)
+    end
+
+    it 'with invalid fields' do
+      a = WithModel1.new(foo: 'foo')
+      e = assert_raises(ArgumentError) do
+        a.with(non_bar: 10)
+      end
+      assert_equal('Unexpected arguments: input({:non_bar=>10}), unexpected({"non_bar"=>10})', e.to_s)
+
+      a = WithModel1.from_hash({'foo' => 'foo', 'foo1' => 'foo1'})
+      e = assert_raises(ArgumentError) do
+        a.with(non_bar: 10)
+      end
+      assert_equal('Unexpected arguments: input({:non_bar=>10}), unexpected({"non_bar"=>10})', e.to_s)
+    end
+
+    it 'with overwrite fields' do
+      a = WithModel1.new(foo: 'foo', bar: 10)
+      b = a.with(bar: 20)
+
+      assert_equal('foo', a.foo)
+      assert_equal(10, a.bar)
+      assert_equal('foo', b.foo)
+      assert_equal(20, b.bar)
+    end
+
+    it 'with nested fields' do
+      a = WithModel2.new(f1: 'foo')
+      b = a.with(f2: {foo: 'foo', bar: 10})
+
+      assert_equal('foo', a.f1)
+      assert_nil(a.f2)
+      assert_equal('foo', b.f1)
+      refute_nil(b.f2)
+      assert_equal('foo', b.f2.foo)
+      assert_equal(10, b.f2.bar)
+    end
+  end
 end

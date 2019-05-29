@@ -127,13 +127,6 @@ module T::Props
       decorator.plugin(mod)
     end
 
-    def optional(*args)
-      raise ArgumentError.new(
-        "Optional properties only make sense when using T::Props::Optional (or one of its " \
-        "children like T::Struct or Chalk::ODM::Document/Model)"
-      )
-    end
-
     # Shorthand helper to define a `prop` with `immutable => true`
     sig {params(name: T.any(Symbol, String), cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
     def const(name, cls_or_args, args={})

@@ -170,7 +170,7 @@ module Opus::Types::Test
             x: Boolean,
             y: Integer,
           )
-            .returns(Integer)
+          .returns(Integer)
         end
         def @mod.foo(x, y)
           y

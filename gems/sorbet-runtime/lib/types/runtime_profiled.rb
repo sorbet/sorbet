@@ -32,4 +32,5 @@
 module T; end
 module T::Utils; end
 # Sorbet guesses this type instead of T.untyped when passed --suggest-runtime-profiled
+
 class T::Utils::RuntimeProfiled; end

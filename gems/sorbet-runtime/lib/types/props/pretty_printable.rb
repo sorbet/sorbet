@@ -33,8 +33,8 @@ module T::Props::PrettyPrintable
           instance,
           multiline: multiline,
           indent: indent
-        ).
-        reject(&:empty?)
+        )
+          .reject(&:empty?)
 
       # Not using #<> here as that makes pry highlight these objects
       # as if they were all comments, whereas this makes them look
@@ -93,9 +93,9 @@ module T::Props::PrettyPrintable
       .returns(String)
     end
     private def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  ')
-      pairs = pretty_kvs.
-        sort_by {|k, _v| k.to_s}.
-        map {|k, v| "#{k}=#{v}"}
+      pairs = pretty_kvs
+        .sort_by {|k, _v| k.to_s}
+        .map {|k, v| "#{k}=#{v}"}
 
       if multiline
         indent + pairs.join("\n#{indent}")

@@ -12,9 +12,11 @@ module T::Profile
       typechecks_measured = typecheck_samples * SAMPLE_RATE
       typecheck_duration * SAMPLE_RATE * 1.0 * total_typechecks / typechecks_measured
     end
+
     def typecheck_count_estimate
       typecheck_samples * SAMPLE_RATE
     end
+
     def reset
       @typecheck_duration = 0
       @typecheck_samples = 0

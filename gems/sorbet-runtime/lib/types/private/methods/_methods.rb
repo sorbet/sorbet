@@ -196,10 +196,10 @@ module T::Private::Methods
 
   def self.run_builder(declaration_block)
     builder = DeclBuilder.new(declaration_block.mod)
-    builder.
-      instance_exec(&declaration_block.blk).
-      finalize!.
-      decl
+    builder
+      .instance_exec(&declaration_block.blk)
+      .finalize!
+      .decl
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration, loc)

@@ -78,8 +78,8 @@ module T::Private::ErrorHandler
         definition_line: method_line,
         kind: "Delete",
         message: error.message,
-        clevel: Chalk::Log::CLevels::Sheddable,
-        )
+        clevel: Opus::Log::CLevels::Sheddable,
+      )
     else
       puts "SIG-DECLARE-FAILED-WITHOUT-LOG Opus::Log is not included at this point. Please fix this sig: #{error.message}" # rubocop:disable PrisonGuard/NoBarePuts
     end
@@ -107,8 +107,8 @@ module T::Private::ErrorHandler
           name: opts[:name],
           expected: opts[:type].name,
           got: got,
-          clevel: Chalk::Log::CLevels::Sheddable,
-          )
+          clevel: Opus::Log::CLevels::Sheddable,
+        )
       else
         puts "SIG-CHECK-FAILED-WITHOUT-LOG Opus::Log is not included at this point. Please fix this sig: #{error_message}" # rubocop:disable PrisonGuard/NoBarePuts
       end
@@ -119,7 +119,11 @@ module T::Private::ErrorHandler
         puts "TypeError: #{error_message}, notify: #{signature.soft_notify}" # rubocop:disable PrisonGuard/NoBarePuts
       end
     else
-      raise TypeError.new(error_message)
+      begin
+        raise TypeError.new(error_message)
+      rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+        T::Private::ErrorHandler.handle_type_error(e)
+      end
     end
   end
 end

@@ -138,7 +138,6 @@ module T
     Private::Casts.cast(value, type, cast_method: "T.let")
   end
 
-
   # Tells the typechecker to ensure that `value` is of type `type` (if not, the typechecker will
   # fail). Use this for debugging typechecking errors, or to ensure that type information is
   # statically known and being checked appropriately. If `checked` is true, raises an exception at
@@ -150,7 +149,6 @@ module T
 
     Private::Casts.cast(value, type, cast_method: "T.assert_type!")
   end
-
 
   # For the static type checker, strips all type information from a value
   # and returns the same value, but statically-typed as `T.untyped`.
