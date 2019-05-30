@@ -112,7 +112,7 @@ class Sorbet::Private::ConstantLookupCache
     go_deeper = [] # make this a bfs to prefer shorter names
     constants.each do |nested|
       begin
-        next if mod.autoload?(nested) # some constants aren't autoloaded even after require_everything, e.g. StateMachine::Graph
+        next if Sorbet::Private::RealStdlib.real_autoload?(mod, nested) # some constants aren't autoloaded even after require_everything, e.g. StateMachine::Graph
 
         begin
           next if DEPRECATED_CONSTANTS.include?("#{prefix}::#{nested}") # avoid stdout spew

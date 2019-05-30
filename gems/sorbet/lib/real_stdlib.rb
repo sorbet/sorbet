@@ -66,4 +66,10 @@ module Sorbet::Private::RealStdlib
     @real_eqeq ||= Object.instance_method(:==)
     @real_eqeq.bind(obj).call(other)
   end
+
+  def self.real_autoload?(o, klass)
+    @real_autoload ||= Object.instance_method(:autoload?)
+    @real_autoload.bind(o).call(klass)
+  end
+
 end
