@@ -55,7 +55,7 @@ void processSource(core::GlobalState &cb, string str) {
     trees.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
     resolver::Resolver::run(ctx, move(trees), *workers);
-    for (auto &tree: trees) {
+    for (auto &tree : trees) {
         tree = flatten::runOne(ctx, move(tree));
     }
 }
