@@ -47,12 +47,12 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_7" [style="tapered"];
 
     "bb::Test#normalize_params_7" [
-        label = "block[id=7](<selfRestore>$15: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<::Test#normalize_params#<block>>\l<self>: Test = <selfRestore>$15\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$15: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<map>\l<self>: Test = <selfRestore>$15\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_11" [style="bold"];
     "bb::Test#normalize_params_9" [
-        label = "block[id=9](<self>: Test, <selfRestore>$15: Test)\louterLoops: 1\l<self>: Test = loadSelf\l<blk>$16: [T.untyped] = load_yield_params(::Test#normalize_params#<block>, Test#normalize_params#<block>)\l<blk>$17: Integer(0) = 0\le$1: T.untyped = <blk>$16: [T.untyped].[](<blk>$17: Integer(0))\l<blockReturnTemp>$18: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)\l<blockReturnTemp>$21: T.noreturn = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$18: T.untyped\l<unconditional>\l"
+        label = "block[id=9](<self>: Test, <selfRestore>$15: Test)\louterLoops: 1\l<self>: Test = loadSelf\l<blk>$16: [T.untyped] = load_yield_params(map)\l<blk>$17: Integer(0) = 0\le$1: T.untyped = <blk>$16: [T.untyped].[](<blk>$17: Integer(0))\l<blockReturnTemp>$18: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)\l<blockReturnTemp>$21: T.noreturn = blockreturn<map> <blockReturnTemp>$18: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_9" -> "bb::Test#normalize_params_6" [style="bold"];
