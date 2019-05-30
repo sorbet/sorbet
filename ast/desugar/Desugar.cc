@@ -526,11 +526,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     core::NameRef tempName = dctx.ctx.state.freshNameUnique(
                         core::UniqueNameKind::Desugar, core::Names::andAnd(), ++dctx.uniqueCounter);
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-
                     auto iff = MK::If(loc, MK::Local(loc, tempName), node2TreeImpl(dctx, std::move(and_->right)),
                                       MK::Local(loc, tempName));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
-
                     result.swap(wrapped);
                 }
             },
@@ -544,11 +542,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     core::NameRef tempName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
                                                                             core::Names::orOr(), ++dctx.uniqueCounter);
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-
                     auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName),
                                       node2TreeImpl(dctx, std::move(or_->right)));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
-
                     result.swap(wrapped);
                 }
             },
@@ -978,10 +974,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             [&](parser::WhilePost *wl) {
                 bool isDoWhile = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-
                 if (isDoWhile) {
                     auto cond = MK::Send0(loc, node2TreeImpl(dctx, std::move(wl->cond)), core::Names::bang());
-
                     auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
                                                                ++dctx.uniqueCounter);
                     auto withResult = MK::Assign(loc, temp, std::move(body));
@@ -1005,10 +999,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             [&](parser::UntilPost *wl) {
                 bool isDoUntil = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-
                 if (isDoUntil) {
                     auto cond = node2TreeImpl(dctx, std::move(wl->cond));
-
                     auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
                                                                ++dctx.uniqueCounter);
                     auto withResult = MK::Assign(loc, temp, std::move(body));
