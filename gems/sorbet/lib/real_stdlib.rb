@@ -51,4 +51,9 @@ module Sorbet::Private::RealStdlib
     @real_hash ||= Object.instance_method(:hash)
     @real_hash.bind(o).call
   end
+
+  def self.real_superclass(o)
+    @real_superclass ||= Class.instance_method(:superclass)
+    @real_superclass.bind(o).call
+  end
 end
