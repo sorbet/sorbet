@@ -569,34 +569,6 @@ public:
         return method;
     }
 
-    unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
-        core::SymbolRef owner = ctx.owner;
-        if (owner == core::Symbols::noSymbol() || owner == core::Symbols::root()) {
-            // Introduce intermediate host for block.
-            ENFORCE(blk->loc.exists());
-            owner = ctx.state.staticInitForFile(blk->loc);
-        } else if (owner.data(ctx)->isClass()) {
-            // If we're at class scope, we're actually in the context of the
-            // singleton class.
-            owner = ctx.state.staticInitForClass(owner, blk->loc);
-        }
-        blk->symbol =
-            ctx.state.enterMethodSymbol(blk->loc, owner,
-                                        ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
-                                                                  ++(owner.data(ctx)->uniqueCounter)));
-
-        enterScope();
-
-        blk->args = fillInArgs(ctx.withOwner(blk->symbol), parseArgs(ctx, blk->args));
-
-        return blk;
-    }
-
-    unique_ptr<ast::Block> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
-        exitScope();
-        return blk;
-    }
-
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
                                                              unique_ptr<ast::UnresolvedIdent> nm) {
         ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");

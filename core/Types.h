@@ -595,20 +595,27 @@ public:
 CheckSize(MetaType, 24, 8);
 
 class SendAndBlockLink {
-    SendAndBlockLink(const SendAndBlockLink &) noexcept = default;
+    SendAndBlockLink(const SendAndBlockLink &) = default;
 
 public:
-    SendAndBlockLink(SendAndBlockLink &&) noexcept = default;
-    SymbolRef block;
+    struct ArgInfo {
+        bool isKeyword;
+        bool isRepeated;
+        bool isDefault;
+        bool isShadow;
+    };
+    SendAndBlockLink(SendAndBlockLink &&) = default;
     TypePtr receiver;
     NameRef fun;
-    std::optional<int> numberOfPositionalBlockParams;
+    std::vector<ArgInfo> argInfos;
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
     SymbolRef blockSpec; // used only by LoadSelf to change type of self inside method.
     TypePtr sendTp;
-    SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams);
+
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo> &&argInfos);
+    std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
 

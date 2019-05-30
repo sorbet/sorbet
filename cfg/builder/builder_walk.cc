@@ -1,3 +1,4 @@
+#include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "cfg/builder/builder.h"
 #include "common/typecase.h"
@@ -276,26 +277,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     argLocs.emplace_back(exp->loc);
                 }
 
-                core::SymbolRef blockSym;
-                if (s->block) {
-                    blockSym = s->block->symbol;
-                }
-
                 if (s->block != nullptr) {
-                    core::SymbolRef sym = s->block->symbol;
-                    const core::SymbolData data = sym.data(cctx.ctx);
-
-                    std::optional<int> arity = 0;
-                    auto &gs = cctx.ctx.state;
-                    for (auto &arg : data->arguments()) {
-                        if (arg.data(gs)->isKeyword() || arg.data(gs)->isBlockArgument() ||
-                            arg.data(gs)->isOptional() || arg.data(gs)->isRepeated()) {
-                            arity = std::nullopt;
-                            break;
-                        }
-                        arity = *arity + 1;
+                    vector<ast::ParsedArg> blockArgs = ast::ArgParsing::parseArgs(cctx.ctx, s->block->args);
+                    vector<core::SendAndBlockLink::ArgInfo> argInfos;
+                    for (auto &e : blockArgs) {
+                        auto &target = argInfos.emplace_back();
+                        target.isKeyword = e.keyword;
+                        target.isRepeated = e.repeated;
+                        target.isDefault = e.default_ != nullptr;
+                        target.isShadow = e.shadow;
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(sym, s->fun, arity);
+                    auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argInfos));
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -315,32 +307,30 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::LocalVariable idxTmp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(core::LocalVariable::selfVariable(), s->loc,
                                                   make_unique<LoadSelf>(link, core::LocalVariable::selfVariable()));
-                    bodyBlock->exprs.emplace_back(argTemp, data->loc(), make_unique<LoadYieldParams>(link, sym));
+                    bodyBlock->exprs.emplace_back(argTemp, s->block->loc, make_unique<LoadYieldParams>(link));
 
-                    for (int i = 0; i < data->arguments().size(); ++i) {
-                        auto &arg = s->block->args[i];
-                        auto id = ast::MK::arg2Local(arg.get());
-                        ENFORCE(id, "Should have been removed by namer");
-                        core::LocalVariable argLoc = id->localVariable;
+                    for (int i = 0; i < blockArgs.size(); ++i) {
+                        auto &arg = blockArgs[i];
+                        core::LocalVariable argLoc = arg.local;
 
-                        if (data->arguments()[i].data(cctx.ctx)->isRepeated()) {
+                        if (arg.repeated) {
                             if (i != 0) {
                                 // Mixing positional and rest args in blocks is
                                 // not currently supported; drop in an untyped.
-                                bodyBlock->exprs.emplace_back(argLoc, id->loc,
+                                bodyBlock->exprs.emplace_back(argLoc, arg.loc,
                                                               make_unique<Alias>(core::Symbols::untyped()));
                             } else {
-                                bodyBlock->exprs.emplace_back(argLoc, id->loc, make_unique<Ident>(argTemp));
+                                bodyBlock->exprs.emplace_back(argLoc, arg.loc, make_unique<Ident>(argTemp));
                             }
                             continue;
                         }
 
                         bodyBlock->exprs.emplace_back(
-                            idxTmp, id->loc, make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
+                            idxTmp, arg.loc, make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};
-                        InlinedVector<core::Loc, 2> locs{id->loc};
+                        InlinedVector<core::Loc, 2> locs{arg.loc};
                         bodyBlock->exprs.emplace_back(
-                            argLoc, id->loc,
+                            argLoc, arg.loc,
                             make_unique<Send>(argTemp, core::Names::squareBrackets(), s->block->loc, idxVec, locs));
                     }
 
