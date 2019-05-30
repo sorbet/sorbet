@@ -99,7 +99,7 @@ class Sorbet::Private::ConstantLookupCache
   end
 
   private def dfs_module(mod, prefix, ret, owner)
-    raise "error #{prefix}: #{mod} is not a module" if !mod.is_a?(Module)
+    raise "error #{prefix}: #{mod} is not a module" if !Sorbet::Private::RealStdlib.real_is_a?(mod, Module)
     name = Sorbet::Private::RealStdlib.real_name(mod)
     Sorbet::Private::Status.say("Naming #{name}", print_without_tty: false)
     return if name == 'RSpec::ExampleGroups' # These are all anonymous classes and will be quadratic in the number of classes to name them. We also know they don't have any hidden definitions
