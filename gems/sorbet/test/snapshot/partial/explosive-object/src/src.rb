@@ -11,4 +11,6 @@ class Boom
       end
     end
   end
+
+  EXPOSION = 1
 end
