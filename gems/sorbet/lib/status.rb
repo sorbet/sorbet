@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-class Sorbet::Private::Status
+module Sorbet::Private::Status
   def self.say(message)
     if STDOUT.isatty
       # Carriage return to reset cursor, ANSI escape code to clear current line.

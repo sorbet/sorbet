@@ -76,7 +76,7 @@ class Sorbet::Private::RequireEverything
 
   def self.my_require(abs_path, numerator, denominator)
     rel_path = Pathname.new(abs_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
-    Sorbet::Private::Status("[#{numerator}/#{denominator}] require_relative './#{rel_path}'")
+    Sorbet::Private::Status.say("[#{numerator}/#{denominator}] require_relative './#{rel_path}'")
     require_relative abs_path
   end
 
