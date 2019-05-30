@@ -34,6 +34,7 @@ module Opus::Log; end
 module Opus::Log::CLevels; end
 class Opus::Log::CLevels::Sheddable; end
 
+module Chalk; end
 module Chalk::Tools; end
 module Chalk::Tools::RedactionUtils
   def self.redact_with_directive(value, opts = [])
