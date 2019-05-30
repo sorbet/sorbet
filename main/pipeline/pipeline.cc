@@ -287,7 +287,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 }
 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                           const options::Options &opts, WorkerPool &workers) {
+                                           const options::Options &opts) {
     try {
         int i = 0;
         Timer timeit(gs.tracer(), "incremental_naming");
