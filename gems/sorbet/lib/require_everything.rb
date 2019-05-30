@@ -101,7 +101,7 @@ class Sorbet::Private::RequireEverything
         super
         return proc {}
       end
-      puts "Ignoring at_exit: #{block}"
+      # puts "Ignoring at_exit: #{block}"
       proc {}
     end
   end
