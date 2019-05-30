@@ -32,6 +32,11 @@ module Sorbet::Private::RealStdlib
     @real_instance_methods.bind(mod).call(arg)
   end
 
+  def self.real_singleton_methods(mod, arg)
+    @real_singleton_methods ||= Module.instance_method(:singleton_methods)
+    @real_singleton_methods.bind(mod).call(arg)
+  end
+
   def self.real_private_instance_methods(mod, arg)
     @real_private_instance_methods ||= Module.instance_method(:private_instance_methods)
     @real_private_instance_methods.bind(mod).call(arg)

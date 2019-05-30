@@ -166,7 +166,7 @@ class Sorbet::Private::Serialize
       serialize_method(method)
     end
     # uniq is not required here, but added to be on the safe side
-    methods += klass.singleton_methods(false).sort.uniq.map do |method_sym|
+    methods += Sorbet::Private::RealStdlib.real_singleton_methods(klass, false).sort.uniq.map do |method_sym|
       begin
         method = klass.singleton_method(method_sym)
       rescue => e
