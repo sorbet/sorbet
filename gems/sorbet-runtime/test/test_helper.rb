@@ -128,3 +128,10 @@ module Opus::HashUtils
     new_obj
   end
 end
+module Opus::DB; end
+module Opus::DB::Model; end
+class Opus::DB::Model::AbstractModel < T::Struct
+  def self.owner(project)
+    @project = project
+  end
+end
