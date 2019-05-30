@@ -13,10 +13,8 @@ public:
         return std::make_unique<ast::EmptyTree>();
     }
 
-    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, MethodDef::ARGS_store args,
-                                        core::SymbolRef symbol = core::Symbols::noSymbol()) {
+    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, MethodDef::ARGS_store args) {
         auto blk = std::make_unique<ast::Block>(loc, std::move(args), std::move(body));
-        blk->symbol = symbol;
         return blk;
     }
 

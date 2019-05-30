@@ -231,7 +231,6 @@ unique_ptr<Expression> Block::_deepCopy(const Expression *avoid, bool root) cons
         throw DeepCopyError();
     }
     auto res = make_unique<Block>(loc, deepCopyVec(avoid, args), body->_deepCopy(avoid));
-    res->symbol = this->symbol;
     return res;
 }
 

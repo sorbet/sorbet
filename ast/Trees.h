@@ -603,7 +603,6 @@ private:
 
 class Block final : public Expression {
 public:
-    core::SymbolRef symbol;
     MethodDef::ARGS_store args;
     std::unique_ptr<Expression> body;
 
