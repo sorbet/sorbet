@@ -2,6 +2,7 @@
 # typed: true
 
 require_relative './real_stdlib'
+require_relative './status'
 
 # This class walks global namespace to find all modules and discover all of their names.
 # At the time you ask for it it, it takes a "spashot" of the world.
@@ -55,6 +56,7 @@ class Sorbet::Private::ConstantLookupCache
   def initialize
     @all_constants = {}
     dfs_module(Object, nil, @all_constants, nil)
+    Sorbet::Private::Status.done
     @consts_by_name = {}
     @all_constants.each_value do |struct|
       fill_primary_name(struct)
@@ -99,6 +101,7 @@ class Sorbet::Private::ConstantLookupCache
   private def dfs_module(mod, prefix, ret, owner)
     raise "error #{prefix}: #{mod} is not a module" if !mod.is_a?(Module)
     name = Sorbet::Private::RealStdlib.real_name(mod)
+    Sorbet::Private::Status.say("Naming #{name}")
     return if name == 'RSpec::ExampleGroups' # These are all anonymous classes and will be quadratic in the number of classes to name them. We also know they don't have any hidden definitions
     begin
       constants = Sorbet::Private::RealStdlib.real_constants(mod)
