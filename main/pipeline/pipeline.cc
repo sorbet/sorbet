@@ -794,6 +794,17 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what), workers);
         }
+        if (opts.stressIncrementalResolver) {
+            for (auto &f : what) {
+                unique_ptr<KeyValueStore> kvstore;
+                auto reIndexed = indexOne(opts, *gs, f.file, kvstore);
+                vector<ast::ParsedFile> toBeReResolved;
+                toBeReResolved.emplace_back(move(reIndexed));
+                auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
+                ENFORCE(reresolved.size() == 1);
+                f = move(reresolved[0]);
+            }
+        }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
