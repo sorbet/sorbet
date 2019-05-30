@@ -1,4 +1,12 @@
 {
   // Runs clang-format when you save (provided by vscode-clangd).
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "[ruby]": {
+    "editor.tabSize": 2,
+  },
+  "[cpp]": {
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+  }
 }
