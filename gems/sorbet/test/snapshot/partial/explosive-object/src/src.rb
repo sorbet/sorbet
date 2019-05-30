@@ -1,11 +1,14 @@
-def bad_object
-  Module.new do
-    def self.name
-      'Object'
+class Boom
+  methods.each do |name|
+    send(:define_method, name) do |*args|
+      raise "boom"
     end
   end
-end
-
-class A
-  include bad_object
+  class << self
+    methods.each do |name|
+      send(:define_method, name) do |*args|
+        raise "boom"
+      end
+    end
+  end
 end
