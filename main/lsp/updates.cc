@@ -18,8 +18,6 @@
 #include "resolver/resolver.h"
 #include <algorithm> // std::unique, std::distance
 
-#include <iostream>
-
 using namespace std;
 
 namespace sorbet::realmain::lsp {
