@@ -148,7 +148,7 @@ class Sorbet::Private::Serialize
       # This method never apears in the reflection list...
       instance_methods += [:initialize]
     end
-    klass.ancestors.reject {|ancestor| constant_cache.name_by_class(ancestor)}.each do |ancestor|
+    Sorbet::Private::RealStdlib.real_ancestors(klass).reject {|ancestor| constant_cache.name_by_class(ancestor)}.each do |ancestor|
       instance_methods += ancestor.instance_methods(false)
     end
 
