@@ -138,7 +138,7 @@ class Sorbet::Private::Serialize
     ret << "\n\n" if !constants_serialized.empty?
 
     methods = []
-    instance_methods = klass.instance_methods(false)
+    instance_methods = Sorbet::Private::RealStdlib.real_instance_methods(klass, false)
     begin
       initialize = klass.instance_method(:initialize)
     rescue
