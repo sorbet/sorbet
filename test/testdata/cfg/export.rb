@@ -56,3 +56,10 @@ module F
     return j # return
   end
 end
+
+
+class DoesNotHaveExportedMethods
+  def foo
+    "i am not exported as I don't inherit T::CFGExport"
+  end
+end
