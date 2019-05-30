@@ -1526,6 +1526,11 @@ public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
+        if (original->symbol == core::Symbols::root()) {
+            ENFORCE(ctx.state.lookupStaticInitForFile(original->loc).exists());
+        } else {
+            ENFORCE(ctx.state.lookupStaticInitForClass(original->symbol).exists());
+        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
