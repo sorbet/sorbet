@@ -14,3 +14,6 @@ class Boom
 
   EXPOSION = 1
 end
+
+class A < Boom
+end
