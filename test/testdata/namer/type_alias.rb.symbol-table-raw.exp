@@ -7,6 +7,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
       argument <C <U A>><U f>x<> -> A::C1 @ Loc {file=test/testdata/namer/type_alias.rb start=8:15 end=8:16}
       argument <C <U A>><U f><blk><block> -> T.untyped @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
   class <S <C <U A>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/type_alias.rb start=2:8 end=2:9}
-    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/type_alias.rb start=8:3 end=8:40}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/type_alias.rb start=2:1 end=2:9}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
 
