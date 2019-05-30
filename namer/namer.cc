@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -71,66 +72,8 @@ class NameInserter {
         return existing;
     }
 
-    struct ParsedArg {
-        core::Loc loc;
-        core::LocalVariable local;
-        unique_ptr<ast::Expression> default_;
-        bool keyword = false;
-        bool block = false;
-        bool repeated = false;
-        bool shadow = false;
-    };
-
-    ParsedArg parseArg(core::MutableContext ctx, unique_ptr<ast::Reference> arg) {
-        ParsedArg parsedArg;
-
-        typecase(
-            arg.get(), [&](ast::UnresolvedIdent *nm) { Exception::raise("Unexpected unresolved name in arg!"); },
-            [&](ast::RestArg *rest) {
-                parsedArg = parseArg(ctx, move(rest->expr));
-                parsedArg.repeated = true;
-            },
-            [&](ast::KeywordArg *kw) {
-                parsedArg = parseArg(ctx, move(kw->expr));
-                parsedArg.keyword = true;
-            },
-            [&](ast::OptionalArg *opt) {
-                parsedArg = parseArg(ctx, move(opt->expr));
-                parsedArg.default_ = move(opt->default_);
-            },
-            [&](ast::BlockArg *blk) {
-                parsedArg = parseArg(ctx, move(blk->expr));
-                parsedArg.block = true;
-            },
-            [&](ast::ShadowArg *shadow) {
-                parsedArg = parseArg(ctx, move(shadow->expr));
-                parsedArg.shadow = true;
-            },
-            [&](ast::Local *local) {
-                parsedArg.local = local->localVariable;
-                parsedArg.loc = local->loc;
-            });
-
-        return parsedArg;
-    }
-
-    vector<ParsedArg> parseArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &args) {
-        vector<ParsedArg> parsedArgs;
-        for (auto &arg : args) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
-            if (!refExp) {
-                Exception::raise("Must be a reference!");
-            }
-            unique_ptr<ast::Reference> refExpImpl(refExp);
-            arg.release();
-            parsedArgs.emplace_back(parseArg(ctx, move(refExpImpl)));
-        }
-
-        return parsedArgs;
-    }
-
     pair<core::SymbolRef, unique_ptr<ast::Expression>> arg2Symbol(core::MutableContext ctx, int pos,
-                                                                  ParsedArg parsedArg) {
+                                                                  ast::ParsedArg parsedArg) {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
             core::SymbolRef sym = ctx.owner.data(ctx)->arguments()[pos];
@@ -404,7 +347,7 @@ public:
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ParsedArg> parsedArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {
         ast::MethodDef::ARGS_store args;
         bool inShadows = false;
         bool intrinsic = isIntrinsic(ctx, ctx.owner);
@@ -509,7 +452,7 @@ public:
         return data->intrinsic != nullptr && data->resultType == nullptr;
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ParsedArg> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
@@ -587,7 +530,7 @@ public:
         }
         ENFORCE(owner.data(ctx)->isClass());
 
-        auto parsedArgs = parseArgs(ctx, method->args);
+        auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
         auto sym = owner.data(ctx)->findMemberNoDealias(ctx, method->name);
         if (sym.exists()) {
