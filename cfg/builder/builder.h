@@ -31,7 +31,7 @@ public:
     core::LocalVariable target;
     core::LocalVariable blockBreakTarget;
     int loops;
-    core::SymbolRef rubyBlock;
+    bool isInsideRubyBlock;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
@@ -43,8 +43,7 @@ public:
 
     CFGContext withTarget(core::LocalVariable target);
     CFGContext withBlockBreakTarget(core::LocalVariable blockBreakTarget);
-    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope,
-                             core::SymbolRef rubyBlock = core::Symbols::noSymbol());
+    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false);
     CFGContext withSendAndBlockLink(const std::shared_ptr<core::SendAndBlockLink> &link);
 
     core::LocalVariable newTemporary(core::NameRef name);

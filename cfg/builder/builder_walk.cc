@@ -352,7 +352,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::LocalVariable blockrv = cctx.newTemporary(core::Names::blockReturnTemp());
                     auto blockLast = walk(cctx.withTarget(blockrv)
                                               .withBlockBreakTarget(cctx.target)
-                                              .withLoopScope(headerBlock, postBlock, s->block->symbol)
+                                              .withLoopScope(headerBlock, postBlock, true)
                                               .withSendAndBlockLink(link),
                                           s->block->body.get(), bodyBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
@@ -400,7 +400,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Next *a) {
                 core::LocalVariable exprSym = cctx.newTemporary(core::Names::nextTemp());
                 auto afterNext = walk(cctx.withTarget(exprSym), a->expr.get(), current);
-                if (afterNext != cctx.inWhat.deadBlock() && cctx.rubyBlock.exists()) {
+                if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
                     core::LocalVariable dead = cctx.newTemporary(core::Names::nextTemp());
                     ENFORCE(cctx.link.get() != nullptr);
                     afterNext->exprs.emplace_back(dead, a->loc, make_unique<BlockReturn>(cctx.link, exprSym));
