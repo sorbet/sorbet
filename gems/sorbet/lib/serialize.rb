@@ -62,7 +62,7 @@ class Sorbet::Private::Serialize
     # that are mixed into Object. This way we at least have a delimiter before
     # the awefulness starts (the superclass).
     Sorbet::Private::RealStdlib.real_ancestors(klass).each do |ancestor|
-      next if ancestor == klass
+      next if Sorbet::Private::RealStdlib.real_eqeq(ancestor, klass)
       break if ancestor == superclass
       ancestor_name = constant_cache.name_by_class(ancestor)
       next unless ancestor_name

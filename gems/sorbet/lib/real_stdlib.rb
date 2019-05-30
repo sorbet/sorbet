@@ -56,4 +56,9 @@ module Sorbet::Private::RealStdlib
     @real_superclass ||= Class.instance_method(:superclass)
     @real_superclass.bind(o).call
   end
+
+  def self.real_eqeq(obj, other)
+    @real_eqeq ||= Object.instance_method(:==)
+    @real_eqeq.bind(obj).call(other)
+  end
 end
