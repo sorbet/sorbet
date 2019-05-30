@@ -367,8 +367,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             if (expCfgJson != test.expectations.end()) {
                 for (auto &cfg : collector.cfgs) {
                     if (cfg->shouldExport(ctx)) {
-                      auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-                      got["cfg-json"].append(core::Proto::toJSON(proto));
+                        auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+                        got["cfg-json"].append(core::Proto::toJSON(proto));
                     }
                 }
                 auto newErrors = errorQueue->drainAllErrors();
