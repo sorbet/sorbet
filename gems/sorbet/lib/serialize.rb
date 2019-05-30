@@ -48,14 +48,14 @@ class Sorbet::Private::Serialize
 
     ret = String.new
 
-    superclass = klass.is_a?(Class) ? klass.superclass : nil
+    superclass = Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? klass.superclass : nil
     if superclass
       superclass_str = superclass == Object ? '' : constant_cache.name_by_class(superclass)
     else
       superclass_str = ''
     end
     superclass_str = !superclass_str || superclass_str.empty? ? '' : " < #{superclass_str}"
-    ret << (klass.is_a?(Class) ? "class #{class_name}#{superclass_str}\n" : "module #{class_name}\n")
+    ret << (Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? "class #{class_name}#{superclass_str}\n" : "module #{class_name}\n")
     ret << "  extend ::T::Sig\n"
 
     # We don't use .included_modules since that also has all the aweful things
@@ -67,7 +67,7 @@ class Sorbet::Private::Serialize
       ancestor_name = constant_cache.name_by_class(ancestor)
       next unless ancestor_name
       next if ancestor_name == class_name
-      if ancestor.is_a?(Class)
+      if Sorbet::Private::RealStdlib.real_is_a?(ancestor, Class)
         ret << "  # Skipping `include #{ancestor_name}` because it is a Class\n"
         next
       end
@@ -84,7 +84,7 @@ class Sorbet::Private::Serialize
       break if ancestor == Object
       ancestor_name = constant_cache.name_by_class(ancestor)
       next unless ancestor_name
-      if ancestor.is_a?(Class)
+      if Sorbet::Private::RealStdlib.real_is_a?(ancestor, Class)
         ret << "  # Skipping `extend #{ancestor_name}` because it is a Class\n"
         next
       end
@@ -207,7 +207,7 @@ class Sorbet::Private::Serialize
   end
 
   def ancestor_has_method(method, klass)
-    return false if !klass.is_a?(Class)
+    return false if !Sorbet::Private::RealStdlib.real_is_a?(klass, Class)
     first_ancestor = klass.ancestors.find do |ancestor|
       next if ancestor == klass
       begin
