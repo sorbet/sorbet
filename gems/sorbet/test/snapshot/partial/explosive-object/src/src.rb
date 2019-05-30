@@ -17,3 +17,6 @@ end
 
 class A < Boom
 end
+class B
+  C = Boom
+end
