@@ -6,7 +6,17 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 unique_ptr<ast::Local> LocalVarSaver::postTransformLocal(core::Context ctx, unique_ptr<ast::Local> local) {
-    bool lspQueryMatch = ctx.state.lspQuery.matchesVar(ctx.owner, local->localVariable);
+    core::SymbolRef owner;
+    if (ctx.owner.data(ctx)->isMethod()) {
+        owner = ctx.owner;
+    } else if (ctx.owner == core::Symbols::root()) {
+        owner = ctx.state.lookupStaticInitForFile(local->loc);
+    } else {
+        ENFORCE(ctx.owner.data(ctx)->isClass());
+        owner = ctx.state.lookupStaticInitForClass(ctx.owner);
+    }
+
+    bool lspQueryMatch = ctx.state.lspQuery.matchesVar(owner, local->localVariable);
     if (lspQueryMatch) {
         // No need for type information; this is for a reference request.
         // Let the default constructor make tp.type an empty shared_ptr and tp.origins an empty vector
