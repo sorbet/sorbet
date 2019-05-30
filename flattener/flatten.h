@@ -2,7 +2,6 @@
 #define SORBET_FLATTEN_H
 
 #include "ast/ast.h"
-#include "common/concurrency/WorkerPool.h"
 
 namespace sorbet::flatten {
 
