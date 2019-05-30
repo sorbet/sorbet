@@ -18,5 +18,8 @@ end
 class A < Boom
 end
 class B
-  C = Boom
+  B1 = Boom
+end
+class C
+  C1 = Class.instance_method(:new).bind(Boom).call
 end
