@@ -793,11 +793,6 @@ SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
     return this->ref(gs);
 }
 
-bool Symbol::isBlockSymbol(const GlobalState &gs) const {
-    const auto &nm = name.data(gs);
-    return nm->kind == NameKind::UNIQUE && nm->unique.original == Names::blockTemp();
-}
-
 bool Symbol::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
     return isBlockArgument() && !loc().exists();
@@ -855,7 +850,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
             ENFORCE(e.second.exists(), "name corresponding to a <none> in scope");
         }
     }
-    if (this->isMethod() && !this->isBlockSymbol(gs)) {
+    if (this->isMethod()) {
         if (isa_type<AliasType>(this->resultType.get())) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
