@@ -784,6 +784,8 @@ public:
 
 class ResolveSignaturesWalk {
 private:
+    std::vector<int> nestedBlockCount;
+
     ast::Local *getArgLocal(core::Context ctx, core::SymbolRef argSym, const ast::MethodDef &mdef, int pos,
                             bool isOverloaded) {
         if (!isOverloaded) {
@@ -1212,11 +1214,11 @@ private:
 
             scope = ctx.owner.data(ctx)->enclosingClass(ctx);
         } else {
-            if (ctx.owner.data(ctx)->isClass()) {
+            if (ctx.owner.data(ctx)->isClass() && nestedBlockCount.back() == 0) {
                 // Declaring a class instance variable
             } else {
                 // Inside a method; declaring a normal instance variable
-                if (ctx.owner.data(ctx)->name != core::Names::initialize()) {
+                if (ctx.owner.data(ctx)->name != core::Names::initialize() || nestedBlockCount.back() != 0) {
                     if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                         e.setHeader("Instance variables must be declared inside `initialize`");
                     }
@@ -1260,6 +1262,10 @@ private:
     }
 
 public:
+    ResolveSignaturesWalk() {
+        nestedBlockCount.emplace_back(0);
+    }
+
     unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         if (handleDeclaration(ctx, asgn)) {
             return asgn;
@@ -1309,9 +1315,35 @@ public:
         return asgn;
     }
 
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+        nestedBlockCount.emplace_back(0);
+        return original;
+    }
+
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
+        nestedBlockCount.pop_back();
         return original;
+    }
+
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        nestedBlockCount.emplace_back(0);
+        return original;
+    }
+
+    unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        nestedBlockCount.pop_back();
+        return original;
+    }
+
+    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        nestedBlockCount.back() += 1;
+        return block;
+    }
+
+    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        nestedBlockCount.back() -= 1;
+        return block;
     }
 
     unique_ptr<ast::Expression> postTransformInsSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> original) {
