@@ -996,8 +996,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
                 if (isKwbegin) {
-                    auto cond_flip = negate(loc, std::move(cond));
-                    unique_ptr<Expression> res = doUntil(dctx, loc, std::move(cond_flip), std::move(body));
+                    unique_ptr<Expression> res = doUntil(dctx, loc, negate(loc, std::move(cond)), std::move(body));
                     result.swap(res);
                 } else {
                     unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
@@ -1019,8 +1018,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     unique_ptr<Expression> res = doUntil(dctx, loc, std::move(cond), std::move(body));
                     result.swap(res);
                 } else {
-                    auto cond_flip = negate(loc, std::move(cond));
-                    unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond_flip), std::move(body));
+                    unique_ptr<Expression> res = make_unique<While>(loc, negate(loc, std::move(cond)), std::move(body));
                     result.swap(res);
                 }
             },
