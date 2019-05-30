@@ -16,12 +16,12 @@ requires: []
  name=[A]
  nesting=[]
  resolved=[A]
- loc=test/testdata/autogen/bad_prop.rb:2
+ loc=test/testdata/autogen/bad_prop.rb:5
  is_defining_ref=1
 [ref id=1]
  scope=[A]
  name=[String]
  nesting=[[A]]
  resolved=[String]
- loc=test/testdata/autogen/bad_prop.rb:3
+ loc=test/testdata/autogen/bad_prop.rb:6
  is_defining_ref=0
