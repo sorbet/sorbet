@@ -971,10 +971,10 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             //   end
             // end
             [&](parser::WhilePost *wl) {
-                bool isDoWhile = parser::isa_node<parser::Kwbegin>(wl->body.get());
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-                if (isDoWhile) {
+                if (isKwbegin) {
                     auto cond_flip = MK::Send0(loc, std::move(cond), core::Names::bang());
                     auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
                                                                ++dctx.uniqueCounter);
@@ -997,10 +997,10 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             // This is the same as WhilePost, but the cond negation in the other branch.
             [&](parser::UntilPost *wl) {
-                bool isDoUntil = parser::isa_node<parser::Kwbegin>(wl->body.get());
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-                if (isDoUntil) {
+                if (isKwbegin) {
                     auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
                                                                ++dctx.uniqueCounter);
                     auto withResult = MK::Assign(loc, temp, std::move(body));
