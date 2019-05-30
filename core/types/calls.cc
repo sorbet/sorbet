@@ -1288,6 +1288,18 @@ private:
         return std::nullopt;
     }
 
+    static std::vector<SendAndBlockLink::ArgInfo> argInfoByArity(std::optional<int> fixedArity) {
+        std::vector<SendAndBlockLink::ArgInfo> res;
+        if (fixedArity) {
+            for (int i = 0; i < *fixedArity; i++) {
+                res.emplace_back();
+            }
+        } else {
+            res.emplace_back().isRepeated = true;
+        }
+        return res;
+    }
+
     static void showLocationOfArgDefn(Context ctx, ErrorBuilder &e, TypePtr blockType,
                                       DispatchComponent &dispatchComp) {
         if (!dispatchComp.method.exists()) {
@@ -1439,7 +1451,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[2]->type, args.locs.call, args.locs.args[2]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(Symbols::noSymbol(), fn, blockArity);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
 
@@ -1501,7 +1513,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[3]->type, args.locs.call, args.locs.args[3]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(Symbols::noSymbol(), fn, blockArity);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
 
@@ -1776,7 +1788,7 @@ public:
             return core::Types::untypedUntracked();
         }
 
-        std::optional<int> numberOfPositionalBlockParams = args.block->numberOfPositionalBlockParams;
+        std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
             return core::Types::procClass();
         }
