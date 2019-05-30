@@ -19,7 +19,7 @@ public:
     // all members are optional, but METHOD NAMES MATTER
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
-    // caller is repsonsible to handle it
+    // caller is responsible to handle it
     unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, ClassDef *original);
     unique_ptr<Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original);
 
