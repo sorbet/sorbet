@@ -11,7 +11,7 @@ begin
         end
         begin
           x.+(y)
-          <self>.lambda() do |(a,b)|
+          <self>.lambda() do |<destructure>$4$1|
             begin
               begin
                 <assignTemp>$5$1 = ::<Magic>.<expand-splat>(<destructure>$4$1, 2, 0)

@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>>(<blk>)
       ::C::L = begin
         ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
-        T.let(<self>.lambda() do |x|
+        T.let(<self>.lambda() do |x$1|
           x$1.*(x$1)
         end, AppliedType {
           klass = <C <U Proc1>>
