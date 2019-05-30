@@ -72,4 +72,8 @@ module Sorbet::Private::RealStdlib
     @real_autoload.bind(o).call(klass)
   end
 
+  def self.real_const_get(obj, const, arg)
+    @real_const_get ||= Object.instance_method(:const_get)
+    @real_const_get.bind(obj).call(const, arg)
+  end
 end

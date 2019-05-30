@@ -122,7 +122,7 @@ class Sorbet::Private::ConstantLookupCache
         end
 
         begin
-          nested_constant = mod.const_get(nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+          nested_constant = Sorbet::Private::RealStdlib.real_const_get(mod, nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
         rescue LoadError
           puts "Failed to load #{name}::#{nested}"
           next
