@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 # typed: true
 
+require 'pathname'
+
 require_relative './gem_loader'
 
 class ExitCalledError < RuntimeError
@@ -67,12 +69,24 @@ class Sorbet::Private::RequireEverything
       rescue
       end
     end
-    puts
+
+    if STDOUT.isatty
+      # Clear the require_relative output when we're done requiring.
+      print "\r\033[K"
+    end
   end
 
-  def self.my_require(path, numerator, denominator)
-    print "\r[#{numerator}/#{denominator}] require_relative #{path}"
-    require_relative path
+  def self.my_require(abs_path, numerator, denominator)
+    rel_path = Pathname.new(abs_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
+    message = "[#{numerator}/#{denominator}] require_relative './#{rel_path}'"
+    if STDOUT.isatty
+      # Carriage return to reset cursor, ANSI escape code to clear current line.
+      # (In case the new message is shorter than the old message.)
+      print "\r\033[K#{message}"
+    else
+      puts message
+    end
+    require_relative abs_path
   end
 
   def self.patch_kernel
