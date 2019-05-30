@@ -29,7 +29,6 @@ Generating: sorbet/rbi/gems/
 
 Generating: sorbet/rbi/hidden-definitions/
 Requiring all of your code
-
 Naming all Modules
 Generating /tmp/sorbet-hidden-definitions/reflection.rbi with X modules and Y aliases
 Printing your code's symbol table into /tmp/sorbet-hidden-definitions/from-source.json
@@ -37,7 +36,6 @@ Printing /tmp/sorbet-hidden-definitions/reflection.rbi's symbol table into /tmp/
 Reading /tmp/sorbet-hidden-definitions/from-source.json
 Reading /tmp/sorbet-hidden-definitions/reflection.json
 Requiring all of your code
-
 Building rbi id to symbol map
 Building source id to symbol map
 Writing /tmp/sorbet-hidden-definitions/hidden.rbi.tmp
