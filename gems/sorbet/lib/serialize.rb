@@ -61,7 +61,7 @@ class Sorbet::Private::Serialize
     # We don't use .included_modules since that also has all the aweful things
     # that are mixed into Object. This way we at least have a delimiter before
     # the awefulness starts (the superclass).
-    klass.ancestors.each do |ancestor|
+    Sorbet::Private::RealStdlib.real_ancestors(klass).each do |ancestor|
       next if ancestor == klass
       break if ancestor == superclass
       ancestor_name = constant_cache.name_by_class(ancestor)
