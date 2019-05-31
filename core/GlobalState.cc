@@ -167,10 +167,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Configatron_Store());
     id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::RootStore());
     ENFORCE(id == Symbols::Configatron_RootStore());
-    id = synthesizeClass(core::Names::Constants::Sinatra(), 0, true);
-    ENFORCE(id == Symbols::Sinatra());
-    id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), core::Names::Constants::Base());
-    ENFORCE(id == Symbols::SinatraBase());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     ENFORCE(id == Symbols::void_());
     id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
@@ -378,10 +374,6 @@ void GlobalState::initEmpty() {
     Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
     Symbols::StubAncestor().data(*this)->setIsModule(true);
-
-    // Some of these are Classes
-    Symbols::SinatraBase().data(*this)->setIsModule(false);
-    Symbols::SinatraBase().data(*this)->setSuperClass(Symbols::Object());
 
     // Synthesize T::Utils
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());

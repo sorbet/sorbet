@@ -11,7 +11,6 @@
 #include "dsl/OpusEnum.h"
 #include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Rails.h"
-#include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
 
@@ -74,14 +73,6 @@ public:
 
                     // This one is different: it gets an extra prevStat argument.
                     nodes = AttrReader::replaceDSL(ctx, send, prevStat);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-                },
-
-                [&](ast::MethodDef *mdef) {
-                    auto nodes = Sinatra::replaceDSL(ctx, mdef);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
