@@ -62,7 +62,7 @@ class Sorbet::Private::Serialize
     # the awefulness starts (the superclass).
     Sorbet::Private::RealStdlib.real_ancestors(klass).each do |ancestor|
       next if Sorbet::Private::RealStdlib.real_eqeq(ancestor, klass)
-      break if ancestor == superclass
+      break if Sorbet::Private::RealStdlib.real_eqeq(ancestor, superclass)
       ancestor_name = @constant_cache.name_by_class(ancestor)
       next unless ancestor_name
       next if ancestor_name == class_name
