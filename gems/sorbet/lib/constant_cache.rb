@@ -99,7 +99,7 @@ class Sorbet::Private::ConstantLookupCache
   end
 
   private def dfs_module(mod, prefix, ret, owner)
-    raise "error #{prefix}: #{mod} is not a module" if !mod.is_a?(Module)
+    raise "error #{prefix}: #{mod} is not a module" if !Sorbet::Private::RealStdlib.real_is_a?(mod, Module)
     name = Sorbet::Private::RealStdlib.real_name(mod)
     Sorbet::Private::Status.say("Naming #{name}", print_without_tty: false)
     return if name == 'RSpec::ExampleGroups' # These are all anonymous classes and will be quadratic in the number of classes to name them. We also know they don't have any hidden definitions
@@ -112,7 +112,7 @@ class Sorbet::Private::ConstantLookupCache
     go_deeper = [] # make this a bfs to prefer shorter names
     constants.each do |nested|
       begin
-        next if mod.autoload?(nested) # some constants aren't autoloaded even after require_everything, e.g. StateMachine::Graph
+        next if Sorbet::Private::RealStdlib.real_autoload?(mod, nested) # some constants aren't autoloaded even after require_everything, e.g. StateMachine::Graph
 
         begin
           next if DEPRECATED_CONSTANTS.include?("#{prefix}::#{nested}") # avoid stdout spew
@@ -122,11 +122,11 @@ class Sorbet::Private::ConstantLookupCache
         end
 
         begin
-          nested_constant = mod.const_get(nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+          nested_constant = Sorbet::Private::RealStdlib.real_const_get(mod, nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
         rescue LoadError
           puts "Failed to load #{name}::#{nested}"
           next
-        rescue NameError
+        rescue NameError, ArgumentError
           puts "Failed to load #{name}::#{nested}"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
