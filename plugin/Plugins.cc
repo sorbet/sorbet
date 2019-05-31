@@ -17,8 +17,8 @@ void Plugins::dumpPluginGeneratedFiles(const core::GlobalState &gs, const realma
 
     for (auto ref : refs) {
         const core::File &file = ref.data(gs);
-        pc.fmt("# Path: \"{}\":\n", file.path());
-        pc.fmt("{}\n", file.source());
+        pc.fmt(gs.tracer(), "# Path: \"{}\":\n", file.path());
+        pc.fmt(gs.tracer(), "{}\n", file.source());
     }
 }
 

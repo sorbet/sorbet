@@ -217,10 +217,10 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
 
     for (auto &elem : merged) {
         if (opts.print.Autogen.enabled) {
-            opts.print.Autogen.print(elem.second.strval);
+            opts.print.Autogen.print(ctx.state.tracer(), elem.second.strval);
         }
         if (opts.print.AutogenMsgPack.enabled) {
-            opts.print.AutogenMsgPack.print(elem.second.msgpack);
+            opts.print.AutogenMsgPack.print(ctx.state.tracer(), elem.second.msgpack);
         }
     }
 } // namespace sorbet::realmain

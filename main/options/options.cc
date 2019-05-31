@@ -51,9 +51,9 @@ const vector<PrintOptions> print_options({
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
-void PrinterConfig::print(const string_view &contents) const {
+void PrinterConfig::print(spdlog::logger &logger, const string_view &contents) const {
     if (outputPath.empty()) {
-        fmt::print("{}", contents);
+        logger.info("{}", contents);
     } else {
         absl::MutexLock lck(&state->mutex);
         fmt::format_to(state->buf, "{}", contents);

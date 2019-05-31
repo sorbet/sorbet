@@ -19,9 +19,9 @@ public:
     bool enabled = false;
     std::string outputPath;
 
-    void print(const std::string_view &contents) const;
-    template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
-        print(fmt::format(msg, args...));
+    void print(spdlog::logger& logger, const std::string_view &contents) const;
+    template <typename... Args> void fmt(spdlog::logger &logger, const std::string &msg, const Args &... args) const {
+        print(logger, fmt::format(msg, args...));
     }
     void flush();
 
