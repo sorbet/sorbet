@@ -9,8 +9,6 @@ fi
 
 echo "--- Pre-setup :bazel:"
 
-git checkout .bazelrc
-
 function finish {
   ./bazel shutdown
 }
@@ -24,7 +22,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcac
 {
   echo 'common --curses=no --color=yes'
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/coverage'
-} >> .bazelrc
+} > .bazelrc.local
 
 ./bazel version
 ./bazel clean

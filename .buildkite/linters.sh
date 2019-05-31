@@ -9,8 +9,6 @@ fi
 
 echo "--- Pre-setup :bazel:"
 
-git checkout .bazelrc
-
 function finish {
   ./bazel shutdown
 }
@@ -23,7 +21,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/linters /usr/local/var/bazelcach
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/linters'
   echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
   echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} >> .bazelrc
+} > .bazelrc.local
 
 ./bazel version
 PATH=$PATH:$(pwd)

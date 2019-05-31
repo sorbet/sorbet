@@ -26,8 +26,6 @@ fi
 
 echo will run with $CONFIG_OPTS
 
-git checkout .bazelrc
-
 function finish {
   ./bazel shutdown
 }
@@ -40,7 +38,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/test-pr /usr/local/var/bazelcach
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/test-pr'
   echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
   echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} >> .bazelrc
+} > .bazelrc.local
 
 ./bazel version
 
