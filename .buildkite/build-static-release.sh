@@ -29,6 +29,7 @@ echo will run with $CONFIG_OPTS
 
 function finish {
   ./bazel shutdown
+  rm .bazelrc.local
 }
 trap finish EXIT
 
@@ -45,8 +46,6 @@ mkdir -p /usr/local/var/bazelcache/output-bases/release /usr/local/var/bazelcach
 
 echo "--- compilation"
 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
-
-rm .bazelrc.local
 
 mkdir gems/sorbet-static/libexec/
 cp bazel-bin/main/sorbet gems/sorbet-static/libexec/

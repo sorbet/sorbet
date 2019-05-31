@@ -27,6 +27,7 @@ fi
 
 function finish {
   ./bazel shutdown
+  rm .bazelrc.local
 }
 trap finish EXIT
 
@@ -40,8 +41,6 @@ mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelc
 } > .bazelrc.local
 
 ./bazel version
-
-rm .bazelrc.local
 
 echo "--- compilation"
 PATH=$PATH:$(pwd)

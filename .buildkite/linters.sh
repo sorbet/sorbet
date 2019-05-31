@@ -11,6 +11,7 @@ echo "--- Pre-setup :bazel:"
 
 function finish {
   ./bazel shutdown
+  rm .bazelrc.local
 }
 trap finish EXIT
 
@@ -24,8 +25,6 @@ mkdir -p /usr/local/var/bazelcache/output-bases/linters /usr/local/var/bazelcach
 } > .bazelrc.local
 
 ./bazel version
-
-rm .bazelrc.local
 
 PATH=$PATH:$(pwd)
 export PATH

@@ -11,6 +11,7 @@ echo "--- Pre-setup :bazel:"
 
 function finish {
   ./bazel shutdown
+  rm .bazelrc.local
 }
 trap finish EXIT
 
@@ -43,8 +44,6 @@ touch _tmp_/reports
     path="${path#//}"
     echo "bazel-testlogs/$path/coverage.dat" >> _tmp_/reports
 done
-
-rm .bazelrc.local
 
 rm -rf ./_tmp_/profdata_combined.profdata
 xargs .buildkite/tools/combine-coverage.sh < _tmp_/reports
