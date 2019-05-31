@@ -44,6 +44,7 @@ usage() {
   echo "Options:"
   echo "  --verbose    be more verbose than just whether it errored"
   echo "  --update     if there is a failure, update the expected file(s) and keep going"
+  echo "  --debug      don't redirect srb output so that it can be debugged"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -75,6 +76,7 @@ fi
 
 VERBOSE=
 UPDATE=
+DEBUG=
 while [[ $# -gt 0 ]]; do
   case $1 in
     --verbose)
@@ -83,6 +85,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --update)
       UPDATE="--update"
+      shift
+      ;;
+    --debug)
+      DEBUG="--debug"
       shift
       ;;
     -*)
@@ -104,7 +110,7 @@ done
 # ----- Stage the test sandbox directory -----
 
 relative_test_exe="$(realpath --relative-to="$PWD" "$0")"
-info "Running test:  $relative_test_exe $relative_test_dir $VERBOSE $UPDATE"
+info "Running test:  $relative_test_exe $relative_test_dir $VERBOSE $UPDATE $DEBUG"
 
 actual="$(mktemp -d)"
 
@@ -198,30 +204,44 @@ export SRB_SORBET_TYPED_REVISION
 
     if [ -z "$UPDATE" ]; then
       error "└─ see output above."
-      exit 1
+      if [ -z "$DEBUG" ]; then
+        # Debugging usually requires changing the Gemfile to add pry. Printing
+        # but not exiting here lets us skip updating for the sake of debugging.
+        exit 1
+      fi
     else
       warn "└─ updating Gemfile.lock"
       cp "$actual/Gemfile.lock" "$test_dir/src/Gemfile.lock"
     fi
   fi
 
-  # note: redirects stderr before the pipe
-  if ! SRB_YES=1 bundle exec "$srb" init 2> "$actual/err.log" | \
-      sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
-      > "$actual/out.log"; then
-    error "├─ srb init failed."
-    if [ -z "$VERBOSE" ]; then
-      error "├─ stdout: $actual/out.log"
-      error "├─ stderr: $actual/err.log"
-      error "└─ (or re-run with --verbose)"
-    else
-      error "├─ stdout ($actual/out.log):"
-      cat "$actual/out.log"
-      error "├─ stderr ($actual/err.log):"
-      cat "$actual/err.log"
-      error "└─ (end stderr)"
+  if ! [ -z "$DEBUG" ]; then
+    # Don't redirect anything, so that binding.pry and friends work
+    bundle exec "$srb" init
+    exit
+  else
+    # Uses /dev/null for stdin so any binding.pry would exit immediately
+    # (otherwise, pry will be waiting for input, but it's impossible to tell
+    # because the pry output is hiding in the *.log files)
+    #
+    # note: redirects stderr before the pipe
+    if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "$actual/err.log" | \
+        sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
+        > "$actual/out.log"; then
+      error "├─ srb init failed."
+      if [ -z "$VERBOSE" ]; then
+        error "├─ stdout: $actual/out.log"
+        error "├─ stderr: $actual/err.log"
+        error "└─ (or re-run with --verbose)"
+      else
+        error "├─ stdout ($actual/out.log):"
+        cat "$actual/out.log"
+        error "├─ stderr ($actual/err.log):"
+        cat "$actual/err.log"
+        error "└─ (end stderr)"
+      fi
+      exit 1
     fi
-    exit 1
   fi
 )
 
