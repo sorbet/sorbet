@@ -20,6 +20,7 @@ class Sorbet::Private::FetchRBIs
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
 
   SORBET_TYPED_REPO = 'https://github.com/sorbet/sorbet-typed.git'
+  SORBET_TYPED_REVISION = ENV['SRB_SORBET_TYPED_REVISION'] || 'master'
 
   HEADER = Sorbet::Private::Serialize.header(false, 'sorbet-typed')
 
@@ -28,14 +29,16 @@ class Sorbet::Private::FetchRBIs
   # Ensure our cache is up-to-date
   Sorbet.sig {void}
   def self.fetch_sorbet_typed
-    if File.directory?(RBI_CACHE_DIR)
-      FileUtils.cd(RBI_CACHE_DIR) do
-        IO.popen(%w{git pull}) {|pipe| pipe.read}
-        raise "Failed to git pull" if $?.exitstatus != 0
-      end
-    else
+    if !File.directory?(RBI_CACHE_DIR)
       IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR]) {|pipe| pipe.read}
       raise "Failed to git pull" if $?.exitstatus != 0
+    end
+
+    FileUtils.cd(RBI_CACHE_DIR) do
+      IO.popen(%w{git fetch origin}) {|pipe| pipe.read}
+      raise "Failed to git fetch" if $?.exitstatus != 0
+      IO.popen(%w{git checkout -q} + [SORBET_TYPED_REVISION]) {|pipe| pipe.read}
+      raise "Failed to git checkout" if $?.exitstatus != 0
     end
   end
 
