@@ -59,9 +59,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Make this script compatible with Bash 3 and Bash 4+
+# https://stackoverflow.com/a/7577209
+flags_str="${FLAGS[*]+"${FLAGS[*]}"}"
+
 # ----- Discover and run all the tests -----
 
-info "Running suite: $0 ${FLAGS[*]}"
+info "Running suite: $0 $flags_str"
 
 if [ -z "$VERBOSE" ]; then
   info "(re-run with --verbose for more information)"
@@ -78,10 +82,11 @@ for test_dir in "$root_dir/test/snapshot"/{partial,total}/*; do
   relative_test_exe="$(realpath --relative-to="$PWD" "$test_exe")"
   relative_test_dir="$(realpath --relative-to="$PWD" "$test_dir")"
 
-  if "$test_exe" "$test_dir" "${FLAGS[@]}"; then
-    passing_tests+=("$relative_test_exe $relative_test_dir ${FLAGS[*]}")
+  # FLAGS: https://stackoverflow.com/a/7577209
+  if "$test_exe" "$test_dir" ${FLAGS[@]+"${FLAGS[@]}"}; then
+    passing_tests+=("$relative_test_exe $relative_test_dir $flags_str")
   else
-    failing_tests+=("$relative_test_exe $relative_test_dir ${FLAGS[*]}")
+    failing_tests+=("$relative_test_exe $relative_test_dir $flags_str")
   fi
 done
 

@@ -123,11 +123,15 @@ if ! [ -z "$RECORD" ] && [ -z "$UPDATE" ]; then
   exit 1
 fi
 
+# Make this script compatible with Bash 3 and Bash 4+
+# https://stackoverflow.com/a/7577209
+flags_str="${FLAGS[*]+"${FLAGS[*]}"}"
+
 
 # ----- Stage the test sandbox directory -----
 
 relative_test_exe="$(realpath --relative-to="$PWD" "$0")"
-info "Running test:  $relative_test_exe $relative_test_dir ${FLAGS[*]}"
+info "Running test:  $relative_test_exe $relative_test_dir $flags_str"
 
 actual="$(mktemp -d)"
 
