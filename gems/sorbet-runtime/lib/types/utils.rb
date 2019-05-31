@@ -150,7 +150,7 @@ module T::Utils
     str = str.to_s
     return str if str.length <= start_len + end_len
 
-    start_part = str[0...start_len]
+    start_part = str[0...start_len - ellipsis.length]
     end_part = end_len == 0 ? '' : str[-end_len..-1]
 
     "#{start_part}#{ellipsis}#{end_part}"
