@@ -532,6 +532,10 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
+        if (opts.autocorrect && opts.silenceErrors) {
+            logger->error("you may not use autocorrect when silencing errors.");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
