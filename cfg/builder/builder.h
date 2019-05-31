@@ -54,7 +54,7 @@ private:
                BasicBlock *breakScope, BasicBlock *rescueScope,
                UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases,
                UnorderedMap<core::NameRef, core::LocalVariable> &discoveredUndeclaredFields, u4 &temporaryCounter)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), nextScope(nextScope), breakScope(breakScope),
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), nextScope(nextScope), breakScope(breakScope),
           rescueScope(rescueScope), aliases(aliases), discoveredUndeclaredFields(discoveredUndeclaredFields),
           temporaryCounter(temporaryCounter){};
 };
