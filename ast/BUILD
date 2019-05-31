@@ -13,8 +13,8 @@ cc_library(
         ],
     ),
     hdrs = [
-        "ast.h",
         "ArgParsing.h",
+        "ast.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
