@@ -109,7 +109,15 @@ module Opus::Sys
     true
   end
 end
-module Opus::Ownership; end
+module Opus::Ownership
+  extend T::Helpers
+  module ClassMethods
+    def get_owner
+      @project
+    end
+  end
+  mixes_in_class_methods(ClassMethods)
+end
 module Opus::HashUtils
   def self.recursive_stringify_keys(h)
     _recursive_stringify_keys(h)
@@ -131,6 +139,7 @@ end
 module Opus::DB; end
 module Opus::DB::Model; end
 class Opus::DB::Model::AbstractModel < T::Struct
+  include Opus::Ownership
   def self.owner(project)
     @project = project
   end
