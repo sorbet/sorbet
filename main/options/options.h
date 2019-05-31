@@ -19,7 +19,7 @@ public:
     bool enabled = false;
     std::string outputPath;
 
-    void print(spdlog::logger& logger, const std::string_view &contents) const;
+    void print(spdlog::logger &logger, const std::string_view &contents) const;
     template <typename... Args> void fmt(spdlog::logger &logger, const std::string &msg, const Args &... args) const {
         print(logger, fmt::format(msg, args...));
     }
