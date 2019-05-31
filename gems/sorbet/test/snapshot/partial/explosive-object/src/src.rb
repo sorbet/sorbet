@@ -1,13 +1,13 @@
 class Boom
   methods.each do |name|
     send(:define_method, name) do |*args|
-      raise "boom"
+      raise "You need to use Sorbet::Private::RealStdlib here"
     end
   end
   class << self
     methods.each do |name|
       send(:define_method, name) do |*args|
-        raise "boom"
+        raise "You need to use Sorbet::Private::RealStdlib here"
       end
     end
   end
