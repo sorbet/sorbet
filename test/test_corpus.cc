@@ -104,11 +104,10 @@ public:
     }
 };
 
-UnorderedSet<string> knownPasses = {"parse-tree", "parse-tree-json", "ast",          "ast-raw",
-                                    "dsl-tree",   "dsl-tree-raw",    "symbol-table", "symbol-table-raw",
-                                    "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw",
-                                    "flattened-tree", "flattened-tree-raw",
-                                    "cfg",        "cfg-json",        "autogen"};
+UnorderedSet<string> knownPasses = {
+    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
+    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
+    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -333,7 +332,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
         resolvedTree = flatten::runOne(ctx, move(resolvedTree));
-        
+
         expectation = test.expectations.find("flattened-tree");
         if (expectation != test.expectations.end()) {
             got["flattened-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
@@ -347,7 +346,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
-
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
