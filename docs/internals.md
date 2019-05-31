@@ -16,10 +16,12 @@ unfinished or confusing section!
 ## Table of Contents
 
 - [Overview](#overview)
+- [Pipeline](#pipeline)
 - [Phases](#phases)
   - [Parser](#parser)
   - [Desugar](#desugar)
   - [DSL](#dsl)
+  - [LocalVars](#localvars)
   - [Namer](#namer)
   - [Resolver](#resolver)
   - [CFG](#cfg)
@@ -30,6 +32,7 @@ unfinished or confusing section!
 - [Work In Progress](#work-in-progress)
   - [`Name`s](#names)
   - [`ast::Expression` (aka Trees)](#astexpression-aka-trees)
+  - [`typecase`](#typecase)
   - [`core::Loc`](#coreloc)
   - [`beginError` and strictness levels](#beginerror-and-strictness-levels)
   - [The type system](#the-type-system)
@@ -37,6 +40,7 @@ unfinished or confusing section!
   - [LSP](#lsp)
   - [RBI files and the payload](#rbi-files-and-the-payload)
   - [General tips for learning about sorbet](#general-tips-for-learning-about-sorbet)
+  - [Other topics to document](#other-topics-to-document)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -91,6 +95,13 @@ jump around between sections.
 In particular, to understand the phases, you have to understand the core
 abstractions, but being familiar with the phases motivates why certain core
 abstractions exist.
+
+## Pipeline
+
+When learning about the phases in the next, it can be helpful to look at this
+high-level architecture diagram of Sorbet's core type checking pipeline:
+
+[→ docs/pipeline.md](pipeline.md)
 
 ## Phases
 
