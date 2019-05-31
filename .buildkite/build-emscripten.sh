@@ -25,10 +25,9 @@ elif [[ "mac" == "$platform" ]]; then
   command -v realpath >/dev/null 2>&1 || brew install realpath
 fi
 
-git checkout .bazelrc
-
 function finish {
   ./bazel shutdown
+  rm .bazelrc.local
 }
 trap finish EXIT
 
@@ -39,7 +38,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelc
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/emscripten'
   echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
   echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} >> .bazelrc
+} > .bazelrc.local
 
 ./bazel version
 

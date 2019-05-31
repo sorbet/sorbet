@@ -26,10 +26,9 @@ fi
 
 echo will run with $CONFIG_OPTS
 
-git checkout .bazelrc
-
 function finish {
   ./bazel shutdown
+  rm .bazelrc.local
 }
 trap finish EXIT
 
@@ -40,7 +39,7 @@ mkdir -p /usr/local/var/bazelcache/output-bases/test-pr /usr/local/var/bazelcach
   echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/test-pr'
   echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
   echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} >> .bazelrc
+} > .bazelrc.local
 
 ./bazel version
 
@@ -59,7 +58,6 @@ mkdir -p _tmp_/log/junit/
     path="${path#//}"
     cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
 done
-
 
 annotation_dir="$(mktemp -d "junit-annotate-plugin-annotation-tmp.XXXXXXXXXX")"
 annotation_path="${annotation_dir}/annotation.md"
