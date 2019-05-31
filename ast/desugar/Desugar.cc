@@ -989,11 +989,16 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             // becomes
             //
             // while true
-            //   inner_body
+            //   begin
+            //     inner_body
+            //   end
             //   if negate(cond)
             //     break
             //   end
             // end
+            //
+            // Note that we preserve the begin-end because inner_body might
+            // contain a rescue.
             //
             // See the negate helper in this file for the definition of negate.
             //
