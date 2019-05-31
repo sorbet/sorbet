@@ -27,6 +27,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
     method <C <U Foo>><U react> (<blk>) -> String @ Loc {file=test/testdata/resolver/alias.rb start=14:3 end=14:12}
       argument <C <U Foo>><U react><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
   class <S <C <U Foo>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/alias.rb start=2:7 end=2:10}
-    method <S <C <U Foo>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=2:10}
+    method <S <C <U Foo>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=33:4}
       argument <S <C <U Foo>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
 

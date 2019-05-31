@@ -44,14 +44,14 @@ begin
     end
 
     def blockyield<blockyield>(<blk>)
-      <self>.yielder() do |i|
+      <self>.yielder() do |i$1|
         <blk>.call(i$1)
       end
     end
 
     def main<main>(<blk>)
       begin
-        l = <self>.lambda() do |x|
+        l = <self>.lambda() do |x$1|
           begin
             <self>.puts(x$1)
             3
