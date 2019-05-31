@@ -126,7 +126,7 @@ class Sorbet::Private::ConstantLookupCache
         rescue LoadError
           puts "Failed to load #{name}::#{nested}"
           next
-        rescue NameError
+        rescue NameError, ArgumentError
           puts "Failed to load #{name}::#{nested}"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
