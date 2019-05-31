@@ -517,33 +517,32 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             // END hand-ordered clauses
             [&](parser::And *and_) {
                 auto lhs = node2TreeImpl(dctx, std::move(and_->left));
+                auto rhs = node2TreeImpl(dctx, std::move(and_->right));
                 if (auto i = cast_tree<Reference>(lhs.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto iff =
-                        MK::If(loc, std::move(cond), node2TreeImpl(dctx, std::move(and_->right)), std::move(lhs));
+                    auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result.swap(iff);
                 } else {
                     core::NameRef tempName = dctx.ctx.state.freshNameUnique(
                         core::UniqueNameKind::Desugar, core::Names::andAnd(), ++dctx.uniqueCounter);
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(loc, tempName), node2TreeImpl(dctx, std::move(and_->right)),
-                                      MK::Local(loc, tempName));
+                    auto iff = MK::If(loc, MK::Local(loc, tempName), std::move(rhs), MK::Local(loc, tempName));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result.swap(wrapped);
                 }
             },
             [&](parser::Or *or_) {
                 auto lhs = node2TreeImpl(dctx, std::move(or_->left));
+                auto rhs = node2TreeImpl(dctx, std::move(or_->right));
                 if (auto i = cast_tree<Reference>(lhs.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto iff = MK::If(loc, std::move(cond), std::move(lhs), node2TreeImpl(dctx, std::move(or_->right)));
+                    auto iff = MK::If(loc, std::move(cond), std::move(lhs), std::move(rhs));
                     result.swap(iff);
                 } else {
                     core::NameRef tempName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
                                                                             core::Names::orOr(), ++dctx.uniqueCounter);
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName),
-                                      node2TreeImpl(dctx, std::move(or_->right)));
+                    auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName), std::move(rhs));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result.swap(wrapped);
                 }
