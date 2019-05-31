@@ -26,22 +26,22 @@ usage() {
 VERBOSE=
 UPDATE=
 RECORD=
-FLAGS=()
+FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --verbose)
       VERBOSE="--verbose"
-      FLAGS+=("$VERBOSE")
+      FLAGS="$FLAGS $VERBOSE"
       shift
       ;;
     --update)
       UPDATE="--update"
-      FLAGS+=("$UPDATE")
+      FLAGS="$FLAGS $UPDATE"
       shift
       ;;
     --record)
       RECORD="--record"
-      FLAGS+=("$RECORD")
+      FLAGS="$FLAGS $RECORD"
       shift
       ;;
     -*)
@@ -59,13 +59,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Make this script compatible with Bash 3 and Bash 4+
-# https://stackoverflow.com/a/7577209
-flags_str="${FLAGS[*]+"${FLAGS[*]}"}"
-
 # ----- Discover and run all the tests -----
 
-info "Running suite: $0 $flags_str"
+info "Running suite: $0 $FLAGS"
 
 if [ -z "$VERBOSE" ]; then
   info "(re-run with --verbose for more information)"
@@ -82,11 +78,17 @@ for test_dir in "$root_dir/test/snapshot"/{partial,total}/*; do
   relative_test_exe="$(realpath --relative-to="$PWD" "$test_exe")"
   relative_test_dir="$(realpath --relative-to="$PWD" "$test_dir")"
 
-  # FLAGS: https://stackoverflow.com/a/7577209
-  if "$test_exe" "$test_dir" ${FLAGS[@]+"${FLAGS[@]}"}; then
-    passing_tests+=("$relative_test_exe $relative_test_dir $flags_str")
+  # We're explicitly relying on word splitting here, because Bash 3 arrays
+  # don't work well for empty arrays. An alternative would be to use arrays +
+  # use this workaround (https://stackoverflow.com/a/7577209).
+  #
+  # This means that FLAGS cannot contain shell special characters.
+  #
+  # shellcheck disable=SC2086
+  if "$test_exe" "$test_dir" $FLAGS; then
+    passing_tests+=("$relative_test_exe $relative_test_dir $FLAGS")
   else
-    failing_tests+=("$relative_test_exe $relative_test_dir $flags_str")
+    failing_tests+=("$relative_test_exe $relative_test_dir $FLAGS")
   fi
 done
 

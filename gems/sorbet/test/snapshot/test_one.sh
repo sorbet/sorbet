@@ -80,27 +80,27 @@ VERBOSE=
 UPDATE=
 RECORD=
 DEBUG=
-FLAGS=()
+FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --verbose)
       VERBOSE="--verbose"
-      FLAGS+=("$VERBOSE")
+      FLAGS="$FLAGS $VERBOSE"
       shift
       ;;
     --update)
       UPDATE="--update"
-      FLAGS+=("$UPDATE")
+      FLAGS="$FLAGS $UPDATE"
       shift
       ;;
     --record)
       RECORD="--record"
-      FLAGS+=("$RECORD")
+      FLAGS="$FLAGS $RECORD"
       shift
       ;;
     --debug)
       DEBUG="--debug"
-      FLAGS+=("$DEBUG")
+      FLAGS="$FLAGS $DEBUG"
       shift
       ;;
     -*)
@@ -123,15 +123,11 @@ if ! [ -z "$RECORD" ] && [ -z "$UPDATE" ]; then
   exit 1
 fi
 
-# Make this script compatible with Bash 3 and Bash 4+
-# https://stackoverflow.com/a/7577209
-flags_str="${FLAGS[*]+"${FLAGS[*]}"}"
-
 
 # ----- Stage the test sandbox directory -----
 
 relative_test_exe="$(realpath --relative-to="$PWD" "$0")"
-info "Running test:  $relative_test_exe $relative_test_dir $flags_str"
+info "Running test:  $relative_test_exe $relative_test_dir $FLAGS"
 
 actual="$(mktemp -d)"
 
