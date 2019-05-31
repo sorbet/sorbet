@@ -365,19 +365,16 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
 }
 
 // while true
-//   temp = body
+//   body
 //   if cond
-//     break temp
+//     break
 //   end
 // end
 unique_ptr<Expression> doUntil(DesugarContext dctx, core::Loc loc, unique_ptr<Expression> cond,
                                unique_ptr<Expression> body) {
-    auto temp =
-        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(), ++dctx.uniqueCounter);
-    auto withResult = MK::Assign(loc, temp, std::move(body));
-    auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree());
-    auto breakWithResult = MK::InsSeq1(loc, std::move(withResult), std::move(breaker));
-    return make_unique<While>(loc, MK::True(loc), std::move(breakWithResult));
+    auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::EmptyTree()), MK::EmptyTree());
+    auto breakWithBody = MK::InsSeq1(loc, std::move(body), std::move(breaker));
+    return make_unique<While>(loc, MK::True(loc), std::move(breakWithBody));
 }
 
 // !expr
@@ -992,9 +989,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             // becomes
             //
             // while true
-            //   temp = inner_body
+            //   inner_body
             //   if negate(cond)
-            //     break temp
+            //     break
             //   end
             // end
             //
