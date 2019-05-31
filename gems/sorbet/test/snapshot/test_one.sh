@@ -42,6 +42,8 @@ usage() {
   echo "  <test_dir>   path to the snapshot to test"
   echo
   echo "Options:"
+  echo "  --installed  Test using the version of 'srb' that's currently installed,"
+  echo "               rather than using the development version."
   echo "  --verbose    Be more verbose than just whether it errored"
   echo "  --update     If there is a failure, update the expected file(s) and keep going"
   echo "  --record     Treat partial tests as total tests for the purpose of creating"
@@ -76,6 +78,7 @@ else
   exit 1
 fi
 
+INSTALLED=
 VERBOSE=
 UPDATE=
 RECORD=
@@ -83,6 +86,11 @@ DEBUG=
 FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --installed)
+      VERBOSE="--installed"
+      FLAGS+=("$INSTALLED")
+      shift
+      ;;
     --verbose)
       VERBOSE="--verbose"
       FLAGS="$FLAGS $VERBOSE"
@@ -131,13 +139,18 @@ info "Running test:  $relative_test_exe $relative_test_dir $FLAGS"
 
 actual="$(mktemp -d)"
 
+if [ -z "$INSTALLED" ]; then
+  srb="$root_dir/bin/srb"
+else
+  srb="srb"
+fi
+
 if [ -n "$VERBOSE" ]; then
   info "├─ PWD:       $PWD"
   info "├─ test_dir:  $test_dir"
   info "├─ actual:    $actual"
+  info "├─ srb:       $srb"
 fi
-
-srb="$root_dir/bin/srb"
 
 if [ -z "${SRB_SORBET_EXE:-}" ]; then
   SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"

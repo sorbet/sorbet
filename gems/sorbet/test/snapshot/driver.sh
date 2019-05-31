@@ -17,18 +17,26 @@ usage() {
   echo "  $0 [options]"
   echo
   echo "Options:"
+  echo "  --installed  Test using the version of 'srb' that's currently installed,"
+  echo "               rather than using the development version."
   echo "  --verbose    Be more verbose (more than just test summary)."
   echo "  --update     If a test fails, overwrite the expected with the actual"
   echo "  --record     Treat partial tests as total tests for the purpose of creating"
   echo "               new tests. Requires --update"
 }
 
+INSTALLED=
 VERBOSE=
 UPDATE=
 RECORD=
 FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --installed)
+      INSTALLED="--installed"
+      FLAGS+=("$INSTALLED")
+      shift
+      ;;
     --verbose)
       VERBOSE="--verbose"
       FLAGS="$FLAGS $VERBOSE"
