@@ -5,41 +5,41 @@
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
-  - label: ":linux: linters.sh"
-    command: .buildkite/linters.sh
-    agents:
-      os: linux
-  - label: ":mac: test-static-sanitized.sh"
-    command: .buildkite/test-static-sanitized.sh
-    agents:
-      os: mac
-  - label: ":linux: test-static-sanitized.sh"
-    command: .buildkite/test-static-sanitized.sh
-    agents:
-      os: linux
-  - wait: ~
+  # - label: ":linux: linters.sh"
+  #   command: .buildkite/linters.sh
+  #   agents:
+  #     os: linux
+  # - label: ":mac: test-static-sanitized.sh"
+  #   command: .buildkite/test-static-sanitized.sh
+  #   agents:
+  #     os: mac
+  # - label: ":linux: test-static-sanitized.sh"
+  #   command: .buildkite/test-static-sanitized.sh
+  #   agents:
+  #     os: linux
+  # - wait: ~
 
 # Build Phase - Build all our artifacts
-  - label: ":mac: build-website.sh"
-    command: .buildkite/build-website.sh
-    artifact_paths: _out_/**/*
-    agents:
-      os: mac
-  - label: ":mac: build-sorbet-runtime.sh"
-    command: .buildkite/build-sorbet-runtime.sh
-    artifact_paths: _out_/**/*
-    agents:
-      os: mac
+  # - label: ":mac: build-website.sh"
+  #   command: .buildkite/build-website.sh
+  #   artifact_paths: _out_/**/*
+  #   agents:
+  #     os: mac
+  # - label: ":mac: build-sorbet-runtime.sh"
+  #   command: .buildkite/build-sorbet-runtime.sh
+  #   artifact_paths: _out_/**/*
+  #   agents:
+  #     os: mac
   - label: ":mac: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":mac: build-emscripten.sh"
-    command: .buildkite/build-emscripten.sh
-    artifact_paths: _out_/**/*
-    agents:
-      os: mac
+  # - label: ":mac: build-emscripten.sh"
+  #   command: .buildkite/build-emscripten.sh
+  #   artifact_paths: _out_/**/*
+  #   agents:
+  #     os: mac
   - label: ":linux: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
@@ -47,12 +47,15 @@ steps:
       os: linux
   - wait: ~
 
-# Test Sorbet Gem Phase - Its own phase because it relies on the gem build built
-    # TODO(jez) Test on linux
+# Test Sorbet Gem Phase - Its own phase because it relies on the built gem
   - label: ":mac: test-sorbet-gem.sh"
     command: .buildkite/test-sorbet-gem.sh
     agents:
       os: mac
+  - label: ":linux: test-sorbet-gem.sh"
+    command: .buildkite/test-sorbet-gem.sh
+    agents:
+      os: linux
   - wait: ~
 
 # Deploy Phase - Send the artifacts to the world

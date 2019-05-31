@@ -88,7 +88,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --installed)
       VERBOSE="--installed"
-      FLAGS+=("$INSTALLED")
+      FLAGS="$FLAGS $INSTALLED"
       shift
       ;;
     --verbose)
@@ -152,19 +152,23 @@ if [ -n "$VERBOSE" ]; then
   info "├─ srb:       $srb"
 fi
 
-if [ -z "${SRB_SORBET_EXE:-}" ]; then
-  SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"
-fi
-export SRB_SORBET_EXE
+if [ -z "$INSTALLED" ]; then
+  # When not testing the installed version, we manually set the path to sorbet.
+  if [ -z "${SRB_SORBET_EXE:-}" ]; then
+    SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"
+  fi
 
-if ! [ -f "$SRB_SORBET_EXE" ]; then
-  error "└─ could not find sorbet executable ($SRB_SORBET_EXE)"
-  exit 1
-fi
+  if ! [ -f "$SRB_SORBET_EXE" ]; then
+    error "└─ could not find sorbet executable ($SRB_SORBET_EXE)"
+    exit 1
+  fi
 
-if ! [ -x "$SRB_SORBET_EXE" ]; then
-  error "└─ sorbet executable has wrong permissions ($SRB_SORBET_EXE)"
-  exit 1
+  if ! [ -x "$SRB_SORBET_EXE" ]; then
+    error "└─ sorbet executable has wrong permissions ($SRB_SORBET_EXE)"
+    exit 1
+  fi
+
+  export SRB_SORBET_EXE
 fi
 
 if ! [ -d "$test_dir/src" ]; then
