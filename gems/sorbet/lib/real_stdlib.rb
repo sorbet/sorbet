@@ -73,7 +73,7 @@ module Sorbet::Private::RealStdlib
   end
 
   def self.real_const_get(obj, const, arg)
-    @real_const_get ||= Object.instance_method(:const_get)
+    @real_const_get ||= Object.singleton_class.instance_method(:const_get)
     @real_const_get.bind(obj).call(const, arg)
   end
 end
