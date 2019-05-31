@@ -271,9 +271,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
             ParentLinearizationInformation mixinLinearization = computeLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassModule()) {
-                if (mixin != core::Symbols::SinatraBase() && mixin != core::Symbols::BasicObject()) {
-                    // This is a class but Sinatra pass `include`'s it.
-                    // Because Sinatra does weird stuff and that's how we model it :-()
+                if (mixin != core::Symbols::BasicObject()) {
                     if (auto e = gs.beginError(data->loc(), core::errors::Resolver::IncludesNonModule)) {
                         e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
                                     mixin.data(gs)->show(gs));

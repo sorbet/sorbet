@@ -339,7 +339,6 @@ NameDef names[] = {
     {"Configatron", "Configatron", true},
     {"Store", "Store", true},
     {"RootStore", "RootStore", true},
-    {"Sinatra", "Sinatra", true},
     {"Base", "Base", true},
     {"Void", "Void", true},
     {"TypeAlias", "<TypeAlias>", true},
