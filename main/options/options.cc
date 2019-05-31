@@ -532,7 +532,6 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
-        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
@@ -587,6 +586,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
+        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
