@@ -58,7 +58,9 @@ PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
 void PrinterConfig::print(const string_view &contents) const {
     if (outputPath.empty()) {
+        // TODO (gdritter): thread a logger through instead of just printing to stdout
         fmt::print("{}", contents);
+        cout.flush();
     } else {
         absl::MutexLock lck(&state->mutex);
         fmt::format_to(state->buf, "{}", contents);
