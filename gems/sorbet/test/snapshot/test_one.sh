@@ -179,6 +179,9 @@ cp -r "$test_dir/src"/* "$actual"
 
 # ----- Run the test in the sandbox -----
 
+SRB_SORBET_TYPED_REVISION="$(<"$root_dir/test/snapshot/sorbet-typed.rev")"
+export SRB_SORBET_TYPED_REVISION
+
 (
   # Only cd because `srb init` needs to be run from the folder with a Gemfile,
   # not because this test driver needs to refer to files with relative paths.
