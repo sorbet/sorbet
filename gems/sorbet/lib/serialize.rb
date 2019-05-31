@@ -49,7 +49,7 @@ class Sorbet::Private::Serialize
 
     superclass = Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? Sorbet::Private::RealStdlib.real_superclass(klass) : nil
     if superclass
-      superclass_str = superclass == Object ? '' : @constant_cache.name_by_class(superclass)
+      superclass_str = Sorbet::Private::RealStdlib.real_eqeq(superclass, Object) ? '' : @constant_cache.name_by_class(superclass)
     else
       superclass_str = ''
     end
