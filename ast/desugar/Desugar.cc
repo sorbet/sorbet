@@ -380,6 +380,11 @@ unique_ptr<Expression> doUntil(DesugarContext dctx, core::Loc loc, unique_ptr<Ex
     return make_unique<While>(loc, MK::True(loc), std::move(breakWithResult));
 }
 
+// !expr
+unique_ptr<Expression> negate(core::Loc loc, unique_ptr<Expression> expr) {
+    return MK::Send0(loc, std::move(expr), core::Names::bang());
+}
+
 unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
@@ -991,7 +996,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
                 if (isKwbegin) {
-                    auto cond_flip = MK::Send0(loc, std::move(cond), core::Names::bang());
+                    auto cond_flip = negate(loc, std::move(cond));
                     unique_ptr<Expression> res = doUntil(dctx, loc, std::move(cond_flip), std::move(body));
                     result.swap(res);
                 } else {
@@ -1000,7 +1005,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 }
             },
             [&](parser::Until *wl) {
-                auto cond = MK::Send0(loc, node2TreeImpl(dctx, std::move(wl->cond)), core::Names::bang());
+                auto cond = negate(loc, node2TreeImpl(dctx, std::move(wl->cond)));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
                 unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                 result.swap(res);
@@ -1014,7 +1019,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     unique_ptr<Expression> res = doUntil(dctx, loc, std::move(cond), std::move(body));
                     result.swap(res);
                 } else {
-                    auto cond_flip = MK::Send0(loc, std::move(cond), core::Names::bang());
+                    auto cond_flip = negate(loc, std::move(cond));
                     unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond_flip), std::move(body));
                     result.swap(res);
                 }
