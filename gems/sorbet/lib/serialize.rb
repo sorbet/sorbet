@@ -102,7 +102,7 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym)
-      rescue LoadError, NameError, RuntimeError
+      rescue LoadError, NameError, RuntimeError, ArgumentError
         ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
@@ -116,7 +116,7 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
-      rescue LoadError, NameError, RuntimeError
+      rescue LoadError, NameError, RuntimeError, ArgumentError
         ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
