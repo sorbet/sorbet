@@ -24,6 +24,9 @@ mkdir -p /usr/local/var/bazelcache/output-bases/linters /usr/local/var/bazelcach
 } > .bazelrc.local
 
 ./bazel version
+
+rm .bazelrc.local
+
 PATH=$PATH:$(pwd)
 export PATH
 

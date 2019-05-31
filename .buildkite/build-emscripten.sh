@@ -41,6 +41,8 @@ mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelc
 
 ./bazel version
 
+rm .bazelrc.local
+
 echo "--- compilation"
 PATH=$PATH:$(pwd)
 export PATH
