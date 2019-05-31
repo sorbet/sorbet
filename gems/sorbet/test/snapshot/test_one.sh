@@ -42,9 +42,11 @@ usage() {
   echo "  <test_dir>   path to the snapshot to test"
   echo
   echo "Options:"
-  echo "  --verbose    be more verbose than just whether it errored"
-  echo "  --update     if there is a failure, update the expected file(s) and keep going"
-  echo "  --debug      don't redirect srb output so that it can be debugged"
+  echo "  --verbose    Be more verbose than just whether it errored"
+  echo "  --update     If there is a failure, update the expected file(s) and keep going"
+  echo "  --record     Treat partial tests as total tests for the purpose of creating"
+  echo "               a new test. Requires --update"
+  echo "  --debug      Don't redirect srb output so that it can be debugged"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -76,6 +78,7 @@ fi
 
 VERBOSE=
 UPDATE=
+RECORD=
 DEBUG=
 FLAGS=()
 while [[ $# -gt 0 ]]; do
@@ -88,6 +91,11 @@ while [[ $# -gt 0 ]]; do
     --update)
       UPDATE="--update"
       FLAGS+=("$UPDATE")
+      shift
+      ;;
+    --record)
+      RECORD="--record"
+      FLAGS+=("$RECORD")
       shift
       ;;
     --debug)
@@ -109,6 +117,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if ! [ -z "$RECORD" ] && [ -z "$UPDATE" ]; then
+  error "--record requires --update"
+  exit 1
+fi
 
 
 # ----- Stage the test sandbox directory -----
@@ -346,9 +359,13 @@ if [ -z "$is_partial" ]; then
 elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
 elif [ -n "$UPDATE" ]; then
-  warn "├─ Treating empty partial test as total for the sake of updating."
-  warn "├─ Feel free to delete files in this snapshot that you don't want."
-  diff_total
+  if [ -z "$RECORD" ]; then
+    warn "├─ Not recording sorbet/ folder for empty partial test."
+    info "├─ Re-run with --record to record."
+  else
+    info "├─ Treating empty partial test as total for the sake of recording."
+    diff_total
+  fi
 else
   # It's fine for a partial test to not have an expected dir.
   # It means the test only cares about the exit code of srb init.
