@@ -80,27 +80,27 @@ VERBOSE=
 UPDATE=
 RECORD=
 DEBUG=
-FLAGS=()
+FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --verbose)
       VERBOSE="--verbose"
-      FLAGS+=("$VERBOSE")
+      FLAGS="$FLAGS $VERBOSE"
       shift
       ;;
     --update)
       UPDATE="--update"
-      FLAGS+=("$UPDATE")
+      FLAGS="$FLAGS $UPDATE"
       shift
       ;;
     --record)
       RECORD="--record"
-      FLAGS+=("$RECORD")
+      FLAGS="$FLAGS $RECORD"
       shift
       ;;
     --debug)
       DEBUG="--debug"
-      FLAGS+=("$DEBUG")
+      FLAGS="$FLAGS $DEBUG"
       shift
       ;;
     -*)
@@ -127,7 +127,7 @@ fi
 # ----- Stage the test sandbox directory -----
 
 relative_test_exe="$(realpath --relative-to="$PWD" "$0")"
-info "Running test:  $relative_test_exe $relative_test_dir ${FLAGS[*]}"
+info "Running test:  $relative_test_exe $relative_test_dir $FLAGS"
 
 actual="$(mktemp -d)"
 
