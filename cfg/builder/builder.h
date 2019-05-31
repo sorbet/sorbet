@@ -54,9 +54,9 @@ private:
                BasicBlock *breakScope, BasicBlock *rescueScope,
                UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases,
                UnorderedMap<core::NameRef, core::LocalVariable> &discoveredUndeclaredFields, u4 &temporaryCounter)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), nextScope(nextScope), breakScope(breakScope),
-          rescueScope(rescueScope), aliases(aliases), discoveredUndeclaredFields(discoveredUndeclaredFields),
-          temporaryCounter(temporaryCounter){};
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), nextScope(nextScope),
+          breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
+          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};
 };
 } // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H
