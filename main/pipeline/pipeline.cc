@@ -661,6 +661,13 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
     resolved = flatten::runOne(ctx, move(resolved));
 
+    if (opts.print.FlattenedTree.enabled) {
+        opts.print.FlattenedTree.fmt("{}\n", resolved.tree->toString(ctx));
+    }
+    if (opts.print.FlattenedTreeRaw.enabled) {
+        opts.print.FlattenedTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
+    }
+
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
         return result;
     }
