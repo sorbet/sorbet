@@ -20,8 +20,6 @@ chmod +x "$SRB_SORBET_EXE"
 
 echo "--- setup :ruby:"
 
-pushd gems/sorbet
-
 # rbenv init has uninitialized variables
 eval "$(rbenv init -)"
 
@@ -31,6 +29,5 @@ echo "+++ tests"
 
 # TODO(jez) test/snapshot/driver.sh is not currently capable of testing the actual gem.
 # This currently tests that local development isn't broken.
-test/snapshot/driver.sh --verbose
 
-popd
+gems/sorbet/test/snapshot/driver.sh --verbose
