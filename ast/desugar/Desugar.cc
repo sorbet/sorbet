@@ -1005,9 +1005,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 }
             },
             [&](parser::Until *wl) {
-                auto cond = negate(loc, node2TreeImpl(dctx, std::move(wl->cond)));
+                auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-                unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
+                unique_ptr<Expression> res = make_unique<While>(loc, negate(loc, std::move(cond)), std::move(body));
                 result.swap(res);
             },
             // This is the same as WhilePost, but the cond negation in the other branch.
