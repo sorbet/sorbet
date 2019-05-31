@@ -1,5 +1,0 @@
-class <emptyTree><<C <root>>> < ()
-  Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(1)
-
-  Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(2)
-end
