@@ -11,9 +11,8 @@ class Sorbet::Private::Serialize
 
   SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
-  def constant_cache
-    @constant_cache ||= Sorbet::Private::ConstantLookupCache.new
-    @constant_cache
+  def initialize(constant_cache)
+    @constant_cache = constant_cache
   end
 
   private def get_constants(mod, inherited=nil)
@@ -42,7 +41,7 @@ class Sorbet::Private::Serialize
       return " # Skipping serializing #{class_name} because it is an invalid name\n"
     end
 
-    klass = constant_cache.class_by_name(class_name)
+    klass = @constant_cache.class_by_name(class_name)
     is_nil = nil.equal?(klass)
     raise "#{class_name} is not a Class or Module. Maybe it was miscategorized?" if is_nil
 
@@ -50,7 +49,7 @@ class Sorbet::Private::Serialize
 
     superclass = Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? Sorbet::Private::RealStdlib.real_superclass(klass) : nil
     if superclass
-      superclass_str = superclass == Object ? '' : constant_cache.name_by_class(superclass)
+      superclass_str = superclass == Object ? '' : @constant_cache.name_by_class(superclass)
     else
       superclass_str = ''
     end
@@ -64,7 +63,7 @@ class Sorbet::Private::Serialize
     Sorbet::Private::RealStdlib.real_ancestors(klass).each do |ancestor|
       next if Sorbet::Private::RealStdlib.real_eqeq(ancestor, klass)
       break if ancestor == superclass
-      ancestor_name = constant_cache.name_by_class(ancestor)
+      ancestor_name = @constant_cache.name_by_class(ancestor)
       next unless ancestor_name
       next if ancestor_name == class_name
       if Sorbet::Private::RealStdlib.real_is_a?(ancestor, Class)
@@ -82,7 +81,7 @@ class Sorbet::Private::Serialize
       break if superclass && ancestor == Sorbet::Private::RealStdlib.real_singleton_class(superclass)
       break if ancestor == Module
       break if ancestor == Object
-      ancestor_name = constant_cache.name_by_class(ancestor)
+      ancestor_name = @constant_cache.name_by_class(ancestor)
       next unless ancestor_name
       if Sorbet::Private::RealStdlib.real_is_a?(ancestor, Class)
         ret << "  # Skipping `extend #{ancestor_name}` because it is a Class\n"
@@ -148,7 +147,7 @@ class Sorbet::Private::Serialize
       # This method never apears in the reflection list...
       instance_methods += [:initialize]
     end
-    Sorbet::Private::RealStdlib.real_ancestors(klass).reject {|ancestor| constant_cache.name_by_class(ancestor)}.each do |ancestor|
+    Sorbet::Private::RealStdlib.real_ancestors(klass).reject {|ancestor| @constant_cache.name_by_class(ancestor)}.each do |ancestor|
       instance_methods += ancestor.instance_methods(false)
     end
 
