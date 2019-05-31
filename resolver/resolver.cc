@@ -1214,6 +1214,8 @@ private:
 
             scope = ctx.owner.data(ctx)->enclosingClass(ctx);
         } else {
+            // we need to check nested block counts because we want all fields to be declared on top level of either
+            // class or body, rather then nested in some block
             if (ctx.owner.data(ctx)->isClass() && nestedBlockCounts.back() == 0) {
                 // Declaring a class instance variable
             } else {
