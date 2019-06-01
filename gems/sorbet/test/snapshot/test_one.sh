@@ -87,7 +87,7 @@ FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --installed)
-      VERBOSE="--installed"
+      INSTALLED="--installed"
       FLAGS="$FLAGS $INSTALLED"
       shift
       ;;
