@@ -733,6 +733,26 @@ module Kernel
   end
   def puts(*arg0); end
 
+  # TODO: this type is not correct. Observe this irb session:
+  #
+  # >> p
+  # => nil
+  # >> p 1
+  # 1
+  # => 1
+  # >> p 1, 2
+  # 1
+  # 2
+  # => [1, 2]
+  #
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(NilClass)
+  end
+  def p(*arg0); end
+
   sig {returns(Float)}
   sig do
     params(
