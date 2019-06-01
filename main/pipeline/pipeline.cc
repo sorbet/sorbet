@@ -766,6 +766,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     for (auto &resolved : what) {
         resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
     }
+    fast_sort(walk.unresolvedConstants);
     opts.print.MissingConstants.fmt("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
     return what;
 }
