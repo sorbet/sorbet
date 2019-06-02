@@ -5,8 +5,6 @@ set -euo pipefail
 export JOB_NAME=test-static-sanitized
 source .buildkite/tools/setup-bazel.sh
 
-echo "--- Pre-setup :bazel:"
-
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     platform="linux";;
