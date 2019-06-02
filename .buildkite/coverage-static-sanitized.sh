@@ -2,33 +2,11 @@
 
 set -euo pipefail
 
-if [[ -n "${CLEAN_BUILD-}" ]]; then
-  echo "--- cleanup"
-  rm -rf /usr/local/var/bazelcache/*
-fi
-
-echo "--- Pre-setup :bazel:"
-
-function finish {
-  ./bazel shutdown
-  rm .bazelrc.local
-}
-trap finish EXIT
+export JOB_NAME=coverage-static-sanitized
+source .buildkite/tools/setup-bazel.sh
 
 # This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
-
-rm -f bazel-*
-mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
-{
-  echo 'common --curses=no --color=yes'
-  echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/coverage'
-} > .bazelrc.local
-
-./bazel version
-./bazel clean
-
-echo "+++ tests"
 
 err=0
 ./bazel coverage //... --config=coverage --config=buildfarm --javabase=@embedded_jdk//:jdk || err=$?  # workaround https://github.com/bazelbuild/bazel/issues/6993

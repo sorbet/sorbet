@@ -2,11 +2,6 @@
 
 set -euo pipefail
 
-if [[ -n "${CLEAN_BUILD-}" ]]; then
-  echo "--- cleanup"
-  rm -rf /usr/local/var/bazelcache/*
-fi
-
 echo "--- Pre-setup"
 
 unameOut="$(uname -s)"
@@ -25,24 +20,9 @@ elif [[ "mac" == "$platform" ]]; then
   command -v realpath >/dev/null 2>&1 || brew install realpath
 fi
 
-function finish {
-  ./bazel shutdown
-  rm .bazelrc.local
-}
-trap finish EXIT
+export JOB_NAME=build-emscripten
+source .buildkite/tools/setup-bazel.sh
 
-rm -f bazel-*
-mkdir -p /usr/local/var/bazelcache/output-bases/emscripten /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
-{
-  echo 'common --curses=no --color=yes'
-  echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/emscripten'
-  echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-  echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} > .bazelrc.local
-
-./bazel version
-
-echo "--- compilation"
 PATH=$PATH:$(pwd)
 export PATH
 tools/scripts/update-sorbet.run.sh
