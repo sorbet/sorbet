@@ -45,6 +45,15 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: linux
+      queue: elastic
+    plugins:
+      - docker#v3.2.0:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
   - wait: ~
 
 # Test Sorbet Gem Phase - Its own phase because it relies on the gem build built
