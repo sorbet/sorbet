@@ -139,11 +139,11 @@ CFGContext CFGContext::withBlockBreakTarget(core::LocalVariable blockBreakTarget
     return ret;
 }
 
-CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, core::SymbolRef rubyBlock) {
+CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock) {
     auto ret = CFGContext(*this);
     ret.nextScope = nextScope;
     ret.breakScope = breakScope;
-    ret.rubyBlock = rubyBlock;
+    ret.isInsideRubyBlock = insideRubyBlock;
     ret.loops += 1;
     return ret;
 }

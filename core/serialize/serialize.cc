@@ -694,7 +694,6 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         },
         [&](ast::Block *a) {
             pickleAstHeader(p, 3, a);
-            p.putU4(a->symbol._id);
             p.putU4(a->args.size());
             pickle(p, file, a->body);
             for (auto &arg : a->args) {
@@ -900,14 +899,13 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return ast::MK::Send(loc, std::move(recv), fun, std::move(store), flags, std::move(blk));
         }
         case 3: {
-            SymbolRef sym(gs, p.getU4());
             auto argsSize = p.getU4();
             auto body = unpickleExpr(p, gs, file);
             ast::MethodDef::ARGS_store args(argsSize);
             for (auto &arg : args) {
                 arg = unpickleExpr(p, gs, file);
             }
-            return ast::MK::Block(loc, std::move(body), std::move(args), sym);
+            return ast::MK::Block(loc, std::move(body), std::move(args));
         }
         case 4: {
             auto tpe = unpickleType(p, &gs);

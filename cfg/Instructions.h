@@ -163,14 +163,13 @@ CheckSize(LoadArg, 16, 8);
 class LoadYieldParams final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    core::SymbolRef block;
 
-    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link, core::SymbolRef blk) : link(link), block(blk) {
+    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(LoadYieldParams, 40, 8);
+CheckSize(LoadYieldParams, 32, 8);
 
 class Cast final : public Instruction {
 public:

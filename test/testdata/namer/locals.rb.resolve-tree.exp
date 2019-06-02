@@ -15,7 +15,7 @@ begin
           end
         end
         b = 3
-        <self>.proc() do |a|
+        <self>.proc() do |a$3; b$3|
           a$3.+(b$3)
         end
       end

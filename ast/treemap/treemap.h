@@ -576,10 +576,10 @@ private:
         for (auto &arg : v->args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg.get())) {
-                optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
+                optArg->default_ = mapIt(move(optArg->default_), ctx);
             }
         }
-        v->body = mapIt(move(v->body), ctx.withOwner(v->symbol));
+        v->body = mapIt(move(v->body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformBlock<FUNC>::value) {
             return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(

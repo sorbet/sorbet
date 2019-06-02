@@ -302,8 +302,6 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
-    bool isBlockSymbol(const GlobalState &gs) const;
-
     inline bool isClassModule() const {
         ENFORCE(isClass());
         if (flags & Symbol::Flags::CLASS_MODULE)

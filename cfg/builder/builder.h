@@ -31,7 +31,7 @@ public:
     core::LocalVariable target;
     core::LocalVariable blockBreakTarget;
     int loops;
-    core::SymbolRef rubyBlock;
+    bool isInsideRubyBlock;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
@@ -43,8 +43,7 @@ public:
 
     CFGContext withTarget(core::LocalVariable target);
     CFGContext withBlockBreakTarget(core::LocalVariable blockBreakTarget);
-    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope,
-                             core::SymbolRef rubyBlock = core::Symbols::noSymbol());
+    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false);
     CFGContext withSendAndBlockLink(const std::shared_ptr<core::SendAndBlockLink> &link);
 
     core::LocalVariable newTemporary(core::NameRef name);
@@ -55,9 +54,9 @@ private:
                BasicBlock *breakScope, BasicBlock *rescueScope,
                UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases,
                UnorderedMap<core::NameRef, core::LocalVariable> &discoveredUndeclaredFields, u4 &temporaryCounter)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), nextScope(nextScope), breakScope(breakScope),
-          rescueScope(rescueScope), aliases(aliases), discoveredUndeclaredFields(discoveredUndeclaredFields),
-          temporaryCounter(temporaryCounter){};
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), nextScope(nextScope),
+          breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
+          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};
 };
 } // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H

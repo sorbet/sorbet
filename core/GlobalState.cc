@@ -517,11 +517,9 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(
-        if (data->isBlockSymbol(*this)) { categoryCounterInc("symbols", "block"); } else if (data->isClass()) {
-            categoryCounterInc("symbols", "class");
-        } else if (data->isMethod()) { categoryCounterInc("symbols", "method"); } else if (data->isField()) {
-            categoryCounterInc("symbols", "field");
-        } else if (data->isStaticField()) {
+        if (data->isClass()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
+            categoryCounterInc("symbols", "method");
+        } else if (data->isField()) { categoryCounterInc("symbols", "field"); } else if (data->isStaticField()) {
             categoryCounterInc("symbols", "static_field");
         } else if (data->isTypeArgument()) {
             categoryCounterInc("symbols", "type_argument");

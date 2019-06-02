@@ -728,13 +728,24 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams)
-    : block(block), fun(fun), numberOfPositionalBlockParams(numberOfPositionalBlockParams),
-      constr(make_shared<TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo> &&argInfos)
+    : fun(fun), argInfos(argInfos), constr(make_shared<TypeConstraint>()) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
     return make_shared<SendAndBlockLink>(move(copy));
+}
+
+optional<int> SendAndBlockLink::fixedArity() const {
+    optional<int> arity = 0;
+    for (auto &arg : argInfos) {
+        if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
+            arity = std::nullopt;
+            break;
+        }
+        arity = *arity + 1;
+    }
+    return arity;
 }
 
 TypePtr TupleType::elementType() const {

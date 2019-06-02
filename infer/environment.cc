@@ -910,10 +910,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkArgs = insn->block.data(ctx)->arguments();
+                auto &blkArgs = insn->link->argInfos;
                 auto *tuple = core::cast_type<core::TupleType>(params.get());
-                if (blkArgs.size() > 1 && !blkArgs.front().data(ctx)->isRepeated() && tuple &&
-                    tuple->elems.size() == 1 && tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
+                if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
+                    tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
                     tp.type = core::Types::untypedUntracked();

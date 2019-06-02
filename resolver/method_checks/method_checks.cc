@@ -238,7 +238,7 @@ void validateSymbols(core::GlobalState &gs) {
         if (sym.data(gs)->isClass()) {
             validateAbstract(gs, abstractCache, sym);
         }
-        if (sym.data(gs)->isMethod() && !sym.data(gs)->isBlockSymbol(gs)) {
+        if (sym.data(gs)->isMethod()) {
             validateOverriding(gs, sym);
         }
     }
