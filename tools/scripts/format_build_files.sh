@@ -11,6 +11,7 @@ if [ "$1" == "-t" ]; then
     echo "$OUTPUT"
     echo -ne "\\e[0m"
     echo -e "✨✨ Run \\e[97;1;42m ./tools/scripts/format_build_files.sh\\e[0m to fix them up.  ✨✨"
+    bazel run //test/lint/buildifier:diff
     exit 1
   fi
 else
