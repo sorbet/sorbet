@@ -31,11 +31,21 @@ steps:
   - wait: ~
 
 # Build Phase - Build all our artifacts
-  - label: ":mac: build-website.sh"
+  - label: ":linux: build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
     agents:
-      os: mac
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#v3.2.0:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+
   - label: ":linux: build-sorbet-runtime.sh"
     command: .buildkite/build-sorbet-runtime.sh
     artifact_paths: _out_/**/*
