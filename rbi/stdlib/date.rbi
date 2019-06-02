@@ -69,22 +69,22 @@ class Date
   end
   def localize(locale=T.unsafe(nil), options=T.unsafe(nil)); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T.nilable(Integer))}
   def <=>(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def <<(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def >>(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def ===(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def eql?(arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Float)}
   def start(); end
 
   sig {returns(T.untyped)}
@@ -99,109 +99,109 @@ class Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def +(arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def inspect(); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def -(arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def mday(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def day(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def mon(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def month(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def year(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def wday(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def yday(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def ctime(); end
 
   sig {returns(T.untyped)}
   def pretty_date(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Date)}
   def succ(); end
 
   sig {returns(T.untyped)}
   def to_utc_time(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def jd(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def sunday?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def monday?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def tuesday?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def wednesday?(); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def step(*arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def friday?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def saturday?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def blank?(); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def downto(arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def asctime(); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(String)}
   def strftime(*arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def thursday?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def to_s(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def leap?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def iso8601(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def rfc3339(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def xmlschema(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def rfc2822(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def rfc822(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def httpdate(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def jisx0301(); end
 
   sig {returns(T.untyped)}
@@ -213,43 +213,43 @@ class Date
   sig {returns(T.untyped)}
   def day_fraction(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def cwyear(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def cweek(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def cwday(); end
 
   sig {returns(T.untyped)}
   def hash(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def julian?(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Boolean)}
   def gregorian?(); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def new_start(*arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Date)}
   def italy(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Date)}
   def england(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Date)}
   def julian(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Date)}
   def gregorian(); end
 
   sig {params(arg0: T.untyped).returns(Date)}
   def next_day(*arg0); end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def ld(); end
 
   sig {params(arg0: T.untyped).returns(Date)}
@@ -291,46 +291,46 @@ class Date
   sig {params(arg0: T.untyped).returns(Date)}
   def self.parse(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.jd(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.valid_jd?(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.valid_ordinal?(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.valid_civil?(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.valid_date?(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.valid_commercial?(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.julian_leap?(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.gregorian_leap?(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(T::Boolean)}
   def self.leap?(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.ordinal(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.civil(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.commercial(*arg0); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self._strptime(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.strptime(*arg0); end
 
   sig do
@@ -345,19 +345,19 @@ class Date
   sig {params(arg0: String).returns(Hash)}
   def self._iso8601(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.iso8601(*arg0); end
 
   sig {params(arg0: String).returns(Hash)}
   def self._rfc3339(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.rfc3339(*arg0); end
 
   sig {params(arg0: String).returns(Hash)}
   def self._xmlschema(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.xmlschema(*arg0); end
 
   sig {params(arg0: String).returns(Hash)}
@@ -366,22 +366,22 @@ class Date
   sig {params(arg0: String).returns(Hash)}
   def self._rfc822(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.rfc2822(*arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.rfc822(*arg0); end
 
   sig {params(arg0: String).returns(Hash)}
   def self._httpdate(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.httpdate(*arg0); end
 
   sig {params(arg0: String).returns(Hash)}
   def self._jisx0301(arg0); end
 
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def self.jisx0301(*arg0); end
 end
 
