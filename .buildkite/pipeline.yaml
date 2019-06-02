@@ -28,6 +28,15 @@ steps:
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: linux
+      queue: elastic
+    plugins:
+      - docker#v3.2.0:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
   - wait: ~
 
 # Build Phase - Build all our artifacts
