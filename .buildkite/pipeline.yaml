@@ -5,7 +5,7 @@
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
-  - label: ":linux: linters.sh"
+  - label: ":linux::cloud: linters.sh"
     command: .buildkite/linters.sh
     agents:
       os: linux
@@ -24,7 +24,7 @@ steps:
     agents:
       os: mac
 
-  - label: ":linux: test-static-sanitized.sh"
+  - label: ":linux::cloud: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: linux
@@ -40,7 +40,7 @@ steps:
   - wait: ~
 
 # Build Phase - Build all our artifacts
-  - label: ":linux: build-website.sh"
+  - label: ":linux::cloud: build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
     agents:
@@ -55,7 +55,7 @@ steps:
           volumes:
             - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
-  - label: ":linux: build-sorbet-runtime.sh"
+  - label: ":linux::cloud: build-sorbet-runtime.sh"
     command: .buildkite/build-sorbet-runtime.sh
     artifact_paths: _out_/**/*
     agents:
@@ -80,7 +80,7 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux: build-static-release.sh"
+  - label: ":linux::cloud: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
     agents:
@@ -119,7 +119,7 @@ steps:
 # Optional Phase - Run optional things
   - block: "Run optional code coverage"
   - wait: ~
-  - label: ":linux: coverage-static-sanitized.sh"
+  - label: ":linux::cloud: coverage-static-sanitized.sh"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*
     retry:
