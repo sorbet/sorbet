@@ -20,7 +20,7 @@ elif [[ "mac" == "$platform" ]]; then
   command -v realpath >/dev/null 2>&1 || brew install realpath
 fi
 
-export JOB_NAME=emscripten
+export JOB_NAME=build-emscripten
 source .buildkite/tools/setup-bazel.sh
 
 PATH=$PATH:$(pwd)

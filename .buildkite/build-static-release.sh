@@ -2,7 +2,7 @@
 
 set -exuo pipefail
 
-export JOB_NAME=static-release
+export JOB_NAME=build-static-release
 source .buildkite/tools/setup-bazel.sh
 
 unameOut="$(uname -s)"

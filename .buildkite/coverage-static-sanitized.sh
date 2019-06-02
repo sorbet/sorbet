@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export JOB_NAME=coverage
+export JOB_NAME=coverage-static-sanitized
 source .buildkite/tools/setup-bazel.sh
 
 # This clean sidesteps a bug in bazel not re-building correct coverage for cached items
