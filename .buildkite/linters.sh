@@ -1,9 +1,10 @@
 #!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
 export JOB_NAME=linters
 source .buildkite/tools/setup-bazel.sh
 
+set -x
 err=0
 globalErr=0
 
