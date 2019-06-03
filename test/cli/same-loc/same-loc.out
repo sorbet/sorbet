@@ -86,7 +86,7 @@ test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` https://sorbet.org/docs/error-reference#7003
+test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(T::Sig::WithoutRuntime)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -118,7 +118,7 @@ test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` https://sorbet.org/docs/error-reference#7003
+test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(T::Sig::WithoutRuntime)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -136,7 +136,7 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(Sorbet)` https://sorbet.org/docs/error-reference#7003
+test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(T::Sig::WithoutRuntime)` https://sorbet.org/docs/error-reference#7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
