@@ -248,8 +248,15 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 tree = move(pluginTree);
                 resultPluginFiles = move(pluginFiles);
             }
+
             if (!opts.skipDSLPasses) {
                 tree = runDSL(gs, file, move(tree));
+            }
+            if (print.DSLTree.enabled) {
+                print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+            }
+            if (print.DSLTreeRaw.enabled) {
+                print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
             }
 
             tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
@@ -257,11 +264,11 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 return emptyPluginFile(file);
             }
         }
-        if (print.DSLTree.enabled) {
-            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+        if (print.IndexTree.enabled) {
+            print.IndexTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
         }
-        if (print.DSLTreeRaw.enabled) {
-            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
+        if (print.IndexTreeRaw.enabled) {
+            print.IndexTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return emptyPluginFile(file);
