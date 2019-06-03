@@ -421,8 +421,8 @@ module Opus::Types::Test
       line = nil
       klass = Class.new do
         extend T::Sig
-          line = __LINE__; sig {params(x: Integer)}
-          def f(x); end
+        line = __LINE__; sig {params(x: Integer)}
+        def f(x); end
       end
 
       e = assert_raises(ArgumentError) do
