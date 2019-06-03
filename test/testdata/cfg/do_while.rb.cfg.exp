@@ -23,14 +23,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_5" [
-        label = "block[id=5](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$8: Integer(2) = 2\lforTemp$2: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$8: Integer(2))\l<statTemp>$10: FalseClass = false\l<ifTemp>$9: TrueClass = <statTemp>$10: FalseClass.!()\l<ifTemp>$9: TrueClass\l"
+        label = "block[id=5](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$8: Integer(2) = 2\l<statTemp>$6: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$8: Integer(2))\l<statTemp>$10: FalseClass = false\l<ifTemp>$9: TrueClass = <statTemp>$10: FalseClass.!()\l<ifTemp>$9: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_2" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_6" [
-        label = "block[id=6](<self>: T.class_of(<root>), forTemp$2: NilClass)\louterLoops: 1\l<block-break-assign>$12: NilClass = forTemp$2\l<unconditional>\l"
+        label = "block[id=6](<self>: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$12: NilClass = <returnTemp>$11\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_6" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
@@ -47,14 +47,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_10" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_11" [
-        label = "block[id=11](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$18: Integer(2) = 2\lforTemp$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: Integer(2))\l<ifTemp>$19: TrueClass = true\l<ifTemp>$19: TrueClass\l"
+        label = "block[id=11](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$18: Integer(2) = 2\l<statTemp>$16: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: Integer(2))\l<ifTemp>$19: TrueClass = true\l<ifTemp>$19: TrueClass\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_11" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];
     "bb::<Class:<root>>#<static-init>_11" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_12" [
-        label = "block[id=12](<self>: T.class_of(<root>), forTemp$3: NilClass)\louterLoops: 1\l<block-break-assign>$21: NilClass = forTemp$3\l<unconditional>\l"
+        label = "block[id=12](<self>: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$21: NilClass = <returnTemp>$20\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_12" -> "bb::<Class:<root>>#<static-init>_10" [style="bold"];
