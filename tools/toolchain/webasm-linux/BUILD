@@ -21,11 +21,13 @@ filegroup(
         "@emscripten_clang_linux//:all",
         "@emscripten_toolchain//:all",
     ],
+    tags = ["manual"],
 )
 
 filegroup(
     name = "emscripten_cache_content_linux",
     srcs = glob(["emscripten_cache_content_linux/**/*"]),
+    tags = ["manual"],
 )
 
 cc_toolchain(
