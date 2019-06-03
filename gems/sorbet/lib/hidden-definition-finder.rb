@@ -5,7 +5,7 @@
 class Sorbet; end
 module Sorbet::Private; end
 
-require_relative './sorbet'
+require_relative './t'
 require_relative './step_interface'
 require_relative './serialize'
 require_relative './constant_cache'

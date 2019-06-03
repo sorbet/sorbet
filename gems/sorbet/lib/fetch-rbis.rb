@@ -2,7 +2,7 @@
 # typed: false
 
 require_relative './step_interface'
-require_relative './sorbet'
+require_relative './t'
 
 require 'bundler'
 require 'fileutils'

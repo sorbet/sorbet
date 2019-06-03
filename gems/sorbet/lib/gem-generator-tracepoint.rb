@@ -6,7 +6,7 @@
 class Sorbet; end
 module Sorbet::Private; end
 
-require_relative './sorbet'
+require_relative './t'
 require_relative './step_interface'
 require_relative './require_everything'
 require_relative './gem-generator-tracepoint/tracer'
