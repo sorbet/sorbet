@@ -92,7 +92,7 @@ module Opus::Types::Test
 
       it "raises an error when adding a method to a different module than the last declaration" do
         mod2 = Module.new do
-					extend T::Sig
+          extend T::Sig
           sig {returns(String)}
           def foo; end
         end
@@ -114,7 +114,7 @@ module Opus::Types::Test
       it "gives a helpful error if you order optional kwargs after required" do
         ex = assert_raises(RuntimeError) do
           mod = Module.new do
-						extend T::Sig
+            extend T::Sig
             sig {params(a: Integer, b: Integer).returns(Integer)}
             def self.foo(a: 1, b:)
               a + b
@@ -309,7 +309,7 @@ module Opus::Types::Test
       describe "instance methods" do
         it "raises an error when the return value is the wrong type " do
           klass = Class.new do
-						extend T::Sig
+            extend T::Sig
             sig {returns(String)}
             def foo
               :foo
@@ -423,7 +423,7 @@ module Opus::Types::Test
 
       it 'does not throw if parent is .generated' do
         parent = Class.new do
-					extend T::Sig
+          extend T::Sig
           sig {generated.returns(Integer)}
           def foo
             1
@@ -431,7 +431,7 @@ module Opus::Types::Test
         end
 
         child = Class.new(parent) do
-					extend T::Sig
+          extend T::Sig
           sig {returns(String)}
           def foo
             "1"
