@@ -1,6 +1,7 @@
-# There are two reasons we intentionally put everything we can on mac machine:
-#  - our mac machine has 12 cores, while linux one has 4 cores.
-#  - we use macs for development thus we want to make sure all scripts run there
+# We currently have 3 execution environments:
+# - arbiter, a linux box that does security enforcement. Should never run tests.
+# - our mac machine that has 12 cores that is used to run mac tests, build mac _and_ emscripten release
+# - autoscaling linux cloud that's used for everything else
 
 steps:
 
