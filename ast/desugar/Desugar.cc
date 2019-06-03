@@ -364,6 +364,19 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     return {tempRecv, std::move(stats), std::move(readArgs), std::move(assgnArgs)};
 }
 
+// while true
+//   body
+//   if cond
+//     break
+//   end
+// end
+unique_ptr<Expression> doUntil(DesugarContext dctx, core::Loc loc, unique_ptr<Expression> cond,
+                               unique_ptr<Expression> body) {
+    auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::EmptyTree()), MK::EmptyTree());
+    auto breakWithBody = MK::InsSeq1(loc, std::move(body), std::move(breaker));
+    return make_unique<While>(loc, MK::True(loc), std::move(breakWithBody));
+}
+
 unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
@@ -517,38 +530,33 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             // END hand-ordered clauses
             [&](parser::And *and_) {
                 auto lhs = node2TreeImpl(dctx, std::move(and_->left));
+                auto rhs = node2TreeImpl(dctx, std::move(and_->right));
                 if (auto i = cast_tree<Reference>(lhs.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto iff =
-                        MK::If(loc, std::move(cond), node2TreeImpl(dctx, std::move(and_->right)), std::move(lhs));
+                    auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result.swap(iff);
                 } else {
                     core::NameRef tempName = dctx.ctx.state.freshNameUnique(
                         core::UniqueNameKind::Desugar, core::Names::andAnd(), ++dctx.uniqueCounter);
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-
-                    auto iff = MK::If(loc, MK::Local(loc, tempName), node2TreeImpl(dctx, std::move(and_->right)),
-                                      MK::Local(loc, tempName));
+                    auto iff = MK::If(loc, MK::Local(loc, tempName), std::move(rhs), MK::Local(loc, tempName));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
-
                     result.swap(wrapped);
                 }
             },
             [&](parser::Or *or_) {
                 auto lhs = node2TreeImpl(dctx, std::move(or_->left));
+                auto rhs = node2TreeImpl(dctx, std::move(or_->right));
                 if (auto i = cast_tree<Reference>(lhs.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto iff = MK::If(loc, std::move(cond), std::move(lhs), node2TreeImpl(dctx, std::move(or_->right)));
+                    auto iff = MK::If(loc, std::move(cond), std::move(lhs), std::move(rhs));
                     result.swap(iff);
                 } else {
                     core::NameRef tempName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
                                                                             core::Names::orOr(), ++dctx.uniqueCounter);
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-
-                    auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName),
-                                      node2TreeImpl(dctx, std::move(or_->right)));
+                    auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName), std::move(rhs));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
-
                     result.swap(wrapped);
                 }
             },
@@ -966,61 +974,34 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
-            // Most of the time a WhilePost is a normal while.
-            // But it might be a do-while, in which case we do this:
-            //
-            // while true
-            //   <temp> = <body>
-            //   if ! <cond>
-            //     break <temp>
-            //   end
-            // end
             [&](parser::WhilePost *wl) {
-                bool isDoWhile = parser::isa_node<parser::Kwbegin>(wl->body.get());
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl->body.get());
+                auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-
-                if (isDoWhile) {
-                    auto cond = MK::Send0(loc, node2TreeImpl(dctx, std::move(wl->cond)), core::Names::bang());
-
-                    auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
-                                                               ++dctx.uniqueCounter);
-                    auto withResult = MK::Assign(loc, temp, std::move(body));
-                    auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree());
-                    auto breakWithResult = MK::InsSeq1(loc, std::move(withResult), std::move(breaker));
-                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), std::move(breakWithResult));
-                    result.swap(res);
-                } else {
-                    auto cond = node2TreeImpl(dctx, std::move(wl->cond));
-                    unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
-                    result.swap(res);
-                }
-            },
-            [&](parser::Until *wl) {
-                auto cond = MK::Send0(loc, node2TreeImpl(dctx, std::move(wl->cond)), core::Names::bang());
-                auto body = node2TreeImpl(dctx, std::move(wl->body));
-                unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
+                // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
+                unique_ptr<Expression> res =
+                    isKwbegin
+                        ? doUntil(dctx, loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body))
+                        : make_unique<While>(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
-            // This is the same as WhilePost, but the cond negation in the other branch.
-            [&](parser::UntilPost *wl) {
-                bool isDoUntil = parser::isa_node<parser::Kwbegin>(wl->body.get());
+            [&](parser::Until *wl) {
+                auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-
-                if (isDoUntil) {
-                    auto cond = node2TreeImpl(dctx, std::move(wl->cond));
-
-                    auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
-                                                               ++dctx.uniqueCounter);
-                    auto withResult = MK::Assign(loc, temp, std::move(body));
-                    auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree());
-                    auto breakWithResult = MK::InsSeq1(loc, std::move(withResult), std::move(breaker));
-                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), std::move(breakWithResult));
-                    result.swap(res);
-                } else {
-                    auto cond = MK::Send0(loc, node2TreeImpl(dctx, std::move(wl->cond)), core::Names::bang());
-                    unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
-                    result.swap(res);
-                }
+                unique_ptr<Expression> res =
+                    make_unique<While>(loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body));
+                result.swap(res);
+            },
+            // This is the same as WhilePost, but the cond negation is in the other branch.
+            [&](parser::UntilPost *wl) {
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl->body.get());
+                auto cond = node2TreeImpl(dctx, std::move(wl->cond));
+                auto body = node2TreeImpl(dctx, std::move(wl->body));
+                unique_ptr<Expression> res =
+                    isKwbegin ? doUntil(dctx, loc, std::move(cond), std::move(body))
+                              : make_unique<While>(loc, MK::Send0(loc, std::move(cond), core::Names::bang()),
+                                                   std::move(body));
+                result.swap(res);
             },
             [&](parser::Nil *wl) {
                 unique_ptr<Expression> res = MK::Nil(loc);
