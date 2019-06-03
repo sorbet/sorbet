@@ -1,7 +1,5 @@
 # frozen_string_literal: true
-# typed: false
-require_relative '../../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
 class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
   it 'works on a class' do
