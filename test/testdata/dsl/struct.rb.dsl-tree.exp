@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
@@ -61,7 +61,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
@@ -113,7 +113,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"foo" => ::BasicObject}).void()
       end
 
@@ -133,7 +133,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"foo" => ::BasicObject}).void()
       end
 
@@ -167,7 +167,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
@@ -201,7 +201,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"x" => ::BasicObject}).void()
       end
 
@@ -231,7 +231,7 @@ class <emptyTree><<C <root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig() do ||
+      ::T::Sig::WithoutRungime.sig() do ||
         <self>.params({:"x" => ::BasicObject}).void()
       end
 

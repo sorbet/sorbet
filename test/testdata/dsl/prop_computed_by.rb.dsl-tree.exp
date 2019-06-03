@@ -1,7 +1,7 @@
 class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-  ::Sorbet.sig() do ||
+  ::T::Sig::WithoutRungime.sig() do ||
     <self>.params({}).returns(<emptyTree>::<C Integer>)
   end
 
@@ -17,7 +17,7 @@ class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
     10
   end
 
-  ::Sorbet.sig() do ||
+  ::T::Sig::WithoutRungime.sig() do ||
     <self>.params({}).returns(<emptyTree>::<C Integer>)
   end
 
@@ -25,7 +25,7 @@ class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
     ::T.assert_type!(<self>.class().compute_missing(::T.unsafe(nil)), <emptyTree>::<C Integer>)
   end
 
-  ::Sorbet.sig() do ||
+  ::T::Sig::WithoutRungime.sig() do ||
     <self>.params({}).returns(<emptyTree>::<C Integer>)
   end
 
@@ -41,7 +41,7 @@ class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
     "not_an_integer"
   end
 
-  ::Sorbet.sig() do ||
+  ::T::Sig::WithoutRungime.sig() do ||
     <self>.params({}).returns(<emptyTree>::<C Integer>)
   end
 
@@ -59,7 +59,7 @@ class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
 
   ::T.let("not_a_symbol", <emptyTree>::<C Symbol>)
 
-  ::Sorbet.sig() do ||
+  ::T::Sig::WithoutRungime.sig() do ||
     <self>.params({}).returns(<emptyTree>::<C String>)
   end
 
@@ -67,7 +67,7 @@ class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
     ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
   end
 
-  ::Sorbet.sig() do ||
+  ::T::Sig::WithoutRungime.sig() do ||
     <self>.params({}).returns(<emptyTree>::<C Integer>)
   end
 
