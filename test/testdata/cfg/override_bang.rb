@@ -1,4 +1,5 @@
-# typed: true
+# typed: false
+# TODO change this to typed: true to actually run this test
 
 class C
   extend T::Sig
