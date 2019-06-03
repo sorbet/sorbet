@@ -1,5 +1,4 @@
-# typed: false
-# TODO change this to typed: true to actually run this test
+# typed: true
 
 class C
   extend T::Sig
@@ -35,9 +34,11 @@ else
 end
 
 until C.new
-  puts # error: This code is unreachable
+  puts # TODO this puts should be unreachable
 end
 
 until !C.new
+  #    ^ error: This code is unreachable
+  # TODO this C.new should be reachable
   puts # error: This code is unreachable
 end
