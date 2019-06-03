@@ -64,7 +64,7 @@ module Sorbet::Private
         add_to_context(type: :method, module: mod, method: method, singleton: singleton)
       end
 
-      T::Sig::WithoutRungime.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
+      T::Sig::WithoutRuntime.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
       def self.trace
         start
         yield
@@ -72,18 +72,18 @@ module Sorbet::Private
         trace_results
       end
 
-      T::Sig::WithoutRungime.sig {void}
+      T::Sig::WithoutRuntime.sig {void}
       def self.start
         pre_cache_module_methods
         install_tracepoints
       end
 
-      T::Sig::WithoutRungime.sig {void}
+      T::Sig::WithoutRuntime.sig {void}
       def self.finish
         disable_tracepoints
       end
 
-      T::Sig::WithoutRungime.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
+      T::Sig::WithoutRuntime.sig {returns({files: T::Hash, delegate_classes: T::Hash})}
       def self.trace_results
         {
           files: @files,

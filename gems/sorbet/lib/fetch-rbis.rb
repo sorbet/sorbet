@@ -27,7 +27,7 @@ class Sorbet::Private::FetchRBIs
   include Sorbet::Private::StepInterface
 
   # Ensure our cache is up-to-date
-  T::Sig::WithoutRungime.sig {void}
+  T::Sig::WithoutRuntime.sig {void}
   def self.fetch_sorbet_typed
     if !File.directory?(RBI_CACHE_DIR)
       IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR]) {|pipe| pipe.read}
@@ -43,7 +43,7 @@ class Sorbet::Private::FetchRBIs
   end
 
   # List of directories whose names satisfy the given Gem::Version (+ 'all/')
-  T::Sig::WithoutRungime.sig do
+  T::Sig::WithoutRuntime.sig do
     params(
       root: String,
       version: Gem::Version,
@@ -66,14 +66,14 @@ class Sorbet::Private::FetchRBIs
   end
 
   # List of directories in lib/ruby whose names satisfy the current RUBY_VERSION
-  T::Sig::WithoutRungime.sig {params(ruby_version: Gem::Version).returns(T::Array[String])}
+  T::Sig::WithoutRuntime.sig {params(ruby_version: Gem::Version).returns(T::Array[String])}
   def self.paths_for_ruby_version(ruby_version)
     ruby_dir = "#{RBI_CACHE_DIR}/lib/ruby"
     matching_version_directories(ruby_dir, ruby_version)
   end
 
   # List of rbi folders in the gem's source
-  T::Sig::WithoutRungime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
+  T::Sig::WithoutRuntime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
   def self.paths_within_gem_sources(gemspec)
     paths = T.let([], T::Array[String])
     %w[rbi rbis].each do |dir|
@@ -84,7 +84,7 @@ class Sorbet::Private::FetchRBIs
   end
 
   # List of directories in lib/gemspec.name whose names satisfy gemspec.version
-  T::Sig::WithoutRungime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
+  T::Sig::WithoutRuntime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
   def self.paths_for_gem_version(gemspec)
     local_dir = "#{RBI_CACHE_DIR}/lib/#{gemspec.name}"
     matching_version_directories(local_dir, gemspec.version)
@@ -92,7 +92,7 @@ class Sorbet::Private::FetchRBIs
 
   # Make the config file that has a list of every non-vendored RBI
   # (we don't vendor these so that (1) people don't have to check them in (2) people aren't likely to patch them)
-  T::Sig::WithoutRungime.sig {params(gem_source_paths: T::Array[String]).void}
+  T::Sig::WithoutRuntime.sig {params(gem_source_paths: T::Array[String]).void}
   def self.serialize_rbi_list(gem_source_paths)
     File.open(SORBET_RBI_LIST, 'w') do |rbi_list|
       rbi_list.puts(gem_source_paths)
@@ -106,7 +106,7 @@ class Sorbet::Private::FetchRBIs
   end
 
   # Copy the relevant RBIs into their repo, with matching folder structure.
-  T::Sig::WithoutRungime.sig {params(vendor_paths: T::Array[String]).void}
+  T::Sig::WithoutRuntime.sig {params(vendor_paths: T::Array[String]).void}
   def self.vendor_rbis_within_paths(vendor_paths)
     vendor_paths.each do |vendor_path|
       relative_vendor_path = vendor_path.sub(RBI_CACHE_DIR, '')
@@ -126,7 +126,7 @@ class Sorbet::Private::FetchRBIs
     end
   end
 
-  T::Sig::WithoutRungime.sig {void}
+  T::Sig::WithoutRuntime.sig {void}
   def self.main
     fetch_sorbet_typed
 

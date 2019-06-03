@@ -215,7 +215,7 @@ If instead you want to explore your files locally, here are some things to try:
     command
   end
 
-  T::Sig::WithoutRungime.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
+  T::Sig::WithoutRuntime.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
   def self.make_step(step)
     -> do
       puts "Generating: #{step.output_file}" if step.output_file
