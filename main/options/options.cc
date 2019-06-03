@@ -534,11 +534,11 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.inlineInput = raw["e"].as<string>();
         if (opts.autocorrect && opts.silenceErrors) {
-            logger->error("you may not use autocorrect when silencing errors.");
+            logger->error("You may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
         }
         if (opts.autocorrect && opts.inlineInput != "") {
-            logger->error("you may not use autocorrect with inline input.");
+            logger->error("You may not use autocorrect with inline input.");
             throw EarlyReturnWithCode(1);
         }
 
