@@ -1322,16 +1322,6 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
-
-        // make sure we've added a static init symbol so we have it ready for later
-        if (auto loc = flatten::extractClassInitLoc(ctx, original)) {
-            if (original->symbol == core::Symbols::root()) {
-                ctx.state.staticInitForFile(*loc);
-            } else {
-                ctx.state.staticInitForClass(original->symbol, *loc);
-            }
-        }
-
         return original;
     }
 
