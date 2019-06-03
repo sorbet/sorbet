@@ -97,11 +97,6 @@ end
     Tempfile
   )
 )
-class Sorbet
-  sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
-  def self.sig(&blk)
-  end
-end
 class T::Private::Methods::DeclBuilder
   sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def type_parameters(*params); end
@@ -131,6 +126,10 @@ end
 module T::Sig
   sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def sig(&blk); end
+end
+module T::Sig::WithoutRuntime
+  sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  def self.sig(&blk); end
 end
 module T
   extend T::Sig
