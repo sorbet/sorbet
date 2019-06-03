@@ -979,52 +979,6 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
-            // When the body of a WhilePost is a Kwbegin, we desugar it into a
-            // do-while.
-            //
-            // begin
-            //   inner_body
-            // end while cond
-            //
-            // becomes
-            //
-            // while true
-            //   begin
-            //     inner_body
-            //   end
-            //   if negate(cond)
-            //     break
-            //   end
-            // end
-            //
-            // Note that we preserve the begin-end because inner_body might
-            // contain a rescue.
-            //
-            // See the negate helper in this file for the definition of negate.
-            //
-            // In all other cases, WhilePost is a regular while. For example:
-            //
-            // puts 3 while rand < 0.3
-            //
-            // becomes
-            //
-            // while rand < 0.3
-            //   puts 3
-            // end
-            //
-            // However, note that in the example
-            //
-            // x = begin
-            //   inner_body
-            // end while cond
-            //
-            // the body of the WhilePost is an assignment, not a Kwbegin, so
-            // this actually takes the regular While route. See
-            // test/testdata/cfg/do_while.rb.
-            //
-            // Note also that we use a helper doUntil, which does not negate
-            // cond (see its definition). So we negate the cond here (if we use
-            // doUntil) to create a do-while loop.
             [&](parser::WhilePost *wl) {
                 bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
