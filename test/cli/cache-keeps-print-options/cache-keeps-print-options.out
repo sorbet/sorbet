@@ -33,17 +33,6 @@ class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
 No errors! Great job.
-ClassDef{
-  kind = class
-  name = UnresolvedConstantLit{
-    scope = EmptyTree
-    cnst = <C <U CCCCCCCCC>>
-  }<<C <U <todo sym>>>>
-  ancestors = [ConstantLit{
-      orig = nullptr
-      symbol = ::<todo sym>
-    }]
-  rhs = [
-    EmptyTree
-  ]
-}
+class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
+  <emptyTree>
+end
