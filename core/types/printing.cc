@@ -84,6 +84,10 @@ string TupleType::show(const GlobalState &gs) const {
                        fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el->show(gs); }));
 }
 
+string TupleType::showWithMoreInfo(const GlobalState &gs) const {
+    return fmt::format("{} ({}-tuple)", show(gs), this->elems.size());
+}
+
 string ShapeType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     auto thisTabs = buildTabs(tabs);

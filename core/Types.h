@@ -523,6 +523,7 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string showWithMoreInfo(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
