@@ -532,6 +532,7 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
+        opts.inlineInput = raw["e"].as<string>();
         if (opts.autocorrect && opts.silenceErrors) {
             logger->error("you may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
@@ -670,7 +671,6 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
         }
 
-        opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
