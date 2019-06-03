@@ -46,6 +46,8 @@ struct Printers {
     PrinterConfig DesugaredRaw;
     PrinterConfig DSLTree;
     PrinterConfig DSLTreeRaw;
+    PrinterConfig IndexTree;
+    PrinterConfig IndexTreeRaw;
     PrinterConfig NameTree;
     PrinterConfig NameTreeRaw;
     PrinterConfig SymbolTable;
