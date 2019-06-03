@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: ignore
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
   it "succeeds when all methods are declared as abstract" do

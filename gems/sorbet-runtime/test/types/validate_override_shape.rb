@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: false
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 module Opus::Types::Test
   class ValidateOverrideShapeTest < Critic::Unit::UnitTest
