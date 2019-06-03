@@ -5,11 +5,13 @@ require_relative '../real_stdlib'
 
 require 'set'
 
-alias DelegateClass_without_rbi_generator DelegateClass
-def DelegateClass(superclass)
-  result = DelegateClass_without_rbi_generator(superclass)
-  Sorbet::Private::GemGeneratorTracepoint::Tracer.register_delegate_class(superclass, result)
-  result
+if defined?(DelegateClass)
+  alias DelegateClass_without_rbi_generator DelegateClass
+  def DelegateClass(superclass)
+    result = DelegateClass_without_rbi_generator(superclass)
+    Sorbet::Private::GemGeneratorTracepoint::Tracer.register_delegate_class(superclass, result)
+    result
+  end
 end
 
 module Sorbet::Private
