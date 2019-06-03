@@ -170,6 +170,11 @@ public:
     }
     // User visible type. Should exactly match what the user can write.
     virtual std::string show(const GlobalState &gs) const = 0;
+    // Like show, but can include extra info. Does not necessarily match what the user can type.
+    virtual std::string showWithMoreInfo(const GlobalState &gs) const {
+        return show(gs);
+    }
+
     virtual std::string typeName() const = 0;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) = 0;
