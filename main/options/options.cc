@@ -537,6 +537,10 @@ void readOptions(Options &opts, int argc, char *argv[],
             logger->error("you may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
         }
+        if (opts.autocorrect && opts.inlineInput != "") {
+            logger->error("you may not use autocorrect with inline input.");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
