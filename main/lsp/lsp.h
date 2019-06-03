@@ -262,9 +262,9 @@ std::optional<std::string> findDocumentation(std::string_view sourceCode, int be
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string_view pattern);
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
-                         core::TypePtr retType, std::shared_ptr<core::TypeConstraint> constraint);
+                         core::TypePtr retType, const std::shared_ptr<core::TypeConstraint> &constraint);
 core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
-                            std::shared_ptr<core::TypeConstraint> constr);
+                            const std::shared_ptr<core::TypeConstraint> &constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
 std::unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc);
 

@@ -124,7 +124,7 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
 }
 
 string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
-                    shared_ptr<core::TypeConstraint> constraint) {
+                    const shared_ptr<core::TypeConstraint> &constraint) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -161,7 +161,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
-                            shared_ptr<core::TypeConstraint> constr) {
+                            const shared_ptr<core::TypeConstraint> &constr) {
     core::Context ctx(gs, core::Symbols::root());
     auto resultType = ofWhat.data(gs)->resultType;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
