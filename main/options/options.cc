@@ -530,8 +530,17 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
+        opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
-        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
+        opts.inlineInput = raw["e"].as<string>();
+        if (opts.autocorrect && opts.silenceErrors) {
+            logger->error("You may not use autocorrect when silencing errors.");
+            throw EarlyReturnWithCode(1);
+        }
+        if (opts.autocorrect && opts.inlineInput != "") {
+            logger->error("You may not use autocorrect with inline input.");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
@@ -586,11 +595,11 @@ void readOptions(Options &opts, int argc, char *argv[],
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
+        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
-        opts.silenceErrors = raw["quiet"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
@@ -666,7 +675,6 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
         }
 
-        opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
