@@ -936,7 +936,7 @@ module Opus::Types::Test
     end
 
     class GenericSingletonChild < GenericSingleton
-      SignletonTP = type_template(fixed: String)
+      SingletonTP = type_template(fixed: String)
     end
 
 
