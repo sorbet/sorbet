@@ -11,7 +11,7 @@ steps:
     agents:
       os: linux
       queue: elastic
-    plugins:
+    plugins: &runs_in_docker
       - docker#v3.2.0:
           image: "darkdimius/sorbet-build-image:latest"
           workdir: /app
@@ -30,14 +30,8 @@ steps:
     agents:
       os: linux
       queue: elastic
-    plugins:
-      - docker#v3.2.0:
-          image: "darkdimius/sorbet-build-image:latest"
-          workdir: /app
-          init: true
-          propagate-environment: true
-          volumes:
-            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+    plugins: *runs_in_docker
+
   - wait: ~
 
 # Build Phase - Build all our artifacts
@@ -47,14 +41,7 @@ steps:
     agents:
       os: linux
       queue: elastic
-    plugins:
-      - docker#v3.2.0:
-          image: "darkdimius/sorbet-build-image:latest"
-          workdir: /app
-          init: true
-          propagate-environment: true
-          volumes:
-            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+    plugins: *runs_in_docker
 
   - label: ":linux::cloud: build-sorbet-runtime.sh"
     command: .buildkite/build-sorbet-runtime.sh
@@ -62,14 +49,7 @@ steps:
     agents:
       os: linux
       queue: elastic
-    plugins:
-      - docker#v3.2.0:
-          image: "darkdimius/sorbet-build-image:latest"
-          workdir: /app
-          init: true
-          propagate-environment: true
-          volumes:
-            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+    plugins: *runs_in_docker
 
   - label: ":mac: build-static-release.sh"
     command: .buildkite/build-static-release.sh
@@ -87,14 +67,7 @@ steps:
     agents:
       os: linux
       queue: elastic
-    plugins:
-      - docker#v3.2.0:
-          image: "darkdimius/sorbet-build-image:latest"
-          workdir: /app
-          init: true
-          propagate-environment: true
-          volumes:
-            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+    plugins: *runs_in_docker
   - wait: ~
 
 # Test Sorbet Gem Phase - Its own phase because it relies on the gem build built
@@ -128,11 +101,4 @@ steps:
     agents:
       os: linux
       queue: elastic
-    plugins:
-      - docker#v3.2.0:
-          image: "darkdimius/sorbet-build-image:latest"
-          workdir: /app
-          init: true
-          propagate-environment: true
-          volumes:
-            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+    plugins: *runs_in_docker
