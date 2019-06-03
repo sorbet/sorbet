@@ -1,7 +1,7 @@
 # typed: strict
 
 class Foo
-  Sorbet.sig {returns(Integer)}
+  T::Sig::WithoutRuntime.sig {returns(Integer)}
   def bar
     91
   end

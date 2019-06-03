@@ -25,7 +25,7 @@ module Sorbet::Private
 
       HEADER = Sorbet::Private::Serialize.header('true', 'gems')
 
-      Sorbet.sig {params(files: T::Hash, delegate_classes: T::Hash).void}
+      T::Sig::WithoutRuntime.sig {params(files: T::Hash, delegate_classes: T::Hash).void}
       def initialize(files:, delegate_classes:)
         @files = files
         @delegate_classes = delegate_classes
@@ -34,7 +34,7 @@ module Sorbet::Private
         @prev_anonymous_id = 0
       end
 
-      Sorbet.sig {params(output_dir: String).void}
+      T::Sig::WithoutRuntime.sig {params(output_dir: String).void}
       def serialize(output_dir)
         gem_class_defs = preprocess(@files)
 

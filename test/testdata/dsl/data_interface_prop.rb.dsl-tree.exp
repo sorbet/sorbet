@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C SomeDataInterface><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    ::Sorbet.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    ::Sorbet.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<C Other>))
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < ()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"opts" => ::T.untyped()}).returns(<emptyTree>::<C Other>)
     end
 

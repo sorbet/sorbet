@@ -3,7 +3,7 @@
 class Sorbet; end
 module Sorbet::Private; end
 
-require_relative '../lib/sorbet'
+require_relative '../lib/t'
 require_relative '../lib/step_interface'
 require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
@@ -215,7 +215,7 @@ If instead you want to explore your files locally, here are some things to try:
     command
   end
 
-  Sorbet.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
+  T::Sig::WithoutRuntime.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
   def self.make_step(step)
     -> do
       puts "Generating: #{step.output_file}" if step.output_file

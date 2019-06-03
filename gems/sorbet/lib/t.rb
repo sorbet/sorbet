@@ -1,19 +1,21 @@
 # frozen_string_literal: true
 # typed: false
 
-# This file contains runtime stubs to make Sorbet.sig work in the runtime.
-# We're using Sorbet.sig in this gem because we don't want to have to
-# depend on the sorbet-runtime gem.
+# This file contains runtime stubs to make `T::Sig::WithoutRuntime.sig` work in
+# the runtime. We're using `T::Sig::WithoutRuntime.sig` in this gem because we
+# don't want to have to depend on the sorbet-runtime gem.
 
-# Note that in particular because sigs are lazily evaluated and Sorbet.sig
-# never forces the sig block, we don't actually need implementations for
-# anything that can only go inside the sig block.
-
-class Sorbet
-  def self.sig(&blk); end
-end
+# Note that in particular because sigs are lazily evaluated and
+# `T::Sig::WithoutRuntime.sig` never forces the sig block, we don't actually
+# need implementations for anything that can only go inside the sig block.
 
 module T
+  module Sig
+    module WithoutRuntime
+      def self.sig(&blk); end
+    end
+  end
+
   def self.any(type_a, type_b, *types); end
   def self.nilable(type); end
   def self.untyped; end
