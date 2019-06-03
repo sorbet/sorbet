@@ -53,6 +53,7 @@ class Sorbet::Private::RequireEverything
       # While this isn't a perfect heuristic for these things, it's pretty good.
       next if File.executable?(abs_path)
       next if excluded_paths.include?(abs_path)
+      next if /^# +typed: +ignore$/.match?(File.read(abs_path))
 
       begin
         my_require(abs_path, i+1, abs_paths.size)
