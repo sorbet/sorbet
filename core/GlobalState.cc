@@ -256,6 +256,9 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::CFGExport());
     ENFORCE(id == Symbols::T_CFGExport());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    ENFORCE(id == Symbols::T_Sig_WithoutRuntime());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::Top()] = Symbols::top();

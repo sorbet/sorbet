@@ -365,6 +365,7 @@ NameDef names[] = {
     {"IMAP", "IMAP", true},
     {"Protocol", "Protocol", true},
     {"CFGExport", "CFGExport", true},
+    {"WithoutRuntime", "WithoutRuntime", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
