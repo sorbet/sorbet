@@ -3,7 +3,7 @@
 class Sorbet; end
 module Sorbet::Private; end
 
-require_relative '../lib/sorbet'
+require_relative '../lib/t'
 require_relative '../lib/step_interface'
 require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
