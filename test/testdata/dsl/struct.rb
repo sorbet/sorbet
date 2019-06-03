@@ -14,6 +14,7 @@ end
 class RealStruct
     A = Struct.new(:foo, :bar)
     KeywordInit = Struct.new(:foo, :bar, keyword_init: true)
+    Named = Struct.new("Named") {}
 end
 class RealStructDesugar
     class A < Struct

@@ -69,6 +69,10 @@ class <emptyTree><<C <root>>> < ()
         ::T.cast(::T.unsafe(nil), <emptyTree>::<C KeywordInit>)
       end
     end
+
+    <emptyTree>::<C Named> = <emptyTree>::<C Struct>.new("Named") do ||
+      <emptyTree>
+    end
   end
 
   class <emptyTree>::<C RealStructDesugar><<C <todo sym>>> < (::<todo sym>)
@@ -185,12 +189,6 @@ class <emptyTree><<C <root>>> < ()
     end
 
     class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
-      <self>.include(<emptyTree>::<C MyMixin>)
-
-      <self>.new().x()
-
-      <self>.new().foo()
-
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       def x<<C <todo sym>>>(&<blk>)
@@ -208,19 +206,15 @@ class <emptyTree><<C <root>>> < ()
       def initialize<<C <todo sym>>>(x = nil, &<blk>)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyStruct>)
       end
-    end
 
-    class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
       <self>.include(<emptyTree>::<C MyMixin>)
 
       <self>.new().x()
 
       <self>.new().foo()
+    end
 
-      <self>.new(1, 2)
-
-      <self>.new({:"giberish" => 1})
-
+    class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       def x<<C <todo sym>>>(&<blk>)
@@ -238,6 +232,16 @@ class <emptyTree><<C <root>>> < ()
       def initialize<<C <todo sym>>>(x: = nil, &<blk>)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<C MyKeywordInitStruct>)
       end
+
+      <self>.include(<emptyTree>::<C MyMixin>)
+
+      <self>.new().x()
+
+      <self>.new().foo()
+
+      <self>.new(1, 2)
+
+      <self>.new({:"giberish" => 1})
     end
 
     <emptyTree>::<C MyKeywordInitStruct>.new(1, 2)
