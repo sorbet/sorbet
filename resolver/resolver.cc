@@ -7,7 +7,6 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
-#include "resolver/flatten/flatten.h"
 #include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
@@ -29,7 +28,6 @@ namespace {
  *
  * - ResolveConstantsWalk
  * - ResolveSignaturesWalk
- * - FlattenWalk
  *
  * There are also other important parts of resolver found elsewhere in the
  * resolver/ package (GlobalPass, type_syntax). Below we describe
@@ -1324,7 +1322,6 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
-        nestedBlockCounts.pop_back();
         return original;
     }
 
@@ -1519,6 +1516,11 @@ public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
+        if (original->symbol == core::Symbols::root()) {
+            ENFORCE(ctx.state.lookupStaticInitForFile(original->loc).exists());
+        } else {
+            ENFORCE(ctx.state.lookupStaticInitForClass(original->symbol).exists());
+        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
@@ -1558,7 +1560,7 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<a
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
     }
 
-    return flatten::run(ctx, std::move(trees));
+    return trees;
 }
 
 vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContext ctx, vector<ast::ParsedFile> trees) {

@@ -5,7 +5,7 @@
 
 namespace sorbet::flatten {
 
-std::vector<ast::ParsedFile> run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
+ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile trees);
 
 } // namespace sorbet::flatten
 

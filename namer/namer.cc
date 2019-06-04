@@ -10,6 +10,7 @@
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
+#include "flattener/flatten.h"
 
 using namespace std;
 
@@ -344,6 +345,14 @@ public:
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }
+
+        // make sure we've added a static init symbol so we have it ready for the flatten pass later
+        if (klass->symbol == core::Symbols::root()) {
+            ctx.state.staticInitForFile(klass->loc);
+        } else {
+            ctx.state.staticInitForClass(klass->symbol, klass->loc);
+        }
+
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 

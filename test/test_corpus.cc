@@ -19,6 +19,7 @@
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
+#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
@@ -103,10 +104,10 @@ public:
     }
 };
 
-UnorderedSet<string> knownPasses = {"parse-tree", "parse-tree-json", "ast",          "ast-raw",
-                                    "dsl-tree",   "dsl-tree-raw",    "symbol-table", "symbol-table-raw",
-                                    "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw",
-                                    "cfg",        "cfg-json",        "autogen"};
+UnorderedSet<string> knownPasses = {
+    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
+    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
+    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -330,6 +331,22 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
+        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+
+        expectation = test.expectations.find("flattened-tree");
+        if (expectation != test.expectations.end()) {
+            got["flattened-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("flattened-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["flattened-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
                 auto path = file.data(ctx).path();

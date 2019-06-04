@@ -85,9 +85,7 @@ ClassDef{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 class <emptyTree><<C <root>>> < ()
-  def self.<static-init><<static-init>$86>(<blk>)
-    1
-  end
+  1
 end
 --- resolve-tree end ---
 --- resolve-tree-raw start ---
@@ -96,14 +94,7 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
-    MethodDef{
-      flags = self
-      name = <U <static-init>><<N <U <static-init>> $86>>
-      args = [Local{
-          localVariable = <U <blk>>
-        }]
-      rhs = Literal{ value = 1 }
-    }
+    Literal{ value = 1 }
   ]
 }
 --- resolve-tree-raw end ---

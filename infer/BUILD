@@ -42,6 +42,7 @@ cc_test(
         "//ast/desugar",
         "//cfg",
         "//dsl",
+        "//flattener",
         "//local_vars",
         "//namer",
         "//resolver",

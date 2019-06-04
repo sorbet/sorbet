@@ -9,4 +9,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
       argument <C <U A>><U take_arguments>f<keyword, repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:43 end=3:46}
       argument <C <U A>><U take_arguments>&g<block> @ Loc {file=test/testdata/namer/arguments.rb start=3:48 end=3:50}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/arguments.rb start=2:7 end=2:8}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/arguments.rb start=2:1 end=10:4}
+      argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/arguments.rb start=??? end=???}
 

@@ -20,6 +20,7 @@ cc_binary(
         "//cfg/proto",
         "//core",
         "//dsl",
+        "//flattener",
         "//infer",
         "//local_vars",
         "//main/autogen",

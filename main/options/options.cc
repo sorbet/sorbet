@@ -43,6 +43,8 @@ const vector<PrintOptions> print_options({
     {"resolve-tree", &Printers::ResolveTree, true},
     {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"missing-constants", &Printers::MissingConstants, true},
+    {"flattened-tree", &Printers::FlattenedTree, true},
+    {"flattened-tree-raw", &Printers::FlattenedTreeRaw, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-json", &Printers::CFGJson, true},
     {"cfg-proto", &Printers::CFGProto, true},
@@ -56,6 +58,7 @@ PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
 void PrinterConfig::print(const string_view &contents) const {
     if (outputPath.empty()) {
+        // TODO (gdritter): thread a logger through instead of just printing to stdout
         fmt::print("{}", contents);
     } else {
         absl::MutexLock lck(&state->mutex);
@@ -92,6 +95,8 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ResolveTree,
         ResolveTreeRaw,
         MissingConstants,
+        FlattenedTree,
+        FlattenedTreeRaw,
         CFG,
         CFGJson,
         CFGProto,

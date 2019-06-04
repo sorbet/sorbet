@@ -10,4 +10,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/mult
       argument <C <U Test>><U some_method>array<> @ Loc {file=test/testdata/desugar/multi_assign.rb start=5:19 end=5:24}
       argument <C <U Test>><U some_method><blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}
   class <S <C <U Test>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:7 end=4:11}
+    method <S <C <U Test>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=13:4}
+      argument <S <C <U Test>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}
 

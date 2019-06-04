@@ -1,7 +1,8 @@
-#include "resolver/flatten/flatten.h"
+#include "flattener/flatten.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/concurrency/WorkerPool.h"
 #include "core/core.h"
 
 #include <utility>
@@ -10,43 +11,51 @@ using namespace std;
 
 namespace sorbet::flatten {
 
+// return true if the expression in question is either a method definition, a class definition, or an assignment to a
+// constant; false otherwise.
+bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
+    if (ast::isa_tree<ast::MethodDef>(what.get())) {
+        return true;
+    }
+    if (ast::isa_tree<ast::ClassDef>(what.get())) {
+        return true;
+    }
+    if (ast::isa_tree<ast::EmptyTree>(what.get())) {
+        return true;
+    }
+
+    if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
+        return ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+    }
+    return false;
+}
+
+// pull all the non-definitions (i.e. anything that's not a method definition, a class definition, or a constant
+// defintion) from a class or file into their own instruction sequence (or, if there is only one, simply move it out of
+// the class body and return it.)
+unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
+    ast::InsSeq::STATS_store inits;
+
+    for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
+        if (isDefinition(ctx, *it)) {
+            ++it;
+            continue;
+        }
+        inits.emplace_back(std::move(*it));
+        it = klass->rhs.erase(it);
+    }
+
+    if (inits.empty()) {
+        return nullptr;
+    }
+    if (inits.size() == 1) {
+        return std::move(inits.front());
+    }
+    return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
+}
+
 class FlattenWalk {
 private:
-    bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
-        if (ast::isa_tree<ast::MethodDef>(what.get())) {
-            return true;
-        }
-        if (ast::isa_tree<ast::ClassDef>(what.get())) {
-            return true;
-        }
-
-        if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
-            return ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
-        }
-        return false;
-    }
-
-    unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::ClassDef> &klass) {
-        ast::InsSeq::STATS_store inits;
-
-        for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
-            if (isDefinition(ctx, *it)) {
-                ++it;
-                continue;
-            }
-            inits.emplace_back(std::move(*it));
-            it = klass->rhs.erase(it);
-        }
-
-        if (inits.empty()) {
-            return nullptr;
-        }
-        if (inits.size() == 1) {
-            return std::move(inits.front());
-        }
-        return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
-    }
-
 public:
     FlattenWalk() {
         newMethodSet();
@@ -57,7 +66,7 @@ public:
         ENFORCE(classStack.empty());
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         newMethodSet();
         classStack.emplace_back(classes.size());
         classes.emplace_back();
@@ -74,9 +83,9 @@ public:
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.staticInitForFile(inits->loc);
+            sym = ctx.state.lookupStaticInitForFile(inits->loc);
         } else {
-            sym = ctx.state.staticInitForClass(classDef->symbol, inits->loc);
+            sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
@@ -242,15 +251,13 @@ private:
     vector<int> classStack;
 };
 
-vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    for (auto &tree : trees) {
-        FlattenWalk flatten;
-        tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
-        tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
-        tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
-    }
+ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
+    FlattenWalk flatten;
+    tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+    tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
+    tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
 
-    return trees;
+    return tree;
 }
 
 } // namespace sorbet::flatten
