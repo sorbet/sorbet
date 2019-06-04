@@ -59,8 +59,8 @@ To set up your project, this script will take two potentially destructive
 actions:
 
 1.  It will #{yellow("require every file in your project")}. Specifically, every script in
-    your project will be run, unless that script checks #{cyan("if __FILE__ == $0")} (or
-    #{cyan("if __FILE__ == $PROGRAM_NAME")}) before running any code.
+    your project will be run, unless that script checks #{cyan("if __FILE__ == $PROGRAM_NAME")}
+    before running any code, or has the magic comment #{cyan("# typed: ignore")} in it.
 
 2.  It will add a #{yellow("comment to the top of every file")} (like #{cyan("# typed: false")} or
     #{cyan("# typed: true")}, depending on how many errors were found in that file.)

@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: false
 
 class Foo
   define_method(:bar) do
