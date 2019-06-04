@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-export JOB_NAME=test-static-sanitized
-source .buildkite/tools/setup-bazel.sh
-
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     platform="linux";;
@@ -19,6 +16,9 @@ if [[ "linux" == "$platform" ]]; then
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
 fi
+
+export JOB_NAME=test-static-sanitized
+source .buildkite/tools/setup-bazel.sh
 
 echo will run with $CONFIG_OPTS
 
