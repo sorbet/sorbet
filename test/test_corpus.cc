@@ -212,6 +212,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
+        ast::ParsedFile dslUnwound;
         ast::ParsedFile localNamed;
 
         if (test.expectations.find("autogen") == test.expectations.end()) {
@@ -219,24 +220,25 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                auto dslUnwound =
+                dslUnwound =
                     testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
-                localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
             }
 
             expectation = test.expectations.find("dsl-tree");
             if (expectation != test.expectations.end()) {
-                got["dsl-tree"].append(localNamed.tree->toString(gs)).append("\n");
+                got["dsl-tree"].append(dslUnwound.tree->toString(gs)).append("\n");
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
 
             expectation = test.expectations.find("dsl-tree-raw");
             if (expectation != test.expectations.end()) {
-                got["dsl-tree-raw"].append(localNamed.tree->showRaw(gs)).append("\n");
+                got["dsl-tree-raw"].append(dslUnwound.tree->showRaw(gs)).append("\n");
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
+
+            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
         } else {
             localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(desugared)));
             if (test.expectations.find("dsl-tree-raw") != test.expectations.end() ||
