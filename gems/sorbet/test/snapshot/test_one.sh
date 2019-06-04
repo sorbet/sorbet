@@ -311,6 +311,7 @@ diff_total() {
     else
       warn "├─ updating expected/sorbet (total):"
       rm -rf "$test_dir/expected/sorbet"
+      mkdir -p "$test_dir/expected"
       cp -r "$actual/src/sorbet" "$test_dir/expected"
     fi
   fi
