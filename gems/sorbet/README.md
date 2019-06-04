@@ -124,10 +124,17 @@ snapshot tests. The anatomy of a snapshot test looks like this:
 ```
 test/snapshot/(total|partial)/<testname>/
 ├── expected/
-│   ├── sorbet/
-│   │   └── ···
-│   ├── err.log
-│   └── out.log
+│   ├── sorbet/
+│   │   └── ···
+│   ├── err.log
+│   └── out.log
+├── gems/
+│   └── 0.0.0/
+│       └── gems/
+│           └── my_gem-0.0.0/
+│               ├── lib
+│               │   └── ···
+│               └── my_gem.gemspec
 └── src/
     ├── Gemfile
     ├── Gemfile.lock
@@ -159,6 +166,12 @@ with the `expected/` folder:
 We **prefer partial tests** because they're more specific and more robust to
 changes in implementation details. Use total tests only when you must test the
 absence of some behavior.
+
+A test can also have an optional `gems/` folder, which can be used to vendor a
+gem into a test. This is useful (for example) to reproduce an issue specific to
+gems / gem loading without having to pull in say "all of Rails" or some other
+large gem. See the `test/snapshot/partial/local_gem/` for an example of the structure
+of a test using the `gems/` folder.
 
 > **Note**: It's currently not possible to test the contents of
 > `sorbet/rbi/hidden-definitions`.
