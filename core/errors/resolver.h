@@ -25,7 +25,7 @@ constexpr ErrorClass AbstractMethodWithBody{5019, StrictLevel::False};
 constexpr ErrorClass InvalidMixinDeclaration{5020, StrictLevel::False};
 constexpr ErrorClass AbstractMethodOutsideAbstract{5021, StrictLevel::False};
 constexpr ErrorClass ConcreteMethodInInterface{5022, StrictLevel::False};
-constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::True}; // there are violations.
+constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::False};
 constexpr ErrorClass RecursiveTypeAlias{5024, StrictLevel::False};
 constexpr ErrorClass TypeAliasInGenericClass{5025, StrictLevel::False};
 constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::False};
