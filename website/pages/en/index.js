@@ -95,6 +95,7 @@ class Index extends React.Component {
                 <div style={{ paddingTop: "1.2em" }}>
                   <Button href={docUrl("overview")}>Read the docs</Button>
                   <Button href="http://sorbet.run">Try it online</Button>
+                  <Button href={docUrl("adopting")}>Get started</Button>
                 </div>
               </div>
             </div>
@@ -271,7 +272,7 @@ class Index extends React.Component {
             <a href="docs/adopting">Get started</a>{" · "}
             <a href="docs/">Docs</a>{" · "}
             <a href="https://sorbet.run">Try it online</a>{" · "}
-            <a href="talks/talks">Talks</a>
+            <a href="talks/talks">Talks</a>{" · "}
             <a href="blog/">Blog</a>
           </p>
         </PageSection>
