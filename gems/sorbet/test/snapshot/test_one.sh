@@ -197,7 +197,8 @@ if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
   fi
 fi
 
-cp -r "$test_dir/src"/* "$actual"
+cp -r "$test_dir/src" "$actual"
+cp -r "$test_dir/gems" "$actual"
 
 
 # ----- Run the test in the sandbox -----
@@ -208,7 +209,7 @@ export SRB_SORBET_TYPED_REVISION
 (
   # Only cd because `srb init` needs to be run from the folder with a Gemfile,
   # not because this test driver needs to refer to files with relative paths.
-  cd "$actual"
+  cd "$actual/src"
 
   # Install what's installed in the Gemfile.lock (ignoring Gemfile)
   wrap_verbose bundle install
@@ -216,7 +217,7 @@ export SRB_SORBET_TYPED_REVISION
   # Make sure what's in the Gemfile matches what's in the Gemfile.lock
   # (running this in the sandbox, because this will update the Gemfile.lock)
   wrap_verbose bundle check
-  if ! diff -u "$test_dir/src/Gemfile.lock" "$actual/Gemfile.lock"; then
+  if ! diff -u "$test_dir/src/Gemfile.lock" "$actual/src/Gemfile.lock"; then
     error "├─ expected Gemfile.lock did not match actual Gemfile.lock"
 
     if [ -z "$UPDATE" ]; then
@@ -228,7 +229,7 @@ export SRB_SORBET_TYPED_REVISION
       fi
     else
       warn "└─ updating Gemfile.lock"
-      cp "$actual/Gemfile.lock" "$test_dir/src/Gemfile.lock"
+      cp "$actual/src/Gemfile.lock" "$test_dir/src/Gemfile.lock"
     fi
   fi
 
@@ -242,19 +243,19 @@ export SRB_SORBET_TYPED_REVISION
     # because the pry output is hiding in the *.log files)
     #
     # note: redirects stderr before the pipe
-    if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "$actual/err.log" | \
+    if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "$actual/src/err.log" | \
         sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
-        > "$actual/out.log"; then
+        > "$actual/src/out.log"; then
       error "├─ srb init failed."
       if [ -z "$VERBOSE" ]; then
-        error "├─ stdout: $actual/out.log"
-        error "├─ stderr: $actual/err.log"
+        error "├─ stdout: $actual/src/out.log"
+        error "├─ stderr: $actual/src/err.log"
         error "└─ (or re-run with --verbose)"
       else
-        error "├─ stdout ($actual/out.log):"
-        cat "$actual/out.log"
-        error "├─ stderr ($actual/err.log):"
-        cat "$actual/err.log"
+        error "├─ stdout ($actual/src/out.log):"
+        cat "$actual/src/out.log"
+        error "├─ stderr ($actual/src/err.log):"
+        cat "$actual/src/err.log"
         error "└─ (end stderr)"
       fi
       exit 1
@@ -265,7 +266,7 @@ export SRB_SORBET_TYPED_REVISION
 # ----- Check out.log -----
 
 if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
-  if ! diff -u "$test_dir/expected/out.log" "$actual/out.log"; then
+  if ! diff -u "$test_dir/expected/out.log" "$actual/src/out.log"; then
     error "├─ expected out.log did not match actual out.log"
 
     if [ -z "$UPDATE" ]; then
@@ -274,7 +275,7 @@ if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
     else
       warn "└─ updating expected/out.log"
       mkdir -p "$test_dir/expected"
-      cp "$actual/out.log" "$test_dir/expected/out.log"
+      cp "$actual/src/out.log" "$test_dir/expected/out.log"
     fi
   fi
 fi
@@ -282,7 +283,7 @@ fi
 # ----- Check err.log -----
 
 if [ -z "$is_partial" ] || [ -f "$test_dir/expected/err.log" ]; then
-  if ! diff -u "$test_dir/expected/err.log" "$actual/err.log"; then
+  if ! diff -u "$test_dir/expected/err.log" "$actual/src/err.log"; then
     error "├─ expected err.log did not match actual err.log"
 
     if [ -z "$UPDATE" ]; then
@@ -290,7 +291,7 @@ if [ -z "$is_partial" ] || [ -f "$test_dir/expected/err.log" ]; then
       exit 1
     else
       warn "└─ updating expected/err.log"
-      cp "$actual/err.log" "$test_dir/expected/err.log"
+      cp "$actual/src/err.log" "$test_dir/expected/err.log"
     fi
   fi
 fi
@@ -298,10 +299,10 @@ fi
 # ----- Check sorbet/ -----
 
 # FIXME: Removing hidden-definitions in actual to hide them from diff output.
-rm -rf "$actual/sorbet/rbi/hidden-definitions"
+rm -rf "$actual/src/sorbet/rbi/hidden-definitions"
 
 diff_total() {
-  if ! diff -ur "$test_dir/expected/sorbet" "$actual/sorbet"; then
+  if ! diff -ur "$test_dir/expected/sorbet" "$actual/src/sorbet"; then
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
     if [ -z "$UPDATE" ]; then
@@ -310,21 +311,21 @@ diff_total() {
     else
       warn "├─ updating expected/sorbet (total):"
       rm -rf "$test_dir/expected/sorbet"
-      cp -r "$actual/sorbet" "$test_dir/expected"
+      cp -r "$actual/src/sorbet" "$test_dir/expected"
     fi
   fi
 }
 
 diff_partial() {
   set +e
-  diff -ur "$test_dir/expected/sorbet" "$actual/sorbet" | \
+  diff -ur "$test_dir/expected/sorbet" "$actual/src/sorbet" | \
     grep -vF "Only in $actual" \
-    > "$actual/partial-diff.log"
+    > "$actual/src/partial-diff.log"
   set -e
 
   # File exists and is non-empty
-  if [ -s "$actual/partial-diff.log" ]; then
-    cat "$actual/partial-diff.log"
+  if [ -s "$actual/src/partial-diff.log" ]; then
+    cat "$actual/src/partial-diff.log"
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
     if [ -z "$UPDATE" ]; then
@@ -335,7 +336,7 @@ diff_partial() {
 
       find "$test_dir/expected/sorbet" -print0 | while IFS= read -r -d '' expected_path; do
         path_suffix="${expected_path#$test_dir/expected/sorbet}"
-        actual_path="$actual/sorbet$path_suffix"
+        actual_path="$actual/src/sorbet$path_suffix"
 
         # Only ever update existing files, never grow this partial snapshot.
         if [ -d "$expected_path" ]; then
