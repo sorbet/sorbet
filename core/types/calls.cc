@@ -946,7 +946,7 @@ public:
         }
 
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::RevealType)) {
-            e.setHeader("Revealed type: `{}`", args.args[0]->type->show(ctx));
+            e.setHeader("Revealed type: `{}`", args.args[0]->type->showWithMoreInfo(ctx));
             e.addErrorSection(ErrorSection("From:", args.args[0]->origins2Explanations(ctx)));
         }
         return args.args[0]->type;

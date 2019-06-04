@@ -60,7 +60,8 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             // be able to see this right above the definition in ruby)
             response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
         } else {
-            auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*gs));
+            auto markupContents =
+                make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->showWithMoreInfo(*gs));
             response->result = make_unique<Hover>(move(markupContents));
         }
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
