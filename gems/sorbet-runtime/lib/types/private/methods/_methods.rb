@@ -326,6 +326,8 @@ module T::Private::Methods
       if original_singleton_method
         original_singleton_method.bind(self).call(name)
       else
+        # We only need to save the attached object once, so we do it during the first call
+        # to this method, that is, when original_singleton_method is nil.
         attached = self
       end
     end
