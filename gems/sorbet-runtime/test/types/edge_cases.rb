@@ -138,21 +138,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal(:foo, klass.new.foo)
   end
 
-  it 'handles class scope change when not already hooked' do
-    klass = Class.new do
-      T::Hooks.install(self)
-      class << self
-        extend T::Sig
-        extend T::Helpers
-        sig {returns(Symbol)}
-        def foo
-          :foo
-        end
-      end
-    end
-    assert_equal(:foo, klass.foo)
-  end
-
   it 'handles class scope change when hooked from class << self' do
     klass = Class.new do
       class << self
