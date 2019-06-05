@@ -42,6 +42,22 @@ StrictLevel File::fileSigil(string_view source) {
         if (start == string_view::npos) {
             return StrictLevel::None;
         }
+
+        auto comment_start = start;
+        while (comment_start > 0) {
+            --comment_start;
+            auto c = source[comment_start];
+            if (c == ' ') {
+                continue;
+            } else {
+                break;
+            }
+        }
+        if (source[comment_start] != '#') {
+            ++start;
+            continue;
+        }
+
         start += 6;
         while (start < source.size() && source[start] == ' ') {
             ++start;
