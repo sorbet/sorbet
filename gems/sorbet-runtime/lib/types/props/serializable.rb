@@ -11,7 +11,7 @@ module T::Props::Serializable
   # Serializes this object to a hash, suitable for conversion to
   # JSON/BSON.
   #
-  # @param strict [Boolean] (true) If false, do not raise an
+  # @param strict [T::Boolean] (true) If false, do not raise an
   #   exception if this object has mandatory props with missing
   #   values.
   # @return [Hash] A serialization of this object.
@@ -117,7 +117,7 @@ module T::Props::Serializable
   #
   # @param hash [Hash<String, Object>] The hash to take property
   #  values from.
-  # @param strict [Boolean] (false) If true, raise an exception if
+  # @param strict [T::Boolean] (false) If true, raise an exception if
   #  the hash contains keys that do not correspond to any known
   #  props on this instance.
   # @return [void]
@@ -241,7 +241,7 @@ module T::Props::Serializable
     new_val
   end
 
-  # @return [Boolean] Was this property missing during deserialize?
+  # @return [T::Boolean] Was this property missing during deserialize?
   def required_prop_missing_from_deserialize?(prop)
     return false if @_required_props_missing_from_deserialize.nil?
     @_required_props_missing_from_deserialize.include?(prop)

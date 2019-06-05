@@ -73,9 +73,9 @@ module Opus::Types::Test
       end
 
       it 'can hand back its underlying types' do
-        type = T.any(Integer, Boolean, NilClass)
+        type = T.any(Integer, T::Boolean, NilClass)
         value = type.types.map(&:raw_type)
-        assert_equal([Integer, Boolean, NilClass], value)
+        assert_equal([Integer, T::Boolean, NilClass], value)
       end
 
       it "does not crash on anonymous classes" do
@@ -126,7 +126,7 @@ module Opus::Types::Test
 
     describe "FixedArray" do
       before do
-        @type = T::Utils.coerce([String, Boolean])
+        @type = T::Utils.coerce([String, T::Boolean])
       end
 
       it "passes validation" do
@@ -136,23 +136,23 @@ module Opus::Types::Test
 
       it "fails validation with a non-array" do
         msg = @type.error_message_for_obj("hello")
-        assert_equal("Expected type [String, Boolean], got type String with value \"hello\"", msg)
+        assert_equal("Expected type [String, T::Boolean], got type String with value \"hello\"", msg)
       end
 
       it "fails validation with an array of the wrong size" do
         msg = @type.error_message_for_obj(["hello", true, false])
-        assert_equal("Expected type [String, Boolean], got array of size 3", msg)
+        assert_equal("Expected type [String, T::Boolean], got array of size 3", msg)
       end
 
       it "fails validation with an array of the right size but wrong types" do
         msg = @type.error_message_for_obj(["hello", nil])
-        assert_equal("Expected type [String, Boolean], got type [String, NilClass]", msg)
+        assert_equal("Expected type [String, T::Boolean], got type [String, NilClass]", msg)
       end
     end
 
     describe "FixedHash" do
       before do
-        @type = T::Utils.coerce({a: String, b: Boolean, c: T.nilable(Numeric)})
+        @type = T::Utils.coerce({a: String, b: T::Boolean, c: T.nilable(Numeric)})
       end
 
       it "passes validation" do
@@ -167,22 +167,22 @@ module Opus::Types::Test
 
       it "fails validation with a non-hash" do
         msg = @type.error_message_for_obj("hello")
-        assert_equal("Expected type {a: String, b: Boolean, c: T.nilable(Numeric)}, got type String with value \"hello\"", msg)
+        assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type String with value \"hello\"", msg)
       end
 
       it "fails validation with a hash of the wrong types" do
         msg = @type.error_message_for_obj({a: true, b: true, c: 3})
-        assert_equal("Expected type {a: String, b: Boolean, c: T.nilable(Numeric)}, got type {a: TrueClass, b: TrueClass, c: Integer}", msg)
+        assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: TrueClass, b: TrueClass, c: Integer}", msg)
       end
 
       it "fails validation if a field is missing" do
         msg = @type.error_message_for_obj({b: true, c: 3})
-        assert_equal("Expected type {a: String, b: Boolean, c: T.nilable(Numeric)}, got type {b: TrueClass, c: Integer}", msg)
+        assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {b: TrueClass, c: Integer}", msg)
       end
 
       it "fails validation if an extra field is present" do
         msg = @type.error_message_for_obj({a: "hello", b: true, d: "ohno"})
-        assert_equal("Expected type {a: String, b: Boolean, c: T.nilable(Numeric)}, got type {a: String, b: TrueClass, d: String}", msg)
+        assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: String, b: TrueClass, d: String}", msg)
       end
     end
 
@@ -197,8 +197,8 @@ module Opus::Types::Test
       end
 
       it 'can hand back the underlying type' do
-        type = T::Array[Boolean]
-        assert_equal(Boolean, type.type.raw_type)
+        type = T::Array[T::Boolean]
+        assert_equal(T::Boolean, type.type.raw_type)
       end
 
       it 'fails if an element of the array is the wrong type' do
@@ -206,20 +206,20 @@ module Opus::Types::Test
         value = [true]
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Array[Integer], " \
-                         "got T::Array[T::Boolean]"
+                         "got T::Array[T::T::Boolean]"
         assert_equal(expected_error, msg)
       end
 
       it 'succeeds if all values have the correct type' do
-        type = T::Array[T.any(Integer, Boolean)]
+        type = T::Array[T.any(Integer, T::Boolean)]
         value = [true, 3, false, 4, 5, false]
         assert_nil(type.error_message_for_obj(value))
       end
 
       it 'fails if any of the values is the wrong type' do
-        type = T::Array[T.any(Integer, Boolean)]
+        type = T::Array[T.any(Integer, T::Boolean)]
         value = [true, 3.0, false, 4, "5", false]
-        expected_error = "Expected type T::Array[T.any(Boolean, Integer)], " \
+        expected_error = "Expected type T::Array[T.any(T::Boolean, Integer)], " \
           "got T::Array[T.any(FalseClass, Float, Integer, String, TrueClass)]"
         msg = type.error_message_for_obj(value)
         assert_equal(expected_error, msg)
@@ -401,8 +401,8 @@ module Opus::Types::Test
       end
 
       it 'can hand back the underlying type' do
-        type = T::Enumerable[Boolean]
-        assert_equal(Boolean, type.type.raw_type)
+        type = T::Enumerable[T::Boolean]
+        assert_equal(T::Boolean, type.type.raw_type)
       end
 
       it 'fails if an element of the array is the wrong type' do
@@ -410,20 +410,20 @@ module Opus::Types::Test
         value = [true]
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerable[Integer], " \
-                         "got T::Array[T::Boolean]"
+                         "got T::Array[T::T::Boolean]"
         assert_equal(expected_error, msg)
       end
 
       it 'succeeds if all values have the correct type' do
-        type = T::Enumerable[T.any(Integer, Boolean)]
+        type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = [true, 3, false, 4, 5, false]
         assert_nil(type.error_message_for_obj(value))
       end
 
       it 'fails if any of the values is the wrong type' do
-        type = T::Enumerable[T.any(Integer, Boolean)]
+        type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = [true, 3.0, false, 4, "5", false]
-        expected_error = "Expected type T::Enumerable[T.any(Boolean, Integer)], " \
+        expected_error = "Expected type T::Enumerable[T.any(T::Boolean, Integer)], " \
           "got T::Array[T.any(FalseClass, Float, Integer, String, TrueClass)]"
         msg = type.error_message_for_obj(value)
         assert_equal(expected_error, msg)
@@ -448,7 +448,7 @@ module Opus::Types::Test
       end
 
       it 'wont check unrewindable enumerables' do
-        type = T::Enumerable[T.any(Integer, Boolean)]
+        type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = File.new(__FILE__)
         assert_nil(type.error_message_for_obj(value))
       end

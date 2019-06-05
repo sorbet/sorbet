@@ -43,7 +43,7 @@ module T::Props
     #   property. If the type is itself a {Document} subclass, this
     #   property will be recursively serialized/deserialized.
     # @param rules [Hash] Options to control this property's behavior.
-    # @option rules [Boolean,Symbol] :optional If `true`, this property
+    # @option rules [T::Boolean,Symbol] :optional If `true`, this property
     #   is never required to be set before an instance is serialized.
     #   If `:on_load` (default), when this property is missing or nil, a
     #   new model cannot be saved, and an existing model can only be
@@ -58,7 +58,7 @@ module T::Props
     #   properties should be sufficient.)
     # @option rules [Array] :enum An array of legal values; The
     #  property is required to take on one of those values.
-    # @option rules [Boolean] :dont_store If true, this property will
+    # @option rules [T::Boolean] :dont_store If true, this property will
     #   not be saved on the hash resulting from {#serialize}
     # @option rules [Object] :ifunset A value to be returned if this
     #   property is requested but has never been set (is set to
@@ -88,13 +88,13 @@ module T::Props
     # @option rules [Proc] :factory A `Proc` that will be called to
     #   generate an initial value for this prop on {#initialize}, if
     #   none is providede.
-    # @option rules [Boolean] :immutable If true, this prop cannot be
+    # @option rules [T::Boolean] :immutable If true, this prop cannot be
     #   modified after an instance is created or loaded from a hash.
     # @option rules [Class,T::Props::CustomType] :array If set, specifies the
     #   type of individual members of a prop with `type` `Array`. This
     #   allows for typechecking of arrays, and also for recursive
     #   serialization of arrays of sub-{Document}s.
-    # @option rules [Boolean] :override It is an error to redeclare a
+    # @option rules [T::Boolean] :override It is an error to redeclare a
     #   `prop` that has already been declared (including on a
     #   superclass), unless `:override` is set to `true`.
     # @option rules [Symbol, Array] :redaction A redaction directive that may
