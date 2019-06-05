@@ -241,6 +241,21 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     )
   end
 
+  it "does not make sig available to attached class" do
+    assert_raises(NoMethodError) do
+      Class.new do
+        class << self
+          extend T::Sig
+          sig {void}
+          def jojo; end
+        end
+
+        sig {void} # this shouldn't work since sig is not available
+        def self.post; end
+      end
+    end
+  end
+
   it 'keeps raising for bad sigs' do
     klass = Class.new do
       extend T::Sig
