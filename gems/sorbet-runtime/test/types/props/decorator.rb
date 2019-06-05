@@ -376,21 +376,21 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   it 'soft asserts if `optional` is ever specified' do
     e = assert_raises do
       Class.new(T::Struct) do
-        prop :optional_true, Boolean, optional: true
+        prop :optional_true, T::Boolean, optional: true
       end
     end
     assert_match(/Use of `optional: true` is deprecated/, e.message)
 
     e = assert_raises do
       Class.new(T::Struct) do
-        prop :optional_on_load, Boolean, optional: :on_load
+        prop :optional_on_load, T::Boolean, optional: :on_load
       end
     end
     assert_match(/Use of `optional: :on_load` is deprecated/, e.message)
 
     e = assert_raises do
       Class.new(T::Struct) do
-        prop :optional_existing, Boolean, optional: :existing
+        prop :optional_existing, T::Boolean, optional: :existing
       end
     end
     assert_match(/Use of `optional: :existing` is not allowed/, e.message)

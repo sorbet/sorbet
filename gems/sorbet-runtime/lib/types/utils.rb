@@ -173,7 +173,7 @@ module T::Utils
   end
 
   module Nilable
-    # :is_union_type, Boolean: whether the type is an T::Types::Union type
+    # :is_union_type, T::Boolean: whether the type is an T::Types::Union type
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.
     TypeInfo = Struct.new(:is_union_type, :non_nilable_type)
 

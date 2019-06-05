@@ -16,8 +16,8 @@ class Opus::Types::Test::Props::OptionalTest < Critic::Unit::UnitTest
 
     prop :prop1, T.nilable(String), default: "this is prop 1"
     prop :prop2, T.nilable(Integer), factory: -> {DefaultsStruct.prop2_source += 1}
-    prop     :trueprop, Boolean, default: true
-    prop     :falseprop, Boolean, default: false
+    prop     :trueprop, T::Boolean, default: true
+    prop     :falseprop, T::Boolean, default: false
   end
 
   it 'uses default and factory props' do

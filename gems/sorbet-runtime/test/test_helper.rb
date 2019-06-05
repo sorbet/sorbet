@@ -8,14 +8,6 @@ require 'pathname'
 
 require_relative '../lib/sorbet-runtime'
 
-module Boolean; end
-class TrueClass
-  include Boolean
-end
-class FalseClass
-  include Boolean
-end
-
 module Critic; end
 module Critic::Unit; end
 module MiniTest; end

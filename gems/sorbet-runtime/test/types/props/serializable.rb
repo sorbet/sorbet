@@ -40,8 +40,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     prop :prop1, T.nilable(String), default: "this is prop 1"
     prop :prop2, T.nilable(Integer), factory: -> {raise "don't call me"}
-    prop     :trueprop, Boolean, default: true
-    prop     :falseprop, Boolean, default: false
+    prop     :trueprop, T::Boolean, default: true
+    prop     :falseprop, T::Boolean, default: false
   end
 
   describe ':default and :factory' do

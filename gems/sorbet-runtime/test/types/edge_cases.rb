@@ -6,7 +6,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {override.params(other: T.self_type).returns(Boolean)}
+      sig {override.params(other: T.self_type).returns(T::Boolean)}
       def ==(other)
         true
       end
