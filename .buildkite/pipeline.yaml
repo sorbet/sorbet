@@ -101,4 +101,6 @@ steps:
     agents:
       os: linux
       queue: elastic
+    soft_fail:
+      - exit_status: "*"
     plugins: *runs_in_docker
