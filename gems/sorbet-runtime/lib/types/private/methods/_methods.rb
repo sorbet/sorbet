@@ -320,15 +320,12 @@ module T::Private::Methods
   private_class_method def self.install_singleton_method_added_hook(singleton_klass)
     attached = nil
     original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
+      attached = self
       T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
       # This will be nil when this gets called for the addition of this method itself. We
       # call it below to compensate.
       if original_singleton_method
         original_singleton_method.bind(self).call(name)
-      else
-        # We only need to save the attached object once, so we do it during the first call
-        # to this method, that is, when original_singleton_method is nil.
-        attached = self
       end
     end
     # See the comment above
