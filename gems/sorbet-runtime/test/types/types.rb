@@ -75,7 +75,7 @@ module Opus::Types::Test
       it 'can hand back its underlying types' do
         type = T.any(Integer, T::Boolean, NilClass)
         value = type.types.map(&:raw_type)
-        assert_equal([Integer, T::Boolean, NilClass], value)
+        assert_equal([Integer, TrueClass, FalseClass, NilClass], value)
       end
 
       it "does not crash on anonymous classes" do
@@ -219,8 +219,8 @@ module Opus::Types::Test
       it 'fails if any of the values is the wrong type' do
         type = T::Array[T.any(Integer, T::Boolean)]
         value = [true, 3.0, false, 4, "5", false]
-        expected_error = "Expected type T::Array[T.any(T::Boolean, Integer)], " \
-          "got T::Array[T.any(FalseClass, Float, Integer, String, TrueClass)]"
+        expected_error = "Expected type T::Array[T.any(Integer, T::Boolean)], " \
+          "got T::Array[T.any(Float, Integer, String, T::Boolean)]"
         msg = type.error_message_for_obj(value)
         assert_equal(expected_error, msg)
       end
@@ -238,7 +238,7 @@ module Opus::Types::Test
         type = T::Array[String]
         value = [true, false, 1]
         expected_error = "Expected type T::Array[String], " \
-          "got T::Array[T.any(FalseClass, Integer, TrueClass)]"
+          "got T::Array[T.any(Integer, T::Boolean)]"
         msg = type.error_message_for_obj(value)
         assert_equal(expected_error, msg)
       end
@@ -401,8 +401,8 @@ module Opus::Types::Test
       end
 
       it 'can hand back the underlying type' do
-        type = T::Enumerable[T::Boolean]
-        assert_equal(T::Boolean, type.type.raw_type)
+        type = T::Enumerable[Integer]
+        assert_equal(Integer, type.type.raw_type)
       end
 
       it 'fails if an element of the array is the wrong type' do
@@ -423,8 +423,8 @@ module Opus::Types::Test
       it 'fails if any of the values is the wrong type' do
         type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = [true, 3.0, false, 4, "5", false]
-        expected_error = "Expected type T::Enumerable[T.any(T::Boolean, Integer)], " \
-          "got T::Array[T.any(FalseClass, Float, Integer, String, TrueClass)]"
+        expected_error = "Expected type T::Enumerable[T.any(Integer, T::Boolean)], " \
+          "got T::Array[T.any(Float, Integer, String, T::Boolean)]"
         msg = type.error_message_for_obj(value)
         assert_equal(expected_error, msg)
       end
@@ -442,7 +442,7 @@ module Opus::Types::Test
         type = T::Enumerable[String]
         value = [true, false, 1]
         expected_error = "Expected type T::Enumerable[String], " \
-          "got T::Array[T.any(FalseClass, Integer, TrueClass)]"
+          "got T::Array[T.any(Integer, T::Boolean)]"
         msg = type.error_message_for_obj(value)
         assert_equal(expected_error, msg)
       end
