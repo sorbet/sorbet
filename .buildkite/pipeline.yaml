@@ -12,7 +12,7 @@ steps:
       os: linux
       queue: elastic
     plugins: &runs_in_docker
-      - docker#v3.2.0:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
           image: "darkdimius/sorbet-build-image:latest"
           workdir: /app
           init: true
