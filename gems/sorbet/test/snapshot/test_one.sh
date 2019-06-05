@@ -118,7 +118,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if ! [ -z "$RECORD" ] && [ -z "$UPDATE" ]; then
+if ! [ "$RECORD" = "" ] && [ "$UPDATE" = "" ]; then
   error "--record requires --update"
   exit 1
 fi
@@ -235,7 +235,7 @@ export SRB_SORBET_TYPED_REVISION
     fi
   fi
 
-  if ! [ -z "$DEBUG" ]; then
+  if [ "$DEBUG" != "" ]; then
     # Don't redirect anything, so that binding.pry and friends work
     bundle exec "$srb" init
     exit
