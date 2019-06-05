@@ -1854,6 +1854,21 @@ public:
     }
 } enumerable_to_h;
 
+// statically determine things like `Integer === 3` to be true
+class Module_tripleEq : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        ENFORCE(args.args.size() == 1, "`===` takes 1 argument");
+        auto rhs = args.args[0]->type;
+        if (rhs->isUntyped()) {
+            return Types::Boolean();
+        }
+        // we know thisType is T.class_of(lhs) because we register this tripleEq on Module. we want lhs, so pull it out.
+        auto lhs = Types::getRepresentedClass(ctx, thisType).data(ctx)->externalType(ctx);
+        return Types::isSubType(ctx, rhs, lhs) ? Types::trueClass() : Types::falseClass();
+    }
+} Module_tripleEq;
+
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -1908,6 +1923,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
 
     {Symbols::Enumerable(), false, Names::to_h(), &enumerable_to_h},
+
+    {Symbols::Module(), false, Names::tripleEq(), &Module_tripleEq},
 };
 
 } // namespace sorbet::core
