@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -exuo pipefail
 
 export JOB_NAME=coverage-static-sanitized
 source .buildkite/tools/setup-bazel.sh
@@ -22,6 +22,8 @@ touch _tmp_/reports
     path="${path#//}"
     echo "bazel-testlogs/$path/coverage.dat" >> _tmp_/reports
 done
+
+find ./bazel-sorbet/external/llvm_toolchain/
 
 rm -rf ./_tmp_/profdata_combined.profdata
 xargs .buildkite/tools/combine-coverage.sh < _tmp_/reports

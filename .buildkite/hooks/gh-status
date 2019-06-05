@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -e
+[ -z "$DEBUG" ] || set -x;
+
+usage() {
+  echo "$0 <repo> <commit> <state> <target_url> <context>" >&2;
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  usage
+  cat >&2 <<EOS
+NOTE:
+valid states are "error", "failure", "pending" and "success"
+
+This uses your \`.netrc\` file to authenticate with GitHub. In order to run the
+script, make sure you have \`api.github.com\`  in
+this file. For example:
+machine api.github.com
+  login foca
+  password <an access token>
+Generate this access token at https://github.com/settings/tokens and make sure
+it has access to the \`"repo"\` scope.
+EOS
+  exit 1;
+fi
+
+[ -n "$5" ] || (usage; exit 1);
+
+REPO="$1"
+shift
+
+COMMIT="$1"
+shift
+
+STATE="$1"
+shift
+
+TARGET_URL="$1"
+shift
+
+CONTEXT="$1"
+shift
+
+BODY=""
+[ -t 0 ] || BODY=$(cat);
+
+payload=$(
+  jq --null-input \
+     --arg state "$STATE" \
+     --arg target_url "$TARGET_URL" \
+     --arg description "$DESCRIPTION" \
+     --arg context "$CONTEXT" \
+     '{ state: $state, target_url: $target_url, description: $description, context: $context}'
+)
+
+response=$(
+  curl --fail \
+       --netrc \
+       --silent \
+       --location \
+       --data "$payload" \
+       "https://api.github.com/repos/${REPO}/statuses/${COMMIT}"
+)
