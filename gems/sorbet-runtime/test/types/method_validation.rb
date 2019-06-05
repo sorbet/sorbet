@@ -129,7 +129,7 @@ module Opus::Types::Test
       it "does not allocate much" do
         @mod.sig do
           params(
-            x: T::Boolean,
+            x: String,
             y: T::Array[Symbol],
             z: T::Hash[Symbol, String]
           )
@@ -139,7 +139,7 @@ module Opus::Types::Test
           y
         end
         TEST_DATA = {
-          x: true,
+          x: "foo",
           y: 50.times.map do |i|
             "foo_#{i}".to_sym
           end,
@@ -167,7 +167,7 @@ module Opus::Types::Test
       it "allocates little for simple sig" do
         @mod.sig do
           params(
-            x: T::Boolean,
+            x: String,
             y: Integer,
           )
           .returns(Integer)
@@ -176,10 +176,10 @@ module Opus::Types::Test
           y
         end
 
-        @mod.foo(true, 1) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
-        @mod.foo(true, 1) # warmup, second run runs in real mode
+        @mod.foo("foo", 1) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo("foo", 1) # warmup, second run runs in real mode
         before = GC.stat(:total_allocated_objects)
-        @mod.foo(true, 1)
+        @mod.foo("foo", 1)
         allocated = GC.stat(:total_allocated_objects) - before
         assert_equal(2, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
       end
