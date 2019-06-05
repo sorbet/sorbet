@@ -197,8 +197,8 @@ module Opus::Types::Test
       end
 
       it 'can hand back the underlying type' do
-        type = T::Array[T::Boolean]
-        assert_equal(T::Boolean, type.type.raw_type)
+        type = T::Array[Integer]
+        assert_equal(Integer, type.type.raw_type)
       end
 
       it 'fails if an element of the array is the wrong type' do
