@@ -198,7 +198,9 @@ if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
 fi
 
 cp -r "$test_dir/src" "$actual"
-cp -r "$test_dir/gems" "$actual"
+if [ -d "$test_dir/gems" ]; then
+  cp -r "$test_dir/gems" "$actual"
+fi
 
 
 # ----- Run the test in the sandbox -----
