@@ -63,7 +63,7 @@ done
 
 info "Running suite: $0 $FLAGS"
 
-if [ -z "$VERBOSE" ]; then
+if [ "$VERBOSE" = "" ]; then
   info "(re-run with --verbose for more information)"
 else
   info "(--verbose mode)"
@@ -109,7 +109,7 @@ if [ "${#failing_tests[@]}" -ne 0 ]; then
     error "$failing_test"
   done
 
-  if [ -z "$UPDATE" ]; then
+  if [ "$UPDATE" = "" ]; then
     echo
     info "If you have reason to believe these differences are ok to keep, run"
     info "    $0 $* --update"
