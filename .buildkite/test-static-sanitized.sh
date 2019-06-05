@@ -22,7 +22,7 @@ echo will run with $CONFIG_OPTS
 
 
 err=0
-./bazel test //... $CONFIG_OPTS || err=$?
+./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
 
 echo "--- uploading test results"
 
