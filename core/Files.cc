@@ -54,6 +54,7 @@ StrictLevel File::fileSigil(string_view source) {
             }
         }
         if (source[comment_start] != '#') {
+            ++start;
             continue;
         }
 
