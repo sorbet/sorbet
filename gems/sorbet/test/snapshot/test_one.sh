@@ -26,7 +26,7 @@ wrap_verbose() {
     fi
     exit 1
   fi
-  if [ -n "$VERBOSE" ]; then
+  if [ "$VERBOSE" != "" ]; then
     cat "$out_log"
   fi
 }
@@ -131,7 +131,7 @@ info "Running test:  $relative_test_exe $relative_test_dir $FLAGS"
 
 actual="$(mktemp -d)"
 
-if [ -n "$VERBOSE" ]; then
+if [ "$VERBOSE" != "" ]; then
   info "├─ PWD:       $PWD"
   info "├─ test_dir:  $test_dir"
   info "├─ actual:    $actual"
@@ -362,7 +362,7 @@ if [ "$is_partial" = "" ]; then
   diff_total
 elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
-elif [ -n "$UPDATE" ]; then
+elif [ "$UPDATE" != "" ]; then
   if [ "$RECORD" = "" ]; then
     warn "├─ Not recording sorbet/ folder for empty partial test."
     info "├─ Re-run with --record to record."
