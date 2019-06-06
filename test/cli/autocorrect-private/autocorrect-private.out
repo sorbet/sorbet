@@ -1,0 +1,41 @@
+autocorrect-private.rb:14: Use `private` to define private instance methods https://sorbet.org/docs/error-reference#4016
+    14 |  private_class_method def foo
+    15 |  end
+  Autocorrect: Done
+    autocorrect-private.rb:14: Replaced with `private`
+    14 |  private_class_method def foo
+          ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-private.rb:19: Use `private_class_method` to define private class methods https://sorbet.org/docs/error-reference#4016
+    19 |  private def self.foo
+    20 |  end
+  Autocorrect: Done
+    autocorrect-private.rb:19: Replaced with `private_class_method`
+    19 |  private def self.foo
+          ^^^^^^^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: false
+
+class A
+  private def foo
+  end
+end
+
+class B
+  private_class_method def self.foo
+  end
+end
+
+class C
+  private def foo
+  end
+end
+
+class D
+  private_class_method def self.foo
+  end
+end
+
