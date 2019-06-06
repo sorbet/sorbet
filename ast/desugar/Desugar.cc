@@ -986,10 +986,36 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Until *wl) {
+                // The code
+                //
+                //   until cond; body; end
+                //
+                // will desugar to
+                //
+                //   while true
+                //     unless cond; body; next; end
+                //     break
+                //   end
+                //
+                //  The reason for this is that we can't reliably rely on `!cond` to be the same as `if cond then false
+                //  else true`, which is the way that Ruby understands the `until` construct. If we naively desugared as
+                //
+                //  while (if cond then false else true)
+                //    body
+                //  end
+                //
+                // then we'll run into the dead code detection inside the synthesized condition, which isn't great. The
+                // above desugaring sidesteps this problem: if we have a condition that's always true (so that the body
+                // never runs), we'll report (the first statement of) the body itself as being unreachable.
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-                unique_ptr<Expression> res =
-                    make_unique<While>(loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body));
+                auto bodyLoc = body->loc;
+
+                auto ins = MK::InsSeq1(body->loc, std::move(body), MK::Next(loc, MK::EmptyTree()));
+                auto wrappedBody = MK::If(bodyLoc, std::move(cond), MK::EmptyTree(), std::move(ins));
+                auto whileBody = MK::InsSeq1(bodyLoc, std::move(wrappedBody), MK::Break(loc, MK::EmptyTree()));
+
+                unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), std::move(whileBody));
                 result.swap(res);
             },
             // This is the same as WhilePost, but the cond negation is in the other branch.
