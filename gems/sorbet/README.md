@@ -58,18 +58,18 @@ behavior:
 - `SRB_SORBET_EXE`
 
   Overrides the `sorbet` executable used by all calls to `srb tc`.
-  (The default is to find and use the version inside the `'sorbet-static'` gem)
+  (The default is to find and use the version inside the `'sorbet-static'` gem.)
 
 - `XDG_CACHE_HOME`
 
-  The `srb` command keeps a cache of `sorbet-typed` on disk. The cache will
-  either be in a subfolder of `$XDG_CACHE_HOME` if set or of `$HOME/.cache/` if
-  not set.
+  The `srb` command keeps a cache of `sorbet-typed` on disk. Setting
+  `XDG_CACHE_HOME` will change the folder where the `sorbet-typed` cache will
+  be. (The default when this is unset is to use `$HOME/.cache/`.)
 
 - `SRB_SORBET_TYPED_REVISION`
 
-  Pin the sorbet-typed cache to a specific revision. By default, fetches and
-  uses the latest `master` commit.
+  Pin the sorbet-typed cache to a specific revision. (The default is to fetch
+  and use the latest `master` commit.)
 
 
 ## Running locally
