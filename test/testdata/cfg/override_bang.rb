@@ -34,11 +34,9 @@ else
 end
 
 until C.new
-  puts # TODO this puts should be unreachable
+  puts # error: This code is unreachable
 end
 
 until !C.new
-  #    ^ error: This code is unreachable
-  # TODO this C.new should be reachable
   puts # error: This code is unreachable
 end

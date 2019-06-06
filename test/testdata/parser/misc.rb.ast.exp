@@ -123,8 +123,18 @@ class <emptyTree><<C <root>>> < ()
     nil
   end
 
-  while true.!()
-    nil
+  while true
+    begin
+      if true
+        <emptyTree>
+      else
+        begin
+          nil
+          next(<emptyTree>)
+        end
+      end
+      break(<emptyTree>)
+    end
   end
 
   while true.!()
