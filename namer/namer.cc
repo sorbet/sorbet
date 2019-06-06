@@ -402,7 +402,25 @@ public:
         if (original->args.size() == 1 && (mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) != nullptr) {
             switch (original->fun._id) {
                 case core::Names::private_()._id:
+                    if (mdef->isSelf()) {
+                        if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::PrivateMethodMismatch)) {
+                            e.setHeader("Use `{}` to define private class methods", "private_class_method");
+                            auto beginPos = original->loc.beginPos();
+                            auto replacementLoc = core::Loc{original->loc.file(), beginPos, beginPos + 7};
+                            e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, "private_class_method"));
+                        }
+                    }
+                    mdef->symbol.data(ctx)->setPrivate();
+                    break;
                 case core::Names::privateClassMethod()._id:
+                    if (!mdef->isSelf()) {
+                        if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::PrivateMethodMismatch)) {
+                            e.setHeader("Use `{}` to define private instance methods", "private");
+                            auto beginPos = original->loc.beginPos();
+                            auto replacementLoc = core::Loc{original->loc.file(), beginPos, beginPos + 20};
+                            e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, "private"));
+                        }
+                    }
                     mdef->symbol.data(ctx)->setPrivate();
                     break;
                 case core::Names::protected_()._id:
