@@ -17,9 +17,9 @@ end
 
 class C < A
   include B
-  def foo # error: overrides a final method
+  def foo # error: Method overrides a final method
   end
 
-  def bar # error: overrides a final method
+  def bar # error: Method overrides a final method
   end
 end
