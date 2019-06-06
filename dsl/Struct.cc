@@ -122,11 +122,10 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
             for (auto &&stat : insSeq->stats) {
                 body.emplace_back(move(stat));
             }
-            body.emplace_back(move(insSeq->expr)); 
+            body.emplace_back(move(insSeq->expr));
         } else {
             body.emplace_back(move(send->block->body));
         }
-
 
         // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
     }
