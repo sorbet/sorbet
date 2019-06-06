@@ -3,6 +3,7 @@
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
 #include "dsl/ChalkODMProp.h"
+#include "dsl/ClassNew.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
 #include "dsl/InterfaceWrapper.h"
@@ -34,6 +35,12 @@ public:
                 stat.get(),
                 [&](ast::Assign *assign) {
                     auto nodes = Struct::replaceDSL(ctx, assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = ClassNew::replaceDSL(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
