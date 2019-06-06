@@ -37,7 +37,7 @@ module T::Types
         type_shortcuts([T::Private::Types::StringHolder.new("T::Boolean")] + remaining_types)
       else
         names = types.map(&:name).compact.sort
-        "T.any(#{names.join(", ")})"
+        "T.any(#{names.join(', ')})"
       end
     end
 
