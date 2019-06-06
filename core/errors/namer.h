@@ -18,7 +18,6 @@ constexpr ErrorClass ModuleKindRedefinition{4012, StrictLevel::False};
 constexpr ErrorClass InterfaceClass{4013, StrictLevel::False};
 constexpr ErrorClass DynamicConstant{4014, StrictLevel::False};
 constexpr ErrorClass InvalidClassOwner{4015, StrictLevel::False};
-constexpr ErrorClass PrivateMethodMismatch{4016, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif

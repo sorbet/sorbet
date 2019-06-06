@@ -5,5 +5,6 @@
 namespace sorbet::core::errors::DSL {
 constexpr ErrorClass BadAttrArg{3501, StrictLevel::True};
 constexpr ErrorClass BadWrapInstance{3502, StrictLevel::True};
+constexpr ErrorClass PrivateMethodMismatch{3503, StrictLevel::False};
 } // namespace sorbet::core::errors::DSL
 #endif
