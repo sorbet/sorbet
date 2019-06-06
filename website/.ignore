@@ -1,2 +1,3 @@
+# Ignore file for ag / ack / rg searching
 node_modules
 build
