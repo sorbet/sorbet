@@ -1,5 +1,5 @@
-# typed: true
 
+# typed: true
 class Parent
   def self.foo; end
 end
@@ -10,13 +10,14 @@ Class.new(Parent)
 Class.new {|cls| cls.superclass}
 Class.new(Parent) {|cls| cls.superclass}
 
-Class.new(Parent).foo
-c = Class.new(Parent) do |cls|
-  # These doesn't typecheck because we don't solve typeconstaints before we
-  # typecheck the block (by our choice, to leave the user with flexibility to
-  # affect type parameters inside the block), so we can't use
-  # `T.type_parameter(:T)` as the block's param's type or the block's bind.
-  # cls.foo
-  # foo
+# Our ClassNew DSL pass can only re-write Class.new where the lefthand
+# side is assigned to a constant
+Class.new(Parent).foo # error: Method `foo` does not exist on `Class`
+c = Class.new(Parent)
+c.foo # error: Method `foo` does not exist on `Class`
+
+C = Class.new(Parent) do |cls|
+  cls.foo
+  foo
 end
-c.foo
+C.foo

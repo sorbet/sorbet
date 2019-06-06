@@ -1494,15 +1494,10 @@ class Class < Module
   sig {returns(T.untyped)}
   def allocate(); end
 
+  # Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
+  # This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
   sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
-
-  sig {returns(Class)}
-  sig {params(blk: T.proc.bind(Class).params(arg0: Class).void).returns(Class)}
-  sig {type_parameters(:T).params(superClass: T.type_parameter(:T)).returns(T.type_parameter(:T))}
-  sig {type_parameters(:T).params(superClass: T.type_parameter(:T), blk: T.proc.bind(Class).params(arg0: Class).void).returns(T.type_parameter(:T))}
-  def self.new(superClass = nil, &blk)
-  end
 
   sig do
     params(
@@ -1547,7 +1542,7 @@ class Class < Module
     )
     .void
   end
-  def initialize(superclass=_, &blk); end
+  def initialize(superclass=Object, &blk); end
 end
 
 class Data < Object
