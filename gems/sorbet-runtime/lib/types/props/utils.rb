@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 # typed: true
 
+module Opus; end
+class Opus::Enum; end
+
 module T::Props::Utils
   # Deep copy an object. The object must consist of Ruby primitive
   # types and Hashes and Arrays.
