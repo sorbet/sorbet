@@ -24,7 +24,7 @@ errors, though in the future they may become static errors).
 > of the special modifiers."
 
 | ↓Child \ Parent → | no sig | `standard` | `overridable` | `override` | `implementation` | `abstract` |
-| ----------------- | ------ | ---------- | ------------- | ---------- | ---------------- | ---------- |
+| ----------------- | :----: | :--------: | :-----------: | :--------: | :--------------: | :--------: |
 | no sig            | ✅     | ✅         | ✅            | ✅         | ✅               | ✅         |
 | `standard`        | ✅     | ✅         | ❌            | ❌         | ❌               | ❌         |
 | `override`        | ✅     | ❌         | ✅            | ✅         | ❌               | ❌         |
