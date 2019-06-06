@@ -23,12 +23,14 @@ errors, though in the future they may become static errors).
 > Below, `standard` (for the child or parent) means "has a `sig`, but has none
 > of the special modifiers."
 
-| ↓Child \ Parent → | no sig | `standard` | `overridable` | `override` | `implementation` | `abstract` |
-| ----------------- | :----: | :--------: | :-----------: | :--------: | :--------------: | :--------: |
-| no sig            | ✅     | ✅         | ✅            | ✅         | ✅               | ✅         |
-| `standard`        | ✅     | ✅         | ❌            | ❌         | ❌               | ❌         |
-| `override`        | ✅     | ❌         | ✅            | ✅         | ❌               | ❌         |
-| `implementation`  | ❌     | ❌         | ❌            | ❌         | ❌               | ✅         |
+| ↓Parent \ Child → | no sig | `standard` | `override` | `implementation` |
+| ----------------- | :----: | :--------: | :--------: | :--------------: |
+| no sig            | ✅     |  ✅        | ✅         | ❌               |
+| `standard`        | ✅     |  ✅        | ❌         | ❌               |
+| `overridable`     | ✅     |  ❌        | ✅         | ❌               |
+| `override`        | ✅     |  ❌        | ✅         | ❌               |
+| `implementation`  | ✅     |  ❌        | ❌         | ❌               |
+| `abstract`        | ✅     |  ❌        | ❌         | ✅               |
 
 > **Note**: if the implementation methods are inherited--from either a class or
 > mixin--the methods don't need the `implementation` annotation.
