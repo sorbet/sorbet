@@ -611,8 +611,6 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
     virtual void _sanityCheck();
 };
 // CheckSize(Block, 56, 8);

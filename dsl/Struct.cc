@@ -73,24 +73,6 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
     ast::Hash::ENTRY_store sigValues;
     ast::ClassDef::RHS_store body;
 
-    if (send->block != nullptr) {
-        // Steal the trees, because the replaceDSL is going to remove the original send node from the tree anyway.
-        if (auto insSeq = ast::cast_tree<ast::InsSeq>(send->block->body.get())) {
-            for (auto &&stat : insSeq->stats) {
-                body.emplace_back(move(stat));
-            }
-            body.emplace_back(move(insSeq->expr));
-        } else {
-            body.emplace_back(move(send->block->body));
-        }
-    }
-
-    // Elem = type_member(fixed: T.untyped)
-    body.emplace_back(ast::MK::Assign(
-        loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
-        ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::typeMember(),
-                       ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
-
     bool keywordInit = false;
     if (auto hash = ast::cast_tree<ast::Hash>(send->args.back().get())) {
         if (send->args.size() == 1) {
@@ -126,6 +108,27 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
         body.emplace_back(ast::MK::Method1(loc, loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),
                                            ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
+    }
+
+    // Elem = type_member(fixed: T.untyped)
+    body.emplace_back(ast::MK::Assign(
+        loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+        ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::typeMember(),
+                       ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
+
+    if (send->block != nullptr) {
+        // Steal the trees, because the replaceDSL is going to remove the original send node from the tree anyway.
+        if (auto insSeq = ast::cast_tree<ast::InsSeq>(send->block->body.get())) {
+            for (auto &&stat : insSeq->stats) {
+                body.emplace_back(move(stat));
+            }
+            body.emplace_back(move(insSeq->expr)); 
+        } else {
+            body.emplace_back(move(send->block->body));
+        }
+
+
+        // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
     }
 
     body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
