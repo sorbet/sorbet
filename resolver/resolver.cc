@@ -1214,14 +1214,19 @@ private:
         } else {
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
-            if (ctx.owner.data(ctx)->isClass() && nestedBlockCounts.back() == 0) {
+            if (nestedBlockCounts.back() == 0 && ctx.owner.data(ctx)->isClass()) {
                 // Declaring a class instance variable
+            } else if (nestedBlockCounts.back() == 0 && ctx.owner.data(ctx)->name == core::Names::initialize()) {
+                // Declaring a instance variable
+            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx)) {
+                // Declaring a class instance variable in a static method
+                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("Singleton instance variables must be declared inside the class body");
+                }
             } else {
                 // Inside a method; declaring a normal instance variable
-                if (ctx.owner.data(ctx)->name != core::Names::initialize() || nestedBlockCounts.back() != 0) {
-                    if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                        e.setHeader("Instance variables must be declared inside `initialize`");
-                    }
+                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("Instance variables must be declared inside `initialize`");
                 }
             }
             scope = ctx.selfClass();
