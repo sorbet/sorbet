@@ -35,4 +35,7 @@ class T::Private::Methods::DeclBuilder
 
   sig {params(arg: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def checked(arg); end
+
+  sig {returns(T::Private::Methods::DeclBuilder)}
+  def final; end
 end

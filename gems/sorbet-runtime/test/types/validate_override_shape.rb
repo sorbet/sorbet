@@ -178,5 +178,35 @@ module Opus::Types::Test
       end
       klass.new.foo
     end
+
+    it "succeeds if there is a single final" do
+      klass = Class.new do
+        extend T::Sig
+        sig do
+          returns(Object).final
+        end
+        def foo; end
+      end
+      klass.new.foo
+    end
+
+    it "succeeds even if the parent class has a final (this is checked statically)" do
+      parent = Class.new do
+        extend T::Sig
+        sig do
+          returns(Object).final
+        end
+        def foo; end
+      end
+      klass = Class.new(parent) do
+        extend T::Sig
+        sig do
+          returns(Object).final
+        end
+        def foo; end
+      end
+      klass.new.foo
+    end
   end
+
 end
