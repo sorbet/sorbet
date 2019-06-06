@@ -236,11 +236,6 @@ module T::Private::Methods
       self
     end
 
-    def final
-      # This does nothing at runtime
-      self
-    end
-
     def finalize!
       check_live!
 
