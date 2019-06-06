@@ -594,8 +594,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
     }
 
+    // keep this around so we know which keyword arguments have been supplied
+    UnorderedSet<NameRef> consumed;
     if (hasKwargs && ait != aend) {
-        UnorderedSet<NameRef> consumed;
         auto &hashArg = *(aend - 1);
         auto hashArgType = Types::approximate(ctx, hashArg->type, *constr);
 
@@ -606,7 +607,6 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             kwit++;
         }
         pend = kwit;
-
         if (hashArgType->isUntyped()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
@@ -706,9 +706,34 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
-                        prettyArity(ctx, method), args.args.size());
-            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
+            if (!hasKwargs) {
+                e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
+                            prettyArity(ctx, method), args.args.size());
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
+            } else {
+                // if we have keyword arguments, we should print a more informative message: otherwise, we might give
+                // people some slightly confusing error messages.
+
+                // count the number of non-keyword arguments
+                int posArgs = absl::c_count_if(
+                    args.args, [](const TypeAndOrigins *const typ) { return !cast_type<ShapeType>(typ->type.get()); });
+                // print a helpful error message
+                e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
+                            data->show(ctx), prettyArity(ctx, method), posArgs);
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
+
+                // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
+                // explicitly
+                auto firstKeyword = absl::c_find_if(data->arguments(), [&ctx, &consumed](SymbolRef arg) {
+                    return arg.exists() && arg.data(ctx)->isKeyword() && arg.data(ctx)->isOptional() &&
+                           consumed.count(arg.data(ctx)->name) == 0;
+                });
+                if (firstKeyword && firstKeyword->exists()) {
+                    e.addErrorLine(args.locs.call,
+                                   "`{}` has unsupplied keyword arguments. Did you mean to supply a value for `{}`?",
+                                   data->show(ctx), firstKeyword->data(ctx)->argumentName(ctx));
+                }
+            }
             result.components.front().errors.emplace_back(e.build());
         }
     }
