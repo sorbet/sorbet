@@ -154,6 +154,108 @@ constants through ancestors (both mixins or superclasses).
     Parent::MY_CONST   # ok
     ```
 
+## 5003
+
+This means the method definition does not match the signature provided. (This
+will happen even in `# typed: false` files.)
+ 
+```ruby
+class A
+  extends T::Sig
+
+  sig {T.params().void}
+  def f(x); end
+end
+```
+
+The signature specifies there are no parameters whereas the method definition has one.
+
+## 5005
+
+This means a class or instance variable is defined in the wrong context.
+
+```ruby
+# typed: true
+class A
+  extend T::Sig
+
+  def foo()
+    @@class_var = T.let(10, Integer)
+    @x = T.let(10, Integer)
+  end
+
+end
+```
+
+There are two such errors in the above. In the first, `@@class_var` is declared outside of the class scope. In the second, `@x` is declared outside of the `initialize` method. 
+
+## 5006
+
+This means an instance variable has been redeclared with another type.
+
+```ruby
+# typed: true
+class A
+  extend T::Sig
+
+  def initialize()
+    @x = T.let(10, Integer)
+    @x = T.let("x", String)
+  end
+
+end
+```
+
+## 5008
+
+This means a class was defined as the subclass of a `type_alias`. It also occurs if a `type_alias` mixin is used in a class.
+
+```ruby
+# typed: true
+A = T.type_alias(Integer)
+class B < A; end
+
+module M; end
+
+Alias_module = T.type_alias(M)
+class C
+  include Alias_module
+end
+```
+
+## 5011
+
+This means a class inherits from itself either directly or through a inheritance chain.
+
+```ruby
+class A < A; end
+
+class B < C; end
+class C < B; end
+```
+
+## 5012
+
+This means a class was changed to inherit from a different superclass.
+
+```ruby
+class A; end
+class B; end
+
+class C < A; end
+class C < B; end
+```
+
+## 5013
+
+This means a class or instance variable declaration used `T.cast` when it should use `T.let`.
+
+```ruby
+class A
+  @@x = T.cast(10, Integer)
+end
+```
+
 ## 5014
 
 Given code like this:
