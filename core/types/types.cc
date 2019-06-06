@@ -588,7 +588,7 @@ TypePtr TypeVar::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("should never happen");
 }
 
-bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
@@ -623,7 +623,7 @@ void AppliedType::_sanityCheck(Context ctx) {
     }
 }
 
-bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     ClassType und(this->klass);
     return und.derivesFrom(gs, klass);
 }
@@ -636,12 +636,12 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     categoryCounterInc("types.allocated", "selftypeparam");
 }
 
-bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise(
         "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise(
         "SelfTypeParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
@@ -775,7 +775,7 @@ TypePtr SelfType::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("should never happen");
 }
 
-bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen");
 }
 

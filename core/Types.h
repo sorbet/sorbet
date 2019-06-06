@@ -184,7 +184,7 @@ public:
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) = 0;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) = 0;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) = 0;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const = 0;
     virtual void _sanityCheck(Context ctx) = 0;
     void sanityCheck(Context ctx) {
         if (!debug_mode)
@@ -229,7 +229,7 @@ public:
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) override;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) override;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const override;
 
     void _sanityCheck(Context ctx) override;
 };
@@ -247,7 +247,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override final;
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(Context ctx) final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override final;
@@ -265,7 +265,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
@@ -287,7 +287,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
@@ -308,7 +308,7 @@ public:
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     SymbolRef symbol;
     void _sanityCheck(Context ctx) final;
@@ -341,7 +341,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     void _sanityCheck(Context ctx) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 };
 CheckSize(SelfType, 8, 8);
 
@@ -385,7 +385,7 @@ public:
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -406,7 +406,7 @@ public:
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
@@ -455,7 +455,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
@@ -561,7 +561,7 @@ public:
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     virtual bool hasUntyped() override;
     virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
@@ -586,7 +586,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     void _sanityCheck(Context ctx) final;
