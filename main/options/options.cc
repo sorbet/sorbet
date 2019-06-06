@@ -516,6 +516,9 @@ void readOptions(Options &opts, int argc, char *argv[],
                 } else {
                     opts.rawInputFileNames.push_back(file);
                     opts.inputFileNames.push_back(file);
+                    fast_sort(opts.inputFileNames);
+                    opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
+                                              opts.inputFileNames.end());
                 }
             }
         }
