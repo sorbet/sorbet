@@ -36,3 +36,6 @@ end
 
 puts foo # error: This code is unreachable
 ```
+
+`T.noreturn` is a subtype of every type, but no type except `T.noreturn`
+(trivially) and `T.untyped` is a subtype of `T.noreturn`.
