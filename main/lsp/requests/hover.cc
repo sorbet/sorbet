@@ -69,12 +69,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             response->result = make_unique<Hover>(move(markupContents));
         } else if (auto identResp = resp->isIdent()) {
             unique_ptr<MarkupContent> markupContents;
-            if (identResp->owner.exists() && identResp->owner.data(*gs)->isMethod()) {
-                markupContents = make_unique<MarkupContent>(
-                    MarkupKind::Markdown, methodDetail(*gs, identResp->owner, nullptr, nullptr, nullptr));
-            } else {
-                markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*gs));
-            }
+            markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*gs));
             response->result = make_unique<Hover>(move(markupContents));
         } else {
             auto markupContents =

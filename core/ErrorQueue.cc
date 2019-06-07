@@ -36,6 +36,13 @@ ErrorQueue::drainWithQueryResponses() {
         auto leftLength = leftTermLoc.endPos() - leftTermLoc.beginPos();
         auto rightLength = rightTermLoc.endPos() - rightTermLoc.beginPos();
         if (leftLength != rightLength) {
+            // 0-length locs were inserted by the compiler, don't represent anything in the file, and should be sorted
+            // last.
+            if (leftLength == 0) {
+                return false;
+            } else if (rightLength == 0) {
+                return true;
+            }
             return leftLength < rightLength;
         }
         if (leftTermLoc.beginPos() != rightTermLoc.beginPos()) {

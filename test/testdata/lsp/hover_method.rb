@@ -6,6 +6,7 @@ class Foo
   def bar
     # ^ hover: returns(Integer)
     baz("1")
+  # ^ hover: params(arg0: String).returns(Integer)
    # ^ hover: params(arg0: String).returns(Integer)
    self.baz("1")
       # ^ hover: params(arg0: String).returns(Integer)
