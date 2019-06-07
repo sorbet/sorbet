@@ -1,4 +1,7 @@
 # typed: true
+
+# This is only an error because autogen does **not** run the ClassNew DSL pass.
+
 A = Class.new
 
 # Ensure that `B` is marked as resolved; Previously we wouldn't
