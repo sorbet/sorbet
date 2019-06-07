@@ -2,6 +2,7 @@
 #define SORBET_OS_H
 #include <functional>
 #include <memory>
+#include <optional>
 #include <pthread.h>
 #include <string>
 
@@ -10,7 +11,8 @@ std::string addr2line(std::string_view programName, void const *const *addr, int
 std::string getProgramName();
 
 class Joinable {
-    friend std::unique_ptr<Joinable> runInAThread(std::string_view threadName, std::function<void()> function);
+    friend std::unique_ptr<Joinable> runInAThread(std::string_view threadName, std::function<void()> function,
+                                                  std::optional<int> bindToCore);
     pthread_t handle;
     pthread_attr_t attr;
     std::function<void()> realFunction;
@@ -31,8 +33,10 @@ public:
 };
 
 // run function in a thread. Return thread handle that you can join on
-std::unique_ptr<Joinable> runInAThread(std::string_view threadName, std::function<void()> function);
+std::unique_ptr<Joinable> runInAThread(std::string_view threadName, std::function<void()> function,
+                                       std::optional<int> bindToCore = std::nullopt);
 bool setCurrentThreadName(std::string_view name);
+bool bindThreadToCore(pthread_t handle, int coreId);
 
 /** The should trigger debugger breakpoint if the debugger is attached, if no debugger is attach, it should do nothing
  *  This allows to:

@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
 
+#import <mach/thread_act.h>
 #include <string>
 #include <sys/sysctl.h>
 #include <sys/types.h>
@@ -80,4 +81,10 @@ bool setCurrentThreadName(string_view name) {
     return retCode == 0;
 }
 
+bool bindThreadToCore(pthread_t handle, int coreId) {
+    thread_affinity_policy_data_t policy = {coreId};
+    thread_port_t mach_thread = pthread_mach_thread_np(handle);
+    auto ret = thread_policy_set(mach_thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy, 1);
+    return ret == 0;
+}
 #endif
