@@ -211,8 +211,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
                 e.setHeader("`{}`:- `{}`", i, it->data(gs)->showFullName(gs));
             }
             int j = 0;
-            for (auto it2 = it->data(gs)->mixins().rbegin(); it2 != it->data(gs)->mixins().rend();
-                 ++it2) {
+            for (auto it2 = it->data(gs)->mixins().rbegin(); it2 != it->data(gs)->mixins().rend(); ++it2) {
                 if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
                     e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs)->showFullName(gs));
                 }
