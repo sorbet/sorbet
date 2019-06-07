@@ -3,7 +3,7 @@ id: untyped
 title: T.untyped
 ---
 
-```rb
+```ruby
 T.untyped
 ```
 
@@ -12,7 +12,7 @@ any operation on a `T.untyped` value without complaint.
 
 You can create a `T.untyped` with `T.unsafe`:
 
-```rb
+```ruby
 # typed: true
 x = 3
 T.reveal_type(x) # Revealed type: Integer(3)
@@ -22,7 +22,7 @@ T.reveal_type(y) # Revealed type: T.untyped
 
 All arguments to methods without `sig`s have the type `T.untyped`, and the return type is `T.untyped` as well.
 
-```rb
+```ruby
 # typed: true
 class C
   extend T::Sig
@@ -45,7 +45,7 @@ T.reveal_type(C.new.bar(3)) # Revealed type: T.untyped
 
 You can put `T.untyped` into generics.
 
-```rb
+```ruby
 # typed: true
 class C
   extend T::Sig
