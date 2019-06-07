@@ -5,6 +5,9 @@ title: T.self_type
 
 > TODO: This page is still a fragment. Contributions welcome!
 
+> **Warning**: This feature is experimental and has known limitations. It may
+> not work as expected or change without notice.
+
 ```ruby
 T.self_type
 ```
