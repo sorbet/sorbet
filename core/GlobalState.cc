@@ -634,12 +634,12 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members.size());
 
-    for (auto arg : ownerScope->argumentsOrMixins) {
+    for (auto arg : ownerScope->arguments()) {
         if (arg.data(*this)->name == name) {
             return arg;
         }
     }
-    auto &store = ownerScope->argumentsOrMixins.emplace_back();
+    auto &store = ownerScope->arguments().emplace_back();
 
     ENFORCE(!symbolTableFrozen);
 
