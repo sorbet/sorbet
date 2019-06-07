@@ -716,7 +716,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
                 // count the number of non-keyword arguments
                 int posArgs = absl::c_count_if(
-                    args.args, [](const TypeAndOrigins *const typ) { return !cast_type<ShapeType>(typ->type.get()); });
+                    args.args, [](const TypeAndOrigins *const typ) { return !isa_type<ShapeType>(typ->type.get()); });
                 // print a helpful error message
                 e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             data->show(ctx), prettyArity(ctx, method), posArgs);
