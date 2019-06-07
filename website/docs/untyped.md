@@ -24,38 +24,34 @@ All arguments to methods without `sig`s have the type `T.untyped`, and the retur
 
 ```ruby
 # typed: true
-class C
-  extend T::Sig
+extend T::Sig
 
-  sig { params(x: Integer).returns(String) }
-  def foo(x)
-    T.reveal_type(x) # Revealed type: Integer
-    x.to_s
-  end
-
-  def bar(x)
-    T.reveal_type(x) # Revealed type: T.untyped
-    x.to_s
-  end
+sig { params(x: Integer).returns(String) }
+def foo(x)
+  T.reveal_type(x) # Revealed type: Integer
+  x.to_s
 end
 
-T.reveal_type(C.new.foo(3)) # Revealed type: String
-T.reveal_type(C.new.bar(3)) # Revealed type: T.untyped
+def bar(x)
+  T.reveal_type(x) # Revealed type: T.untyped
+  x.to_s
+end
+
+T.reveal_type(foo(3)) # Revealed type: String
+T.reveal_type(bar(3)) # Revealed type: T.untyped
 ```
 
 You can put `T.untyped` into generics.
 
 ```ruby
 # typed: true
-class C
-  extend T::Sig
+extend T::Sig
 
-  sig { params(x: T::Array[T.untyped]).returns(Integer) }
-  def foo(x)
-    T.reveal_type(x.first) # Revealed type: T.untyped
-    x.length
-  end
+sig { params(x: T::Array[T.untyped]).returns(Integer) }
+def foo(x)
+  T.reveal_type(x.first) # Revealed type: T.untyped
+  x.length
 end
 
-T.reveal_type(C.new.foo([1, "bar", false])) # Revealed type: Integer
+T.reveal_type(foo([1, "bar", false])) # Revealed type: Integer
 ```

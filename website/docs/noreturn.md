@@ -17,25 +17,22 @@ unreachable code error.
 
 ```ruby
 # typed: true
+extend T::Sig
 
-class C
-  extend T::Sig
-
-  sig { returns(T.noreturn) }
-  def foo
-    loop {}
-  end
-
-  sig { returns(T.noreturn) }
-  def bar
-    exit
-  end
-
-  sig { returns(T.noreturn) }
-  def baz
-    raise RuntimeError
-  end
+sig { returns(T.noreturn) }
+def foo
+  loop {}
 end
 
-puts C.new.foo # error: This code is unreachable
+sig { returns(T.noreturn) }
+def bar
+  exit
+end
+
+sig { returns(T.noreturn) }
+def baz
+  raise RuntimeError
+end
+
+puts foo # error: This code is unreachable
 ```
