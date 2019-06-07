@@ -179,7 +179,7 @@ This means a class or instance variable is defined in the wrong context.
 class A
   extend T::Sig
 
-  def foo()
+  def foo
     @@class_var = T.let(10, Integer)
     @x = T.let(10, Integer)
   end
@@ -198,11 +198,10 @@ This means an instance variable has been redeclared with another type.
 class A
   extend T::Sig
 
-  def initialize()
+  def initialize
     @x = T.let(10, Integer)
     @x = T.let("x", String)
   end
-
 end
 ```
 
@@ -213,13 +212,13 @@ This means a class was defined as the subclass of a `type_alias`. It also occurs
 ```ruby
 # typed: true
 A = T.type_alias(Integer)
-class B < A; end
+class B < A; end # error: Superclasses and mixins may not be type aliases
 
 module M; end
 
-Alias_module = T.type_alias(M)
+AliasModule = T.type_alias(M)
 class C
-  include Alias_module
+  include AliasModule # error: Superclasses and mixins may not be type aliases
 end
 ```
 

@@ -16,20 +16,21 @@ anywhere the class or module is inherited, included, or extended.
 
 Keep in mind:
 - `abstract!` can be used to prevent a class from being instantiated.
-- Both either `abstract!` and `interface!` allow the class or module to
+- Both `abstract!` and `interface!` allow the class or module to
   have `abstract` methods.
-- Mixin a module (via `include` or `extend`) to declare that a class
+- Mix in a module (via `include` or `extend`) to declare that a class
   implements an interface.
 
 
 ## Creating an abstract method
 
 To create an abstract method:
-1.  Add `extend T::Helpers` to the class or module (as well as `extend T::Sig`).
+1.  Add `extend T::Helpers` to the class or module (in addition to `extend T::Sig`).
 1.  Add `abstract!` or `interface!` to the top of the class or module. (*All*
     methods must be abstract to use `interface!`.)
-1.  Add a `sig` with `abstract` to any methods that should be abstract.
-1.  Define the method on a single line with an empty body.
+1.  Add a `sig` with `abstract` to any methods that should be abstract,
+    and thus implemented by a child.
+1.  Declare the method on a single line with an empty body.
 
 ```ruby
 module Runnable
@@ -68,7 +69,7 @@ end
 
 ## Additional Requirements
 
-Use of `abstract!` and `interface!` requires:
+Use of `abstract!` and `interface!` requires that:
 
 - All methods in a module marked as `interface!` have signatures
 - The methods of classes or modules marked `interface!` must all be marked `abstract`
@@ -77,7 +78,7 @@ Use of `abstract!` and `interface!` requires:
 - The `interface!` can't have `private` or `protected` methods
 - `abstract` self-methods on a module are not allowed, as there's no way to
   implement these methods
-- `abstract` methods will raise an error when called in the runtime
+- `abstract` methods raise an exception when called in the runtime
 - Classes without `abstract!` or `interface!` must implement all `abstract`
   methods from their parents
 - `extend MyAbstractModule` works just like `include MyAbstractModule`, but for self-methods
