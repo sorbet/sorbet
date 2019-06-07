@@ -49,27 +49,41 @@ test/cli/arity-messages/arity-messages.rb:15: Not enough arguments provided for 
     14 |def quux(x, y, z); end
         ^^^^^^^^^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:18: Too many positional arguments provided for method `Object#pippo`. Expected: `1`, got: `2` https://sorbet.org/docs/error-reference#7004
-    18 |pippo(2, 3, z: 4)
+test/cli/arity-messages/arity-messages.rb:18: Unrecognized keyword argument `c` passed for method `Object#qaadr` https://sorbet.org/docs/error-reference#7004
+    18 |qaadr({a: 1}, {b: 2}, {c: 3})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/arity-messages/arity-messages.rb:18: Too many positional arguments provided for method `Object#qaadr`. Expected: `0`, got: `0` https://sorbet.org/docs/error-reference#7004
+    18 |qaadr({a: 1}, {b: 2}, {c: 3})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/arity-messages/arity-messages.rb:17: `qaadr` defined here
+    17 |def qaadr(e: 1); end
+        ^^^^^^^^^^^^^^^
+    test/cli/arity-messages/arity-messages.rb:18: `Object#qaadr` has optional keyword arguments. Did you mean to provide a value for `e`?
+    18 |qaadr({a: 1}, {b: 2}, {c: 3})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/arity-messages/arity-messages.rb:21: Too many positional arguments provided for method `Object#pippo`. Expected: `1`, got: `2` https://sorbet.org/docs/error-reference#7004
+    21 |pippo(2, 3, z: 4)
         ^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:17: `pippo` defined here
-    17 |def pippo(x, **kwargs); end
+    test/cli/arity-messages/arity-messages.rb:20: `pippo` defined here
+    20 |def pippo(x, **kwargs); end
         ^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:21: Not enough arguments provided for method `Object#pluto`. Expected: `1+`, got: `0` https://sorbet.org/docs/error-reference#7004
-    21 |pluto
+test/cli/arity-messages/arity-messages.rb:24: Not enough arguments provided for method `Object#pluto`. Expected: `1+`, got: `0` https://sorbet.org/docs/error-reference#7004
+    24 |pluto
         ^^^^^
-    test/cli/arity-messages/arity-messages.rb:20: `Object#pluto` defined here
-    20 |def pluto(x, *args); end
+    test/cli/arity-messages/arity-messages.rb:23: `Object#pluto` defined here
+    23 |def pluto(x, *args); end
         ^^^^^^^^^^^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:24: Too many positional arguments provided for method `Object#paperino`. Expected: `1`, got: `2` https://sorbet.org/docs/error-reference#7004
-    24 |paperino(2, 3, z: 4)
+test/cli/arity-messages/arity-messages.rb:27: Too many positional arguments provided for method `Object#paperino`. Expected: `1`, got: `2` https://sorbet.org/docs/error-reference#7004
+    27 |paperino(2, 3, z: 4)
         ^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:23: `paperino` defined here
-    23 |def paperino(x, y: nil, **kwargs); end
+    test/cli/arity-messages/arity-messages.rb:26: `paperino` defined here
+    26 |def paperino(x, y: nil, **kwargs); end
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:24: `Object#paperino` has optional keyword arguments. Did you mean to provide a value for `y`?
-    24 |paperino(2, 3, z: 4)
+    test/cli/arity-messages/arity-messages.rb:27: `Object#paperino` has optional keyword arguments. Did you mean to provide a value for `y`?
+    27 |paperino(2, 3, z: 4)
         ^^^^^^^^^^^^^^^^^^^^
-Errors: 9
+Errors: 11

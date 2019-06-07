@@ -14,6 +14,9 @@ baz 7
 def quux(x, y, z); end
 quux(2, z: 3)
 
+def qaadr(e: 1); end
+qaadr({a: 1}, {b: 2}, {c: 3})
+
 def pippo(x, **kwargs); end
 pippo(2, 3, z: 4)
 
