@@ -19,8 +19,8 @@ namespace to represent them:
 - `T::Enumerable[Type]`
 - `T::Range[Type]`
 
-While you still can write `Array` or `Hash` inside a sig, they will be treated
-as `T::Array[T.untyped]` and `T::Hash[T.untyped, T.untyped]` respectively.
+Inside a sig, just writing `Array` or `Hash` will be treated as
+`T::Array[T.untyped]` and `T::Hash[T.untyped, T.untyped]` respectively.
 
 ```ruby
 # typed: true
