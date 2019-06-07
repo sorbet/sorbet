@@ -336,37 +336,6 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass();
 }
 
-// Given a type, return a SymbolRef for the Ruby class that has that type, or no
-// symbol if no such class exists
-static core::SymbolRef getRepresentedClass(core::Context ctx, const core::Type *ty) {
-    if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
-        return core::Symbols::noSymbol();
-    }
-
-    core::SymbolRef singleton;
-    auto *s = core::cast_type<core::ClassType>(ty);
-    if (s != nullptr) {
-        singleton = s->symbol;
-    } else {
-        auto *at = core::cast_type<core::AppliedType>(ty);
-        if (at == nullptr) {
-            return core::Symbols::noSymbol();
-        }
-        // If this class is a "real" generic, leave it alone. We're not quite
-        // sure yet what it means to move between the "attached" and "singleton"
-        // levels for generic singletons. However, if the singleton has kind `*`
-        // due to all type members being fixed:, we're OK to treat the
-        // AppliedType and the Symbol as interchangeable here.
-        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
-            return core::Symbols::noSymbol();
-        }
-        singleton = at->klass;
-    }
-
-    core::SymbolRef attachedClass = singleton.data(ctx)->attachedClass(ctx);
-    return attachedClass;
-}
-
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
     if (send->fun == core::Names::bang()) {
@@ -432,7 +401,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         auto &klassType = send->args[0].type;
-        core::SymbolRef klass = getRepresentedClass(ctx, klassType.get());
+        core::SymbolRef klass = core::Types::getRepresentedClass(ctx, klassType.get());
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType(ctx);
             if (!ty->isUntyped()) {
@@ -481,7 +450,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         const auto &recvType = send->recv.type;
-        core::SymbolRef klass = getRepresentedClass(ctx, recvType.get());
+        core::SymbolRef klass = core::Types::getRepresentedClass(ctx, recvType.get());
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType(ctx);
             if (!ty->isUntyped()) {

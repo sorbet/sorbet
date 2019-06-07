@@ -805,6 +805,35 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
     return ret;
 }
 
+core::SymbolRef getRepresentedClass(core::Context ctx, const core::Type *ty) {
+    if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
+        return core::Symbols::noSymbol();
+    }
+
+    core::SymbolRef singleton;
+    auto *s = core::cast_type<core::ClassType>(ty);
+    if (s != nullptr) {
+        singleton = s->symbol;
+    } else {
+        auto *at = core::cast_type<core::AppliedType>(ty);
+        if (at == nullptr) {
+            return core::Symbols::noSymbol();
+        }
+        // If this class is a "real" generic, leave it alone. We're not quite
+        // sure yet what it means to move between the "attached" and "singleton"
+        // levels for generic singletons. However, if the singleton has kind `*`
+        // due to all type members being fixed:, we're OK to treat the
+        // AppliedType and the Symbol as interchangeable here.
+        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
+            return core::Symbols::noSymbol();
+        }
+        singleton = at->klass;
+    }
+
+    core::SymbolRef attachedClass = singleton.data(ctx)->attachedClass(ctx);
+    return attachedClass;
+}
+
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {
     return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
 }
