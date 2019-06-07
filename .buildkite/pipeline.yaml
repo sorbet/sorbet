@@ -24,7 +24,7 @@ steps:
     command: .buildkite/linters.sh
     <<: *elastic
 
-  - label: ":mac: test-static-sanitized.sh(master only)"
+  - label: ":mac: test-static-sanitized.sh (master only)"
     command: .buildkite/test-static-sanitized.sh
     branches: "master"
     agents:
