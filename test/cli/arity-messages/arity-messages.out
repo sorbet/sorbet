@@ -4,7 +4,7 @@ test/cli/arity-messages/arity-messages.rb:4: Too many positional arguments provi
     test/cli/arity-messages/arity-messages.rb:3: `foo` defined here
      3 |def foo(x: nil); end
         ^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:4: `Object#foo` has unsupplied keyword arguments. Did you mean to supply a value for `x`?
+    test/cli/arity-messages/arity-messages.rb:4: `Object#foo` has optional keyword arguments. Did you mean to provide a value for `x`?
      4 |foo 1
         ^^^^^
 
@@ -14,7 +14,7 @@ test/cli/arity-messages/arity-messages.rb:7: Too many positional arguments provi
     test/cli/arity-messages/arity-messages.rb:6: `bar` defined here
      6 |def bar(x: nil, y: nil); end
         ^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:7: `Object#bar` has unsupplied keyword arguments. Did you mean to supply a value for `y`?
+    test/cli/arity-messages/arity-messages.rb:7: `Object#bar` has optional keyword arguments. Did you mean to provide a value for `y`?
      7 |bar(5, x: 8)
         ^^^^^^^^^^^^
 
@@ -24,7 +24,7 @@ test/cli/arity-messages/arity-messages.rb:10: Too many positional arguments prov
     test/cli/arity-messages/arity-messages.rb:9: `baz` defined here
      9 |def baz(x: nil); end
         ^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:10: `Object#baz` has unsupplied keyword arguments. Did you mean to supply a value for `x`?
+    test/cli/arity-messages/arity-messages.rb:10: `Object#baz` has optional keyword arguments. Did you mean to provide a value for `x`?
     10 |baz 7
         ^^^^^
 Errors: 3
