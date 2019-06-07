@@ -9,11 +9,11 @@ title: T.noreturn
 T.noreturn
 ```
 
-This indicates that a method never returns. Some examples of things that never return are: infinite loops, exiting the
-program, and raising exceptions.
+This indicates that a method never returns. Some examples of things that never
+return are: infinite loops, exiting the program, and raising exceptions.
 
-This powers dead code analysis. If you try to do something with a value of type `T.noreturn`, you will get an
-unreachable code error.
+This powers dead code analysis. If you try to do something with a value of type
+`T.noreturn`, you will get an unreachable code error.
 
 ```ruby
 # typed: true

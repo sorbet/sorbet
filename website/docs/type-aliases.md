@@ -9,8 +9,9 @@ title: Type Aliases
 Alias = T.type_alias(Type)
 ```
 
-This creates a type alias of `Type` called `Alias`. The type alias has exactly the same behavior as the original type
-and can be used anywhere the original type can be used. The converse is also true.
+This creates a type alias of `Type` called `Alias`. The type alias has exactly
+the same behavior as the original type and can be used anywhere the original
+type can be used. The converse is also true.
 
 Note that the type alias will not show up in error messages.
 
@@ -36,7 +37,8 @@ c = foo(3)
 T.reveal_type(c) # Revealed type: String
 ```
 
-When creating a type alias from another type alias, you [must use `T.type_alias` again][1]:
+When creating a type alias from another type alias, you [must use `T.type_alias`
+again][1]:
 
 ```ruby
 A = T.type_alias(Integer)

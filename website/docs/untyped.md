@@ -9,8 +9,8 @@ title: T.untyped
 T.untyped
 ```
 
-This is the type of values whose type is not statically known. The static typechecker will permit any operation on a
-`T.untyped` value without complaint.
+This is the type of values whose type is not statically known. The static
+typechecker will permit any operation on a `T.untyped` value without complaint.
 
 You can create a `T.untyped` with `T.unsafe`:
 
@@ -22,7 +22,8 @@ y = T.unsafe(x)
 T.reveal_type(y) # Revealed type: T.untyped
 ```
 
-All arguments to methods without `sig`s have the type `T.untyped`, and the return type is `T.untyped` as well.
+All arguments to methods without `sig`s have the type `T.untyped`, and the
+return type is `T.untyped` as well.
 
 ```ruby
 # typed: true

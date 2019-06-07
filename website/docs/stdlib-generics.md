@@ -6,11 +6,12 @@ sidebar_label: Arrays & Hashes
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-Sorbet supports generics types. The syntax looks likes `MyClass[Elem]`. For user defined generic classes, it's possible
-to make this valid Ruby syntax.
+Sorbet supports generics types. The syntax looks likes `MyClass[Elem]`. For user
+defined generic classes, it's possible to make this valid Ruby syntax.
 
-However, it's not possible to change the syntax for classes in the Ruby standard library that should be generic. To make
-up for this, we use wrappers in the `T` namespace to represent them:
+However, it's not possible to change the syntax for classes in the Ruby standard
+library that should be generic. To make up for this, we use wrappers in the `T`
+namespace to represent them:
 
 - `T::Array[Type]`
 - `T::Hash[KeyType, ValueType]`
@@ -18,8 +19,8 @@ up for this, we use wrappers in the `T` namespace to represent them:
 - `T::Enumerable[Type]`
 - `T::Range[Type]`
 
-While you still can write `Array` or `Hash` inside a sig, they will be treated as `T::Array[T.untyped]` and
-`T::Hash[T.untyped, T.untyped]` respectively.
+While you still can write `Array` or `Hash` inside a sig, they will be treated
+as `T::Array[T.untyped]` and `T::Hash[T.untyped, T.untyped]` respectively.
 
 ```ruby
 # typed: true
