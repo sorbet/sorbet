@@ -10,6 +10,7 @@
 #include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
 #include "dsl/OpusEnum.h"
+#include "dsl/Private.h"
 #include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Rails.h"
 #include "dsl/Struct.h"
@@ -73,6 +74,12 @@ public:
                     }
 
                     nodes = DSLBuilder::replaceDSL(ctx, send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = Private::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
