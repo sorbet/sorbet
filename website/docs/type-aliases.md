@@ -45,6 +45,35 @@ A = T.type_alias(Integer)
 B = T.type_alias(A)
 ```
 
-TODO how is `Int = T.type_alias(Integer)` different from `Int = Integer`?
+For simple use cases, type aliases are nearly identical to just making a new
+constant:
+
+```ruby
+# typed: true
+extend T::Sig
+
+A = T.type_alias(Integer)
+sig {returns(A)}
+def foo; 3; end
+
+B = Integer
+sig {returns(B)}
+def bar; 3; end
+```
+
+However, when the type is more complex, you must use type aliases:
+
+```ruby
+# typed: true
+extend T::Sig
+
+A = T.type_alias(T.any(Integer, String))
+sig {returns(A)}
+def foo; 3; end
+
+B = T.any(Integer, String)
+sig {returns(B)} # error: Constant B is not a class or type alias
+def bar; 3; end
+```
 
 [1]: https://sorbet.org/docs/error-reference#5034
