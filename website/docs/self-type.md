@@ -35,3 +35,17 @@ class Child < Parent; end
 T.reveal_type(Parent.new.foo) # Revealed type: Parent
 T.reveal_type(Child.new.foo) # Revealed type: Child
 ```
+
+Certain advanced use cases of `T.self_type` are not supported:
+
+```ruby
+class Generic < Parent
+  extend T::Generic
+  TM = type_member
+
+  sig {returns(Generic[T.self_type])} # error: Only top-level T.self_type is supported
+  def bad
+    Generic[T.untyped].new
+  end
+end
+```
