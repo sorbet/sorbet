@@ -9,6 +9,11 @@
     "editor.tabSize": 4,
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
   },
+  "[markdown]": {
+    "editor.rulers": [
+      80
+    ],
+  },
   "[ruby]": {
     "editor.tabSize": 2,
   }
