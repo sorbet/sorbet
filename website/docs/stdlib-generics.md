@@ -20,3 +20,22 @@ up for this, we use wrappers in the `T` namespace to represent them:
 
 While you still can write `Array` or `Hash` inside a sig, they will be treated as `T::Array[T.untyped]` and
 `T::Hash[T.untyped, T.untyped]` respectively.
+
+```ruby
+# typed: true
+extend T::Sig
+
+sig { returns(Array) }
+def foo
+  [1, "heh"]
+end
+
+T.reveal_type(foo.first) # Revealed type: T.untyped
+
+sig { returns(T::Array[T.any(Integer, String)]) }
+def bar
+  [1, "heh"]
+end
+
+T.reveal_type(bar.first) # Revealed type: T.nilable(T.any(Integer, String))
+```
