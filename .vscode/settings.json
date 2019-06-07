@@ -5,11 +5,11 @@
   "editor.rulers": [
     120
   ],
-  "[ruby]": {
-    "editor.tabSize": 2,
-  },
   "[cpp]": {
     "editor.tabSize": 4,
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+  },
+  "[ruby]": {
+    "editor.tabSize": 2,
   }
 }
