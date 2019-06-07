@@ -19,17 +19,17 @@ This powers dead code analysis. If you try to do something with a value of type
 # typed: true
 extend T::Sig
 
-sig { returns(T.noreturn) }
+sig {returns(T.noreturn)}
 def foo
   loop {}
 end
 
-sig { returns(T.noreturn) }
+sig {returns(T.noreturn)}
 def bar
   exit
 end
 
-sig { returns(T.noreturn) }
+sig {returns(T.noreturn)}
 def baz
   raise RuntimeError
 end

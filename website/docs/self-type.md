@@ -21,12 +21,12 @@ type.
 class C
   extend T::Sig
 
-  sig { returns(T.self_type) }
+  sig {returns(T.self_type)}
   def foo
     self
   end
 
-  sig { returns(T.self_type) }
+  sig {returns(T.self_type)}
   def bar
     C.new
   end

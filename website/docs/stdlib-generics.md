@@ -26,14 +26,14 @@ as `T::Array[T.untyped]` and `T::Hash[T.untyped, T.untyped]` respectively.
 # typed: true
 extend T::Sig
 
-sig { returns(Array) }
+sig {returns(Array)}
 def foo
   [1, "heh"]
 end
 
 T.reveal_type(foo.first) # Revealed type: T.untyped
 
-sig { returns(T::Array[T.any(Integer, String)]) }
+sig {returns(T::Array[T.any(Integer, String)])}
 def bar
   [1, "heh"]
 end

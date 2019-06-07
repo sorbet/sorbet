@@ -29,7 +29,7 @@ return type is `T.untyped` as well.
 # typed: true
 extend T::Sig
 
-sig { params(x: Integer).returns(String) }
+sig {params(x: Integer).returns(String)}
 def foo(x)
   T.reveal_type(x) # Revealed type: Integer
   x.to_s
@@ -51,7 +51,7 @@ You can put `T.untyped` into generics.
 # typed: true
 extend T::Sig
 
-sig { params(x: T::Array[T.untyped]).returns(Integer) }
+sig {params(x: T::Array[T.untyped]).returns(Integer)}
 def foo(x)
   T.reveal_type(x.first) # Revealed type: T.untyped
   x.length
