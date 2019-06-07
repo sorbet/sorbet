@@ -55,3 +55,10 @@ end
 
 T.reveal_type(foo([1, "bar", false])) # Revealed type: Integer
 ```
+
+Files with `typed: strong` forbid the usage of `T.untyped`.
+
+```ruby
+# typed: strong
+x = T.unsafe(0) # error: This code is untyped
+```
