@@ -14,3 +14,23 @@ subclass will return the same class as the receiver (the receiver is the thing
 we call a method on i.e., x in `x.foo`). For instance, `#dup` returns
 `T.self_type`. No matter what class you call it on, you will get back the same
 type.
+
+```ruby
+# typed: true
+
+class C
+  extend T::Sig
+
+  sig { returns(T.self_type) }
+  def foo
+    self
+  end
+
+  sig { returns(T.self_type) }
+  def bar
+    C.new
+  end
+end
+
+T.reveal_type(C.new.foo) # Revealed type: C
+```
