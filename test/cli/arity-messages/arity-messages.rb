@@ -14,8 +14,11 @@ baz 7
 def quux(x, y, z); end
 quux(2, z: 3)
 
-def pippo(x, **kwargs); args; end
+def pippo(x, **kwargs); end
 pippo(2, 3, z: 4)
 
-def paperino(x, y: nil, **kwargs); args; end
+def pluto(x, *args); end
+pluto
+
+def paperino(x, y: nil, **kwargs); end
 paperino(2, 3, z: 4)
