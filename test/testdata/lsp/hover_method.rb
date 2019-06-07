@@ -5,6 +5,7 @@ class Foo
   sig {returns(Integer)}
   def bar
     # ^ hover: returns(Integer)
+    # N.B. Checking two positions on below function call as they used to return different strings.
     baz("1")
   # ^ hover: params(arg0: String).returns(Integer)
    # ^ hover: params(arg0: String).returns(Integer)
@@ -14,14 +15,15 @@ class Foo
 
   sig {params(arg0: String).returns(Integer)}
   def baz(arg0)
-    Foo::bat
+    Foo::bat(1)
   # ^ hover: Foo
-       # ^ hover: returns(Integer)
+       # ^ hover: params(i: Integer).returns(Integer)
+           # ^ hover: Integer(1)
     arg0.to_i
   end
 
-  sig {returns(Integer)}
-  def self.bat()
+  sig {params(i: Integer).returns(Integer)}
+  def self.bat(i)
     10
   end
 end
