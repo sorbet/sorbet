@@ -28,6 +28,7 @@ steps:
     command: .buildkite/test-static-sanitized.sh
     agents:
       os: mac
+    branches: 'master'
 
   - label: ":linux::cloud: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
