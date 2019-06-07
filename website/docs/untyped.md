@@ -32,12 +32,13 @@ def foo(x)
   x.to_s
 end
 
+T.reveal_type(foo(3)) # Revealed type: String
+
 def bar(x)
   T.reveal_type(x) # Revealed type: T.untyped
   x.to_s
 end
 
-T.reveal_type(foo(3)) # Revealed type: String
 T.reveal_type(bar(3)) # Revealed type: T.untyped
 ```
 
