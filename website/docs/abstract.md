@@ -6,10 +6,8 @@ title: Abstract Classes and Interfaces
 Sorbet supports abstract classes, abstract methods, and interfaces.
 
 > **Note**: Much of the support for abstract classes, methods, and interfaces is
-> only implemented using the runtime system. At Stripe, these checks are
-> enforced with a wholesome test that loads up all Stripe's code and checks
-> that these invariants hold. Support for these checks in the static system is
-> planned for the future.
+> only implemented using the runtime system.  Support for these checks in the
+> static system is planned for the future.
 
 Abstract methods ensure that a particular method gets implemented
 anywhere the class or module is inherited, included, or extended.
