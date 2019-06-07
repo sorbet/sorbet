@@ -65,27 +65,41 @@ class HelloWorld
 end
 ```
 
-- - -
-
 ## Additional Requirements
 
 Use of `abstract!` and `interface!` requires that:
 
-- All methods in a module marked as `interface!` have signatures
-- The methods of classes or modules marked `interface!` must all be marked `abstract`
+- All methods in a module marked as `interface!` must have signatures, and must
+  be marked `abstract`
   - **Note**: this applies to all methods defined within the module, as well as
     any that are included from another module
 - The `interface!` can't have `private` or `protected` methods
-- `abstract` self-methods on a module are not allowed, as there's no way to
-  implement these methods
 - `abstract` methods raise an exception when called in the runtime
 - Classes without `abstract!` or `interface!` must implement all `abstract`
   methods from their parents
-- `extend MyAbstractModule` works just like `include MyAbstractModule`, but for self-methods
+- `extend MyAbstractModule` works just like `include MyAbstractModule`, but for
+  singleton methods
 - `abstract!` classes cannot be instantiated
 
 
-- - -
+## Abstract singleton methods
+
+`abstract` singleton methods on a module are not allowed, as there's no way to
+implement these methods.
+
+```ruby
+module M
+  extend T::Sig
+  extend T::Helpers
+
+  abstract!
+
+  sig {abstract.void}
+  def self.foo; end
+end
+
+M::foo # raises an exception, as M::foo can never be implemented
+```
 
 ## Interfaces and the `included` hook
 
@@ -156,7 +170,3 @@ end
 # Sorbet knows that `foo` is a class method on `A`
 A.foo
 ```
-
-- - -
-
-

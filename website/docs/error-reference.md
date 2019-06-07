@@ -154,25 +154,9 @@ constants through ancestors (both mixins or superclasses).
     Parent::MY_CONST   # ok
     ```
 
-## 5003
-
-This means the method definition does not match the signature provided. (This
-will happen even in `# typed: false` files.)
- 
-```ruby
-class A
-  extends T::Sig
-
-  sig {T.params().void}
-  def f(x); end
-end
-```
-
-The signature specifies there are no parameters whereas the method definition has one.
-
 ## 5005
 
-This means a class or instance variable is defined in the wrong context.
+A class or instance variable is defined in the wrong context.
 
 ```ruby
 # typed: true
@@ -187,11 +171,15 @@ class A
 end
 ```
 
-There are two such errors in the above. In the first, `@@class_var` is declared outside of the class scope. In the second, `@x` is declared outside of the `initialize` method. 
+There are two such errors in the above. In the first, `@@class_var` is declared
+outside of the class scope. In the second, `@x` is declared outside of the
+`initialize` method.
+
+For how to fix, see [Strict Mode](strict.md).
 
 ## 5006
 
-This means an instance variable has been redeclared with another type.
+An instance variable has been redeclared with another type.
 
 ```ruby
 # typed: true
@@ -207,7 +195,7 @@ end
 
 ## 5008
 
-This means a class was defined as the subclass of a `type_alias`. It also occurs if a `type_alias` mixin is used in a class.
+A class was defined as the subclass of a `type_alias`. It also occurs if a `type_alias` mixin is used in a class.
 
 ```ruby
 # typed: true
@@ -224,7 +212,7 @@ end
 
 ## 5011
 
-This means a class inherits from itself either directly or through a inheritance chain.
+A class inherits from itself either directly or through a inheritance chain.
 
 ```ruby
 class A < A; end
@@ -235,7 +223,7 @@ class C < B; end
 
 ## 5012
 
-This means a class was changed to inherit from a different superclass.
+A class was changed to inherit from a different superclass.
 
 ```ruby
 class A; end
@@ -247,13 +235,15 @@ class C < B; end
 
 ## 5013
 
-This means a class or instance variable declaration used `T.cast` when it should use `T.let`.
+A class or instance variable declaration used `T.cast` when it should use `T.let`.
 
 ```ruby
 class A
   @@x = T.cast(10, Integer)
 end
 ```
+
+For how to fix, see [Strict Mode](strict.md).
 
 ## 5014
 

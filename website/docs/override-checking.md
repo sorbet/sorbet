@@ -6,11 +6,11 @@ title: Override Checking
 Sorbet supports method override checking. These checks are implemented as
 `sig` annotations:
 
-- `overridable`, children can override this method
-- `override`, this class overrides a method on its parent (or ancestor)
-- `abstract`, this method is abstract (has no implementation) and must be
+- `overridable` means children can override this method
+- `override` means this method overrides a method on its parent (or ancestor)
+- `abstract` means this method is abstract (has no implementation) and must be
   implemented by being overridden in all concrete subclasses.
-- `implementation`, this method implements an abstract method
+- `implementation` means this method implements an abstract method
 
 These annotations can be chained, for example `.implementation.overridable`
 lets a grandchild class override a concrete implementation of its parent.
@@ -25,12 +25,12 @@ errors, though in the future they may become static errors).
 
 | ↓Parent \ Child → | no sig | `standard` | `override` | `implementation` |
 | ----------------- | :----: | :--------: | :--------: | :--------------: |
-| no sig            | ✅     |  ✅        | ✅         | ❌               |
-| `standard`        | ✅     |  ✅        | ❌         | ❌               |
-| `overridable`     | ✅     |  ❌        | ✅         | ❌               |
-| `override`        | ✅     |  ❌        | ✅         | ❌               |
-| `implementation`  | ✅     |  ❌        | ❌         | ❌               |
-| `abstract`        | ✅     |  ❌        | ❌         | ✅               |
+| no sig            | ✅     | ✅         | ✅         | ❌               |
+| `standard`        | ✅     | ✅         | ❌         | ❌               |
+| `overridable`     | ✅     | ❌         | ✅         | ❌               |
+| `override`        | ✅     | ❌         | ✅         | ❌               |
+| `implementation`  | ✅     | ❌         | ❌         | ❌               |
+| `abstract`        | ✅     | ❌         | ❌         | ✅               |
 
 > **Note**: if the implementation methods are inherited--from either a class or
 > mixin--the methods don't need the `implementation` annotation.
