@@ -145,7 +145,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     core::GlobalState gs(errorQueue);
-    auto workers = WorkerPool::create(0, gs.tracer());
+    auto workers = WorkerPool::create(0, gs.tracer(), false);
     core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
     core::MutableContext ctx(gs, core::Symbols::root());
     // Parser

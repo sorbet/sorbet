@@ -49,7 +49,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
             }
         }
         realmain::options::Options emptyOpts;
-        auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
+        auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer(), false);
         auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
         realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers); // result is thrown away
     } else {
