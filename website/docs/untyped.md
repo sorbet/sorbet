@@ -7,9 +7,8 @@ title: T.untyped
 T.untyped
 ```
 
-This indicates a value whose type is statically unknown and will allow all
-values. The static typechecker will permit any operation on a `T.untyped` value
-without complaint.
+This indicates a value whose type is statically unknown and will allow all values. The static typechecker will permit
+any operation on a `T.untyped` value without complaint.
 
 You can create a `T.untyped` with `T.unsafe`:
 
