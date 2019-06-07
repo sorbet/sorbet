@@ -98,7 +98,7 @@ module M
   def self.foo; end
 end
 
-M::foo # raises an exception, as M::foo can never be implemented
+M.foo # raises an exception, as M.foo can never be implemented
 ```
 
 ## Interfaces and the `included` hook
