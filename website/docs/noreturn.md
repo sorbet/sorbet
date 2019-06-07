@@ -20,17 +20,17 @@ This powers dead code analysis. If you try to do something with a value of type
 extend T::Sig
 
 sig {returns(T.noreturn)}
-def foo
+def infinitely_loops
   loop {}
 end
 
 sig {returns(T.noreturn)}
-def bar
+def exits_program
   exit
 end
 
 sig {returns(T.noreturn)}
-def baz
+def always_raises
   raise RuntimeError
 end
 
