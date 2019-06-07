@@ -67,10 +67,6 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 MarkupKind::Markdown,
                 methodSignatureString(*gs, defResp->retType.type, defResp->dispatchComponents, nullptr));
             response->result = make_unique<Hover>(move(markupContents));
-        } else if (auto identResp = resp->isIdent()) {
-            unique_ptr<MarkupContent> markupContents;
-            markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->show(*gs));
-            response->result = make_unique<Hover>(move(markupContents));
         } else {
             auto markupContents =
                 make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->showWithMoreInfo(*gs));
