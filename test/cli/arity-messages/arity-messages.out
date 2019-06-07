@@ -1,27 +1,30 @@
-allexport      	off
-braceexpand    	on
-emacs          	off
-errexit        	on
-errtrace       	off
-functrace      	off
-hashall        	on
-histexpand     	off
-history        	off
-ignoreeof      	off
-interactive-comments	on
-keyword        	off
-monitor        	off
-noclobber      	off
-noexec         	off
-noglob         	off
-nolog          	off
-notify         	off
-nounset        	off
-onecmd         	off
-physical       	off
-pipefail       	off
-posix          	off
-privileged     	off
-verbose        	off
-vi             	off
-xtrace         	off
+test/cli/arity-messages/arity-messages.rb:4: Too many positional arguments provided for method `Object#foo`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
+     4 |foo 1
+        ^^^^^
+    test/cli/arity-messages/arity-messages.rb:3: `foo` defined here
+     3 |def foo(x: nil); end
+        ^^^^^^^^^^^^^^^
+    test/cli/arity-messages/arity-messages.rb:4: `Object#foo` has unsupplied keyword arguments. Did you mean to supply a value for `x`?
+     4 |foo 1
+        ^^^^^
+
+test/cli/arity-messages/arity-messages.rb:7: Too many positional arguments provided for method `Object#bar`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
+     7 |bar(5, x: 8)
+        ^^^^^^^^^^^^
+    test/cli/arity-messages/arity-messages.rb:6: `bar` defined here
+     6 |def bar(x: nil, y: nil); end
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/arity-messages/arity-messages.rb:7: `Object#bar` has unsupplied keyword arguments. Did you mean to supply a value for `y`?
+     7 |bar(5, x: 8)
+        ^^^^^^^^^^^^
+
+test/cli/arity-messages/arity-messages.rb:10: Too many positional arguments provided for method `Object#baz`. Expected: `0`, got: `1` https://sorbet.org/docs/error-reference#7004
+    10 |baz 7
+        ^^^^^
+    test/cli/arity-messages/arity-messages.rb:9: `baz` defined here
+     9 |def baz(x: nil); end
+        ^^^^^^^^^^^^^^^
+    test/cli/arity-messages/arity-messages.rb:10: `Object#baz` has unsupplied keyword arguments. Did you mean to supply a value for `x`?
+    10 |baz 7
+        ^^^^^
+Errors: 3
