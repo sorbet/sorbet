@@ -18,6 +18,7 @@ Usage:
 
 Options:
   -h, --help     View help for this subcommand.
+  --version      Show version.
 
 For full help:
   https://sorbet.org
@@ -75,6 +76,10 @@ case $subcommand in
         help_and_exit
     fi
     typecheck "$@"
+    ;;
+
+  "--version")
+    typecheck --version
     ;;
 
   *)
