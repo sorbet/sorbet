@@ -14,6 +14,9 @@ baz 7
 def quux(x, y, z); end
 quux(2, z: 3)
 
+def qaar(a, b, c: nil, d: nil); end
+qaar(1, 2, 3, c: nil, d: nil)
+
 def qaadr(e: 1); end
 qaadr({a: 1}, {b: 2}, {c: 3})
 
