@@ -4,15 +4,15 @@
 
 using namespace std;
 namespace sorbet {
-unique_ptr<WorkerPool> WorkerPool::create(int size, spd::logger &logger) {
-    return make_unique<WorkerPoolImpl>(size, logger);
+unique_ptr<WorkerPool> WorkerPool::create(int size, spd::logger &logger, bool pinThreads) {
+    return make_unique<WorkerPoolImpl>(size, logger, pinThreads);
 }
 
 WorkerPool::~WorkerPool() {
     // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
 }
 
-WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : size(size), logger(logger) {
+WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger, bool pinThreads) : size(size), logger(logger) {
     logger.debug("Creating {} worker threads", size);
     if (sorbet::emscripten_build) {
         ENFORCE(size == 0);
@@ -23,16 +23,23 @@ WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : size(size), logg
             auto &last = threadQueues.emplace_back(make_unique<Queue>());
             auto *ptr = last.get();
             auto threadIdleName = absl::StrCat("idle", i);
-            threads.emplace_back(runInAThread(threadIdleName, [ptr, &logger, threadIdleName]() {
-                bool repeat = true;
-                while (repeat) {
-                    Task_ task;
-                    setCurrentThreadName(threadIdleName);
-                    ptr->wait_dequeue(task);
-                    logger.debug("Worker got task");
-                    repeat = task();
-                }
-            }));
+            optional<int> pinToCore;
+            if (pinThreads) {
+                pinToCore = i;
+            }
+            threads.emplace_back(runInAThread(
+                threadIdleName,
+                [ptr, &logger, threadIdleName]() {
+                    bool repeat = true;
+                    while (repeat) {
+                        Task_ task;
+                        setCurrentThreadName(threadIdleName);
+                        ptr->wait_dequeue(task);
+                        logger.debug("Worker got task");
+                        repeat = task();
+                    }
+                },
+                pinToCore));
         }
     }
     logger.debug("Worker threads created");

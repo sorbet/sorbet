@@ -86,7 +86,7 @@ class WorkerPoolImpl : public WorkerPool {
     void multiplexJob_(Task_ t);
 
 public:
-    WorkerPoolImpl(int size, spd::logger &logger);
+    WorkerPoolImpl(int size, spd::logger &logger, bool pinThreads);
     ~WorkerPoolImpl();
 
     void multiplexJob(std::string_view taskName, Task t) override;

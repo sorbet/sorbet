@@ -118,6 +118,7 @@ struct Options {
     bool skipDSLPasses = false;
     bool suggestRuntimeProfiledType = false;
     int threads = 0;
+    bool pinThreads = false;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     std::string typedSource = "";
