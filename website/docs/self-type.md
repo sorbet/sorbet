@@ -21,19 +21,17 @@ type.
 ```ruby
 # typed: true
 
-class C
+class Parent
   extend T::Sig
 
   sig {returns(T.self_type)}
   def foo
     self
   end
-
-  sig {returns(T.self_type)}
-  def bar
-    C.new
-  end
 end
 
-T.reveal_type(C.new.foo) # Revealed type: C
+class Child < Parent; end
+
+T.reveal_type(Parent.new.foo) # Revealed type: Parent
+T.reveal_type(Child.new.foo) # Revealed type: Child
 ```
