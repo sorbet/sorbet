@@ -81,13 +81,13 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
 
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
     if (isClassLinearizationComputed()) {
-        for (SymbolRef a : argumentsOrMixins) {
+        for (SymbolRef a : mixins()) {
             if (a == sym) {
                 return true;
             }
         }
     } else {
-        for (SymbolRef a : argumentsOrMixins) {
+        for (SymbolRef a : mixins()) {
             if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
                 return true;
             }
@@ -205,14 +205,13 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
                         this->showFullName(gs));
         }
         int i = -1;
-        for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+        for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             i++;
             if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
                 e.setHeader("`{}`:- `{}`", i, it->data(gs)->showFullName(gs));
             }
             int j = 0;
-            for (auto it2 = it->data(gs)->argumentsOrMixins.rbegin(); it2 != it->data(gs)->argumentsOrMixins.rend();
-                 ++it2) {
+            for (auto it2 = it->data(gs)->mixins().rbegin(); it2 != it->data(gs)->mixins().rend(); ++it2) {
                 if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
                     e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs)->showFullName(gs));
                 }
@@ -230,7 +229,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
         }
     }
     if (isClassLinearizationComputed()) {
-        for (auto it = this->argumentsOrMixins.begin(); it != this->argumentsOrMixins.end(); ++it) {
+        for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
             if (isClassLinearizationComputed()) {
                 result = it->data(gs)->findMember(gs, name);
@@ -243,7 +242,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             }
         }
     } else {
-        for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+        for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             ENFORCE(it->exists());
             result = it->data(gs)->findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
             if (result.exists()) {
@@ -330,7 +329,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         candidateScopes.emplace_back(sym->superClass());
                     }
                 }
-                for (auto ancestor : sym->argumentsOrMixins) {
+                for (auto ancestor : sym->mixins()) {
                     if (!absl::c_linear_search(candidateScopes, ancestor)) {
                         candidateScopes.emplace_back(ancestor);
                     }
@@ -434,7 +433,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         }
     }
 
-    for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+    for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
         ENFORCE(it->exists());
 
         auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
