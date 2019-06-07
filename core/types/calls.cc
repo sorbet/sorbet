@@ -728,9 +728,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     return arg.exists() && arg.data(ctx)->isKeyword() && arg.data(ctx)->isOptional() &&
                            consumed.count(arg.data(ctx)->name) == 0;
                 });
-                if (firstKeyword && firstKeyword->exists()) {
+                if (firstKeyword != data->arguments().end()) {
                     e.addErrorLine(args.locs.call,
-                                   "`{}` has unsupplied keyword arguments. Did you mean to supply a value for `{}`?",
+                                   "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
                                    data->show(ctx), firstKeyword->data(ctx)->argumentName(ctx));
                 }
             }
