@@ -186,8 +186,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
           1
         end
 
-        def sanity
-        end
+        def sanity; end
       end
     end
 
@@ -220,7 +219,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # hook registration overwrites this method but it should
         # still call the original defined above
         :singleton_method_added,
-        :post_hook
+        :post_hook,
       ],
       klass.instance_variable_get(:@called)
     )
