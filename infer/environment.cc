@@ -338,17 +338,17 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
 
 // Given a type, return a SymbolRef for the Ruby class that has that type, or no
 // symbol if no such class exists
-static core::SymbolRef getRepresentedClass(core::Context ctx, core::TypePtr ty) {
+static core::SymbolRef getRepresentedClass(core::Context ctx, const core::Type *ty) {
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
 
     core::SymbolRef singleton;
-    auto *s = core::cast_type<core::ClassType>(ty.get());
+    auto *s = core::cast_type<core::ClassType>(ty);
     if (s != nullptr) {
         singleton = s->symbol;
     } else {
-        auto *at = core::cast_type<core::AppliedType>(ty.get());
+        auto *at = core::cast_type<core::AppliedType>(ty);
         if (at == nullptr) {
             return core::Symbols::noSymbol();
         }
@@ -432,7 +432,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         auto &klassType = send->args[0].type;
-        core::SymbolRef klass = getRepresentedClass(ctx, klassType);
+        core::SymbolRef klass = getRepresentedClass(ctx, klassType.get());
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType(ctx);
             if (!ty->isUntyped()) {
@@ -481,7 +481,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         const auto &recvType = send->recv.type;
-        core::SymbolRef klass = getRepresentedClass(ctx, recvType);
+        core::SymbolRef klass = getRepresentedClass(ctx, recvType.get());
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType(ctx);
             if (!ty->isUntyped()) {
