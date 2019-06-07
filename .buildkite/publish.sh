@@ -80,10 +80,13 @@ fi
 git checkout -f "$current_rev"
 
 echo "--- releasing stripe.dev/sorbet-repo (gem repo)"
-rm -rf sorbet-repo
-git clone git@github.com:stripe/sorbet-repo.git
+if [ ! -d "sorbet-repo" ]; then
+  git clone git@github.com:stripe/sorbet-repo.git
+fi
 pushd sorbet-repo
 git fetch origin gh-pages
+git reset --hard origin/gh-pages
+git clean -fdx
 git checkout gh-pages
 mkdir -p super-secret-private-beta/gems/
 cp -R ../_out_/gems/*.gem super-secret-private-beta/gems/
