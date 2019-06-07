@@ -14,11 +14,7 @@ library that should be generic. To make up for this, we use wrappers in the T::
 namespace to represent them:
 
 - `T::Array[Type]`
-  - This validates that the value is an array of any length where all elements
-    of the array are the specified type.
 - `T::Hash[KeyType, ValueType]`
-  - This validates that the value is a hash where all keys of the type specified
-    by `KeyType`, and all values are of the type specified by `ValueType`.
 - `T::Set[Type]`
 - `T::Enumerable[Type]`
 - `T::Range[Type]`
