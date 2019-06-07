@@ -6,7 +6,7 @@ sidebar_label: Arrays & Hashes
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-Sorbet supports generics types. The syntax looks likes `MyClass[Elem]`. For user
+Sorbet supports generic types. The syntax looks likes `MyClass[Elem]`. For user
 defined generic classes, it's possible to make this valid Ruby syntax.
 
 However, it's not possible to change the syntax for classes in the Ruby standard
