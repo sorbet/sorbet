@@ -241,6 +241,31 @@ module Kernel
   end
   def extend(mod); end
 
+  sig do
+    params(
+        status: Integer,
+    )
+    .returns(T.untyped)
+  end
+  def exit(status=T.unsafe(nil)); end
+
+  sig do
+    params(
+        status: Integer,
+    )
+    .returns(T.untyped)
+  end
+  def exit!(status=T.unsafe(nil)); end
+
+  sig {returns(T.nilable(Integer))}
+  sig do
+    params(
+        blk: T.proc.params().returns(BasicObject),
+    )
+    .returns(T.nilable(Integer))
+  end
+  def fork(&blk); end
+
   sig {returns(T.self_type)}
   def freeze(); end
 

@@ -34,14 +34,6 @@ module Process
   WNOHANG = T.let(T.unsafe(nil), Integer)
   WUNTRACED = T.let(T.unsafe(nil), Integer)
 
-  sig do
-    params(
-        msg: String,
-    )
-    .returns(T.untyped)
-  end
-  def self.abort(msg=T.unsafe(nil)); end
-
   sig {returns(String)}
   def self.argv0(); end
 
@@ -101,31 +93,6 @@ module Process
     .returns(Integer)
   end
   def self.euid=(arg0); end
-
-  sig do
-    params(
-        status: Integer,
-    )
-    .returns(T.untyped)
-  end
-  def self.exit(status=T.unsafe(nil)); end
-
-  sig do
-    params(
-        status: Integer,
-    )
-    .returns(T.untyped)
-  end
-  def self.exit!(status=T.unsafe(nil)); end
-
-  sig {returns(T.nilable(Integer))}
-  sig do
-    params(
-        blk: T.proc.params().returns(BasicObject),
-    )
-    .returns(T.nilable(Integer))
-  end
-  def self.fork(&blk); end
 
   sig do
     params(
