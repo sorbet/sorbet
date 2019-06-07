@@ -8,7 +8,7 @@ class Tempfile < File
 
   sig do
     type_parameters(:U).params(
-      basename: T.any(String, T::Array[String]),
+      basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: String,
       options: T::Hash[Symbol, T.untyped],
@@ -18,7 +18,7 @@ class Tempfile < File
   end
   sig do
     type_parameters(:U).params(
-      basename: T.any(String, T::Array[String]),
+      basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: String,
       options: T::Hash[Symbol, T.untyped],
@@ -29,7 +29,7 @@ class Tempfile < File
 
   sig do
     type_parameters(:U).params(
-      basename: T.any(String, T::Array[String]),
+      basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: String,
       options: T::Hash[Symbol, T.untyped],
@@ -39,7 +39,7 @@ class Tempfile < File
   end
   sig do
     type_parameters(:U).params(
-      basename: T.any(String, T::Array[String]),
+      basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: String,
       options: T::Hash[Symbol, T.untyped],
@@ -50,7 +50,7 @@ class Tempfile < File
 
   sig do
     type_parameters(:U).params(
-      basename: T.any(String, T::Array[String]),
+      basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: String,
       options: T::Hash[Symbol, T.untyped],
