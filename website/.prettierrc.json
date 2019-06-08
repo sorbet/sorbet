@@ -1,0 +1,9 @@
+{
+  "printWidth": 80,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "bracketSpacing": false,
+  "arrowParens": "always",
+  "proseWrap": "always",
+  "endOfLine": "lf"
+}

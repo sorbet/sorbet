@@ -13,7 +13,7 @@ is an instance of the `String` class, and so `"abc"` has type `String`. The same
 goes for many other values in Ruby:
 
 | Type       | Example value |
-| ---        | ---           |
+| ---------- | ------------- |
 | `String`   | `"abc"`       |
 | `Symbol`   | `:abc`        |
 | `Integer`  | `42`          |
@@ -42,8 +42,8 @@ end
 
 One gotcha is that `false` is an instance of `FalseClass`, and `true` is an
 instance of `TrueClass`---there is no `Boolean` class in Ruby. So to represent
-the type of booleans in Sorbet, the `sorbet-runtime` uses [type
-aliases](type-aliases.md) and [union types](union-types.md) to define a
+the type of booleans in Sorbet, the `sorbet-runtime` uses
+[type aliases](type-aliases.md) and [union types](union-types.md) to define a
 convenient name for "either `true` or `false`": `T::Boolean`.
 
 ```ruby
@@ -161,4 +161,3 @@ end
 
 foo(MyClass.new)  # ok; MyClass mixes in MyModule
 ```
-

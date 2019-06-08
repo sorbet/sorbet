@@ -23,14 +23,13 @@ answers three main questions:
 
 We'll cover these questions in order.
 
-
 ## Quickref
 
 These are the many commands to create or update RBI files within a Sorbet
 project:
 
 | I want to:                                                           | so I'll run:                 |
-| ---                                                                  | ---                          |
+| -------------------------------------------------------------------- | ---------------------------- |
 | Initialize a new Sorbet project, including all RBI files             | `srb init`                   |
 | Update every kind of RBI in an existing project                      | `srb rbi update`             |
 | &nbsp;                                                               | &nbsp;                       |
@@ -105,7 +104,6 @@ class Child < Parent
 end
 ```
 
-
 ## Gem RBIs
 
 RBIs are predominantly used to define classes, constants, and methods to Sorbet.
@@ -159,8 +157,8 @@ Hand-written RBIs for gems can come from either:
 
 When initializing a new Sorbet project, `srb init` reads the project's
 `Gemfile`, checks to see if `sorbet-typed` already has any suitable RBI files,
-and fetches them into the current project if so. After initialization, to
-update or add new RBI files from `sorbet-typed`, run:
+and fetches them into the current project if so. After initialization, to update
+or add new RBI files from `sorbet-typed`, run:
 
 ```bash
 srb rbi sorbet-typed
@@ -182,7 +180,6 @@ The way this works is that when `srb` will load a project's `Gemfile` to find
 the source folders for every gem in a project. If any gems have a top-level
 `rbi/` or `rbis/` folder, `srb` will collect the paths to any such folders into
 a file (`sorbet/rbi_list`) and mention this file in the `sorbet/config` file.
-
 
 ## The Hidden Definition RBI
 
@@ -217,18 +214,17 @@ definitions RBI file:
 srb rbi hidden-definitions
 ```
 
-On a philosophical level, we believe that while heavily metaprogrammed APIs
-can make it easy for a code author, they're frequently harder for consumers of
-the API to understand where things are being defined. By making metaprogramming
+On a philosophical level, we believe that while heavily metaprogrammed APIs can
+make it easy for a code author, they're frequently harder for consumers of the
+API to understand where things are being defined. By making metaprogramming
 explicit in one file, it's easy to track whether the amount of metaprogramming
 in a codebase is going up or down over time.
 
-Sorbet offers a number of powerful type-level features to enforce
-ergonomic abstractions. When writing new code or refactoring old code,
-be sure to read up on [Abstract methods and interfaces](abstract.md) and [Union
-types](union-types.md), both of which allow code authors to write code that
-Sorbet can understand and analyze more effectively.
-
+Sorbet offers a number of powerful type-level features to enforce ergonomic
+abstractions. When writing new code or refactoring old code, be sure to read up
+on [Abstract methods and interfaces](abstract.md) and
+[Union types](union-types.md), both of which allow code authors to write code
+that Sorbet can understand and analyze more effectively.
 
 ## The TODO RBI file
 
@@ -237,24 +233,22 @@ aren't enough to adopt Sorbet in a new codebase. Sorbet requires that all
 constants resolve, and our runtime reflection to find constants is still
 imperfect.
 
-As one last attempt to ease the adoption process of Sorbet, when running `srb
-init` if after creating all these RBI files there are still missing constants,
-we'll write out an RBI file that defines them, regardless of whether they exist
-at runtime or not. **This can be dangerous!** In particular, at this point we're
-not checking whether something was actually defined but Sorbet couldn't see it,
-or whether it was never defined and is actually buggy code that hasn't been
-caught by a project's test suite!
+As one last attempt to ease the adoption process of Sorbet, when running
+`srb init` if after creating all these RBI files there are still missing
+constants, we'll write out an RBI file that defines them, regardless of whether
+they exist at runtime or not. **This can be dangerous!** In particular, at this
+point we're not checking whether something was actually defined but Sorbet
+couldn't see it, or whether it was never defined and is actually buggy code that
+hasn't been caught by a project's test suite!
 
 That's why this file is called the TODO RBI. After initializing a project to use
-Sorbet, take a glance over the file at `sorbet/rbi/todo.rbi` and
-attempt to find out why Sorbet thinks these constants are missing. Ask: is the
-code actually covered by tests? Does the constant exist in an `irb` or `pry`
-REPL session?
+Sorbet, take a glance over the file at `sorbet/rbi/todo.rbi` and attempt to find
+out why Sorbet thinks these constants are missing. Ask: is the code actually
+covered by tests? Does the constant exist in an `irb` or `pry` REPL session?
 
 If after inspecting a constant in the TODO RBI file you're sure it should always
 exist at runtime, feel free to move it out of the TODO RBI file and into a
 hand-written RBI file.
-
 
 ## A note about vendoring RBIs
 
@@ -271,5 +265,6 @@ and predictable over time.
 So if/when we wish to upgrade an RBI that we've already checked in to our
 project's version control, we can do so explicitly with the `srb rbi` command.
 
-[the same as theirs]: https://github.com/flow-typed/flow-typed/wiki/FAQs#why-do-i-need-to-commit-the-libdefs-that-flow-typed-installs-for-my-project
+[the same as theirs]:
+  https://github.com/flow-typed/flow-typed/wiki/FAQs#why-do-i-need-to-commit-the-libdefs-that-flow-typed-installs-for-my-project
 [`sorbet-typed`]: https://github.com/sorbet/sorbet-typed

@@ -50,9 +50,8 @@ Now `srb` **and** `sorbet-runtime` will check that our `Main.main` method is
 given only `String`s and returns only `Integer`s:
 
 - `srb` will do this with [static checks](static.md).
-- `sorbet-runtime` will do this by wrapping `Main.main` with [dynamic
-  checks](runtime.md) that run every time the method is called.
-
+- `sorbet-runtime` will do this by wrapping `Main.main` with
+  [dynamic checks](runtime.md) that run every time the method is called.
 
 ## Type System
 
@@ -78,7 +77,6 @@ table of contents:
 - [T.class_of](class-of.md)
 - [T.self_type](self-type.md)
 - [T.all](intersection-types.md) – Intersection Types
-
 
 ## How do I...
 

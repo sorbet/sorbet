@@ -3,9 +3,9 @@
   --sorbet-purple-2: #4f4397;
   --sorbet-purple-3: #6255b0;
 
-  --sorbet-purple-4: #8673FF;
-  --sorbet-purple-5: #997AFC; /* currently unused */
-  --sorbet-purple-6: #B4A8FF;
+  --sorbet-purple-4: #8673ff;
+  --sorbet-purple-5: #997afc; /* currently unused */
+  --sorbet-purple-6: #b4a8ff;
 }
 
 .homeContainer {
@@ -66,7 +66,8 @@
   background: #ffffff;
 }
 
-.homeContainer a, .footer a {
+.homeContainer a,
+.footer a {
   color: var(--sorbet-purple-6);
 }
 
@@ -94,7 +95,7 @@
 }
 
 .row:after {
-  content: "";
+  content: '';
   display: table;
   clear: both;
 }

@@ -102,7 +102,7 @@ end
 
 ## `returns` & `void`: Annotating return types
 
-Unlike `params`, we *have* to tell Sorbet what our method returns, even if it
+Unlike `params`, we _have_ to tell Sorbet what our method returns, even if it
 has "no useful return." For example, consider this method:
 
 ```ruby
@@ -114,7 +114,7 @@ end
 ```
 
 We care more about what **effect** this method has (printing to the screen) than
-what this method **returns** (`5`). We *could* write a `sig` like this:
+what this method **returns** (`5`). We _could_ write a `sig` like this:
 
 ```ruby
 sig {returns(Integer)}   # ← Problematic! Read why below...
@@ -145,7 +145,7 @@ Using `void` instead of `returns(...)` does a number of things:
 - Also statically, `srb` will error when typed code tries to inspect the result
   of a `void` method.
 
-- In the runtime, `sorbet-runtime` will *throw away* the result of our method,
+- In the runtime, `sorbet-runtime` will _throw away_ the result of our method,
   and return a dummy value instead. (All `void` methods return the same dummy
   value.) This prevents untyped code from silently depending on what we return.
 
@@ -176,7 +176,6 @@ end
 Main.name_length(Main.greet('Alice')) # => error!
 ```
 
-
 ## Why do we need signatures?
 
 Taking a step back, why do we need `sig`s in the first place?
@@ -189,7 +188,7 @@ and type annotations balances being **explicit** with being **powerful**:
   results** and catch **type errors**.
 - Since there's no type inference across methods, each method can be typechecked
   **100% in parallel**, for fast performance. Other people can't write code
-  which makes typechecking *your* code slow.
+  which makes typechecking _your_ code slow.
 - Method signatures serve as machine-checked documentation for whoever reads the
   code.
 
@@ -220,8 +219,8 @@ calls:
 
   In a [gradual type system](gradual.md) like Sorbet, the static checks can be
   turned off at any time. Having [runtime-validated](runtime.md) type
-  annotations gives greater confidence in the predictions that `srb` [makes
-  statically](static.md).
+  annotations gives greater confidence in the predictions that `srb`
+  [makes statically](static.md).
 
 - Type assertions in code would be inevitable.
 
