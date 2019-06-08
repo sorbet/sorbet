@@ -33,8 +33,22 @@ shift
 srb_path="${BASH_SOURCE[0]}"
 
 typecheck() {
+  fileList=$(mktemp)
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet"
+
+  [ -d "$cache_dir" ] || mkdir "$cache_dir"
+  if [ -f Gemfile.lock ]; then
+    cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
+    cache_file="${cache_dir}/${cache_hash}"
+    if [ ! -f "$cache_file" ]; then
+      bundle exec rbis | tr " " "\n" > "$cache_file"
+    fi
+    cat "$cache_file" >> "${fileList}"
+  fi
+
   if [ -n "$SRB_SORBET_EXE" ]; then
-    "$SRB_SORBET_EXE" "$@"
+    # shellcheck disable=SC2086
+    "$SRB_SORBET_EXE" @$fileList "$@"
   else
     # We're using bash string operations here to avoid forking.
     # Using dirname / basename / etc. would mean ~15ms for each call.
@@ -49,7 +63,8 @@ typecheck() {
     # (assumes people only have one platform-depdendent gem installed per version)
     sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
 
-    "${sorbet[0]}" "$@"
+    # shellcheck disable=SC2086
+    "${sorbet[0]}" @$fileList "$@"
   fi
 }
 
