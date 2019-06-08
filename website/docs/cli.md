@@ -15,9 +15,9 @@ line:
 ❯ srb tc --help
 ```
 
-In this doc, we'll cover **only** the command line interface to the
-`srb tc` subcommand. For information about `srb init` and `srb rbi`, see [RBI
-files](rbi.md).
+In this doc, we'll cover **only** the command line interface to the `srb tc`
+subcommand. For information about `srb init` and `srb rbi`, see
+[RBI files](rbi.md).
 
 ## Config file
 
@@ -26,16 +26,15 @@ read, located at `sorbet/config`. The config file is actually just a
 newline-separated list of arguments to pass to `srb tc`, the same as if they'd
 been passed at the command line.
 
-Every line in this file acts as if it's prepended to the argument list of `srb
-tc`. So arguments in the config file are always passed first (if it exists), followed
-by arguments provided on the command line.
+Every line in this file acts as if it's prepended to the argument list of
+`srb tc`. So arguments in the config file are always passed first (if it
+exists), followed by arguments provided on the command line.
 
-For a full description of the config file format, see the output of `srb tc
---help`.
+For a full description of the config file format, see the output of
+`srb tc --help`.
 
 Next we'll call out some specific flags that are likely to help troubleshoot
 problems or adapt Sorbet into an existing project.
-
 
 ## Including and excluding files
 
@@ -57,12 +56,16 @@ srb tc . --ignore=/vendor
 that it should read. By default, `sorbet/config` is created to contain `.`, so
 `srb tc` will type check every file in the current directory[^gems].
 
-> **Note**: Sorbet only checks files that end in `*.rb` or `*.rbi`. To check other files,
-> they must be explicitly named on the command line (or in the config file), or 
-> given an appropriate file extension.
+> **Note**: Sorbet only checks files that end in `*.rb` or `*.rbi`. To check
+> other files, they must be explicitly named on the command line (or in the
+> config file), or given an appropriate file extension.
+
+<!-- prettier-ignore-start -->
 
 [^gems]: This is incidentally why Sorbet does not type check gems: the paths to
 gems' source directories are never given to Sorbet.
+
+<!-- prettier-ignore-end -->
 
 Sometimes, including an entire folder includes too many files. We can refine the
 list of files Sorbet reads with the `--ignore` flag. The syntax is:
@@ -79,9 +82,9 @@ and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.
 
 ## Overriding strictness levels
 
-By default, Sorbet reads each file to determine its [strictness
-level](static.md#file-level-granularity-strictness-levels), defaulting to
-`# typed: false` if none is provided.
+By default, Sorbet reads each file to determine its
+[strictness level](static.md#file-level-granularity-strictness-levels),
+defaulting to `# typed: false` if none is provided.
 
 It can be useful, especially when [Adopting Sorbet](adopting.md) to see what it
 would be like if certain files were at a different strictness level. There are a
@@ -105,7 +108,7 @@ overrides on a file-by-file basis. For example, with this YAML file:
 ```yaml
 # -- foo.yaml --
 true:
-- foo.rb
+  - foo.rb
 ```
 
 and this Ruby file:

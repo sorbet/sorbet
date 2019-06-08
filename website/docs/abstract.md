@@ -6,28 +6,30 @@ title: Abstract Classes and Interfaces
 Sorbet supports abstract classes, abstract methods, and interfaces.
 
 > **Note**: Much of the support for abstract classes, methods, and interfaces is
-> only implemented using the runtime system.  Support for these checks in the
+> only implemented using the runtime system. Support for these checks in the
 > static system is planned for the future.
 
-Abstract methods ensure that a particular method gets implemented
-anywhere the class or module is inherited, included, or extended.
+Abstract methods ensure that a particular method gets implemented anywhere the
+class or module is inherited, included, or extended.
 
 Keep in mind:
-- `abstract!` can be used to prevent a class from being instantiated.
-- Both `abstract!` and `interface!` allow the class or module to
-  have `abstract` methods.
-- Mix in a module (via `include` or `extend`) to declare that a class
-  implements an interface.
 
+- `abstract!` can be used to prevent a class from being instantiated.
+- Both `abstract!` and `interface!` allow the class or module to have `abstract`
+  methods.
+- Mix in a module (via `include` or `extend`) to declare that a class implements
+  an interface.
 
 ## Creating an abstract method
 
 To create an abstract method:
-1.  Add `extend T::Helpers` to the class or module (in addition to `extend T::Sig`).
-1.  Add `abstract!` or `interface!` to the top of the class or module. (*All*
+
+1.  Add `extend T::Helpers` to the class or module (in addition to
+    `extend T::Sig`).
+1.  Add `abstract!` or `interface!` to the top of the class or module. (_All_
     methods must be abstract to use `interface!`.)
-1.  Add a `sig` with `abstract` to any methods that should be abstract,
-    and thus implemented by a child.
+1.  Add a `sig` with `abstract` to any methods that should be abstract, and thus
+    implemented by a child.
 1.  Declare the method on a single line with an empty body.
 
 ```ruby
@@ -46,10 +48,9 @@ end
 
 ## Implementing an abstract method
 
-Define the method in the implementing class or module with the same signature as the
-parent, changing `abstract` to `implementation`. 
-Sorbet cannot check types on the child, statically or at runtime, unless the
-signatures match.
+Define the method in the implementing class or module with the same signature as
+the parent, changing `abstract` to `implementation`. Sorbet cannot check types
+on the child, statically or at runtime, unless the signatures match.
 
 ```ruby
 class HelloWorld
@@ -78,7 +79,6 @@ Use of `abstract!` and `interface!` requires that:
 - `extend MyAbstractModule` works just like `include MyAbstractModule`, but for
   singleton methods
 - `abstract!` classes cannot be instantiated
-
 
 ## Abstract singleton methods
 

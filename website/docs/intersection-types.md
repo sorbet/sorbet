@@ -42,8 +42,8 @@ foo(D.new)
 ```
 
 This is useful because we don't have to know ahead of time all the things that
-might implement these two interfaces. It also gets around the problem where
-we'd have to make a third interface, `I12`, like this:
+might implement these two interfaces. It also gets around the problem where we'd
+have to make a third interface, `I12`, like this:
 
 ```ruby
 module I12
@@ -52,7 +52,7 @@ module I12
 end
 ```
 
-and include this interface into `C` and `D` (because maybe we don't have
-control over what interfaces C and D can include).
+and include this interface into `C` and `D` (because maybe we don't have control
+over what interfaces C and D can include).
 
-<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Amodule%20I1%0A%20%20def%20i1%3B%20end%0Aend%0A%0Amodule%20I2%0A%20%20def%20i2%3B%20end%0Aend%0A%0Aclass%20C%0A%20%20include%20I1%0A%20%20include%20I2%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.all(I1%2C%20I2)).void%7D%0Adef%20foo(x)%0A%20%20x.i1%0A%20%20x.i2%0Aend%0A%0Afoo(C.new)%0A">→ View on sorbet.run</a>
+[→ View on sorbet.run](<https://sorbet.run/#extend%20T%3A%3ASig%0A%0Amodule%20I1%0A%20%20def%20i1%3B%20end%0Aend%0A%0Amodule%20I2%0A%20%20def%20i2%3B%20end%0Aend%0A%0Aclass%20C%0A%20%20include%20I1%0A%20%20include%20I2%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.all(I1%2C%20I2)).void%7D%0Adef%20foo(x)%0A%20%20x.i1%0A%20%20x.i2%0Aend%0A%0Afoo(C.new)%0A>)

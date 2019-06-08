@@ -45,7 +45,6 @@ The default error handler is to raise (a `TypeError`).
 Note that setting this callback will **not** handle type errors raised when a
 method with a signature is called incorrectly. For those, see the next section.
 
-
 ## Errors from invalid method calls
 
 To customize the behvaior when a method with a sig is called and the argument
@@ -58,8 +57,8 @@ end
 ```
 
 The default error handler is to raise an error, but it respects the `.soft` and
-`.checked` builder methods, discussed in [Escape
-Hatches](troubleshooting.md#escape-hatches).
+`.checked` builder methods, discussed in
+[Escape Hatches](troubleshooting.md#escape-hatches).
 
 ## Errors from invalid sig procs
 
@@ -90,4 +89,3 @@ T::Configuration.sig_validation_error_handler = lambda do |error, opts|
   puts error.message
 end
 ```
-
