@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Override Checking · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Sorbet supports method override checking. These checks are implemented as&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Override Checking · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Sorbet supports method override checking. These checks are implemented as&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try it online</a></li><li class=""><a href="/docs/talks/talks" target="_self">Talks</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">Typed Structs</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/strict">Strict Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/override-checking.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Override Checking</h1></header><article><div><span><p>Sorbet supports method override checking. These checks are implemented as
+<code>sig</code> annotations:</p>
+<ul>
+<li><code>overridable</code> means children can override this method</li>
+<li><code>override</code> means this method overrides a method on its parent (or ancestor)</li>
+<li><code>abstract</code> means this method is abstract (has no implementation) and must be
+implemented by being overridden in all concrete subclasses.</li>
+<li><code>implementation</code> means this method implements an abstract method</li>
+</ul>
+<p>These annotations can be chained, for example <code>.implementation.overridable</code>
+lets a grandchild class override a concrete implementation of its parent.</p>
+<p>Use this table to track when annotations can be used, although the error
+messages are the canonical source of truth. ✅ means “this pairing is allowed”
+while ❌ means “this is an error” (currently, most of these errors are runtime
+errors, though in the future they may become static errors).</p>
+<blockquote>
+<p>Below, <code>standard</code> (for the child or parent) means “has a <code>sig</code>, but has none
+of the special modifiers.”</p>
+</blockquote>
+<table>
+<thead>
+<tr><th>↓Parent \ Child →</th><th style="text-align:center">no sig</th><th style="text-align:center"><code>standard</code></th><th style="text-align:center"><code>override</code></th><th style="text-align:center"><code>implementation</code></th></tr>
+</thead>
+<tbody>
+<tr><td>no sig</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+<tr><td><code>standard</code></td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+<tr><td><code>overridable</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+<tr><td><code>override</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+<tr><td><code>implementation</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+<tr><td><code>abstract</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note</strong>: if the implementation methods are inherited–from either a class or
+mixin–the methods don’t need the <code>implementation</code> annotation.</p>
+</blockquote>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/abstract"><span class="arrow-prev">← </span><span>Abstract Classes and Interfaces</span></a><a class="docs-next button" href="/docs/strict"><span>Strict Mode</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>

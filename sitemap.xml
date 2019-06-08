@@ -15,6 +15,7 @@
 <url> <loc>https://sorbet.org/docs/intersection-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/intersection-types" /> </url>
 <url> <loc>https://sorbet.org/docs/nilable-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/nilable-types" /> </url>
 <url> <loc>https://sorbet.org/docs/noreturn</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/noreturn" /> </url>
+<url> <loc>https://sorbet.org/docs/override-checking</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/override-checking" /> </url>
 <url> <loc>https://sorbet.org/docs/overview</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/overview" /> </url>
 <url> <loc>https://sorbet.org/docs/procs</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/procs" /> </url>
 <url> <loc>https://sorbet.org/docs/quickref</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/quickref" /> </url>
