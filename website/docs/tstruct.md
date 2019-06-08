@@ -5,7 +5,7 @@ title: Typed Structs
 
 > TODO: This page is still a fragment. Contributions welcome!
 
-While Sorbet supports using `Hash`es and `Struct`s, using they aren't always
+While Sorbet supports using Hashes and Structs, using they aren't always
 possible to model well statically.
 
 The `sorbet-runtime` gem ships with an alternative to using Ruby's `Hash` or

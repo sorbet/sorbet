@@ -154,6 +154,97 @@ constants through ancestors (both mixins or superclasses).
     Parent::MY_CONST   # ok
     ```
 
+## 5005
+
+A class or instance variable is defined in the wrong context.
+
+```ruby
+# typed: true
+class A
+  extend T::Sig
+
+  def foo
+    @@class_var = T.let(10, Integer)
+    @x = T.let(10, Integer)
+  end
+
+end
+```
+
+There are two such errors in the above. In the first, `@@class_var` is declared
+outside of the class scope. In the second, `@x` is declared outside of the
+`initialize` method.
+
+For how to fix, see [Strict Mode](strict.md).
+
+## 5006
+
+An instance variable has been redeclared with another type.
+
+```ruby
+# typed: true
+class A
+  extend T::Sig
+
+  def initialize
+    @x = T.let(10, Integer)
+    @x = T.let("x", String)
+  end
+end
+```
+
+## 5008
+
+A class was defined as the subclass of a `type_alias`. It also occurs if a `type_alias` mixin is used in a class.
+
+```ruby
+# typed: true
+A = T.type_alias(Integer)
+class B < A; end # error: Superclasses and mixins may not be type aliases
+
+module M; end
+
+AliasModule = T.type_alias(M)
+class C
+  include AliasModule # error: Superclasses and mixins may not be type aliases
+end
+```
+
+## 5011
+
+A class inherits from itself either directly or through a inheritance chain.
+
+```ruby
+class A < A; end
+
+class B < C; end
+class C < B; end
+```
+
+## 5012
+
+A class was changed to inherit from a different superclass.
+
+```ruby
+class A; end
+class B; end
+
+class C < A; end
+class C < B; end
+```
+
+## 5013
+
+A class or instance variable declaration used `T.cast` when it should use `T.let`.
+
+```ruby
+class A
+  @@x = T.cast(10, Integer)
+end
+```
+
+For how to fix, see [Strict Mode](strict.md).
+
 ## 5014
 
 Given code like this:
