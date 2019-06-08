@@ -50,11 +50,11 @@ if [ "$err" -ne 0 ]; then
 fi
 
 err=0
-echo $'```' > lint_website
-./tools/scripts/lint_website.sh &>> lint_website || err=$?
-echo $'```' >> lint_website
+echo $'```' > format_website
+./tools/scripts/format_website.sh -t &>> format_website || err=$?
+echo $'```' >> format_website
 if [ "$err" -ne 0 ]; then
-    buildkite-agent annotate --context tools/scripts/lint_website.sh --style error --append < lint_website
+    buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
     globalErr=$err
 fi
 
