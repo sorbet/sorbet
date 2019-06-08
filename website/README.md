@@ -31,6 +31,14 @@ All commands must be run from within Sorbet's top-level `website/` folder.
     ❯ yarn start
     ```
 
+1.  Format your changes with Prettier:
+
+    ```sh
+    ❯ yarn prettier
+    ```
+
+    (Recommended: set up your editor to run Prettier on save.)
+
 1.  The build should be automatically deployed when pushing to `github.com`.
     To deploy manually:
 
