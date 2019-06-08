@@ -49,6 +49,15 @@ if [ "$err" -ne 0 ]; then
     globalErr=$err
 fi
 
+err=0
+echo $'```' > lint_website
+./tools/scripts/lint_website.sh &>> lint_website || err=$?
+echo $'```' >> lint_website
+if [ "$err" -ne 0 ]; then
+    buildkite-agent annotate --context tools/scripts/lint_website.sh --style error --append < lint_website
+    globalErr=$err
+fi
+
 if [ "$globalErr" -ne 0 ]; then
     exit $globalErr
 fi
