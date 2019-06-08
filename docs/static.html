@@ -1,5 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Enabling Static Checks · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;This doc will cover how to enable and disable the &lt;strong&gt;static checks&lt;/strong&gt; that&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Enabling Static Checks · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;This doc will cover how to enable and disable the &lt;strong&gt;static checks&lt;/strong&gt; that&lt;/p&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Enabling Static Checks · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;This doc will cover how to enable and disable the &lt;strong&gt;static checks&lt;/strong&gt; that &lt;code&gt;srb&lt;/code&gt;&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Enabling Static Checks · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;This doc will cover how to enable and disable the &lt;strong&gt;static checks&lt;/strong&gt; that &lt;code&gt;srb&lt;/code&gt;&lt;/p&gt;
 "/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -64,8 +64,8 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/static.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Enabling Static Checks</h1></header><article><div><span><p>This doc will cover how to enable and disable the <strong>static checks</strong> that
-<code>srb</code> reports. Specifically, we’ll look at how to toggle these checks…</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/static.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Enabling Static Checks</h1></header><article><div><span><p>This doc will cover how to enable and disable the <strong>static checks</strong> that <code>srb</code>
+reports. Specifically, we’ll look at how to toggle these checks…</p>
 <ul>
 <li>…within an entire <strong>file</strong>.</li>
 <li>…for a particular <strong>method</strong>.</li>
@@ -85,10 +85,12 @@ slap on a quick warning label:</p>
 <li>Display all errors to the user.</li>
 </ol>
 <p>However, in step (3), most kinds of errors are <em>silenced</em> by default, instead of
-being reported. To opt into <em>more</em> checks, we use <code># typed:</code> <strong>sigils</strong><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>. A
-<code># typed:</code> sigil is a comment placed at the top of a Ruby file, indicating to
+being reported. To opt into <em>more</em> checks, we use <code># typed:</code> <strong>sigils</strong><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>.
+A <code># typed:</code> sigil is a comment placed at the top of a Ruby file, indicating to
 <code>srb</code> which errors to report and which to silence. These are the available
 sigils, each defining a <strong>strictness level</strong>:</p>
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 <table>
 <thead>
 <tr><th>All errors silenced</th><th></th><th></th><th></th><th>All errors reported</th></tr>
@@ -104,9 +106,9 @@ all are reported in that file. <strong>Note</strong>: ignoring a file can cause 
 appear in <em>other</em> files, because that other file references something defined
 in an ignored file. We recommend pushing the entire project to out of <code>ignore</code>
 (at Stripe, 100% of non-test files are not ignored.)</p></li>
-<li><p>At <code># typed: false</code>, only errors related to syntax, constant resolution and correctness of <code>sig</code>s are reported.
-Fixing these errors is the baseline for adopting
-Sorbet in a new codebase, and provides value even before adding type
+<li><p>At <code># typed: false</code>, only errors related to syntax, constant resolution and
+correctness of <code>sig</code>s are reported. Fixing these errors is the baseline for
+adopting Sorbet in a new codebase, and provides value even before adding type
 annotations. <code># typed: false</code> is the <strong>default</strong> for files without sigils.</p></li>
 <li><p>At <code># typed: true</code>, things that would normally be called “type errors” are
 reported. This includes calling a non-existent method, calling a method with
@@ -114,16 +116,16 @@ mismatched argument counts, using variables inconsistently with their types,
 etc.</p></li>
 <li><p>At <code># typed: strict</code>, Sorbet no longer implicitly marks things as being
 <a href="/docs/untyped">dynamically typed</a>. At this level all methods, constants, and
-instance variables must have <a href="/docs/strict">explicitly annotated types</a>.
-This is analogous to TypeScript’s <code>noImplicitAny</code> flag.</p></li>
+instance variables must have <a href="/docs/strict">explicitly annotated types</a>. This is
+analogous to TypeScript’s <code>noImplicitAny</code> flag.</p></li>
 <li><p>At <code># typed: strong</code>, Sorbet no longer allows <a href="/docs/untyped"><code>T.untyped</code></a> as the
 intermediate result of any method call. This effectively means that Sorbet
 knew the type statically for 100% of calls within a file. It’s currently
 impossible to write code with no errors at this strictness level.</p></li>
 </ul>
 <p>To recap: adding one of these comments to the top of a Ruby file controls which
-errors <code>srb</code> reports or silences in that file. The strictness level only
-affects which errors are reported.</p>
+errors <code>srb</code> reports or silences in that file. The strictness level only affects
+which errors are reported.</p>
 <blockquote>
 <p><strong>Note</strong>: Method signatures in <code># typed: false</code> files are <em>still parsed and
 used</em> by Sorbet if that method is called in other files. Specifically, adding
@@ -171,10 +173,10 @@ additional checks. Now <code>srb</code> reports this:</p>
                 ^^^^^^^
 </code></pre>
 <p>For example, it’s possible that we don’t care about what’s stored in the <code>env</code>,
-only that we access things in the <code>env</code> with <code>Symbol</code> keys. Right now though,
-an <code>env</code> of <code>{user: 'jez'}</code> is a type error. In this case, we may want to <em>opt
-out</em> of some static checks on this speficic argument, without opting out the
-method entirely. In this case, we can use <a href="/docs/untyped"><code>T.untyped</code></a>:</p>
+only that we access things in the <code>env</code> with <code>Symbol</code> keys. Right now though, an
+<code>env</code> of <code>{user: 'jez'}</code> is a type error. In this case, we may want to <em>opt out</em>
+of some static checks on this speficic argument, without opting out the method
+entirely. In this case, we can use <a href="/docs/untyped"><code>T.untyped</code></a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
@@ -187,8 +189,8 @@ log_env({<span class="hljs-symbol">timeout_len:</span> <span class="hljs-number"
 </code></pre>
 <p><code>T.untyped</code> is a type that effectively makes a region of code act like it was
 written in a dynamically typed language with no static checks. By using
-<code>T.untyped</code> in specific arguments within a <code>sig</code>, we can silence most (but
-not all) errors relating to that argument.</p>
+<code>T.untyped</code> in specific arguments within a <code>sig</code>, we can silence most (but not
+all) errors relating to that argument.</p>
 <blockquote>
 <p><strong>Warning</strong>: Be careful about opting out of static checks with <code>T.untyped</code>!
 Usually, we can rewrite our code to avoid silencing errors. For example, we
@@ -214,8 +216,8 @@ a.foo             <span class="hljs-comment"># =&gt; Method `foo` does not exist
 T.unsafe(a).foo   <span class="hljs-comment"># ok</span>
 </code></pre>
 <p>The call to <code>T.unsafe</code> marks <code>a</code> as <code>T.untyped</code>, which causes Sorbet to silence
-the error about the method <code>foo</code> as missing. Note: sometimes what looks like
-a local variable is actually a method call on <code>self</code> in Ruby:</p>
+the error about the method <code>foo</code> as missing. Note: sometimes what looks like a
+local variable is actually a method call on <code>self</code> in Ruby:</p>
 <pre><code class="hljs css language-ruby">define_singleton_method(<span class="hljs-symbol">:foo</span>) { puts <span class="hljs-string">'A.foo'</span>; <span class="hljs-literal">true</span> }
 
 <span class="hljs-keyword">if</span> foo                 <span class="hljs-comment"># =&gt; Method `foo` does not exist on `T.class_of(A)`</span>

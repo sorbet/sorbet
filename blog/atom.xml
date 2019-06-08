@@ -20,6 +20,8 @@ millions of lines of code. At that scale and with our expected rapid growth rate
 two things are true: 1) we need all the tooling help we can get to understand
 and modify that much code, and 2) a total rewrite in a statically typed language
 would be a massive undertaking.</p>
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 <p>With that in mind, in October 2017 a small team of engineers conceived of
 building Sorbet, a gradual static type system for Ruby. Static type systems look
 for certain classes of potential errors without running your code. A gradual

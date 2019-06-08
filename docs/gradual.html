@@ -68,12 +68,12 @@
 <h2><a class="anchor" aria-hidden="true" id="what-is-a-gradual-type-system"></a><a href="#what-is-a-gradual-type-system" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What is a gradual type system?</h2>
 <p>In large codebases, complete rewrites are expensive and dangerous. A complete
 halt on new features to pay down technical debt? Oof. “Ah, but if we just
-rewrite in <em>&lt;my favorite language&gt;</em>, we’ll be fine!” Maybe… This risk pays off
-only in extreme circumstances.</p>
-<p><strong>Gradual type systems</strong> solve this. Types can be adopted incrementally, team-by-team
-or file-by-file, according to the velocity of individual teams. In the
-face of large user asks, quarterly planning, and re-orgs, migrations to gradual
-type systems are resilient to shifting priorities.</p>
+rewrite in <em>&lt;my favorite language&gt;</em>, we’ll be fine!” Maybe… This risk pays
+off only in extreme circumstances.</p>
+<p><strong>Gradual type systems</strong> solve this. Types can be adopted incrementally,
+team-by-team or file-by-file, according to the velocity of individual teams. In
+the face of large user asks, quarterly planning, and re-orgs, migrations to
+gradual type systems are resilient to shifting priorities.</p>
 <p>To deliver on this promise, gradual type systems make a compromise: type checks
 can be “turned off” at any time and at any level of granularity. In Sorbet, we
 can opt out of type checking at a call site, a method definition, a class, or
@@ -109,9 +109,9 @@ T.reveal_type(z) <span class="hljs-comment"># =&gt; String</span>
 
 <span class="hljs-comment"># ... z = 0, but its type is String!</span>
 </code></pre>
-<p>Follow what this example is doing: we start with <code>x = 0</code>, then set <code>y = x</code>,
-then <code>z = y</code>, so in the end <code>z = 0</code>. But at the same time, Sorbet thinks that
-<code>z</code> has type String!</p>
+<p>Follow what this example is doing: we start with <code>x = 0</code>, then set <code>y = x</code>, then
+<code>z = y</code>, so in the end <code>z = 0</code>. But at the same time, Sorbet thinks that <code>z</code> has
+type String!</p>
 <p>At first blush, it looks like we <strong>do not</strong> want this property in our type
 system. It lets us make wildly inaccurate claims! But let’s withhold judgement
 for a second, and see what this property enables:</p>
@@ -140,9 +140,9 @@ is <code>T.untyped</code>. Why? This is what Sorbet assumes for any methods that
 a corresponding <code>sig</code> annotation.</p>
 <p>Since <code>T.untyped</code> <em>could be</em> any type, when <code>name.length</code> runs, Sorbet
 optimistically assumes that <code>name</code> <em>will</em> have some type which has a <code>#length</code>
-method. Then it also optimistically assumes that the thing <code>#length</code> returns
-(in this case, <code>len</code>) could be an <code>Integer</code>. Thus, Sorbet declares that this
-method type checks.</p>
+method. Then it also optimistically assumes that the thing <code>#length</code> returns (in
+this case, <code>len</code>) could be an <code>Integer</code>. Thus, Sorbet declares that this method
+type checks.</p>
 <p>In a sense, “being optimistic” is really just a way of the programmer telling
 Sorbet, “I believe this code is correct.” And realistically, we might be
 convinced of our code’s correctness for a number of reasons:</p>
@@ -208,7 +208,8 @@ already enabled <code>typed: true</code> in the vast majority of files in our ma
 codebase, but most methods and even a few core abstractions are not typed yet.</p>
 <p>There are a number of tools for managing <code>T.untyped</code> in a codebase:</p>
 <ul>
-<li><a href="/docs/static">Strictness levels</a> (<code>typed: true</code>, <code>typed: strict</code>, and <code>typed: strong</code>).
+<li><a href="/docs/static">Strictness levels</a> (<code>typed: true</code>, <code>typed: strict</code>, and
+<code>typed: strong</code>).
 <ul>
 <li>These levels control when <code>T.untyped</code> is allowed.</li>
 </ul></li>
@@ -232,8 +233,8 @@ troubleshooting. See <a href="/docs/troubleshooting">Troubleshooting</a> for mor
 <h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <p>Gradual type systems make it tractable to mix feature development with adopting
 a typed language. The guarantees they provide are necessarily weaker than
-languages without a type like <code>T.untyped</code>, because <code>T.untyped</code> allows us to
-“opt out” of type checking. But it’s precisely this property which enables
+languages without a type like <code>T.untyped</code>, because <code>T.untyped</code> allows us to “opt
+out” of type checking. But it’s precisely this property which enables
 incremental adoption through a large codebase.</p>
 <p>Armed with this knowledge, here are some resources to check out next:</p>
 <ul>

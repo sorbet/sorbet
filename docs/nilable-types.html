@@ -84,10 +84,10 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="tracking-nil"></a><a href="#tracking-nil" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracking <code>nil</code></h2>
-<p>Sorbet is smart enough to follow the control flow of a program to update
-its knowledge about what types each variable has within each branch. For
-example, if we have a method that declares it can only be given something that’s
-not <code>nil</code>, Sorbet will force us to first check whether our variable is <code>nil</code>:</p>
+<p>Sorbet is smart enough to follow the control flow of a program to update its
+knowledge about what types each variable has within each branch. For example, if
+we have a method that declares it can only be given something that’s not <code>nil</code>,
+Sorbet will force us to first check whether our variable is <code>nil</code>:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 sig {params(<span class="hljs-symbol">x:</span> String).void}
@@ -103,7 +103,7 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20String).void%7D%0Adef%20must_be_given_string(x)%0A%20%20puts%20%22Got%20string%3A%20%23%7Bx%7D%22%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(String)).void%7D%0Adef%20foo(x)%0A%20%20must_be_given_string(x)%20%23%20error%3A%20%0A%20%20if%20x%0A%20%20%20%20must_be_given_string(x)%20%23%20ok%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#extend%20T%253A%253ASig%0A%0Asig%20%7Bparams(x%253A%20String).void%7D%0Adef%20must_be_given_string(x)%0A%20%20puts%20%22Got%20string%253A%20%2523%7Bx%7D%22%0Aend%0A%0Asig%20%7Bparams(x%253A%20T.nilable(String)).void%7D%0Adef%20foo(x)%0A%20%20must_be_given_string(x)%20%2523%20error%253A%20%0A%20%20if%20x%0A%20%20%20%20must_be_given_string(x)%20%2523%20ok%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
 <p>This is one of the most useful features of Sorbet. Many bugs can be prevented by
 ensuring when something is <code>nil</code> and when something is not <code>nil</code>! For more
 information on how this control flow-sensitivity works and how to take full
@@ -135,9 +135,9 @@ sig {params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symb
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>In this example, <code>foo</code> accepts a Hash with <code>Symbol</code> keys and <code>Integer</code> values.
-We looked up the element in the Hash at key <code>key</code>, got back <code>val</code>, and passed
-it to <code>doesnt_take_nil</code>. Here, Sorbet complains, because <code>val</code> could be <code>nil</code>
-(if the key doesn’t exist in the hash).</p>
+We looked up the element in the Hash at key <code>key</code>, got back <code>val</code>, and passed it
+to <code>doesnt_take_nil</code>. Here, Sorbet complains, because <code>val</code> could be <code>nil</code> (if
+the key doesn’t exist in the hash).</p>
 <p>In general, there’s no way to know whether <code>key</code> is in <code>options</code>, but we might
 have special knowledge (that Sorbet doesn’t know) to convince us that <code>val</code> will
 never be <code>nil</code>. Maybe:</p>
@@ -146,7 +146,8 @@ never be <code>nil</code>. Maybe:</p>
 <li>our test suite has good coverage for this code.</li>
 <li>we validate that <code>key</code> is a valid key somewhere higher up in our code.</li>
 </ul>
-<p>When we’re <strong>sure</strong> that <code>val</code> must never be <code>nil</code>, we can wrap it in <code>T.must(...)</code>:</p>
+<p>When we’re <strong>sure</strong> that <code>val</code> must never be <code>nil</code>, we can wrap it in
+<code>T.must(...)</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
@@ -218,13 +219,13 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).returns(T.ni
   T.reveal_type(y)
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(Integer)%7D%0Adef%20foo(x)%0A%20%20y%20%3D%20T.must(x).abs%0A%20%20T.reveal_type(y)%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(T.nilable(Integer))%7D%0Adef%20bar(x)%0A%20%20y%20%3D%20x%26.abs%0A%20%20T.reveal_type(y)%0Aend">→ View on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#extend%20T%253A%253ASig%0A%0Asig%20%7Bparams(x%253A%20T.nilable(Integer)).returns(Integer)%7D%0Adef%20foo(x)%0A%20%20y%20%253D%20T.must(x).abs%0A%20%20T.reveal_type(y)%0Aend%0A%0Asig%20%7Bparams(x%253A%20T.nilable(Integer)).returns(T.nilable(Integer))%7D%0Adef%20bar(x)%0A%20%20y%20%253D%20x%2526.abs%0A%20%20T.reveal_type(y)%0Aend">→ View on sorbet.run</a></p>
 <h3><a class="anchor" aria-hidden="true" id="other-escape-hatches"></a><a href="#other-escape-hatches" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Other escape hatches</h3>
 <p><code>T.must</code> is one of the handful of escape hatches in Sorbet. For more
 information, see <a href="/docs/troubleshooting#escape-hatches">escape hatches</a>.</p>
 <p>Also, people frequently confuse <code>T.must</code> with <code>T.let</code>, <code>T.cast</code>, and <code>T.unsafe</code>.
-Each of these four are actually rather different; for the differences, see <a href="/docs/type-assertions">Type
-Assertions</a>.</p>
+Each of these four are actually rather different; for the differences, see
+<a href="/docs/type-assertions">Type Assertions</a>.</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/class-types"><span class="arrow-prev">← </span><span>Class Types</span></a><a class="docs-next button" href="/docs/union-types"><span>Union Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tracking-nil">Tracking <code>nil</code></a></li><li><a href="#tmust-asserting-that-something-is-not-nil"><code>T.must</code>: Asserting that something is not <code>nil</code></a></li><li><a href="#alternatives-to-tmust">Alternatives to <code>T.must</code></a><ul class="toc-headings"><li><a href="#array-fetch-hash-fetch"><code>Array#fetch</code> &amp; <code>Hash#fetch</code></a></li><li><a href="#the-safe-navigation-operator"><code>&amp;.</code>: The safe navigation operator</a></li><li><a href="#other-escape-hatches">Other escape hatches</a></li></ul></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {

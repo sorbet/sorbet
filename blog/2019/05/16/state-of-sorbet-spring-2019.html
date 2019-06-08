@@ -68,6 +68,8 @@ millions of lines of code. At that scale and with our expected rapid growth rate
 two things are true: 1) we need all the tooling help we can get to understand
 and modify that much code, and 2) a total rewrite in a statically typed language
 would be a massive undertaking.</p>
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 <p>With that in mind, in October 2017 a small team of engineers conceived of
 building Sorbet, a gradual static type system for Ruby. Static type systems look
 for certain classes of potential errors without running your code. A gradual
@@ -83,9 +85,11 @@ some very helpful collaborators. We now run Sorbet’s type checking as a part o
 every build in Stripe’s Ruby codebase, and our developers have come to rely on
 its feedback. Having proven out Sorbet’s value internally, we’re now getting
 ready to share it with the rest of the Ruby community as open source. We’ve also
-begun beta testing an editor integration which you can play with at
-<a href="https://sorbet.run">sorbet.run</a> (if you’re on a desktop browser<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>). You can read more about
-how Sorbet works in our <a href="/docs/overview">documentation</a>.</p>
+begun beta testing an editor integration which you can play with at <a href="https://sorbet.run">sorbet.run</a>
+(if you’re on a desktop browser<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>). You can read more about how Sorbet
+works in our <a href="/docs/overview">documentation</a>.</p>
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 <h2><a class="anchor" aria-hidden="true" id="where-sorbet-is-now"></a><a href="#where-sorbet-is-now" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Where Sorbet is now</h2>
 <p>It took about eight months to build and test Sorbet by deeply typing a handful
 of isolated components. We focused equally on building Sorbet and using it to
@@ -141,6 +145,8 @@ allowing us to find mismatches in the types of parameters or return values:</p>
     12 |  Hello.new.greeting(:foo)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 </code></pre>
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 <p>There’s more integration work to do and features to build, but so far work has
 already paid off in the number bugs prevented. The feedback from Stripe
 developers has already been largely positive:</p>
@@ -244,7 +250,8 @@ the <a href="https://github.com/sorbet/sorbet-typed">sorbet-typed</a> gems for R
   1579 # typed: true
 </code></pre>
 <p>It’s worth mentioning that even with <code># typed: false</code> Sorbet will still find
-invalid constants such as misspelled class names. Only the small number of  <code># typed: ignore</code> files are getting nothing from Sorbet.</p>
+invalid constants such as misspelled class names. Only the small number of
+<code># typed: ignore</code> files are getting nothing from Sorbet.</p>
 <h3><a class="anchor" aria-hidden="true" id="editor-integration"></a><a href="#editor-integration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Editor integration</h3>
 <p>We’ve built a beta integration with VS Code, which you can use in a desktop
 browser<sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2]</a></sup> at <a href="https://sorbet.run">sorbet.run</a>. As we stabilize our editor integration we plan
@@ -277,9 +284,9 @@ to DSLs that result from metaprogramming.</li>
 Sorbet as one of their integrations.</li>
 </ul>
 <p>In addition to code and tool contributions we’ve had many fruitful conversations
-that helped shape our thinking. Our thanks go out to <a href="https://github.com/soutaro">@soutaro</a>, author of Steep;
-<a href="https://github.com/mame">@mame</a>, who is working on a Type profiler; and of course our favorite BDFL
-<a href="https://github.com/matz">@matz</a>.</p>
+that helped shape our thinking. Our thanks go out to <a href="https://github.com/soutaro">@soutaro</a>, author of
+Steep; <a href="https://github.com/mame">@mame</a>, who is working on a Type profiler; and of course our favorite
+BDFL <a href="https://github.com/matz">@matz</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="wrapping-up"></a><a href="#wrapping-up" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wrapping up</h2>
 <p>Sorbet has matured a lot since its first conception and a host of fantastic
 contributors and collaborators have helped significantly. We’ve proven Sorbet’s
@@ -307,9 +314,8 @@ Sorbet at <a href="https://sorbet.run">sorbet.run</a>.</p>
 infrastructure tasks, Scala for data wrangling, and JavaScript for client-side
 work. <a href="#fnref1" class="footnote-backref">↩</a></p>
 </li>
-<li id="fn2"  class="footnote-item"><p><a href="https://sorbet.run">sorbet.run</a> also works on mobile devices but
-does not offer all the code navigation and exploration features of the desktop
-version. <a href="#fnref2" class="footnote-backref">↩</a> <a href="#fnref2:1" class="footnote-backref">↩</a></p>
+<li id="fn2"  class="footnote-item"><p><a href="https://sorbet.run">sorbet.run</a> also works on mobile devices but does not offer all the
+code navigation and exploration features of the desktop version. <a href="#fnref2" class="footnote-backref">↩</a> <a href="#fnref2:1" class="footnote-backref">↩</a></p>
 </li>
 <li id="fn3"  class="footnote-item"><p>A call site is just a single location in a codebase that will
 result in a call to function or method when run. We don’t use the term <em>method
