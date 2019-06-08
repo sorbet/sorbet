@@ -18,7 +18,7 @@ wrap_verbose() {
   trap "rm -f '$out_log'" EXIT
 
   if ! "$@" > "$out_log" 2>&1; then
-    if [ -z "$VERBOSE" ]; then
+    if [ "$VERBOSE" = "" ]; then
       error "└─ '$*' failed. Re-run with --verbose for more."
     else
       cat "$out_log"
@@ -26,7 +26,7 @@ wrap_verbose() {
     fi
     exit 1
   fi
-  if [ -n "$VERBOSE" ]; then
+  if [ "$VERBOSE" != "" ]; then
     cat "$out_log"
   fi
 }
@@ -118,7 +118,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if ! [ -z "$RECORD" ] && [ -z "$UPDATE" ]; then
+if ! [ "$RECORD" = "" ] && [ "$UPDATE" = "" ]; then
   error "--record requires --update"
   exit 1
 fi
@@ -131,7 +131,7 @@ info "Running test:  $relative_test_exe $relative_test_dir $FLAGS"
 
 actual="$(mktemp -d)"
 
-if [ -n "$VERBOSE" ]; then
+if [ "$VERBOSE" != "" ]; then
   info "├─ PWD:       $PWD"
   info "├─ test_dir:  $test_dir"
   info "├─ actual:    $actual"
@@ -139,7 +139,7 @@ fi
 
 srb="$root_dir/bin/srb"
 
-if [ -z "${SRB_SORBET_EXE:-}" ]; then
+if [ "${SRB_SORBET_EXE:-}" = "" ]; then
   SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"
 fi
 export SRB_SORBET_EXE
@@ -161,7 +161,7 @@ fi
 
 if ! [ -f "$test_dir/src/Gemfile" ]; then
   error "├─ each test must have src/Gemfile: $test_dir/src/Gemfile"
-  if [ -z "$UPDATE" ]; then
+  if [ "$UPDATE" = "" ]; then
     warn "└─ re-run with --update to create it."
     exit 1
   else
@@ -172,7 +172,7 @@ fi
 
 if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
   error "├─ each test must have src/Gemfile.lock: $test_dir/src/Gemfile.lock"
-  if [ -z "$UPDATE" ]; then
+  if [ "$UPDATE" = "" ]; then
     warn "└─ re-run with --update to create it."
     exit 1
   else
@@ -188,7 +188,7 @@ fi
 if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
   error "├─ hidden-definitions are not currently testable."
 
-  if [ -z "$UPDATE" ]; then
+  if [ "$UPDATE" = "" ]; then
     warn "└─ please remove: $test_dir/expected/sorbet/rbi/hidden-definitions"
     exit 1
   else
@@ -222,9 +222,9 @@ export SRB_SORBET_TYPED_REVISION
   if ! diff -u "$test_dir/src/Gemfile.lock" "$actual/src/Gemfile.lock"; then
     error "├─ expected Gemfile.lock did not match actual Gemfile.lock"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
-      if [ -z "$DEBUG" ]; then
+      if [ "$DEBUG" = "" ]; then
         # Debugging usually requires changing the Gemfile to add pry. Printing
         # but not exiting here lets us skip updating for the sake of debugging.
         exit 1
@@ -235,7 +235,7 @@ export SRB_SORBET_TYPED_REVISION
     fi
   fi
 
-  if ! [ -z "$DEBUG" ]; then
+  if [ "$DEBUG" != "" ]; then
     # Don't redirect anything, so that binding.pry and friends work
     bundle exec "$srb" init
     exit
@@ -249,7 +249,7 @@ export SRB_SORBET_TYPED_REVISION
         sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
         > "$actual/src/out.log"; then
       error "├─ srb init failed."
-      if [ -z "$VERBOSE" ]; then
+      if [ "$VERBOSE" = "" ]; then
         error "├─ stdout: $actual/src/out.log"
         error "├─ stderr: $actual/src/err.log"
         error "└─ (or re-run with --verbose)"
@@ -267,11 +267,11 @@ export SRB_SORBET_TYPED_REVISION
 
 # ----- Check out.log -----
 
-if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
+if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/out.log" ]; then
   if ! diff -u "$test_dir/expected/out.log" "$actual/src/out.log"; then
     error "├─ expected out.log did not match actual out.log"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
       exit 1
     else
@@ -284,11 +284,11 @@ fi
 
 # ----- Check err.log -----
 
-if [ -z "$is_partial" ] || [ -f "$test_dir/expected/err.log" ]; then
+if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/err.log" ]; then
   if ! diff -u "$test_dir/expected/err.log" "$actual/src/err.log"; then
     error "├─ expected err.log did not match actual err.log"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
       exit 1
     else
@@ -307,7 +307,7 @@ diff_total() {
   if ! diff -ur "$test_dir/expected/sorbet" "$actual/src/sorbet"; then
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above. Run with --update to fix."
       exit 1
     else
@@ -331,7 +331,7 @@ diff_partial() {
     cat "$actual/src/partial-diff.log"
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
       exit 1
     else
@@ -358,12 +358,12 @@ diff_partial() {
   fi
 }
 
-if [ -z "$is_partial" ]; then
+if [ "$is_partial" = "" ]; then
   diff_total
 elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
-elif [ -n "$UPDATE" ]; then
-  if [ -z "$RECORD" ]; then
+elif [ "$UPDATE" != "" ]; then
+  if [ "$RECORD" = "" ]; then
     warn "├─ Not recording sorbet/ folder for empty partial test."
     info "├─ Re-run with --record to record."
   else
