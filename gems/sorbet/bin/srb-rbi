@@ -9,6 +9,7 @@ require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-definition-finder'
 require_relative '../lib/fetch-rbis'
+require_relative '../lib/find-gem-rbis'
 require_relative '../lib/suggest-typed'
 require_relative '../lib/todo-rbi'
 
@@ -201,6 +202,9 @@ If instead you want to explore your files locally, here are some things to try:
       make_step(Sorbet::Private::TodoRBI)
     when 'suggest-typed'
       make_step(Sorbet::Private::SuggestTyped)
+
+    when 'find-gem-rbis', Sorbet::Private::FindGemRBIs.output_file
+      make_step(Sorbet::Private::FindGemRBIs)
 
     when 'update'
       nil

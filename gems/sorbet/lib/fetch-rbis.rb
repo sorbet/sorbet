@@ -72,37 +72,11 @@ class Sorbet::Private::FetchRBIs
     matching_version_directories(ruby_dir, ruby_version)
   end
 
-  # List of rbi folders in the gem's source
-  T::Sig::WithoutRuntime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
-  def self.paths_within_gem_sources(gemspec)
-    paths = T.let([], T::Array[String])
-    %w[rbi rbis].each do |dir|
-      gem_rbi = "#{gemspec.full_gem_path}/#{dir}"
-      paths << gem_rbi if Dir.exist?(gem_rbi)
-    end
-    paths
-  end
-
   # List of directories in lib/gemspec.name whose names satisfy gemspec.version
   T::Sig::WithoutRuntime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
   def self.paths_for_gem_version(gemspec)
     local_dir = "#{RBI_CACHE_DIR}/lib/#{gemspec.name}"
     matching_version_directories(local_dir, gemspec.version)
-  end
-
-  # Make the config file that has a list of every non-vendored RBI
-  # (we don't vendor these so that (1) people don't have to check them in (2) people aren't likely to patch them)
-  T::Sig::WithoutRuntime.sig {params(gem_source_paths: T::Array[String]).void}
-  def self.serialize_rbi_list(gem_source_paths)
-    File.open(SORBET_RBI_LIST, 'w') do |rbi_list|
-      rbi_list.puts(gem_source_paths)
-    end
-
-    File.open(SORBET_CONFIG_FILE, 'r+') do |config|
-      if config.lines.all? {|line| !line.match(/^@#{SORBET_RBI_LIST}$/)}
-        config.puts("@#{SORBET_RBI_LIST}")
-      end
-    end
   end
 
   # Copy the relevant RBIs into their repo, with matching folder structure.
@@ -132,19 +106,10 @@ class Sorbet::Private::FetchRBIs
 
     gemspecs = Bundler.load.specs.sort_by(&:name)
 
-    gem_source_paths = T.let([], T::Array[String])
-    gemspecs.each do |gemspec|
-      gem_source_paths += paths_within_gem_sources(gemspec)
-    end
-
     vendor_paths = T.let([], T::Array[String])
     vendor_paths += paths_for_ruby_version(Gem::Version.create(RUBY_VERSION))
     gemspecs.each do |gemspec|
       vendor_paths += paths_for_gem_version(gemspec)
-    end
-
-    if gem_source_paths.length > 0
-      serialize_rbi_list(gem_source_paths)
     end
 
     if vendor_paths.length > 0
