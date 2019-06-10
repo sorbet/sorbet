@@ -1,11 +1,8 @@
+<!-- (optional) Explain your change, focusing on the details of the solution. This is a great place to call out user-visible changes. -->
+
+
 ### Motivation
-<!-- Why make this change? Describe the problem, not the solution.
-     This can also be a link to an issue. -->
-
-
-### Summary
-<!-- (optional) Explain your change, focusing on the details of the solution.
-     This is a great place to call out user-visible changes. -->
+<!-- Why make this change? Describe the problem, not the solution. This can also be a link to an issue. -->
 
 
 ### Test plan
