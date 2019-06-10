@@ -4,27 +4,31 @@ extend T::Sig
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
 def exhaustive_all_cases(x)
-  case x
+  ret = case x
   when Integer
     x
   when String
     x.to_i
   end
+  T.reveal_type(ret) # error: Revealed type: `Integer`
+  ret
 end
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
 def exhaustive_some_cases(x)
-  case x
+  ret = case x
   when Integer
     x
   else
     3
   end
+  T.reveal_type(ret) # error: Revealed type: `Integer`
+  ret
 end
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
 def exhaustive_unreachable_case(x)
-  case x
+  ret = case x
   when String
     x.to_i
   when Integer
@@ -32,6 +36,8 @@ def exhaustive_unreachable_case(x)
   else
     3 # error: This code is unreachable
   end
+  T.reveal_type(ret) # error: Revealed type: `Integer`
+  ret
 end
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
