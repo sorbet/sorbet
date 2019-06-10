@@ -44,7 +44,9 @@ def foo(xs)
 end
 ```
 
-[→ View on sorbet.run](<https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend>)
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend">
+  → View on sorbet.run
+</a>
 
 With this example we see that `xs.first` returns `T.nilable(Integer)`.
 
