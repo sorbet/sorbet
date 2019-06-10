@@ -47,5 +47,5 @@ class Sorbet::Private::FindGemRBIs
 end
 
 if $PROGRAM_NAME == __FILE__
-  Sorbet::Private::FetchRBIs.main
+  Sorbet::Private::FindGemRBIs.main
 end
