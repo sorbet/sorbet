@@ -133,6 +133,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                 rootUri = *rootUriString;
             }
             clientCompletionItemSnippetSupport = false;
+            clientHoverMarkupKind = MarkupKind::Plaintext;
             if (params->capabilities->textDocument) {
                 auto &textDocument = *params->capabilities->textDocument;
                 if (textDocument->completion) {
@@ -140,6 +141,16 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                     if (completion->completionItem) {
                         clientCompletionItemSnippetSupport =
                             (*completion->completionItem)->snippetSupport.value_or(false);
+                    }
+                }
+                if (textDocument->hover) {
+                    auto &hover = *textDocument->hover;
+                    if (hover->contentFormat) {
+                        auto &contentFormat = *hover->contentFormat;
+                        clientHoverMarkupKind = find(contentFormat.begin(), contentFormat.end(),
+                                                     MarkupKind::Markdown) != contentFormat.end()
+                                                    ? MarkupKind::Markdown
+                                                    : MarkupKind::Plaintext;
                     }
                 }
             }

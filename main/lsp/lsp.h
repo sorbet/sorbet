@@ -109,6 +109,8 @@ class LSPLoop {
      * optional.
      */
     bool clientCompletionItemSnippetSupport = false;
+    /** What hover markup should we send to the client? */
+    MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
     /** Input file descriptor; used by runLSP to receive LSP messages */
     int inputFd;
     /** Output stream; used by LSP to output messages */

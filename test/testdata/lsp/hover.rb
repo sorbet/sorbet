@@ -58,6 +58,8 @@ end
 def main
   BigFoo.bar(10, "hello")
         # ^ hover: sig {generated.params(num1: Integer, num2: String).returns(Integer)}
+        # ^ hover: ```ruby
+        # Checks that we're sending Markdown.
   BigFoo.baz
         # ^ hover: sig {generated.void}
   l = BigFoo.anotherFunc
