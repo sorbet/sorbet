@@ -7,6 +7,7 @@ require_relative './t'
 require 'bundler'
 require 'fileutils'
 require 'set'
+require 'digest'
 
 class Sorbet; end
 module Sorbet::Private; end
@@ -28,18 +29,20 @@ class Sorbet::Private::FindGemRBIs
 
   T::Sig::WithoutRuntime.sig {void}
   def self.main
+    output_file = File.exist?('Gemfile.lock') ? RBI_CACHE_DIR + Digest::MD5.hexdigest(File.read('Gemfile.lock')) : nil
+    return unless output_file
     gemspecs = Bundler.load.specs.sort_by(&:name)
 
     gem_source_paths = T.let([], T::Array[String])
     gemspecs.each do |gemspec|
-      gem_source_paths += paths_within_gem_sources(gemspec)
+      gem_source_paths << paths_within_gem_sources(gemspec)
     end
 
     File.write(output_file, gem_source_paths.compact.join("\n"))
   end
 
   def self.output_file
-    RBI_CACHE_DIR + Digest::MD5.hexdigest(File.read('Gemfile.lock'))
+    nil
   end
 end
 
