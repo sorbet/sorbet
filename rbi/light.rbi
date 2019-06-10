@@ -122,6 +122,8 @@ class T::Private::Methods::DeclBuilder
   def soft(notify:); end
   sig {params(arg: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def checked(arg); end
+  sig {returns(T::Private::Methods::DeclBuilder)}
+  def final; end
 end
 module T::Sig
   sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}

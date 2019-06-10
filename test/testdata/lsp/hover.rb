@@ -34,8 +34,9 @@ class BigFoo; extend T::Sig
     arg + self.class.bar(1, "2").to_s
   end
           
-  sig {params(num: Integer).returns(String)}
-  def quux(num)
+  sig {params(num: Integer).returns(String).final}
+  private def quux(num)
+            # ^ hover: private sig {params(num: Integer).returns(String).final}
     if num < 10
       s = 1
     else
@@ -43,6 +44,10 @@ class BigFoo; extend T::Sig
     end
     s.to_s
   end
+
+  sig {void}
+  protected def protected_fun; end;
+              # ^ hover: protected sig {void}
 
   sig { returns([Integer, String]) }
   def self.anotherFunc()
