@@ -34,10 +34,10 @@ srb_path="${BASH_SOURCE[0]}"
 
 typecheck() {
   args=""
-  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet"
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet/gem-rbis/"
 
-  [ -d "$cache_dir" ] || mkdir "$cache_dir"
   if [ -f Gemfile.lock ]; then
+    [ -d "$cache_dir" ] || mkdir "$cache_dir"
     cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
     cache_file="${cache_dir}/${cache_hash}"
     if [ ! -f "$cache_file" ]; then

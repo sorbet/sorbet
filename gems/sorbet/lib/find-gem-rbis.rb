@@ -13,7 +13,7 @@ class Sorbet; end
 module Sorbet::Private; end
 class Sorbet::Private::FindGemRBIs
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
-  RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/"
+  RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/gem-rbis/"
   GEM_DIR = 'rbi'
 
   HEADER = Sorbet::Private::Serialize.header(false, 'find-gem-rbis')
