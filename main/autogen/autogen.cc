@@ -20,6 +20,19 @@ Reference &ReferenceRef::data(ParsedFile &pf) {
     return pf.refs[_id];
 }
 
+string_view Definition::typeAsStringView() {
+    switch (type) {
+        case Definition::Module:
+            return "module"sv;
+        case Definition::Class:
+            return "class"sv;
+        case Definition::Casgn:
+            return "casgn"sv;
+        case Definition::Alias:
+            return "alias"sv;
+    }
+}
+
 class AutogenWalk {
     vector<Definition> defs;
     vector<Reference> refs;
@@ -664,13 +677,43 @@ string ParsedFile::toMsgpack(core::Context ctx, int version) {
 }
 
 void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
-    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
+    auto nameToString = [&](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); };
     for (auto &def : defs) {
         if (def.type != Definition::Class) {
             continue;
         }
         auto names = showFullName(ctx, def.id);
         out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", nameToString)));
+    }
+}
+
+void ParsedFile::subclasses(core::Context ctx, map<string, set<string>> &out) {
+    // Ignore files in dirs we don't care about
+    if (path.find("test/") == 0 || path.find("scripts/") == 0 || path.find("lib/identification/scripts/") == 0 ||
+        path.find("ruby_benchmarks/") == 0 || path.find("/test/") != string_view::npos ||
+        path.find("/benchmark/") != string_view::npos) {
+        // Ignoring 'test/' also ignores the Sorbet CLI test input files :(
+        if (!(path.find("test/cli/autogen-subclasses") == 0)) {
+            return;
+        }
+    }
+
+    auto nameToString = [&](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); };
+
+    for (const Reference &ref : refs) {
+        DefinitionRef defn = ref.parent_of;
+
+        if (!defn.exists()) {
+            continue;
+        }
+
+        // Get fully-qualified parent name as string
+        string parentName = fmt::format("{}", fmt::map_join(ref.resolved, "::", nameToString));
+
+        // Add child class to the set identified by its parent
+        string childName = fmt::format("{},{}", fmt::map_join(showFullName(ctx, defn), "::", nameToString),
+                                       defn.data(*this).typeAsStringView());
+        out[parentName].insert(childName);
     }
 }
 
