@@ -176,10 +176,10 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         }
     }
 
+    string flagString = "";
     if (flags.size() > 0) {
-        flags.push_back("");
+        flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
-    auto flagString = fmt::join(flags, ".");
     string paramsString = "";
     if (typeAndArgNames.size() > 0) {
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
