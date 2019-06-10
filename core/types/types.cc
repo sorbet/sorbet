@@ -809,7 +809,6 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
-
     core::SymbolRef singleton;
     auto *s = core::cast_type<core::ClassType>(ty);
     if (s != nullptr) {
@@ -829,7 +828,6 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         }
         singleton = at->klass;
     }
-
     core::SymbolRef attachedClass = singleton.data(ctx)->attachedClass(ctx);
     return attachedClass;
 }
