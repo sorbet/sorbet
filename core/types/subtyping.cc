@@ -1225,26 +1225,26 @@ bool Types::equiv(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
-bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return underlying()->derivesFrom(gs, klass);
 }
 
-bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     if (symbol == Symbols::untyped() || symbol == klass) {
         return true;
     }
     return symbol.data(gs)->derivesFrom(gs, klass);
 }
 
-bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return left->derivesFrom(gs, klass) && right->derivesFrom(gs, klass);
 }
 
-bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return left->derivesFrom(gs, klass) || right->derivesFrom(gs, klass);
 }
 
-bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("AliasType.derivesfrom");
 }
 
@@ -1277,7 +1277,7 @@ bool MetaType::isFullyDefined() {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 
-bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return false;
 }
 
