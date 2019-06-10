@@ -828,8 +828,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         }
         singleton = at->klass;
     }
-    core::SymbolRef attachedClass = singleton.data(ctx)->attachedClass(ctx);
-    return attachedClass;
+    return singleton.data(ctx)->attachedClass(ctx);
 }
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {
