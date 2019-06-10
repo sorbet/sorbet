@@ -52,6 +52,7 @@ const vector<PrintOptions> print_options({
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
+    {"autogen-subclasses", &Printers::AutogenSubclasses, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -104,6 +105,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         Autogen,
         AutogenMsgPack,
         AutogenClasslist,
+        AutogenSubclasses,
         PluginGeneratedCode,
     });
 }
@@ -598,10 +600,16 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
+
+        // Certain features only need certain passes
         if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) &&
-            (opts.stopAfterPhase != Phase::NAMER)) {
+            (opts.stopAfterPhase < Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
-                          opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");
+                          opts.print.AutogenMsgPack.enabled ? "-msgpack" : ""); // TODO(gwu) Fix this
+            throw EarlyReturnWithCode(1);
+        }
+        if ((opts.print.AutogenSubclasses.enabled) && (opts.stopAfterPhase < Phase::RESOLVER)) {
+            logger->error("-p autogen-subclasses must also include --stop-after=resolver");
             throw EarlyReturnWithCode(1);
         }
 

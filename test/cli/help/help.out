@@ -120,7 +120,7 @@ Usage:
                                 missing-constants, flattened-tree,
                                 flattened-tree-raw, cfg, cfg-json, cfg-proto, autogen,
                                 autogen-msgpack, autogen-classlist,
-                                plugin-generated-code]
+                                autogen-subclasses, plugin-generated-code]
       --stop-after phase        Stop After: [init, parser, desugarer, dsl,
                                 local-vars, namer, resolver, cfg, inferencer]
                                 (default: inferencer)

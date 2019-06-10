@@ -158,6 +158,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
+        map<string, set<string>> subclasses;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -201,6 +202,10 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     Timer timeit(logger, "autogenClasslist");
                     pf.classlist(ctx, serialized.classlist);
                 }
+                if (opts.print.AutogenSubclasses.enabled) {
+                    Timer timeit(logger, "autogenSubclasses");
+                    pf.subclasses(ctx, serialized.subclasses);
+                }
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
@@ -239,6 +244,31 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         fast_sort(mergedClasslist);
         auto last = unique(mergedClasslist.begin(), mergedClasslist.end());
         opts.print.AutogenClasslist.fmt("{}\n", fmt::join(mergedClasslist.begin(), last, "\n"));
+    }
+    if (opts.print.AutogenSubclasses.enabled) {
+        Timer timeit(logger, "autogenSubclassesPrint");
+
+        // Merge the {Parent: Set{Child1, Child2}} maps from each thread
+        map<string, set<string>> mergedSubclasses;
+        for (auto &el : merged) {
+            for (auto const &[parentName, children] : el.second.subclasses) {
+                if (parentName.empty()) {
+                    // Child < NonexistentParent
+                    continue;
+                }
+                mergedSubclasses[parentName].insert(children.begin(), children.end());
+            }
+        }
+
+        vector<string> mergedSubclasseslist;
+        for (auto const &[parentName, children] : mergedSubclasses) {
+            mergedSubclasseslist.insert(mergedSubclasseslist.end(), parentName);
+            for (auto const child : children) {
+                mergedSubclasseslist.insert(mergedSubclasseslist.end(), fmt::format(" {}", child));
+            }
+        }
+        opts.print.AutogenSubclasses.fmt("{}\n",
+                                         fmt::join(mergedSubclasseslist.begin(), mergedSubclasseslist.end(), "\n"));
     }
 } // namespace sorbet::realmain
 
@@ -343,7 +373,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) {
+    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled ||
+        opts.print.AutogenSubclasses.enabled) {
         gs->runningUnderAutogen = true;
     }
     if (opts.reserveMemKiB > 0) {
