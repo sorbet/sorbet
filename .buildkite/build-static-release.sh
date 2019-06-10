@@ -53,13 +53,13 @@ if [[ "mac" == "$platform" ]]; then
   mkdir -p srb-init-smoke-test
   (
     cd srb-init-smoke-test
-    rbenv exec srb init
+    SRB_YES=1 rbenv exec srb init
     rbenv exec srb tc
 
     rm -rf sorbet/
 
     touch Gemfile
-    rbenv exec srb init
+    SRB_YES=1 rbenv exec srb init
     rbenv exec srb tc
   )
   rm -rf srb-init-smoke-test
