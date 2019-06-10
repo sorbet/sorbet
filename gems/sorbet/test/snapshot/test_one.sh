@@ -162,10 +162,10 @@ fi
 if ! [ -f "$test_dir/src/Gemfile" ]; then
   error "├─ each test must have src/Gemfile: $test_dir/src/Gemfile"
   if [ "$UPDATE" = "" ]; then
-    warn "└─ re-run with --update to create it."
+    attn "└─ re-run with --update to create it."
     exit 1
   else
-    warn "├─ creating empty Gemfile"
+    attn "├─ creating empty Gemfile"
     touch "$test_dir/src/Gemfile"
   fi
 fi
@@ -173,10 +173,10 @@ fi
 if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
   error "├─ each test must have src/Gemfile.lock: $test_dir/src/Gemfile.lock"
   if [ "$UPDATE" = "" ]; then
-    warn "└─ re-run with --update to create it."
+    attn "└─ re-run with --update to create it."
     exit 1
   else
-    warn "├─ running 'bundle install' to create it"
+    attn "├─ running 'bundle install' to create it"
     (
       cd "$test_dir/src"
       bundle install
@@ -189,10 +189,10 @@ if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
   error "├─ hidden-definitions are not currently testable."
 
   if [ "$UPDATE" = "" ]; then
-    warn "└─ please remove: $test_dir/expected/sorbet/rbi/hidden-definitions"
+    attn "└─ please remove: $test_dir/expected/sorbet/rbi/hidden-definitions"
     exit 1
   else
-    warn "├─ removing: $test_dir/expected/sorbet/rbi/hidden-definitions"
+    attn "├─ removing: $test_dir/expected/sorbet/rbi/hidden-definitions"
     rm -rf "$test_dir/expected/sorbet/rbi/hidden-definitions"
   fi
 fi
@@ -230,7 +230,7 @@ export SRB_SORBET_TYPED_REVISION
         exit 1
       fi
     else
-      warn "├─ updating Gemfile.lock"
+      attn "├─ updating Gemfile.lock"
       cp "$actual/src/Gemfile.lock" "$test_dir/src/Gemfile.lock"
     fi
   fi
@@ -275,7 +275,7 @@ if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/out.log" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "├─ updating expected/out.log"
+      attn "├─ updating expected/out.log"
       mkdir -p "$test_dir/expected"
       cp "$actual/src/out.log" "$test_dir/expected/out.log"
     fi
@@ -292,7 +292,7 @@ if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/err.log" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "├─ updating expected/err.log"
+      attn "├─ updating expected/err.log"
       cp "$actual/src/err.log" "$test_dir/expected/err.log"
     fi
   fi
@@ -311,7 +311,7 @@ diff_total() {
       error "└─ see output above. Run with --update to fix."
       exit 1
     else
-      warn "├─ updating expected/sorbet (total):"
+      attn "├─ updating expected/sorbet (total):"
       rm -rf "$test_dir/expected/sorbet"
       mkdir -p "$test_dir/expected"
       cp -r "$actual/src/sorbet" "$test_dir/expected"
@@ -335,7 +335,7 @@ diff_partial() {
       error "└─ see output above."
       exit 1
     else
-      warn "├─ updating expected/sorbet (partial):"
+      attn "├─ updating expected/sorbet (partial):"
 
       find "$test_dir/expected/sorbet" -print0 | while IFS= read -r -d '' expected_path; do
         path_suffix="${expected_path#$test_dir/expected/sorbet}"
@@ -364,7 +364,7 @@ elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
 elif [ "$UPDATE" != "" ]; then
   if [ "$RECORD" = "" ]; then
-    warn "├─ Not recording sorbet/ folder for empty partial test."
+    attn "├─ Not recording sorbet/ folder for empty partial test."
     info "├─ Re-run with --record to record."
   else
     info "├─ Treating empty partial test as total for the sake of recording."
