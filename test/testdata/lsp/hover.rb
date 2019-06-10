@@ -43,6 +43,11 @@ class BigFoo; extend T::Sig
     end
     s.to_s
   end
+
+  sig { returns([Integer, String]) }
+  def self.anotherFunc()
+    [1, "hello"]
+  end
 end
 
 def main
@@ -50,4 +55,6 @@ def main
         # ^ hover: sig {generated.params(num1: Integer, num2: String).returns(Integer)}
   BigFoo.baz
         # ^ hover: sig {generated.void}
+  l = BigFoo.anotherFunc
+# ^ hover: [Integer, String] (2-tuple)
 end
