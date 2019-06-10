@@ -165,7 +165,7 @@ if ! [ -f "$test_dir/src/Gemfile" ]; then
     warn "└─ re-run with --update to create it."
     exit 1
   else
-    warn "└─ creating empty Gemfile"
+    warn "├─ creating empty Gemfile"
     touch "$test_dir/src/Gemfile"
   fi
 fi
@@ -176,7 +176,7 @@ if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
     warn "└─ re-run with --update to create it."
     exit 1
   else
-    warn "└─ running 'bundle install' to create it"
+    warn "├─ running 'bundle install' to create it"
     (
       cd "$test_dir/src"
       bundle install
@@ -230,7 +230,7 @@ export SRB_SORBET_TYPED_REVISION
         exit 1
       fi
     else
-      warn "└─ updating Gemfile.lock"
+      warn "├─ updating Gemfile.lock"
       cp "$actual/src/Gemfile.lock" "$test_dir/src/Gemfile.lock"
     fi
   fi
@@ -275,7 +275,7 @@ if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/out.log" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "└─ updating expected/out.log"
+      warn "├─ updating expected/out.log"
       mkdir -p "$test_dir/expected"
       cp "$actual/src/out.log" "$test_dir/expected/out.log"
     fi
@@ -292,7 +292,7 @@ if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/err.log" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "└─ updating expected/err.log"
+      warn "├─ updating expected/err.log"
       cp "$actual/src/err.log" "$test_dir/expected/err.log"
     fi
   fi
