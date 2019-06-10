@@ -203,7 +203,7 @@ If instead you want to explore your files locally, here are some things to try:
     when 'suggest-typed'
       make_step(Sorbet::Private::SuggestTyped)
 
-    when 'find-gem-rbis', Sorbet::Private::FindGemRBIs.output_file
+    when 'find-gem-rbis', "#{ENV['HOME']}/.cache/sorbet", "#{ENV['HOME']}/.cache/sorbet/"
       make_step(Sorbet::Private::FindGemRBIs)
 
     when 'update'
