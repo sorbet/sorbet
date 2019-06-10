@@ -805,7 +805,7 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
     return ret;
 }
 
-core::SymbolRef getRepresentedClass(core::Context ctx, const core::Type *ty) {
+core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *ty) {
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
