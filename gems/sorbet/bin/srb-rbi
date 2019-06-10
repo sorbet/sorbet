@@ -9,6 +9,7 @@ require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-definition-finder'
 require_relative '../lib/fetch-rbis'
+require_relative '../lib/find-gem-rbis'
 require_relative '../lib/suggest-typed'
 require_relative '../lib/todo-rbi'
 
@@ -182,6 +183,7 @@ If instead you want to explore your files locally, here are some things to try:
     hidden-definitions  Load all your code and generate type definitions for any dynamic code
     todo                Run Sorbet and generate constants which Sorbet errors on
     suggest-typed       Put the highest `typed:` sigil in each of your files
+    find-gem-rbis       Find all `rbi/` direcotries in your gems and list them in `~/.cache/sorbet`
     "
 
     command = case (argv[0])
@@ -201,6 +203,9 @@ If instead you want to explore your files locally, here are some things to try:
       make_step(Sorbet::Private::TodoRBI)
     when 'suggest-typed'
       make_step(Sorbet::Private::SuggestTyped)
+
+    when 'find-gem-rbis', "#{ENV['HOME']}/.cache/sorbet/gem-rbis", "#{ENV['HOME']}/.cache/sorbet/gem-rbis/"
+      make_step(Sorbet::Private::FindGemRBIs)
 
     when 'update'
       nil
