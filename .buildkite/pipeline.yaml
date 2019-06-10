@@ -14,6 +14,8 @@ _agents_:
         workdir: /app
         init: true
         propagate-environment: true
+        environment:
+          - "CODECOV_TOKEN"
         volumes:
           - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
