@@ -43,7 +43,7 @@ typecheck() {
     if [ ! -f "$cache_file" ]; then
       $0 rbi find-gem-rbis > /dev/null
     fi
-    args="$cache_file "
+    args="@$cache_file "
   fi
   args="$args$@"
 
