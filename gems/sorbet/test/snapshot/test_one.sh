@@ -364,8 +364,7 @@ elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
 elif [ "$UPDATE" != "" ]; then
   if [ "$RECORD" = "" ]; then
-    attn "├─ Not recording sorbet/ folder for empty partial test."
-    info "├─ Re-run with --record to record."
+    info "├─ Not recording sorbet/ folder for empty partial test (add --record if you wanted this)."
   else
     info "├─ Treating empty partial test as total for the sake of recording."
     diff_total
