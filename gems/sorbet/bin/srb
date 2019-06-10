@@ -41,7 +41,7 @@ typecheck() {
     cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
     cache_file="${cache_dir}/${cache_hash}"
     if [ ! -f "$cache_file" ]; then
-      $0 rbi find-gem-rbis > "$cache_file"
+      $0 rbi find-gem-rbis
     fi
     cat "$cache_file" >> "${fileList}"
   fi

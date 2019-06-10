@@ -35,7 +35,7 @@ class Sorbet::Private::FindGemRBIs
       gem_source_paths += paths_within_gem_sources(gemspec)
     end
 
-    puts gem_source_paths.compact.join("\n")
+    File.write(output_file, gem_source_paths.compact.join("\n"))
   end
 
   def self.output_file
