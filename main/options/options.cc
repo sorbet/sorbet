@@ -342,9 +342,9 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("error-white-list", "Whitelist of errors to be reported", cxxopts::value<vector<int>>(),
+    options.add_options("dev")("error-white-list", "Error(s) to be reported", cxxopts::value<vector<int>>(),
                                "errorCodes");
-    options.add_options("dev")("error-black-list", "Blacklist of errors to be reported", cxxopts::value<vector<int>>(),
+    options.add_options("dev")("error-black-list", "Error(s) to be ignored", cxxopts::value<vector<int>>(),
                                "errorCodes");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
