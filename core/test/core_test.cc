@@ -87,6 +87,8 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"# typed: false\n", StrictLevel::False},
         {"# typed: lax\n", StrictLevel::None},
         {"# typed: ignore\n", StrictLevel::Ignore},
+        {"#    typed:      true\n", StrictLevel::True},
+        {"typed: true\n", StrictLevel::None},
 
         // We no longer support the old sigil
         {"# @typed", StrictLevel::None},

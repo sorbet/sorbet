@@ -72,6 +72,9 @@ public:
     SymbolRef staticInitForFile(Loc loc);
     SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
 
+    SymbolRef lookupStaticInitForFile(Loc loc) const;
+    SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
+
     NameRef enterNameUTF8(std::string_view nm);
 
     NameRef getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;

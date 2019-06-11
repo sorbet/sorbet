@@ -43,7 +43,7 @@ for src in "${cxx_src[@]}"; do
     rm -f "$src.formatted"
 done
 
-if [ -z "${misformatted[*]}" ]; then
+if [ "${#misformatted[@]}" -eq 0 ]; then
     exit 0
 fi
 

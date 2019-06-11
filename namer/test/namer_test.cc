@@ -86,17 +86,19 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
         newtree = namer::Namer::run(ctx, move(localTree));
     }
+    auto helloWorldMethod = 1;
+    auto blockArg = 1;
     auto staticInit = 1;
     auto staticInitBlockArg = 1;
-    auto extraSymbols = staticInit + staticInitBlockArg;
+    auto extraSymbols = helloWorldMethod + blockArg + staticInit + staticInitBlockArg;
 
     ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
-    ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
+    ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
 
     // Run it again and get the same numbers
     namer::Namer::run(ctx, move(newtree));
     ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
-    ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
+    ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
 }
 
 TEST_F(NamerFixture, NameClass) { // NOLINT

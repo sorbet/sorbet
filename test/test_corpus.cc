@@ -19,6 +19,7 @@
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
+#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
@@ -103,10 +104,10 @@ public:
     }
 };
 
-UnorderedSet<string> knownPasses = {"parse-tree", "parse-tree-json", "ast",          "ast-raw",
-                                    "dsl-tree",   "dsl-tree-raw",    "symbol-table", "symbol-table-raw",
-                                    "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw",
-                                    "cfg",        "cfg-json",        "autogen"};
+UnorderedSet<string> knownPasses = {
+    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
+    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
+    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -212,6 +213,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
+        ast::ParsedFile dslUnwound;
         ast::ParsedFile localNamed;
 
         if (test.expectations.find("autogen") == test.expectations.end()) {
@@ -219,24 +221,25 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                auto dslUnwound =
+                dslUnwound =
                     testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
-                localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
             }
 
             expectation = test.expectations.find("dsl-tree");
             if (expectation != test.expectations.end()) {
-                got["dsl-tree"].append(localNamed.tree->toString(gs)).append("\n");
+                got["dsl-tree"].append(dslUnwound.tree->toString(gs)).append("\n");
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
 
             expectation = test.expectations.find("dsl-tree-raw");
             if (expectation != test.expectations.end()) {
-                got["dsl-tree-raw"].append(localNamed.tree->showRaw(gs)).append("\n");
+                got["dsl-tree-raw"].append(dslUnwound.tree->showRaw(gs)).append("\n");
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
+
+            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
         } else {
             localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(desugared)));
             if (test.expectations.find("dsl-tree-raw") != test.expectations.end() ||
@@ -328,6 +331,22 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
+        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+
+        expectation = test.expectations.find("flattened-tree");
+        if (expectation != test.expectations.end()) {
+            got["flattened-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("flattened-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["flattened-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
                 auto path = file.data(ctx).path();
@@ -366,8 +385,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
             if (expCfgJson != test.expectations.end()) {
                 for (auto &cfg : collector.cfgs) {
-                    auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-                    got["cfg-json"].append(core::Proto::toJSON(proto));
+                    if (cfg->shouldExport(ctx)) {
+                        auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+                        got["cfg-json"].append(core::Proto::toJSON(proto));
+                    }
                 }
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));

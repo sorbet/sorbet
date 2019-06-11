@@ -594,8 +594,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
     }
 
+    // keep this around so we know which keyword arguments have been supplied
+    UnorderedSet<NameRef> consumed;
     if (hasKwargs && ait != aend) {
-        UnorderedSet<NameRef> consumed;
         auto &hashArg = *(aend - 1);
         auto hashArgType = Types::approximate(ctx, hashArg->type, *constr);
 
@@ -606,7 +607,6 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             kwit++;
         }
         pend = kwit;
-
         if (hashArgType->isUntyped()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
@@ -706,9 +706,38 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
-                        prettyArity(ctx, method), args.args.size());
-            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
+            if (!hasKwargs) {
+                e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
+                            prettyArity(ctx, method), args.args.size());
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
+            } else {
+                // if we have keyword arguments, we should print a more informative message: otherwise, we might give
+                // people some slightly confusing error messages.
+
+                // count the number of arguments
+                int posArgs = args.args.size();
+                // and if we have keyword arguments (i.e. if the last argument is a hash) then subtract 1 to get the
+                // total number of positional arguments
+                if (posArgs > 0 && isa_type<ShapeType>(args.args.back()->type.get())) {
+                    posArgs--;
+                }
+                // print a helpful error message
+                e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
+                            data->show(ctx), prettyArity(ctx, method), posArgs);
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.show(ctx));
+
+                // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
+                // explicitly
+                auto firstKeyword = absl::c_find_if(data->arguments(), [&ctx, &consumed](SymbolRef arg) {
+                    return arg.exists() && arg.data(ctx)->isKeyword() && arg.data(ctx)->isOptional() &&
+                           consumed.count(arg.data(ctx)->name) == 0;
+                });
+                if (firstKeyword != data->arguments().end()) {
+                    e.addErrorLine(args.locs.call,
+                                   "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
+                                   data->show(ctx), firstKeyword->data(ctx)->argumentName(ctx));
+                }
+            }
             result.components.front().errors.emplace_back(e.build());
         }
     }
@@ -946,7 +975,7 @@ public:
         }
 
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::RevealType)) {
-            e.setHeader("Revealed type: `{}`", args.args[0]->type->show(ctx));
+            e.setHeader("Revealed type: `{}`", args.args[0]->type->showWithMoreInfo(ctx));
             e.addErrorSection(ErrorSection("From:", args.args[0]->origins2Explanations(ctx)));
         }
         return args.args[0]->type;
@@ -1288,6 +1317,18 @@ private:
         return std::nullopt;
     }
 
+    static std::vector<SendAndBlockLink::ArgInfo> argInfoByArity(std::optional<int> fixedArity) {
+        std::vector<SendAndBlockLink::ArgInfo> res;
+        if (fixedArity) {
+            for (int i = 0; i < *fixedArity; i++) {
+                res.emplace_back();
+            }
+        } else {
+            res.emplace_back().isRepeated = true;
+        }
+        return res;
+    }
+
     static void showLocationOfArgDefn(Context ctx, ErrorBuilder &e, TypePtr blockType,
                                       DispatchComponent &dispatchComp) {
         if (!dispatchComp.method.exists()) {
@@ -1439,7 +1480,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[2]->type, args.locs.call, args.locs.args[2]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(Symbols::noSymbol(), fn, blockArity);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
 
@@ -1501,7 +1542,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[3]->type, args.locs.call, args.locs.args[3]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(Symbols::noSymbol(), fn, blockArity);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
 
@@ -1776,7 +1817,7 @@ public:
             return core::Types::untypedUntracked();
         }
 
-        std::optional<int> numberOfPositionalBlockParams = args.block->numberOfPositionalBlockParams;
+        std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
             return core::Types::procClass();
         }

@@ -195,14 +195,10 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       foo = OptionalArrayClass.props.fetch(:foo)
       assert_equal(T::Types::TypedArray, foo.fetch(:type).class, T::Types::TypedArray)
       assert_equal(Integer, foo.fetch(:array), Integer)
-      assert(foo.fetch(:optional))
+      assert(T::Utils::Props.optional_prop?(foo))
     end
 
     it "validates setting 'optional' argument when defining with 'optional' keyword" do
-      assert_prop_error(/Use of `optional` is deprecated/, error: RuntimeError, mixin: T::Props::Serializable) do
-        optional :foo, String, optional: :migration
-      end
-
       assert_prop_error(/:optional must be one of/, mixin: T::Props::Serializable) do
         prop :foo, String, optional: :arglebargle
       end
@@ -267,6 +263,18 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       end
       assert_match(/Opus::Types::Test::Props::DecoratorTest::OptionalMigrate.foo not set/, e.message)
     end
+  end
+
+  class OwnedTestingModel < Opus::DB::Model::AbstractModel
+    owner Opus::Project.storage
+
+    prop :foo, String
+  end
+
+  it 'notifies both the model and project owners on deserialization errors' do
+    Opus::Error.expects(:hard).with(anything, has_entry(project: Opus::Project.storage))
+    Opus::Error.expects(:hard).with(anything, Not(has_entry(project: Opus::Project.storage)))
+    OwnedTestingModel.from_hash({})
   end
 
   class ImmutablePropStruct
@@ -368,21 +376,21 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   it 'soft asserts if `optional` is ever specified' do
     e = assert_raises do
       Class.new(T::Struct) do
-        prop :optional_true, Boolean, optional: true
+        prop :optional_true, T::Boolean, optional: true
       end
     end
     assert_match(/Use of `optional: true` is deprecated/, e.message)
 
     e = assert_raises do
       Class.new(T::Struct) do
-        prop :optional_on_load, Boolean, optional: :on_load
+        prop :optional_on_load, T::Boolean, optional: :on_load
       end
     end
     assert_match(/Use of `optional: :on_load` is deprecated/, e.message)
 
     e = assert_raises do
       Class.new(T::Struct) do
-        prop :optional_existing, Boolean, optional: :existing
+        prop :optional_existing, T::Boolean, optional: :existing
       end
     end
     assert_match(/Use of `optional: :existing` is not allowed/, e.message)

@@ -7,7 +7,6 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
-#include "resolver/flatten/flatten.h"
 #include "resolver/method_checks/method_checks.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
@@ -29,7 +28,6 @@ namespace {
  *
  * - ResolveConstantsWalk
  * - ResolveSignaturesWalk
- * - FlattenWalk
  *
  * There are also other important parts of resolver found elsewhere in the
  * resolver/ package (GlobalPass, type_syntax). Below we describe
@@ -784,6 +782,8 @@ public:
 
 class ResolveSignaturesWalk {
 private:
+    std::vector<int> nestedBlockCounts;
+
     ast::Local *getArgLocal(core::Context ctx, core::SymbolRef argSym, const ast::MethodDef &mdef, int pos,
                             bool isOverloaded) {
         if (!isOverloaded) {
@@ -1212,14 +1212,21 @@ private:
 
             scope = ctx.owner.data(ctx)->enclosingClass(ctx);
         } else {
-            if (ctx.owner.data(ctx)->isClass()) {
+            // we need to check nested block counts because we want all fields to be declared on top level of either
+            // class or body, rather then nested in some block
+            if (nestedBlockCounts.back() == 0 && ctx.owner.data(ctx)->isClass()) {
                 // Declaring a class instance variable
+            } else if (nestedBlockCounts.back() == 0 && ctx.owner.data(ctx)->name == core::Names::initialize()) {
+                // Declaring a instance variable
+            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx)) {
+                // Declaring a class instance variable in a static method
+                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("Singleton instance variables must be declared inside the class body");
+                }
             } else {
                 // Inside a method; declaring a normal instance variable
-                if (ctx.owner.data(ctx)->name != core::Names::initialize()) {
-                    if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                        e.setHeader("Instance variables must be declared inside `initialize`");
-                    }
+                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("Instance variables must be declared inside `initialize`");
                 }
             }
             scope = ctx.selfClass();
@@ -1260,6 +1267,10 @@ private:
     }
 
 public:
+    ResolveSignaturesWalk() {
+        nestedBlockCounts.emplace_back(0);
+    }
+
     unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         if (handleDeclaration(ctx, asgn)) {
             return asgn;
@@ -1309,9 +1320,34 @@ public:
         return asgn;
     }
 
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+        nestedBlockCounts.emplace_back(0);
+        return original;
+    }
+
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
         return original;
+    }
+
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        nestedBlockCounts.emplace_back(0);
+        return original;
+    }
+
+    unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        nestedBlockCounts.pop_back();
+        return original;
+    }
+
+    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        nestedBlockCounts.back() += 1;
+        return block;
+    }
+
+    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        nestedBlockCounts.back() -= 1;
+        return block;
     }
 
     unique_ptr<ast::Expression> postTransformInsSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> original) {
@@ -1485,6 +1521,11 @@ public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
+        if (original->symbol == core::Symbols::root()) {
+            ENFORCE(ctx.state.lookupStaticInitForFile(original->loc).exists());
+        } else {
+            ENFORCE(ctx.state.lookupStaticInitForClass(original->symbol).exists());
+        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
@@ -1495,11 +1536,6 @@ public:
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
         ENFORCE(false, "These should have all been removed: {}", original->toString(ctx));
-        return original;
-    }
-    unique_ptr<ast::Expression> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
-        ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
-                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
@@ -1529,7 +1565,7 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<a
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
     }
 
-    return flatten::run(ctx, std::move(trees));
+    return trees;
 }
 
 vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContext ctx, vector<ast::ParsedFile> trees) {

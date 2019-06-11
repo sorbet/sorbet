@@ -5,7 +5,7 @@
 class Sorbet; end
 module Sorbet::Private; end
 
-require_relative './sorbet'
+require_relative './t'
 require_relative './step_interface'
 require_relative './serialize'
 require_relative './constant_cache'
@@ -113,7 +113,7 @@ class Sorbet::Private::HiddenMethodFinder
 
   def gen_source_rbi(classes, aliases)
     puts "Generating #{TMP_RBI} with #{classes.count} modules and #{aliases.count} aliases"
-    serializer = Sorbet::Private::Serialize.new
+    serializer = Sorbet::Private::Serialize.new(constant_cache)
     buffer = []
     buffer << Sorbet::Private::Serialize.header
 
@@ -368,7 +368,7 @@ class Sorbet::Private::HiddenMethodFinder
   private def serialize_methods(source, rbi, klass, is_singleton)
     source_by_name = source.map {|v| [v["name"]["name"], v]}.to_h
     ret = []
-    maker = Sorbet::Private::Serialize.new
+    maker = Sorbet::Private::Serialize.new(constant_cache)
     rbi.each do |rbi_entry|
       next if rbi_entry["kind"] != "METHOD"
       name = rbi_entry["name"]["name"]

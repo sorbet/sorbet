@@ -30,10 +30,10 @@ end
 
 ## Tracking `nil`
 
-Sorbet is smart enough to follow the control flow of a program to update
-its knowledge about what types each variable has within each branch. For
-example, if we have a method that declares it can only be given something that's
-not `nil`, Sorbet will force us to first check whether our variable is `nil`:
+Sorbet is smart enough to follow the control flow of a program to update its
+knowledge about what types each variable has within each branch. For example, if
+we have a method that declares it can only be given something that's not `nil`,
+Sorbet will force us to first check whether our variable is `nil`:
 
 ```ruby
 extend T::Sig
@@ -52,13 +52,14 @@ def foo(x)
 end
 ```
 
-<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20String).void%7D%0Adef%20must_be_given_string(x)%0A%20%20puts%20%22Got%20string%3A%20%23%7Bx%7D%22%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(String)).void%7D%0Adef%20foo(x)%0A%20%20must_be_given_string(x)%20%23%20error%3A%20%0A%20%20if%20x%0A%20%20%20%20must_be_given_string(x)%20%23%20ok%0A%20%20end%0Aend">→ View on sorbet.run</a>
+<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20String).void%7D%0Adef%20must_be_given_string(x)%0A%20%20puts%20%22Got%20string%3A%20%23%7Bx%7D%22%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(String)).void%7D%0Adef%20foo(x)%0A%20%20must_be_given_string(x)%20%23%20error%3A%20%0A%20%20if%20x%0A%20%20%20%20must_be_given_string(x)%20%23%20ok%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
 
 This is one of the most useful features of Sorbet. Many bugs can be prevented by
 ensuring when something is `nil` and when something is not `nil`! For more
 information on how this control flow-sensitivity works and how to take full
 advantage of it, see [Flow-sensitive Typing](flow-sensitive.md).
-
 
 ## `T.must`: Asserting that something is not `nil`
 
@@ -92,9 +93,9 @@ end
 ```
 
 In this example, `foo` accepts a Hash with `Symbol` keys and `Integer` values.
-We looked up the element in the Hash at key `key`, got back `val`, and passed
-it to `doesnt_take_nil`. Here, Sorbet complains, because `val` could be `nil`
-(if the key doesn't exist in the hash).
+We looked up the element in the Hash at key `key`, got back `val`, and passed it
+to `doesnt_take_nil`. Here, Sorbet complains, because `val` could be `nil` (if
+the key doesn't exist in the hash).
 
 In general, there's no way to know whether `key` is in `options`, but we might
 have special knowledge (that Sorbet doesn't know) to convince us that `val` will
@@ -104,7 +105,8 @@ never be `nil`. Maybe:
 - our test suite has good coverage for this code.
 - we validate that `key` is a valid key somewhere higher up in our code.
 
-When we're **sure** that `val` must never be `nil`, we can wrap it in `T.must(...)`:
+When we're **sure** that `val` must never be `nil`, we can wrap it in
+`T.must(...)`:
 
 ```ruby
 # typed: true
@@ -131,12 +133,10 @@ observability, etc.). In fact, it's the same tradeoff we make every time we
 > **Note**: Like all other type checks in Sorbet, `T.must` will raise at runtime
 > if it fails. For more information, see [Enabling Runtime Checks](runtime.md).
 
-
 ## Alternatives to `T.must`
 
 Sometimes `T.must` can "clutter up" code, so here are some alternatives that
 accomplish the same thing as or something similar to `T.must`.
-
 
 ### `Array#fetch` & `Hash#fetch`
 
@@ -198,8 +198,9 @@ def bar(x)
 end
 ```
 
-<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(Integer)%7D%0Adef%20foo(x)%0A%20%20y%20%3D%20T.must(x).abs%0A%20%20T.reveal_type(y)%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(T.nilable(Integer))%7D%0Adef%20bar(x)%0A%20%20y%20%3D%20x%26.abs%0A%20%20T.reveal_type(y)%0Aend">→ View on sorbet.run</a>
-
+<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(Integer)%7D%0Adef%20foo(x)%0A%20%20y%20%3D%20T.must(x).abs%0A%20%20T.reveal_type(y)%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(T.nilable(Integer))%7D%0Adef%20bar(x)%0A%20%20y%20%3D%20x%26.abs%0A%20%20T.reveal_type(y)%0Aend">
+  → View on sorbet.run
+</a>
 
 ### Other escape hatches
 
@@ -207,5 +208,5 @@ end
 information, see [escape hatches](troubleshooting.md#escape-hatches).
 
 Also, people frequently confuse `T.must` with `T.let`, `T.cast`, and `T.unsafe`.
-Each of these four are actually rather different; for the differences, see [Type
-Assertions](type-assertions.md).
+Each of these four are actually rather different; for the differences, see
+[Type Assertions](type-assertions.md).

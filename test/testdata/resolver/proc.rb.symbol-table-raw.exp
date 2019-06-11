@@ -67,6 +67,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
         ]
       } @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
   class <S <C <U TestProc>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
-    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=6:3 end=9:6}
+    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=42:4}
       argument <S <C <U TestProc>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
 

@@ -1,7 +1,7 @@
 ---
 id: strange-loop-2018
-title: "Gradual typing of Ruby at Scale"
-sidebar_label: "Strange Loop 2018"
+title: 'Gradual typing of Ruby at Scale'
+sidebar_label: 'Strange Loop 2018'
 ---
 
 - [→ Talk page](https://www.thestrangeloop.com/2018/gradual-typing-of-ruby-at-scale.html)
@@ -32,4 +32,3 @@ project and how they withstood reality of production use:
   cost of ease of adoption in a duck-typed language;
 - The choice to build a very custom control flow dependent type checking to
   infer truthiness and organically support smart casts and pattern matching.
-

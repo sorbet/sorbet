@@ -1,35 +1,10 @@
 #!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
+export JOB_NAME=linters
+source .buildkite/tools/setup-bazel.sh
 
-if [[ -n "${CLEAN_BUILD-}" ]]; then
-  echo "--- cleanup"
-  rm -rf /usr/local/var/bazelcache/*
-fi
-
-echo "--- Pre-setup :bazel:"
-
-git checkout .bazelrc
-
-function finish {
-  ./bazel shutdown
-}
-trap finish EXIT
-
-rm -f bazel-*
-mkdir -p /usr/local/var/bazelcache/output-bases/linters /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
-{
-  echo 'common --curses=no --color=yes'
-  echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/linters'
-  echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-  echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} >> .bazelrc
-
-./bazel version
-PATH=$PATH:$(pwd)
-export PATH
-
-echo "+++ linters"
+set -x
 err=0
 globalErr=0
 
@@ -71,6 +46,15 @@ err=0
 ./tools/scripts/lint_sh.sh -t &> lint_sh || err=$?
 if [ "$err" -ne 0 ]; then
     buildkite-agent annotate --context tools/scripts/lint_sh.sh --style error --append < lint_sh
+    globalErr=$err
+fi
+
+err=0
+echo $'```' > format_website
+./tools/scripts/format_website.sh -t &>> format_website || err=$?
+echo $'```' >> format_website
+if [ "$err" -ne 0 ]; then
+    buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
     globalErr=$err
 fi
 

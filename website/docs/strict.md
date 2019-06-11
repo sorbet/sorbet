@@ -56,4 +56,3 @@ class HasVariables
   @alpaca_count = T.let(0, Integer)
 end
 ```
-

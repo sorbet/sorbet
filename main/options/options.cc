@@ -28,8 +28,10 @@ const vector<PrintOptions> print_options({
     {"parse-tree-json", &Printers::ParseTreeJson},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
-    {"dsl-tree", &Printers::DSLTree, true},
-    {"dsl-tree-raw", &Printers::DSLTreeRaw, true},
+    {"dsl-tree", &Printers::DSLTree},
+    {"dsl-tree-raw", &Printers::DSLTreeRaw},
+    {"index-tree", &Printers::IndexTree, true},
+    {"index-tree-raw", &Printers::IndexTreeRaw, true},
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
@@ -41,11 +43,14 @@ const vector<PrintOptions> print_options({
     {"resolve-tree", &Printers::ResolveTree, true},
     {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"missing-constants", &Printers::MissingConstants, true},
+    {"flattened-tree", &Printers::FlattenedTree, true},
+    {"flattened-tree-raw", &Printers::FlattenedTreeRaw, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-json", &Printers::CFGJson, true},
     {"cfg-proto", &Printers::CFGProto, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
+    {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -53,6 +58,7 @@ PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
 void PrinterConfig::print(const string_view &contents) const {
     if (outputPath.empty()) {
+        // TODO (gdritter): thread a logger through instead of just printing to stdout
         fmt::print("{}", contents);
     } else {
         absl::MutexLock lck(&state->mutex);
@@ -76,6 +82,8 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         DesugaredRaw,
         DSLTree,
         DSLTreeRaw,
+        IndexTree,
+        IndexTreeRaw,
         SymbolTable,
         SymbolTableRaw,
         SymbolTableJson,
@@ -87,11 +95,14 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ResolveTree,
         ResolveTreeRaw,
         MissingConstants,
+        FlattenedTree,
+        FlattenedTreeRaw,
         CFG,
         CFGJson,
         CFGProto,
         Autogen,
         AutogenMsgPack,
+        AutogenClasslist,
         PluginGeneratedCode,
     });
 }
@@ -505,6 +516,9 @@ void readOptions(Options &opts, int argc, char *argv[],
                 } else {
                     opts.rawInputFileNames.push_back(file);
                     opts.inputFileNames.push_back(file);
+                    fast_sort(opts.inputFileNames);
+                    opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
+                                              opts.inputFileNames.end());
                 }
             }
         }
@@ -528,8 +542,17 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
+        opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
-        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
+        opts.inlineInput = raw["e"].as<string>();
+        if (opts.autocorrect && opts.silenceErrors) {
+            logger->error("You may not use autocorrect when silencing errors.");
+            throw EarlyReturnWithCode(1);
+        }
+        if (opts.autocorrect && opts.inlineInput != "") {
+            logger->error("You may not use autocorrect with inline input.");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
@@ -538,7 +561,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) &&
+        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) &&
             (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{} must also include --stop-after=namer",
                           opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");
@@ -584,11 +607,11 @@ void readOptions(Options &opts, int argc, char *argv[],
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
+        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
-        opts.silenceErrors = raw["quiet"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
@@ -664,7 +687,6 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
         }
 
-        opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);

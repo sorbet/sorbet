@@ -1,35 +1,54 @@
-# There are two reasons we intentionally put everything we can on mac machine:
-#  - our mac machine has 12 cores, while linux one has 4 cores.
-#  - we use macs for development thus we want to make sure all scripts run there
+# We currently have 3 execution environments:
+# - arbiter, a linux box that does security enforcement. Should never run tests.
+# - our mac machine that has 12 cores that is used to run mac tests, build mac _and_ emscripten release
+# - autoscaling linux cloud that's used for everything else
+
+_agents_:
+- &elastic
+  agents:
+    os: linux
+    queue: elastic
+  plugins:
+    - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+        image: "darkdimius/sorbet-build-image:latest"
+        workdir: /app
+        init: true
+        propagate-environment: true
+        volumes:
+          - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
-  - label: ":linux: linters.sh"
+  - label: ":linux::cloud: linters.sh"
     command: .buildkite/linters.sh
-    agents:
-      os: linux
-  - label: ":mac: test-static-sanitized.sh"
+    <<: *elastic
+
+  - label: ":mac: test-static-sanitized.sh (master only)"
     command: .buildkite/test-static-sanitized.sh
+    branches: "master"
     agents:
       os: mac
-  - label: ":linux: test-static-sanitized.sh"
+
+  - label: ":linux::cloud: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
-    agents:
-      os: linux
+    <<: *elastic
+
   - wait: ~
 
 # Build Phase - Build all our artifacts
-  - label: ":mac: build-website.sh"
+  - label: ":linux::cloud: build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
-    agents:
-      os: mac
-  - label: ":mac: build-sorbet-runtime.sh"
+    <<: *elastic
+
+
+  - label: ":linux::cloud: build-sorbet-runtime.sh"
     command: .buildkite/build-sorbet-runtime.sh
     artifact_paths: _out_/**/*
-    agents:
-      os: mac
+    <<: *elastic
+
+
   - label: ":mac: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
@@ -40,11 +59,10 @@ steps:
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux: build-static-release.sh"
+  - label: ":linux::cloud: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
-    agents:
-      os: linux
+    <<: *elastic
   - wait: ~
 
 # Test Sorbet Gem Phase - Its own phase because it relies on the gem build built
@@ -70,10 +88,11 @@ steps:
 # Optional Phase - Run optional things
   - block: "Run optional code coverage"
   - wait: ~
-  - label: ":mac: coverage-static-sanitized.sh"
+  - label: ":linux::cloud: coverage-static-sanitized.sh"
     command: .buildkite/coverage-static-sanitized.sh
     artifact_paths: _out_/**/*
     retry:
       automatic: true
-    agents:
-      os: mac
+    soft_fail:
+      - exit_status: "*"
+    <<: *elastic

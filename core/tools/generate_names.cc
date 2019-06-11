@@ -339,7 +339,6 @@ NameDef names[] = {
     {"Configatron", "Configatron", true},
     {"Store", "Store", true},
     {"RootStore", "RootStore", true},
-    {"Sinatra", "Sinatra", true},
     {"Base", "Base", true},
     {"Void", "Void", true},
     {"TypeAlias", "<TypeAlias>", true},
@@ -366,6 +365,7 @@ NameDef names[] = {
     {"IMAP", "IMAP", true},
     {"Protocol", "Protocol", true},
     {"CFGExport", "CFGExport", true},
+    {"WithoutRuntime", "WithoutRuntime", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

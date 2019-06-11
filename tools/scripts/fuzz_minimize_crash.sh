@@ -52,16 +52,16 @@ handler_term()
 trap handler_int SIGINT
 trap handler_term SIGTERM
 
-mkdir -p "${dir}/../../fuzz_crashers/min/" 
+mkdir -p "${dir}/../../fuzz_crashers/min/"
 
 (
     cd "$dir"/../..
     ASAN_OPTIONS=dedup_token_length=10 ./bazel-bin/test/fuzz/fuzz_dash_e -use_value_profile=1 -dict=test/fuzz/ruby.dict -minimize_crash=1 "$crash_full_path" -exact_artifact_path=fuzz_crashers/min/"$file_arg" ${FUZZ_ARG}
 ) & # start a subshell that we'll monitor
-				  
-child=$! 
+
+child=$!
 wait "$child"
 
 if [ -z "$interrupted" ]; then
-  mv "${output_file}" "${output_file}.done" 
+  mv "${output_file}" "${output_file}.done"
 fi

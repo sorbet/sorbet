@@ -1,35 +1,12 @@
 #!/bin/bash
 
-set -euo pipefail
+set -exuo pipefail
 
-if [[ -n "${CLEAN_BUILD-}" ]]; then
-  echo "--- cleanup"
-  rm -rf /usr/local/var/bazelcache/*
-fi
-
-echo "--- Pre-setup :bazel:"
-
-git checkout .bazelrc
-
-function finish {
-  ./bazel shutdown
-}
-trap finish EXIT
+export JOB_NAME=coverage-static-sanitized
+source .buildkite/tools/setup-bazel.sh
 
 # This clean sidesteps a bug in bazel not re-building correct coverage for cached items
 ./bazel clean
-
-rm -f bazel-*
-mkdir -p /usr/local/var/bazelcache/output-bases/coverage /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
-{
-  echo 'common --curses=no --color=yes'
-  echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/coverage'
-} >> .bazelrc
-
-./bazel version
-./bazel clean
-
-echo "+++ tests"
 
 err=0
 ./bazel coverage //... --config=coverage --config=buildfarm --javabase=@embedded_jdk//:jdk || err=$?  # workaround https://github.com/bazelbuild/bazel/issues/6993
@@ -45,6 +22,8 @@ touch _tmp_/reports
     path="${path#//}"
     echo "bazel-testlogs/$path/coverage.dat" >> _tmp_/reports
 done
+
+find ./bazel-sorbet/external/llvm_toolchain/
 
 rm -rf ./_tmp_/profdata_combined.profdata
 xargs .buildkite/tools/combine-coverage.sh < _tmp_/reports

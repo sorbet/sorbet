@@ -13,10 +13,8 @@ public:
         return std::make_unique<ast::EmptyTree>();
     }
 
-    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, MethodDef::ARGS_store args,
-                                        core::SymbolRef symbol = core::Symbols::noSymbol()) {
+    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, MethodDef::ARGS_store args) {
         auto blk = std::make_unique<ast::Block>(loc, std::move(args), std::move(body));
-        blk->symbol = symbol;
         return blk;
     }
 
@@ -259,7 +257,7 @@ public:
                                            std::unique_ptr<Expression> ret) {
         auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), std::move(ret));
-        auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
+        auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
         sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
@@ -269,7 +267,7 @@ public:
     static std::unique_ptr<Expression> SigVoid(core::Loc loc, std::unique_ptr<Expression> hash) {
         auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
         auto void_ = Send0(loc, std::move(params), core::Names::void_());
-        auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
+        auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(void_));
         sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
@@ -278,7 +276,7 @@ public:
 
     static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
         auto returns = Send1(loc, Self(loc), core::Names::returns(), std::move(ret));
-        auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
+        auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
         return sig;

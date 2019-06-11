@@ -148,6 +148,11 @@ public:
     /** Recursively replaces proxies with their underlying types */
     static TypePtr widen(Context ctx, const TypePtr &type);
     static std::optional<int> getProcArity(const AppliedType &type);
+
+    // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
+    // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
+    // be intrinsics so that this can become an anonymous helper function in calls.cc.
+    static core::SymbolRef getRepresentedClass(core::Context ctx, const core::Type *ty);
 };
 
 struct Intrinsic {
@@ -170,6 +175,11 @@ public:
     }
     // User visible type. Should exactly match what the user can write.
     virtual std::string show(const GlobalState &gs) const = 0;
+    // Like show, but can include extra info. Does not necessarily match what the user can type.
+    virtual std::string showWithMoreInfo(const GlobalState &gs) const {
+        return show(gs);
+    }
+
     virtual std::string typeName() const = 0;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) = 0;
@@ -179,7 +189,7 @@ public:
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) = 0;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) = 0;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) = 0;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const = 0;
     virtual void _sanityCheck(Context ctx) = 0;
     void sanityCheck(Context ctx) {
         if (!debug_mode)
@@ -224,7 +234,7 @@ public:
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) override;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) override;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const override;
 
     void _sanityCheck(Context ctx) override;
 };
@@ -242,7 +252,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override final;
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(Context ctx) final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override final;
@@ -260,7 +270,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
@@ -282,7 +292,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
@@ -303,7 +313,7 @@ public:
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     SymbolRef symbol;
     void _sanityCheck(Context ctx) final;
@@ -336,7 +346,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     void _sanityCheck(Context ctx) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 };
 CheckSize(SelfType, 8, 8);
 
@@ -380,7 +390,7 @@ public:
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -401,7 +411,7 @@ public:
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
@@ -450,7 +460,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
@@ -518,6 +528,7 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string showWithMoreInfo(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -555,7 +566,7 @@ public:
 
     virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     virtual bool hasUntyped() override;
     virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
@@ -580,7 +591,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
 
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     void _sanityCheck(Context ctx) final;
@@ -595,20 +606,27 @@ public:
 CheckSize(MetaType, 24, 8);
 
 class SendAndBlockLink {
-    SendAndBlockLink(const SendAndBlockLink &) noexcept = default;
+    SendAndBlockLink(const SendAndBlockLink &) = default;
 
 public:
-    SendAndBlockLink(SendAndBlockLink &&) noexcept = default;
-    SymbolRef block;
+    struct ArgInfo {
+        bool isKeyword;
+        bool isRepeated;
+        bool isDefault;
+        bool isShadow;
+    };
+    SendAndBlockLink(SendAndBlockLink &&) = default;
     TypePtr receiver;
     NameRef fun;
-    std::optional<int> numberOfPositionalBlockParams;
+    std::vector<ArgInfo> argInfos;
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
     SymbolRef blockSpec; // used only by LoadSelf to change type of self inside method.
     TypePtr sendTp;
-    SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams);
+
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo> &&argInfos);
+    std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
 

@@ -53,13 +53,17 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/sig
       argument <C <U A>><U test_yield_no_block_type>x<> -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=70:15 end=70:16}
       argument <C <U A>><U test_yield_no_block_type><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=6:7 end=6:8}
-    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=9:3 end=9:28}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=6:1 end=114:4}
       argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <S <C <U A>> $1><U static> : private (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=60:24 end=60:42}
       argument <S <C <U A>> $1><U static>x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=59:15 end=59:16}
       argument <S <C <U A>> $1><U static><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=3:9}
   class <S <C <U T1>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:7 end=3:9}
+    method <S <C <U T1>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=3:14}
+      argument <S <C <U T1>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U T2>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=4:1 end=4:9}
   class <S <C <U T2>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=4:7 end=4:9}
+    method <S <C <U T2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=4:1 end=4:14}
+      argument <S <C <U T2>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
 

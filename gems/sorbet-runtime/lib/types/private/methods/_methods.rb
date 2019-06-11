@@ -196,10 +196,10 @@ module T::Private::Methods
 
   def self.run_builder(declaration_block)
     builder = DeclBuilder.new(declaration_block.mod)
-    builder.
-      instance_exec(&declaration_block.blk).
-      finalize!.
-      decl
+    builder
+      .instance_exec(&declaration_block.blk)
+      .finalize!
+      .decl
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration, loc)
@@ -304,12 +304,23 @@ module T::Private::Methods
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
 
-    original_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :method_added) do |name|
-      T::Private::Methods._on_method_added(self, name)
-      original_method.bind(self).call(name)
-    end
+    if mod.singleton_class?
+      install_singleton_method_added_hook(mod)
+      install_singleton_method_added_hook(mod.singleton_class)
+    else
+      original_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :method_added) do |name|
+        T::Private::Methods._on_method_added(self, name)
+        original_method.bind(self).call(name)
+      end
 
-    original_singleton_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :singleton_method_added) do |name|
+      install_singleton_method_added_hook(mod.singleton_class)
+    end
+  end
+
+  private_class_method def self.install_singleton_method_added_hook(singleton_klass)
+    attached = nil
+    original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
+      attached = self
       T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
       # This will be nil when this gets called for the addition of this method itself. We
       # call it below to compensate.
@@ -318,7 +329,7 @@ module T::Private::Methods
       end
     end
     # See the comment above
-    original_singleton_method.bind(mod).call(:singleton_method_added)
+    original_singleton_method.bind(attached).call(:singleton_method_added)
   end
 
   private_class_method def self.method_to_key(method)

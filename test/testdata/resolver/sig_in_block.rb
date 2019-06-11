@@ -15,4 +15,4 @@ class A
   end
 end
 
-T.reveal_type(A.bar) # error: Revealed type: `Integer`
+T.reveal_type(A.new.bar) # error: Revealed type: `Integer`

@@ -18,7 +18,7 @@ wrap_verbose() {
   trap "rm -f '$out_log'" EXIT
 
   if ! "$@" > "$out_log" 2>&1; then
-    if [ -z "$VERBOSE" ]; then
+    if [ "$VERBOSE" = "" ]; then
       error "└─ '$*' failed. Re-run with --verbose for more."
     else
       cat "$out_log"
@@ -26,7 +26,7 @@ wrap_verbose() {
     fi
     exit 1
   fi
-  if [ -n "$VERBOSE" ]; then
+  if [ "$VERBOSE" != "" ]; then
     cat "$out_log"
   fi
 }
@@ -42,8 +42,11 @@ usage() {
   echo "  <test_dir>   path to the snapshot to test"
   echo
   echo "Options:"
-  echo "  --verbose    be more verbose than just whether it errored"
-  echo "  --update     if there is a failure, update the expected file(s) and keep going"
+  echo "  --verbose    Be more verbose than just whether it errored"
+  echo "  --update     If there is a failure, update the expected file(s) and keep going"
+  echo "  --record     Treat partial tests as total tests for the purpose of creating"
+  echo "               a new test. Requires --update"
+  echo "  --debug      Don't redirect srb output so that it can be debugged"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -75,14 +78,29 @@ fi
 
 VERBOSE=
 UPDATE=
+RECORD=
+DEBUG=
+FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --verbose)
       VERBOSE="--verbose"
+      FLAGS="$FLAGS $VERBOSE"
       shift
       ;;
     --update)
       UPDATE="--update"
+      FLAGS="$FLAGS $UPDATE"
+      shift
+      ;;
+    --record)
+      RECORD="--record"
+      FLAGS="$FLAGS $RECORD"
+      shift
+      ;;
+    --debug)
+      DEBUG="--debug"
+      FLAGS="$FLAGS $DEBUG"
       shift
       ;;
     -*)
@@ -100,15 +118,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if ! [ "$RECORD" = "" ] && [ "$UPDATE" = "" ]; then
+  error "--record requires --update"
+  exit 1
+fi
+
 
 # ----- Stage the test sandbox directory -----
 
 relative_test_exe="$(realpath --relative-to="$PWD" "$0")"
-info "Running test:  $relative_test_exe $relative_test_dir $VERBOSE $UPDATE"
+info "Running test:  $relative_test_exe $relative_test_dir $FLAGS"
 
 actual="$(mktemp -d)"
 
-if [ -n "$VERBOSE" ]; then
+if [ "$VERBOSE" != "" ]; then
   info "├─ PWD:       $PWD"
   info "├─ test_dir:  $test_dir"
   info "├─ actual:    $actual"
@@ -116,7 +139,7 @@ fi
 
 srb="$root_dir/bin/srb"
 
-if [ -z "${SRB_SORBET_EXE:-}" ]; then
+if [ "${SRB_SORBET_EXE:-}" = "" ]; then
   SRB_SORBET_EXE="$(realpath "$root_dir/../../bazel-bin/main/sorbet")"
 fi
 export SRB_SORBET_EXE
@@ -138,22 +161,22 @@ fi
 
 if ! [ -f "$test_dir/src/Gemfile" ]; then
   error "├─ each test must have src/Gemfile: $test_dir/src/Gemfile"
-  if [ -z "$UPDATE" ]; then
-    warn "└─ re-run with --update to create it."
+  if [ "$UPDATE" = "" ]; then
+    attn "└─ re-run with --update to create it."
     exit 1
   else
-    warn "└─ creating empty Gemfile"
+    attn "├─ creating empty Gemfile"
     touch "$test_dir/src/Gemfile"
   fi
 fi
 
 if ! [ -f "$test_dir/src/Gemfile.lock" ]; then
   error "├─ each test must have src/Gemfile.lock: $test_dir/src/Gemfile.lock"
-  if [ -z "$UPDATE" ]; then
-    warn "└─ re-run with --update to create it."
+  if [ "$UPDATE" = "" ]; then
+    attn "└─ re-run with --update to create it."
     exit 1
   else
-    warn "└─ running 'bundle install' to create it"
+    attn "├─ running 'bundle install' to create it"
     (
       cd "$test_dir/src"
       bundle install
@@ -165,24 +188,30 @@ fi
 if [ -d "$test_dir/expected/sorbet/rbi/hidden-definitions" ]; then
   error "├─ hidden-definitions are not currently testable."
 
-  if [ -z "$UPDATE" ]; then
-    warn "└─ please remove: $test_dir/expected/sorbet/rbi/hidden-definitions"
+  if [ "$UPDATE" = "" ]; then
+    attn "└─ please remove: $test_dir/expected/sorbet/rbi/hidden-definitions"
     exit 1
   else
-    warn "├─ removing: $test_dir/expected/sorbet/rbi/hidden-definitions"
+    attn "├─ removing: $test_dir/expected/sorbet/rbi/hidden-definitions"
     rm -rf "$test_dir/expected/sorbet/rbi/hidden-definitions"
   fi
 fi
 
-cp -r "$test_dir/src"/* "$actual"
+cp -r "$test_dir/src" "$actual"
+if [ -d "$test_dir/gems" ]; then
+  cp -r "$test_dir/gems" "$actual"
+fi
 
 
 # ----- Run the test in the sandbox -----
 
+SRB_SORBET_TYPED_REVISION="$(<"$root_dir/test/snapshot/sorbet-typed.rev")"
+export SRB_SORBET_TYPED_REVISION
+
 (
   # Only cd because `srb init` needs to be run from the folder with a Gemfile,
   # not because this test driver needs to refer to files with relative paths.
-  cd "$actual"
+  cd "$actual/src"
 
   # Install what's installed in the Gemfile.lock (ignoring Gemfile)
   wrap_verbose bundle install
@@ -190,67 +219,81 @@ cp -r "$test_dir/src"/* "$actual"
   # Make sure what's in the Gemfile matches what's in the Gemfile.lock
   # (running this in the sandbox, because this will update the Gemfile.lock)
   wrap_verbose bundle check
-  if ! diff -u "$test_dir/src/Gemfile.lock" "$actual/Gemfile.lock"; then
+  if ! diff -u "$test_dir/src/Gemfile.lock" "$actual/src/Gemfile.lock"; then
     error "├─ expected Gemfile.lock did not match actual Gemfile.lock"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
-      exit 1
+      if [ "$DEBUG" = "" ]; then
+        # Debugging usually requires changing the Gemfile to add pry. Printing
+        # but not exiting here lets us skip updating for the sake of debugging.
+        exit 1
+      fi
     else
-      warn "└─ updating Gemfile.lock"
-      cp "$actual/Gemfile.lock" "$test_dir/src/Gemfile.lock"
+      attn "├─ updating Gemfile.lock"
+      cp "$actual/src/Gemfile.lock" "$test_dir/src/Gemfile.lock"
     fi
   fi
 
-  # note: redirects stderr before the pipe
-  if ! SRB_YES=1 bundle exec "$srb" init 2> "$actual/err.log" | \
-      sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
-      > "$actual/out.log"; then
-    error "├─ srb init failed."
-    if [ -z "$VERBOSE" ]; then
-      error "├─ stdout: $actual/out.log"
-      error "├─ stderr: $actual/err.log"
-      error "└─ (or re-run with --verbose)"
-    else
-      error "├─ stdout ($actual/out.log):"
-      cat "$actual/out.log"
-      error "├─ stderr ($actual/err.log):"
-      cat "$actual/err.log"
-      error "└─ (end stderr)"
+  if [ "$DEBUG" != "" ]; then
+    # Don't redirect anything, so that binding.pry and friends work
+    bundle exec "$srb" init
+    exit
+  else
+    # Uses /dev/null for stdin so any binding.pry would exit immediately
+    # (otherwise, pry will be waiting for input, but it's impossible to tell
+    # because the pry output is hiding in the *.log files)
+    #
+    # note: redirects stderr before the pipe
+    if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "$actual/src/err.log" | \
+        sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
+        > "$actual/src/out.log"; then
+      error "├─ srb init failed."
+      if [ "$VERBOSE" = "" ]; then
+        error "├─ stdout: $actual/src/out.log"
+        error "├─ stderr: $actual/src/err.log"
+        error "└─ (or re-run with --verbose)"
+      else
+        error "├─ stdout ($actual/src/out.log):"
+        cat "$actual/src/out.log"
+        error "├─ stderr ($actual/src/err.log):"
+        cat "$actual/src/err.log"
+        error "└─ (end stderr)"
+      fi
+      exit 1
     fi
-    exit 1
   fi
 )
 
 # ----- Check out.log -----
 
-if [ -z "$is_partial" ] || [ -f "$test_dir/expected/out.log" ]; then
-  if ! diff -u "$test_dir/expected/out.log" "$actual/out.log"; then
+if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/out.log" ]; then
+  if ! diff -u "$test_dir/expected/out.log" "$actual/src/out.log"; then
     error "├─ expected out.log did not match actual out.log"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "└─ updating expected/out.log"
+      attn "├─ updating expected/out.log"
       mkdir -p "$test_dir/expected"
-      cp "$actual/out.log" "$test_dir/expected/out.log"
+      cp "$actual/src/out.log" "$test_dir/expected/out.log"
     fi
   fi
 fi
 
 # ----- Check err.log -----
 
-if [ -z "$is_partial" ] || [ -f "$test_dir/expected/err.log" ]; then
-  if ! diff -u "$test_dir/expected/err.log" "$actual/err.log"; then
+if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/err.log" ]; then
+  if ! diff -u "$test_dir/expected/err.log" "$actual/src/err.log"; then
     error "├─ expected err.log did not match actual err.log"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "└─ updating expected/err.log"
-      cp "$actual/err.log" "$test_dir/expected/err.log"
+      attn "├─ updating expected/err.log"
+      cp "$actual/src/err.log" "$test_dir/expected/err.log"
     fi
   fi
 fi
@@ -258,44 +301,45 @@ fi
 # ----- Check sorbet/ -----
 
 # FIXME: Removing hidden-definitions in actual to hide them from diff output.
-rm -rf "$actual/sorbet/rbi/hidden-definitions"
+rm -rf "$actual/src/sorbet/rbi/hidden-definitions"
 
 diff_total() {
-  if ! diff -ur "$test_dir/expected/sorbet" "$actual/sorbet"; then
+  if ! diff -ur "$test_dir/expected/sorbet" "$actual/src/sorbet"; then
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above. Run with --update to fix."
       exit 1
     else
-      warn "├─ updating expected/sorbet (total):"
+      attn "├─ updating expected/sorbet (total):"
       rm -rf "$test_dir/expected/sorbet"
-      cp -r "$actual/sorbet" "$test_dir/expected"
+      mkdir -p "$test_dir/expected"
+      cp -r "$actual/src/sorbet" "$test_dir/expected"
     fi
   fi
 }
 
 diff_partial() {
   set +e
-  diff -ur "$test_dir/expected/sorbet" "$actual/sorbet" | \
+  diff -ur "$test_dir/expected/sorbet" "$actual/src/sorbet" | \
     grep -vF "Only in $actual" \
-    > "$actual/partial-diff.log"
+    > "$actual/src/partial-diff.log"
   set -e
 
   # File exists and is non-empty
-  if [ -s "$actual/partial-diff.log" ]; then
-    cat "$actual/partial-diff.log"
+  if [ -s "$actual/src/partial-diff.log" ]; then
+    cat "$actual/src/partial-diff.log"
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
 
-    if [ -z "$UPDATE" ]; then
+    if [ "$UPDATE" = "" ]; then
       error "└─ see output above."
       exit 1
     else
-      warn "├─ updating expected/sorbet (partial):"
+      attn "├─ updating expected/sorbet (partial):"
 
       find "$test_dir/expected/sorbet" -print0 | while IFS= read -r -d '' expected_path; do
         path_suffix="${expected_path#$test_dir/expected/sorbet}"
-        actual_path="$actual/sorbet$path_suffix"
+        actual_path="$actual/src/sorbet$path_suffix"
 
         # Only ever update existing files, never grow this partial snapshot.
         if [ -d "$expected_path" ]; then
@@ -314,14 +358,17 @@ diff_partial() {
   fi
 }
 
-if [ -z "$is_partial" ]; then
+if [ "$is_partial" = "" ]; then
   diff_total
 elif [ -d "$test_dir/expected/sorbet" ]; then
   diff_partial
-elif [ -n "$UPDATE" ]; then
-  warn "├─ Treating empty partial test as total for the sake of updating."
-  warn "├─ Feel free to delete files in this snapshot that you don't want."
-  diff_total
+elif [ "$UPDATE" != "" ]; then
+  if [ "$RECORD" = "" ]; then
+    info "├─ Not recording sorbet/ folder for empty partial test (add --record if you wanted this)."
+  else
+    info "├─ Treating empty partial test as total for the sake of recording."
+    diff_total
+  fi
 else
   # It's fine for a partial test to not have an expected dir.
   # It means the test only cares about the exit code of srb init.

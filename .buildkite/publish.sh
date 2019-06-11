@@ -33,11 +33,11 @@ pushd sorbet.run/docs
 git add sorbet-wasm.wasm sorbet-wasm.js
 dirty=
 git diff-index --quiet HEAD -- || dirty=1
-if [ -n "$dirty" ]; then
+if [ "$dirty" != "" ]; then
   echo "$BUILDKITE_COMMIT" > sha.html
   git add sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-  if [ -z "$dryrun" ]; then
+  if [ "$dryrun" = "" ]; then
       git push
   fi
 else
@@ -57,11 +57,11 @@ git add .
 git reset HEAD _out_
 dirty=
 git diff-index --quiet HEAD -- || dirty=1
-if [ -n "$dirty" ]; then
+if [ "$dirty" != "" ]; then
   echo "$BUILDKITE_COMMIT" > sha.html
   git add sha.html
   git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-  if [ -z "$dryrun" ]; then
+  if [ "$dryrun" = "" ]; then
       git push origin gh-pages
 
       # For some reason, GitHub Pages won't automatically build for us on push
@@ -80,10 +80,13 @@ fi
 git checkout -f "$current_rev"
 
 echo "--- releasing stripe.dev/sorbet-repo (gem repo)"
-rm -rf sorbet-repo
-git clone git@github.com:stripe/sorbet-repo.git
+if [ ! -d "sorbet-repo" ]; then
+  git clone git@github.com:stripe/sorbet-repo.git
+fi
 pushd sorbet-repo
 git fetch origin gh-pages
+git reset --hard origin/gh-pages
+git clean -fdx
 git checkout gh-pages
 mkdir -p super-secret-private-beta/gems/
 cp -R ../_out_/gems/*.gem super-secret-private-beta/gems/
@@ -93,7 +96,7 @@ gem generate_index
 popd
 git add super-secret-private-beta/
 git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-if [ -z "$dryrun" ]; then
+if [ "$dryrun" = "" ]; then
     git push origin gh-pages
 fi
 popd
@@ -105,7 +108,7 @@ prefix="0.4"
 release_version="v$prefix.$git_commit_count.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 echo releasing "${release_version}"
 git tag -f "${release_version}"
-if [ -z "$dryrun" ]; then
+if [ "$dryrun" = "" ]; then
     git push origin "${release_version}"
 fi
 
@@ -127,7 +130,7 @@ source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
   gem 'sorbet', '$prefix.$git_commit_count'
 end
 \`\`\`"
-if [ -z "$dryrun" ]; then
+if [ "$dryrun" = "" ]; then
     echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
 fi
 popd

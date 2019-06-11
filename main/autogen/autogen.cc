@@ -663,4 +663,15 @@ string ParsedFile::toMsgpack(core::Context ctx, int version) {
     return write.pack(ctx, *this);
 }
 
+void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
+    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
+    for (auto &def : defs) {
+        if (def.type != Definition::Class) {
+            continue;
+        }
+        auto names = showFullName(ctx, def.id);
+        out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", nameToString)));
+    }
+}
+
 } // namespace sorbet::autogen

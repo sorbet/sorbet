@@ -12,8 +12,8 @@ There are four ways to do type assertions in Sorbet:
 - `T.must(expr)`
 - `T.assert_type!(expr, Type)`
 
-There is also `T.unsafe` which is not a "type assertion" so much as an [Escape
-Hatch](troubleshooting.md#escape-hatches).
+There is also `T.unsafe` which is not a "type assertion" so much as an
+[Escape Hatch](troubleshooting.md#escape-hatches).
 
 At a high level:
 
@@ -32,38 +32,38 @@ At a high level:
 
 Some other ways to think about it:
 
--   `T.let` vs `T.cast`
+- `T.let` vs `T.cast`
 
-    ```ruby
-    T.cast(expr, Type)
-    ```
+  ```ruby
+  T.cast(expr, Type)
+  ```
 
-    is the same as
+  is the same as
 
-    ```ruby
-    T.let(T.unsafe(expr), Type)
-    ```
+  ```ruby
+  T.let(T.unsafe(expr), Type)
+  ```
 
--   `T.unsafe` in terms of `T.let`
+- `T.unsafe` in terms of `T.let`
 
-    ```ruby
-    T.unsafe(expr)
-    ```
+  ```ruby
+  T.unsafe(expr)
+  ```
 
-    is the same as
+  is the same as
 
-    ```ruby
-    T.let(expr, T.untyped)
-    ```
+  ```ruby
+  T.let(expr, T.untyped)
+  ```
 
--   `T.must` is like `T.cast`, but without having to know the result type:
+- `T.must` is like `T.cast`, but without having to know the result type:
 
-    ```ruby
-    T.cast(nil_or_string, String)
-    ```
+  ```ruby
+  T.cast(nil_or_string, String)
+  ```
 
-    is the same as
+  is the same as
 
-    ```ruby
-    T.must(nil_or_string)
-    ```
+  ```ruby
+  T.must(nil_or_string)
+  ```

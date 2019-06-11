@@ -37,6 +37,7 @@
       "class-of",
       "self-type",
       "abstract",
+      "override-checking",
       "strict",
       "intersection-types"
     ]

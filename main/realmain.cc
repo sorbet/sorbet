@@ -156,6 +156,7 @@ struct AutogenResult {
         // Selectively populated based on print options
         string strval;
         string msgpack;
+        vector<string> classlist;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -195,6 +196,10 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     Timer timeit(logger, "autogenToMsgpack");
                     serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
                 }
+                if (opts.print.AutogenClasslist.enabled) {
+                    Timer timeit(logger, "autogenClasslist");
+                    pf.classlist(ctx, serialized.classlist);
+                }
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
@@ -222,6 +227,17 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         if (opts.print.AutogenMsgPack.enabled) {
             opts.print.AutogenMsgPack.print(elem.second.msgpack);
         }
+    }
+    if (opts.print.AutogenClasslist.enabled) {
+        Timer timeit(logger, "autogenClasslistPrint");
+        vector<string> mergedClasslist;
+        for (auto &el : merged) {
+            auto &v = el.second.classlist;
+            mergedClasslist.insert(mergedClasslist.end(), make_move_iterator(v.begin()), make_move_iterator(v.end()));
+        }
+        fast_sort(mergedClasslist);
+        auto last = unique(mergedClasslist.begin(), mergedClasslist.end());
+        opts.print.AutogenClasslist.fmt("{}\n", fmt::join(mergedClasslist.begin(), last, "\n"));
     }
 } // namespace sorbet::realmain
 
@@ -326,7 +342,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
+    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) {
         gs->runningUnderAutogen = true;
     }
     if (opts.reserveMemKiB > 0) {

@@ -6,6 +6,12 @@ module T::Sig
   sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def sig(&blk); end
 end
+module T::Sig::WithoutRuntime
+  # At runtime, does nothing, but statically it is treated exactly the same
+  # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
+  sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  def self.sig(&blk); end
+end
 
 module T
   extend T::Sig

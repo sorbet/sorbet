@@ -60,7 +60,6 @@ end
 Otherwise, let's walk through an example explaining not only **how** we can get
 exhaustiveness checking, but also **why** it's useful:
 
-
 ## Example
 
 Let's say we have this setup:
@@ -133,8 +132,8 @@ actually do something with it!
 error. It lets us catch the problem statically before causing all sorts of
 problems down the line.
 
-We can enable exhaustivness checking in Sorbet using a [type
-assertion](type-assertions.md):
+We can enable exhaustivness checking in Sorbet using a
+[type assertion](type-assertions.md):
 
 ```ruby
 sig {params(x: T.any(A, B, C)).void}

@@ -10,7 +10,6 @@ sidebar_label: Adopting Sorbet
 >
 > Interested in signing up? Email us at <sorbet@stripe.com>.
 
-
 ## Step 1: Install dependencies
 
 There are two components to Sorbet: the command line interface and runtime
@@ -42,7 +41,6 @@ No errors! Great job.
 true
 ```
 
-
 ## Step 2: Initialize Sorbet in our project
 
 For small projects, Sorbet can run on a single file with no additional
@@ -59,7 +57,6 @@ It's normal for this command to spew a bunch of output to the terminal. When
 it's done, there should be a `sorbet/` folder in the current directory. Be sure
 to check the entire folder into version control.
 
-
 ### Verify initialization
 
 The contents of the `sorbet/` folder should now look like this:
@@ -71,19 +68,18 @@ sorbet/
     └── ···
 ```
 
-- `sorbet/config` is the config file Sorbet will read (see [Command Line
-  Reference](cli.md))
+- `sorbet/config` is the config file Sorbet will read (see
+  [Command Line Reference](cli.md))
 
 - `sorbet/rbi/` is a folder containing [RBI files](rbi.md). RBI files (or "Ruby
   Interface" files) declare classes, modules, constants, and methods to Sorbet
   that it can't see on its own.
 
-  `srb init` creates many kinds of RBI files. For more information, see [RBI
-  files](rbi.md).
+  `srb init` creates many kinds of RBI files. For more information, see
+  [RBI files](rbi.md).
 
 If these two items exist, we're all set to typecheck our project for the first
 time.
-
 
 ## Step 3: Run `srb tc` for the first time
 
@@ -98,7 +94,6 @@ Now that we've initialized Sorbet, type checking Sorbet should be as simple as:
 
 By default, this will type check every Ruby file in the current folder. To
 configure this, see [Command Line Reference](cli.md).
-
 
 ## Step 4: Fix constant resolution errors
 
@@ -136,7 +131,8 @@ people encounter at this step:
     central to understanding the inheritance hierarchy and thus knowing which
     types can be used in place of which other types.
 
-[rand-include]: https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
+[rand-include]:
+  https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
 
 To solve points (3) and (4), Sorbet uses [RBI files](rbi.md). We mentioned RBI
 files before when we introduced `srb init`. RBI files are purely annotations
@@ -146,7 +142,6 @@ Sorbet requires hand-written RBI files.
 
 To learn more about RBI files and how they can help with adopting Sorbet, see
 [the docs here](rbi.md).
-
 
 ## Step 5: Enable type checking
 
@@ -160,17 +155,17 @@ enforces that...
 - every class, module, and constant in a codebase is known. These can be 100%
   accurately shown in auto-complete suggestions and used in type annotations.
 
-- all gems have explicit interfaces. More than YARD documentation, RBI files
-  are machine-checked documentation about the libraries we're using.
+- all gems have explicit interfaces. More than YARD documentation, RBI files are
+  machine-checked documentation about the libraries we're using.
 
 Importantly, Sorbet does **not** yet report **type errors** (the errors we've
 seen so far have been syntax errors and constant resolution errors). The final
 step is to start enabling more type checks in our code.
 
 The rest of this site is dedicated to learning about the extra checks we can
-enable. The tl;dr is that type checking happens when we add [`# typed:
-true`](static.md) to files and write [method signatures](sigs.md) in those
-files.
+enable. The tl;dr is that type checking happens when we add
+[`# typed: true`](static.md) to files and write [method signatures](sigs.md) in
+those files.
 
 ## What next?
 

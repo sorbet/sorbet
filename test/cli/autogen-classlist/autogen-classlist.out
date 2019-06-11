@@ -1,0 +1,13 @@
+--- autogen-classlist ---
+A::B::C1
+A::Child
+A::Dup
+A::Parent
+C::D
+Z
+--- invalid: class in method ---
+test/cli/autogen-classlist/b.rb:5: Parse Error: class definition in method body https://sorbet.org/docs/error-reference#2001
+     5 |    class InMethod; end # Not allowed
+            ^^^^^
+Errors: 1
+

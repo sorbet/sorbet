@@ -19,6 +19,7 @@
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
+#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/configatron/configatron.h"
@@ -248,8 +249,15 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 tree = move(pluginTree);
                 resultPluginFiles = move(pluginFiles);
             }
+
             if (!opts.skipDSLPasses) {
                 tree = runDSL(gs, file, move(tree));
+            }
+            if (print.DSLTree.enabled) {
+                print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+            }
+            if (print.DSLTreeRaw.enabled) {
+                print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
             }
 
             tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
@@ -257,11 +265,11 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 return emptyPluginFile(file);
             }
         }
-        if (print.DSLTree.enabled) {
-            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+        if (print.IndexTree.enabled) {
+            print.IndexTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
         }
-        if (print.DSLTreeRaw.enabled) {
-            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
+        if (print.IndexTreeRaw.enabled) {
+            print.IndexTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return emptyPluginFile(file);
@@ -650,6 +658,16 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
+
+    resolved = flatten::runOne(ctx, move(resolved));
+
+    if (opts.print.FlattenedTree.enabled) {
+        opts.print.FlattenedTree.fmt("{}\n", resolved.tree->toString(ctx));
+    }
+    if (opts.print.FlattenedTreeRaw.enabled) {
+        opts.print.FlattenedTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
+    }
+
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
         return result;
     }
@@ -748,6 +766,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     for (auto &resolved : what) {
         resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
     }
+    fast_sort(walk.unresolvedConstants);
     opts.print.MissingConstants.fmt("{}\n", fmt::join(walk.unresolvedConstants, "\n"));
     return what;
 }
@@ -800,6 +819,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
+
     gs->errorQueue->flushErrors();
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
@@ -814,6 +834,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
     if (opts.print.MissingConstants.enabled) {
         what = printMissingConstants(*gs, opts, move(what));
     }
+
     return what;
 }
 
@@ -833,6 +854,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         }
 
         core::Context ctx(*gs, core::Symbols::root());
+
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }

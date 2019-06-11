@@ -8,10 +8,14 @@ Sorbet implements a **control flow-sensitive** type system. It models control
 flow through a program and uses it to track the program's types more
 accurately.[^control]
 
+<!-- prettier-ignore-start -->
+
 [^control]: We abbreviate "control flow-sensitive" to "flow-sensitive"
-throughout these docs, because Sorbet does little to no *data flow analysis*.
+throughout these docs, because Sorbet does little to no _data flow analysis_.
 (Data flow analysis is a separate family of techniques that models the way data
 flows between variables in a program.)
+
+<!-- prettier-ignore-end -->
 
 ## Example
 
@@ -82,17 +86,16 @@ The complete list of constructs that affect Sorbet's flow-sensitive typing:
 - `Class#===` (this is how `case` on a class object works)
 - `Class#<` (like `is_a?`, but for class objects instead of instances of
 - Negated conditions (including both `!` and `unless`)
-- Truthiness (everything but `nil` and `false` is truthy in Ruby)
-  classes)
+- Truthiness (everything but `nil` and `false` is truthy in Ruby) classes)
 
-> **Warning**: Sorbet's analysis for these constructs hinges on them not
-> being overridden! For example, Sorbet can behave unpredictably if when
-> overriding `is_a?` in weird ways.
+> **Warning**: Sorbet's analysis for these constructs hinges on them not being
+> overridden! For example, Sorbet can behave unpredictably if when overriding
+> `is_a?` in weird ways.
 
 ## Limitations of flow-sensitivity
 
-An alternative title for this section: "*Why does Sorbet think this is nil? I
-just checked that it's not!*"
+An alternative title for this section: "_Why does Sorbet think this is nil? I
+just checked that it's not!_"
 
 Flow-sensitive type checking only works for local variables, not for values
 returned from method calls. Why? Sorbet can't know that if a method is called
@@ -124,9 +127,8 @@ tmp = maybe_int
 y = tmp.nil? && (2 * tmp)
 ```
 
-<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→ View full example on sorbet.run</a>
+[→ View full example on sorbet.run](<https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20tmp.nil%3F%20%26%26%20(2%20*%20tmp)>)
 
 > **Note**: Many Ruby constructs that look like local variables are actually
 > method calls without parens! Specifically, watch out for `attr_reader` and
 > zero-argument method definitions.
-

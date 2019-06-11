@@ -12,9 +12,13 @@ two things are true: 1) we need all the tooling help we can get to understand
 and modify that much code, and 2) a total rewrite in a statically typed language
 would be a massive undertaking.
 
+<!-- prettier-ignore-start -->
+
 [^languages]: We also use plenty of of other languages including Go for
 infrastructure tasks, Scala for data wrangling, and JavaScript for client-side
 work.
+
+<!-- prettier-ignore-end -->
 
 With that in mind, in October 2017 a small team of engineers conceived of
 building Sorbet, a gradual static type system for Ruby. Static type systems look
@@ -26,9 +30,9 @@ systems that have been added onto existing dynamically typed languages are
 like to give a brief update about what we've been working on, and where we're
 going next.
 
-[Flow]: https://flow.org/
-[TypeScript]: https://www.typescriptlang.org/
-[Hack]: https://hacklang.org/
+[flow]: https://flow.org/
+[typescript]: https://www.typescriptlang.org/
+[hack]: https://hacklang.org/
 
 <!--truncate-->
 
@@ -37,14 +41,16 @@ some very helpful collaborators. We now run Sorbet's type checking as a part of
 every build in Stripe's Ruby codebase, and our developers have come to rely on
 its feedback. Having proven out Sorbet's value internally, we're now getting
 ready to share it with the rest of the Ruby community as open source. We've also
-begun beta testing an editor integration which you can play with at
-[sorbet.run] (if you're on a desktop browser[^mobile]). You can read more about
-how Sorbet works in our [documentation](/docs/overview).
+begun beta testing an editor integration which you can play with at [sorbet.run]
+(if you're on a desktop browser[^mobile]). You can read more about how Sorbet
+works in our [documentation](/docs/overview).
 
-[^mobile]: [sorbet.run] also works on mobile devices but
-does not offer all the code navigation and exploration features of the desktop
-version.
+<!-- prettier-ignore-start -->
 
+[^mobile]: [sorbet.run] also works on mobile devices but does not offer all the
+code navigation and exploration features of the desktop version.
+
+<!-- prettier-ignore-end -->
 
 ## Where Sorbet is now
 
@@ -118,11 +124,15 @@ editor.rb:12: Symbol(:"foo") doesn't match String for argument name
           ^^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
+<!-- prettier-ignore-start -->
+
 [^call-site]: A call site is just a single location in a codebase that will
-result in a call to function or method when run. We don't use the term *method
-calls* because that can also mean a call at runtime. For example, `foo.bar`
+result in a call to function or method when run. We don't use the term _method
+calls_ because that can also mean a call at runtime. For example, `foo.bar`
 might exist at only one call site in your code, but if it's in a loop it might
 result in 0, 1, or `n` method calls at runtime.
+
+<!-- prettier-ignore-end -->
 
 There's more integration work to do and features to build, but so far work has
 already paid off in the number bugs prevented. The feedback from Stripe
@@ -143,7 +153,7 @@ automate some of the lessons we learned as we rolled it out to Stripe's
 codebase. We've also published our documentation and offered a beta program
 signup to get early feedback at [sorbet.org](https://sorbet.org).
 
-A natural question might be *why not open source now?* Given the strong feelings
+A natural question might be _why not open source now?_ Given the strong feelings
 that people have around static type systems and the effort required to integrate
 static types, we don't want rough edges in developer experience to accidentally
 drive people away from the idea entirely. Developer experience is as crucial to
@@ -168,7 +178,6 @@ subdirectory with metadata about your project:
 ❯ srb init
 ...
 ```
-
 
 ```plaintext
 sorbet/
@@ -217,7 +226,6 @@ sig {params(new_value: T.nilable(Integer)).void}
 def my_id=(new_value); end
 ```
 
-
 ### Supporting the existing Ruby ecosystem
 
 Sorbet will support all of the [types that Matz announced] for the Ruby 3
@@ -225,7 +233,8 @@ release. In fact, we're part of the working group (with Matz and the Ruby core
 team) that is collaborating on the goals and design of Ruby 3 types, and we've
 been sharing everything we've learned from Sorbet.
 
-[types that Matz announced]: https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148
+[types that matz announced]:
+  https://www.youtube.com/watch?v=cmOt9HhszCI&feature=youtu.be&t=2148
 
 Coinbase has built [sorbet-typed], a central repository for sharing type
 definitions for existing Ruby gems. This enables types for the existing
@@ -270,8 +279,8 @@ GitLab:
 ```
 
 It's worth mentioning that even with `# typed: false` Sorbet will still find
-invalid constants such as misspelled class names. Only the small number of  `#
-typed: ignore` files are getting nothing from Sorbet.
+invalid constants such as misspelled class names. Only the small number of
+`# typed: ignore` files are getting nothing from Sorbet.
 
 ### Editor integration
 
@@ -305,7 +314,6 @@ with Sorbet:
 
 We're indebted to several people and groups who have helped us get where we are:
 
-
 - Jeff Foster at Tufts University and his students have been working on RDL. We
   based our initial type annotations for the Ruby standard library on theirs.
 - Our initial Ruby parser was from [@charliesome] at GitHub.
@@ -317,9 +325,9 @@ We're indebted to several people and groups who have helped us get where we are:
   Sorbet as one of their integrations.
 
 In addition to code and tool contributions we've had many fruitful conversations
-that helped shape our thinking. Our thanks go out to [@soutaro], author of Steep;
-[@mame], who is working on a Type profiler; and of course our favorite BDFL
-[@matz].
+that helped shape our thinking. Our thanks go out to [@soutaro], author of
+Steep; [@mame], who is working on a Type profiler; and of course our favorite
+BDFL [@matz].
 
 [@charliesome]: https://github.com/charliesome
 [@soutaro]: https://github.com/soutaro
@@ -346,9 +354,8 @@ James Iry [@jamesiry](https://twitter.com/jamesiry) on behalf of the Sorbet team
 - John Vilk ([@jvilk](https://github.com/jvilk))
 - Jake Zimmerman ([@jez](https://github.com/jez))
 - Neil Parikh ([@neilparikh](https://github.com/neilparikh))
-- Russell Davis ([@_russelldavis](https://twitter.com/_russelldavis))
+- Russell Davis ([@\_russelldavis](https://twitter.com/_russelldavis))
 - Nelson Elhage ([@nelhage](https://twitter.com/nelhage))
-
 
 [sorbet-typed]: https://github.com/sorbet/sorbet-typed
 [sorbet.org]: https://sorbet.org

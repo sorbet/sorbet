@@ -14,7 +14,6 @@ This doc covers two main topics:
 - When stuck, how to [find out **why**](#validating-our-assumptions).
 - Regardless of why, [how to **get unstuck**](#escape-hatches).
 
-
 ## Validating our assumptions
 
 When faced with a type error, checking our assumptions is step number one. The
@@ -26,8 +25,8 @@ There are also some tools for helping debug type-related errors:
 
 ### `T.reveal_type`
 
-If we wrap a variable or method call in `T.reveal_type`, Sorbet will show
-us what type it thinks that variable has. This is a super powerful debugging
+If we wrap a variable or method call in `T.reveal_type`, Sorbet will show us
+what type it thinks that variable has. This is a super powerful debugging
 technique! `T.reveal_type` should be **one of the first tools** to reach for
 when debugging a confusing error.
 
@@ -44,7 +43,10 @@ def foo(xs)
   T.reveal_type(xs.first) # => Revealed type: `T.nilable(Integer)`
 end
 ```
-[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend)
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend">
+  → View on sorbet.run
+</a>
 
 With this example we see that `xs.first` returns `T.nilable(Integer)`.
 
@@ -90,8 +92,8 @@ even when it does:
   typed incorrectly (our standard library shims are sometimes incomplete).
 
 - Maybe a method Sorbet thinks doesn't exist actually **does** exist because it
-  was dynamically defined with `define_method` or `missing_method`. See [Escape
-  Hatches](#escape-hatches) below for working around this.
+  was dynamically defined with `define_method` or `missing_method`. See
+  [Escape Hatches](#escape-hatches) below for working around this.
 
 ### `*.rbi` files & missing methods
 
@@ -100,8 +102,8 @@ exist." Ruby is a very dynamic language, and methods can be defined in ways
 Sorbet cannot see statically. It's possible that even though a method exists at
 runtime, Sorbet cannot see it.
 
-However, we can use `*.rbi` files to declare methods to Sorbet so that it **can**
-see them statically. For more information about RBI files:
+However, we can use `*.rbi` files to declare methods to Sorbet so that it
+**can** see them statically. For more information about RBI files:
 
 [→ RBI files](rbi.md)
 
@@ -120,7 +122,6 @@ gotchas when using Sorbet, here are two more specific resources:
 
   This is a list of questions people commonly have when working with Sorbet and
   the runtime type system. Skim it to see if it says anything useful!
-
 
 ## Escape Hatches
 
@@ -175,7 +176,8 @@ programmer.
 Note that the call to `T.unsafe` must wrap the [receiver] of the method call. In
 this example:
 
-[receiver]: https://stackoverflow.com/questions/916572/in-ruby-what-does-the-receiver-refer-to
+[receiver]:
+  https://stackoverflow.com/questions/916572/in-ruby-what-does-the-receiver-refer-to
 
 ```ruby
 # typed: true
@@ -239,7 +241,7 @@ is an instance of `A`, and same for `'b'` / `B`.
 Ideally we'd refactor our code to express this invariant in the types. To
 reiterate: the **preferred** solution is to refactor this code. The time spent
 adjusting this code now will make it easier and safer to refactor the code in
-the future. Even still, we don't always have the time *right now*, so let's see
+the future. Even still, we don't always have the time _right now_, so let's see
 how we can work around the issue.
 
 We **could** use `T.unsafe` here, but that's a pretty big hammer. Instead, we'll
@@ -266,7 +268,6 @@ invocation.
 
 will still be caught as a missing method statically.
 
-
 ### `.soft()` & `.checked()`
 
 `T.unsafe` and `T.cast` let us opt out of static checks. These next constructs
@@ -289,7 +290,7 @@ effect. In the runtime, the behavior of these three differs depending on whether
 we're in tests or in production:
 
 | If types don't match, using ↓ in → ... | Tests            | Production       |
-| ---                                    | -----            | ----------       |
+| -------------------------------------- | ---------------- | ---------------- |
 | _none of the below_                    | will raise       | will raise       |
 | `.soft(notify: ...)`                   | will raise       | soft asserts     |
 | `.checked(:tests)`                     | will raise       | skips validation |
@@ -310,4 +311,3 @@ To recap:
 - `.checked(:never)` is a hammer. It silences all validation in both tests and
   production. Use this with caution!! Without **any** runtime validation, Sorbet
   cannot warn when interoperating with untyped code.
-

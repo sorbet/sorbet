@@ -2,7 +2,7 @@
 # typed: false
 
 require_relative './step_interface'
-require_relative './sorbet'
+require_relative './t'
 
 require 'bundler'
 require 'fileutils'
@@ -20,27 +20,30 @@ class Sorbet::Private::FetchRBIs
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
 
   SORBET_TYPED_REPO = 'https://github.com/sorbet/sorbet-typed.git'
+  SORBET_TYPED_REVISION = ENV['SRB_SORBET_TYPED_REVISION'] || 'origin/master'
 
   HEADER = Sorbet::Private::Serialize.header(false, 'sorbet-typed')
 
   include Sorbet::Private::StepInterface
 
   # Ensure our cache is up-to-date
-  Sorbet.sig {void}
+  T::Sig::WithoutRuntime.sig {void}
   def self.fetch_sorbet_typed
-    if File.directory?(RBI_CACHE_DIR)
-      FileUtils.cd(RBI_CACHE_DIR) do
-        IO.popen(%w{git pull}) {|pipe| pipe.read}
-        raise "Failed to git pull" if $?.exitstatus != 0
-      end
-    else
+    if !File.directory?(RBI_CACHE_DIR)
       IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR]) {|pipe| pipe.read}
       raise "Failed to git pull" if $?.exitstatus != 0
+    end
+
+    FileUtils.cd(RBI_CACHE_DIR) do
+      IO.popen(%w{git fetch origin}) {|pipe| pipe.read}
+      raise "Failed to git fetch" if $?.exitstatus != 0
+      IO.popen(%w{git checkout -q} + [SORBET_TYPED_REVISION]) {|pipe| pipe.read}
+      raise "Failed to git checkout" if $?.exitstatus != 0
     end
   end
 
   # List of directories whose names satisfy the given Gem::Version (+ 'all/')
-  Sorbet.sig do
+  T::Sig::WithoutRuntime.sig do
     params(
       root: String,
       version: Gem::Version,
@@ -63,47 +66,21 @@ class Sorbet::Private::FetchRBIs
   end
 
   # List of directories in lib/ruby whose names satisfy the current RUBY_VERSION
-  Sorbet.sig {params(ruby_version: Gem::Version).returns(T::Array[String])}
+  T::Sig::WithoutRuntime.sig {params(ruby_version: Gem::Version).returns(T::Array[String])}
   def self.paths_for_ruby_version(ruby_version)
     ruby_dir = "#{RBI_CACHE_DIR}/lib/ruby"
     matching_version_directories(ruby_dir, ruby_version)
   end
 
-  # List of rbi folders in the gem's source
-  Sorbet.sig {params(gemspec: T.untyped).returns(T::Array[String])}
-  def self.paths_within_gem_sources(gemspec)
-    paths = T.let([], T::Array[String])
-    %w[rbi rbis].each do |dir|
-      gem_rbi = "#{gemspec.full_gem_path}/#{dir}"
-      paths << gem_rbi if Dir.exist?(gem_rbi)
-    end
-    paths
-  end
-
   # List of directories in lib/gemspec.name whose names satisfy gemspec.version
-  Sorbet.sig {params(gemspec: T.untyped).returns(T::Array[String])}
+  T::Sig::WithoutRuntime.sig {params(gemspec: T.untyped).returns(T::Array[String])}
   def self.paths_for_gem_version(gemspec)
     local_dir = "#{RBI_CACHE_DIR}/lib/#{gemspec.name}"
     matching_version_directories(local_dir, gemspec.version)
   end
 
-  # Make the config file that has a list of every non-vendored RBI
-  # (we don't vendor these so that (1) people don't have to check them in (2) people aren't likely to patch them)
-  Sorbet.sig {params(gem_source_paths: T::Array[String]).void}
-  def self.serialize_rbi_list(gem_source_paths)
-    File.open(SORBET_RBI_LIST, 'w') do |rbi_list|
-      rbi_list.puts(gem_source_paths)
-    end
-
-    File.open(SORBET_CONFIG_FILE, 'r+') do |config|
-      if config.lines.all? {|line| !line.match(/^@#{SORBET_RBI_LIST}$/)}
-        config.puts("@#{SORBET_RBI_LIST}")
-      end
-    end
-  end
-
   # Copy the relevant RBIs into their repo, with matching folder structure.
-  Sorbet.sig {params(vendor_paths: T::Array[String]).void}
+  T::Sig::WithoutRuntime.sig {params(vendor_paths: T::Array[String]).void}
   def self.vendor_rbis_within_paths(vendor_paths)
     vendor_paths.each do |vendor_path|
       relative_vendor_path = vendor_path.sub(RBI_CACHE_DIR, '')
@@ -123,25 +100,16 @@ class Sorbet::Private::FetchRBIs
     end
   end
 
-  Sorbet.sig {void}
+  T::Sig::WithoutRuntime.sig {void}
   def self.main
     fetch_sorbet_typed
 
     gemspecs = Bundler.load.specs.sort_by(&:name)
 
-    gem_source_paths = T.let([], T::Array[String])
-    gemspecs.each do |gemspec|
-      gem_source_paths += paths_within_gem_sources(gemspec)
-    end
-
     vendor_paths = T.let([], T::Array[String])
     vendor_paths += paths_for_ruby_version(Gem::Version.create(RUBY_VERSION))
     gemspecs.each do |gemspec|
       vendor_paths += paths_for_gem_version(gemspec)
-    end
-
-    if gem_source_paths.length > 0
-      serialize_rbi_list(gem_source_paths)
     end
 
     if vendor_paths.length > 0

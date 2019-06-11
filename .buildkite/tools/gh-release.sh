@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-[ -z "$DEBUG" ] || set -x;
+[ "$DEBUG" = "" ] || set -x;
 
 usage() {
   echo "$0 <repo> <tag> [<release name>] [-- <asset>...]" >&2;
@@ -41,7 +41,7 @@ EOS
   exit 1;
 fi
 
-[ -n "$2" ] || (usage; exit 1);
+[ "$2" != "" ] || (usage; exit 1);
 
 REPO="$1"
 shift
@@ -50,7 +50,7 @@ TAG="$1"
 shift
 
 NAME="$(basename "$REPO") ${TAG}"
-if [ -n "$1" ] && [ "$1" != "--" ]; then
+if [ "$1" != "" ] && [ "$1" != "--" ]; then
   NAME="${NAME}: $1";
   shift
 fi

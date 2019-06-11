@@ -7,6 +7,7 @@
 #include "core/Names.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
+#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
@@ -54,6 +55,9 @@ void processSource(core::GlobalState &cb, string str) {
     trees.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
     resolver::Resolver::run(ctx, move(trees), *workers);
+    for (auto &tree : trees) {
+        tree = flatten::runOne(ctx, move(tree));
+    }
 }
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT

@@ -52,6 +52,7 @@ require_relative 'types/types/union'
 require_relative 'types/types/untyped'
 require_relative 'types/private/types/not_typed'
 require_relative 'types/private/types/void'
+require_relative 'types/private/types/string_holder'
 
 require_relative 'types/types/type_variable'
 require_relative 'types/types/type_member'
@@ -68,7 +69,6 @@ require_relative 'types/private/abstract/validate'
 
 # Catch all. Sort of built by `cd extn; find types -type f | grep -v test | sort`
 require_relative 'types/generic'
-require_relative 'types/hooks'
 require_relative 'types/interface_wrapper'
 require_relative 'types/private/abstract/declare'
 require_relative 'types/private/abstract/hooks'

@@ -19,18 +19,29 @@ usage() {
   echo "Options:"
   echo "  --verbose    Be more verbose (more than just test summary)."
   echo "  --update     If a test fails, overwrite the expected with the actual"
+  echo "  --record     Treat partial tests as total tests for the purpose of creating"
+  echo "               new tests. Requires --update"
 }
 
 VERBOSE=
 UPDATE=
+RECORD=
+FLAGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --verbose)
       VERBOSE="--verbose"
+      FLAGS="$FLAGS $VERBOSE"
       shift
       ;;
     --update)
       UPDATE="--update"
+      FLAGS="$FLAGS $UPDATE"
+      shift
+      ;;
+    --record)
+      RECORD="--record"
+      FLAGS="$FLAGS $RECORD"
       shift
       ;;
     -*)
@@ -50,9 +61,9 @@ done
 
 # ----- Discover and run all the tests -----
 
-info "Running suite: $0 $VERBOSE $UPDATE"
+info "Running suite: $0 $FLAGS"
 
-if [ -z "$VERBOSE" ]; then
+if [ "$VERBOSE" = "" ]; then
   info "(re-run with --verbose for more information)"
 else
   info "(--verbose mode)"
@@ -67,10 +78,17 @@ for test_dir in "$root_dir/test/snapshot"/{partial,total}/*; do
   relative_test_exe="$(realpath --relative-to="$PWD" "$test_exe")"
   relative_test_dir="$(realpath --relative-to="$PWD" "$test_dir")"
 
-  if "$test_exe" "$test_dir" $VERBOSE $UPDATE; then
-    passing_tests+=("$relative_test_exe $relative_test_dir $VERBOSE $UPDATE")
+  # We're explicitly relying on word splitting here, because Bash 3 arrays
+  # don't work well for empty arrays. An alternative would be to use arrays +
+  # use this workaround (https://stackoverflow.com/a/7577209).
+  #
+  # This means that FLAGS cannot contain shell special characters.
+  #
+  # shellcheck disable=SC2086
+  if "$test_exe" "$test_dir" $FLAGS; then
+    passing_tests+=("$relative_test_exe $relative_test_dir $FLAGS")
   else
-    failing_tests+=("$relative_test_exe $relative_test_dir $VERBOSE $UPDATE")
+    failing_tests+=("$relative_test_exe $relative_test_dir $FLAGS")
   fi
 done
 
@@ -91,7 +109,7 @@ if [ "${#failing_tests[@]}" -ne 0 ]; then
     error "$failing_test"
   done
 
-  if [ -z "$UPDATE" ]; then
+  if [ "$UPDATE" = "" ]; then
     echo
     info "If you have reason to believe these differences are ok to keep, run"
     info "    $0 $* --update"

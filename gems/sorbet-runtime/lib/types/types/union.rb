@@ -19,30 +19,26 @@ module T::Types
 
     # @override Base
     def name
-      if @types.size == 1
-        return @types[0].name
-      end
-      nilable = T::Utils.coerce(NilClass)
-      if @types.any? {|t| t == nilable}
-        remaining_types = @types.reject {|t| t == nilable}
-        if remaining_types.length == 1
-          "T.nilable(#{remaining_types.first.name})"
-        else
-          "T.nilable(T.any(#{pretty_names(remaining_types)}))"
-        end
-      elsif @types.size == 2 && @types.include?(T::Utils.coerce(TrueClass)) && @types.include?(T::Utils.coerce(FalseClass))
-        "T::Boolean"
-      else
-        "T.any(#{pretty_names(@types)})"
-      end
+      type_shortcuts(@types)
     end
 
-    private def pretty_names(names)
-      types = names.map(&:name).compact.sort
-      if types.length == 2 && types[0] == 'FalseClass' && types[1] == 'TrueClass'
-        types = ['TrueClass', 'FalseClass']
+    private def type_shortcuts(types)
+      if types.size == 1
+        return types[0].name
       end
-      types.join(", ")
+      nilable = T::Utils.coerce(NilClass)
+      trueclass = T::Utils.coerce(TrueClass)
+      falseclass = T::Utils.coerce(FalseClass)
+      if types.any? {|t| t == nilable}
+        remaining_types = types.reject {|t| t == nilable}
+        "T.nilable(#{type_shortcuts(remaining_types)})"
+      elsif types.any? {|t| t == trueclass} && types.any? {|t| t == falseclass}
+        remaining_types = types.reject {|t| t == trueclass || t == falseclass}
+        type_shortcuts([T::Private::Types::StringHolder.new("T::Boolean")] + remaining_types)
+      else
+        names = types.map(&:name).compact.sort
+        "T.any(#{names.join(', ')})"
+      end
     end
 
     # @override Base

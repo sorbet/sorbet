@@ -19,7 +19,7 @@ public:
     // all members are optional, but METHOD NAMES MATTER
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
-    // caller is repsonsible to handle it
+    // caller is responsible to handle it
     unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, ClassDef *original);
     unique_ptr<Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original);
 
@@ -576,10 +576,10 @@ private:
         for (auto &arg : v->args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg.get())) {
-                optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
+                optArg->default_ = mapIt(move(optArg->default_), ctx);
             }
         }
-        v->body = mapIt(move(v->body), ctx.withOwner(v->symbol));
+        v->body = mapIt(move(v->body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformBlock<FUNC>::value) {
             return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(

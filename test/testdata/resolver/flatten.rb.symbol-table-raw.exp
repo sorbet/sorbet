@@ -5,6 +5,8 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
     method <C <U A>><U food> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=4:5 end=4:13}
       argument <C <U A>><U food><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:7 end=2:8}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
+      argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <S <C <U A>> $1><U foos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=6:5 end=6:18}
       argument <S <C <U A>> $1><U foos><blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <S <C <U A>> $1><U sfoo> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=9:3 end=9:16}

@@ -17,10 +17,12 @@ ClassDef{
         MethodDef{
           flags = self
           name = <U prop><<C <U <todo sym>>>>
-          args = [RestArg{ expr = Local{
-              localVariable = <U args>
-            } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U args>
+            } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -278,7 +280,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -315,8 +317,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foo><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -348,7 +351,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -392,10 +395,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foo=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -463,8 +468,9 @@ ClassDef{
         MethodDef{
           flags = 0
           name = <U foo2><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = UnresolvedConstantLit{
@@ -549,10 +555,12 @@ ClassDef{
         MethodDef{
           flags = 0
           name = <U foo2=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = UnresolvedConstantLit{
@@ -602,7 +610,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -639,8 +647,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U default><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -672,7 +681,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -716,10 +725,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U default=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -751,7 +762,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -798,8 +809,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U t_nilable><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -841,7 +853,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -905,10 +917,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U t_nilable=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -950,7 +964,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -987,8 +1001,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U type><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1020,7 +1035,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1064,10 +1079,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U type=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1099,7 +1116,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1136,8 +1153,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U object><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1169,7 +1187,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1213,10 +1231,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U object=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1248,7 +1268,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1285,8 +1305,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U array><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1318,7 +1339,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1362,10 +1383,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U array=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1405,7 +1428,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -1449,10 +1472,12 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U array=><<C <U <todo sym>>>>
-              args = [Local{
-                  localVariable = <U arg0>
-                }, BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -1484,7 +1509,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -1542,8 +1567,9 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U array><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -1608,7 +1634,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1655,8 +1681,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U array_of><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1698,7 +1725,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1762,10 +1789,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U array_of=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1807,7 +1836,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1844,8 +1873,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U array_of_explicit><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1877,7 +1907,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1921,10 +1951,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U array_of_explicit=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -1964,7 +1996,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -2008,10 +2040,12 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U array_of_explicit=><<C <U <todo sym>>>>
-              args = [Local{
-                  localVariable = <U arg0>
-                }, BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -2043,7 +2077,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -2101,8 +2135,9 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U array_of_explicit><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -2167,7 +2202,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -2217,8 +2252,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U t_array><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -2263,7 +2299,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -2333,10 +2369,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U t_array=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -2389,7 +2427,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -2459,10 +2497,12 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U t_array=><<C <U <todo sym>>>>
-              args = [Local{
-                  localVariable = <U arg0>
-                }, BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -2507,7 +2547,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -2559,8 +2599,9 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U t_array><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -2619,7 +2660,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -2673,8 +2714,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U hash_of><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -2723,7 +2765,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -2801,10 +2843,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U hash_of=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -2861,7 +2905,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -2939,10 +2983,12 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U hash_of=><<C <U <todo sym>>>>
-              args = [Local{
-                  localVariable = <U arg0>
-                }, BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -2991,7 +3037,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -3047,8 +3093,9 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U hash_of><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -3111,7 +3158,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3148,8 +3195,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U const_explicit><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3181,7 +3229,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3218,8 +3266,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U const><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3251,7 +3300,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3288,8 +3337,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U no_class_arg><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3329,7 +3379,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -3373,10 +3423,12 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U no_class_arg=><<C <U <todo sym>>>>
-              args = [Local{
-                  localVariable = <U arg0>
-                }, BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
+                }, BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -3408,7 +3460,7 @@ ClassDef{
             Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Sorbet
+                symbol = ::T::Sig::WithoutRuntime
               }
               fun = <U sig>
               block = Block {
@@ -3466,8 +3518,9 @@ ClassDef{
             MethodDef{
               flags = dsl
               name = <U no_class_arg><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = Local{
-                  localVariable = <U <blk>>
+              args = [BlockArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
                 } }]
               rhs = Send{
                 recv = ConstantLit{
@@ -3532,7 +3585,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3575,8 +3628,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U enum_prop><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3594,7 +3648,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3631,8 +3685,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3664,7 +3719,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3708,10 +3763,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3743,7 +3800,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3803,10 +3860,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3824,7 +3883,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3874,10 +3933,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_!><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3895,7 +3956,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -3932,8 +3993,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_lazy><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -3965,7 +4027,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4009,10 +4071,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_lazy=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4044,7 +4108,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4104,10 +4168,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_lazy_><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4125,7 +4191,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4175,10 +4241,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_lazy_!><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4196,7 +4264,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4233,8 +4301,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_proc><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4266,7 +4335,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4310,10 +4379,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_proc=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4345,7 +4416,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4405,10 +4476,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_proc_><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4426,7 +4499,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4476,10 +4549,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_proc_!><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4497,7 +4572,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4534,8 +4609,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_invalid><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4567,7 +4643,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4611,10 +4687,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_invalid=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4646,7 +4724,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4702,10 +4780,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_invalid_><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4723,7 +4803,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4779,10 +4859,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foreign_invalid_!><<C <U <todo sym>>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
-              localVariable = <U opts>
-            } } }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4800,7 +4882,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4837,8 +4919,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U ifunset><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4870,7 +4953,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4914,10 +4997,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U ifunset=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -4949,7 +5034,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -4996,8 +5081,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U ifunset_nilable><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5039,7 +5125,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5103,10 +5189,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U ifunset_nilable=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5161,7 +5249,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5198,8 +5286,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U token><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5231,7 +5320,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5275,10 +5364,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U token=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5310,7 +5401,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5347,8 +5438,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U created><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5380,7 +5472,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5424,10 +5516,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U created=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5472,7 +5566,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5509,8 +5603,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U token><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5542,7 +5637,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5586,10 +5681,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U token=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5621,7 +5718,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5658,8 +5755,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U created><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5704,7 +5802,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5741,8 +5839,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U merchant><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5787,7 +5886,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5834,8 +5933,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foo><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5877,7 +5977,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -5939,8 +6039,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U encrypted_foo><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -5997,7 +6098,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -6061,10 +6162,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U foo=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -6106,7 +6209,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -6200,10 +6303,12 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U encrypted_foo=><<C <U <todo sym>>>>
-          args = [Local{
-              localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -6260,7 +6365,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -6307,8 +6412,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U bar><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -6350,7 +6456,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -6412,8 +6518,9 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = <U encrypted_bar><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = Local{
-              localVariable = <U <blk>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
             } }]
           rhs = Send{
             recv = ConstantLit{
@@ -6472,8 +6579,9 @@ ClassDef{
     MethodDef{
       flags = 0
       name = <U main><<C <U <todo sym>>>>
-      args = [BlockArg{ expr = Local{
-          localVariable = <U <blk>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [

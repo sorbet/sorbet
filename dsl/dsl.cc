@@ -3,15 +3,16 @@
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
 #include "dsl/ChalkODMProp.h"
+#include "dsl/ClassNew.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
 #include "dsl/OpusEnum.h"
+#include "dsl/Private.h"
 #include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Rails.h"
-#include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
 
@@ -35,6 +36,12 @@ public:
                 stat.get(),
                 [&](ast::Assign *assign) {
                     auto nodes = Struct::replaceDSL(ctx, assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = ClassNew::replaceDSL(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
@@ -72,16 +79,14 @@ public:
                         return;
                     }
 
-                    // This one is different: it gets an extra prevStat argument.
-                    nodes = AttrReader::replaceDSL(ctx, send, prevStat);
+                    nodes = Private::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
-                },
 
-                [&](ast::MethodDef *mdef) {
-                    auto nodes = Sinatra::replaceDSL(ctx, mdef);
+                    // This one is different: it gets an extra prevStat argument.
+                    nodes = AttrReader::replaceDSL(ctx, send, prevStat);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

@@ -42,7 +42,7 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor:   '#4f4397', // --sorbet-purple-2
+    primaryColor: '#4f4397', // --sorbet-purple-2
     secondaryColor: '#4f4397', // --sorbet-purple-2
   },
 
@@ -93,7 +93,7 @@ const siteConfig = {
   algolia: {
     apiKey: 'fa1ec885ab70787d636759b88e509b92',
     indexName: 'stripe_sorbet',
-    algoliaOptions: {} // Optional, if provided by Algolia
+    algoliaOptions: {}, // Optional, if provided by Algolia
   },
 
   gaTrackingId: 'UA-119877071-2',

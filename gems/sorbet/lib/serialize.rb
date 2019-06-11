@@ -11,9 +11,8 @@ class Sorbet::Private::Serialize
 
   SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
-  def constant_cache
-    @constant_cache ||= Sorbet::Private::ConstantLookupCache.new
-    @constant_cache
+  def initialize(constant_cache)
+    @constant_cache = constant_cache
   end
 
   private def get_constants(mod, inherited=nil)
@@ -42,15 +41,15 @@ class Sorbet::Private::Serialize
       return " # Skipping serializing #{class_name} because it is an invalid name\n"
     end
 
-    klass = constant_cache.class_by_name(class_name)
+    klass = @constant_cache.class_by_name(class_name)
     is_nil = nil.equal?(klass)
     raise "#{class_name} is not a Class or Module. Maybe it was miscategorized?" if is_nil
 
     ret = String.new
 
-    superclass = Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? klass.superclass : nil
+    superclass = Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? Sorbet::Private::RealStdlib.real_superclass(klass) : nil
     if superclass
-      superclass_str = superclass == Object ? '' : constant_cache.name_by_class(superclass)
+      superclass_str = Sorbet::Private::RealStdlib.real_eqeq(superclass, Object) ? '' : @constant_cache.name_by_class(superclass)
     else
       superclass_str = ''
     end
@@ -61,10 +60,10 @@ class Sorbet::Private::Serialize
     # We don't use .included_modules since that also has all the aweful things
     # that are mixed into Object. This way we at least have a delimiter before
     # the awefulness starts (the superclass).
-    klass.ancestors.each do |ancestor|
-      next if ancestor == klass
-      break if ancestor == superclass
-      ancestor_name = constant_cache.name_by_class(ancestor)
+    Sorbet::Private::RealStdlib.real_ancestors(klass).each do |ancestor|
+      next if Sorbet::Private::RealStdlib.real_eqeq(ancestor, klass)
+      break if Sorbet::Private::RealStdlib.real_eqeq(ancestor, superclass)
+      ancestor_name = @constant_cache.name_by_class(ancestor)
       next unless ancestor_name
       next if ancestor_name == class_name
       if Sorbet::Private::RealStdlib.real_is_a?(ancestor, Class)
@@ -82,7 +81,7 @@ class Sorbet::Private::Serialize
       break if superclass && ancestor == Sorbet::Private::RealStdlib.real_singleton_class(superclass)
       break if ancestor == Module
       break if ancestor == Object
-      ancestor_name = constant_cache.name_by_class(ancestor)
+      ancestor_name = @constant_cache.name_by_class(ancestor)
       next unless ancestor_name
       if Sorbet::Private::RealStdlib.real_is_a?(ancestor, Class)
         ret << "  # Skipping `extend #{ancestor_name}` because it is a Class\n"
@@ -103,7 +102,7 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym)
-      rescue LoadError, NameError, RuntimeError
+      rescue LoadError, NameError, RuntimeError, ArgumentError
         ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
@@ -117,7 +116,7 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
-      rescue LoadError, NameError, RuntimeError
+      rescue LoadError, NameError, RuntimeError, ArgumentError
         ret << "# Failed to load #{class_name}::#{const_sym}\n"
         next
       end
@@ -138,7 +137,7 @@ class Sorbet::Private::Serialize
     ret << "\n\n" if !constants_serialized.empty?
 
     methods = []
-    instance_methods = klass.instance_methods(false)
+    instance_methods = Sorbet::Private::RealStdlib.real_instance_methods(klass, false)
     begin
       initialize = klass.instance_method(:initialize)
     rescue
@@ -148,7 +147,7 @@ class Sorbet::Private::Serialize
       # This method never apears in the reflection list...
       instance_methods += [:initialize]
     end
-    klass.ancestors.reject {|ancestor| constant_cache.name_by_class(ancestor)}.each do |ancestor|
+    Sorbet::Private::RealStdlib.real_ancestors(klass).reject {|ancestor| @constant_cache.name_by_class(ancestor)}.each do |ancestor|
       instance_methods += ancestor.instance_methods(false)
     end
 
@@ -166,7 +165,7 @@ class Sorbet::Private::Serialize
       serialize_method(method)
     end
     # uniq is not required here, but added to be on the safe side
-    methods += klass.singleton_methods(false).sort.uniq.map do |method_sym|
+    methods += Sorbet::Private::RealStdlib.real_singleton_methods(klass, false).sort.uniq.map do |method_sym|
       begin
         method = klass.singleton_method(method_sym)
       rescue => e

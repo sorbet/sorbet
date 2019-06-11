@@ -588,7 +588,7 @@ TypePtr TypeVar::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("should never happen");
 }
 
-bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
@@ -623,7 +623,7 @@ void AppliedType::_sanityCheck(Context ctx) {
     }
 }
 
-bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     ClassType und(this->klass);
     return und.derivesFrom(gs, klass);
 }
@@ -636,12 +636,12 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     categoryCounterInc("types.allocated", "selftypeparam");
 }
 
-bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise(
         "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise(
         "SelfTypeParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
@@ -728,13 +728,24 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun, std::optional<int> numberOfPositionalBlockParams)
-    : block(block), fun(fun), numberOfPositionalBlockParams(numberOfPositionalBlockParams),
-      constr(make_shared<TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo> &&argInfos)
+    : fun(fun), argInfos(argInfos), constr(make_shared<TypeConstraint>()) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
     return make_shared<SendAndBlockLink>(move(copy));
+}
+
+optional<int> SendAndBlockLink::fixedArity() const {
+    optional<int> arity = 0;
+    for (auto &arg : argInfos) {
+        if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
+            arity = std::nullopt;
+            break;
+        }
+        arity = *arity + 1;
+    }
+    return arity;
 }
 
 TypePtr TupleType::elementType() const {
@@ -764,7 +775,7 @@ TypePtr SelfType::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("should never happen");
 }
 
-bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen");
 }
 
@@ -792,6 +803,32 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
         [&](Type *tp) { ret = type; });
     ENFORCE(ret);
     return ret;
+}
+
+core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *ty) {
+    if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
+        return core::Symbols::noSymbol();
+    }
+    core::SymbolRef singleton;
+    auto *s = core::cast_type<core::ClassType>(ty);
+    if (s != nullptr) {
+        singleton = s->symbol;
+    } else {
+        auto *at = core::cast_type<core::AppliedType>(ty);
+        if (at == nullptr) {
+            return core::Symbols::noSymbol();
+        }
+        // If this class is a "real" generic, leave it alone. We're not quite
+        // sure yet what it means to move between the "attached" and "singleton"
+        // levels for generic singletons. However, if the singleton has kind `*`
+        // due to all type members being fixed:, we're OK to treat the
+        // AppliedType and the Symbol as interchangeable here.
+        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
+            return core::Symbols::noSymbol();
+        }
+        singleton = at->klass;
+    }
+    return singleton.data(ctx)->attachedClass(ctx);
 }
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {

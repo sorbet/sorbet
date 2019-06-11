@@ -9,7 +9,7 @@ module T::Props
     # of this type.
     #
     # @param [Object] _value
-    # @return Boolean
+    # @return T::Boolean
     def instance?(_value)
       raise NotImplementedError.new('Must override in included class')
     end

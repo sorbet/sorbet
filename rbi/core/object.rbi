@@ -241,6 +241,31 @@ module Kernel
   end
   def extend(mod); end
 
+  sig do
+    params(
+        status: Integer,
+    )
+    .returns(T.untyped)
+  end
+  def exit(status=T.unsafe(nil)); end
+
+  sig do
+    params(
+        status: Integer,
+    )
+    .returns(T.untyped)
+  end
+  def exit!(status=T.unsafe(nil)); end
+
+  sig {returns(T.nilable(Integer))}
+  sig do
+    params(
+        blk: T.proc.params().returns(BasicObject),
+    )
+    .returns(T.nilable(Integer))
+  end
+  def fork(&blk); end
+
   sig {returns(T.self_type)}
   def freeze(); end
 
@@ -732,6 +757,26 @@ module Kernel
     .returns(NilClass)
   end
   def puts(*arg0); end
+
+  # TODO: this type is not correct. Observe this irb session:
+  #
+  # >> p
+  # => nil
+  # >> p 1
+  # 1
+  # => 1
+  # >> p 1, 2
+  # 1
+  # 2
+  # => [1, 2]
+  #
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(NilClass)
+  end
+  def p(*arg0); end
 
   sig {returns(Float)}
   sig do
@@ -1474,15 +1519,10 @@ class Class < Module
   sig {returns(T.untyped)}
   def allocate(); end
 
+  # Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
+  # This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
   sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
-
-  sig {returns(Class)}
-  sig {params(blk: T.proc.bind(Class).params(arg0: Class).void).returns(Class)}
-  sig {type_parameters(:T).params(superClass: T.type_parameter(:T)).returns(T.type_parameter(:T))}
-  sig {type_parameters(:T).params(superClass: T.type_parameter(:T), blk: T.proc.bind(Class).params(arg0: Class).void).returns(T.type_parameter(:T))}
-  def self.new(superClass = nil, &blk)
-  end
 
   sig do
     params(
@@ -1527,7 +1567,7 @@ class Class < Module
     )
     .void
   end
-  def initialize(superclass=_, &blk); end
+  def initialize(superclass=Object, &blk); end
 end
 
 class Data < Object

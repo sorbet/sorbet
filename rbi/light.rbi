@@ -97,11 +97,6 @@ end
     Tempfile
   )
 )
-class Sorbet
-  sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
-  def self.sig(&blk)
-  end
-end
 class T::Private::Methods::DeclBuilder
   sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def type_parameters(*params); end
@@ -131,6 +126,10 @@ end
 module T::Sig
   sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def sig(&blk); end
+end
+module T::Sig::WithoutRuntime
+  sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  def self.sig(&blk); end
 end
 module T
   extend T::Sig
@@ -650,12 +649,6 @@ class Class < Module
   def allocate(); end
   sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
-  sig {returns(Class)}
-  sig {params(blk: T.proc.bind(Class).params(arg0: Class).void).returns(Class)}
-  sig {type_parameters(:T).params(superClass: T.type_parameter(:T)).returns(T.type_parameter(:T))}
-  sig {type_parameters(:T).params(superClass: T.type_parameter(:T), blk: T.proc.bind(Class).params(arg0: Class).void).returns(T.type_parameter(:T))}
-  def self.new(superClass = nil, &blk)
-  end
   sig {returns(T.nilable(String))}
   def name(); end
   sig {returns(T.nilable(Class))}

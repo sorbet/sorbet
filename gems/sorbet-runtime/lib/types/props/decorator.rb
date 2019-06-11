@@ -76,6 +76,7 @@ class T::Props::Decorator
       clobber_existing_method!
       extra
       optional
+      _tnilable
     }
   end
 
@@ -130,10 +131,48 @@ class T::Props::Decorator
   # Passing in rules here is purely a performance optimization.
   sig {params(prop: Symbol, val: T.untyped, rules: Rules).void.checked(:never)}
   private def check_prop_type(prop, val, rules=prop_rules(prop))
-    type = rules.fetch(:type_object)
-    unless type.valid?(val)
-      raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
+    type_object = rules.fetch(:type_object)
+    type = rules.fetch(:type)
+
+    # TODO: ideally we'd add `&& rules[:optional] != :existing` to this check
+    # (it makes sense to treat those props required in this context), but we'd need
+    # to be sure that doesn't break any existing code first.
+    if val.nil?
+      if !T::Props::Utils.need_nil_write_check?(rules) || (rules.key?(:default) && rules[:default].nil?)
+        return
+      end
+
+      # If nil write check is needed, we check at prop set time, not at serialization time. We have to do the
+      # separate check here because the later check uses T.nilable type for the check.
+      if rules[:notify_on_nil_write]
+        Opus::Error.soft(
+          'nil value written to prop with :notify_on_nil_write set',
+          notify: rules[:notify_on_nil_write],
+          storytime: {
+            klass: self.class.name,
+            prop: prop,
+            type: rules[:type],
+            type_object: rules[:type_object],
+          },
+        )
+      end
+      if rules[:raise_on_nil_write]
+        raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
         "(instance of #{val.class}) - need a #{type}")
+      end
+    end
+
+    # T::Props::CustomType is not a real object based class so that we can not run real type check call.
+    # T::Props::CustomType.valid?() is only a helper function call.
+    valid =
+      if type.is_a?(T::Props::CustomType) && T::Utils::Props.optional_prop?(rules)
+        type.valid?(val)
+      else
+        type_object.valid?(val)
+      end
+    if !valid
+      raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
+        "(instance of #{val.class}) - need a #{type_object}")
     end
   end
 
@@ -225,7 +264,7 @@ class T::Props::Decorator
         "to 'sensitivity:' (in prop #{@class.name}.#{name})")
     end
 
-    unless rules.keys.all? {|k| valid_props.include?(k)}
+    if !(rules.keys - valid_props).empty?
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 
@@ -307,23 +346,28 @@ class T::Props::Decorator
   def prop_defined(name, cls, rules={})
     # TODO(jerry): Create similar soft assertions against false
     if rules[:optional] == true
-      optional_setter = rules.delete(:optional_setter)
-      if optional_setter != :t_nilable
-        Opus::Error.soft(
-          'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
-          notify: 'wei',
-          storytime: {
-            name: name,
-            cls_or_args: cls.to_s,
-            args: rules,
-            klass: decorated_class.name,
-          },
-        )
-      end
+      Opus::Error.hard(
+        'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
+        storytime: {
+          name: name,
+          cls_or_args: cls.to_s,
+          args: rules,
+          klass: decorated_class.name,
+        },
+      )
+    elsif rules[:optional] == false
+      Opus::Error.hard(
+        'Use of `optional: :false` is deprecated as it\'s the default value.',
+        storytime: {
+          name: name,
+          cls_or_args: cls.to_s,
+          args: rules,
+          klass: decorated_class.name,
+        },
+      )
     elsif rules[:optional] == :on_load
-      Opus::Error.soft(
+      Opus::Error.hard(
         'Use of `optional: :on_load` is deprecated. You probably want `T.nilable(...)` with :raise_on_nil_write instead.',
-        notify: 'jerry',
         storytime: {
           name: name,
           cls_or_args: cls.to_s,
@@ -332,9 +376,8 @@ class T::Props::Decorator
         },
       )
     elsif rules[:optional] == :existing
-      Opus::Error.soft(
+      Opus::Error.hard(
         'Use of `optional: :existing` is not allowed: you should use use T.nilable (http://go/optional)',
-        notify: 'wei',
         storytime: {
           name: name,
           cls_or_args: cls.to_s,
@@ -344,16 +387,12 @@ class T::Props::Decorator
       )
     end
 
-    # Finally, if `optional` was not specified, then we set it to its default
-    # value of `false`.
-    if rules[:optional].nil?
-      if is_nilable?(cls)
-        rules[:optional] = true
-      elsif rules[:ifunset].nil?
-        # TODO(jerry): Once we get rid of :ifunset, we can unconditionally make
-        # the default to be `optional: false`
-        rules[:optional] = false
-      end
+    if T::Utils::Nilable.is_union_with_nilclass(cls)
+      # :_tnilable is introduced internally for performance purpose so that clients do not need to call
+      # T::Utils::Nilable.is_tnilable(cls) again.
+      # It is strictly internal: clients should always use T::Utils::Props.required_prop?() or
+      # T::Utils::Props.optional_prop?() for checking whether a field is required or optional.
+      rules[:_tnilable] = true
     end
 
     name = name.to_sym
@@ -368,8 +407,13 @@ class T::Props::Decorator
 
     prop_validate_definition!(name, cls, rules, type_object)
 
-    array_subdoc_type = array_subdoc_type(type_object)
-    hash_value_subdoc_type = hash_value_subdoc_type(type_object)
+    # Retrive the possible underlying object with T.nilable.
+    underlying_type_object = T::Utils::Nilable.get_underlying_type_object(type_object)
+    type = T::Utils::Nilable.get_underlying_type(type)
+
+    array_subdoc_type = array_subdoc_type(underlying_type_object)
+    hash_value_subdoc_type = hash_value_subdoc_type(underlying_type_object)
+    hash_key_custom_type = hash_key_custom_type(underlying_type_object)
 
     sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
     if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::Utils)
@@ -389,7 +433,7 @@ class T::Props::Decorator
 
     needs_clone =
       if cls <= Array || cls <= Hash || cls <= Set
-        shallow_clone_ok(type_object) ? :shallow : true
+        shallow_clone_ok(underlying_type_object) ? :shallow : true
       else
         false
       end
@@ -403,8 +447,9 @@ class T::Props::Decorator
       # and can/should be moved accordingly.
       type_is_custom_type: cls.singleton_class < T::Props::CustomType,
       type_is_serializable: cls < T::Props::Serializable,
-      type_is_array_of_serializable: !!array_subdoc_type,
-      type_is_hash_of_serializable: !!hash_value_subdoc_type,
+      type_is_array_of_serializable: !array_subdoc_type.nil?,
+      type_is_hash_of_serializable_values: !hash_value_subdoc_type.nil?,
+      type_is_hash_of_custom_type_keys: !hash_key_custom_type.nil?,
       type_object: type_object,
       type_needs_clone: needs_clone,
       accessor_key: "@#{name}".to_sym,
@@ -427,8 +472,15 @@ class T::Props::Decorator
       rules[:serializable_subtype] = cls
     elsif array_subdoc_type
       rules[:serializable_subtype] = array_subdoc_type
+    elsif hash_value_subdoc_type && hash_key_custom_type
+      rules[:serializable_subtype] = {
+        keys: hash_key_custom_type,
+        values: hash_value_subdoc_type,
+      }
     elsif hash_value_subdoc_type
       rules[:serializable_subtype] = hash_value_subdoc_type
+    elsif hash_key_custom_type
+      rules[:serializable_subtype] = hash_key_custom_type
     end
 
     add_prop_definition(name, rules)
@@ -468,24 +520,51 @@ class T::Props::Decorator
     .returns(T.nilable(Module))
   end
   private def array_subdoc_type(type)
-    if type.is_a?(T::Types::TypedArray) && type.type.is_a?(T::Types::Simple) && type.type.raw_type < T::Props::Serializable
-      type.type.raw_type
-    else
-      nil
+    if type.is_a?(T::Types::TypedArray)
+      el_type = T::Utils.unwrap_nilable(type.type) || type.type
+
+      if el_type.is_a?(T::Types::Simple) &&
+          (el_type.raw_type < T::Props::Serializable || el_type.raw_type.is_a?(T::Props::CustomType))
+        return el_type.raw_type
+      end
     end
+
+    nil
   end
 
-  # returns the subdoc of the hash key tupe, or nil if it's not a Document type
+  # returns the subdoc of the hash value type, or nil if it's not a Document type
   sig do
     params(type: PropType)
     .returns(T.nilable(Module))
   end
   private def hash_value_subdoc_type(type)
-    if type.is_a?(T::Types::TypedHash) && type.values.is_a?(T::Types::Simple) && type.values.raw_type < T::Props::Serializable
-      type.values.raw_type
-    else
-      nil
+    if type.is_a?(T::Types::TypedHash)
+      values_type = T::Utils.unwrap_nilable(type.values) || type.values
+
+      if values_type.is_a?(T::Types::Simple) &&
+          (values_type.raw_type < T::Props::Serializable || values_type.raw_type.is_a?(T::Props::CustomType))
+        return values_type.raw_type
+      end
     end
+
+    nil
+  end
+
+  # returns the type of the hash key, or nil. Any CustomType could be a key, but we only expect Opus::Enum right now.
+  sig do
+    params(type: PropType)
+    .returns(T.nilable(Module))
+  end
+  private def hash_key_custom_type(type)
+    if type.is_a?(T::Types::TypedHash)
+      keys_type = T::Utils.unwrap_nilable(type.keys) || type.keys
+
+      if keys_type.is_a?(T::Types::Simple) && keys_type.raw_type.is_a?(T::Props::CustomType)
+        return keys_type.raw_type
+      end
+    end
+
+    nil
   end
 
   # From T::Props::Utils.deep_clone_object, plus String
@@ -525,7 +604,11 @@ class T::Props::Decorator
         T::Array[array]
       end
     elsif !enum.nil?
-      T.enum(enum)
+      if T::Utils.unwrap_nilable(type)
+        T.nilable(T.enum(enum))
+      else
+        T.enum(enum)
+      end
     else
       T::Utils.coerce(type)
     end
@@ -649,6 +732,15 @@ class T::Props::Decorator
       end
 
       self.class.decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
+    end
+
+    force_fk_method = "#{fk_method}!"
+    @class.send(:define_method, force_fk_method) do |allow_direct_mutation: nil|
+      loaded_foreign = send(fk_method, allow_direct_mutation: allow_direct_mutation)
+      if !loaded_foreign
+        Opus::Error.hard('Failed to load foreign model', storytime: {method: force_fk_method, class: self.class})
+      end
+      T.must(loaded_foreign)
     end
 
     @class.send(:define_method, "#{prop_name}_record") do |allow_direct_mutation: nil|

@@ -26,6 +26,7 @@ cc_library(
         "//core/proto",
         "//core/serialize",
         "//dsl",
+        "//flattener",
         "//infer",
         "//local_vars",
         "//main/options",

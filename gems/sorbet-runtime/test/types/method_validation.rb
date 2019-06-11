@@ -92,7 +92,7 @@ module Opus::Types::Test
 
       it "raises an error when adding a method to a different module than the last declaration" do
         mod2 = Module.new do
-					extend T::Sig
+          extend T::Sig
           sig {returns(String)}
           def foo; end
         end
@@ -114,7 +114,7 @@ module Opus::Types::Test
       it "gives a helpful error if you order optional kwargs after required" do
         ex = assert_raises(RuntimeError) do
           mod = Module.new do
-						extend T::Sig
+            extend T::Sig
             sig {params(a: Integer, b: Integer).returns(Integer)}
             def self.foo(a: 1, b:)
               a + b
@@ -129,7 +129,7 @@ module Opus::Types::Test
       it "does not allocate much" do
         @mod.sig do
           params(
-            x: Boolean,
+            x: String,
             y: T::Array[Symbol],
             z: T::Hash[Symbol, String]
           )
@@ -139,7 +139,7 @@ module Opus::Types::Test
           y
         end
         TEST_DATA = {
-          x: true,
+          x: "foo",
           y: 50.times.map do |i|
             "foo_#{i}".to_sym
           end,
@@ -167,19 +167,19 @@ module Opus::Types::Test
       it "allocates little for simple sig" do
         @mod.sig do
           params(
-            x: Boolean,
+            x: String,
             y: Integer,
           )
-            .returns(Integer)
+          .returns(Integer)
         end
         def @mod.foo(x, y)
           y
         end
 
-        @mod.foo(true, 1) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
-        @mod.foo(true, 1) # warmup, second run runs in real mode
+        @mod.foo("foo", 1) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo("foo", 1) # warmup, second run runs in real mode
         before = GC.stat(:total_allocated_objects)
-        @mod.foo(true, 1)
+        @mod.foo("foo", 1)
         allocated = GC.stat(:total_allocated_objects) - before
         assert_equal(2, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
       end
@@ -309,7 +309,7 @@ module Opus::Types::Test
       describe "instance methods" do
         it "raises an error when the return value is the wrong type " do
           klass = Class.new do
-						extend T::Sig
+            extend T::Sig
             sig {returns(String)}
             def foo
               :foo
@@ -329,7 +329,7 @@ module Opus::Types::Test
             params(
               req_str: String,
               opt_hash: Hash,
-              kwopt_bool: Boolean,
+              kwopt_bool: T::Boolean,
             )
             .returns(Symbol)
           end
@@ -356,14 +356,14 @@ module Opus::Types::Test
           err = assert_raises(TypeError) do
             @mod.foo("foo", {kwopt_bool: 42})
           end
-          assert_match(/\AParameter 'kwopt_bool': Expected type Boolean, got type Integer/, err.message)
+          assert_match(/\AParameter 'kwopt_bool': Expected type T::Boolean, got type Integer/, err.message)
         end
 
         it "correctly validates a hash passed as the optional arg using implied-hash syntax (treating it as kwargs)" do
           err = assert_raises(TypeError) do
             @mod.foo("foo", kwopt_bool: 42)
           end
-          assert_match(/\AParameter 'kwopt_bool': Expected type Boolean, got type Integer/, err.message)
+          assert_match(/\AParameter 'kwopt_bool': Expected type T::Boolean, got type Integer/, err.message)
         end
       end
 
@@ -423,7 +423,7 @@ module Opus::Types::Test
 
       it 'does not throw if parent is .generated' do
         parent = Class.new do
-					extend T::Sig
+          extend T::Sig
           sig {generated.returns(Integer)}
           def foo
             1
@@ -431,7 +431,7 @@ module Opus::Types::Test
         end
 
         child = Class.new(parent) do
-					extend T::Sig
+          extend T::Sig
           sig {returns(String)}
           def foo
             "1"
@@ -518,7 +518,7 @@ module Opus::Types::Test
                 req_hash: Hash,
                 opt_array: Array,
                 kwreq_int: Integer,
-                kwopt_bool: Boolean,
+                kwopt_bool: T::Boolean,
                 blk: T.nilable(Proc),
               )
               .returns([String, Float])

@@ -2,13 +2,6 @@
 
 set -euo pipefail
 
-if [[ -n "${CLEAN_BUILD-}" ]]; then
-  echo "--- cleanup"
-  rm -rf /usr/local/var/bazelcache/*
-fi
-
-echo "--- Pre-setup :bazel:"
-
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     platform="linux";;
@@ -17,37 +10,19 @@ case "${unameOut}" in
 esac
 
 if [[ "linux" == "$platform" ]]; then
-  apt-get update -yy
-  apt-get install -yy pkg-config zip g++ zlib1g-dev unzip python ruby
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
 fi
 
+export JOB_NAME=test-static-sanitized
+source .buildkite/tools/setup-bazel.sh
+
 echo will run with $CONFIG_OPTS
 
-git checkout .bazelrc
-
-function finish {
-  ./bazel shutdown
-}
-trap finish EXIT
-
-rm -f bazel-*
-mkdir -p /usr/local/var/bazelcache/output-bases/test-pr /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
-{
-  echo 'common --curses=no --color=yes'
-  echo 'startup --output_base=/usr/local/var/bazelcache/output-bases/test-pr'
-  echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-  echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} >> .bazelrc
-
-./bazel version
-
-echo "+++ tests"
 
 err=0
-./bazel test //... $CONFIG_OPTS || err=$?
+./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
 
 echo "--- uploading test results"
 
@@ -59,7 +34,6 @@ mkdir -p _tmp_/log/junit/
     path="${path#//}"
     cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
 done
-
 
 annotation_dir="$(mktemp -d "junit-annotate-plugin-annotation-tmp.XXXXXXXXXX")"
 annotation_path="${annotation_dir}/annotation.md"

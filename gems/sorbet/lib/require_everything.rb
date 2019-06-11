@@ -4,6 +4,7 @@
 require 'pathname'
 
 require_relative './gem_loader'
+require_relative './status'
 
 class ExitCalledError < RuntimeError
 end
@@ -52,6 +53,7 @@ class Sorbet::Private::RequireEverything
       # While this isn't a perfect heuristic for these things, it's pretty good.
       next if File.executable?(abs_path)
       next if excluded_paths.include?(abs_path)
+      next if /^# +typed: +ignore$/.match?(File.read(abs_path).scrub)
 
       begin
         my_require(abs_path, i+1, abs_paths.size)
@@ -70,22 +72,12 @@ class Sorbet::Private::RequireEverything
       end
     end
 
-    if STDOUT.isatty
-      # Clear the require_relative output when we're done requiring.
-      print "\r\033[K"
-    end
+    Sorbet::Private::Status.done
   end
 
   def self.my_require(abs_path, numerator, denominator)
     rel_path = Pathname.new(abs_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
-    message = "[#{numerator}/#{denominator}] require_relative './#{rel_path}'"
-    if STDOUT.isatty
-      # Carriage return to reset cursor, ANSI escape code to clear current line.
-      # (In case the new message is shorter than the old message.)
-      print "\r\033[K#{message}"
-    else
-      puts message
-    end
+    Sorbet::Private::Status.say("[#{numerator}/#{denominator}] require_relative './#{rel_path}'")
     require_relative abs_path
   end
 

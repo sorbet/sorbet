@@ -167,10 +167,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Configatron_Store());
     id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::RootStore());
     ENFORCE(id == Symbols::Configatron_RootStore());
-    id = synthesizeClass(core::Names::Constants::Sinatra(), 0, true);
-    ENFORCE(id == Symbols::Sinatra());
-    id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), core::Names::Constants::Base());
-    ENFORCE(id == Symbols::SinatraBase());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     ENFORCE(id == Symbols::void_());
     id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
@@ -259,6 +255,9 @@ void GlobalState::initEmpty() {
     // A magic symbol to cause CFGs to be exported
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::CFGExport());
     ENFORCE(id == Symbols::T_CFGExport());
+
+    id = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    ENFORCE(id == Symbols::T_Sig_WithoutRuntime());
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -378,10 +377,6 @@ void GlobalState::initEmpty() {
     Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
     Symbols::StubAncestor().data(*this)->setIsModule(true);
-
-    // Some of these are Classes
-    Symbols::SinatraBase().data(*this)->setIsModule(false);
-    Symbols::SinatraBase().data(*this)->setSuperClass(Symbols::Object());
 
     // Synthesize T::Utils
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
@@ -525,11 +520,9 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(
-        if (data->isBlockSymbol(*this)) { categoryCounterInc("symbols", "block"); } else if (data->isClass()) {
-            categoryCounterInc("symbols", "class");
-        } else if (data->isMethod()) { categoryCounterInc("symbols", "method"); } else if (data->isField()) {
-            categoryCounterInc("symbols", "field");
-        } else if (data->isStaticField()) {
+        if (data->isClass()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
+            categoryCounterInc("symbols", "method");
+        } else if (data->isField()) { categoryCounterInc("symbols", "field"); } else if (data->isStaticField()) {
             categoryCounterInc("symbols", "static_field");
         } else if (data->isTypeArgument()) {
             categoryCounterInc("symbols", "type_argument");
@@ -641,12 +634,12 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members.size());
 
-    for (auto arg : ownerScope->argumentsOrMixins) {
+    for (auto arg : ownerScope->arguments()) {
         if (arg.data(*this)->name == name) {
             return arg;
         }
     }
-    auto &store = ownerScope->argumentsOrMixins.emplace_back();
+    auto &store = ownerScope->arguments().emplace_back();
 
     ENFORCE(!symbolTableFrozen);
 
@@ -1340,6 +1333,14 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
     return sym;
 }
 
+SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
+    auto &classData = klass.data(*this);
+    ENFORCE(classData->isClass());
+    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
+    return ref;
+}
+
 SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();
@@ -1351,6 +1352,14 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     }
     return sym;
 }
+
+SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
+    auto nm = getNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
+    auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
+    return ref;
+}
+
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
 }

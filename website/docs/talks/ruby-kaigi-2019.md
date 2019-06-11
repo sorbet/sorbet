@@ -1,7 +1,7 @@
 ---
 id: ruby-kaigi-2019
-title: "State of Sorbet: A type checker for Ruby"
-sidebar_label: "RubyKaigi 2019"
+title: 'State of Sorbet: A type checker for Ruby'
+sidebar_label: 'RubyKaigi 2019'
 ---
 
 - [→ Talk page](https://rubykaigi.org/2019/presentations/jez.html#apr19)

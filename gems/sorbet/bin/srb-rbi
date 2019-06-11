@@ -3,12 +3,13 @@
 class Sorbet; end
 module Sorbet::Private; end
 
-require_relative '../lib/sorbet'
+require_relative '../lib/t'
 require_relative '../lib/step_interface'
 require_relative '../lib/create-config'
 require_relative '../lib/gem-generator-tracepoint'
 require_relative '../lib/hidden-definition-finder'
 require_relative '../lib/fetch-rbis'
+require_relative '../lib/find-gem-rbis'
 require_relative '../lib/suggest-typed'
 require_relative '../lib/todo-rbi'
 
@@ -59,8 +60,8 @@ To set up your project, this script will take two potentially destructive
 actions:
 
 1.  It will #{yellow("require every file in your project")}. Specifically, every script in
-    your project will be run, unless that script checks #{cyan("if __FILE__ == $0")} (or
-    #{cyan("if __FILE__ == $PROGRAM_NAME")}) before running any code.
+    your project will be run, unless that script checks #{cyan("if __FILE__ == $PROGRAM_NAME")}
+    before running any code, or has the magic comment #{cyan("# typed: ignore")} in it.
 
 2.  It will add a #{yellow("comment to the top of every file")} (like #{cyan("# typed: false")} or
     #{cyan("# typed: true")}, depending on how many errors were found in that file.)
@@ -182,6 +183,7 @@ If instead you want to explore your files locally, here are some things to try:
     hidden-definitions  Load all your code and generate type definitions for any dynamic code
     todo                Run Sorbet and generate constants which Sorbet errors on
     suggest-typed       Put the highest `typed:` sigil in each of your files
+    find-gem-rbis       Find all `rbi/` direcotries in your gems and list them in `~/.cache/sorbet`
     "
 
     command = case (argv[0])
@@ -202,6 +204,9 @@ If instead you want to explore your files locally, here are some things to try:
     when 'suggest-typed'
       make_step(Sorbet::Private::SuggestTyped)
 
+    when 'find-gem-rbis', "#{ENV['HOME']}/.cache/sorbet/gem-rbis", "#{ENV['HOME']}/.cache/sorbet/gem-rbis/"
+      make_step(Sorbet::Private::FindGemRBIs)
+
     when 'update'
       nil
 
@@ -215,7 +220,7 @@ If instead you want to explore your files locally, here are some things to try:
     command
   end
 
-  Sorbet.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
+  T::Sig::WithoutRuntime.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
   def self.make_step(step)
     -> do
       puts "Generating: #{step.output_file}" if step.output_file

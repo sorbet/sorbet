@@ -31,6 +31,6 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/stripe/
       argument <C <U Test>><U i=>i<> -> String @ Loc {file=test/testdata/dsl/attr_multi.rb start=22:20 end=22:21}
       argument <C <U Test>><U i=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
   class <S <C <U Test>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:7 end=3:11}
-    method <S <C <U Test>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=6:3 end=6:35}
+    method <S <C <U Test>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=23:4}
       argument <S <C <U Test>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
 

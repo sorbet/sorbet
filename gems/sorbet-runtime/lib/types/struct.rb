@@ -2,6 +2,7 @@
 # typed: true
 
 class T::Struct
+  include T::Props
   include T::Props::Serializable
   include T::Props::Constructor
 end

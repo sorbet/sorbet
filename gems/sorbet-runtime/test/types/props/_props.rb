@@ -106,7 +106,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       d = TestRedactedProps.new
       d.secret = '1234abcd'
       assert_equal('1234abcd', d.secret)
-      assert_equal('1234...', d.secret_redacted)
+      assert_equal('1...', d.secret_redacted)
     end
   end
 
@@ -116,7 +116,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       @id = id
     end
 
-    def self.load(id, extra={}, opts={}) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+    def self.load(id, extra={}, opts={})
       return nil if id.nil?
       MyTestModel.new(id)
     end

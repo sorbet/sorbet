@@ -150,30 +150,71 @@ module T::Utils
     str = str.to_s
     return str if str.length <= start_len + end_len
 
-    start_part = str[0...start_len]
+    start_part = str[0...start_len - ellipsis.length]
     end_part = end_len == 0 ? '' : str[-end_len..-1]
 
     "#{start_part}#{ellipsis}#{end_part}"
   end
 
+  module Props
+    def self.required_prop?(prop_rules)
+      # Clients should never reference :_tnilable as the implementation can change.
+      !prop_rules[:_tnilable]
+    end
+
+    def self.optional_prop?(prop_rules)
+      # Clients should never reference :_tnilable as the implementation can change.
+      !!prop_rules[:_tnilable]
+    end
+
+    def self.merge_serialized_optional_rule(prop_rules)
+      {'_tnilable' => true}.merge(prop_rules.merge('_tnilable' => true))
+    end
+  end
+
   module Nilable
-    # :is_union_type, Boolean: whether the type is an T::Types::Union type
+    # :is_union_type, T::Boolean: whether the type is an T::Types::Union type
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.
     TypeInfo = Struct.new(:is_union_type, :non_nilable_type)
 
     def self.get_type_info(prop_type)
       if prop_type.is_a?(T::Types::Union)
         non_nilable_type = T::Utils.unwrap_nilable(prop_type)
-        if non_nilable_type
-          if non_nilable_type.is_a?(T::Types::Simple)
-            non_nilable_type = non_nilable_type.raw_type
-          else
-            non_nilable_type = non_nilable_type
-          end
+        if non_nilable_type && non_nilable_type.is_a?(T::Types::Simple)
+          non_nilable_type = non_nilable_type.raw_type
         end
         TypeInfo.new(true, non_nilable_type)
       else
         TypeInfo.new(false, nil)
+      end
+    end
+
+    # Get the underlying type inside prop_type:
+    #  - if the type is A, the function returns A
+    #  - if the type is T.nilable(A), the function returns A
+    def self.get_underlying_type(prop_type)
+      type_info = get_type_info(prop_type)
+      if type_info.is_union_type
+        type_info.non_nilable_type || prop_type
+      elsif prop_type.is_a?(T::Types::Simple)
+        prop_type.raw_type
+      else
+        prop_type
+      end
+    end
+
+    # The difference between this function and the above function is that the Sorbet type, like T::Types::Simple
+    # is preserved.
+    def self.get_underlying_type_object(prop_type)
+      T::Utils.unwrap_nilable(prop_type) || prop_type
+    end
+
+    def self.is_union_with_nilclass(prop_type)
+      case prop_type
+      when T::Types::Union
+        prop_type.types.any? {|t| t == T::Utils.coerce(NilClass)}
+      else
+        false
       end
     end
   end

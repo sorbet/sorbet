@@ -10,7 +10,7 @@ cnone=$'\x1b[0m'
 if [ -t 1 ]; then
   USE_COLOR=1
 else
-  USE_COLOR=0
+  USE_COLOR=
 fi
 
 # Detects whether we can add colors or not
@@ -18,7 +18,7 @@ in_color() {
   local color="$1"
   shift
 
-  if [ "$USE_COLOR" = "1" ]; then
+  if [ "$USE_COLOR" != "" ]; then
     echo "$color$*$cnone"
   else
     echo "$*"
@@ -28,8 +28,8 @@ in_color() {
 success() { echo "$(in_color "$green" "[ OK ]") $*"; }
 error()   { echo "$(in_color "$red"   "[ERR!]") $*"; }
 info()    { echo "$(in_color "$cyan"  "[ .. ]") $*"; }
-# Color entire warning to get users' attention (because we won't stop).
-warn()    { in_color "$yellow" "[ .. ] $*"; }
+# Color entire line to get users' attention (because we won't stop).
+attn()    { in_color "$yellow" "[ .. ] $*"; }
 
 fatal() {
   error "$@"
