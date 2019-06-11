@@ -22,16 +22,15 @@ for:
 > unannotated methods, instance variables, and constants are assumed to be
 > `T.untyped`.
 
-Files at `# typed: strict` will also raise a few other errors that
-didn't show up before:
+Files at `# typed: strict` will also raise a few other errors that didn't show
+up before:
 
 - Any use of `undef` produces an error.
-- Using `yield` when you don't include a named block parameter in your
-  argument list produces an error.
-- Redundant casting operations, such as using `T.cast` to cast a value
-  to a type that it is already known to be, or using `T.must` on a
-  value already known to be non-`nil`, produce errors.
-
+- Using `yield` when you don't include a named block parameter in your argument
+  list produces an error.
+- Redundant casting operations, such as using `T.cast` to cast a value to a type
+  that it is already known to be, or using `T.must` on a value already known to
+  be non-`nil`, produce errors.
 
 ## Annotating Constants
 
@@ -69,12 +68,12 @@ end
 
 ## Annotating Block Parameters
 
-With Ruby's `yield` keyword, you can invoke a block without including
-a block argument in the parameter list. At `# typed: strict`, Sorbet
-will force you to give that parameter a name _even if you're using_
-`yield`. For example, Sorbet will **reject** the following code
-snippet because the method uses `yield` but has not named its block
-parameter, which in turn means that it lacks a declared type:
+With Ruby's `yield` keyword, you can invoke a block without including a block
+argument in the parameter list. At `# typed: strict`, Sorbet will force you to
+give that parameter a name _even if you're using_ `yield`. For example, Sorbet
+will **reject** the following code snippet because the method uses `yield` but
+has not named its block parameter, which in turn means that it lacks a declared
+type:
 
 ```ruby
 # typed: strict
@@ -85,11 +84,10 @@ def call_twice  # error: Method call_twice uses yield but does not mention a blo
 end
 ```
 
-You don't need to refactor your method body to use `block.call` to fix
-this problem: you can give the method a named block parameter like
-`&blk`, and `yield` will automatically invoke the `blk`
-parameter. This also means that you must give a type to that block
-parameter when you're using `# typed: strict`:
+You don't need to refactor your method body to use `block.call` to fix this
+problem: you can give the method a named block parameter like `&blk`, and
+`yield` will automatically invoke the `blk` parameter. This also means that you
+must give a type to that block parameter when you're using `# typed: strict`:
 
 ```ruby
 # typed: strict
