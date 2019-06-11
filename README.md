@@ -44,11 +44,6 @@ If you are at Stripe, you might also want to see:
     - [Testing incremental typechecking](#testing-incremental-typechecking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
-- [Running over pay-server locally](#running-over-pay-server-locally)
-  - [Build `sorbet`](#build-sorbet)
-  - [Set up autogen locally](#set-up-autogen-locally)
-  - [Make sure `sorbet` is on your PATH](#make-sure-sorbet-is-on-your-path)
-  - [Run `sorbet/scripts/typecheck_devel`](#run-sorbetscriptstypecheck_devel)
 - [C++ conventions](#c-conventions)
 - [Debugging and profiling](#debugging-and-profiling)
   - [Debugging](#debugging)
@@ -165,7 +160,6 @@ optimizations for any build:
 
 - `-c opt`
   - Enables `clang` optimizations (i.e., `-O2`)
-  - Required to run over pay-server without stack overflowing.
 
 These args are not mutually exclusive. For example, a common pairing when
 debugging is
@@ -237,7 +231,6 @@ the common ones for contributors:
   - Show `logger` output (increasing verbosity)
 - `--max-threads=1`
   - Useful for determining if you're dealing with a concurrency bug or not.
-  - Note that this will be really slow on pay-server!
 - `--wait-for-dbg`
   - Will freeze Sorbet on startup and wait for a debugger to attach
   - This is useful when you don't have control over launching the process (LSP)
@@ -289,22 +282,8 @@ To see the failing output, either:
 
 > This is specific to contributing to Sorbet at Stripe.
 
-There are two ways to run your changes to `sorbet` over pay-server:
-
-1.  Push your Sorbet changes to a branch, and then make a PR to pay-server to
-    bump the SHA in [sorbet/sorbet.sha].
-
-    On that PR, pay-server will fetch this SHA, build it on Stripe
-    infrastructure, and then type check pay-server with it.
-
-2.  Use the `sorbet/scripts/typecheck_devel` script in pay-server to run a
-    version of Sorbet built on your laptop.
-
-    This requires a bit more setup. See the section below on [Running over
-    pay-server locally](#running-over-pay-server-locally).
-
-[sorbet/sorbet.sha]: https://git.corp.stripe.com/stripe-internal/pay-server/blob/master/sorbet/sorbet.sha
-
+If you are at Stripe and want to test your branch against pay-server, see
+<http://go/types/local-dev>.
 
 ## Writing tests
 
@@ -496,98 +475,6 @@ You will probably want to look through the changes and `git checkout` any files
 with changes that you believe are actually bugs in your code and fix your code.
 
 
-## Running over pay-server locally
-
-There are a couple hoops to jump through for local development, but it's worth
-it because at the end you'll be able to run `sorbet` under `lldb` running over
-`pay-server`.
-
-### Build `sorbet`
-
-There is a lot of code in pay-server, so it's best to build Sorbet with
-optimizations before running over pay-server:
-
-```
-bazel build //main:sorbet -c opt --config=debugsymbols
-```
-
-Or, if you want to try running sorbet under LLDB:
-
-```
-bazel build //main:sorbet --config=dbg
-```
-
-Careful! This will build a version of Sorbet without optimizations and with
-all ENFORCE checks enabled, so it will take longer to run. You might want to see
-if you can reproduce and minimize the issue with an optimized build first, and
-then use `--config=dbg` + LLDB on a minimized example.
-
-Alternatively, if you want to exactly reproduce what we ship to our users:
-
-```
-bazel build //main:sorbet --config=release-mac
-bazel build //main:sorbet --config=release-linux
-```
-
-(but note that `--config=release*` has poor symbols because `-O2` is very
-aggressive, and no sanitization).
-
-Also note that `--config=release-linux` on Linux makes a fully static binary.
-This means that this binary can potentially run on any Linux distribution, but
-it has some quirks due to glibc having long-known bugs when linked statically
-(e.g. it can't resolve DNS names).
-
-### Set up autogen locally
-
-Officially, local autogen is not supported. Welcome to Developer Productivity:
-local autogen is supported for you, by you. Sorbet depends on having a list of
-all Ruby files to run over, which we can get by running autogen:
-
-```
-bundle install
-bundle exec scripts/bin/autogen
-```
-
-This might fail for any number of reasons, but the error messages are usually
-decent if you need to troubleshoot.
-
-The generated files changes frequently. A good rule of thumb is: any time you
-pull pay-server, you'll need to re-run autogen.
-
-### Make sure `sorbet` is on your PATH
-
-`sorbet` must be on your PATH for the next step. There are plenty of ways to do
-this; here are two:
-
-1.  Make a `~/bin` folder, and add it to your `PATH`.
-    Then make a symlink to sorbet:
-
-    ```
-    cd ~/bin && ln -s ~/stripe/sorbet/bazel-bin/main/sorbet .
-    ```
-
-2.  Add sorbet's `bazel-bin/main` folder directly to your `PATH`.
-
-### Run `sorbet/scripts/typecheck_devel`
-
-Once you have an optimized build and the file list generated, you can run
-`sorbet` locally using the `typecheck_devel` script in pay-server:
-
-```
-sorbet/scripts/typecheck_devel
-```
-
-If it crashes with a message about a "bus error," probably you forgot to build
-with optimizations. See step 1.
-
-If you're debugging a crash, you might also want to set `SORBET_RUN_UNDER`:
-
-```
-SORBET_RUN_UNDER="lldb --" sorbet/scripts/typecheck_devel
-```
-
-This will launch Sorbet under LLDB mode.
-
 ## C++ conventions
 
 - [ ] TODO(jez) Write and link to "Notes on C++ Development"
@@ -606,8 +493,6 @@ In general,
   - `lldb bazel-bin/main/sorbet -- <args> ...`
   - (Consider using `--config=static-libs` for better debug symbols)
   - If you see weird Python errors on macOS, try `PATH=/usr/bin lldb`.
-- to debug something in pay-server?
-  - See the section on “Local development” using `typecheck_devel`
 - to debug an existing Sorbet process (i.e., LSP)
   - launch Sorbet with the `--wait-for-dbg` flag
   - `lldb -p <pid>`
