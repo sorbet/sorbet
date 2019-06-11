@@ -52,7 +52,9 @@ def foo(x)
 end
 ```
 
-[→ View on sorbet.run](<https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20String).void%7D%0Adef%20must_be_given_string(x)%0A%20%20puts%20%22Got%20string%3A%20%23%7Bx%7D%22%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(String)).void%7D%0Adef%20foo(x)%0A%20%20must_be_given_string(x)%20%23%20error%3A%20%0A%20%20if%20x%0A%20%20%20%20must_be_given_string(x)%20%23%20ok%0A%20%20end%0Aend>)
+<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20String).void%7D%0Adef%20must_be_given_string(x)%0A%20%20puts%20%22Got%20string%3A%20%23%7Bx%7D%22%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(String)).void%7D%0Adef%20foo(x)%0A%20%20must_be_given_string(x)%20%23%20error%3A%20%0A%20%20if%20x%0A%20%20%20%20must_be_given_string(x)%20%23%20ok%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
 
 This is one of the most useful features of Sorbet. Many bugs can be prevented by
 ensuring when something is `nil` and when something is not `nil`! For more
@@ -196,7 +198,9 @@ def bar(x)
 end
 ```
 
-[→ View on sorbet.run](<https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(Integer)%7D%0Adef%20foo(x)%0A%20%20y%20%3D%20T.must(x).abs%0A%20%20T.reveal_type(y)%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(T.nilable(Integer))%7D%0Adef%20bar(x)%0A%20%20y%20%3D%20x%26.abs%0A%20%20T.reveal_type(y)%0Aend>)
+<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(Integer)%7D%0Adef%20foo(x)%0A%20%20y%20%3D%20T.must(x).abs%0A%20%20T.reveal_type(y)%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.nilable(Integer)).returns(T.nilable(Integer))%7D%0Adef%20bar(x)%0A%20%20y%20%3D%20x%26.abs%0A%20%20T.reveal_type(y)%0Aend">
+  → View on sorbet.run
+</a>
 
 ### Other escape hatches
 
