@@ -254,9 +254,9 @@ class Sorbet::Private::Serialize
       return false if piece[0].upcase != piece[0]
     end
     return false if [
-      'Sorbet::Private::RbiGenerator::ClassOverride',
-      'Sorbet::Private::RbiGenerator::ModuleOverride',
-      'Sorbet::Private::RbiGenerator::ObjectOverride',
+      'Sorbet::Private::GemGeneratorTracepoint::Tracer::ClassOverride',
+      'Sorbet::Private::GemGeneratorTracepoint::Tracer::ModuleOverride',
+      'Sorbet::Private::GemGeneratorTracepoint::Tracer::ObjectOverride',
     ].include?(name)
     true
   end
