@@ -49,7 +49,7 @@ class A
   sig {params(x: T.any(String, Integer, TrueClass)).void}
   def foo(x)
     T.reveal_type(x) # Revealed type: T.any(String, Integer, T::Boolean)
-    if x.is_a?(String) or x.is_a?(Integer)
+    if x.is_a?(String) || x.is_a?(Integer)
       T.reveal_type(x) # Revealed type: T.any(String, Integer)
     else
       T.reveal_type(x) # Revealed type: TrueClass
@@ -105,12 +105,10 @@ class C;
   def bar; end
 end
 
-ABC = T.type_alias(T.any(A, B, C))
-
 class D
   extend T::Sig
 
-  sig {params(x: ABC).void}
+  sig {params(x: T.any(A, B, C)).void}
   def foo(x)
     x.bar # error: method bar does not exist on A or B
 
