@@ -35,7 +35,7 @@ A.f(true)
   → View on sorbet.run
 </a>
 
-## Examining union types
+## Union types and flow-sensitivity
 
 Information can be learned about union types by examining its values in
 conditionals, or the `case` statement. For exampke, when using `Object#is_a?` in
@@ -86,6 +86,8 @@ end
   → View on sorbet.run
 </a>
 
+Read the [flow-sensitive typing](flow-sensitive.md) section for a deeper dive on
+this topic.
 
 ## Enumerations
 
@@ -136,7 +138,8 @@ href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Aclass%20B
 - `T::Boolean` is a type alias to `T.any(TrueClass, FalseClass)`
 
 An effect of this implementation choice is that the same information propagation
-behavior outlined in [Examining union types](#examining-union-types) will take
+behavior outlined in
+[Union types and flow sensitivity](#union-types-and-flow-sensitivity) will take
 place:
 
 ```ruby
