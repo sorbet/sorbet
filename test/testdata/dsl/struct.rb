@@ -57,11 +57,11 @@ class MixinStruct
     include MyMixin
     self.new.x
     self.new.foo
-    self.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
+    self.new(1, 2) # error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
     self.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   end
 
-  MyKeywordInitStruct.new(1, 2) # error: Too many arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
+  MyKeywordInitStruct.new(1, 2) # error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
   MyKeywordInitStruct.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   MyStruct.new.x
   MyStruct.new.foo
@@ -93,7 +93,7 @@ class Main
         T.assert_type!(RealStruct::KeywordInit.new, RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 1), RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 2, bar: 3), RealStruct::KeywordInit)
-        RealStruct::KeywordInit.new(1, 2) # error: Too many arguments provided for method `RealStruct::KeywordInit#initialize`. Expected: `0`, got: `2`
+        RealStruct::KeywordInit.new(1, 2) # error: Too many positional arguments provided for method `RealStruct::KeywordInit#initialize`. Expected: `0`, got: `2`
 
         T.assert_type!(RealStructDesugar::A.new(2, 3), RealStructDesugar::A)
     end
