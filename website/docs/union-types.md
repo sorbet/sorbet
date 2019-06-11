@@ -93,7 +93,7 @@ this topic.
 
 Union types can be used to express enumerations. For example, if we have three
 classes `A`, `B`, and `C`, and would like to make one type that describes these
-three cases, a type alias for `T.any(A, B, C)` is a good option:
+three cases, `T.any(A, B, C)` is a good option:
 
 ```ruby
 class A; end
