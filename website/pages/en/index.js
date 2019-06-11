@@ -127,13 +127,6 @@ class Index extends React.Component {
             />
           </Container>
         </div>
-        <PageSection gray short>
-          <div style={{fontSize: '1.2em', textAlign: 'center'}}>
-            <strong>Coming Summer 2019</strong>. We're looking for early
-            feedback to make Sorbet great: <a href={signUpLink}>sign up here</a>{' '}
-            to get involved!
-          </div>
-        </PageSection>
         <PageSection>
           <h2>A Taste of Sorbet</h2>
           <div className="row">
@@ -211,10 +204,8 @@ class Index extends React.Component {
               </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and projects. If you'd
-              like to try it,{' '}
-              <a href={signUpLink}>sign up for our mailing list</a> and we'll
-              reach out when we have more to share!
+              Sorbet is currently used by many companies and projects. <a href="mailto:sorbet@stripe.com">Email us</a>{' '}
+              if you'd like your logo to appear here.
             </p>
           </div>
         </PageSection>
