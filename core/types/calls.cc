@@ -1869,10 +1869,6 @@ public:
             return Types::Boolean();
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
-        // 1. rhs <: lhs (e.g. rhs = A, lhs = A | B). this is always true.
-        // 2. lhs <: rhs (e.g. lhs = A | B, rhs = A). this is true if LHS is A but false if LHS is B, so we don't know
-        //    statically which branch to choose.
-        // 3. otherwise, neither is a subtype of the other.
         return Types::isSubType(ctx, rhs, lhs)
                    ? Types::trueClass()
                    : Types::isSubType(ctx, lhs, rhs) ? Types::Boolean() : Types::falseClass();
