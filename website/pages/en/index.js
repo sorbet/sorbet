@@ -193,36 +193,27 @@ class Index extends React.Component {
         <PageSection short>
           <div className="pageSectionColumns">
             <p
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                paddingRight: '50px',
-                margin: 0,
-              }}
+              class="logos"
             >
               <img
                 src={`${baseUrl}img/stripe-logo.svg`}
                 alt="Stripe Logo"
-                style={{
-                  height: '50px',
-                  marginLeft: '-10px',
-                  marginRight: '30px',
-                }}
               />
               <img
-                src={`${baseUrl}img/coinbase.png`}
+                src={`${baseUrl}img/coinbase-logo.png`}
                 alt="Coinbase Logo"
                 style={{
-                  height: '50px',
-                  marginLeft: '-5px',
                   position: 'relative',
                   top: '-4px',
                 }}
               />
+              <img
+                src={`${baseUrl}img/gusto-logo.svg`}
+                alt="Gusto Logo"
+              />
             </p>
             <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by the teams at Stripe and Coinbase. If
-              you'd like to try it at your company,{' '}
+              Sorbet is currently used by many companies and project. If you'd like to try it,{' '}
               <a href={signUpLink}>sign up for our mailing list</a> and we'll
               reach out when we have more to share!
             </p>
