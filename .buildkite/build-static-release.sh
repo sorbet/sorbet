@@ -49,8 +49,24 @@ gem build sorbet.gemspec
 if [[ "mac" == "$platform" ]]; then
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
   rbenv exec gem install sorbet-*.gem
+
+  mkdir -p srb-init-smoke-test
+  (
+    cd srb-init-smoke-test
+    SRB_YES=1 rbenv exec srb init
+    rbenv exec srb tc
+
+    rm -rf sorbet/
+
+    touch Gemfile
+    SRB_YES=1 rbenv exec srb init
+    rbenv exec srb tc
+  )
+  rm -rf srb-init-smoke-test
+
   rbenv exec bundle
   rbenv exec bundle exec rake test
+
   rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 fi
 popd
