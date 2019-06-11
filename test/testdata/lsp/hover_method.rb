@@ -4,6 +4,7 @@ class Foo
 
   sig {returns(Integer)}
   def bar
+    # ^ hover: sig {returns(Integer)}
     baz("1")
    # ^ hover: Foo
   end
