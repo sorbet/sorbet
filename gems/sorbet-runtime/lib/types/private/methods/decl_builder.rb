@@ -80,6 +80,7 @@ module T::Private::Methods
     end
 
     def checked(level)
+      raise "The .checked API is unstable, so its use is prevented. To change Sorbet's runtime behavior, see https://sorbet.org/docs/tconfiguration"
       check_live!
 
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
@@ -101,6 +102,7 @@ module T::Private::Methods
     end
 
     def soft(notify:)
+      raise "The .soft API is unstable, so its use is prevented. To change Sorbet's runtime behavior, see https://sorbet.org/docs/tconfiguration"
       check_live!
 
       if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
@@ -125,6 +127,7 @@ module T::Private::Methods
     end
 
     def generated
+      raise "The .generated API is unstable, so its use is prevented. To change Sorbet's runtime behavior, see https://sorbet.org/docs/tconfiguration"
       check_live!
 
       if !decl.generated.equal?(ARG_NOT_PROVIDED)
