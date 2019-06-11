@@ -1869,9 +1869,13 @@ public:
             return Types::Boolean();
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
-        return Types::isSubType(ctx, rhs, lhs)
-                   ? Types::trueClass()
-                   : Types::isSubType(ctx, lhs, rhs) ? Types::Boolean() : Types::falseClass();
+        if (Types::isSubType(ctx, rhs, lhs)) {
+            return Types::trueClass();
+        }
+        if (Types::isSubType(ctx, lhs, rhs)) {
+            return Types::Boolean();
+        }
+        return Types::falseClass();
     }
 } Module_tripleEq;
 
