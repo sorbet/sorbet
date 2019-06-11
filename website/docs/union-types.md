@@ -39,7 +39,7 @@ A.f(true)
 
 Information can be learned about union types by examining its values in
 conditionals, or the `case` statement. For example, when using `Object#is_a?` in
-a conditional information learned by that test will be propagated down to
+a conditional information Sorbet will learn information and propagate it down to
 branches of the conditional:
 
 ```ruby
@@ -62,8 +62,8 @@ end
   → View on sorbet.run
 </a>
 
-Similarly, any types specified in the `when` clause of a `case` statement will
-pass that information on to the body of that branch:
+Similarly, any classes specified in the `when` clause of a `case` statement will
+update Sorbet's knowledge of the types within the body of that branch:
 
 ```ruby
 class A
@@ -91,7 +91,7 @@ this topic.
 
 ## Enumerations
 
-Union types can be used to express enumerations. For example, if you have three
+Union types can be used to express enumerations. For example, if we have three
 classes `A`, `B`, and `C`, and would like to make one type that describes these
 three cases, a type alias for `T.any(A, B, C)` is a good option:
 
@@ -140,7 +140,7 @@ href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Aclass%20B
 An effect of this implementation choice is that the same information propagation
 behavior outlined in
 [Union types and flow sensitivity](#union-types-and-flow-sensitivity) will take
-place:
+place for nilable types and booleans, as with any other union type:
 
 ```ruby
 class A
