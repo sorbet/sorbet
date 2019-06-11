@@ -270,7 +270,7 @@ export SRB_SORBET_TYPED_REVISION
 if [ "$is_partial" = "" ] || [ -f "$test_dir/expected/out.log" ]; then
   out_filtered="$(mktemp)"
   sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
-    | sed -e 's,$TMPDIR[^ ]*/\([^/]*\),<tmp>/\1,g' \
+    | sed -e "s,${TMPDIR}[^ ]*/([^/]*),<tmp>/\1,g" \
     > "$out_filtered" \
     < "$actual/src/out.log"
   mv "$out_filtered" "$actual/src/out.log"
