@@ -246,8 +246,9 @@ export SRB_SORBET_TYPED_REVISION
     # because the pry output is hiding in the *.log files)
     #
     # note: redirects stderr before the pipe
-    if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "$actual/src/err.log" | \
-        sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
+    if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "$actual/src/err.log" \
+        | sed -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
+        | sed -e 's,/var/folders/[^ ]*/\([^/]*\),<tmp>/\1,g'
         > "$actual/src/out.log"; then
       error "├─ srb init failed."
       if [ "$VERBOSE" = "" ]; then
