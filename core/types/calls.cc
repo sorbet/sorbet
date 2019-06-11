@@ -1861,7 +1861,7 @@ public:
         ENFORCE(args.args.size() == 1, "`===` takes 1 argument");
         auto rhs = args.args[0]->type;
         if (rhs->isUntyped()) {
-            return Types::Boolean();
+            return Types::untypedUntracked();
         }
         auto rc = Types::getRepresentedClass(ctx, thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
@@ -1870,7 +1870,7 @@ public:
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
         if (lhs->isUntyped()) {
-            return Types::Boolean();
+            return Types::untypedUntracked();
         }
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
