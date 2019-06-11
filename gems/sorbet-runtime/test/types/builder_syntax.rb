@@ -141,6 +141,42 @@ module Opus::Types::Test
 
     describe 'declarations' do
       describe '.checked' do
+        it 'raises when using .checked' do
+          err = assert_raises(RuntimeError) do
+            mod = Module.new do
+              extend T::Sig
+              sig {void.checked(:never)}
+              def self.test_method; end
+            end
+            mod.test_method
+          end
+          assert_match(/\.checked API is unstable/, err.message)
+        end
+
+        it 'raises when using .soft' do
+          err = assert_raises(RuntimeError) do
+            mod = Module.new do
+              extend T::Sig
+              sig {void.soft(notify: 'foo')}
+              def self.test_method; end
+            end
+            mod.test_method
+          end
+          assert_match(/\.soft API is unstable/, err.message)
+        end
+
+        it 'raises when using generated.' do
+          err = assert_raises(RuntimeError) do
+            mod = Module.new do
+              extend T::Sig
+              sig {generated.void}
+              def self.test_method; end
+            end
+            mod.test_method
+          end
+          assert_match(/\.generated API is unstable/, err.message)
+        end
+
         it 'raises RuntimeError with invalid level' do
           skip
           err = assert_raises(ArgumentError) do
