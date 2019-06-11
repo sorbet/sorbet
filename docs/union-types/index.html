@@ -1,9 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Union Types · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
-&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
-&lt;/blockquote&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Union Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
-&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
-&lt;/blockquote&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Union Types · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Union types are how we merge the values of a set of types into one new type. The&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Union Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Union types are how we merge the values of a set of types into one new type. The&lt;/p&gt;
 "/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -68,42 +64,139 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/union-types.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Union Types</h1></header><article><div><span><blockquote>
-<p>TODO: This page is still a fragment. Contributions welcome!</p>
-</blockquote>
-<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">end</span>
-
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Test</span></span>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/union-types.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Union Types</h1></header><article><div><span><p>Union types are how we merge the values of a set of types into one new type. The
+basic syntax for <code>T.any</code> is:</p>
+<pre><code class="hljs css language-ruby">T.any(SomeType, SomeOtherType, ...)
+</code></pre>
+<p>Note that <code>T.any</code> requires at least two type arguments.</p>
+<p>For example, <code>T.any(Integer, String)</code> describes a type whose values can be
+either <code>Integer</code> or <code>String</code> values, but no others.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
-  sig {params(<span class="hljs-symbol">x:</span> T.any(A, B)).returns(String)}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
-    <span class="hljs-comment"># (1) Outside the if: either A or B</span>
-    T.reveal_type(x) <span class="hljs-comment"># Revealed type: `T.any(A, B)`</span>
-
-    <span class="hljs-comment"># (2) Flow-sensitive typing (see next doc) works on union types</span>
-    <span class="hljs-keyword">if</span> x.is_a?(A)
-      T.reveal_type(x) <span class="hljs-comment"># Revealed type: `A`</span>
-    <span class="hljs-keyword">else</span>
-      T.reveal_type(x) <span class="hljs-comment"># Revealed type: `B`</span>
-    <span class="hljs-keyword">end</span>
-
-    <span class="hljs-comment"># Both A and B have a #to_s method (because they inherit from Object)</span>
-    x.to_s
-  <span class="hljs-keyword">end</span>
+  sig {params(<span class="hljs-symbol">x:</span> T.any(Integer,String)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-Test.foo(A.new)
-Test.foo(B.new)
+<span class="hljs-comment"># 10 and "Hello, world" both have type `T.any(Integer, String)`</span>
+A.f(<span class="hljs-number">10</span>)
+A.f(<span class="hljs-string">"Hello, world"</span>)
 
-Test.foo(C.new) <span class="hljs-comment"># error: `C` doesn't match `T.any(A, B)` for argument `x`</span>
+<span class="hljs-comment"># error: `TrueClass` does not match `T.any(Integer, String)`</span>
+A.f(<span class="hljs-literal">true</span>)
 </code></pre>
-<p><a href="https://sorbet.run/#class%20A%3B%20end%0Aclass%20B%3B%20end%0Aclass%20C%3B%20end%0A%0Aclass%20Test%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(A%2C%20B)).returns(String)%7D%0A%20%20def%20self.foo(x)%0A%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20%60T.any(A%2C%20B)%60%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0ATest.foo(A.new)%0ATest.foo(B.new)%0A%0ATest.foo(C.new)%20%23%20error%3A%20%60C%60%20doesn't%20match%20%60T.any(A%2C%20B)%60%20for%20argument%20%60x%60">
+<p><a href="https://sorbet.run/#%23%20typed%3A%20True%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(Integer%2CString)).void%7D%0A%20%20def%20self.foo(x)%3B%20end%0Aend%0A%0A%23%2010%20and%20%22Hello%2C%20world%22%20both%20have%20type%20%60T.any(Integer%2C%20String)%60%0AA.f(10)%0AA.f(%22Hello%2C%20world%22)%0A%0A%23%20%60TrueClass%60%20does%20not%20match%20%60T.any(Integer%2C%20String)%60%0AA.f(true)">
 → View on sorbet.run
 </a></p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/nilable-types"><span class="arrow-prev">← </span><span>Nilable Types</span></a><a class="docs-next button" href="/docs/flow-sensitive"><span>Flow Sensitivity</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="union-types-and-flow-sensitivity"></a><a href="#union-types-and-flow-sensitivity" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Union types and flow-sensitivity</h2>
+<p>Information can be learned about union types by examining its values in
+conditionals, or the <code>case</code> statement. For example, when using <code>Object#is_a?</code> in
+a conditional information Sorbet will learn information and propagate it down to
+branches of the conditional:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">x:</span> T.any(String, Integer, TrueClass)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+    T.reveal_type(x) <span class="hljs-comment"># Revealed type: T.any(String, Integer, T::Boolean)</span>
+    <span class="hljs-keyword">if</span> x.is_a?(String) <span class="hljs-params">||</span> x.is_a?(Integer)
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: T.any(String, Integer)</span>
+    <span class="hljs-keyword">else</span>
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: TrueClass</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(String%2C%20Integer%2C%20TrueClass)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.any(String%2C%20Integer%2C%20T%3A%3ABoolean)%0A%20%20%20%20if%20x.is_a%3F(String)%20%7C%7C%20x.is_a%3F(Integer)%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.any(String%2C%20Integer)%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20end%0A%20%20end%0Aend">
+→ View on sorbet.run
+</a></p>
+<p>Similarly, any classes specified in the <code>when</code> clause of a <code>case</code> statement will
+update Sorbet’s knowledge of the types within the body of that branch:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">x:</span> T.any(String, Integer, TrueClass)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+    T.reveal_type(x) <span class="hljs-comment"># Revealed type: T.any(String, Integer, TrueClass)</span>
+    <span class="hljs-keyword">case</span> x
+    <span class="hljs-keyword">when</span> Integer, String
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: T.any(Integer, String)</span>
+    <span class="hljs-keyword">else</span>
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: TrueClass</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(String%2C%20Integer%2C%20TrueClass)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20%23%20Revealed%20type%3A%20T.any(String%2C%20Integer%2C%20TrueClass)%0A%20%20%20%20T.reveal_type(x)%0A%20%20%20%20case%20x%0A%20%20%20%20when%20Integer%2C%20String%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20T.any(Integer%2C%20String)%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20else%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20end%0A%20%20end%0Aend">
+→ View on sorbet.run
+</a></p>
+<p>Read the <a href="/docs/flow-sensitive">flow-sensitive typing</a> section for a deeper dive on
+this topic.</p>
+<h2><a class="anchor" aria-hidden="true" id="enumerations"></a><a href="#enumerations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enumerations</h2>
+<p>Union types can be used to express enumerations. For example, if we have three
+classes <code>A</code>, <code>B</code>, and <code>C</code>, and would like to make one type that describes these
+three cases, a type alias for <code>T.any(A, B, C)</code> is a good option:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span>
+  extend T::Sig
+
+  sig {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">D</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">x:</span> T.any(A, B, C)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+    x.bar <span class="hljs-comment"># error: method bar does not exist on A or B</span>
+
+    <span class="hljs-keyword">case</span> x
+    <span class="hljs-keyword">when</span> A, B
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: T.any(B, A)</span>
+    <span class="hljs-keyword">else</span>
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: C</span>
+      x.bar <span class="hljs-comment"># OK, x is known to be an instance of C</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Aclass%20B%3B%20end%0Aclass%20C%3B%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%3B%20end%0Aend%0A%0Aclass%20D%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(A%2C%20B%2C%20C)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20x.bar%20%23%20error%3A%20method%20bar%20does%20not%20exist%20on%20A%20or%20B%0A%0A%20%20%20%20case%20x%0A%20%20%20%20when%20A%2C%20B%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.any(B%2C%20A)%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20C%0A%20%20%20%20%20%20x.bar%20%23%20OK%2C%20x%20is%20known%20to%20be%20an%20instance%20of%20C%0A%20%20%20%20end%0A%20%20end%0Aend">
+→ View on sorbet.run </a></p>
+<h2><a class="anchor" aria-hidden="true" id="tnilable-and-t-boolean"></a><a href="#tnilable-and-t-boolean" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.nilable</code> and <code>T::Boolean</code></h2>
+<p><code>T.nilable</code> and <code>T::Boolean</code> are both defined in terms of <code>T.any</code>:</p>
+<ul>
+<li><code>T.nilable(x)</code> is a type constructor that will return <code>T.any(NilClass, x)</code></li>
+<li><code>T::Boolean</code> is a type alias to <code>T.any(TrueClass, FalseClass)</code></li>
+</ul>
+<p>An effect of this implementation choice is that the same information propagation
+behavior outlined in
+<a href="#union-types-and-flow-sensitivity">Union types and flow sensitivity</a> will take
+place for nilable types and booleans, as with any other union type:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">x:</span> T.nilable(T::Boolean)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+    <span class="hljs-keyword">if</span> x.<span class="hljs-literal">nil</span>?
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: NilClass</span>
+    <span class="hljs-keyword">else</span>
+      T.reveal_type(x) <span class="hljs-comment"># Revealed type: T::Boolean</span>
+      <span class="hljs-keyword">if</span> x
+        T.reveal_type(x) <span class="hljs-comment"># Revealed type: TrueClass</span>
+      <span class="hljs-keyword">else</span>
+        T.reveal_type(x) <span class="hljs-comment"># Revealed type: FalseClass</span>
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.nilable(T%3A%3ABoolean)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20if%20x.nil%3F%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20NilClass%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T%3A%3ABoolean%0A%20%20%20%20%20%20if%20x%0A%20%20%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20%20%20else%0A%20%20%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20FalseClass%0A%20%20%20%20%20%20end%0A%20%20%20%20end%0A%20%20end%0Aend">
+→ View on sorbet.run
+</a></p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/nilable-types"><span class="arrow-prev">← </span><span>Nilable Types</span></a><a class="docs-next button" href="/docs/flow-sensitive"><span>Flow Sensitivity</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#union-types-and-flow-sensitivity">Union types and flow-sensitivity</a></li><li><a href="#enumerations">Enumerations</a></li><li><a href="#tnilable-and-t-boolean"><code>T.nilable</code> and <code>T::Boolean</code></a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
