@@ -1869,9 +1869,7 @@ public:
             return Types::Boolean();
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
-        if (lhs->isUntyped()) {
-            return lhs;
-        }
+        ENFORCE(!lhs->isUntyped(), "lhs of `===` intrinsic must be typed");
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
         }
