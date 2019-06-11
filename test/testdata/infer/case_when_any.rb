@@ -10,8 +10,8 @@ extend T::Sig
 sig {params(x: T.any(A, B, C)).returns(T.any(A, B, C))}
 def foo(x) # error: Returning value that does not conform to method result type
   case x
-  when A, B # error: Revealed type: `T.any(B, A)`
-    T.reveal_type(x)
+  when A, B
+    T.reveal_type(x) # error: Revealed type: `T.any(B, A)`
   when C
     T.reveal_type(x) # error: Revealed type: `C`
   end
