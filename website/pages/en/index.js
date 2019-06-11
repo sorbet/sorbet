@@ -211,7 +211,7 @@ class Index extends React.Component {
               </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and project. If you'd
+              Sorbet is currently used by many companies and projects. If you'd
               like to try it,{' '}
               <a href={signUpLink}>sign up for our mailing list</a> and we'll
               reach out when we have more to share!
