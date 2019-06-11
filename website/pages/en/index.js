@@ -195,22 +195,28 @@ class Index extends React.Component {
             <p
               class="logos"
             >
-              <img
-                src={`${baseUrl}img/stripe-logo.svg`}
-                alt="Stripe Logo"
-              />
-              <img
-                src={`${baseUrl}img/coinbase-logo.png`}
-                alt="Coinbase Logo"
-                style={{
-                  position: 'relative',
-                  top: '-4px',
-                }}
-              />
-              <img
-                src={`${baseUrl}img/gusto-logo.svg`}
-                alt="Gusto Logo"
-              />
+              <a href="https://stripe.com/">
+                <img
+                  src={`${baseUrl}img/stripe-logo.svg`}
+                  alt="Stripe Logo"
+                />
+              </a>
+              <a href="https://coinbase.com/">
+                <img
+                  src={`${baseUrl}img/coinbase-logo.png`}
+                  alt="Coinbase Logo"
+                  style={{
+                    position: 'relative',
+                    top: '-4px',
+                  }}
+                />
+              </a>
+              <a href="https://engineering.gusto.com/">
+                <img
+                  src={`${baseUrl}img/gusto-logo.svg`}
+                  alt="Gusto Logo"
+                />
+              </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
               Sorbet is currently used by many companies and project. If you'd like to try it,{' '}
