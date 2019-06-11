@@ -1858,7 +1858,7 @@ public:
 class Module_tripleEq : public IntrinsicMethod {
 public:
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        ENFORCE(args.args.size() == 1, "`===` takes 1 argument");
+        ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs");
         auto rhs = args.args[0]->type;
         if (rhs->isUntyped()) {
             return rhs;
@@ -1869,7 +1869,7 @@ public:
             return Types::Boolean();
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
-        ENFORCE(!lhs->isUntyped(), "lhs of `===` intrinsic must be typed");
+        ENFORCE(!lhs->isUntyped(), "lhs of Module.=== must be typed");
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
         }
