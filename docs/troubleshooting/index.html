@@ -98,7 +98,9 @@ sig {params(<span class="hljs-symbol">xs:</span> T::Array[Integer]).returns(Inte
   T.reveal_type(xs.first) <span class="hljs-comment"># =&gt; Revealed type: `T.nilable(Integer)`</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#%2523%20typed%253A%20true%0Aextend%20T%253A%253ASig%0A%0Asig%20%7Bparams(xs%253A%20T%253A%253AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%2523%20%253D%3E%20Revealed%20type%253A%20%60T.nilable(Integer)%60%0Aend">→ View on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(xs%3A%20T%3A%3AArray%5BInteger%5D).returns(Integer)%7D%0Adef%20foo(xs)%0A%20%20T.reveal_type(xs.first)%20%23%20%3D%3E%20Revealed%20type%3A%20%60T.nilable(Integer)%60%0Aend">
+→ View on sorbet.run
+</a></p>
 <p>With this example we see that <code>xs.first</code> returns <code>T.nilable(Integer)</code>.</p>
 <p>Frequently when troubleshooting type errors, either something is <code>nil</code> or
 <code>T.untyped</code> unexpectedly. We can use <code>T.reveal_type</code> to track down where the
