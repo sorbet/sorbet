@@ -35,12 +35,12 @@ A.f(true)
   → View on sorbet.run
 </a>
 
-## Refining union types
+## Examining union types
 
-Union types can be refined through the use of `Object#is_a?` in a conditional
-statement, or the ruby `case` statement. When using `Object#is_a?` in a
-conditional, information learned by that test will be propagated down to
-branches of the conditional. For example:
+Information can be learned about union types by examining its values in
+conditionals, or the `case` statement. For exampke, when using `Object#is_a?` in
+a conditional information learned by that test will be propagated down to
+branches of the conditional:
 
 ```ruby
 class A
@@ -63,8 +63,7 @@ end
 </a>
 
 Similarly, any types specified in the `when` clause of a `case` statement will
-refine the type of the expression being analyzed within the context of that
-`when` branch:
+pass that information on to the body of that branch:
 
 ```ruby
 class A
@@ -84,5 +83,82 @@ end
 ```
 
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(String%2C%20Integer%2C%20TrueClass)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20%23%20Revealed%20type%3A%20T.any(String%2C%20Integer%2C%20TrueClass)%0A%20%20%20%20T.reveal_type(x)%0A%20%20%20%20case%20x%0A%20%20%20%20when%20Integer%2C%20String%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20T.any(Integer%2C%20String)%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20else%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20end%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
+
+
+## Enumerations
+
+Union types can be used to express enumerations. For example, if you have three
+classes `A`, `B`, and `C`, and would like to make one type that describes these
+three cases, a type alias for `T.any(A, B, C)` is a good option:
+
+```ruby
+class A; end
+class B; end
+class C;
+  extend T::Sig
+
+  sig {void}
+  def bar; end
+end
+
+ABC = T.type_alias(T.any(A, B, C))
+
+class D
+  extend T::Sig
+
+  sig {params(x: ABC).void}
+  def foo(x)
+    x.bar # error: method bar does not exist on A or B
+
+    case x
+    when A, B
+      T.reveal_type(x) # Revealed type: T.any(B, A)
+    else
+      T.reveal_type(x) # Revealed type: C
+      x.bar # OK, x is known to be an instance of C
+    end
+  end
+end
+```
+
+<a
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Aclass%20B%3B%20end%0Aclass%20C%3B%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%3B%20end%0Aend%0A%0AABC%20%3D%20T.type_alias(T.any(A%2C%20B%2C%20C))%0A%0Aclass%20D%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20ABC).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20x.bar%20%23%20error%3A%20method%20bar%20does%20not%20exist%20on%20A%20or%20B%0A%0A%20%20%20%20case%20x%0A%20%20%20%20when%20A%2C%20B%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.any(B%2C%20A)%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20C%0A%20%20%20%20%20%20x.bar%20%23%20OK%2C%20x%20is%20known%20to%20be%20an%20instance%20of%20C%0A%20%20%20%20end%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
+
+## `T.nilable` and `T::Boolean`
+
+`T.nilable` and `T::Boolean` are both defined in terms of `T.any`:
+
+- `T.nilable(x)` is a type constructor that will return `T.any(NilClass, x)`
+- `T::Boolean` is a type alias to `T.any(TrueClass, FalseClass)`
+
+An effect of this implementation choice is that the same information propagation
+behavior outlined in [Examining union types](#examining-union-types) will take
+place:
+
+```ruby
+class A
+  extend T::Sig
+
+  sig {params(x: T.nilable(T::Boolean)).void}
+  def foo(x)
+    if x.nil?
+      T.reveal_type(x) # Revealed type: NilClass
+    else
+      T.reveal_type(x) # Revealed type: T::Boolean
+      if x
+        T.reveal_type(x) # Revealed type: TrueClass
+      else
+        T.reveal_type(x) # Revealed type: FalseClass
+      end
+    end
+  end
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.nilable(T%3A%3ABoolean)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20if%20x.nil%3F%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20NilClass%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T%3A%3ABoolean%0A%20%20%20%20%20%20if%20x%0A%20%20%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20%20%20else%0A%20%20%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20FalseClass%0A%20%20%20%20%20%20end%0A%20%20%20%20end%0A%20%20end%0Aend">
   → View on sorbet.run
 </a>
