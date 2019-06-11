@@ -4,6 +4,22 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &retType,
+                             const core::DispatchResult::ComponentVec &dispatchComponents,
+                             const shared_ptr<core::TypeConstraint> &constraint) {
+    string contents = "";
+    for (auto &dispatchComponent : dispatchComponents) {
+        if (dispatchComponent.method.exists()) {
+            if (contents.size() > 0) {
+                contents += " ";
+            }
+            contents += methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint);
+        }
+    }
+    return contents;
+}
+
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
@@ -37,28 +53,20 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             string contents = "";
             auto retType = sendResp->retType.type;
             auto &constraint = sendResp->constraint;
-            for (auto &dispatchComponent : sendResp->dispatchComponents) {
-                if (constraint) {
-                    retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
-                }
-                if (dispatchComponent.method.exists()) {
-                    if (contents.size() > 0) {
-                        contents += " ";
-                    }
-                    contents +=
-                        methodDetail(*gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint);
-                }
+            if (constraint) {
+                retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
             // We use markdown here because if we just use a string, VSCode tries to interpret
             // things like <Class:Foo> as html tags and make them clickable (but the click takes
             // you somewhere nonsensical)
-            auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, contents);
+            auto markupContents = make_unique<MarkupContent>(
+                MarkupKind::Markdown, methodSignatureString(*gs, retType, sendResp->dispatchComponents, constraint));
             response->result = make_unique<Hover>(move(markupContents));
         } else if (auto defResp = resp->isDefinition()) {
-            // TODO: Actually send the type signature here. I'm skipping this for now
-            // since it's not a very useful feature for the end user (i.e., they should
-            // be able to see this right above the definition in ruby)
-            response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
+            auto markupContents = make_unique<MarkupContent>(
+                MarkupKind::Markdown,
+                methodSignatureString(*gs, defResp->retType.type, defResp->dispatchComponents, nullptr));
+            response->result = make_unique<Hover>(move(markupContents));
         } else {
             auto markupContents =
                 make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->showWithMoreInfo(*gs));
