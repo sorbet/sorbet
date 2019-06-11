@@ -138,10 +138,30 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(gs), ")");
     vector<string> typeAndArgNames;
 
-    string generatedString = "";
-    if (method.data(gs)->isMethod()) {
-        if (method.data(gs)->hasGeneratedSig()) {
-            generatedString = "generated.";
+    vector<string> flags;
+    const core::SymbolData &sym = method.data(gs);
+    string accessFlagString = "";
+    if (sym->isMethod()) {
+        if (sym->hasGeneratedSig()) {
+            flags.push_back("generated");
+        }
+        if (sym->isAbstract()) {
+            flags.push_back("abstract");
+        }
+        if (sym->isOverridable()) {
+            flags.push_back("overridable");
+        }
+        if (sym->isOverride()) {
+            flags.push_back("override");
+        }
+        if (sym->isImplementation()) {
+            flags.push_back("implementation");
+        }
+        if (sym->isPrivate()) {
+            accessFlagString = "private ";
+        }
+        if (sym->isProtected()) {
+            accessFlagString = "protected ";
         }
         for (auto &argSym : method.data(gs)->arguments()) {
             // Don't display synthetic arguments (like blk).
@@ -152,12 +172,15 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         }
     }
 
-    if (typeAndArgNames.size() == 0) {
-        return fmt::format("sig {{{}{}}}", generatedString, methodReturnType);
-    } else {
-        return fmt::format("sig {{{}params({}).{}}}", generatedString, fmt::join(typeAndArgNames, ", "),
-                           methodReturnType);
+    string flagString = "";
+    if (flags.size() > 0) {
+        flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
+    string paramsString = "";
+    if (typeAndArgNames.size() > 0) {
+        paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
+    }
+    return fmt::format("{}sig {{{}{}{}}}", accessFlagString, flagString, paramsString, methodReturnType);
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
