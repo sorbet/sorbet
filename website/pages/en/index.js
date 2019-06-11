@@ -16,9 +16,6 @@ const GridBlock = CompLibrary.GridBlock;
 const sorbetRunExample =
   'https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20This%20code%20is%20editable!%0A%23%20You%20can%20also%20hover%20to%20see%20error%20messages%20and%20types!%0A%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(name%3A%20String).returns(Integer)%7D%0Adef%20main(name)%0A%20%20puts%20%22Hello%2C%20%23%7Bname%7D!%22%0A%20%20name.length%0Aend%0A%0Amain(%22Sorbet%22)%20%23%20ok!%0Amain()%20%20%20%23%20error%3A%20Not%20enough%20arguments%20provided%20for%20method%20%60main%60%0Aman(%22%22)%20%20%23%20error%3A%20Method%20%60man%60%20does%20not%20exist';
 
-const signUpLink =
-  'https://docs.google.com/forms/d/1aj1XkNwdeNeX5gzm_cMWiKC1__vUQ29qBbBxHx6tNOc/viewform';
-
 const mainExample = `
 \`\`\`ruby
 # typed: true
@@ -127,13 +124,6 @@ class Index extends React.Component {
             />
           </Container>
         </div>
-        <PageSection gray short>
-          <div style={{fontSize: '1.2em', textAlign: 'center'}}>
-            <strong>Coming Summer 2019</strong>. We're looking for early
-            feedback to make Sorbet great: <a href={signUpLink}>sign up here</a>{' '}
-            to get involved!
-          </div>
-        </PageSection>
         <PageSection>
           <h2>A Taste of Sorbet</h2>
           <div className="row">
@@ -211,10 +201,9 @@ class Index extends React.Component {
               </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and projects. If you'd
-              like to try it,{' '}
-              <a href={signUpLink}>sign up for our mailing list</a> and we'll
-              reach out when we have more to share!
+              Sorbet is currently used by many companies and projects.{' '}
+              <a href="mailto:sorbet@stripe.com">Email us</a> if you'd like your
+              logo to appear here.
             </p>
           </div>
         </PageSection>
