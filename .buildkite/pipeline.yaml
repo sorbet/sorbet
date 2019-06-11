@@ -84,15 +84,3 @@ steps:
   - label: "All tests and builds succeeded"
     command: .buildkite/all-succeeded.sh
   - wait: ~
-
-# Optional Phase - Run optional things
-  - block: "Run optional code coverage"
-  - wait: ~
-  - label: ":linux::cloud: coverage-static-sanitized.sh"
-    command: .buildkite/coverage-static-sanitized.sh
-    artifact_paths: _out_/**/*
-    retry:
-      automatic: true
-    soft_fail:
-      - exit_status: "*"
-    <<: *elastic
