@@ -3,10 +3,10 @@ id: union-types
 title: Union Types
 ---
 
-Union types, introduced by `T.any`, are how we merge the values of a set of
-types into one new type. The basic syntax for `T.any` is:
+Union types are how we merge the values of a set of types into one new type. The
+basic syntax for `T.any` is:
 
-```
+```ruby
 T.any(SomeType, SomeOtherType, ...)
 ```
 
@@ -20,18 +20,18 @@ class A
   extend T::Sig
 
   sig {params(x: T.any(Integer,String)).void}
-  def self.f(x); end
+  def self.foo(x); end
 end
 
 # 10 and "Hello, world" both have type `T.any(Integer, String)`
 A.f(10)
 A.f("Hello, world")
 
-# `TrueClass` does not match `T.any(Integer, String)`
+# error: `TrueClass` does not match `T.any(Integer, String)`
 A.f(true)
 ```
 
-<a href="https://sorbet.run/#%23%20typed%3A%20True%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(Integer%2CString)).void%7D%0A%20%20def%20self.f(x)%3B%20end%0Aend%0A%0A%23%2010%20and%20%22Hello%2C%20world%22%20both%20have%20type%20%60T.any(Integer%2C%20String)%60%0AA.f(10)%0AA.f(%22Hello%2C%20world%22)%0A%0A%23%20%60TrueClass%60%20does%20not%20match%20%60T.any(Integer%2C%20String)%60%0AA.f(true)">
+<a href="https://sorbet.run/#%23%20typed%3A%20True%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(Integer%2CString)).void%7D%0A%20%20def%20self.foo(x)%3B%20end%0Aend%0A%0A%23%2010%20and%20%22Hello%2C%20world%22%20both%20have%20type%20%60T.any(Integer%2C%20String)%60%0AA.f(10)%0AA.f(%22Hello%2C%20world%22)%0A%0A%23%20%60TrueClass%60%20does%20not%20match%20%60T.any(Integer%2C%20String)%60%0AA.f(true)">
   → View on sorbet.run
 </a>
 
@@ -47,15 +47,12 @@ class A
   extend T::Sig
 
   sig {params(x: T.any(String, Integer, TrueClass)).void}
-  def f(x)
-    # Revealed type: T.any(String, Integer, T::Boolean)
-    T.reveal_type(x)
+  def foo(x)
+    T.reveal_type(x) # Revealed type: T.any(String, Integer, T::Boolean)
     if x.is_a?(String) or x.is_a?(Integer)
-      # Revealed type: T.any(String, Integer)
-      T.reveal_type(x)
+      T.reveal_type(x) # Revealed type: T.any(String, Integer)
     else
-      # Revealed type: TrueClass
-      T.reveal_type(x)
+      T.reveal_type(x) # Revealed type: TrueClass
     end
   end
 end
@@ -74,21 +71,18 @@ class A
   extend T::Sig
 
   sig {params(x: T.any(String, Integer, TrueClass)).void}
-  def f(x)
-    # Revealed type: T.any(String, Integer, TrueClass)
-    T.reveal_type(x)
+  def foo(x)
+    T.reveal_type(x) # Revealed type: T.any(String, Integer, TrueClass)
     case x
     when Integer, String
-      # Revealed type: T.any(Integer, String)
-      T.reveal_type(x)
+      T.reveal_type(x) # Revealed type: T.any(Integer, String)
     else
-      # Revealed type: TrueClass
-      T.reveal_type(x)
+      T.reveal_type(x) # Revealed type: TrueClass
     end
   end
 end
 ```
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(String%2C%20Integer%2C%20TrueClass)).void%7D%0A%20%20def%20f(x)%0A%20%20%20%20%23%20Revealed%20type%3A%20T.any(String%2C%20Integer%2C%20TrueClass)%0A%20%20%20%20T.reveal_type(x)%0A%20%20%20%20case%20x%0A%20%20%20%20when%20Integer%2C%20String%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20T.any(Integer%2C%20String)%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20else%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20end%0A%20%20end%0Aend">
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(String%2C%20Integer%2C%20TrueClass)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20%23%20Revealed%20type%3A%20T.any(String%2C%20Integer%2C%20TrueClass)%0A%20%20%20%20T.reveal_type(x)%0A%20%20%20%20case%20x%0A%20%20%20%20when%20Integer%2C%20String%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20T.any(Integer%2C%20String)%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20else%0A%20%20%20%20%20%20%23%20Revealed%20type%3A%20TrueClass%0A%20%20%20%20%20%20T.reveal_type(x)%0A%20%20%20%20end%0A%20%20end%0Aend">
   → View on sorbet.run
 </a>
