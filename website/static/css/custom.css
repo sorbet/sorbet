@@ -57,13 +57,18 @@
 }
 
 .homeContainer .button {
-  border-color: #ffffff;
+  border-color: var(--sorbet-purple-6);
+  border-radius: 8px;
+  border-width: 2px;
   color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 27px;
 }
 
 .homeContainer .button:hover {
   color: var(--sorbet-purple-2);
-  background: #ffffff;
+  background: var(--sorbet-purple-6);
 }
 
 .homeContainer a,

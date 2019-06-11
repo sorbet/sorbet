@@ -97,9 +97,8 @@ class Index extends React.Component {
                   <a href="https://stripe.com">Stripe</a>.
                 </p>
                 <div style={{paddingTop: '1.2em'}}>
-                  <Button href={docUrl('overview')}>Read the docs</Button>
-                  <Button href="http://sorbet.run">Try it online</Button>
                   <Button href={docUrl('adopting')}>Get started</Button>
+                  <Button href="https://sorbet.run">Try it online</Button>
                 </div>
               </div>
             </div>
