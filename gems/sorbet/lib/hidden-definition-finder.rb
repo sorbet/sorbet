@@ -15,10 +15,11 @@ require_relative './real_stdlib'
 require 'fileutils'
 require 'json'
 require 'set'
+require 'tmpdir'
 
 class Sorbet::Private::HiddenMethodFinder
   PATH = "sorbet/rbi/hidden-definitions/"
-  TMP_PATH = "/tmp/sorbet-hidden-definitions/"
+  TMP_PATH = Dir.mktmpdir + "/"
   TMP_RBI = TMP_PATH + "reflection.rbi"
   DIFF_RBI = TMP_PATH + "hidden.rbi.tmp"
   RBI_CONSTANTS = TMP_PATH + "reflection.json"
@@ -38,62 +39,29 @@ class Sorbet::Private::HiddenMethodFinder
   end
 
   def main
-    remove_temp_files # comment this out if you want to use incremental
-    mkdir
-    if hidden_rbi
-      require_everything
-      classes, aliases = all_modules_and_aliases
-      gen_source_rbi(classes, aliases)
-    end
-    if hidden_json
-      rm_rbis
-      write_constants
-    end
-    if hidden_diff
-      rm_rbis
-      source, rbi = read_constants
-      require_everything
-      write_diff(source, rbi)
-    end
-    if hidden_splits
-      split_rbi
-    end
-  end
-
-  def mkdir
-    FileUtils.mkdir_p(PATH) unless Dir.exist?(PATH)
-    FileUtils.mkdir_p(TMP_PATH) unless Dir.exist?(TMP_PATH)
-  end
-
-  def remove_temp_files
-    FileUtils.rm_r(PATH) if Dir.exist?(PATH)
-    FileUtils.rm_r(TMP_PATH) if Dir.exist?(TMP_PATH)
+    mk_dir
+    require_everything
+    classes, aliases = all_modules_and_aliases
+    gen_source_rbi(classes, aliases)
     rm_rbis
+    write_constants
+    source, rbi = read_constants
+    write_diff(source, rbi)
+    split_rbi
+    rm_dir
+  end
+
+  def mk_dir
+    FileUtils.mkdir_p(PATH) unless Dir.exist?(PATH)
+  end
+
+  def rm_dir
+    FileUtils.rmdir(TMP_PATH)
   end
 
   def require_everything
     puts "Requiring all of your code"
     Sorbet::Private::RequireEverything.require_everything
-  end
-
-  def hidden_rbi
-    return true if !File.exist?(TMP_RBI)
-    puts "#{TMP_RBI} already exists, not generating"
-  end
-
-  def hidden_json
-    return true if !File.exist?(RBI_CONSTANTS) || !File.exist?(SOURCE_CONSTANTS)
-    puts "#{RBI_CONSTANTS} and #{SOURCE_CONSTANTS} already exists, not generating"
-  end
-
-  def hidden_diff
-    return true if !File.exist?(DIFF_RBI)
-    puts "#{DIFF_RBI} already exists, not generating"
-  end
-
-  def hidden_splits
-    return true if !File.exist?(HIDDEN_RBI) || !File.exist?(ERRORS_RBI)
-    puts "All split RBIs already exist, not generating"
   end
 
   def constant_cache
