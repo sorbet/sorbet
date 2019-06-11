@@ -12,7 +12,7 @@ T.any(SomeType, SomeOtherType, ...)
 
 Note that `T.any` requires at least two type arguments.
 
-For example, `T.any(Integer,String)` describes a type whose values can be either
+For example, `T.any(Integer, String)` describes a type whose values can be either
 `Integer` or `String` values, but no others.
 
 ```ruby
