@@ -38,7 +38,7 @@ A.f(true)
 ## Union types and flow-sensitivity
 
 Information can be learned about union types by examining its values in
-conditionals, or the `case` statement. For exampke, when using `Object#is_a?` in
+conditionals, or the `case` statement. For example, when using `Object#is_a?` in
 a conditional information learned by that test will be propagated down to
 branches of the conditional:
 
