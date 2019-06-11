@@ -1869,6 +1869,9 @@ public:
             return Types::Boolean();
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
+        if (lhs->isUntyped()) {
+            return Types::Boolean();
+        }
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
         }
