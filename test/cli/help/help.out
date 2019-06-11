@@ -130,10 +130,14 @@ Usage:
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message
-      --error-white-list errorCodes
-                                Whitelist of errors to be reported
-      --error-black-list errorCodes
-                                Blacklist of errors to be reported
+      --error-white-list errorCode
+                                Error code to whitelist into reporting.
+                                Errors not mentioned will be silenced. This option
+                                can be passed multiple times.
+      --error-black-list errorCode
+                                Error code to blacklist from reporting.
+                                Errors mentioned will be silenced. This option can
+                                be passed multiple times.
       --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)

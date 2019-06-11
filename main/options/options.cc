@@ -342,10 +342,16 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("error-white-list", "Whitelist of errors to be reported", cxxopts::value<vector<int>>(),
-                               "errorCodes");
-    options.add_options("dev")("error-black-list", "Blacklist of errors to be reported", cxxopts::value<vector<int>>(),
-                               "errorCodes");
+    options.add_options("dev")("error-white-list",
+                               "Error code to whitelist into reporting. "
+                               "Errors not mentioned will be silenced. "
+                               "This option can be passed multiple times.",
+                               cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("error-black-list",
+                               "Error code to blacklist from reporting. "
+                               "Errors mentioned will be silenced. "
+                               "This option can be passed multiple times.",
+                               cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
