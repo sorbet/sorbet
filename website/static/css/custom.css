@@ -118,6 +118,17 @@
   padding-right: 20px;
 }
 
+.logos {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+}
+
+.logos img {
+  height: 50px;
+  margin-right: 20px;
+}
+
 /* Responsive styles*/
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
