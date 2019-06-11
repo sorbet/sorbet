@@ -395,7 +395,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 u4 flags = 0;
                 auto rec = node2TreeImpl(dctx, std::move(send->receiver));
                 if (isa_tree<EmptyTree>(rec.get())) {
-                    rec = MK::Self(loc);
+                    // 0-sized Loc, since `self.` doesn't appear in the original file.
+                    rec = MK::Self(core::Loc(loc.file(), loc.beginPos(), loc.beginPos()));
                     flags |= Send::PRIVATE_OK;
                 }
                 if (absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); })) {
