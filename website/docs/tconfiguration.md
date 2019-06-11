@@ -56,9 +56,11 @@ T::Configuration.call_validation_error_handler = lambda do |signature, opts|
 end
 ```
 
-The default error handler is to raise an error, but it respects the `.soft` and
-`.checked` builder methods, discussed in
-[Escape Hatches](troubleshooting.md#escape-hatches).
+The default error handler is to raise an error.
+
+<!-- The default error handler is to raise an error, but it respects the `.soft` and -->
+<!-- `.checked` builder methods, discussed in -->
+<!-- [Escape Hatches](troubleshooting.md#escape-hatches). -->
 
 ## Errors from invalid sig procs
 

@@ -268,46 +268,46 @@ invocation.
 
 will still be caught as a missing method statically.
 
-### `.soft()` & `.checked()`
+<!-- ### `.soft()` & `.checked()` -->
 
-`T.unsafe` and `T.cast` let us opt out of static checks. These next constructs
-let us opt out of runtime checks. We might want to opt out of runtime checks
-because...
+<!-- `T.unsafe` and `T.cast` let us opt out of static checks. These next constructs -->
+<!-- let us opt out of runtime checks. We might want to opt out of runtime checks -->
+<!-- because... -->
 
-- we've measured that calling our method is performance sensitive
-- we're rolling out types to previously-untyped code, and want to make sure our
-  types are correct
+<!-- - we've measured that calling our method is performance sensitive -->
+<!-- - we're rolling out types to previously-untyped code, and want to make sure our -->
+<!--   types are correct -->
 
-To opt out of runtime checks, we have three options, all of which we'll add to
-the `sig` of the specific method we'd like to opt out of:
+<!-- To opt out of runtime checks, we have three options, all of which we'll add to -->
+<!-- the `sig` of the specific method we'd like to opt out of: -->
 
-- `.soft(notify: ...)`
-- `.checked(:tests)`
-- `.checked(:never)`
+<!-- - `.soft(notify: ...)` -->
+<!-- - `.checked(:tests)` -->
+<!-- - `.checked(:never)` -->
 
-From the static system's perspective, adding any of these to a sig will have no
-effect. In the runtime, the behavior of these three differs depending on whether
-we're in tests or in production:
+<!-- From the static system's perspective, adding any of these to a sig will have no -->
+<!-- effect. In the runtime, the behavior of these three differs depending on whether -->
+<!-- we're in tests or in production: -->
 
-| If types don't match, using ↓ in → ... | Tests            | Production       |
-| -------------------------------------- | ---------------- | ---------------- |
-| _none of the below_                    | will raise       | will raise       |
-| `.soft(notify: ...)`                   | will raise       | soft asserts     |
-| `.checked(:tests)`                     | will raise       | skips validation |
-| `.checked(:never)`                     | skips validation | skips validation |
+<!-- | If types don't match, using ↓ in → ... | Tests            | Production       | -->
+<!-- | -------------------------------------- | ---------------- | ---------------- | -->
+<!-- | _none of the below_                    | will raise       | will raise       | -->
+<!-- | `.soft(notify: ...)`                   | will raise       | soft asserts     | -->
+<!-- | `.checked(:tests)`                     | will raise       | skips validation | -->
+<!-- | `.checked(:never)`                     | skips validation | skips validation | -->
 
-To recap:
+<!-- To recap: -->
 
-- By default, calling a method or returning a result that doesn't match the sig
-  will **raise** in both tests and prod.
+<!-- - By default, calling a method or returning a result that doesn't match the sig -->
+<!--   will **raise** in both tests and prod. -->
 
-- `.soft()` works the same as all soft assertions (raise in tests, soft assert
-  in prod)
+<!-- - `.soft()` works the same as all soft assertions (raise in tests, soft assert -->
+<!--   in prod) -->
 
-- `.checked(:tests)` is preferred for methods which we've measured to be
-  performance sensitive. They'll have no effect on production from the runtime
-  perspective, but will still be checked in tests.
+<!-- - `.checked(:tests)` is preferred for methods which we've measured to be -->
+<!--   performance sensitive. They'll have no effect on production from the runtime -->
+<!--   perspective, but will still be checked in tests. -->
 
-- `.checked(:never)` is a hammer. It silences all validation in both tests and
-  production. Use this with caution!! Without **any** runtime validation, Sorbet
-  cannot warn when interoperating with untyped code.
+<!-- - `.checked(:never)` is a hammer. It silences all validation in both tests and -->
+<!--   production. Use this with caution!! Without **any** runtime validation, Sorbet -->
+<!--   cannot warn when interoperating with untyped code. -->
