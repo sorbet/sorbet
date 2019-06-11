@@ -69,13 +69,12 @@ end
 
 ## Annotating Block Parameters
 
-Ruby allows you to write methods that take a block parameter without
-naming that parameter by using `yield` in the body of the method. At
-`# typed: strict`, Sorbet will force you to give that parameter a name
-even if you're using `yield`. For example, Sorbet will **reject** the
-following code snippet because the method uses `yield` but has not
-named its block parameter, which in turn means that it lacks a
-declared type:
+With Ruby's `yield` keyword, you can invoke a block without including
+a block argument in the parameter list. At `# typed: strict`, Sorbet
+will force you to give that parameter a name _even if you're using_
+`yield`. For example, Sorbet will **reject** the following code
+snippet because the method uses `yield` but has not named its block
+parameter, which in turn means that it lacks a declared type:
 
 ```ruby
 # typed: strict
