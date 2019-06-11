@@ -60,8 +60,7 @@ module Opus::Types::Test
     describe 'sig_builder_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          skip
-          @mod.sig {generated.returns(Symbol).checked(:always)}
+          @mod.sig {returns(Symbol).void}
           def @mod.foo
             :bar
           end
@@ -70,7 +69,7 @@ module Opus::Types::Test
           end
           assert_includes(
             ex.message,
-            "You can't use .checked with .generated."
+            "You can't call .void after calling .returns."
           )
         end
       end
@@ -87,13 +86,12 @@ module Opus::Types::Test
         end
 
         it 'handles a sig builder error' do
-          skip
           CustomReceiver.expects(:receive).once.with do |error, location|
-            error.message == "You can't use .checked with .generated." &&
+            error.message == "You can't call .void after calling .returns." &&
               error.is_a?(T::Private::Methods::DeclBuilder::BuilderError) &&
               location.is_a?(Thread::Backtrace::Location)
           end
-          @mod.sig {generated.returns(Symbol).checked(:always)}
+          @mod.sig {returns(Symbol).void}
           def @mod.foo
             :bar
           end
