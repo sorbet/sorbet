@@ -9,6 +9,11 @@ class Foo
    # ^ hover: Foo
   end
 
+  sig {params(a: String).void}
+  def self.bar(a)
+         # ^ hover: sig {params(a: String).void}
+  end
+
   sig {params(arg0: String).returns(Integer)}
   def baz(arg0)
     arg0.to_i
