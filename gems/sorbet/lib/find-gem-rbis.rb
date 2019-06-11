@@ -29,6 +29,7 @@ class Sorbet::Private::FindGemRBIs
 
   T::Sig::WithoutRuntime.sig {void}
   def self.main
+    FileUtils.mkdir_p(RBI_CACHE_DIR) unless Dir.exist?(RBI_CACHE_DIR)
     output_file = File.exist?('Gemfile.lock') ? RBI_CACHE_DIR + Digest::MD5.hexdigest(File.read('Gemfile.lock')) : nil
     return unless output_file
     gemspecs = Bundler.load.specs.sort_by(&:name)
