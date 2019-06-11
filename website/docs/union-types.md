@@ -12,8 +12,8 @@ T.any(SomeType, SomeOtherType, ...)
 
 Note that `T.any` requires at least two type arguments.
 
-For example, `T.any(Integer, String)` describes a type whose values can be either
-`Integer` or `String` values, but no others.
+For example, `T.any(Integer, String)` describes a type whose values can be
+either `Integer` or `String` values, but no others.
 
 ```ruby
 class A
@@ -125,8 +125,7 @@ end
 
 <a
 href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Aclass%20B%3B%20end%0Aclass%20C%3B%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%3B%20end%0Aend%0A%0Aclass%20D%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(A%2C%20B%2C%20C)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20x.bar%20%23%20error%3A%20method%20bar%20does%20not%20exist%20on%20A%20or%20B%0A%0A%20%20%20%20case%20x%0A%20%20%20%20when%20A%2C%20B%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.any(B%2C%20A)%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20C%0A%20%20%20%20%20%20x.bar%20%23%20OK%2C%20x%20is%20known%20to%20be%20an%20instance%20of%20C%0A%20%20%20%20end%0A%20%20end%0Aend">
-  → View on sorbet.run
-</a>
+→ View on sorbet.run </a>
 
 ## `T.nilable` and `T::Boolean`
 
