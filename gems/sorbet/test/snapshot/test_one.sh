@@ -237,8 +237,9 @@ export SRB_SORBET_TYPED_REVISION
 
   if [ "$DEBUG" != "" ]; then
     # Don't redirect anything, so that binding.pry and friends work
-    bundle exec "$srb" init
-    exit
+    SRB_YES=1 bundle exec "$srb" init
+    error "Exiting since debug mode doesn't run tests"
+    exit 1
   else
     # Uses /dev/null for stdin so any binding.pry would exit immediately
     # (otherwise, pry will be waiting for input, but it's impossible to tell
