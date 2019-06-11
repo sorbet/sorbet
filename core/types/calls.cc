@@ -1865,8 +1865,10 @@ public:
         }
         auto rc = Types::getRepresentedClass(ctx, thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
-        // TODO args.selfType vs thisType?
-        auto lhs = rc == core::Symbols::noSymbol() ? args.selfType : rc.data(ctx)->externalType(ctx);
+        if (rc == core::Symbols::noSymbol()) {
+            return Types::Boolean();
+        }
+        auto lhs = rc.data(ctx)->externalType(ctx);
         // 1. rhs <: lhs (e.g. rhs = A, lhs = A | B). this is always true.
         // 2. lhs <: rhs (e.g. lhs = A | B, rhs = A). this is true if LHS is A but false if LHS is B, so we don't know
         //    statically which branch to choose.
