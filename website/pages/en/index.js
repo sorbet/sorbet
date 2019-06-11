@@ -192,14 +192,9 @@ class Index extends React.Component {
         </PageSection>
         <PageSection short>
           <div className="pageSectionColumns">
-            <p
-              class="logos"
-            >
+            <p class="logos">
               <a href="https://stripe.com/">
-                <img
-                  src={`${baseUrl}img/stripe-logo.svg`}
-                  alt="Stripe Logo"
-                />
+                <img src={`${baseUrl}img/stripe-logo.svg`} alt="Stripe Logo" />
               </a>
               <a href="https://coinbase.com/">
                 <img
@@ -212,14 +207,12 @@ class Index extends React.Component {
                 />
               </a>
               <a href="https://engineering.gusto.com/">
-                <img
-                  src={`${baseUrl}img/gusto-logo.svg`}
-                  alt="Gusto Logo"
-                />
+                <img src={`${baseUrl}img/gusto-logo.svg`} alt="Gusto Logo" />
               </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and project. If you'd like to try it,{' '}
+              Sorbet is currently used by many companies and project. If you'd
+              like to try it,{' '}
               <a href={signUpLink}>sign up for our mailing list</a> and we'll
               reach out when we have more to share!
             </p>
