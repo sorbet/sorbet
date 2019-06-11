@@ -3,8 +3,6 @@ id: strict
 title: Strict Mode
 ---
 
-> TODO: This page is still a fragment. Contributions welcome!
-
 As introduced in [Enabling Static Checks](static.md), Sorbet has multiple
 strictness modes. The default is `# typed: false`, which silences all type
 errors. Next up is `# typed: true`, where type errors are reported. There's also
@@ -18,10 +16,22 @@ for:
 - instance variables
 - class variables
 - constants
+- block parameters
 
 > Why is this not an error in `# typed: true`? In that strictness level,
 > unannotated methods, instance variables, and constants are assumed to be
 > `T.untyped`.
+
+Files at `# typed: strict` will also raise a few other errors that
+didn't show up before:
+
+- Any use of `undef` produces an error.
+- Using `yield` when you don't include a named block parameter in your
+  argument list produces an error.
+- Redundant casting operations, such as using `T.cast` to cast a value
+  to a type that it is already known to be, or using `T.must` on a
+  value already known to be non-`nil`, produce errors.
+
 
 ## Annotating Constants
 
@@ -54,5 +64,39 @@ class HasVariables
 
   # Instance variable on the singleton class
   @alpaca_count = T.let(0, Integer)
+end
+```
+
+## Annotating Block Parameters
+
+Ruby allows you to write methods that take a block parameter without
+naming that parameter by using `yield` in the body of the method. At
+`# typed: strict`, Sorbet will force you to give that parameter a name
+even if you're using `yield`. For example, Sorbet will **reject** the
+following code snippet because the method uses `yield` but has not
+named its block parameter, which in turn means that it lacks a
+declared type:
+
+```ruby
+# typed: strict
+sig { void }
+def call_twice  # error: Method call_twice uses yield but does not mention a block parameter
+  yield
+  yield
+end
+```
+
+You don't need to refactor your method body to use `block.call` to fix
+this problem: you can give the method a named block parameter like
+`&blk`, and `yield` will automatically invoke the `blk`
+parameter. This also means that you must give a type to that block
+parameter when you're using `# typed: strict`:
+
+```ruby
+# typed: strict
+sig { params(blk: T.proc.void).void }
+def call_twice(&blk)
+  yield
+  yield
 end
 ```
