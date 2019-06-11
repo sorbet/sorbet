@@ -58,9 +58,7 @@ end
 
 The default error handler is to raise an error.
 
-<!-- The default error handler is to raise an error, but it respects the `.soft` and -->
-<!-- `.checked` builder methods, discussed in -->
-<!-- [Escape Hatches](troubleshooting.md#escape-hatches). -->
+<!-- TODO(jez) Document .soft / .checked once API is stable. -->
 
 ## Errors from invalid sig procs
 
