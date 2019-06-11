@@ -1864,7 +1864,8 @@ public:
             return Types::Boolean();
         }
         // we know thisType is T.class_of(lhs) because we register this tripleEq on Module. we want lhs, so pull it out.
-        auto lhs = Types::getRepresentedClass(ctx, thisType).data(ctx)->externalType(ctx);
+        auto rc = Types::getRepresentedClass(ctx, thisType);
+        auto lhs = rc.data(ctx)->externalType(ctx);
         // 1. rhs <: lhs (e.g. rhs = A, lhs = A | B). this is always true.
         // 2. lhs <: rhs (e.g. lhs = A | B, rhs = A). this is true if LHS is A but false if LHS is B, so we don't know
         //    statically which branch to choose.
