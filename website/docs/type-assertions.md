@@ -3,7 +3,7 @@ id: type-assertions
 title: Type Assertions
 ---
 
-There are four ways to assert the types of expressions in Sorbet:
+There are five ways to assert the types of expressions in Sorbet:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
