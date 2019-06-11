@@ -201,8 +201,9 @@ class Index extends React.Component {
               </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and projects. <a href="mailto:sorbet@stripe.com">Email us</a>{' '}
-              if you'd like your logo to appear here.
+              Sorbet is currently used by many companies and projects.{' '}
+              <a href="mailto:sorbet@stripe.com">Email us</a> if you'd like your
+              logo to appear here.
             </p>
           </div>
         </PageSection>
