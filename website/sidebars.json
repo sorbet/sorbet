@@ -20,11 +20,12 @@
     ],
     "Type System": [
       "sigs",
+      "type-annotations",
+      "type-assertions",
       "class-types",
       "nilable-types",
       "union-types",
       "flow-sensitive",
-      "type-assertions",
       "exhaustiveness",
       "tuples",
       "shapes",
@@ -38,7 +39,6 @@
       "self-type",
       "abstract",
       "override-checking",
-      "strict",
       "intersection-types"
     ]
   },
