@@ -1,5 +1,4 @@
 # typed: strict
-T.dynamic_cast(nil, String)
 T.let("foo", String)
 T.assert_type!("foo", String)
 T.cast("foo", String) # error: Useless cast
@@ -18,7 +17,6 @@ T.any(String, Integer, Symbol)
 T.all(String, Integer, Symbol)
 
 
-T.dynamic_cast # error: Not enough arguments provided for method `T.dynamic_cast`. Expected: `2`, got: `0`
 T.let # error: Not enough arguments provided for method `T.let`. Expected: `2`, got: `0`
 T.assert_type! # error: Not enough arguments provided for method `T.assert_type!`. Expected: `2`, got: `0`
 T.cast # error: Not enough arguments provided for method `T.cast`. Expected: `2`, got: `0`

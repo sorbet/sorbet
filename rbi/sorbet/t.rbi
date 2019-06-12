@@ -19,15 +19,6 @@ module T
   sig {params(value: T.untyped).returns(T.untyped)}
   def self.unsafe(value); end
 
-  # Once we get generic methods, it should return T.nilable(<type>)
-  sig do
-    params(
-      obj: T.untyped,
-      type: Class
-    ).returns(T.untyped)
-  end
-  def self.dynamic_cast(obj, type); end
-
   # These are implemented in C++ when they appear in type context; We
   # implement them here in Ruby so they also exist if they are called
   # in value context. Several of these methods additionally have a C++
