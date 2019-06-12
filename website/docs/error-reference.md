@@ -171,7 +171,7 @@ There are two such errors in the above. In the first, `@@class_var` is declared
 outside of the class scope. In the second, `@x` is declared outside of the
 `initialize` method.
 
-For how to fix, see [Strict Mode](strict.md).
+For how to fix, see [Type Annotations](type-annotations.md).
 
 ## 5006
 
@@ -241,7 +241,7 @@ class A
 end
 ```
 
-For how to fix, see [Strict Mode](strict.md).
+For how to fix, see [Type Annotations](type-annotations.md).
 
 ## 5014
 
@@ -281,7 +281,7 @@ The same thing holds for type templates.
 In `# typed: strict` files, Sorbet requires that all constants are annotated
 with a `T.let`.
 
-For how to fix, see [Strict Mode](strict.md).
+For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [6002](#6002), [7017](#7017).
 
@@ -319,7 +319,7 @@ reported in `# typed: strict`).
 In `# typed: strict` files, Sorbet requires that all instance and class
 variables are annotated with a `T.let`.
 
-For how to fix, see [Strict Mode](strict.md).
+For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [5028](#5028), [7017](#7017).
 
