@@ -58,7 +58,7 @@ const siteConfig = {
     {label: 'Docs', doc: 'overview'},
     {label: 'Try', href: 'https://sorbet.run'},
     {label: 'Community', href: '/en/community'},
-    {label: 'GitHub', doc: 'https://github.com/sorbet/sorbet'},
+    {label: 'GitHub', href: 'https://github.com/sorbet/sorbet'},
     {blog: true, label: 'Blog'},
   ],
 
