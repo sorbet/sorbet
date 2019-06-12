@@ -210,62 +210,11 @@ class A
 end
 ```
 
-### `T.cast`
+## Alternatives to `T.unsafe`
 
 `T.unsafe` is maximally unsafe. It forces Sorbet to forget all type information
-statically---sometimes this is more power than we need. For example, sometimes
-we the programmer are aware of an invariant in the code that isn't currently
-expressed in the type system:
-
-```ruby
-extend T::Sig
-
-class A; def foo; end; end
-class B; def bar; end; end
-
-sig {params(label: String, a_or_b: T.any(A, B)).void}
-def foo(label, a_or_b)
-  case label
-  when 'a'
-    a_or_b.foo
-  when 'b'
-    a_or_b.bar
-  end
-end
-```
-
-In this case, we know (through careful test cases / confidence in our production
-monitoring) that every time this method is called with `label = 'a'`, `a_or_b`
-is an instance of `A`, and same for `'b'` / `B`.
-
-Ideally we'd refactor our code to express this invariant in the types. To
-reiterate: the **preferred** solution is to refactor this code. The time spent
-adjusting this code now will make it easier and safer to refactor the code in
-the future. Even still, we don't always have the time _right now_, so let's see
-how we can work around the issue.
-
-We **could** use `T.unsafe` here, but that's a pretty big hammer. Instead, we'll
-use `T.cast` to explicitly tell our invariant to Sorbet:
-
-```ruby
-  case label
-  when 'a'
-    T.cast(a_or_b, A).foo
-  when 'b'
-    T.cast(a_or_b, B).bar
-  end
-```
-
-Sorbet cannot **statically** guarantee that a `T.cast`-enforced invariant will
-succeed in every case, but it will check the invariant **dynamically** on every
-invocation.
-
-`T.cast` is better than `T.unsafe`, because it means that something like
-
-```ruby
-    T.cast(a_or_b, A).bad_method
-```
-
-will still be caught as a missing method statically.
+statically---sometimes this is more power than we need. For the cases where we
+the programmer know of an invariant that isn't currently expressed in the type
+system, [`T.cast`](type-assertions#tcast) is a good middle-ground.
 
 <!-- TODO(jez) Document .soft / .checked once API is stable. -->
