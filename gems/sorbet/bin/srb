@@ -32,13 +32,23 @@ shift
 # /path/to/gems/sorbet-0.0.1/bin/srb
 srb_path="${BASH_SOURCE[0]}"
 
+#!/bin/bash
+f_md5() {
+  if command -v md5sum >/dev/null
+  then
+    md5sum "$1"
+  else
+    md5 -r "$1"
+  fi
+}
+
 typecheck() {
   args=""
-  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet/gem-rbis/"
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet/gem-rbis"
 
   if [ -f Gemfile.lock ]; then
     [ -d "$cache_dir" ] || mkdir "$cache_dir"
-    cache_hash=$(md5sum Gemfile.lock | awk '{ print $1 }')
+    cache_hash=$(f_md5 Gemfile.lock | awk '{ print $1 }')
     cache_file="${cache_dir}/${cache_hash}"
     if [ ! -f "$cache_file" ]; then
       $0 rbi find-gem-rbis > /dev/null
