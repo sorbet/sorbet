@@ -4,3 +4,9 @@ config-file.rb:2: Method `+` does not exist on `Symbol` component of `Symbol(:"s
 Errors: 1
 ------------------------------
 No errors! Great job.
+------------------------------
+No errors! Great job.
+------------------------------
+Option `--no-config` cannot be used inside the config file.
+------------------------------
+No errors! Great job.
