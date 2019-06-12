@@ -3,28 +3,24 @@
 # - our mac machine that has 12 cores that is used to run mac tests, build mac _and_ emscripten release
 # - autoscaling linux cloud that's used for everything else
 
-_agents_:
-- &elastic
-  agents:
-    os: linux
-    queue: elastic
-  plugins:
-    - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
-        image: "darkdimius/sorbet-build-image:latest"
-        workdir: /app
-        init: true
-        propagate-environment: true
-        environment:
-          - "CODECOV_TOKEN"
-        volumes:
-          - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
-
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
   - label: ":linux::cloud: linters.sh"
     command: .buildkite/linters.sh
-    <<: *elastic
+    agents:
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          environment:
+            - "CODECOV_TOKEN"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
   - label: ":mac: test-static-sanitized.sh (master only)"
     command: .buildkite/test-static-sanitized.sh
@@ -34,7 +30,19 @@ steps:
 
   - label: ":linux::cloud: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
-    <<: *elastic
+    agents:
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          environment:
+            - "CODECOV_TOKEN"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
   - wait: ~
 
@@ -42,13 +50,37 @@ steps:
   - label: ":linux::cloud: build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
-    <<: *elastic
+    agents:
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          environment:
+            - "CODECOV_TOKEN"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
 
   - label: ":linux::cloud: build-sorbet-runtime.sh"
     command: .buildkite/build-sorbet-runtime.sh
     artifact_paths: _out_/**/*
-    <<: *elastic
+    agents:
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          environment:
+            - "CODECOV_TOKEN"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
 
   - label: ":mac: build-static-release.sh"
@@ -64,7 +96,19 @@ steps:
   - label: ":linux::cloud: build-static-release.sh"
     command: .buildkite/build-static-release.sh
     artifact_paths: _out_/**/*
-    <<: *elastic
+    agents:
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          environment:
+            - "CODECOV_TOKEN"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
   - wait: ~
 
 # Test Sorbet Gem Phase - Its own phase because it relies on the gem build built
