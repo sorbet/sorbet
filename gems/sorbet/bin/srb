@@ -33,8 +33,7 @@ shift
 srb_path="${BASH_SOURCE[0]}"
 
 compute_md5() {
-  if command -v md5sum >/dev/null
-  then
+  if command -v md5sum > /dev/null; then
     md5sum "$1"
   else
     md5 -r "$1"
