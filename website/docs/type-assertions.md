@@ -25,6 +25,7 @@ T.reveal_type(x) # Revealed type: Integer
 
 y = T.let(10, String) # error: Argument does not have asserted type String
 ```
+
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Ax%20%3D%20T.let(10%2C%20Integer)%0AT.reveal_type(x)%20%23%20Revealed%20type%3A%20Integer%0A%0Ay%20%3D%20T.let(10%2C%20String)%20%23%20error%3A%20Argument%20does%20not%20have%20asserted%20type%20String">
   → View on sorbet.run
 </a>
@@ -94,7 +95,6 @@ invocation.
 ```
 
 will still be caught as a missing method statically.
-
 
 ## `T.must`
 
