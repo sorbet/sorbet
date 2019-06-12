@@ -1,9 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type Assertions · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
-&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
-&lt;/blockquote&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type Assertions · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
-&lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
-&lt;/blockquote&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type Assertions · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;There are four ways to assert the types of expressions in Sorbet:&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type Assertions · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;There are four ways to assert the types of expressions in Sorbet:&lt;/p&gt;
 "/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -68,31 +64,133 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/type-assertions.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Type Assertions</h1></header><article><div><span><blockquote>
-<p>TODO: This page is still a fragment. Contributions welcome!</p>
-</blockquote>
-<p>There are four ways to do type assertions in Sorbet:</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/type-assertions.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Type Assertions</h1></header><article><div><span><p>There are four ways to assert the types of expressions in Sorbet:</p>
 <ul>
 <li><code>T.let(expr, Type)</code></li>
 <li><code>T.cast(expr, Type)</code></li>
 <li><code>T.must(expr)</code></li>
 <li><code>T.assert_type!(expr, Type)</code></li>
 </ul>
+<blockquote>
 <p>There is also <code>T.unsafe</code> which is not a “type assertion” so much as an
 <a href="/docs/troubleshooting#escape-hatches">Escape Hatch</a>.</p>
-<p>At a high level:</p>
-<ul>
-<li><p>A <code>T.let</code> assertion is checked statically <strong>and</strong> at runtime.</p></li>
-<li><p>A <code>T.cast</code> assertion is only checked at runtime. Statically, Sorbet assumes
-this assertion is always true. This can be used to change the result type of
-an expression from the perspective of the static system.</p></li>
-<li><p><code>T.must</code> is specifically for <a href="/docs/nilable-types">Nilable Types</a>. Use it when
-you want to assert that something is not <code>nil</code>.</p></li>
-<li><p><code>T.assert_type!</code> is similar to <code>T.let</code>: it is checked statically <strong>and</strong> at
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="tlet"></a><a href="#tlet" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.let</code></h2>
+<p>A <code>T.let</code> assertion is checked statically <strong>and</strong> at runtime. In the following
+example, the definition of <code>y</code> will raise an error when Sorbet is run, and also
+when the program is run.</p>
+<pre><code class="hljs css language-ruby">x = T.let(<span class="hljs-number">10</span>, Integer)
+T.reveal_type(x) <span class="hljs-comment"># Revealed type: Integer</span>
+
+y = T.let(<span class="hljs-number">10</span>, String) <span class="hljs-comment"># error: Argument does not have asserted type String</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Ax%20%3D%20T.let(10%2C%20Integer)%0AT.reveal_type(x)%20%23%20Revealed%20type%3A%20Integer%0A%0Ay%20%3D%20T.let(10%2C%20String)%20%23%20error%3A%20Argument%20does%20not%20have%20asserted%20type%20String">
+→ View on sorbet.run
+</a></p>
+<p>At runtime, a <code>TypeError</code> will be raised when the assignment to <code>y</code> is
+evaluated:</p>
+<pre><code class="hljs css language-cli">$ ruby test.rb
+&lt;...&gt;/lib/types/<span class="hljs-keyword">private</span>/casts.rb:<span class="hljs-number">15</span>:in `cast': <span class="hljs-type">T</span>.let: <span class="hljs-type">Expected</span> <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">String</span>, <span class="hljs-title">got</span> <span class="hljs-title">type</span> <span class="hljs-title">Integer</span> <span class="hljs-keyword">with</span> <span class="hljs-title">value</span> 10 (<span class="hljs-params"><span class="hljs-type">TypeError</span></span>)</span>
+<span class="hljs-type">Caller</span>: test.rb:<span class="hljs-number">8</span>
+    from &lt;...&gt;/lib/types/_types.rb:<span class="hljs-number">138</span>:in `let'
+    from test.rb:<span class="hljs-number">8</span>:in `&lt;main&gt;'
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="tcast"></a><a href="#tcast" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.cast</code></h2>
+<p>Sometimes we the programmer are aware of an invariant in the code that isn’t
+currently expressible in the Sorbet type system:</p>
+<pre><code class="hljs css language-ruby">extend T::Sig
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>; <span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">label:</span> String, <span class="hljs-symbol">a_or_b:</span> T.any(A, B)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(label, a_or_b)</span></span>
+  <span class="hljs-keyword">case</span> label
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'a'</span>
+    a_or_b.foo
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'b'</span>
+    a_or_b.bar
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this case, we know (through careful test cases / confidence in our production
+monitoring) that every time this method is called with <code>label = 'a'</code>, <code>a_or_b</code>
+is an instance of <code>A</code>, and same for <code>'b'</code> / <code>B</code>.</p>
+<p>Ideally we’d refactor the code to express this invariant in the types. To
+reiterate: the <strong>preferred</strong> solution is to refactor this code. The time spent
+adjusting this code now will make it easier and safer to refactor the code in
+the future. Even still, we don’t always have the time <em>right now</em>, so let’s see
+how we can work around the issue.</p>
+<p>We can use <code>T.cast</code> to explicitly tell our invariant to Sorbet:</p>
+<pre><code class="hljs css language-ruby">  <span class="hljs-keyword">case</span> label
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'a'</span>
+    T.cast(a_or_b, A).foo
+  <span class="hljs-keyword">when</span> <span class="hljs-string">'b'</span>
+    T.cast(a_or_b, B).bar
+  <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sorbet cannot <strong>statically</strong> guarantee that a <code>T.cast</code>-enforced invariant will
+succeed in every case, but it will check the invariant <strong>dynamically</strong> on every
+invocation.</p>
+<p><code>T.cast</code> is better than <code>T.unsafe</code>, because it means that something like</p>
+<pre><code class="hljs css language-ruby">    T.cast(a_or_b, A).bad_method
+</code></pre>
+<p>will still be caught as a missing method statically.</p>
+<h2><a class="anchor" aria-hidden="true" id="tmust"></a><a href="#tmust" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.must</code></h2>
+<p><code>T.must</code> is for asserting that a value of a <a href="/docs/nilable-types">nilable type</a> is
+not <code>nil</code>. <code>T.must</code> is similar to <code>T.cast</code> in that it will not necessarily
+trigger an error when <code>srb tc</code> is run, but can trigger an error during runtime.
+The following example illustrates two cases:</p>
+<ol>
+<li>a use of <code>T.must</code> with a value that Sorbet is able to determine statically is
+<code>nil</code>, that raises an error indicating that the subsequent statements are
+unreachable;</li>
+<li>a use of <code>T.must</code> with a computed <code>nil</code> value that Sorbet is not able to
+detect statically, which raises an error at runtime.</li>
+</ol>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+
+  sig {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
+    x = T.let(<span class="hljs-literal">nil</span>, T.nilable(String))
+    y = T.must(<span class="hljs-literal">nil</span>)
+    puts y <span class="hljs-comment"># error: This code is unreachable</span>
+  <span class="hljs-keyword">end</span>
+
+  sig {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
+    vals = T.let([], T::Array[Integer])
+    x = vals.find {<span class="hljs-params">|a|</span> a &gt; <span class="hljs-number">0</span>}
+    T.reveal_type(x) <span class="hljs-comment"># Revealed type: T.nilable(Integer)</span>
+    y = T.must(x)
+    puts y <span class="hljs-comment"># no static error</span>
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20foo%0A%20%20%20%20x%20%3D%20T.let(nil%2C%20T.nilable(String))%0A%20%20%20%20y%20%3D%20T.must(nil)%0A%20%20%20%20puts%20y%20%23%20error%3A%20This%20code%20is%20unreachable%0A%20%20end%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%0A%20%20%20%20vals%20%3D%20T.let(%5B%5D%2C%20T%3A%3AArray%5BInteger%5D)%0A%20%20%20%20x%20%3D%20vals.find%20%7B%7Ca%7C%20a%20%3E%200%7D%0A%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.nilable(Integer)%0A%20%20%20%20y%20%3D%20T.must(x)%0A%20%20%20%20puts%20y%20%23%20no%20static%20error%0A%20%20end%0A%0Aend">
+→ View on sorbet.run
+</a></p>
+<h2><a class="anchor" aria-hidden="true" id="tassert_type"></a><a href="#tassert_type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.assert_type!</code></h2>
+<p><code>T.assert_type!</code> is similar to <code>T.let</code>: it is checked statically <strong>and</strong> at
 runtime. It has the additional restriction that it will <strong>always</strong> fail
-statically if given something that’s <a href="/docs/untyped"><code>T.untyped</code></a>.</p></li>
-</ul>
-<p>Some other ways to think about it:</p>
+statically if given something that’s <a href="/docs/untyped"><code>T.untyped</code></a>. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">x:</span> T.untyped).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+    T.assert_type!(x, String) <span class="hljs-comment"># error here</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.untyped).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20T.assert_type!(x%2C%20String)%20%23%20error%20here%0A%20%20end%0Aend">
+→ View on sorbet.run
+</a></p>
+<h2><a class="anchor" aria-hidden="true" id="comparison-of-type-assertions"></a><a href="#comparison-of-type-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Comparison of type assertions</h2>
+<p>Here are some other ways to think of the behavior of the individual type
+assertions:</p>
 <ul>
 <li><p><code>T.let</code> vs <code>T.cast</code></p>
 <pre><code class="hljs css language-ruby">T.cast(expr, Type)
@@ -113,7 +211,7 @@ statically if given something that’s <a href="/docs/untyped"><code>T.untyped</
 <pre><code class="hljs css language-ruby">T.must(nil_or_string)
 </code></pre></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/flow-sensitive"><span class="arrow-prev">← </span><span>Flow Sensitivity</span></a><a class="docs-next button" href="/docs/exhaustiveness"><span>Exhaustiveness Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/flow-sensitive"><span class="arrow-prev">← </span><span>Flow Sensitivity</span></a><a class="docs-next button" href="/docs/exhaustiveness"><span>Exhaustiveness Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tlet"><code>T.let</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#tmust"><code>T.must</code></a></li><li><a href="#tassert_type"><code>T.assert_type!</code></a></li><li><a href="#comparison-of-type-assertions">Comparison of type assertions</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
