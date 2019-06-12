@@ -75,6 +75,7 @@ require_relative 'types/private/abstract/hooks'
 require_relative 'types/private/casts'
 require_relative 'types/private/methods/decl_builder'
 require_relative 'types/private/methods/signature'
+require_relative 'types/private/final'
 require_relative 'types/utils'
 require_relative 'types/boolean'
 
