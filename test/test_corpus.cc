@@ -487,14 +487,6 @@ int countNonTestMessages(const vector<unique_ptr<LSPMessage>> &msgs) {
     return count;
 }
 
-int compareSymbols(const DocumentSymbol &a, const DocumentSymbol &b) {
-    auto cmp = rangeComparison(*a.range, *b.range);
-    if (cmp == 0) {
-        return a.name.compare(b.name);
-    }
-    return cmp;
-}
-
 string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>> &symbolResult) {
     if (get_if<JSONNullObject>(&symbolResult)) {
         return "null";
