@@ -7,7 +7,7 @@ class BigFoo; extend T::Sig
     # ^ hover: Integer(3)
     end
   end
-                
+
   class LittleFoo2; extend T::Sig
     sig {returns(Integer)}
     def bar
@@ -19,7 +19,7 @@ class BigFoo; extend T::Sig
       # ^ hover: sig {params(num: Integer).returns(Integer)}
     end
   end
-                        
+
   sig {generated.params(num1: Integer, num2: String).returns(Integer)}
   def self.bar(num1, num2)
     4 + num1 + num2.to_i
@@ -33,15 +33,25 @@ class BigFoo; extend T::Sig
   def baz(arg)
     arg + self.class.bar(1, "2").to_s
   end
-          
+
   sig {params(num: Integer).returns(String)}
-  def quux(num)
+  private def quux(num)
+            # ^ hover: private sig {params(num: Integer).returns(String)}
     if num < 10
       s = 1
     else
       s = "1"
     end
     s.to_s
+  end
+
+  sig {void}
+  protected def protected_fun; end;
+              # ^ hover: protected sig {void}
+
+  sig { returns([Integer, String]) }
+  def self.anotherFunc()
+    [1, "hello"]
   end
 end
 
@@ -50,4 +60,6 @@ def main
         # ^ hover: sig {generated.params(num1: Integer, num2: String).returns(Integer)}
   BigFoo.baz
         # ^ hover: sig {generated.void}
+  l = BigFoo.anotherFunc
+# ^ hover: [Integer, String] (2-tuple)
 end
