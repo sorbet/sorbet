@@ -3,13 +3,15 @@ id: type-assertions
 title: Type Assertions
 ---
 
-There are five ways to assert the types of expressions in Sorbet:
+There are four ways to assert the types of expressions in Sorbet:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
 - `T.must(expr)`
 - `T.assert_type!(expr, Type)`
-- `T.unsafe(expr)`
+
+> There is also `T.unsafe` which is not a "type assertion" so much as an
+> [Escape Hatch](troubleshooting.md#escape-hatches).
 
 ## `T.let`
 
@@ -23,10 +25,20 @@ T.reveal_type(x) # Revealed type: Integer
 
 y = T.let(10, String) # error: Argument does not have asserted type String
 ```
-
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Ax%20%3D%20T.let(10%2C%20Integer)%0AT.reveal_type(x)%20%23%20Revealed%20type%3A%20Integer%0A%0Ay%20%3D%20T.let(10%2C%20String)%20%23%20error%3A%20Argument%20does%20not%20have%20asserted%20type%20String">
   → View on sorbet.run
 </a>
+
+At runtime, a `TypeError` will be raised when the assignment to `y` is
+evaluated:
+
+```cli
+$ ruby test.rb
+<...>/lib/types/private/casts.rb:15:in `cast': T.let: Expected type String, got type Integer with value 10 (TypeError)
+Caller: test.rb:8
+	from <...>/lib/types/_types.rb:138:in `let'
+	from test.rb:8:in `<main>'
+```
 
 ## `T.cast`
 
@@ -48,11 +60,21 @@ T.reveal_type(y) # Revealed type: String
   → View on sorbet.run
 </a>
 
+The runtime error that this example raises will look very similar to the one in
+the above example for `T.let`:
+
+```cli
+<...>/lib/types/private/casts.rb:15:in `cast': T.cast: Expected type String, got type Integer with value 10 (TypeError)
+Caller: test.rb:7
+	from <...>/lib/types/_types.rb:121:in `cast'
+	from test.rb:7:in `<main>'
+```
+
 ## `T.must`
 
 `T.must` is for asserting that a value of a [nilable type](nilable-types.md) is
 not `nil`. `T.must` is similar to `T.cast` in that it will not necessarily
-trigger an error when Sorbet is run, but can trigger an error during runtime.
+trigger an error when `srb tc` is run, but can trigger an error during runtime.
 The following example illustrates two cases:
 
 1. a use of `T.must` with a value that Sorbet is able to determine statically is
