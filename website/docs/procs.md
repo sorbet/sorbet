@@ -20,7 +20,7 @@ demand.
 Types of procs are not checked at all at runtime (the same way methods are), and
 serve only as hints to `srb` statically (and for documentation).
 
-## Annotating Block Parameters With Yield
+## Annotating block parameters with yield
 
 Ruby's `yield` keyword can invoke a block without requiring a block argument in
 the parameter list. Even so, it's a good idea when using Sorbet to name those
@@ -55,7 +55,7 @@ def call_twice(&blk)
 end
 ```
 
-## Modifying The Self Type
+## Modifying the self type
 
 While blocks are usually evaluated in the context in which they appear, it's
 possible to use the methods `instance_exec` and `instance_eval` to evaluate them

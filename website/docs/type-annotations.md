@@ -31,7 +31,7 @@ definition. Method type annotations are
 annotations are usually provided using the `T.let`
 [type assertion](type-assertions.md).
 
-## Annotating Constants
+## Annotating constants
 
 Sorbet does not, by default, infer the types of constants, but you can specify
 them using `T.let`:
@@ -40,7 +40,7 @@ them using `T.let`:
 NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String])
 ```
 
-## Declaring Class and Instance Variables
+## Declaring class and instance variables
 
 To declare the static type of an instance variable, we can use `T.let` in a
 class's constructor:
