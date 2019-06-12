@@ -20,15 +20,57 @@ demand.
 Types of procs are not checked at all at runtime (the same way methods are), and
 serve only as hints to `srb` statically (and for documentation).
 
-Question: what do I put in my `params` if I'm using `yield` instead of
-`blk.call`?
+## Annotating Block Parameters With Yield
 
-Answer: just add a new block parameter to your method definition. Ruby will
-automatically `yield` to the thing named by the `blk` parameter.
+Ruby's `yield` keyword can invoke a block without requiring a block argument in
+the parameter list. Even so, it's a good idea when using Sorbet to name those
+block parameters anyway, because without a local name there's no way to give the
+block parameter a static type annotation. In fact, at the typed level
+`# typed: strict`, Sorbet will require that all block parameters have names
+_even if the methods use_ `yield`. For example, Sorbet will **reject** the
+following code snippet because the method uses `yield` but has not named its
+block parameter, which in turn means that it lacks a declared type in the `sig`:
 
 ```ruby
-T.proc.bind(BindType).params(...).returns(...)
+# typed: strict
+sig { void }
+def call_twice  # error: Method call_twice uses yield but does not mention a block parameter
+  yield
+  yield
+end
 ```
 
-Use this when the block of the signature will be `instance_exec`'d or
-`instance_eval`'d in a context other than the method definition's `self`.
+This error can be fixed without modifying the method body to use `block.call`:
+It's possible to give the method a named block parameter like `&blk`, and
+`yield` will still work exactly as it did, invoking the block regardless of
+whether or not it was named. Once the block parameter has a name, it's in turn
+possible to associate that name with a type:
+
+```ruby
+# typed: strict
+sig { params(blk: T.proc.void).void }
+def call_twice(&blk)
+  yield
+  yield
+end
+```
+
+## Modifying The Self Type
+
+While blocks are usually evaluated in the context in which they appear, it's
+possible to use the methods `instance_exec` and `instance_eval` to evaluate them
+in some other specified context, which changes the meaning of `self` in the body
+of that block. To convey this to Sorbet, we add a `.bind(...)` clause on the
+`T.proc` type that indicates the context in which the method will be invoked:
+
+```ruby
+# typed: true
+extend T::Sig
+
+sig { params(blk: T.proc.bind(String).returns(String)).returns(String) }
+def foo(&blk)
+  "Hello".instance_eval(&blk)
+end
+
+puts foo { self.upcase }
+```
