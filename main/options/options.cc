@@ -303,6 +303,7 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
                                     "{always,never,[auto]}");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
+    options.add_options("advanced")("no-config", "Do not load the content of the `sorbet/config` file");
     options.add_options("advanced")("disable-watchman",
                                     "When in language-server-protocol mode, disable file watching via Watchman");
     options.add_options("advanced")("watchman-path",

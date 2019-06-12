@@ -36,13 +36,21 @@ cxxopts::ParseResult FileFlatMapper::parseConfig() {
         stringArgs.emplace_back(argv[0]);
     }
 
-    // Look for .sorbet/config before all other args, so that the CLI args can overwrite the config file
-    auto configFilename = "sorbet/config";
-    if (FileOps::exists(configFilename)) {
-        // TODO(jez) Recurse upwards to find file in parent directory
-        readArgsFromFile(configFilename);
+    auto tmpArgc = argc;
+    auto tmpArgv = argv;
+    auto tmpOpts = options.parse(tmpArgc, tmpArgv);
+    auto noConfigCount = tmpOpts.count("no-config");
+
+    // Look for `sorbet/config` before all other args, only if `--no-config` was not specified
+    if (noConfigCount == 0) {
+        auto configFilename = "sorbet/config";
+        if (FileOps::exists(configFilename)) {
+            // TODO(jez) Recurse upwards to find file in parent directory
+            readArgsFromFile(configFilename);
+        }
     }
 
+    // Override `sorbet/config` options by CLI and config files ones
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '@') {
             readArgsFromFile(argv[i] + 1);
@@ -50,6 +58,8 @@ cxxopts::ParseResult FileFlatMapper::parseConfig() {
             stringArgs.emplace_back(argv[i]);
         }
     }
+
+    // Recompose the `argv` array from what we parsed previously
     args.reserve(stringArgs.size());
     for (auto &arg : stringArgs) {
         args.emplace_back(const_cast<char *>(arg.c_str()));
@@ -57,7 +67,14 @@ cxxopts::ParseResult FileFlatMapper::parseConfig() {
     argc = args.size();
     argv = args.data();
 
-    return options.parse(argc, argv);
+    // Parse actual options
+    auto opts = options.parse(argc, argv);
+    if (opts.count("no-config") > noConfigCount) {
+        logger->error("Option `--no-config` cannot be used inside the config file.");
+        throw EarlyReturnWithCode(1);
+    }
+
+    return opts;
 }
 
 FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger, cxxopts::Options options)
