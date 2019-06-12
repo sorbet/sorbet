@@ -112,11 +112,9 @@ Sometimes runtime checks don't make sense. There are two main reasons why
     have to make the compromise that adopting Sorbet doesn't affect the runtime
     behavior of the code.
 
-The solution for (1) is to use the
-[`.soft` or `.checked`](troubleshooting.md#soft-checked) escape hatch when
-annotating the method. See those docs for more information.
+<!-- TODO(jez) Document .soft / .checked once API is stable. -->
 
-For (2), it's possible to change the runtime behavior by defining callbacks. See
+It's possible to change the runtime behavior by defining callbacks. See
 [Runtime Configuration](tconfiguration.md) for more about what callbacks are
 available and how to register them.
 

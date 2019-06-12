@@ -70,7 +70,6 @@ module T::Props::PrettyPrintable
     sig do
       params(instance: T::Props::PrettyPrintable, prop: Symbol, multiline: T::Boolean, indent: String)
       .returns(String)
-      .checked(:never)
     end
     private def inspect_prop_value(instance, prop, multiline:, indent:)
       val = T.unsafe(self).get(instance, prop)
