@@ -1854,6 +1854,32 @@ public:
     }
 } enumerable_to_h;
 
+// statically determine things like `Integer === 3` to be true
+class Module_tripleEq : public IntrinsicMethod {
+public:
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs");
+        auto rhs = args.args[0]->type;
+        if (rhs->isUntyped()) {
+            return rhs;
+        }
+        auto rc = Types::getRepresentedClass(ctx, thisType);
+        // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
+        if (rc == core::Symbols::noSymbol()) {
+            return Types::Boolean();
+        }
+        auto lhs = rc.data(ctx)->externalType(ctx);
+        ENFORCE(!lhs->isUntyped(), "lhs of Module.=== must be typed");
+        if (Types::isSubType(ctx, rhs, lhs)) {
+            return Types::trueClass();
+        }
+        if (Types::isSubType(ctx, lhs, rhs)) {
+            return Types::Boolean();
+        }
+        return Types::falseClass();
+    }
+} Module_tripleEq;
+
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -1908,6 +1934,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
 
     {Symbols::Enumerable(), false, Names::to_h(), &enumerable_to_h},
+
+    {Symbols::Module(), false, Names::tripleEq(), &Module_tripleEq},
 };
 
 } // namespace sorbet::core
