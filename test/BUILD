@@ -34,6 +34,24 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "print_document_symbols",
+    testonly = 1,
+    srcs = [
+        "print_document_symbols.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//main/lsp",
+        "//payload:light",
+        "//test/helpers",
+    ],
+)
+
 cc_test(
     name = "hello-test",
     size = "small",

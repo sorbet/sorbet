@@ -104,10 +104,10 @@ public:
     }
 };
 
-UnorderedSet<string> knownPasses = {
+UnorderedSet<string> knownExpectations = {
     "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
     "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
-    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen"};
+    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen",      "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -136,8 +136,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     SCOPED_TRACE(inputPath);
 
     for (auto &exp : test.expectations) {
-        auto it = knownPasses.find(exp.first);
-        if (it == knownPasses.end()) {
+        auto it = knownExpectations.find(exp.first);
+        if (it == knownExpectations.end()) {
             ADD_FAILURE() << "Unknown pass: " << exp.first;
         }
     }
@@ -487,6 +487,16 @@ int countNonTestMessages(const vector<unique_ptr<LSPMessage>> &msgs) {
     return count;
 }
 
+string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>> &symbolResult) {
+    if (get_if<JSONNullObject>(&symbolResult)) {
+        return "null";
+    } else {
+        auto &symbols = get<vector<unique_ptr<DocumentSymbol>>>(symbolResult);
+        return fmt::format("{}", fmt::map_join(symbols.begin(), symbols.end(), ", ",
+                                               [](const auto &sym) -> string { return sym->toJSON(); }));
+    }
+}
+
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -540,6 +550,38 @@ TEST_P(LSPTest, All) {
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
             if (i == 2) {
                 ADD_FAILURE() << "Note: To disable fast path tests, add `# disable-fast-path: true` to the file.";
+            }
+        }
+    }
+
+    // Document symbols
+    auto docSymbolExpectation = test.expectations.find("document-symbols");
+    if (docSymbolExpectation != test.expectations.end()) {
+        ASSERT_EQ(filenames.size(), 1) << "document-symbols only works with tests that have a single file.";
+        auto params =
+            make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]));
+        auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
+        auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
+        EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a documentSymbols request.";
+        if (responses.size() == 1) {
+            auto &msg = responses.at(0);
+            EXPECT_TRUE(msg->isResponse());
+            if (msg->isResponse()) {
+                auto &response = msg->asResponse();
+                ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
+                auto &receivedSymbolResponse =
+                    get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
+
+                auto expectedSymbolsPath = test.folder + docSymbolExpectation->second;
+                auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
+                auto &expectedResp = expected->asResponse();
+                auto &expectedSymbolResponse =
+                    get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
+
+                // Simple string comparison, just like other *.exp files.
+                EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse),
+                          documentSymbolsToString(expectedSymbolResponse))
+                    << "Mismatch on: " << expectedSymbolsPath;
             }
         }
     }
