@@ -49,5 +49,10 @@
       "talks/strange-loop-2018",
       "talks/ruby-kaigi-2019"
     ]
+  },
+  "community": {
+    "Community": [
+      "community/community",
+    ]
   }
 }
