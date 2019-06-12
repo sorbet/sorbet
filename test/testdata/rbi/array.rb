@@ -15,6 +15,9 @@ T.assert_type!([1].sum(1.0) {|t| t.to_f}, Float)
 # this should raise an error but does not:
 T.assert_type!(T::Array[Float].new.sum('a') {|t| 1.0}, T.any(Float, String))
 
+# zip zips up nils sometimes
+T.assert_type!([1,2].zip([1]), T::Array[[T.nilable(Integer), T.nilable(Integer)]]
+
 [1, 2] - [1, nil]
 
 # errors
