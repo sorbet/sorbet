@@ -11,9 +11,6 @@ There are five ways to assert the types of expressions in Sorbet:
 - `T.assert_type!(expr, Type)`
 - `T.unsafe(expr)`
 
-> `T.unsafe` is a cast to `T.untyped`, so it's more of an
-> [Escape Hatch](troubleshooting.md#escape-hatches).
-
 ## `T.let`
 
 A `T.let` assertion is checked statically **and** at runtime. In the following
@@ -26,6 +23,7 @@ T.reveal_type(x) # Revealed type: Integer
 
 y = T.let(10, String) # error: Argument does not have asserted type String
 ```
+
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Ax%20%3D%20T.let(10%2C%20Integer)%0AT.reveal_type(x)%20%23%20Revealed%20type%3A%20Integer%0A%0Ay%20%3D%20T.let(10%2C%20String)%20%23%20error%3A%20Argument%20does%20not%20have%20asserted%20type%20String">
   → View on sorbet.run
 </a>
@@ -45,6 +43,7 @@ T.reveal_type(x) # Revealed type: Integer
 y = T.cast(10, String) # OK statically, but will raise an error at runtime!
 T.reveal_type(y) # Revealed type: String
 ```
+
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Ax%20%3D%20T.cast(10%2C%20Integer)%0AT.reveal_type(x)%20%23%20Revealed%20type%3A%20Integer%0A%0Ay%20%3D%20T.cast(10%2C%20String)%20%23%20OK%20statically%2C%20but%20will%20raise%20an%20error%20at%20runtime!%0AT.reveal_type(y)%20%23%20Revealed%20type%3A%20String">
   → View on sorbet.run
 </a>
@@ -56,8 +55,8 @@ not `nil`. `T.must` is similar to `T.cast` in that it will not necessarily
 trigger an error when Sorbet is run, but can trigger an error during runtime.
 The following example illustrates two cases:
 
-1. a use of `T.must` with a value that Sorbet is able to determine statically
-   is `nil`, that raises an error indicating that the subsequent statements are
+1. a use of `T.must` with a value that Sorbet is able to determine statically is
+   `nil`, that raises an error indicating that the subsequent statements are
    unreachable;
 2. a use of `T.must` with a computed `nil` value that Sorbet is not able to
    detect statically, which raises an error at runtime.
@@ -84,6 +83,7 @@ class A
 
 end
 ```
+
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20foo%0A%20%20%20%20x%20%3D%20T.let(nil%2C%20T.nilable(String))%0A%20%20%20%20y%20%3D%20T.must(nil)%0A%20%20%20%20puts%20y%20%23%20error%3A%20This%20code%20is%20unreachable%0A%20%20end%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%0A%20%20%20%20vals%20%3D%20T.let(%5B%5D%2C%20T%3A%3AArray%5BInteger%5D)%0A%20%20%20%20x%20%3D%20vals.find%20%7B%7Ca%7C%20a%20%3E%200%7D%0A%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.nilable(Integer)%0A%20%20%20%20y%20%3D%20T.must(x)%0A%20%20%20%20puts%20y%20%23%20no%20static%20error%0A%20%20end%0A%0Aend">
   → View on sorbet.run
 </a>
@@ -104,13 +104,22 @@ class A
   end
 end
 ```
+
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.untyped).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20T.assert_type!(x%2C%20String)%20%23%20error%20here%0A%20%20end%0Aend">
   → View on sorbet.run
 </a>
 
+## `T.unsafe`
+
+`T.unsafe` exists as an [escape hatch](troubleshooting.md#escape-hatches) for
+cases where the Sorbet static type system is not able to validate program
+behavior. Uses of `missing_method` would fall into this category, as Sorbet does
+not attempt to build a model of its behavior.
+
 ## Comparison of type assertions
 
-Some other ways to think about it:
+Here are some other ways to think of the behavior of the individual type
+assertions:
 
 - `T.let` vs `T.cast`
 
