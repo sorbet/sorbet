@@ -135,12 +135,6 @@ module T
   extend T::Sig
   sig {params(value: T.untyped).returns(T.untyped)}
   def self.unsafe(value); end
-  sig do
-    params(
-      obj: T.untyped,
-      type: Class
-    ).returns(T.untyped)
-  end
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.let(value, type, checked: true); end
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
