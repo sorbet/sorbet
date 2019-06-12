@@ -3,8 +3,6 @@ id: untyped
 title: T.untyped
 ---
 
-> TODO: This page is still a fragment. Contributions welcome!
-
 The type `T.untyped` represents a type that Sorbet has no specific knowledge
 about. Instance variables and constants that have not been given a static type
 with `T.let` or another [type assertion](type-assertions.md) are assumed to have
