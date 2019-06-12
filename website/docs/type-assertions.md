@@ -42,33 +42,59 @@ Caller: test.rb:8
 
 ## `T.cast`
 
-A `T.cast` assertion is only checked at runtime. Statically, Sorbet assumes this
-assertion is always true. This can be used to change the result type of an
-expression from the perspective of the static system. In the example below,
-Sorbet will not report any problems with the definition of `y`, while an error
-will be raised at runtime:
+Sometimes we the programmer are aware of an invariant in the code that isn't
+currently expressible in the Sorbet type system:
 
 ```ruby
-x = T.cast(10, Integer)
-T.reveal_type(x) # Revealed type: Integer
+extend T::Sig
 
-y = T.cast(10, String) # OK statically, but will raise an error at runtime!
-T.reveal_type(y) # Revealed type: String
+class A; def foo; end; end
+class B; def bar; end; end
+
+sig {params(label: String, a_or_b: T.any(A, B)).void}
+def foo(label, a_or_b)
+  case label
+  when 'a'
+    a_or_b.foo
+  when 'b'
+    a_or_b.bar
+  end
+end
 ```
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0Ax%20%3D%20T.cast(10%2C%20Integer)%0AT.reveal_type(x)%20%23%20Revealed%20type%3A%20Integer%0A%0Ay%20%3D%20T.cast(10%2C%20String)%20%23%20OK%20statically%2C%20but%20will%20raise%20an%20error%20at%20runtime!%0AT.reveal_type(y)%20%23%20Revealed%20type%3A%20String">
-  → View on sorbet.run
-</a>
+In this case, we know (through careful test cases / confidence in our production
+monitoring) that every time this method is called with `label = 'a'`, `a_or_b`
+is an instance of `A`, and same for `'b'` / `B`.
 
-The runtime error that this example raises will look very similar to the one in
-the above example for `T.let`:
+Ideally we'd refactor the code to express this invariant in the types. To
+reiterate: the **preferred** solution is to refactor this code. The time spent
+adjusting this code now will make it easier and safer to refactor the code in
+the future. Even still, we don't always have the time _right now_, so let's see
+how we can work around the issue.
 
-```cli
-<...>/lib/types/private/casts.rb:15:in `cast': T.cast: Expected type String, got type Integer with value 10 (TypeError)
-Caller: test.rb:7
-	from <...>/lib/types/_types.rb:121:in `cast'
-	from test.rb:7:in `<main>'
+We can use `T.cast` to explicitly tell our invariant to Sorbet:
+
+```ruby
+  case label
+  when 'a'
+    T.cast(a_or_b, A).foo
+  when 'b'
+    T.cast(a_or_b, B).bar
+  end
 ```
+
+Sorbet cannot **statically** guarantee that a `T.cast`-enforced invariant will
+succeed in every case, but it will check the invariant **dynamically** on every
+invocation.
+
+`T.cast` is better than `T.unsafe`, because it means that something like
+
+```ruby
+    T.cast(a_or_b, A).bad_method
+```
+
+will still be caught as a missing method statically.
+
 
 ## `T.must`
 
@@ -130,13 +156,6 @@ end
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.untyped).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20T.assert_type!(x%2C%20String)%20%23%20error%20here%0A%20%20end%0Aend">
   → View on sorbet.run
 </a>
-
-## `T.unsafe`
-
-`T.unsafe` exists as an [escape hatch](troubleshooting.md#escape-hatches) for
-cases where the Sorbet static type system is not able to validate program
-behavior. Uses of `missing_method` would fall into this category, as Sorbet does
-not attempt to build a model of its behavior.
 
 ## Comparison of type assertions
 
