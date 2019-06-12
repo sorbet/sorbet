@@ -160,7 +160,7 @@ module Kernel
     )
     .returns(Numeric)
   end
-  def srand(number); end
+  def srand(number=T.unsafe(nil)); end
 
   sig do
     params(
