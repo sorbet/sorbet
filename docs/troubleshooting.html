@@ -269,50 +269,8 @@ invocation.</p>
 <pre><code class="hljs css language-ruby">    T.cast(a_or_b, A).bad_method
 </code></pre>
 <p>will still be caught as a missing method statically.</p>
-<h3><a class="anchor" aria-hidden="true" id="soft-checked"></a><a href="#soft-checked" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>.soft()</code> &amp; <code>.checked()</code></h3>
-<p><code>T.unsafe</code> and <code>T.cast</code> let us opt out of static checks. These next constructs
-let us opt out of runtime checks. We might want to opt out of runtime checks
-because…</p>
-<ul>
-<li>we’ve measured that calling our method is performance sensitive</li>
-<li>we’re rolling out types to previously-untyped code, and want to make sure our
-types are correct</li>
-</ul>
-<p>To opt out of runtime checks, we have three options, all of which we’ll add to
-the <code>sig</code> of the specific method we’d like to opt out of:</p>
-<ul>
-<li><code>.soft(notify: ...)</code></li>
-<li><code>.checked(:tests)</code></li>
-<li><code>.checked(:never)</code></li>
-</ul>
-<p>From the static system’s perspective, adding any of these to a sig will have no
-effect. In the runtime, the behavior of these three differs depending on whether
-we’re in tests or in production:</p>
-<table>
-<thead>
-<tr><th>If types don’t match, using ↓ in → …</th><th>Tests</th><th>Production</th></tr>
-</thead>
-<tbody>
-<tr><td><em>none of the below</em></td><td>will raise</td><td>will raise</td></tr>
-<tr><td><code>.soft(notify: ...)</code></td><td>will raise</td><td>soft asserts</td></tr>
-<tr><td><code>.checked(:tests)</code></td><td>will raise</td><td>skips validation</td></tr>
-<tr><td><code>.checked(:never)</code></td><td>skips validation</td><td>skips validation</td></tr>
-</tbody>
-</table>
-<p>To recap:</p>
-<ul>
-<li><p>By default, calling a method or returning a result that doesn’t match the sig
-will <strong>raise</strong> in both tests and prod.</p></li>
-<li><p><code>.soft()</code> works the same as all soft assertions (raise in tests, soft assert
-in prod)</p></li>
-<li><p><code>.checked(:tests)</code> is preferred for methods which we’ve measured to be
-performance sensitive. They’ll have no effect on production from the runtime
-perspective, but will still be checked in tests.</p></li>
-<li><p><code>.checked(:never)</code> is a hammer. It silences all validation in both tests and
-production. Use this with caution!! Without <strong>any</strong> runtime validation, Sorbet
-cannot warn when interoperating with untyped code.</p></li>
-</ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tconfiguration"><span class="arrow-prev">← </span><span>Runtime Configuration</span></a><a class="docs-next button" href="/docs/faq"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#validating-our-assumptions">Validating our assumptions</a><ul class="toc-headings"><li><a href="#treveal_type"><code>T.reveal_type</code></a></li><li><a href="#sorbetrun">sorbet.run</a></li><li><a href="#run-the-code">Run the code</a></li><li><a href="#rbi-files-missing-methods"><code>*.rbi</code> files &amp; missing methods</a></li><li><a href="#help-with-common-errors">Help with common errors</a></li></ul></li><li><a href="#escape-hatches">Escape Hatches</a><ul class="toc-headings"><li><a href="#tunsafe"><code>T.unsafe</code></a></li><li><a href="#tunsafeself"><code>T.unsafe(self)</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#soft-checked"><code>.soft()</code> &amp; <code>.checked()</code></a></li></ul></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<!-- TODO(jez) Document .soft / .checked once API is stable. -->
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tconfiguration"><span class="arrow-prev">← </span><span>Runtime Configuration</span></a><a class="docs-next button" href="/docs/faq"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#validating-our-assumptions">Validating our assumptions</a><ul class="toc-headings"><li><a href="#treveal_type"><code>T.reveal_type</code></a></li><li><a href="#sorbetrun">sorbet.run</a></li><li><a href="#run-the-code">Run the code</a></li><li><a href="#rbi-files-missing-methods"><code>*.rbi</code> files &amp; missing methods</a></li><li><a href="#help-with-common-errors">Help with common errors</a></li></ul></li><li><a href="#escape-hatches">Escape Hatches</a><ul class="toc-headings"><li><a href="#tunsafe"><code>T.unsafe</code></a></li><li><a href="#tunsafeself"><code>T.unsafe(self)</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li></ul></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
