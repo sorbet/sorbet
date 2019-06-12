@@ -141,7 +141,6 @@ module T
       type: Class
     ).returns(T.untyped)
   end
-  def self.dynamic_cast(obj, type); end
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.let(value, type, checked: true); end
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}

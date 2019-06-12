@@ -113,8 +113,6 @@ module T
   # exception at runtime if the value doesn't match the type.
   #
   # Compared to `T.let`, `T.cast` is _trusted_ by static system.
-  #
-  # Does not support unwrapping T::InterfaceWrapper; for that, use dynamic_cast.
   def self.cast(value, type, checked: true)
     return value unless checked
 
@@ -130,8 +128,6 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type.
-  #
-  # Does not support unwrapping T::InterfaceWrapper; for that, use dynamic_cast.
   def self.let(value, type, checked: true)
     return value unless checked
 
@@ -142,8 +138,6 @@ module T
   # fail). Use this for debugging typechecking errors, or to ensure that type information is
   # statically known and being checked appropriately. If `checked` is true, raises an exception at
   # runtime if the value doesn't match the type.
-  #
-  # Does not support unwrapping T::InterfaceWrapper; for that, use dynamic_cast.
   def self.assert_type!(value, type, checked: true)
     return value unless checked
 
@@ -198,12 +192,6 @@ module T
       T::Private::ErrorHandler.handle_inline_type_error(e)
       arg
     end
-  end
-
-  # Attempts to cast a value to a type at runtime. Unwraps `T::InterfaceWrapper` as
-  # necessary. If the cast is not possible, returns `nil`.
-  def self.dynamic_cast(obj, type)
-    T::InterfaceWrapper.dynamic_cast(obj, type)
   end
 
   # A way to ask Sorbet to show what type it thinks an expression has.
