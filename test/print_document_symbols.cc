@@ -30,7 +30,10 @@ int printDocumentSymbols(string_view filePath) {
     // Make documentSymbol request.
     auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
 
-    if (responses.size() == 0 || responses.size() > 1 || !responses.at(0)->isResponse()) {
+    if (responses.size() == 1 && responses.at(0)->isResponse()) {
+        cout << responses.at(0)->toJSON() << "\n";
+        return 0;
+    } else {
         cout << "Sorbet returned invalid response for documentSymbols:\n";
         if (responses.size() == 0) {
             cout << "(nothing)\n";
@@ -41,8 +44,6 @@ int printDocumentSymbols(string_view filePath) {
         }
         return 1;
     }
-    cout << responses.at(0)->toJSON() << "\n";
-    return 0;
 }
 } // namespace sorbet::realmain::lsp
 
