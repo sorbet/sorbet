@@ -73,3 +73,18 @@ class HasVariables
   @alpaca_count = T.let(0, Integer)
 end
 ```
+
+A current shortcoming of Sorbet is it cannot reuse static type knowledge in
+order to automatically determine the type of an instance or class variable. In
+the following example, despite the fact that Sorbet knows that `x` has type
+`Integer`, it still treats `@x` as `T.untyped` without an explicit type
+annotation:
+
+```ruby
+class Foo
+  sig {param(x: Integer).void}
+  def initialize(x)
+    @x = x
+  end
+end
+```
