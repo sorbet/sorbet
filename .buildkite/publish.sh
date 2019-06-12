@@ -98,6 +98,15 @@ git add super-secret-private-beta/
 git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
 if [ "$dryrun" = "" ]; then
     git push origin gh-pages
+
+    # For some reason, GitHub Pages won't automatically build for us on push
+    # We have a ticket open with GitHub to investigate why.
+    # For now, we trigger a build manually.
+    curl \
+      -X POST \
+      --netrc \
+      -H "Accept: application/vnd.github.mister-fantastic-preview+json" \
+      "https://api.github.com/repos/stripe/sorbet.run/pages/builds"
 fi
 popd
 rm -rf sorbet-repo
