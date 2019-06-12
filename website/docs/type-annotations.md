@@ -3,16 +3,24 @@ id: type-annotations
 title: Type Annotations
 ---
 
-Sorbet provides the most value when it has a wealth of static type information
-to work with, which in turn requires the programmer to add annotations that
-inform Sorbet of the intended static types of elements of your program. Sorbet
-also allows the programmer to opt-in to greater levels of static type rigor: at
-lower [strictness modes](static.md), Sorbet will allow some definitions by
-untyped, but at `# typed: strict`, Sorbet requires that everything which can
-have a type annotation _must_ have one.
+Sorbet provides the most value when it has a wealth of programmer-supplied
+static types. However, because Sorbet implements a
+[gradual type system](gradual.md), it treats most definitions without explicit
+annotations as [untyped](untyped.md). This means that Sorbet can only use static
+types for methods, constants, instance variables, and class variables if they
+are accompanied with explicit static types.
 
-Specifically, in a `# typed: strict` file it's an error to omit type annotations
-for:
+> What about local variables? Sorbet _does_ do limited type inference for local
+> variables based on how they are initialized, so type assertions may not be
+> necessary for local variables. However, they may still be useful, especially
+> if you want a local variable to have a more general type than the one that
+> Sorbet infers.
+
+Sorbet also allows the programmer to opt-in to greater levels of static type
+rigor: at lower [strictness modes](static.md), Sorbet will allow some
+definitions to be untyped, but at `# typed: strict`, Sorbet requires obligatory
+type annotations on anything which can be annotated. Specifically, in a
+`# typed: strict` file it's an error to omit type annotations for:
 
 - methods
 - instance variables
