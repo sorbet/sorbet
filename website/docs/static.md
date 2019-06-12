@@ -60,8 +60,8 @@ Each strictness level reports all errors at lower levels, plus new errors:
   etc.
 
 - At `# typed: strict`, Sorbet no longer implicitly marks things as being
-  [dynamically typed](untyped.md). At this level all methods, constants, and
-  instance variables must have
+  [dynamically typed](untyped.md). At this level all methods must have
+  [sigs](sigs.md), and all constants and instance variables must have
   [explicitly annotated types](type-annotations.md). This is analogous to
   TypeScript's `noImplicitAny` flag.
 
