@@ -58,9 +58,6 @@ const ProjectList = (props) => (
 
 class Index extends React.Component {
   render() {
-    const {config: siteConfig, language = ''} = this.props;
-    const {baseUrl, docsUrl} = siteConfig;
-
     return (
       <div>
         <div className="homeContainer">
@@ -79,25 +76,25 @@ class Index extends React.Component {
               </div>
             </div>
           </div>
+          <PageSection align="center" className="featuresContainer" lightPurple>
+            <GridBlock
+              layout="threeColumn"
+              contents={[
+                {
+                  title: `Get Help`,
+                  content: `Ask a question on the [Sorbet Stack Overflow](https://stackoverflow.com/questions/tagged/sorbet) community.`,
+                },
+                {
+                  title: `Come Chat`,
+                  content: `Join in the conversation on our [Slack](https://join.slack.com/t/sorbet-ruby/shared_invite/enQtNjUwNzY0MTQ1MTg2LWYzZjJhZGM2OTgzMTJiOTRmZDA0OTI1YjU5ZjU1NzQxM2MyZTFhOWNkNDE0ODQ3N2ViOTQwZjE4Y2IzOGEzYTg) instance.`,
+                },
+                {
+                  title: `Report Issues`,
+                  content: `Found a bug? Report it on the [Sorbet Github repo](https://github.com/stripe/sorbet/issues).`,
+                },
+              ]} />
+          </PageSection>
         </div>
-        <PageSection align="center" className="mainContainer documentContainer postContainer">
-          <GridBlock
-            layout="threeColumn"
-            contents={[
-              {
-                title: `Get Help`,
-                content: `Ask a question on the [Sorbet Stack Overflow](https://stackoverflow.com/questions/tagged/sorbet) community.`,
-              },
-              {
-                title: `Come Chat`,
-                content: `Join in the conversation on our [Slack](https://join.slack.com/t/sorbet-ruby/shared_invite/enQtNjUwNzY0MTQ1MTg2LWYzZjJhZGM2OTgzMTJiOTRmZDA0OTI1YjU5ZjU1NzQxM2MyZTFhOWNkNDE0ODQ3N2ViOTQwZjE4Y2IzOGEzYTg) instance.`,
-              },
-              {
-                title: `Report Issues`,
-                content: `Found a bug? Report it on the [Sorbet Github repo](https://github.com/stripe/sorbet/issues).`,
-              },
-            ]} />
-        </PageSection>
         <PageSection gray>
           <h1>Talks</h1>
           <TalkList content={[
