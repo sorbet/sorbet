@@ -26,7 +26,6 @@
 <url> <loc>https://sorbet.org/docs/sigs</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/sigs" /> </url>
 <url> <loc>https://sorbet.org/docs/static</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/static" /> </url>
 <url> <loc>https://sorbet.org/docs/stdlib-generics</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/stdlib-generics" /> </url>
-<url> <loc>https://sorbet.org/docs/strict</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/strict" /> </url>
 <url> <loc>https://sorbet.org/docs/talks/ruby-kaigi-2018</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/ruby-kaigi-2018" /> </url>
 <url> <loc>https://sorbet.org/docs/talks/ruby-kaigi-2019</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/ruby-kaigi-2019" /> </url>
 <url> <loc>https://sorbet.org/docs/talks/strange-loop-2018</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/talks/strange-loop-2018" /> </url>
@@ -36,6 +35,7 @@
 <url> <loc>https://sorbet.org/docs/tstruct</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/tstruct" /> </url>
 <url> <loc>https://sorbet.org/docs/tuples</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/tuples" /> </url>
 <url> <loc>https://sorbet.org/docs/type-aliases</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/type-aliases" /> </url>
+<url> <loc>https://sorbet.org/docs/type-annotations</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/type-annotations" /> </url>
 <url> <loc>https://sorbet.org/docs/type-assertions</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/type-assertions" /> </url>
 <url> <loc>https://sorbet.org/docs/union-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/union-types" /> </url>
 <url> <loc>https://sorbet.org/docs/untyped</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/untyped" /> </url>
