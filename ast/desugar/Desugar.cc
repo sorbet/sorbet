@@ -213,8 +213,10 @@ unique_ptr<Block> symbol2Proc(DesugarContext dctx, unique_ptr<Expression> expr) 
     // &:foo => {|temp| temp.foo() }
     core::NameRef name(dctx.ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
     MethodDef::ARGS_store args;
-    args.emplace_back(MK::Local(loc, temp));
-    unique_ptr<Expression> recv = MK::Local(loc, temp);
+    // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
+    core::Loc zeroLengthLoc(loc.file(), loc.beginPos(), loc.beginPos());
+    args.emplace_back(MK::Local(zeroLengthLoc, temp));
+    unique_ptr<Expression> recv = MK::Local(zeroLengthLoc, temp);
     unique_ptr<Expression> body = MK::Send0(loc, std::move(recv), name);
     return make_unique<Block>(loc, std::move(args), std::move(body));
 }
