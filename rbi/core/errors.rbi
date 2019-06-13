@@ -21,6 +21,9 @@ end
 class LoadError < ScriptError
 end
 
+class LocalJumpError < StandardError
+end
+
 class NameError < StandardError
 end
 
@@ -61,6 +64,9 @@ class SystemCallError < StandardError
 end
 
 class SystemExit < Exception
+end
+
+class SystemStackError < Exception
 end
 
 class ThreadError < StandardError

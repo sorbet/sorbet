@@ -43,9 +43,3 @@ class Proc < Object
   sig {returns(String)}
   def inspect(); end
 end
-
-class LocalJumpError < StandardError
-end
-
-class SystemStackError < Exception
-end
