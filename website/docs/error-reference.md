@@ -4,6 +4,25 @@ title: Sorbet Error Reference
 sidebar_label: Error Reference
 ---
 
+<style>
+#missing-doc-for-error-code-box.is-hidden {
+  display: none;
+}
+</style>
+
+<div class="is-hidden" id="missing-doc-for-error-code-box">
+
+> **Heads up**: There aren't any docs yet for <span id="missing-error-code">this
+> error code</span>. If you have suggestions for what would have helped you
+> solve this problem, click the "Edit" button above to contribute! Otherwise,
+> try using the search above to find an answer.
+
+</div>
+
+> **Note**: This list is not exhaustive! Some errors are very context dependent
+> and other error codes are not common enough to know how to generally suggest
+> help. Contributions to this list are welcome!
+
 This is one of three docs aimed at helping answer common questions about Sorbet:
 
 1.  [Troubleshooting](troubleshooting.md)
@@ -11,10 +30,6 @@ This is one of three docs aimed at helping answer common questions about Sorbet:
 1.  [Sorbet Error Reference](error-reference.md) (this doc)
 
 This page contains tips and tricks for common errors from `srb`.
-
-> **Note**: This list is not exhaustive! Some errors are very context dependent
-> and other error codes are not common enough to know how to generally suggest
-> help. Contributions to this list are welcome!
 
 ## 1001
 
@@ -121,34 +136,34 @@ like the constant is related to a gem, maybe one of these helps:
 Another thing it could be: Sorbet explicitly does not support resolving
 constants through ancestors (both mixins or superclasses).
 
-- Concretely, here's an example of code rejected and accepted by Sorbet:
+Concretely, here's an example of code rejected and accepted by Sorbet:
 
-  ```ruby
-  class Parent
-    MY_CONST = 91
-  end
+```ruby
+class Parent
+  MY_CONST = 91
+end
 
-  class Child < Parent; end
+class Child < Parent; end
 
-  Child::MY_CONST    # error
-  Parent::MY_CONST   # ok
-  ```
+Child::MY_CONST    # error
+Parent::MY_CONST   # ok
+```
 
-- Alternatively, if it's much more preferable to access the constant on the
-  child, we can set up an explicit alias:
+Alternatively, if it's much more preferable to access the constant on the child,
+we can set up an explicit alias:
 
-  ```ruby
-  class Parent
-    MY_CONST = 91
-  end
+```ruby
+class Parent
+  MY_CONST = 91
+end
 
-  class Child < Parent
-    MY_CONST = Parent::MY_CONST
-  end
+class Child < Parent
+  MY_CONST = Parent::MY_CONST
+end
 
-  Child::MY_CONST    # ok
-  Parent::MY_CONST   # ok
-  ```
+Child::MY_CONST    # ok
+Parent::MY_CONST   # ok
+```
 
 ## 5005
 
@@ -635,3 +650,5 @@ end
 ```
 
 [report an issue]: https://github.com/stripe/sorbet/issues
+
+<script src="/js/error-reference.js"></script>
