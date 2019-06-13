@@ -9,6 +9,9 @@ module T::Private::Abstract::Declare
     if AbstractUtils.abstract_module?(mod)
       raise "#{mod.name} is already declared as abstract"
     end
+    if T::Private::Final.is_final?(mod)
+      raise "#{mod.name} was already declared as final and cannot also be declared as abstract"
+    end
 
     Abstract::Data.set(mod, :can_have_abstract_methods, true)
     Abstract::Data.set(mod.singleton_class, :can_have_abstract_methods, true)

@@ -42,4 +42,26 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
     end
     assert_includes(err.message, "was declared final and cannot be subclassed")
   end
+
+  it "forbids declaring a class as abstract and then final" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Helpers
+        abstract!
+        final!
+      end
+    end
+    assert_includes(err.message, "was already declared as abstract and cannot also be declared as final")
+  end
+
+  it "forbids declaring a class as final and then abstract" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Helpers
+        final!
+        abstract!
+      end
+    end
+    assert_includes(err.message, "was already declared as final and cannot also be declared as abstract")
+  end
 end
