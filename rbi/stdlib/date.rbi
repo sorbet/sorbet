@@ -1,38 +1,4 @@
 # typed: __STDLIB_INTERNAL
-class Date::Infinity < Numeric
-  sig {returns(Date::Infinity)}
-  def +@(); end
-
-  sig {returns(Date::Infinity)}
-  def -@(); end
-
-  sig {params(other: T.untyped).returns(T.nilable(Integer))}
-  def <=>(other); end
-
-  sig {returns(Float)}
-  def to_f(); end
-
-  sig {params(other: T.untyped).returns(Numeric)}
-  def coerce(other); end
-
-  sig {returns(Date::Infinity)}
-  def abs(); end
-
-  sig {returns(T::Boolean)}
-  def zero?(); end
-
-  sig {returns(T::Boolean)}
-  def finite?(); end
-
-  sig {returns(T::Boolean)}
-  def infinite?(); end
-
-  sig {returns(T::Boolean)}
-  def nan?(); end
-
-  sig {returns(T::Boolean)}
-  def d(); end
-end
 
 class Date
   include Comparable
@@ -383,4 +349,39 @@ class Date
 
   sig {params(arg0: T.untyped).returns(Date)}
   def self.jisx0301(*arg0); end
+end
+
+class Date::Infinity < Numeric
+  sig {returns(Date::Infinity)}
+  def +@(); end
+
+  sig {returns(Date::Infinity)}
+  def -@(); end
+
+  sig {params(other: T.untyped).returns(T.nilable(Integer))}
+  def <=>(other); end
+
+  sig {returns(Float)}
+  def to_f(); end
+
+  sig {params(other: T.untyped).returns(Numeric)}
+  def coerce(other); end
+
+  sig {returns(Date::Infinity)}
+  def abs(); end
+
+  sig {returns(T::Boolean)}
+  def zero?(); end
+
+  sig {returns(T::Boolean)}
+  def finite?(); end
+
+  sig {returns(T::Boolean)}
+  def infinite?(); end
+
+  sig {returns(T::Boolean)}
+  def nan?(); end
+
+  sig {returns(T::Boolean)}
+  def d(); end
 end
