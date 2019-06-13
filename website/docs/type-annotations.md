@@ -18,7 +18,7 @@ possible to provide type annotations for local variables.
 Type annotations for methods are provided using a `sig` before the method
 definition. Method type annotations are
 [described in great detail on the Method Signatures](sigs.md). Other type
-annotations are usually provided using the `T.let`
+annotations are provided using the `T.let`
 [type assertion](type-assertions.md).
 
 ## Annotating constants
