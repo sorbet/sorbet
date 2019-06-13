@@ -5,7 +5,7 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
   it "allows declaring a class as final" do
     c = Class.new do
       extend T::Helpers
-      final!
+      __UNSTABLE_final!
       def foo; 3; end
     end
     assert_equal(c.new.foo, 3)
@@ -15,7 +15,7 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Module.new do
         extend T::Helpers
-        final!
+        __UNSTABLE_final!
       end
     end
     assert_includes(err.message, "is not a class (it is a Module), but was declared final")
@@ -25,8 +25,8 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Helpers
-        final!
-        final!
+        __UNSTABLE_final!
+        __UNSTABLE_final!
       end
     end
     assert_includes(err.message, "was already declared as final")
@@ -35,7 +35,7 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
   it "forbids subclassing a final class" do
     c = Class.new do
       extend T::Helpers
-      final!
+      __UNSTABLE_final!
     end
     err = assert_raises(RuntimeError) do
       Class.new(c)
@@ -48,7 +48,7 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
       Class.new do
         extend T::Helpers
         abstract!
-        final!
+        __UNSTABLE_final!
       end
     end
     assert_includes(err.message, "was already declared as abstract and cannot also be declared as final")
@@ -58,7 +58,7 @@ class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Helpers
-        final!
+        __UNSTABLE_final!
         abstract!
       end
     end
