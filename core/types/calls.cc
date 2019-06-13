@@ -1873,10 +1873,7 @@ public:
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
         }
-        if (Types::isSubType(ctx, lhs, rhs)) {
-            return Types::Boolean();
-        }
-        return Types::falseClass();
+        return Types::Boolean();
     }
 } Module_tripleEq;
 
