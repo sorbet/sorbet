@@ -145,6 +145,3 @@ class Regexp < Object
   end
   def eql?(other); end
 end
-
-class RegexpError < StandardError
-end

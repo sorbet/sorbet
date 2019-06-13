@@ -36,6 +36,9 @@ end
 class RangeError < StandardError
 end
 
+class RegexpError < StandardError
+end
+
 class RuntimeError < StandardError
 end
 
