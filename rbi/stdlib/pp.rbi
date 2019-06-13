@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class PrettyPrint
   def self.format(output = nil, maxwidth = nil, newline = nil, genspace = nil); end
   def self.singleline_format(output = nil, maxwidth = nil, newline = nil, genspace = nil); end
@@ -19,12 +20,14 @@ class PrettyPrint
   def output; end
   def text(obj, width = nil); end
 end
+
 class PrettyPrint::Text
   def add(obj, width); end
   def initialize; end
   def output(out, output_width); end
   def width; end
 end
+
 class PrettyPrint::Breakable
   def indent; end
   def initialize(sep, width, q); end
@@ -32,6 +35,7 @@ class PrettyPrint::Breakable
   def output(out, output_width); end
   def width; end
 end
+
 class PrettyPrint::Group
   def break; end
   def break?; end
@@ -40,12 +44,14 @@ class PrettyPrint::Group
   def first?; end
   def initialize(depth); end
 end
+
 class PrettyPrint::GroupQueue
   def delete(group); end
   def deq; end
   def enq(group); end
   def initialize(*groups); end
 end
+
 class PrettyPrint::SingleLine
   def breakable(sep = nil, width = nil); end
   def first?; end
@@ -55,6 +61,7 @@ class PrettyPrint::SingleLine
   def nest(indent); end
   def text(obj, width = nil); end
 end
+
 class PP < PrettyPrint
   include PP::PPMethods
   def self.mcall(obj, mod, meth, *args, &block); end
@@ -63,6 +70,7 @@ class PP < PrettyPrint
   def self.sharing_detection=(arg0); end
   def self.singleline_pp(obj, out = nil); end
 end
+
 module PP::PPMethods
   def check_inspect_key(id); end
   def comma_breakable; end
@@ -76,9 +84,11 @@ module PP::PPMethods
   def push_inspect_key(id); end
   def seplist(list, sep = nil, iter_method = nil); end
 end
+
 class PP::SingleLine < PrettyPrint::SingleLine
   include PP::PPMethods
 end
+
 module PP::ObjectMixin
   def pretty_print(q); end
   def pretty_print_cycle(q); end

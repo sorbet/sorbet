@@ -127,4 +127,3 @@ class DateTime < Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self.jisx0301(*arg0); end
 end
-

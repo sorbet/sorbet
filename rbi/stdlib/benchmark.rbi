@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module Benchmark
   BENCHMARK_VERSION = T.let(T.unsafe(nil), String)
   CAPTION = T.let(T.unsafe(nil), String)

@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module Mutex_m
   def self.append_features(cl); end
   def self.define_aliases(cl); end

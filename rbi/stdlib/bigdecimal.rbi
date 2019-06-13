@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class BigDecimal < Numeric
   BASE = T.let(T.unsafe(nil), Integer)
   EXCEPTION_ALL = T.let(T.unsafe(nil), Integer)
