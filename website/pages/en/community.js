@@ -4,25 +4,30 @@ const CompLibrary = require('../../core/CompLibrary.js');
 
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
-const MarkdownBlock = CompLibrary.MarkdownBlock;
 
 // TODO(jez) No inline styles
-const PageSection = (props) => (
-  <div
-    style={{
-      backgroundColor: props.gray
-        ? '#f5f5f5'
-        : props.lightPurple
-        ? '#6255b0'
-        : 'white',
-      color: props.lightPurple ? 'white' : 'inherit',
-      padding: props.short ? '2em 0' : '3em 0',
-    }}
-    className="pageSection"
-  >
-    <div className="wrapper">{props.children}</div>
-  </div>
-);
+const PageSection = (props) => {
+  var className = "pageSection";
+  if (props.className && props.className != "") {
+    className += props.className;
+  }
+  return (
+    <div
+      style={{
+        backgroundColor: props.gray
+          ? '#f5f5f5'
+          : props.lightPurple
+          ? '#6255b0'
+          : 'white',
+        color: props.lightPurple ? 'white' : 'inherit',
+        padding: props.short ? '2em 0' : '3em 0',
+      }}
+      className={className}
+    >
+      <div className="wrapper">{props.children}</div>
+    </div>
+  );
+}
 
 const TalkListItem = (props) => (
   <li>
@@ -89,56 +94,58 @@ class Index extends React.Component {
           </PageSection>
         </div>
         <PageSection gray short>
-          <h1>Talks</h1>
-          <TalkList
-            content={[
-              {
-                title: 'A practical type system for Ruby at Stripe',
-                link: '/docs/talks/ruby-kaigi-2018',
-                venue: 'RubyKaigi 2018',
-              },
-              {
-                title: 'Gradual typing of Ruby at Scale',
-                link: '/docs/talks/strange-loop-2018',
-                venue: 'Strange Loop 2018',
-              },
-              {
-                title: 'State of Sorbet: A type checker for Ruby',
-                link: '/docs/talks/ruby-kaigi-2019',
-                venue: 'RubyKaigi 2019',
-              },
-            ]}
-          />
+          <div>
+            <h1>Talks</h1>
+            <TalkList
+              content={[
+                {
+                  title: 'A practical type system for Ruby at Stripe',
+                  link: '/docs/talks/ruby-kaigi-2018',
+                  venue: 'RubyKaigi 2018',
+                },
+                {
+                  title: 'Gradual typing of Ruby at Scale',
+                  link: '/docs/talks/strange-loop-2018',
+                  venue: 'Strange Loop 2018',
+                },
+                {
+                  title: 'State of Sorbet: A type checker for Ruby',
+                  link: '/docs/talks/ruby-kaigi-2019',
+                  venue: 'RubyKaigi 2019',
+                },
+              ]}
+            />
+          </div>
+          <div>
+            <h1>Projects</h1>
+            <ProjectList
+              content={[
+                {
+                  title: 'sorbet-typed',
+                  link: 'https://github.com/sorbet/sorbet-typed',
+                  description:
+                    'A central repository for sharing type definitions for Ruby gems',
+                },
+                {
+                  title: 'sorbet-rails',
+                  link: 'https://github.com/chanzuckerberg/sorbet-rails',
+                  description:
+                    'A set of tools to make sorbet work with rails seamlessly',
+                },
+              ]}
+            />
+          </div>
         </PageSection>
-        <PageSection>
-          <h1>Projects</h1>
-          <ProjectList
-            content={[
-              {
-                title: 'sorbet-typed',
-                link: 'https://github.com/sorbet/sorbet-typed',
-                description:
-                  'A central repository for sharing type definitions for Ruby gems',
-              },
-              {
-                title: 'sorbet-rails',
-                link: 'https://github.com/chanzuckerberg/sorbet-rails',
-                description:
-                  'A set of tools to make sorbet work with rails seamlessly',
-              },
-            ]}
-          />
-        </PageSection>
-        <PageSection short lightPurple>
+        <PageSection className="nav-footer" short lightPurple>
           <p className="footer">
             © 2019 Stripe{' · '}
             <a href="docs/adopting">Get started</a>
             {' · '}
             <a href="docs/">Docs</a>
             {' · '}
-            <a href="https://sorbet.run">Try it online</a>
+            <a href="https://sorbet.run">Try</a>
             {' · '}
-            <a href="talks/talks">Talks</a>
+            <a href="en/community">Community</a>
             {' · '}
             <a href="blog/">Blog</a>
           </p>

@@ -25,7 +25,7 @@ const siteConfig = {
     // for "Get started" means that only the "Docs" tab will ever be active.
     {label: 'Get started', href: '/docs/adopting'},
     {label: 'Docs', doc: 'overview'},
-    {label: 'Try it online', href: 'https://sorbet.run'},
+    {label: 'Try', href: 'https://sorbet.run'},
     {label: 'Community', href: '/en/community'},
     {blog: true, label: 'Blog'},
   ],
