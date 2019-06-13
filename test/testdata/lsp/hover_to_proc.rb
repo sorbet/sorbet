@@ -1,6 +1,8 @@
 # typed: true
 
-class Dog extend T::Sig
+class Dog
+  extend T::Sig
+
   sig {returns(String)}
   attr_reader :breed
 end
