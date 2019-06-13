@@ -57,6 +57,3 @@ end
 
 class ThreadError < StandardError
 end
-
-class ThreadGroup < Object
-end
