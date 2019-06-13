@@ -23,8 +23,8 @@ annotations are provided using the `T.let`
 
 ## Annotating constants
 
-Sorbet does not, by default, infer the types of constants, but you can specify
-them using `T.let`:
+Sorbet does not, by default, infer the types of constants, but they
+can be specified using `T.let`:
 
 ```ruby
 NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String])
@@ -64,12 +64,19 @@ annotation:
 
 ```ruby
 class Foo
-  sig {param(x: Integer).void}
-  def initialize(x)
+  sig {param(x: Integer, y: Integer).void}
+  def initialize(x, y)
     @x = x
+    @y = T.let(y, Integer)
+
+    T.reveal_type(@x)  # T.untyped
+    T.reveal_type(@y)  # Integer
   end
 end
 ```
+
+This is a known limitation of Sorbet, and we're considering ways to
+make it less verbose in the future.
 
 ## Type annotations and strictness levels
 
