@@ -300,8 +300,11 @@ TEST_F(ProtocolTest, EmptyRootUriInitialization) {
 TEST_F(ProtocolTest, MonacoInitialization) {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
-    auto params = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
-                                              makeInitializeParams(JSONNullObject(), JSONNullObject(), false));
+    const bool enableTypecheckInfo = false;
+    const bool supportsMarkdown = true;
+    auto params = make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::Initialize,
+        makeInitializeParams(JSONNullObject(), JSONNullObject(), enableTypecheckInfo, supportsMarkdown));
     auto responses = send(LSPMessage(move(params)));
     ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
     auto &respMsg = responses.at(0);
@@ -394,6 +397,31 @@ TEST_F(ProtocolTest, RejectsRequestsThatDontTypecheck) {
 TEST_F(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw("{"), {});
+}
+
+// If a client doesn't support markdown, send hover as plaintext.
+TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
+    const bool enableTypecheckInfo = false;
+    const bool supportsMarkdown = false;
+    auto initializeResponses =
+        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo, supportsMarkdown);
+    updateDiagnostics(initializeResponses);
+    assertDiagnostics(move(initializeResponses), {});
+
+    assertDiagnostics(send(*openFile("foobar.rb", "# typed: true\n1\n")), {});
+
+    auto hoverResponses = send(LSPMessage(make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::TextDocumentHover,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("foobar.rb")),
+                                                make_unique<Position>(1, 0)))));
+    ASSERT_EQ(hoverResponses.size(), 1);
+    auto &hoverResponse = hoverResponses.at(0);
+    ASSERT_TRUE(hoverResponse->isResponse());
+    auto &hoverResult = get<variant<JSONNullObject, unique_ptr<Hover>>>(*hoverResponse->asResponse().result);
+    auto &hover = get<unique_ptr<Hover>>(hoverResult);
+    auto &contents = hover->contents;
+    ASSERT_EQ(contents->kind, MarkupKind::Plaintext);
+    ASSERT_EQ(contents->value, "Integer(1)");
 }
 
 } // namespace sorbet::test::lsp

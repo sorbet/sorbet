@@ -51,8 +51,12 @@ unique_ptr<WorkspaceClientCapabilities> makeWorkspaceClientCapabilities() {
     return capabilities;
 }
 
-unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() {
+unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bool supportsMarkdown) {
     auto capabilities = make_unique<TextDocumentClientCapabilities>();
+    vector<MarkupKind> supportedTextFormats({MarkupKind::Plaintext});
+    if (supportsMarkdown) {
+        supportedTextFormats.push_back(MarkupKind::Markdown);
+    }
 
     auto publishDiagnostics = make_unique<PublishDiagnosticsCapabilities>();
     publishDiagnostics->relatedInformation = true;
@@ -69,7 +73,7 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
     auto completionItem = make_unique<CompletionItemCapabilities>();
     completionItem->snippetSupport = true;
     completionItem->commitCharactersSupport = true;
-    completionItem->documentationFormat = {MarkupKind::Markdown, MarkupKind::Plaintext};
+    completionItem->documentationFormat = supportedTextFormats;
     completion->completionItem = std::move(completionItem);
     auto completionItemKind = make_unique<CompletionItemKindCapabilities>();
     completionItemKind->valueSet =
@@ -78,12 +82,12 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
     capabilities->completion = std::move(completion);
 
     auto hover = makeDynamicRegistrationOption<HoverCapabilities>(true);
-    hover->contentFormat = {MarkupKind::Markdown, MarkupKind::Plaintext};
+    hover->contentFormat = supportedTextFormats;
     capabilities->hover = std::move(hover);
 
     auto signatureHelp = makeDynamicRegistrationOption<SignatureHelpCapabilities>(true);
     auto signatureInformation = make_unique<SignatureInformationCapabilities>();
-    signatureInformation->documentationFormat = {MarkupKind::Markdown, MarkupKind::Plaintext};
+    signatureInformation->documentationFormat = supportedTextFormats;
     signatureHelp->signatureInformation = std::move(signatureInformation);
     capabilities->signatureHelp = std::move(signatureHelp);
 
@@ -111,10 +115,11 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
 }
 
 unique_ptr<InitializeParams> makeInitializeParams(variant<string, JSONNullObject> rootPath,
-                                                  variant<string, JSONNullObject> rootUri, bool enableTypecheckInfo) {
+                                                  variant<string, JSONNullObject> rootUri, bool enableTypecheckInfo,
+                                                  bool supportsMarkdown) {
     auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
-    initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities();
+    initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities(supportsMarkdown);
     initializeParams->trace = TraceKind::Off;
 
     string stringRootUri = "";
@@ -262,13 +267,14 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
-                                             int &nextId, bool enableTypecheckInfo) {
+                                             int &nextId, bool enableTypecheckInfo, bool supportsMarkdown) {
     // Reset next id.
     nextId = 0;
 
     // Send 'initialize' message.
     {
-        auto initializeParams = makeInitializeParams(string(rootPath), string(rootUri), enableTypecheckInfo);
+        auto initializeParams =
+            makeInitializeParams(string(rootPath), string(rootUri), enableTypecheckInfo, supportsMarkdown);
         LSPMessage message(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
         auto responses = lspWrapper.getLSPResponsesFor(message);
 

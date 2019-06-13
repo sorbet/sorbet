@@ -20,6 +20,13 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     return contents;
 }
 
+unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string str) {
+    if (markupKind == MarkupKind::Markdown && str.length() > 0) {
+        str = fmt::format("```ruby\n{}\n```", str);
+    }
+    return make_unique<MarkupContent>(markupKind, move(str));
+}
+
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
@@ -50,27 +57,20 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                     "Did not find any dispatchComponents for a SEND QueryResponse in textDocument/hover");
                 return LSPResult::make(move(gs), move(response));
             }
-            string contents = "";
             auto retType = sendResp->retType.type;
             auto &constraint = sendResp->constraint;
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
-            // We use markdown here because if we just use a string, VSCode tries to interpret
-            // things like <Class:Foo> as html tags and make them clickable (but the click takes
-            // you somewhere nonsensical)
-            auto markupContents = make_unique<MarkupContent>(
-                MarkupKind::Markdown, methodSignatureString(*gs, retType, sendResp->dispatchComponents, constraint));
-            response->result = make_unique<Hover>(move(markupContents));
+            response->result = make_unique<Hover>(formatRubyCode(
+                clientHoverMarkupKind, methodSignatureString(*gs, retType, sendResp->dispatchComponents, constraint)));
         } else if (auto defResp = resp->isDefinition()) {
-            auto markupContents = make_unique<MarkupContent>(
-                MarkupKind::Markdown,
-                methodSignatureString(*gs, defResp->retType.type, defResp->dispatchComponents, nullptr));
-            response->result = make_unique<Hover>(move(markupContents));
+            response->result = make_unique<Hover>(
+                formatRubyCode(clientHoverMarkupKind, methodSignatureString(*gs, defResp->retType.type,
+                                                                            defResp->dispatchComponents, nullptr)));
         } else {
-            auto markupContents =
-                make_unique<MarkupContent>(MarkupKind::Markdown, resp->getRetType()->showWithMoreInfo(*gs));
-            response->result = make_unique<Hover>(move(markupContents));
+            response->result =
+                make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs)));
         }
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
