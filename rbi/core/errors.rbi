@@ -9,6 +9,9 @@ end
 class EncodingError < StandardError
 end
 
+class FloatDomainError < RangeError
+end
+
 class IndexError < StandardError
 end
 
@@ -73,4 +76,7 @@ class ThreadError < StandardError
 end
 
 class TypeError < StandardError
+end
+
+class ZeroDivisionError < StandardError
 end

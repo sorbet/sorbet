@@ -294,9 +294,3 @@ class Numeric < Object
   sig {returns(T::Boolean)}
   def zero?(); end
 end
-
-class FloatDomainError < RangeError
-end
-
-class ZeroDivisionError < StandardError
-end
