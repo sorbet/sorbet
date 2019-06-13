@@ -80,11 +80,12 @@ make it less verbose in the future.
 
 ## Type annotations and strictness levels
 
-Sorbet allows the programmer to opt-in to greater levels of static type rigor:
-at lower [strictness modes](static.md), Sorbet allows definitions to be untyped,
-but at `# typed: strict`, Sorbet requires explicit type annotations on certain
-common kinds of definitions. Specifically, in a `# typed: strict` file it's an
-error to omit type annotations for:
+Sorbet allows the programmer to opt-in to greater levels of static
+type rigor: at lower [strictness modes](static.md), Sorbet allows
+definitions to be untyped, but at `# typed: strict`, Sorbet requires
+explicit type annotations on any definitions where it would have
+assumed `T.untyped` without an annotation before. Specifically, in a
+`# typed: strict` file it's an error to omit type annotations for:
 
 - methods
 - instance variables
@@ -96,5 +97,5 @@ a file marked `# typed: true`, but this is an intentional part of Sorbet's
 implementation of [gradual typing](gradual-typing.md). In the `# typed: true`
 strictness level, unannotated methods, instance variables, and constants are
 assumed to be `T.untyped`. This allows a programmer to write untyped or
-partially-untyped definitions while still benefitting from type-checking when
+partially-typed definitions while still benefitting from type-checking when
 static type information is present.
