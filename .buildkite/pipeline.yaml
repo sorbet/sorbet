@@ -3,28 +3,25 @@
 # - our mac machine that has 12 cores that is used to run mac tests, build mac _and_ emscripten release
 # - autoscaling linux cloud that's used for everything else
 
-_agents_:
-- &elastic
-  agents:
-    os: linux
-    queue: elastic
-  plugins:
-    - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
-        image: "darkdimius/sorbet-build-image:latest"
-        workdir: /app
-        init: true
-        propagate-environment: true
-        environment:
-          - "CODECOV_TOKEN"
-        volumes:
-          - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
-
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
   - label: ":linux::cloud: linters.sh"
     command: .buildkite/linters.sh
-    <<: *elastic
+    <<: &elastic
+      agents:
+        os: linux
+        queue: elastic
+      plugins:
+        - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+            image: "darkdimius/sorbet-build-image:latest"
+            workdir: /app
+            init: true
+            propagate-environment: true
+            environment:
+              - "CODECOV_TOKEN"
+            volumes:
+              - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
   - label: ":mac: test-static-sanitized.sh (master only)"
     command: .buildkite/test-static-sanitized.sh
