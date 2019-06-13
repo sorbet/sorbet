@@ -122,6 +122,3 @@ end
 
 class Enumerator::Yielder < Object
 end
-
-class StopIteration < IndexError
-end

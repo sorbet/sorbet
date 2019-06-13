@@ -66,6 +66,9 @@ end
 class StandardError < Exception
 end
 
+class StopIteration < IndexError
+end
+
 class SyntaxError < ScriptError
 end
 
