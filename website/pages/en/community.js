@@ -7,8 +7,8 @@ const GridBlock = CompLibrary.GridBlock;
 
 // TODO(jez) No inline styles
 const PageSection = (props) => {
-  var className = "pageSection";
-  if (props.className && props.className != "") {
+  var className = 'pageSection';
+  if (props.className && props.className != '') {
     className += props.className;
   }
   return (
@@ -27,7 +27,7 @@ const PageSection = (props) => {
       <div className="wrapper">{props.children}</div>
     </div>
   );
-}
+};
 
 const TalkListItem = (props) => (
   <li>
