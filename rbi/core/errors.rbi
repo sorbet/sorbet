@@ -9,6 +9,9 @@ end
 class EncodingError < StandardError
 end
 
+class EOFError < IOError
+end
+
 class FloatDomainError < RangeError
 end
 
@@ -16,6 +19,9 @@ class IndexError < StandardError
 end
 
 class Interrupt < SignalException
+end
+
+class IOError < StandardError
 end
 
 class KeyError < IndexError
