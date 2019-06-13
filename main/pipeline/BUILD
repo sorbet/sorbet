@@ -37,5 +37,6 @@ cc_library(
         "//payload/text",
         "//plugin",
         "//resolver",
+        "//resolver/method_checks",
     ],
 )

@@ -274,4 +274,12 @@ std::vector<ast::ParsedFile> validateSymbolsTwo(core::Context ctx, std::vector<a
     return trees;
 }
 
+ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree) {
+    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbolsTwo");
+
+    ValidateWalk validate;
+    tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
+    return tree;
+}
+
 } // namespace sorbet::method_checks
