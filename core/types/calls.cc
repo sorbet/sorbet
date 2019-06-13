@@ -1873,10 +1873,9 @@ public:
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
         }
-        if (Types::isSubType(ctx, lhs, rhs)) {
-            return Types::Boolean();
-        }
-        return Types::falseClass();
+        // previously we checked for isSubType(ctx, lhs, rhs), and if that was true return Boolean else return
+        // FalseClass. however, this led to some false negatives.
+        return Types::Boolean();
     }
 } Module_tripleEq;
 
