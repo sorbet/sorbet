@@ -26,7 +26,7 @@ const siteConfig = {
     {label: 'Get started', href: '/docs/adopting'},
     {label: 'Docs', doc: 'overview'},
     {label: 'Try it online', href: 'https://sorbet.run'},
-    {label: 'Community', doc: 'community/community'},
+    {label: 'Community', href: '/en/community'},
     {blog: true, label: 'Blog'},
   ],
 
