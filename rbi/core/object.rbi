@@ -7,21 +7,6 @@ class Object < BasicObject
   def object_id(); end
 end
 
-class FalseClass
-  sig {params(obj: BasicObject).returns(FalseClass)}
-  def &(obj)
-  end
-  sig {params(obj: BasicObject).returns(T::Boolean)}
-  def ^(obj)
-  end
-  sig {params(obj: BasicObject).returns(T::Boolean)}
-  def |(obj)
-  end
-  sig {returns(TrueClass)}
-  def !
-  end
-end
-
 ::ARGF = T.let(T.unsafe(nil), Object)
 ::ARGV = T.let(T.unsafe(nil), Array)
 ::CROSS_COMPILING = T.let(T.unsafe(nil), NilClass)
