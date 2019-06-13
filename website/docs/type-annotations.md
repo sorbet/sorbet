@@ -44,7 +44,7 @@ end
 ```
 
 We can also declare class variables and instance variables on a singleton class
-using `T.let` outside of any method:
+using `T.let` at the top-level of a class:
 
 ```ruby
 class HasVariables
