@@ -47,8 +47,5 @@ end
 class LocalJumpError < StandardError
 end
 
-class Method < Object
-end
-
 class SystemStackError < Exception
 end
