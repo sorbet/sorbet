@@ -3,6 +3,9 @@
 class ArgumentError < StandardError
 end
 
+class ClosedQueueError < StopIteration
+end
+
 class EncodingError < StandardError
 end
 
@@ -55,6 +58,9 @@ class SystemCallError < StandardError
 end
 
 class SystemExit < Exception
+end
+
+class ThreadError < StandardError
 end
 
 class TypeError < StandardError

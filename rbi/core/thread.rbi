@@ -51,9 +51,3 @@ end
 
 class Thread::SizedQueue < Thread::Queue
 end
-
-class ClosedQueueError < StopIteration
-end
-
-class ThreadError < StandardError
-end
