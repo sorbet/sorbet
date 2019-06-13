@@ -1,5 +1,5 @@
 cc_library(
-    name = "method_checks",
+    name = "method_checker",
     srcs = glob(
         [
             "*.cc",

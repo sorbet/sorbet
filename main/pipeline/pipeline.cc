@@ -22,6 +22,7 @@
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
+#include "method_checker/method_checks.h"
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -29,7 +30,6 @@
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
 #include "resolver/resolver.h"
-#include "resolver/method_checks/method_checks.h"
 
 using namespace std;
 

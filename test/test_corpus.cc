@@ -23,11 +23,11 @@
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
+#include "method_checker/method_checks.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
-#include "resolver/method_checks/method_checks.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
@@ -298,7 +298,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         trees = resolver::Resolver::run(ctx, move(trees), *workers);
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-
     }
 
     expectation = test.expectations.find("symbol-table");

@@ -196,8 +196,8 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     }
 }
 
-void validateAbstract(const core::GlobalState &gs, UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
-                      core::SymbolRef sym) {
+void validateAbstract(const core::GlobalState &gs,
+                      UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache, core::SymbolRef sym) {
     if (sym.data(gs)->isClassAbstract()) {
         return;
     }

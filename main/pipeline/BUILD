@@ -30,6 +30,7 @@ cc_library(
         "//infer",
         "//local_vars",
         "//main/options",
+        "//method_checker",
         "//namer",
         "//namer/configatron",
         "//parser",
@@ -37,6 +38,5 @@ cc_library(
         "//payload/text",
         "//plugin",
         "//resolver",
-        "//resolver/method_checks",
     ],
 )
