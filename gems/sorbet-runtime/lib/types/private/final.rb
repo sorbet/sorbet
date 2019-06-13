@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Final
-  FinalMarker = "@sorbet_final_marker"
+  FinalMarker = :@sorbet_is_final
 
   def self.declare(klass)
     if !klass.is_a?(Class)
