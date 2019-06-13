@@ -384,14 +384,3 @@ class Date
   sig {params(arg0: T.untyped).returns(Date)}
   def self.jisx0301(*arg0); end
 end
-
-class Time
-  sig {returns(Time)}
-  def to_time(); end
-
-  sig {returns(Date)}
-  def to_date(); end
-
-  sig {returns(DateTime)}
-  def to_datetime(); end
-end
