@@ -4,6 +4,7 @@
 #include <cxxopts.hpp>
 
 #include "common/FileOps.h"
+#include "common/Timer.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/FileFlatMapper.h"
