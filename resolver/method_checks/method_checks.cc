@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include "ast/treemap/treemap.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
@@ -8,7 +9,7 @@ using namespace std;
 
 namespace sorbet::method_checks {
 
-const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
+const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs,
                                                   UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
                                                   core::SymbolRef klass) {
     vector<core::SymbolRef> abstract;
@@ -54,7 +55,7 @@ struct Signature {
     core::SymbolRef blk;
 } left, right;
 
-Signature decomposeSignature(core::GlobalState &gs, core::SymbolRef method) {
+Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method) {
     Signature sig;
     for (auto arg : method.data(gs)->arguments()) {
         if (arg.data(gs)->isBlockArgument()) {
@@ -77,7 +78,7 @@ Signature decomposeSignature(core::GlobalState &gs, core::SymbolRef method) {
 // Eventually this should check the appropriate subtype relationships on types,
 // as well, but for now we just look at the argument shapes and ensure that they
 // are compatible.
-void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMethod, core::SymbolRef method) {
+void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef superMethod, core::SymbolRef method) {
     if (method.data(gs)->isOverloaded()) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
@@ -162,7 +163,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
     }
 }
 
-void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
+void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     auto klass = method.data(gs)->owner;
     auto name = method.data(gs)->name;
     ENFORCE(klass.data(gs)->isClass());
@@ -195,7 +196,7 @@ void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
     }
 }
 
-void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
+void validateAbstract(const core::GlobalState &gs, UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
                       core::SymbolRef sym) {
     if (sym.data(gs)->isClassAbstract()) {
         return;
@@ -242,6 +243,36 @@ void validateSymbols(core::GlobalState &gs) {
             validateOverriding(gs, sym);
         }
     }
+}
+
+class ValidateWalk {
+private:
+    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
+
+public:
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        auto sym = classDef->symbol;
+        validateAbstract(ctx.state, abstractCache, sym);
+        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        validateAbstract(ctx.state, abstractCache, singleton);
+        return classDef;
+    }
+
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto sym = methodDef->symbol;
+        validateOverriding(ctx.state, methodDef->symbol);
+        return methodDef;
+    }
+};
+
+std::vector<ast::ParsedFile> validateSymbolsTwo(core::Context ctx, std::vector<ast::ParsedFile> trees) {
+    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbolsTwo");
+
+    ValidateWalk validate;
+    for (auto &tree : trees) {
+        tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
+    }
+    return trees;
 }
 
 } // namespace sorbet::method_checks
