@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative '../test_helper'
 
-class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
+class Opus::Types::Test::FinalValidationTest < Critic::Unit::UnitTest
   it "allows declaring a class as final" do
     c = Class.new do
       extend T::Helpers
