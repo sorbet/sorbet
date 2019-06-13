@@ -18,13 +18,12 @@ possible to provide type annotations for local variables.
 Type annotations for methods are provided using a `sig` before the method
 definition. Method type annotations are
 [described in great detail on the Method Signatures](sigs.md). Other type
-annotations are provided using the `T.let`
-[type assertion](type-assertions.md).
+annotations are provided using the `T.let` [type assertion](type-assertions.md).
 
 ## Annotating constants
 
-Sorbet does not, by default, infer the types of constants, but they
-can be specified using `T.let`:
+Sorbet does not, by default, infer the types of constants, but they can be
+specified using `T.let`:
 
 ```ruby
 NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String])
@@ -75,17 +74,17 @@ class Foo
 end
 ```
 
-This is a known limitation of Sorbet, and we're considering ways to
-make it less verbose in the future.
+This is a known limitation of Sorbet, and we're considering ways to make it less
+verbose in the future.
 
 ## Type annotations and strictness levels
 
-Sorbet allows the programmer to opt-in to greater levels of static
-type rigor: at lower [strictness modes](static.md), Sorbet allows
-definitions to be untyped, but at `# typed: strict`, Sorbet requires
-explicit type annotations on any definitions where it would have
-assumed `T.untyped` without an annotation before. Specifically, in a
-`# typed: strict` file it's an error to omit type annotations for:
+Sorbet allows the programmer to opt-in to greater levels of static type rigor:
+at lower [strictness modes](static.md), Sorbet allows definitions to be untyped,
+but at `# typed: strict`, Sorbet requires explicit type annotations on any
+definitions where it would have assumed `T.untyped` without an annotation
+before. Specifically, in a `# typed: strict` file it's an error to omit type
+annotations for:
 
 - methods
 - instance variables
