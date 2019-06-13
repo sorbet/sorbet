@@ -9,7 +9,7 @@ module T::Private::Final
     if klass.instance_variable_get(:@sorbet_is_final) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
       raise "#{klass.name} was already declared as final"
     end
-    klass.send(:define_singleton_method, :inherited) do |sub|
+    klass.define_singleton_method(:inherited) do |sub|
       raise "#{self.name} was declared final and cannot be subclassed"
     end
     klass.instance_variable_set(:@sorbet_is_final, true) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
