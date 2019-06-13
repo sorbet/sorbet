@@ -18,7 +18,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         final!
       end
     end
-    assert_includes(err.message, "is not a class, but was declared final")
+    assert_includes(err.message, "is not a class (it is a Module), but was declared final")
   end
 
   it "forbids re-declaring a class as final" do
