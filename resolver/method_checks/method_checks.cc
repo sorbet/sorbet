@@ -259,7 +259,6 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        auto sym = methodDef->symbol;
         validateOverriding(ctx.state, methodDef->symbol);
         return methodDef;
     }
