@@ -244,7 +244,7 @@ public:
 };
 
 std::vector<ast::ParsedFile> validateSymbols(core::Context ctx, std::vector<ast::ParsedFile> trees) {
-    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbols");
+    Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
     for (auto &tree : trees) {
@@ -254,7 +254,7 @@ std::vector<ast::ParsedFile> validateSymbols(core::Context ctx, std::vector<ast:
 }
 
 ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree) {
-    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbols");
+    Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
     tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
