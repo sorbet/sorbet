@@ -58,6 +58,3 @@ end
 
 class TypeError < StandardError
 end
-
-module Warning
-end
