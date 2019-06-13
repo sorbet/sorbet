@@ -227,24 +227,6 @@ void validateAbstract(const core::GlobalState &gs,
     }
 }
 
-void validateSymbols(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "Resolver::validateSymbols");
-    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
-
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, i);
-        if (!sym.data(gs)->loc().exists() || sym.data(gs)->loc().file().data(gs).isPayload()) {
-            continue;
-        }
-        if (sym.data(gs)->isClass()) {
-            validateAbstract(gs, abstractCache, sym);
-        }
-        if (sym.data(gs)->isMethod()) {
-            validateOverriding(gs, sym);
-        }
-    }
-}
-
 class ValidateWalk {
 private:
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
@@ -264,8 +246,8 @@ public:
     }
 };
 
-std::vector<ast::ParsedFile> validateSymbolsTwo(core::Context ctx, std::vector<ast::ParsedFile> trees) {
-    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbolsTwo");
+std::vector<ast::ParsedFile> validateSymbols(core::Context ctx, std::vector<ast::ParsedFile> trees) {
+    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbols");
 
     ValidateWalk validate;
     for (auto &tree : trees) {
@@ -275,7 +257,7 @@ std::vector<ast::ParsedFile> validateSymbolsTwo(core::Context ctx, std::vector<a
 }
 
 ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree) {
-    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbolsTwo");
+    Timer timeit(ctx.state.tracer(), "Resolver::validateSymbols");
 
     ValidateWalk validate;
     tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
