@@ -9,43 +9,6 @@ using namespace std;
 
 namespace sorbet::method_checks {
 
-const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs,
-                                                  UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
-                                                  core::SymbolRef klass) {
-    vector<core::SymbolRef> abstract;
-    auto ent = abstractCache.find(klass);
-    if (ent != abstractCache.end()) {
-        return ent->second;
-    }
-
-    auto superclass = klass.data(gs)->superClass();
-    if (superclass.exists()) {
-        auto &superclassMethods = getAbstractMethods(gs, abstractCache, superclass);
-        // TODO(nelhage): This code coud go quadratic or even exponential given
-        // pathological arrangments of interfaces and abstract methods. Switch
-        // to a better data structure if that is ever a problem.
-        abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
-    }
-
-    for (auto ancst : klass.data(gs)->mixins()) {
-        auto fromMixin = getAbstractMethods(gs, abstractCache, ancst);
-        abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
-    }
-
-    auto isAbstract = klass.data(gs)->isClassAbstract();
-    if (isAbstract) {
-        for (auto mem : klass.data(gs)->members) {
-            if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
-                abstract.emplace_back(mem.second);
-            }
-        }
-    }
-
-    auto &entry = abstractCache[klass];
-    entry = std::move(abstract);
-    return entry;
-}
-
 struct Signature {
     struct {
         absl::InlinedVector<core::SymbolRef, 4> required;
@@ -196,47 +159,82 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     }
 }
 
-void validateAbstract(const core::GlobalState &gs,
-                      UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache, core::SymbolRef sym) {
-    if (sym.data(gs)->isClassAbstract()) {
-        return;
-    }
-    auto loc = sym.data(gs)->loc();
-    if (loc.exists() && loc.file().data(gs).isRBI()) {
-        return;
-    }
-
-    auto &abstract = getAbstractMethods(gs, abstractCache, sym);
-
-    if (abstract.empty()) {
-        return;
-    }
-
-    for (auto proto : abstract) {
-        if (proto.data(gs)->owner == sym) {
-            continue;
-        }
-
-        auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
-        if (!mem.exists()) {
-            if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
-                e.setHeader("Missing definition for abstract method `{}`", proto.data(gs)->show(gs));
-                e.addErrorLine(proto.data(gs)->loc(), "defined here");
-            }
-        }
-    }
-}
-
 class ValidateWalk {
 private:
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
+    const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs, core::SymbolRef klass) {
+        vector<core::SymbolRef> abstract;
+        auto ent = abstractCache.find(klass);
+        if (ent != abstractCache.end()) {
+            return ent->second;
+        }
+
+        auto superclass = klass.data(gs)->superClass();
+        if (superclass.exists()) {
+            auto &superclassMethods = getAbstractMethods(gs, superclass);
+            // TODO(nelhage): This code coud go quadratic or even exponential given
+            // pathological arrangments of interfaces and abstract methods. Switch
+            // to a better data structure if that is ever a problem.
+            abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
+        }
+
+        for (auto ancst : klass.data(gs)->mixins()) {
+            auto fromMixin = getAbstractMethods(gs, ancst);
+            abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
+        }
+
+        auto isAbstract = klass.data(gs)->isClassAbstract();
+        if (isAbstract) {
+            for (auto mem : klass.data(gs)->members) {
+                if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
+                    abstract.emplace_back(mem.second);
+                }
+            }
+        }
+
+        auto &entry = abstractCache[klass];
+        entry = std::move(abstract);
+        return entry;
+    }
+
+    void validateAbstract(const core::GlobalState &gs, core::SymbolRef sym) {
+        if (sym.data(gs)->isClassAbstract()) {
+            return;
+        }
+        auto loc = sym.data(gs)->loc();
+        if (loc.exists() && loc.file().data(gs).isRBI()) {
+            return;
+        }
+
+        auto &abstract = getAbstractMethods(gs, sym);
+
+        if (abstract.empty()) {
+            return;
+        }
+
+        for (auto proto : abstract) {
+            if (proto.data(gs)->owner == sym) {
+                continue;
+            }
+
+            auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
+            if (!mem.exists()) {
+                if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
+                    e.setHeader("Missing definition for abstract method `{}`", proto.data(gs)->show(gs));
+                    e.addErrorLine(proto.data(gs)->loc(), "defined here");
+                }
+            }
+        }
+    }
+
+
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         auto sym = classDef->symbol;
-        validateAbstract(ctx.state, abstractCache, sym);
+        validateAbstract(ctx.state, sym);
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
-        validateAbstract(ctx.state, abstractCache, singleton);
+        validateAbstract(ctx.state, singleton);
         return classDef;
     }
 
