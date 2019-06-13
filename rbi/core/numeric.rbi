@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Numeric < Object
   include Comparable
 

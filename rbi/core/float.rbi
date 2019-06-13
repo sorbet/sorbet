@@ -630,4 +630,3 @@ class Float < Numeric
   sig {returns(T::Boolean)}
   def zero?(); end
 end
-

@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class IO < Object
   include File::Constants
   include Enumerable
