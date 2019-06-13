@@ -87,5 +87,8 @@ end
 class TypeError < StandardError
 end
 
+class UncaughtThrowError < ArgumentError
+end
+
 class ZeroDivisionError < StandardError
 end

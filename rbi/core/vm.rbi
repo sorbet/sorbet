@@ -7,6 +7,3 @@ end
 
 class RubyVM::InstructionSequence < Object
 end
-
-class UncaughtThrowError < ArgumentError
-end
