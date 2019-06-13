@@ -1,4 +1,3 @@
-
 const React = require('react');
 
 const CompLibrary = require('../../core/CompLibrary.js');
@@ -31,30 +30,23 @@ const TalkListItem = (props) => (
   </li>
 );
 
-const TalkList = (props) => (
-  <ul>
-    {props.content.map(TalkListItem)}
-  </ul>
-);
+const TalkList = (props) => <ul>{props.content.map(TalkListItem)}</ul>;
 
 const ProjectListItem = (props) => {
-  var description = "";
-  if (props.description != null && props.description != "") {
-    description = " - " + props.description;
+  var description = '';
+  if (props.description != null && props.description != '') {
+    description = ' - ' + props.description;
   }
 
   return (
     <li>
-      <a href={props.link}>{props.title}</a>{description}
+      <a href={props.link}>{props.title}</a>
+      {description}
     </li>
   );
-}
+};
 
-const ProjectList = (props) => (
-  <ul>
-    {props.content.map(ProjectListItem)}
-  </ul>
-);
+const ProjectList = (props) => <ul>{props.content.map(ProjectListItem)}</ul>;
 
 class Index extends React.Component {
   render() {
@@ -92,43 +84,50 @@ class Index extends React.Component {
                   title: `Report Issues`,
                   content: `Found a bug? Report it on the [Sorbet Github repo](https://github.com/stripe/sorbet/issues).`,
                 },
-              ]} />
+              ]}
+            />
           </PageSection>
         </div>
-        <PageSection gray>
+        <PageSection gray short>
           <h1>Talks</h1>
-          <TalkList content={[
-            {
-              title: "A practical type system for Ruby at Stripe",
-              link: "/docs/talks/ruby-kaigi-2018",
-              venue: "RubyKaigi 2018",
-            },
-            {
-              title: "Gradual typing of Ruby at Scale",
-              link: "/docs/talks/strange-loop-2018",
-              venue: "Strange Loop 2018",
-            },
-            {
-              title: "State of Sorbet: A type checker for Ruby",
-              link: "/docs/talks/ruby-kaigi-2019",
-              venue: "RubyKaigi 2019",
-            },
-          ]} />
+          <TalkList
+            content={[
+              {
+                title: 'A practical type system for Ruby at Stripe',
+                link: '/docs/talks/ruby-kaigi-2018',
+                venue: 'RubyKaigi 2018',
+              },
+              {
+                title: 'Gradual typing of Ruby at Scale',
+                link: '/docs/talks/strange-loop-2018',
+                venue: 'Strange Loop 2018',
+              },
+              {
+                title: 'State of Sorbet: A type checker for Ruby',
+                link: '/docs/talks/ruby-kaigi-2019',
+                venue: 'RubyKaigi 2019',
+              },
+            ]}
+          />
         </PageSection>
         <PageSection>
           <h1>Projects</h1>
-          <ProjectList content={[
-            {
-              title: "sorbet-typed",
-              link: "https://github.com/sorbet/sorbet-typed",
-              description: "A central repository for sharing type definitions for Ruby gems",
-            },
-            {
-              title: "sorbet-rails",
-              link: "https://github.com/chanzuckerberg/sorbet-rails",
-              description: "A set of tools to make sorbet work with rails seamlessly",
-            }
-          ]} />
+          <ProjectList
+            content={[
+              {
+                title: 'sorbet-typed',
+                link: 'https://github.com/sorbet/sorbet-typed',
+                description:
+                  'A central repository for sharing type definitions for Ruby gems',
+              },
+              {
+                title: 'sorbet-rails',
+                link: 'https://github.com/chanzuckerberg/sorbet-rails',
+                description:
+                  'A set of tools to make sorbet work with rails seamlessly',
+              },
+            ]}
+          />
         </PageSection>
         <PageSection short lightPurple>
           <p className="footer">
