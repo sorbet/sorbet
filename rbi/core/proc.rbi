@@ -44,9 +44,6 @@ class Proc < Object
   def inspect(); end
 end
 
-class Binding < Object
-end
-
 class LocalJumpError < StandardError
 end
 
