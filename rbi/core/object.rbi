@@ -7,9 +7,6 @@ class Object < BasicObject
   def object_id(); end
 end
 
-class Data < Object
-end
-
 class NilClass < Object
   sig do
     params(
