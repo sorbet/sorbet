@@ -3,6 +3,25 @@
 
 # typed: __STDLIB_INTERNAL
 
+class Dir
+  sig do
+    params(
+      prefix_suffix: T.nilable(T.any(String, T::Array[String])),
+      tmpdir: T.nilable(String),
+    )
+    .returns(String)
+  end
+  sig do
+    type_parameters(:U).params(
+      prefix_suffix: T.nilable(T.any(String, T::Array[String])),
+      tmpdir: T.nilable(String),
+      blk: T.proc.params(dir: String).returns(T.type_parameter(:U)),
+    )
+    .returns(T.type_parameter(:U))
+  end
+  def self.mktmpdir(prefix_suffix=nil, tmpdir=nil, &blk); end
+end
+
 module Dir::Tmpname
   sig do
     params(
@@ -26,23 +45,4 @@ module Dir::Tmpname
 
   sig {returns(::T.untyped)}
   def self.tmpdir(); end
-end
-
-class Dir
-  sig do
-    params(
-      prefix_suffix: T.nilable(T.any(String, T::Array[String])),
-      tmpdir: T.nilable(String),
-    )
-    .returns(String)
-  end
-  sig do
-    type_parameters(:U).params(
-      prefix_suffix: T.nilable(T.any(String, T::Array[String])),
-      tmpdir: T.nilable(String),
-      blk: T.proc.params(dir: String).returns(T.type_parameter(:U)),
-    )
-    .returns(T.type_parameter(:U))
-  end
-  def self.mktmpdir(prefix_suffix=nil, tmpdir=nil, &blk); end
 end
