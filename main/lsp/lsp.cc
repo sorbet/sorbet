@@ -180,10 +180,10 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                             }
                             // Add link to error documentation.
                             relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                make_unique<Location>(absl::StrCat("http://go/e/", e->what.code), make_unique<Range>(
-                                    make_unique<Position>(0, 0), make_unique<Position>(0, 0)
-                                )), "Click for more information on this error."
-                            ));
+                                make_unique<Location>(
+                                    absl::StrCat(opts.errorUrlBase, e->what.code),
+                                    make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
+                                "Click for more information on this error."));
                             diagnostic->relatedInformation = move(relatedInformation);
                         });
                         diagnostics.push_back(move(diagnostic));
