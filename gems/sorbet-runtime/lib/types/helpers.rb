@@ -16,7 +16,7 @@ module T::Helpers
     Private::Abstract::Declare.declare_abstract(self, type: :interface)
   end
 
-  def final!
+  def __UNSTABLE_final!
     Private::Final::declare(self)
   end
 
