@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sorbet Error Reference · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;This is one of three docs aimed at helping answer common questions about Sorbet:&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sorbet Error Reference · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;This is one of three docs aimed at helping answer common questions about Sorbet:&lt;/p&gt;
-"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sorbet Error Reference · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;style&gt;"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sorbet Error Reference · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;style&gt;"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-purple-sparkles.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -64,18 +62,31 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/error-reference.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Sorbet Error Reference</h1></header><article><div><span><p>This is one of three docs aimed at helping answer common questions about Sorbet:</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/stripe/sorbet/edit/master/website/docs/error-reference.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Sorbet Error Reference</h1></header><article><div><span><style>
+#missing-doc-for-error-code-box.is-hidden {
+  display: none;
+}
+</style>
+<div class="is-hidden" id="missing-doc-for-error-code-box">
+<blockquote>
+<p><strong>Heads up</strong>: There aren’t any docs yet for <span id="missing-error-code">this
+error code</span>. If you have suggestions for what would have helped you
+solve this problem, click the “Edit” button above to contribute! Otherwise,
+try using the search above to find an answer.</p>
+</blockquote>
+</div>
+<blockquote>
+<p><strong>Note</strong>: This list is not exhaustive! Some errors are very context dependent
+and other error codes are not common enough to know how to generally suggest
+help. Contributions to this list are welcome!</p>
+</blockquote>
+<p>This is one of three docs aimed at helping answer common questions about Sorbet:</p>
 <ol>
 <li><a href="/docs/troubleshooting">Troubleshooting</a></li>
 <li><a href="/docs/faq">Frequently Asked Questions</a></li>
 <li><a href="/docs/error-reference">Sorbet Error Reference</a> (this doc)</li>
 </ol>
 <p>This page contains tips and tricks for common errors from <code>srb</code>.</p>
-<blockquote>
-<p><strong>Note</strong>: This list is not exhaustive! Some errors are very context dependent
-and other error codes are not common enough to know how to generally suggest
-help. Contributions to this list are welcome!</p>
-</blockquote>
 <h2><a class="anchor" aria-hidden="true" id="1001"></a><a href="#1001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>1001</h2>
 <p>Sorbet has crashed. Please <a href="https://github.com/stripe/sorbet/issues">report an issue</a>!</p>
 <h2><a class="anchor" aria-hidden="true" id="2001"></a><a href="#2001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2001</h2>
@@ -154,8 +165,7 @@ or regenerating the file.</p></li>
 </ul>
 <p>Another thing it could be: Sorbet explicitly does not support resolving
 constants through ancestors (both mixins or superclasses).</p>
-<ul>
-<li><p>Concretely, here’s an example of code rejected and accepted by Sorbet:</p>
+<p>Concretely, here’s an example of code rejected and accepted by Sorbet:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   MY_CONST = <span class="hljs-number">91</span>
 <span class="hljs-keyword">end</span>
@@ -164,9 +174,9 @@ constants through ancestors (both mixins or superclasses).</p>
 
 Child::MY_CONST    <span class="hljs-comment"># error</span>
 Parent::MY_CONST   <span class="hljs-comment"># ok</span>
-</code></pre></li>
-<li><p>Alternatively, if it’s much more preferable to access the constant on the
-child, we can set up an explicit alias:</p>
+</code></pre>
+<p>Alternatively, if it’s much more preferable to access the constant on the child,
+we can set up an explicit alias:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   MY_CONST = <span class="hljs-number">91</span>
 <span class="hljs-keyword">end</span>
@@ -177,8 +187,7 @@ child, we can set up an explicit alias:</p>
 
 Child::MY_CONST    <span class="hljs-comment"># ok</span>
 Parent::MY_CONST   <span class="hljs-comment"># ok</span>
-</code></pre></li>
-</ul>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="5005"></a><a href="#5005" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5005</h2>
 <p>A class or instance variable is defined in the wrong context.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
@@ -537,6 +546,7 @@ sig {params(<span class="hljs-symbol">blk:</span> T.untyped).returns(T.untyped)}
 <span class="hljs-keyword">end</span>
 <span class="hljs-comment"># ---------------------------------------------</span>
 </code></pre>
+<script src="/js/error-reference.js"></script>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#2001">2001</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#4015">4015</a></li><li><a href="#5002">5002</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#5036">5036</a></li><li><a href="#6002">6002</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7006">7006</a></li><li><a href="#7014">7014</a></li><li><a href="#7017">7017</a></li><li><a href="#7019">7019</a></li><li><a href="#7021">7021</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li></ul></nav></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
