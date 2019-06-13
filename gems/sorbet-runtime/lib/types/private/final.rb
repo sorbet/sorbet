@@ -11,7 +11,7 @@ module T::Private::Final
     if self.is_final?(klass)
       raise "#{klass.name} was already declared as final"
     end
-    def klass.inherited(sub)
+    klass.send(:define_singleton_method, :inherited) do |sub|
       raise "#{self.name} was declared final and cannot be subclassed"
     end
     self.mark_as_final(klass)
