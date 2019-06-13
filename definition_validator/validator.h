@@ -6,11 +6,11 @@
 
 #include <vector>
 
-namespace sorbet::method_checks {
+namespace sorbet::definition_validator {
 
 std::vector<ast::ParsedFile> validateSymbols(core::Context ctx, std::vector<ast::ParsedFile> trees);
 ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree);
 
-} // namespace sorbet::method_checks
+} // namespace sorbet::definition_validator
 
 #endif

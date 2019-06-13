@@ -18,12 +18,12 @@
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
+#include "definition_validator/validator.h"
 #include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
-#include "method_checker/method_checks.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
@@ -334,7 +334,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto file = resolvedTree.file;
 
         {
-            resolvedTree = method_checks::validateSymbolsOne(ctx, move(resolvedTree));
+            resolvedTree = definition_validator::validateSymbolsOne(ctx, move(resolvedTree));
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }

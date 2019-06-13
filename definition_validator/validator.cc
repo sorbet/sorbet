@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace sorbet::method_checks {
+namespace sorbet::definition_validator {
 
 struct Signature {
     struct {
@@ -261,4 +261,4 @@ ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree) {
     return tree;
 }
 
-} // namespace sorbet::method_checks
+} // namespace sorbet::definition_validator

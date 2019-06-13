@@ -18,11 +18,11 @@
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
+#include "definition_validator/validator.h"
 #include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
-#include "method_checker/method_checks.h"
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -660,7 +660,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
 
-    resolved = method_checks::validateSymbolsOne(ctx, std::move(resolved));
+    resolved = definition_validator::validateSymbolsOne(ctx, std::move(resolved));
 
     resolved = flatten::runOne(ctx, move(resolved));
 
