@@ -15,4 +15,11 @@ def main
               # ^ hover: sig {params(blk: T.proc.params(arg0: Dog).returns(String)).returns(T::Array[String])}
                    # ^ hover: sig {returns(String)}
                     # ^ hover: sig {returns(String)}
+
+  # Safenav
+  dog = Dog.new
+  breed = dog&.breed
+# ^ hover: T.nilable(String)
+            # ^ hover: sig {returns(String)}
+             # ^ hover: sig {returns(String)}
 end
