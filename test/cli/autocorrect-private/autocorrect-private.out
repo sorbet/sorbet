@@ -1,4 +1,4 @@
-autocorrect-private.rb:14: Use `private` to define private instance methods https://sorbet.org/docs/error-reference#3503
+autocorrect-private.rb:14: Use `private` to define private instance methods https://srb.help/3503
     14 |  private_class_method def foo
     15 |  end
   Autocorrect: Done
@@ -6,7 +6,7 @@ autocorrect-private.rb:14: Use `private` to define private instance methods http
     14 |  private_class_method def foo
           ^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-private.rb:19: Use `private_class_method` to define private class methods https://sorbet.org/docs/error-reference#3503
+autocorrect-private.rb:19: Use `private_class_method` to define private class methods https://srb.help/3503
     19 |  private def self.foo
     20 |  end
   Autocorrect: Done

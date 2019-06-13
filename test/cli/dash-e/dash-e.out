@@ -5,7 +5,7 @@ class ::<root> < ::Object () @ (https://github.com/stripe/sorbet/tree/master/baz
     method ::<Class:Foo>#<static-init> (<blk>) @ -e:1
       argument ::<Class:Foo>#<static-init>#<blk><block> @ -e
 
--e:2: This function does not have a `sig` https://sorbet.org/docs/error-reference#7017
+-e:2: This function does not have a `sig` https://srb.help/7017
      2 |def foo; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect

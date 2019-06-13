@@ -1,4 +1,4 @@
-bar.rb:4: `String("bar.rb")` does not match `Integer` for argument `arg0` https://sorbet.org/docs/error-reference#7002
+bar.rb:4: `String("bar.rb")` does not match `Integer` for argument `arg0` https://srb.help/7002
      4 |1 + "bar.rb"
         ^^^^^^^^^^^^
     https://github.com/stripe/sorbet/tree/master/rbi/core/numeric.rbi#L1030: Method `Integer#+` has specified `arg0` as `Integer`
