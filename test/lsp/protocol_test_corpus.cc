@@ -300,8 +300,11 @@ TEST_F(ProtocolTest, EmptyRootUriInitialization) {
 TEST_F(ProtocolTest, MonacoInitialization) {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
-    auto params = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
-                                              makeInitializeParams(JSONNullObject(), JSONNullObject(), false, true));
+    const bool enableTypecheckInfo = false;
+    const bool supportsMarkdown = true;
+    auto params = make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::Initialize,
+        makeInitializeParams(JSONNullObject(), JSONNullObject(), enableTypecheckInfo, supportsMarkdown));
     auto responses = send(LSPMessage(move(params)));
     ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
     auto &respMsg = responses.at(0);
@@ -398,7 +401,10 @@ TEST_F(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
 
 // If a client doesn't support markdown, send hover as plaintext.
 TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
-    auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, false, false);
+    const bool enableTypecheckInfo = false;
+    const bool supportsMarkdown = false;
+    auto initializeResponses =
+        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo, supportsMarkdown);
     updateDiagnostics(initializeResponses);
     assertDiagnostics(move(initializeResponses), {});
 
