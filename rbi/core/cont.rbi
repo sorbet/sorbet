@@ -7,6 +7,3 @@ class Fiber < Object
   sig {returns(T::Boolean)}
   def alive?; end
 end
-
-class FiberError < StandardError
-end
