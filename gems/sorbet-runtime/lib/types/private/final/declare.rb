@@ -12,8 +12,9 @@ module T::Private::Final
     if T::AbstractUtils.abstract_module?(klass)
       raise "#{klass.name} was already declared as abstract and cannot also be declared as final"
     end
-    klass.define_singleton_method(:inherited) do |sub|
+    original = T::Private::ClassUtils.replace_method(klass.singleton_class, :inherited) do |sub|
       raise "#{self.name} was declared final and cannot be subclassed"
+      original.bind(self).call(sub)
     end
     T::Private::Abstract::Data.set(klass, "is_final", true)
   end
