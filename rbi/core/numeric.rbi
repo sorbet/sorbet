@@ -300,5 +300,3 @@ end
 
 class ZeroDivisionError < StandardError
 end
-
-Fixnum = Integer
