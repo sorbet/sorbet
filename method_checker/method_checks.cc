@@ -228,7 +228,6 @@ private:
         }
     }
 
-
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         auto sym = classDef->symbol;
