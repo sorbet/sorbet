@@ -182,7 +182,7 @@ class Index extends React.Component {
         </PageSection>
         <PageSection short>
           <div className="pageSectionColumns">
-            <p class="logos">
+            <p className="logos">
               <a href="https://stripe.com/">
                 <img src={`${baseUrl}img/stripe-logo.svg`} alt="Stripe Logo" />
               </a>
