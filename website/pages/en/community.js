@@ -8,7 +8,7 @@ const GridBlock = CompLibrary.GridBlock;
 const PageSection = require(`${process.cwd()}/core/PageSection.js`);
 
 const TalkListItem = (props) => (
-  <li>
+  <li key={props.link}>
     <a href={props.link}>{props.title}</a> at {props.venue}
   </li>
 );
@@ -22,7 +22,7 @@ const ProjectListItem = (props) => {
   }
 
   return (
-    <li>
+    <li key={props.link}>
       <a href={props.link}>{props.title}</a>
       {description}
     </li>
