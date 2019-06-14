@@ -9,10 +9,13 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
+
 if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
+  RUBY_TESTS=""
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
+  RUBY_TESTS="@ruby_2_4_3//:smoke_test"
 fi
 
 export JOB_NAME=test-static-sanitized
@@ -22,7 +25,7 @@ echo will run with $CONFIG_OPTS
 
 
 err=0
-./bazel test @ruby_2_4_3//:smoke_test //... $CONFIG_OPTS --test_summary=terse || err=$?
+./bazel test $RUBY_TESTS //... $CONFIG_OPTS --test_summary=terse || err=$?
 
 echo "--- uploading test results"
 
