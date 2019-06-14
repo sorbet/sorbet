@@ -23,7 +23,7 @@ module T::Props
     # supported by T::Props.
     #
     # @param [Object] _instance
-    # @return An instance of one of T::Props::Constants::SCALAR_TYPES
+    # @return An instance of one of T::Configuration.scalar_types
     def serialize(_instance)
       raise NotImplementedError.new('Must override in included class')
     end
@@ -31,7 +31,7 @@ module T::Props
     # Given the serialized form of your type, this returns an instance
     # of that custom type representing that value.
     #
-    # @param _mongo_scalar One of T::Props::Constants::SCALAR_TYPES
+    # @param _mongo_scalar One of T::Configuration.scalar_types
     # @return Object
     def deserialize(_mongo_scalar)
       raise NotImplementedError.new('Must override in included class')
@@ -45,11 +45,11 @@ module T::Props
 
     def self.scalar_type?(val)
       # We don't need to check for val's included modules in
-      # Constants::SCALAR_TYPES, because Constants::SCALAR_TYPES are all
-      # classes.
+      # T::Configuration.scalar_types, because T::Configuration.scalar_types
+      # are all classes.
       klass = val.class
       until klass.nil?
-        return true if T::Props::Constants::SCALAR_TYPES.include?(klass.to_s)
+        return true if T::Configuration.scalar_types.include?(klass.to_s)
         klass = klass.superclass
       end
       false
