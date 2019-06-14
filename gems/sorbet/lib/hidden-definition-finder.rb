@@ -56,7 +56,7 @@ class Sorbet::Private::HiddenMethodFinder
   end
 
   def rm_dir
-    FileUtils.rmdir(TMP_PATH)
+    FileUtils.rm_r(TMP_PATH)
   end
 
   def require_everything
