@@ -9,9 +9,9 @@ title: Type Aliases
 Alias = T.type_alias(Type)
 ```
 
-This creates a type alias of `Type` called `Alias`. The type alias has exactly
-the same behavior as the original type and can be used anywhere the original
-type can be used. The converse is also true.
+This creates a type alias of `Type` called `Alias`. In the context of Sorbet,
+the type alias has exactly the same behavior as the original type and can be
+used anywhere the original type can be used. The converse is also true.
 
 Note that the type alias will not show up in error messages.
 
@@ -74,6 +74,43 @@ def foo; 3; end
 B = T.any(Integer, String)
 sig {returns(B)} # error: Constant B is not a class or type alias
 def bar; 3; end
+```
+
+Note that because type aliases are a Sorbet construct, they cannot be used in
+certrain runtime contexts. For instance, it is not possible to match an
+expression against a type alias in a `case` expression.
+
+```ruby
+# typed: true
+extend T::Sig
+
+class A; end
+class B; end
+class C; end
+
+AB = T.type_alias(T.any(A, B))
+sig {params(x: T.any(AB, C)).returns(Integer)}
+def invalid(x) # error: Returning value that does not conform to method result type
+  case x
+  when AB then 1 # <- this line is problematic
+  when C then 2
+  end
+end
+```
+
+We could refactor this example to use `A, B` in the `when` and `AB` in the
+`sig`. However, this introduces coupling between the definition of `AB` and our
+method. If we ever updated the definition of `AB`, we would need to update the
+definition of our method as well.
+
+```ruby
+sig {params(x: T.any(AB, C)).returns(Integer)}
+def valid(x)
+  case x
+  when A, B then 1
+  when C then 2
+  end
+end
 ```
 
 [1]: https://sorbet.org/docs/error-reference#5034
