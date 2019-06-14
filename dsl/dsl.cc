@@ -113,12 +113,12 @@ public:
         classDef->rhs.reserve(oldRHS.size());
 
         for (auto &stat : oldRHS) {
-            if (replaceNodes.find(stat.get()) != replaceNodes.end()) {
+            if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
+                classDef->rhs.emplace_back(std::move(stat));
+            } else {
                 for (auto &newNode : replaceNodes.at(stat.get())) {
                     classDef->rhs.emplace_back(std::move(newNode));
                 }
-            } else {
-                classDef->rhs.emplace_back(std::move(stat));
             }
         }
         return classDef;
