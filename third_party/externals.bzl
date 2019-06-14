@@ -234,3 +234,26 @@ package(default_visibility = ["//visibility:public"])
         commit = "de5f791d0457ffa866c371f16a3a53228515bb9a",
         build_file = "//third_party:cpp_subprocess.BUILD",
     )
+
+    http_archive(
+        name = "ruby_2_4_3",
+        url = "https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.3.tar.gz",
+        sha256 = "fd0375582c92045aa7d31854e724471fb469e11a4b08ff334d39052ccaaa3a98",
+        strip_prefix = "ruby-2.4.3",
+        build_file = "//third_party/ruby:ruby-2.4.BUILD",
+        patches = [
+            "//third_party/ruby:config.h.patch",
+            "//third_party/ruby:probes.h.patch",
+            "//third_party/ruby:rbconfig.rb.patch",
+            "//third_party/ruby:enc.encinit.c.patch",
+        ],
+        patch_args = ["-p1"],
+    )
+
+    http_archive(
+        name = "zlib",
+        url = "https://zlib.net/zlib-1.2.11.tar.gz",
+        sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+        strip_prefix = "zlib-1.2.11",
+        build_file = "//third_party:zlib.BUILD",
+    )
