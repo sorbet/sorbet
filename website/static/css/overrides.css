@@ -28,6 +28,19 @@ a:hover {
   text-decoration: underline;
 }
 
+/*
+ * The default footer is gray. We override it in a few ways.
+ */
+.nav-footer {
+  background-color: var(--sorbet-purple-3);
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.nav-footer a {
+  color: var(--sorbet-purple-6);
+}
+
 /* Don't highlight the logo in the header on hover:
  *
  * .fixedHeaderContainer is hard coded here:
