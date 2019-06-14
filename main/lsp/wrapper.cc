@@ -62,17 +62,13 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
 }
 
 LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
+    opts.rawInputDirNames.emplace_back(rootPath);
+
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
     stderrColorSink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
     auto logger = make_shared<spd::logger>("console", stderrColorSink);
     typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");
-
-    // Pass -e to avoid file system operations. We just want to initialize default options.
-    const char *argv[] = {"sorbet", "--color=never", "-e", "0"};
-    options::readOptions(opts, size(argv), const_cast<char **>(argv), logger);
-    opts.rawInputDirNames.emplace_back(rootPath);
-
     auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     unique_ptr<KeyValueStore> kvstore;
     payload::createInitialGlobalState(gs, opts, kvstore);
