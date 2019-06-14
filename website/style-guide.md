@@ -29,4 +29,4 @@
   - `M`, `N`, `O`: module
   - `Parent` / `Child`: classes with inheritance relationship
 - Don't e.g. use `foo` to mean a local variable, or `f` to mean an arbitrary
-  method, or `A` mean an interface.
+  method, or `A` mean an module.
