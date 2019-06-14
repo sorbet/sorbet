@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include "ast/treemap/treemap.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
@@ -6,44 +7,7 @@
 
 using namespace std;
 
-namespace sorbet::method_checks {
-
-const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
-                                                  UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
-                                                  core::SymbolRef klass) {
-    vector<core::SymbolRef> abstract;
-    auto ent = abstractCache.find(klass);
-    if (ent != abstractCache.end()) {
-        return ent->second;
-    }
-
-    auto superclass = klass.data(gs)->superClass();
-    if (superclass.exists()) {
-        auto &superclassMethods = getAbstractMethods(gs, abstractCache, superclass);
-        // TODO(nelhage): This code coud go quadratic or even exponential given
-        // pathological arrangments of interfaces and abstract methods. Switch
-        // to a better data structure if that is ever a problem.
-        abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
-    }
-
-    for (auto ancst : klass.data(gs)->mixins()) {
-        auto fromMixin = getAbstractMethods(gs, abstractCache, ancst);
-        abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
-    }
-
-    auto isAbstract = klass.data(gs)->isClassAbstract();
-    if (isAbstract) {
-        for (auto mem : klass.data(gs)->members) {
-            if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
-                abstract.emplace_back(mem.second);
-            }
-        }
-    }
-
-    auto &entry = abstractCache[klass];
-    entry = std::move(abstract);
-    return entry;
-}
+namespace sorbet::definition_validator {
 
 struct Signature {
     struct {
@@ -54,7 +18,7 @@ struct Signature {
     core::SymbolRef blk;
 } left, right;
 
-Signature decomposeSignature(core::GlobalState &gs, core::SymbolRef method) {
+Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method) {
     Signature sig;
     for (auto arg : method.data(gs)->arguments()) {
         if (arg.data(gs)->isBlockArgument()) {
@@ -77,7 +41,7 @@ Signature decomposeSignature(core::GlobalState &gs, core::SymbolRef method) {
 // Eventually this should check the appropriate subtype relationships on types,
 // as well, but for now we just look at the argument shapes and ensure that they
 // are compatible.
-void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMethod, core::SymbolRef method) {
+void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef superMethod, core::SymbolRef method) {
     if (method.data(gs)->isOverloaded()) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
@@ -162,7 +126,7 @@ void validateCompatibleOverride(core::GlobalState &gs, core::SymbolRef superMeth
     }
 }
 
-void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
+void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     auto klass = method.data(gs)->owner;
     auto name = method.data(gs)->name;
     ENFORCE(klass.data(gs)->isClass());
@@ -195,53 +159,96 @@ void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
     }
 }
 
-void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
-                      core::SymbolRef sym) {
-    if (sym.data(gs)->isClassAbstract()) {
-        return;
-    }
-    auto loc = sym.data(gs)->loc();
-    if (loc.exists() && loc.file().data(gs).isRBI()) {
-        return;
-    }
+class ValidateWalk {
+private:
+    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
-    auto &abstract = getAbstractMethods(gs, abstractCache, sym);
-
-    if (abstract.empty()) {
-        return;
-    }
-
-    for (auto proto : abstract) {
-        if (proto.data(gs)->owner == sym) {
-            continue;
+    const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs, core::SymbolRef klass) {
+        vector<core::SymbolRef> abstract;
+        auto ent = abstractCache.find(klass);
+        if (ent != abstractCache.end()) {
+            return ent->second;
         }
 
-        auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
-        if (!mem.exists()) {
-            if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
-                e.setHeader("Missing definition for abstract method `{}`", proto.data(gs)->show(gs));
-                e.addErrorLine(proto.data(gs)->loc(), "defined here");
+        auto superclass = klass.data(gs)->superClass();
+        if (superclass.exists()) {
+            auto &superclassMethods = getAbstractMethods(gs, superclass);
+            // TODO(nelhage): This code coud go quadratic or even exponential given
+            // pathological arrangments of interfaces and abstract methods. Switch
+            // to a better data structure if that is ever a problem.
+            abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
+        }
+
+        for (auto ancst : klass.data(gs)->mixins()) {
+            auto fromMixin = getAbstractMethods(gs, ancst);
+            abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
+        }
+
+        auto isAbstract = klass.data(gs)->isClassAbstract();
+        if (isAbstract) {
+            for (auto mem : klass.data(gs)->members) {
+                if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
+                    abstract.emplace_back(mem.second);
+                }
+            }
+        }
+
+        auto &entry = abstractCache[klass];
+        entry = std::move(abstract);
+        return entry;
+    }
+
+    void validateAbstract(const core::GlobalState &gs, core::SymbolRef sym) {
+        if (sym.data(gs)->isClassAbstract()) {
+            return;
+        }
+        auto loc = sym.data(gs)->loc();
+        if (loc.exists() && loc.file().data(gs).isRBI()) {
+            return;
+        }
+
+        auto &abstract = getAbstractMethods(gs, sym);
+
+        if (abstract.empty()) {
+            return;
+        }
+
+        for (auto proto : abstract) {
+            if (proto.data(gs)->owner == sym) {
+                continue;
+            }
+
+            auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
+            if (!mem.exists()) {
+                if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
+                    e.setHeader("Missing definition for abstract method `{}`", proto.data(gs)->show(gs));
+                    e.addErrorLine(proto.data(gs)->loc(), "defined here");
+                }
             }
         }
     }
-}
 
-void validateSymbols(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "Resolver::validateSymbols");
-    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
-
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, i);
-        if (!sym.data(gs)->loc().exists() || sym.data(gs)->loc().file().data(gs).isPayload()) {
-            continue;
-        }
-        if (sym.data(gs)->isClass()) {
-            validateAbstract(gs, abstractCache, sym);
-        }
-        if (sym.data(gs)->isMethod()) {
-            validateOverriding(gs, sym);
-        }
+public:
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        auto sym = classDef->symbol;
+        validateAbstract(ctx.state, sym);
+        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        validateAbstract(ctx.state, singleton);
+        return classDef;
     }
+
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        validateOverriding(ctx.state, methodDef->symbol);
+        return methodDef;
+    }
+};
+
+ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
+    Timer timeit(ctx.state.tracer(), "validateSymbols");
+
+    ValidateWalk validate;
+    tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
+    return tree;
 }
 
-} // namespace sorbet::method_checks
+} // namespace sorbet::definition_validator

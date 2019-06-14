@@ -18,6 +18,7 @@
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
+#include "definition_validator/validator.h"
 #include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
@@ -331,6 +332,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
+
+        {
+            resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
         resolvedTree = flatten::runOne(ctx, move(resolvedTree));
 
         expectation = test.expectations.find("flattened-tree");

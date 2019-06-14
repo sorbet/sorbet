@@ -1,5 +1,5 @@
 cc_library(
-    name = "method_checks",
+    name = "definition_validator",
     srcs = glob(
         [
             "*.cc",
@@ -11,7 +11,7 @@ cc_library(
         ],
     ),
     hdrs = [
-        "method_checks.h",
+        "validator.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,

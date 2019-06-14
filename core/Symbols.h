@@ -449,7 +449,7 @@ public:
         flags |= Symbol::Flags::METHOD_OVERRIDE;
     }
 
-    inline bool isFinalMethod() {
+    inline bool isFinalMethod() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_FINAL) != 0;
     }

@@ -19,6 +19,7 @@ cc_binary(
         "//cfg/builder",
         "//cfg/proto",
         "//core",
+        "//definition_validator",
         "//dsl",
         "//flattener",
         "//infer",

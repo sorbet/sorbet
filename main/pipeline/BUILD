@@ -25,6 +25,7 @@ cc_library(
         "//core",
         "//core/proto",
         "//core/serialize",
+        "//definition_validator",
         "//dsl",
         "//flattener",
         "//infer",

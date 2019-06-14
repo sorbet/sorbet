@@ -18,6 +18,7 @@
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
+#include "definition_validator/validator.h"
 #include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
@@ -658,6 +659,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
+
+    resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = flatten::runOne(ctx, move(resolved));
 
