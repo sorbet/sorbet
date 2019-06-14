@@ -44,7 +44,7 @@ sig {params(x: T.any(Integer, String)).returns(Integer)}
 def exhaustive_unreachable_when_before(x)
   ret = case x
   when Symbol
-    3 # used to be marked unreachable
+    3 # error: This code is unreachable
   when String
     x.to_i
   when Integer
@@ -82,6 +82,6 @@ def non_exhaustive_some_cases_unreachable_when(x) # error: Returning value that 
   when Integer
     x
   when Symbol
-    3 # used to be marked unreachable
+    3 # error: This code is unreachable
   end
 end

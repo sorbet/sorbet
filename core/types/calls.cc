@@ -1873,6 +1873,9 @@ public:
         if (Types::isSubType(ctx, rhs, lhs)) {
             return Types::trueClass();
         }
+        if (Types::glb(ctx, rhs, lhs)->isBottom()) {
+            return Types::falseClass();
+        }
         return Types::Boolean();
     }
 } Module_tripleEq;
