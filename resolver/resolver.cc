@@ -1551,6 +1551,7 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     finalizeSymbols(ctx.state);
     trees = resolveSigs(ctx, std::move(trees));
+    sanityCheck(ctx, trees);
 
     return trees;
 }
