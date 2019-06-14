@@ -755,7 +755,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(
                     core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
                 core::Loc recvLoc = csend->receiver->loc;
-                // Assign all desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text
+                // Assign some desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text
                 // location to node.
                 core::Loc zeroLengthLoc(loc.file(), loc.beginPos(), loc.beginPos());
                 core::Loc zeroLengthRecvLoc(recvLoc.file(), recvLoc.beginPos(), recvLoc.beginPos());
