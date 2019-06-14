@@ -257,7 +257,7 @@ cxxopts::Options buildOptions() {
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
     // Common user options in order of use
-    options.add_options()("d,dir", "Input directory", cxxopts::value<vector<string>>());
+    options.add_options()("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options()("e", "Parse an inline ruby string",
                           cxxopts::value<string>()->default_value(empty.inlineInput), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
