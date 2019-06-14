@@ -32,6 +32,7 @@ public:
 
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
+        vector<ChalkODMProp::Prop> props;
         for (auto &stat : classDef->rhs) {
             typecase(
                 stat.get(),
@@ -61,6 +62,7 @@ public:
                     if (nodesAndProp.has_value()) {
                         ENFORCE(!nodesAndProp->nodes.empty(), "nodesAndProp with value must not have nodes be empty");
                         replaceNodes[stat.get()] = std::move(nodesAndProp->nodes);
+                        props.push_back(std::move(nodesAndProp->prop));
                         return;
                     }
 
