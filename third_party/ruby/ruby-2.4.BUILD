@@ -1035,10 +1035,10 @@ sh_binary(
 # tests ########################################################################
 
 genrule(
-    name = "generate_test_puts",
-    outs = [ "test_puts.sh" ],
+    name = "generate_test_sanity.sh",
+    outs = [ "test_sanity.sh" ],
     cmd = """
-cat > $(location test_puts.sh) <<EOF
+cat > $(location test_sanity.sh) <<EOF
 #!/bin/bash
 
 export PATH="\$$(dirname \$$1):\$$PATH"
@@ -1054,13 +1054,13 @@ EOF
 )
 
 sh_test(
-    name = "test_puts",
+    name = "test_sanity",
     deps = [ ":ruby", "@bazel_tools//tools/bash/runfiles" ],
-    srcs = [ "test_puts.sh" ],
+    srcs = [ "test_sanity.sh" ],
     args = [ "$(location :ruby)" ],
 )
 
 test_suite(
     name = "ruby-2.4",
-    tests = [ ":test_puts" ],
+    tests = [ ":test_sanity" ],
 )
