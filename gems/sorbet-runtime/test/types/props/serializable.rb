@@ -28,12 +28,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     m
   end
 
-  class MyPIISerializable
-    include T::Props::Serializable
-    extend Opus::Sensitivity::PIIable
-    prop :pii, T::Hash[String, String], sensitivity: %w{name email_address}
-  end
-
   class DefaultsStruct
     include T::Props::Serializable
     include T::Props::WeakConstructor
@@ -94,13 +88,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       str = obj.inspect
       assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
-    end
-
-    it 'redacts PII' do
-      obj = MyPIISerializable.new
-      obj.pii = {"private" => "s3cr3t"}
-      str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MyPIISerializable pii=<REDACTED name, email_address>>', str)
     end
   end
 
