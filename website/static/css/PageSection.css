@@ -1,0 +1,22 @@
+.PageSection {
+  background-color: #ffffff;
+  padding: 3em 0;
+}
+
+.PageSection-Wrapper {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 0 20px;
+}
+
+.PageSection--gray {
+  background-color: #f5f5f5;
+}
+
+.PageSection--light-purple {
+  background-color: #6255b0;
+}
+
+.PageSection--short {
+  padding: 2em 0;
+}

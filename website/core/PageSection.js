@@ -1,25 +1,15 @@
 const React = require('react');
+const classNames = require('classnames');
 
-// TODO(jez) No inline styles
 const PageSection = (props) => {
-  var className = 'pageSection';
-  if (props.className && props.className != '') {
-    className += props.className;
-  }
+  var className = classNames('PageSection', props.className, {
+    'PageSection--gray': props.gray,
+    'PageSection--light-purple': props.lightPurple,
+    'PageSection--short': props.short,
+  });
   return (
-    <div
-      style={{
-        backgroundColor: props.gray
-          ? '#f5f5f5'
-          : props.lightPurple
-          ? '#6255b0'
-          : 'white',
-        color: props.lightPurple ? 'white' : 'inherit',
-        padding: props.short ? '2em 0' : '3em 0',
-      }}
-      className={className}
-    >
-      <div className="wrapper">{props.children}</div>
+    <div className={className}>
+      <div className="PageSection-Wrapper">{props.children}</div>
     </div>
   );
 };
