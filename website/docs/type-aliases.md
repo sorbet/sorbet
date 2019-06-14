@@ -77,8 +77,8 @@ def bar; 3; end
 ```
 
 Note that because type aliases are a Sorbet construct, they cannot be used in
-the context of the runtime. For instance, you cannot match an expression against
-a type alias in a `case` expression.
+certrain runtime contexts. For instance, it is not possible to match an
+expression against a type alias in a `case` expression.
 
 ```ruby
 # typed: true
