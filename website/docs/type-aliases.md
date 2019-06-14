@@ -99,7 +99,7 @@ def good(x)
 end
 
 AB = T.type_alias(T.any(A, B))
-sig {params(x: T.any(A, B, C)).returns(Integer)}
+sig {params(x: T.any(AB, C)).returns(Integer)}
 def bad(x) # error: Returning value that does not conform to method result type
   case x
   when AB # <- this line is problematic
