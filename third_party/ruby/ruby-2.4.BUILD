@@ -1035,10 +1035,10 @@ sh_binary(
 # tests ########################################################################
 
 genrule(
-    name = "generate_test_sanity.sh",
-    outs = [ "test_sanity.sh" ],
+    name = "generate_smoke_test.sh",
+    outs = [ "smoke_test.sh" ],
     cmd = """
-cat > $(location test_sanity.sh) <<EOF
+cat > $(location smoke_test.sh) <<EOF
 #!/bin/bash
 
 export PATH="\$$(dirname \$$1):\$$PATH"
@@ -1054,13 +1054,13 @@ EOF
 )
 
 sh_test(
-    name = "test_sanity",
+    name = "smoke_test",
     deps = [ ":ruby", "@bazel_tools//tools/bash/runfiles" ],
-    srcs = [ "test_sanity.sh" ],
+    srcs = [ "smoke_test.sh" ],
     args = [ "$(location :ruby)" ],
 )
 
 test_suite(
     name = "ruby-2.4",
-    tests = [ ":test_sanity" ],
+    tests = [ ":smoke_test" ],
 )
