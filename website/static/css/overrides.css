@@ -66,7 +66,14 @@ sup {
   }
 }
 
-@media only screen and (max-width: 1023px) {
+/*
+ * The .wrapper class defaults to max-width: 1400px on large screens (>1500px).
+ * We never want to use more than 1100px, even at that breakpoint.
+ */
+@media only screen and (min-width: 1500px) {
+  .wrapper {
+    max-width: 1100px;
+  }
 }
 
 /*

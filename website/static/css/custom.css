@@ -20,10 +20,6 @@
   padding: 4em 20px;
 }
 
-.wrapper {
-  max-width: 1100px;
-}
-
 .homeContainer .homeWrapper .projectLogo {
   padding: 0;
 }
@@ -32,17 +28,17 @@
   width: 200px;
 }
 
-.container .wrapper .threeByGridBlock {
+.container .threeByGridBlock {
   text-align: left;
   margin-bottom: 20px;
 }
 
-.container .wrapper .threeByGridBlock h2 {
+.container .threeByGridBlock h2 {
   margin-top: 0;
   text-align: left;
 }
 
-.container .wrapper .threeByGridBlock h2 p {
+.container .threeByGridBlock h2 p {
   margin-top: 0;
   text-align: left;
   margin-bottom: 0;
@@ -83,7 +79,7 @@
   background: var(--sorbet-purple-3);
 }
 
-.featuresContainer .wrapper .threeByGridBlock {
+.featuresContainer .threeByGridBlock {
   margin-bottom: 0;
 }
 
