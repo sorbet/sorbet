@@ -82,6 +82,13 @@
   margin-bottom: 0;
 }
 
+.featuresContainer code {
+  background-color: initial;
+  border-radius: initial;
+  font-size: initial;
+  padding: initial;
+}
+
 /* Page sections */
 .pageSection h2 {
   margin-bottom: 0.7em;

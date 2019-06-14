@@ -46,7 +46,9 @@ class Index extends React.Component {
                   Community
                 </h2>
                 <p style={{paddingTop: '1em'}}>
-                  Stay up to date with the Sorbet community!
+                  Follow us{' '}
+                  <a href="https://twitter.com/sorbet_ruby">on Twitter</a> for
+                  announcemnts!
                 </p>
               </div>
             </div>
@@ -56,20 +58,28 @@ class Index extends React.Component {
               layout="threeColumn"
               contents={[
                 {
-                  title: `Get Help`,
-                  content: `Ask a question on the [Sorbet Stack Overflow](https://stackoverflow.com/questions/tagged/sorbet) community.`,
+                  title: `Ask questions`,
+                  content: `The Sorbet team monitors questions on Stack Overflow with the tag [\`sorbet\`](https://stackoverflow.com/questions/tagged/sorbet). We direct most questions here, to make the answers easier for others to discover.`,
                 },
                 {
-                  title: `Report Issues`,
-                  content: `Found a bug? Report it on the [Sorbet Github repo](https://github.com/stripe/sorbet/issues).`,
+                  title: `Chat with us`,
+                  content: `We have a [Slack community](#) for general discussions. Topics include discussion of Sorbet internals, learning how others use Sorbet, and showing off projects built with Sorbet.`,
+                },
+                {
+                  title: `Report issues`,
+                  content: `Found a bug? We track issues [on GitHub](https://github.com/stripe/sorbet/issues). Since we have limited time to dedicate to issue triage, you'll be asked to articulate a specific problem or explicit steps to reproduce the bug.`,
                 },
               ]}
             />
           </PageSection>
         </div>
-        <PageSection gray short>
+        <PageSection short>
           <div>
             <h1>Talks</h1>
+            <p>
+              The Sorbet team has given a number of talks that are available
+              online:
+            </p>
             <TalkList
               content={[
                 {
@@ -92,6 +102,10 @@ class Index extends React.Component {
           </div>
           <div>
             <h1>Projects</h1>
+            <p>
+              These are some community-maintained projects built on top of or
+              alongside the core Sorbet tooling:
+            </p>
             <ProjectList
               content={[
                 {
@@ -104,10 +118,14 @@ class Index extends React.Component {
                   title: 'sorbet-rails',
                   link: 'https://github.com/chanzuckerberg/sorbet-rails',
                   description:
-                    'A set of tools to make sorbet work with rails seamlessly',
+                    'A set of tools to make Sorbet work with Rails seamlessly',
                 },
               ]}
             />
+            <p>
+              If you've built a tool you think benefits the Sorbet community,
+              feel free to open a PR to add it to this list!
+            </p>
           </div>
         </PageSection>
       </div>
