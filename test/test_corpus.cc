@@ -334,7 +334,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto file = resolvedTree.file;
 
         {
-            resolvedTree = definition_validator::validateSymbolsOne(ctx, move(resolvedTree));
+            resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }

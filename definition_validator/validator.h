@@ -8,7 +8,7 @@
 
 namespace sorbet::definition_validator {
 
-ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree);
+ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree);
 
 } // namespace sorbet::definition_validator
 

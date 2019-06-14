@@ -660,7 +660,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
     core::FileRef f = resolved.file;
 
-    resolved = definition_validator::validateSymbolsOne(ctx, std::move(resolved));
+    resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = flatten::runOne(ctx, move(resolved));
 

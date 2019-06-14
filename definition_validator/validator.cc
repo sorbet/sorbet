@@ -243,7 +243,7 @@ public:
     }
 };
 
-ast::ParsedFile validateSymbolsOne(core::Context ctx, ast::ParsedFile tree) {
+ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
