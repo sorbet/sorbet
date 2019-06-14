@@ -182,6 +182,11 @@ class Index extends React.Component {
         </PageSection>
         <PageSection short>
           <div className="pageSectionColumns">
+            <p style={{flex: 1, margin: 0}}>
+              Sorbet is currently used by many companies and projects.{' '}
+              <a href="mailto:sorbet@stripe.com">Email us</a> if you'd like your
+              logo to appear here.
+            </p>
             <p class="logos">
               <a href="https://stripe.com/">
                 <img src={`${baseUrl}img/stripe-logo.svg`} alt="Stripe Logo" />
@@ -196,17 +201,15 @@ class Index extends React.Component {
                   }}
                 />
               </a>
+              <a href="https://medium.com/czi-technology">
+                <img src={`${baseUrl}img/czi-logo.png`} alt="CZI Logo" />
+              </a>
               <a href="https://engineering.gusto.com/">
                 <img src={`${baseUrl}img/gusto-logo.svg`} alt="Gusto Logo" />
               </a>
               <a href="https://atrium.com">
                 <img src={`${baseUrl}img/atrium-logo.png`} alt="Atrium Logo" />
               </a>
-            </p>
-            <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and projects.{' '}
-              <a href="mailto:sorbet@stripe.com">Email us</a> if you'd like your
-              logo to appear here.
             </p>
           </div>
         </PageSection>
