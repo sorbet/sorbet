@@ -771,6 +771,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 histogramInc("dispatchCall.components", dispatched.components.size());
                 tp.type = dispatched.returnType;
                 for (auto &comp : dispatched.components) {
+                    if (comp.method.exists() && comp.method.data(ctx)->isMethod() && comp.method.data(ctx)->isAbstract()) {
+                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::AbstractMethodInvoked)) {
+                            e.setHeader("Invoking abstract method {}", comp.method.show(ctx));
+                        }
+                    }
+
                     for (auto &err : comp.errors) {
                         ctx.state._error(std::move(err));
                     }

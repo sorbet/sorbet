@@ -38,11 +38,12 @@ module M1
   extend T::Helpers
   abstract!
   sig {abstract.returns(Object)}
-  def self.foo; end
+  def self.foo; end # XXXXX
 end
 
-# it raises an error when calling an abstract method
-AbstractClass.foo
+AbstractClass.foo # error: Invoking abstract method AbstractClass.foo
+
+AbstractClass.new.bar # error: Invoking abstract method AbstractClass#bar
 
 # it fails if a concrete module doesn't implement abstract methods
   module M2
@@ -72,7 +73,7 @@ end
 
 
   # it fails when instantiating the class
-  AbstractClass.new
+  AbstractClass.new # XXXXX
 
   # it handles splats and kwargs
 class SplatParent
@@ -84,11 +85,11 @@ class SplatParent
 end
 
 class SplatChild1 < SplatParent
-  def foo(*args); end # should fail with no **kwargs error
+  def foo(*args); end # XXX should fail with no **kwargs error
 end
 
 class SplatChild2 < SplatParent
-  def foo(**opts); end # should fail with no *args error
+  def foo(**opts); end # XXX should fail with no *args error
 end
 
 
@@ -123,7 +124,7 @@ module PrivateMethodInInterface
   extend T::Sig
   extend T::Helpers
   interface!
-  include UntypedMixin # XXX
+  include UntypedMixin # XXXXX
 
   sig {abstract.returns(Object)}
   def good; end
@@ -135,7 +136,7 @@ module PrivateMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  private def bad; end # XXXX
+  private def bad; end # XXXXX
 end
 
 module ProtectedMethodInInterface
@@ -144,7 +145,7 @@ module ProtectedMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  protected def bad; end # XXXX
+  protected def bad; end # XXXXX
 end
 
 module GoodInterface
@@ -160,6 +161,6 @@ module BadTypedImpl
   extend T::Sig
   extend T::Helpers
 
-  sig {implementation.returns(Integer)} # XXXX
+  sig {implementation.returns(Integer)} # XXXXX
   def foo; 1; end
 end
