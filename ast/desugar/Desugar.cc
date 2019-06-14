@@ -755,21 +755,26 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(
                     core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
                 core::Loc recvLoc = csend->receiver->loc;
+                // Assign some desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text
+                // location to node.
+                core::Loc zeroLengthLoc(loc.file(), loc.beginPos(), loc.beginPos());
+                core::Loc zeroLengthRecvLoc(recvLoc.file(), recvLoc.beginPos(), recvLoc.beginPos());
 
                 // NOTE(dug): We actually desugar into a call to `== nil`. If an
                 // object has overridden `==`, this technically will not match
                 // Ruby's behavior.
 
-                auto assgn = MK::Assign(recvLoc, tempRecv, node2TreeImpl(dctx, std::move(csend->receiver)));
-                auto cond = MK::Send1(loc, MK::Local(recvLoc, tempRecv), core::Names::eqeq(), MK::Nil(loc));
+                auto assgn = MK::Assign(zeroLengthRecvLoc, tempRecv, node2TreeImpl(dctx, std::move(csend->receiver)));
+                auto cond = MK::Send1(zeroLengthLoc, MK::Local(zeroLengthRecvLoc, tempRecv), core::Names::eqeq(),
+                                      MK::Nil(zeroLengthLoc));
 
                 unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
-                unique_ptr<Expression> nil = MK::Nil(loc);
-                auto iff = MK::If(loc, std::move(cond), std::move(nil), std::move(send));
-                auto res = MK::InsSeq1(loc, std::move(assgn), std::move(iff));
+                unique_ptr<Expression> nil = MK::Nil(zeroLengthLoc);
+                auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
+                auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
                 result.swap(res);
             },
             [&](parser::Self *self) {
