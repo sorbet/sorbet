@@ -1,7 +1,7 @@
 # typed: strict
 
 class GoodUsages
-  extend(T::Sig)
+  extend T::Sig
   # basic usages
   delegate :foo, :bar, to: :thing
   delegate :baz, to: :@ivar
