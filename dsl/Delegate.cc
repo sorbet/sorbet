@@ -98,7 +98,7 @@ vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ct
         }
         core::NameRef methodName;
         if (prefixNode) {
-            if (useToAsPrefix && beforeUnderscore[0] == '@') {
+            if (useToAsPrefix && !beforeUnderscore.empty() && beforeUnderscore[0] == '@') {
                 // Active Support raises at runtime for this case
                 return empty;
             }
