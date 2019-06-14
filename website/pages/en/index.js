@@ -199,6 +199,9 @@ class Index extends React.Component {
               <a href="https://engineering.gusto.com/">
                 <img src={`${baseUrl}img/gusto-logo.svg`} alt="Gusto Logo" />
               </a>
+              <a href="https://atrium.com">
+                <img src={`${baseUrl}img/atrium-logo.png`} alt="Atrium Logo" />
+              </a>
             </p>
             <p style={{flex: 1, margin: 0}}>
               Sorbet is currently used by many companies and projects.{' '}
