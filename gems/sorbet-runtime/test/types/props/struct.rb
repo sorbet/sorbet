@@ -150,12 +150,12 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
       assert_equal(10, doc.foo1)
       assert_equal(20, doc.foo2)
 
-      assert_raises(Opus::Extn::Assertions::HardAssertionRuntimeError) do
+      assert_raises(RuntimeError) do
         StructWithReqiredField.from_hash({'foo2' => 20})
       end
 
       # The code should behave for deserialization.
-      assert_raises(Opus::Extn::Assertions::HardAssertionRuntimeError) do
+      assert_raises(RuntimeError) do
         StructWithReqiredField.from_hash({'foo1' => 10})
       end
     end

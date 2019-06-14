@@ -148,29 +148,4 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       assert_equal(obj.foreign2, test_model.id)
     end
   end
-
-  class BionicleEnum < Opus::Enum
-    GALI = new
-    POHATU = new
-    ONUA = new
-  end
-
-  describe 'deep_clone_object utils method treats Opus::Enum as basic type' do
-    it 'Results in same object_id for enum' do
-      first = BionicleEnum::GALI
-      cloned = T::Props::Utils.deep_clone_object(BionicleEnum::GALI)
-      assert_equal(cloned, first)
-      assert_equal(cloned.object_id, first.object_id)
-    end
-
-    it 'Results in same object if Enum is a nested object' do
-      mapping = {BionicleEnum::ONUA => BionicleEnum::GALI, "foo" => {BionicleEnum::POHATU => "a toa"}, "onua" => BionicleEnum::ONUA}
-      cloned = T::Props::Utils.deep_clone_object(mapping)
-      assert_equal(cloned, mapping)
-      assert_equal(cloned["onua"].object_id, mapping["onua"].object_id)
-      assert_equal(cloned["foo"], mapping["foo"])
-      assert_equal(cloned[BionicleEnum::ONUA], mapping[BionicleEnum::ONUA])
-      assert_equal(cloned.keys, mapping.keys)
-    end
-  end
 end
