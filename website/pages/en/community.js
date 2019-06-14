@@ -60,10 +60,6 @@ class Index extends React.Component {
                   content: `Ask a question on the [Sorbet Stack Overflow](https://stackoverflow.com/questions/tagged/sorbet) community.`,
                 },
                 {
-                  title: `Come Chat`,
-                  content: `Join the conversation on our [Slack](https://join.slack.com/t/sorbet-ruby/shared_invite/enQtNjUwNzY0MTQ1MTg2LWYzZjJhZGM2OTgzMTJiOTRmZDA0OTI1YjU5ZjU1NzQxM2MyZTFhOWNkNDE0ODQ3N2ViOTQwZjE4Y2IzOGEzYTg) instance.`,
-                },
-                {
                   title: `Report Issues`,
                   content: `Found a bug? Report it on the [Sorbet Github repo](https://github.com/stripe/sorbet/issues).`,
                 },
