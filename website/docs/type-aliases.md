@@ -90,7 +90,7 @@ class C; end
 
 AB = T.type_alias(T.any(A, B))
 sig {params(x: T.any(AB, C)).returns(Integer)}
-def bad(x) # error: Returning value that does not conform to method result type
+def invalid(x) # error: Returning value that does not conform to method result type
   case x
   when AB then 1 # <- this line is problematic
   when C then 2
@@ -105,7 +105,7 @@ definition of our method as well.
 
 ```ruby
 sig {params(x: T.any(AB, C)).returns(Integer)}
-def coupled(x)
+def valid(x)
   case x
   when A, B then 1
   when C then 2
