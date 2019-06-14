@@ -110,7 +110,7 @@ struct Options {
     bool supressNonCriticalErrors = false;
     bool runLSP = false;
     bool disableWatchman = false;
-    std::string watchmanPath;
+    std::string watchmanPath = "watchman";
     bool stressIncrementalResolver = false;
     bool noErrorCount = false;
     bool autocorrect = false;
@@ -130,23 +130,23 @@ struct Options {
     std::string storeState = "";
     bool enableCounters = false;
     std::vector<std::string> someCounters;
-    std::string errorUrlBase;
+    std::string errorUrlBase = "https://srb.help/";
     std::vector<int> errorCodeWhiteList;
     std::vector<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
-    u4 reserveMemKiB;
+    u4 reserveMemKiB = 0;
 
     std::string statsdHost;
-    std::string statsdPrefix;
-    int statsdPort;
+    std::string statsdPrefix = "ruby_typer.unknown";
+    int statsdPort = 8200;
 
     std::string metricsFile;
-    std::string metricsRepo;
-    std::string metricsPrefix;
-    std::string metricsBranch;
-    std::string metricsSha;
+    std::string metricsRepo = "none";
+    std::string metricsPrefix = "ruby_typer.unknown.";
+    std::string metricsBranch = "none";
+    std::string metricsSha = "none";
 
     // Contains the file names passed in to Sorbet.
     std::vector<std::string> rawInputFileNames;
@@ -159,13 +159,13 @@ struct Options {
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
-    bool lspGoToDefinitionEnabled;
-    bool lspFindReferencesEnabled;
-    bool lspAutocompleteEnabled;
-    bool lspWorkspaceSymbolsEnabled;
-    bool lspDocumentSymbolEnabled;
-    bool lspSignatureHelpEnabled;
-    bool lspHoverEnabled;
+    bool lspGoToDefinitionEnabled = false;
+    bool lspFindReferencesEnabled = false;
+    bool lspAutocompleteEnabled = false;
+    bool lspWorkspaceSymbolsEnabled = false;
+    bool lspDocumentSymbolEnabled = false;
+    bool lspSignatureHelpEnabled = false;
+    bool lspHoverEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

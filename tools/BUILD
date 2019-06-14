@@ -31,6 +31,7 @@ compilation_database(
         "//parser:parser_test",
         "//parser:generate_ast",
         "//namer:namer_test",
+        "//main/options:options_test",
         "//main/lsp:lsp_test",
         "//main/lsp:generate_lsp_messages",
         "//main:sorbet-orig-light",
