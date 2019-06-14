@@ -17,10 +17,8 @@ might also want to:
 - Watch the [talks we've given](https://sorbet.org/docs/talks/talks) about Sorbet
 - Try the [Sorbet playground](https://sorbet.run) online
 
-If you are at Stripe, you might also want to see:
-
-- The Sorbet [design doc](https://hackpad.corp.stripe.com/Design-Doc-sorbet-zd1LGHPfpvW)
-- Dmitry's talk about [Sorbet's internals](https://stripe.exceedlms.com/student/activity/372979)
+If you are at Stripe, you might also want to see <http://go/types/internals> for
+docs about Stripe-specific development workflows and historical Stripe context.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
