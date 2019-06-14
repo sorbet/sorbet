@@ -56,13 +56,14 @@ public:
                 },
 
                 [&](ast::Send *send) {
-                    auto nodes = ChalkODMProp::replaceDSL(ctx, send);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
+                    auto nodesOpt = ChalkODMProp::replaceDSL(ctx, send);
+                    if (nodesOpt.has_value()) {
+                        ENFORCE(!nodesOpt->empty(), "optional with vec must not have vec be empty");
+                        replaceNodes[stat.get()] = std::move(*nodesOpt);
                         return;
                     }
 
-                    nodes = MixinEncryptedProp::replaceDSL(ctx, send);
+                    auto nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

@@ -11,12 +11,10 @@ using namespace std;
 
 namespace sorbet::dsl {
 
-vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
-    vector<unique_ptr<ast::Expression>> empty;
-
+optional<vector<unique_ptr<ast::Expression>>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     if (ctx.state.runningUnderAutogen) {
         // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
-        return empty;
+        return std::nullopt;
     }
 
     bool isImmutable = false; // Are there no setters?
@@ -59,18 +57,18 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             break;
 
         default:
-            return empty;
+            return std::nullopt;
     }
 
     if ((!name.exists() && send->args.empty()) || send->args.size() > 3) {
-        return empty;
+        return std::nullopt;
     }
     auto loc = send->loc;
 
     if (!name.exists()) {
         auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
         if (!sym || !sym->isSymbol(ctx)) {
-            return empty;
+            return std::nullopt;
         }
         name = sym->asSymbol(ctx);
         ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
@@ -92,7 +90,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (rules == nullptr) {
         if (type == nullptr) {
             // No type, and rules isn't a hash: This isn't a T::Props prop
-            return empty;
+            return std::nullopt;
         }
         if (send->args.size() == 3) {
             // Three args. We need name, type, and either rules, or, for
@@ -100,7 +98,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             if (auto thunk = thunkBody(ctx, send->args.back().get())) {
                 foreign = std::move(thunk);
             } else {
-                return empty;
+                return std::nullopt;
             }
         }
     }
@@ -126,11 +124,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (type == nullptr) {
         auto [arrayLit, arrayType] = ASTUtil::extractHashValue(ctx, *rules, core::Names::array());
         if (!arrayType.get()) {
-            return empty;
+            return std::nullopt;
         }
         if (!ASTUtil::dupType(arrayType.get())) {
             ASTUtil::putBackHashValue(ctx, *rules, move(arrayLit), move(arrayType));
-            return empty;
+            return std::nullopt;
         } else {
             type = ast::MK::Send1(loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
                                   core::Names::squareBrackets(), std::move(arrayType));
@@ -140,14 +138,14 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (auto *snd = ast::cast_tree<ast::Send>(type.get())) {
         if (snd->fun == core::Names::coerce()) {
             // TODO: either support T.coerce or remove it from pay-server
-            return empty;
+            return std::nullopt;
         }
     }
     ENFORCE(type != nullptr, "No obvious type AST for this prop");
     auto getType = ASTUtil::dupType(type.get());
     ENFORCE(getType != nullptr);
 
-    // From this point, we can't `return empty` anymore since we're going to be
+    // From this point, we can't `return std::nullopt` anymore since we're going to be
     // consuming the tree.
 
     vector<unique_ptr<ast::Expression>> stats;
