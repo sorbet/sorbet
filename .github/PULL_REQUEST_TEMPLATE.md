@@ -6,6 +6,6 @@
 
 
 ### Test plan
-<!-- If you did not write tests for this change, replace the message below explaining why not. Why we should be confident this change is correct? -->
+<!-- If you did not write tests for this change, replace the message below explaining why not. Why we should be confident this change is correct? If you changed the website, please include a screenshot of the proposed changes. -->
 
 See included automated tests.

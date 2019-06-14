@@ -44,7 +44,6 @@
   },
   "talks": {
     "Talks": [
-      "talks/talks",
       "talks/ruby-kaigi-2018",
       "talks/strange-loop-2018",
       "talks/ruby-kaigi-2019"
