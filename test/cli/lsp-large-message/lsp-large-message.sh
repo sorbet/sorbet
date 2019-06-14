@@ -3,4 +3,4 @@
 LSP_PAYLOAD="$(yes "a" | tr -d '\n' | head -c 10245)"
 LSP_MESSAGE="Content-Length: ${#LSP_PAYLOAD}\r\n\r\n$LSP_PAYLOAD"
 
-echo -e "$LSP_MESSAGE" | main/sorbet --silence-dev-message --lsp --disable-watchman test/cli/lsp-large-message 2>&1
+echo -e "$LSP_MESSAGE" | main/sorbet --silence-dev-message --lsp --disable-watchman -d test/cli/lsp-large-message 2>&1

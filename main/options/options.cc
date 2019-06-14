@@ -258,6 +258,7 @@ cxxopts::Options buildOptions() {
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
     // Common user options in order of use
+    options.add_options()("d,dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options()("e", "Parse an inline ruby string",
                           cxxopts::value<string>()->default_value(empty.inlineInput), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
@@ -401,7 +402,7 @@ cxxopts::Options buildOptions() {
 
     // Positional params
     options.parse_positional("files");
-    options.positional_help("<path 1> <path 2> ...");
+    options.positional_help("[<file 1> <file 2> ...]");
     return options;
 }
 
@@ -503,35 +504,32 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
-            auto rawFiles = raw["files"].as<vector<string>>();
-            UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
-            struct stat s;
-            for (auto &file : rawFiles) {
-                if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    auto fileNormalized = stripTrailingSlashes(file);
-                    if (opts.pathPrefix.empty() && rawFiles.size() == 1) {
-                        // If Sorbet is provided with a single input directory, the
-                        // default path prefix is that directory.
-                        opts.pathPrefix = fmt::format("{}/", fileNormalized);
-                    }
-                    opts.rawInputDirNames.emplace_back(fileNormalized);
-                    // Expand directory into list of files.
-                    auto containedFiles =
-                        opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true, opts.absoluteIgnorePatterns,
-                                                opts.relativeIgnorePatterns);
-                    opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
-                    opts.inputFileNames.insert(opts.inputFileNames.end(),
-                                               std::make_move_iterator(containedFiles.begin()),
-                                               std::make_move_iterator(containedFiles.end()));
-                } else {
-                    opts.rawInputFileNames.push_back(file);
-                    opts.inputFileNames.push_back(file);
-                }
-            }
-            fast_sort(opts.inputFileNames);
-            opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
-                                      opts.inputFileNames.end());
+            opts.rawInputFileNames = raw["files"].as<vector<string>>();
+            opts.inputFileNames = opts.rawInputFileNames;
         }
+
+        if (raw.count("dir") > 0) {
+            auto rawDirs = raw["dir"].as<vector<string>>();
+            for (auto &dir : rawDirs) {
+                UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
+                auto fileNormalized = stripTrailingSlashes(dir);
+                if (opts.pathPrefix.empty() && rawDirs.size() == 1 && opts.rawInputFileNames.size() == 0) {
+                    // If Sorbet is provided with a single input directory, the
+                    // default path prefix is that directory.
+                    opts.pathPrefix = fmt::format("{}/", fileNormalized);
+                }
+                opts.rawInputDirNames.emplace_back(fileNormalized);
+                // Expand directory into list of files.
+                auto containedFiles = opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true,
+                                                              opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+                opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
+                opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
+                                           std::make_move_iterator(containedFiles.end()));
+            }
+        }
+        fast_sort(opts.inputFileNames);
+        opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
+                                  opts.inputFileNames.end());
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();

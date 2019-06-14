@@ -4,8 +4,9 @@ You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] <path 1> <path 2> ...
+  sorbet [OPTION...] [<file 1> <file 2> ...]
 
+  -d, --dir arg  Input directory
   -e, string     Parse an inline ruby string (default: )
   -q, --quiet    Silence all non-critical errors
   -v, --verbose  Verbosity level [0-3]
@@ -20,8 +21,9 @@ You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] <path 1> <path 2> ...
+  sorbet [OPTION...] [<file 1> <file 2> ...]
 
+  -d, --dir arg  Input directory
   -e, string     Parse an inline ruby string (default: )
   -q, --quiet    Silence all non-critical errors
   -v, --verbose  Verbosity level [0-3]
@@ -34,8 +36,9 @@ Usage:
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] <path 1> <path 2> ...
+  sorbet [OPTION...] [<file 1> <file 2> ...]
 
+  -d, --dir arg  Input directory
   -e, string     Parse an inline ruby string (default: )
   -q, --quiet    Silence all non-critical errors
   -v, --verbose  Verbosity level [0-3]
