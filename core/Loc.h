@@ -108,6 +108,11 @@ public:
     // - how many characters of the start of this line are whitespace.
     //
     std::pair<Loc, u4> findStartOfLine(const GlobalState &ctx) const;
+
+    // For a given Loc, returns a zero-length version that starts at the same location.
+    Loc zeroLength() const {
+        return Loc(file(), beginPos(), beginPos());
+    }
 };
 CheckSize(Loc, 8, 8);
 
