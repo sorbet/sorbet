@@ -14,14 +14,19 @@
   - `sorbet-runtime` → _specifically_ the runtime system
   - `sig` or signature, never sig
 
-- each doc should declare audience + main point in a comment
-
-  - lint for this
-
-- prettier
-
-  - code blocks must have language, explicit plain for "no highlight"
+- code blocks must have language, explicit plain for "no highlight"
 
 - guides (i.e., non-reference pages) should end with a `What's next?` section
   with 2-4 links to suggested reading, relevant to reinforce what they just read
   about.
+
+- When possible, use descriptive variable names.
+- When the variable name is insignificant, be consistent with these conventions:
+  - `x`, `y`, `z`: local variables
+  - `@x`, `@y`, `@z`: instance variables
+  - `foo`, `bar`, `qux`: methods
+  - `A`, `B`, `C`: classes
+  - `M`, `N`, `O`: module
+  - `Parent` / `Child`: classes with inheritance relationship
+- Don't e.g. use `foo` to mean a local variable, or `f` to mean an arbitrary
+  method, or `A` mean an module.
