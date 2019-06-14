@@ -10,7 +10,6 @@
 #include "main/options/ConfigParser.h"
 #include "main/options/options.h"
 #include "options.h"
-#include "sys/stat.h"
 #include "third_party/licences/licences.h"
 #include "version/version.h"
 
