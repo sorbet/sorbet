@@ -71,8 +71,7 @@
   background: var(--sorbet-purple-6);
 }
 
-.homeContainer a,
-.footer a {
+.homeContainer a {
   color: var(--sorbet-purple-6);
 }
 

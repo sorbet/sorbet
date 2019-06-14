@@ -136,20 +136,6 @@ class Index extends React.Component {
             />
           </div>
         </PageSection>
-        <PageSection className="nav-footer" short lightPurple>
-          <p className="footer">
-            © 2019 Stripe{' · '}
-            <a href="docs/adopting">Get started</a>
-            {' · '}
-            <a href="docs/">Docs</a>
-            {' · '}
-            <a href="https://sorbet.run">Try</a>
-            {' · '}
-            <a href="en/community">Community</a>
-            {' · '}
-            <a href="blog/">Blog</a>
-          </p>
-        </PageSection>
       </div>
     );
   }
