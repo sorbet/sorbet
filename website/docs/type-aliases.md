@@ -88,21 +88,28 @@ class A; end
 class B; end
 class C; end
 
-sig {params(x: T.any(A, B, C)).returns(Integer)}
-def good(x)
-  case x
-  when A, B
-    1
-  when C
-    2
-  end
-end
-
 AB = T.type_alias(T.any(A, B))
 sig {params(x: T.any(AB, C)).returns(Integer)}
 def bad(x) # error: Returning value that does not conform to method result type
   case x
   when AB # <- this line is problematic
+    1
+  when C
+    2
+  end
+end
+```
+
+We could refactor this example to use `A, B` in the `when` and `AB` in the
+`sig`. However, this introduces coupling between the definition of `AB` and our
+method. If we ever updated the definition of `AB`, we would need to update the
+definition of our method as well.
+
+```ruby
+sig {params(x: T.any(AB, C)).returns(Integer)}
+def coupled(x)
+  case x
+  when A, B
     1
   when C
     2
