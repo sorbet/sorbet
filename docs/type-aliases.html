@@ -73,9 +73,9 @@
 </blockquote>
 <pre><code class="hljs css language-ruby">Alias = T.type_alias(Type)
 </code></pre>
-<p>This creates a type alias of <code>Type</code> called <code>Alias</code>. The type alias has exactly
-the same behavior as the original type and can be used anywhere the original
-type can be used. The converse is also true.</p>
+<p>This creates a type alias of <code>Type</code> called <code>Alias</code>. In the context of Sorbet,
+the type alias has exactly the same behavior as the original type and can be
+used anywhere the original type can be used. The converse is also true.</p>
 <p>Note that the type alias will not show up in error messages.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
@@ -126,6 +126,37 @@ sig {returns(A)}
 B = T.any(Integer, String)
 sig {returns(B)} <span class="hljs-comment"># error: Constant B is not a class or type alias</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-number">3</span>; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Note that because type aliases are a Sorbet construct, they cannot be used in
+certrain runtime contexts. For instance, it is not possible to match an
+expression against a type alias in a <code>case</code> expression.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+extend T::Sig
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">end</span>
+
+AB = T.type_alias(T.any(A, B))
+sig {params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invalid</span><span class="hljs-params">(x)</span></span> <span class="hljs-comment"># error: Returning value that does not conform to method result type</span>
+  <span class="hljs-keyword">case</span> x
+  <span class="hljs-keyword">when</span> AB <span class="hljs-keyword">then</span> <span class="hljs-number">1</span> <span class="hljs-comment"># &lt;- this line is problematic</span>
+  <span class="hljs-keyword">when</span> C <span class="hljs-keyword">then</span> <span class="hljs-number">2</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>We could refactor this example to use <code>A, B</code> in the <code>when</code> and <code>AB</code> in the
+<code>sig</code>. However, this introduces coupling between the definition of <code>AB</code> and our
+method. If we ever updated the definition of <code>AB</code>, we would need to update the
+definition of our method as well.</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">valid</span><span class="hljs-params">(x)</span></span>
+  <span class="hljs-keyword">case</span> x
+  <span class="hljs-keyword">when</span> A, B <span class="hljs-keyword">then</span> <span class="hljs-number">1</span>
+  <span class="hljs-keyword">when</span> C <span class="hljs-keyword">then</span> <span class="hljs-number">2</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
 </code></pre>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/noreturn"><span class="arrow-prev">← </span><span>T.noreturn</span></a><a class="docs-next button" href="/docs/stdlib-generics"><span>Arrays &amp; Hashes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="docs/adopting">Get started</a> · <a href="docs/">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="en/community">Community</a> · <a href="blog/">Blog</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
