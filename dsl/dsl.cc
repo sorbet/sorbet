@@ -56,10 +56,11 @@ public:
                 },
 
                 [&](ast::Send *send) {
-                    auto nodesOpt = ChalkODMProp::replaceDSL(ctx, send);
-                    if (nodesOpt.has_value()) {
-                        ENFORCE(!nodesOpt->empty(), "optional with vec must not have vec be empty");
-                        replaceNodes[stat.get()] = std::move(*nodesOpt);
+                    // This one is different: it returns nodes and a prop.
+                    auto nodesAndProp = ChalkODMProp::replaceDSL(ctx, send);
+                    if (nodesAndProp.has_value()) {
+                        ENFORCE(!nodesAndProp->nodes.empty(), "nodesAndProp with value must not have nodes be empty");
+                        replaceNodes[stat.get()] = std::move(nodesAndProp->nodes);
                         return;
                     }
 

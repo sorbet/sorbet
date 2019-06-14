@@ -35,11 +35,21 @@ namespace sorbet::dsl {
  *
  * Any deviation from this expected shape stops the desugaring.
  *
+ * Most other `replaceDSL`s return just nodes, but we also want to keep track of the prop information so that at the end
+ * of the DSL pass on the classDef, we can construct an `initialize` method with good static types.
+ *
  */
 class ChalkODMProp final {
 public:
-    static std::optional<std::vector<std::unique_ptr<ast::Expression>>> replaceDSL(core::MutableContext ctx,
-                                                                                   ast::Send *send);
+    struct Prop {};
+
+    struct NodesAndProp {
+        // invariant: !nodes.empty().
+        std::vector<std::unique_ptr<ast::Expression>> nodes;
+        Prop prop;
+    };
+
+    static std::optional<NodesAndProp> replaceDSL(core::MutableContext ctx, ast::Send *send);
 
     ChalkODMProp() = delete;
 };
