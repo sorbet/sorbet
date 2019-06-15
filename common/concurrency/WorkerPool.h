@@ -12,7 +12,7 @@ public:
         return 250ms;
     }
     typedef std::function<void()> Task;
-    static std::unique_ptr<WorkerPool> create(int size, spd::logger &logger, bool pinThreads);
+    static std::unique_ptr<WorkerPool> create(int size, spd::logger &logger);
     virtual void multiplexJob(std::string_view taskName, Task t) = 0;
     virtual ~WorkerPool() = 0;
     WorkerPool() = default;

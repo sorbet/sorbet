@@ -55,7 +55,7 @@ extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     static const unique_ptr<core::GlobalState> commonGs = buildInitialGlobalState();
-    static unique_ptr<WorkerPool> workers = WorkerPool::create(0, *logger, false);
+    static unique_ptr<WorkerPool> workers = WorkerPool::create(0, *logger);
     commonGs->trace("starting run");
     unique_ptr<core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }

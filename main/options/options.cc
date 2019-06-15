@@ -575,8 +575,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.threads = opts.runLSP ? raw["max-threads"].as<int>()
                                    : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
 
-        opts.pinThreads = opts.threads == thread::hardware_concurrency();
-
         if (raw["h"].as<bool>()) {
             logger->info("{}", options.help({""}));
             throw EarlyReturnWithCode(0);

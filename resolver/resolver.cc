@@ -1588,7 +1588,7 @@ void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &tr
 }
 
 vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    auto workers = WorkerPool::create(0, ctx.state.tracer(), false);
+    auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));

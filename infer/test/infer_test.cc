@@ -53,7 +53,7 @@ void processSource(core::GlobalState &cb, string str) {
     tree = namer::Namer::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
-    auto workers = WorkerPool::create(0, *logger, false);
+    auto workers = WorkerPool::create(0, *logger);
     resolver::Resolver::run(ctx, move(trees), *workers);
     for (auto &tree : trees) {
         tree = flatten::runOne(ctx, move(tree));

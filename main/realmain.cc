@@ -318,7 +318,7 @@ int realmain(int argc, char *argv[]) {
                          "or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.\n");
         }
     }
-    unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger, opts.pinThreads);
+    unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
