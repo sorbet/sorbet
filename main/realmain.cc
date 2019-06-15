@@ -38,6 +38,7 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderrColorSink() {
     auto color_sink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
+    color_sink->set_level(spd::level::info);
     return color_sink;
 }
 

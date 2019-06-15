@@ -4,6 +4,7 @@
 #include <cxxopts.hpp>
 
 #include "common/FileOps.h"
+#include "common/Timer.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/FileFlatMapper.h"
@@ -479,6 +480,7 @@ void Options::flushPrinters() {
 
 void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
+    Timer timeit(*logger, "readOptions");
     FileFlatMapper flatMapper(argc, argv, logger);
 
     cxxopts::Options options = buildOptions();
