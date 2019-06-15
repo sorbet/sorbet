@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
 
 export JOB_NAME=build-static-release
 source .buildkite/tools/setup-bazel.sh
