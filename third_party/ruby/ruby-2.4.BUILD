@@ -1012,7 +1012,7 @@ set -euo pipefail
 
 base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
 
-# was this script invoked via `bazel run`?
+# was this script invoked via 'bazel run"?
 if [ -d "\$$base_dir/ruby.runfiles" ]; then
   export RUBYLIB="\$${RUBYLIB:-}:\$$base_dir/ruby.runfiles/ruby_2_4_3/lib"
 else
