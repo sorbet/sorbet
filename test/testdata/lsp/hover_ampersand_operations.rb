@@ -5,6 +5,7 @@ class Dog
 
   sig {returns(String)}
   attr_reader :breed
+              # ^ sig {returns(String)}
 end
 
 def main
@@ -17,9 +18,19 @@ def main
                     # ^ hover: sig {returns(String)}
 
   # Safenav
-  dog = Dog.new
+  dog = T.let(Dog.new, T.nilable(Dog))
   breed = dog&.breed
 # ^ hover: T.nilable(String)
             # ^ hover: sig {returns(String)}
              # ^ hover: sig {returns(String)}
+  
+  breed2 = T.let(nil, T.nilable(String))
+  breed2 ||= dog&.breed
+# ^ hover: T.nilable(String)
+               # ^ hover: sig {returns(String)}
+                # ^ hover: sig {returns(String)}
+  breed2 &&= dog&.breed
+  # ^ hover: T.nilable(String)
+               # ^ hover: sig {returns(String)}
+                # ^ hover: sig {returns(String)}
 end
