@@ -9,4 +9,14 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     end
     assert_includes(err.message, "is a subclass of T::Struct and cannot be subclassed")
   end
+
+  it "forbids declaring a Struct as abstract" do
+    err = assert_raises(RuntimeError) do
+      Class.new(T::Struct) do
+        extend T::Helpers
+        abstract!
+      end
+    end
+    assert_includes(err.message, "is a subclass of T::Struct and cannot be declared abstract")
+  end
 end
