@@ -17,6 +17,11 @@ if [ "$BUILDKITE_BRANCH" == 'master' ]; then
     dryrun=""
 fi
 
+git_commit_count=$(git rev-list --count HEAD)
+prefix="0.4"
+release_version="0.4.${git_commit_count}"
+long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
+
 echo "--- Dowloading artifacts"
 rm -rf release
 rm -rf _out_
@@ -111,14 +116,28 @@ fi
 popd
 rm -rf sorbet-repo
 
-echo "--- making a github release"
-git_commit_count=$(git rev-list --count HEAD)
-prefix="0.4"
-release_version="v$prefix.$git_commit_count.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
-echo releasing "${release_version}"
-git tag -f "${release_version}"
+echo "--- publishing gems to RubyGems.org"
+gem_tmpdir="$(mktemp -d)"
+# We want this to expand right now, not later.
+# shellcheck disable=SC2064
+trap "rm -rf '$gem_tmpdir'" EXIT
+cp .buildkite/dummy.gemspec "$gem_tmpdir/sorbet.gemspec"
+
+pushd "$gem_tmpdir"
+sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
+gem build sorbet.gemspec
 if [ "$dryrun" = "" ]; then
-    git push origin "${release_version}"
+  echo "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
+  gem push sorbet*.gem
+fi
+popd
+
+
+echo "--- making a github release"
+echo releasing "${long_release_version}"
+git tag -f "${long_release_version}"
+if [ "$dryrun" = "" ]; then
+    git push origin "${long_release_version}"
 fi
 
 mkdir release
@@ -140,6 +159,6 @@ source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
 end
 \`\`\`"
 if [ "$dryrun" = "" ]; then
-    echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
+    echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd
