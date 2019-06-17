@@ -18,19 +18,26 @@ def main
                     # ^ hover: sig {returns(String)}
 
   # Safenav
-  dog = T.let(Dog.new, T.nilable(Dog))
+  dog = Dog.new
   breed = dog&.breed
 # ^ hover: T.nilable(String)
+        # ^ hover: Dog
             # ^ hover: sig {returns(String)}
              # ^ hover: sig {returns(String)}
   
-  breed2 = T.let(nil, T.nilable(String))
-  breed2 ||= dog&.breed
+  maybeDog = T.let(nil, T.nilable(Dog))
+  maybeBreed = maybeDog&.breed
 # ^ hover: T.nilable(String)
-               # ^ hover: sig {returns(String)}
-                # ^ hover: sig {returns(String)}
-  breed2 &&= dog&.breed
+             # ^ hover: T.nilable(Dog)
+                      # ^ hover: sig {returns(String)}
+                       # ^ hover: sig {returns(String)}
+  breed2 = T.let(nil, T.nilable(String))
+  breed2 ||= maybeDog&.breed
+# ^ hover: T.nilable(String)
+                    # ^ hover: sig {returns(String)}
+                     # ^ hover: sig {returns(String)}
+  breed2 &&= maybeDog&.breed
   # ^ hover: T.nilable(String)
-               # ^ hover: sig {returns(String)}
-                # ^ hover: sig {returns(String)}
+                    # ^ hover: sig {returns(String)}
+                     # ^ hover: sig {returns(String)}
 end
