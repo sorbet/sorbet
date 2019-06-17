@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char **argv) {
     ifstream fin(argv[1], ios::binary);
     if (!fin.good()) {
-        throw sorbet::FileNotFoundException();
+        throw sorbet::FileNotFoundException(fmt::format("Payload file `{}` not found", argv[1]));
     }
     vector<sorbet::u1> data;
 

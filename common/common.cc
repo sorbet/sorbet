@@ -46,7 +46,7 @@ string sorbet::FileOps::read(string_view filename) {
         }
         return contents;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("File `{}` not found", filename));
 }
 
 void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data) {
@@ -56,7 +56,7 @@ void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data
         fclose(fp);
         return;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("File `{}` not found", filename));
 }
 
 void sorbet::FileOps::write(string_view filename, string_view text) {
@@ -66,7 +66,7 @@ void sorbet::FileOps::write(string_view filename, string_view text) {
         fclose(fp);
         return;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("File `{}` not found", filename));
 }
 
 void sorbet::FileOps::append(string_view filename, string_view text) {
@@ -76,7 +76,7 @@ void sorbet::FileOps::append(string_view filename, string_view text) {
         fclose(fp);
         return;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("File `{}` not found", filename));
 }
 
 string_view sorbet::FileOps::getFileName(string_view path) {
@@ -206,7 +206,7 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
                 throw sorbet::FileNotDirException();
             default:
                 // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
-                throw sorbet::FileNotFoundException();
+                throw sorbet::FileNotFoundException(fmt::format("File `{}` not found", path));
         }
     }
 
