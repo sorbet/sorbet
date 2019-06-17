@@ -23,9 +23,14 @@ source .buildkite/tools/setup-bazel.sh
 
 echo will run with $CONFIG_OPTS
 
-
 err=0
-./bazel test $RUBY_TESTS //... $CONFIG_OPTS --test_summary=terse || err=$?
+
+if [ ! -z "$RUBY_TESTS" ]; then
+  # NOTE: runnihng ruby testing without the sanitized flags
+  ./bazel test $RUBY_TESTS --config=buildfarm --test_summary=terse || err=$?
+fi
+
+./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
 
 echo "--- uploading test results"
 
