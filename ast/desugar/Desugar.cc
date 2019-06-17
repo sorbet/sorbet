@@ -214,7 +214,7 @@ unique_ptr<Block> symbol2Proc(DesugarContext dctx, unique_ptr<Expression> expr) 
     core::NameRef name(dctx.ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
     MethodDef::ARGS_store args;
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
-    core::Loc zeroLengthLoc(loc.file(), loc.beginPos(), loc.beginPos());
+    core::Loc zeroLengthLoc = loc.copyWithZeroLength();
     args.emplace_back(MK::Local(zeroLengthLoc, temp));
     unique_ptr<Expression> recv = MK::Local(zeroLengthLoc, temp);
     unique_ptr<Expression> body = MK::Send0(loc, std::move(recv), name);
@@ -398,7 +398,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto rec = node2TreeImpl(dctx, std::move(send->receiver));
                 if (isa_tree<EmptyTree>(rec.get())) {
                     // 0-sized Loc, since `self.` doesn't appear in the original file.
-                    rec = MK::Self(core::Loc(loc.file(), loc.beginPos(), loc.beginPos()));
+                    rec = MK::Self(loc.copyWithZeroLength());
                     flags |= Send::PRIVATE_OK;
                 }
                 if (absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); })) {
@@ -757,8 +757,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 core::Loc recvLoc = csend->receiver->loc;
                 // Assign some desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text
                 // location to node.
-                core::Loc zeroLengthLoc(loc.file(), loc.beginPos(), loc.beginPos());
-                core::Loc zeroLengthRecvLoc(recvLoc.file(), recvLoc.beginPos(), recvLoc.beginPos());
+                core::Loc zeroLengthLoc = loc.copyWithZeroLength();
+                core::Loc zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
 
                 // NOTE(dug): We actually desugar into a call to `== nil`. If an
                 // object has overridden `==`, this technically will not match

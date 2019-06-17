@@ -327,7 +327,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                         // Inserting a statement that does not directly map to any source text. Make its loc
                         // 0-length so LSP ignores it in queries.
-                        core::Loc zeroLengthLoc(arg.loc.file(), arg.loc.beginPos(), arg.loc.beginPos());
+                        core::Loc zeroLengthLoc = arg.loc.copyWithZeroLength();
                         bodyBlock->exprs.emplace_back(
                             idxTmp, zeroLengthLoc,
                             make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
