@@ -610,7 +610,6 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         auto &filename = filenameAndDiagnostics.first;
         auto &diagnostics = filenameAndDiagnostics.second;
 
-
         // Sort diagnostics within file in range, message order.
         // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
         // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
