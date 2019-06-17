@@ -128,6 +128,7 @@ sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
 gem build sorbet.gemspec
 if [ "$dryrun" = "" ]; then
   echo "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
+  chmod 600 "$HOME/.gem/credentials"
   gem push sorbet*.gem
 fi
 popd
