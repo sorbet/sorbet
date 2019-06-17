@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class File < IO
   ALT_SEPARATOR = T.let(T.unsafe(nil), NilClass)
   APPEND = T.let(T.unsafe(nil), Integer)
@@ -795,7 +796,4 @@ class File::Stat < Object
 
   sig {returns(T::Boolean)}
   def zero?(); end
-end
-
-module FileTest
 end

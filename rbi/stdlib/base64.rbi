@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module Base64
   sig do
     params(

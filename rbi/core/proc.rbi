@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Proc < Object
   sig {returns(Integer)}
   def arity(); end
@@ -42,16 +43,4 @@ class Proc < Object
 
   sig {returns(String)}
   def inspect(); end
-end
-
-class Binding < Object
-end
-
-class LocalJumpError < StandardError
-end
-
-class Method < Object
-end
-
-class SystemStackError < Exception
 end

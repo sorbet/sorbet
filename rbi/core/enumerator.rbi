@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Enumerator < Object
   include Enumerable
 
@@ -121,7 +122,4 @@ class Enumerator::Lazy < Enumerator
 end
 
 class Enumerator::Yielder < Object
-end
-
-class StopIteration < IndexError
 end

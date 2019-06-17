@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class IO < Object
   include File::Constants
   include Enumerable
@@ -684,10 +685,4 @@ module IO::WaitReadable
 end
 
 module IO::WaitWritable
-end
-
-class IOError < StandardError
-end
-
-class EOFError < IOError
 end

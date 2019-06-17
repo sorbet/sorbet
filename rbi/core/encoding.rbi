@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Encoding < Object
   ANSI_X3_4_1968 = T.let(T.unsafe(nil), Encoding)
   ASCII = T.let(T.unsafe(nil), Encoding)

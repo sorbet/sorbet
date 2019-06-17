@@ -63,4 +63,3 @@ class TracePoint < Object
   sig {returns(T.untyped)}
   def self; end
 end
-

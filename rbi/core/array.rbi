@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Array < Object
   include Enumerable
 

@@ -1577,49 +1577,42 @@ class Net::HTTP::Get < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Head < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Lock < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Mkcol < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Move < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Options < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Patch < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Persistent
@@ -2104,21 +2097,18 @@ class Net::HTTP::Post < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Propfind < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Proppatch < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 module Net::HTTP::ProxyDelta
@@ -2135,7 +2125,6 @@ class Net::HTTP::Trace < Net::HTTPRequest
   METHOD = ::T.let(nil, ::T.untyped)
   REQUEST_HAS_BODY = ::T.let(nil, ::T.untyped)
   RESPONSE_HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTP::Unlock < Net::HTTPRequest
@@ -2147,17 +2136,14 @@ end
 
 class Net::HTTPAccepted < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPBadGateway < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPBadRequest < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPBadResponse < StandardError
@@ -2165,12 +2151,10 @@ end
 
 class Net::HTTPClientError < Net::HTTPResponse
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPConflict < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPContinue < Net::HTTPInformation
@@ -2180,7 +2164,6 @@ end
 
 class Net::HTTPCreated < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPError < Net::ProtocolError
@@ -2206,12 +2189,10 @@ end
 
 class Net::HTTPExpectationFailed < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPFailedDependency < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPFatalError < Net::ProtoFatalError
@@ -2220,17 +2201,14 @@ end
 
 class Net::HTTPForbidden < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPFound < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPGatewayTimeOut < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPGenericRequest
@@ -2354,7 +2332,6 @@ end
 
 class Net::HTTPGone < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 module Net::HTTPHeader
@@ -2598,127 +2575,102 @@ end
 
 class Net::HTTPIMUsed < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPInformation < Net::HTTPResponse
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPInsufficientStorage < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPInternalServerError < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPLengthRequired < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPLocked < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPMethodNotAllowed < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPMovedPermanently < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPMultiStatus < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPMultipleChoices < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNetworkAuthenticationRequired < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNoContent < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNonAuthoritativeInformation < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNotAcceptable < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNotFound < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNotImplemented < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPNotModified < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPOK < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPPartialContent < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPPaymentRequired < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPPermanentRedirect < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPPreconditionFailed < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPPreconditionRequired < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPProxyAuthenticationRequired < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPRedirection < Net::HTTPResponse
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPRequest < Net::HTTPGenericRequest
@@ -2734,32 +2686,26 @@ end
 
 class Net::HTTPRequestEntityTooLarge < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPRequestHeaderFieldsTooLarge < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPRequestTimeOut < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPRequestURITooLong < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPRequestedRangeNotSatisfiable < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPResetContent < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPResponse
@@ -2927,12 +2873,10 @@ end
 
 class Net::HTTPSeeOther < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPServerError < Net::HTTPResponse
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPServerException < Net::ProtoServerError
@@ -2941,67 +2885,54 @@ end
 
 class Net::HTTPServiceUnavailable < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPSuccess < Net::HTTPResponse
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPSwitchProtocol < Net::HTTPInformation
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPTemporaryRedirect < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPTooManyRequests < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUnauthorized < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUnavailableForLegalReasons < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUnknownResponse < Net::HTTPResponse
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUnprocessableEntity < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUnsupportedMediaType < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUpgradeRequired < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPUseProxy < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPVersionNotSupported < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::IMAP < Net::Protocol

@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module GC
   INTERNAL_CONSTANTS = T.let(T.unsafe(nil), Hash)
   OPTS = T.let(T.unsafe(nil), Array)

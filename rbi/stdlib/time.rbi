@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Time
   sig do
     params(
@@ -91,4 +92,13 @@ class Time
     .returns(String)
   end
   def xmlschema(fraction_digits=0); end
+
+  sig {returns(Time)}
+  def to_time(); end
+
+  sig {returns(Date)}
+  def to_date(); end
+
+  sig {returns(DateTime)}
+  def to_datetime(); end
 end

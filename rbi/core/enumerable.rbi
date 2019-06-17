@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module Enumerable
   extend T::Generic
   Elem = type_member(:out)

@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Logger
   include Logger::Severity
 
@@ -143,8 +144,10 @@ end
 
 class Logger::Error < RuntimeError
 end
+
 class Logger::ShiftingError < Logger::Error
 end
+
 module Logger::Severity
   DEBUG = T.let(T.unsafe(nil), Integer)
   INFO = T.let(T.unsafe(nil), Integer)
@@ -153,6 +156,7 @@ module Logger::Severity
   FATAL = T.let(T.unsafe(nil), Integer)
   UNKNOWN = T.let(T.unsafe(nil), Integer)
 end
+
 class Logger::Formatter
   def call(severity, time, progname, msg); end
   def datetime_format; end
@@ -161,12 +165,14 @@ class Logger::Formatter
   def initialize; end
   def msg2str(msg); end
 end
+
 module Logger::Period
   def self.next_rotate_time(now, shift_age); end
   def self.previous_period_end(now, shift_age); end
   def next_rotate_time(now, shift_age); end
   def previous_period_end(now, shift_age); end
 end
+
 class Logger::LogDevice
   include Logger::Period
 

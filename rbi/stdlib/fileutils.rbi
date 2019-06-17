@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module FileUtils
   LOW_METHODS = T.let(T.unsafe(nil), Array)
   METHODS = T.let(T.unsafe(nil), Array)

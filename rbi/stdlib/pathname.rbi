@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 class Pathname < Object
   SAME_PATHS = T.let(T.unsafe(nil), Proc)
   SEPARATOR_LIST = T.let(T.unsafe(nil), String)

@@ -1,4 +1,5 @@
 # typed: __STDLIB_INTERNAL
+
 module Math
   E = T.let(T.unsafe(nil), Float)
   PI = T.let(T.unsafe(nil), Float)
