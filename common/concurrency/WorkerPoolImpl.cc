@@ -18,21 +18,29 @@ WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : size(size), logg
         ENFORCE(size == 0);
         this->size = 0;
     } else {
+        bool pinThreads = (size > 0) && (size == thread::hardware_concurrency());
         threadQueues.reserve(size);
         for (int i = 0; i < size; i++) {
             auto &last = threadQueues.emplace_back(make_unique<Queue>());
             auto *ptr = last.get();
             auto threadIdleName = absl::StrCat("idle", i);
-            threads.emplace_back(runInAThread(threadIdleName, [ptr, &logger, threadIdleName]() {
-                bool repeat = true;
-                while (repeat) {
-                    Task_ task;
-                    setCurrentThreadName(threadIdleName);
-                    ptr->wait_dequeue(task);
-                    logger.debug("Worker got task");
-                    repeat = task();
-                }
-            }));
+            optional<int> pinToCore;
+            if (pinThreads) {
+                pinToCore = i;
+            }
+            threads.emplace_back(runInAThread(
+                threadIdleName,
+                [ptr, &logger, threadIdleName]() {
+                    bool repeat = true;
+                    while (repeat) {
+                        Task_ task;
+                        setCurrentThreadName(threadIdleName);
+                        ptr->wait_dequeue(task);
+                        logger.debug("Worker got task");
+                        repeat = task();
+                    }
+                },
+                pinToCore));
         }
     }
     logger.debug("Worker threads created");

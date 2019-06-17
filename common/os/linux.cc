@@ -101,4 +101,11 @@ bool setCurrentThreadName(string_view name) {
     return retCode == 0;
 }
 
+bool bindThreadToCore(pthread_t handle, int coreId) {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(coreId, &cpuset);
+    int rc = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
+    return rc == 0;
+}
 #endif
