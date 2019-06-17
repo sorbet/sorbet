@@ -119,21 +119,12 @@ echo "--- publishing gems to RubyGems.org"
 gem_tmpdir="$(mktemp -d)"
 # We want this to expand right now, not later.
 # shellcheck disable=SC2064
-trap "rm -f '$gem_tmpdir'" EXIT
+trap "rm -rf '$gem_tmpdir'" EXIT
+cp .buildkite/dummy.gemspec "$gem_tmpdir/sorbet.gemspec"
+
 pushd "$gem_tmpdir"
-
-cat > sorbet.gemspec <<EOF
-Gem::Specification.new do |s|
-  s.name        = 'sorbet'
-  s.version     = '$release_version'
-  s.summary     = 'A Typechecker for Ruby'
-  s.authors     = ['Sorbet Contributors']
-  s.files       = []
-  s.post_install_message = "Sorbet is not available publically yet. This gem is only a placeholder."
-end
-EOF
+sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
 gem build sorbet.gemspec
-
 if [ "$dryrun" = "" ]; then
   echo "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
   gem push sorbet*.gem
