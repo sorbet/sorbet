@@ -41,9 +41,9 @@ module M1
   def self.foo; end # XXXXX
 end
 
-AbstractClass.foo # error: Invoking abstract method AbstractClass.foo
+AbstractClass.foo # error: Invoking abstract class method AbstractClass.foo
 
-AbstractClass.new.bar # error: Invoking abstract method AbstractClass#bar
+AbstractClass.new.bar
 
 # it fails if a concrete module doesn't implement abstract methods
   module M2
