@@ -98,8 +98,8 @@ vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ct
         }
         core::NameRef methodName;
         if (prefixNode) {
-            if (useToAsPrefix && !beforeUnderscore.empty() && beforeUnderscore[0] == '@') {
-                // Active Support raises at runtime for this case
+            if (useToAsPrefix && (beforeUnderscore.empty() || beforeUnderscore[0] == '@')) {
+                // Active Support raises at runtime for these cases
                 return empty;
             }
             methodName = ctx.state.enterNameUTF8(

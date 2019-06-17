@@ -37,6 +37,7 @@ class IgnoredUsages
   delegate :foo, local => :thing # error: Method `delegate` does not exist
   delegate 234, to: :good # error: Method `delegate` does not exist
   delegate :thing => :thing # error: Method `delegate` does not exist
-  # this one raises at runtime
+  # these raise at runtime
   delegate :foo, :bar, to: :@hi, prefix: true # error: Method `delegate` does not exist
+  delegate :foo, :bar, to: '', prefix: true # error: Method `delegate` does not exist
 end
