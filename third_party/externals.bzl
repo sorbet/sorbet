@@ -243,7 +243,6 @@ package(default_visibility = ["//visibility:public"])
         build_file = "//third_party/ruby:ruby-2.4.BUILD",
         patches = [
             "//third_party/ruby:probes.h.patch",
-            "//third_party/ruby:rbconfig.rb.patch",
             "//third_party/ruby:enc.encinit.c.patch",
         ],
         patch_args = ["-p1"],

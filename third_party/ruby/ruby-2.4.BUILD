@@ -100,7 +100,7 @@ cc_library(
 cc_binary(
     name = "bin/miniruby",
 
-    data = [ ":ruby_lib" ],
+    data = [ ":ruby_lib_staged" ],
 
     srcs = [
         "main.c",
@@ -209,6 +209,34 @@ cc_binary(
 )
 
 # full ruby ####################################################################
+
+# TODO: don't hardcode the arch string
+# TODO: don't hardcode the ruby version
+genrule(
+    name = "generate-rbconfig",
+    srcs = [
+        ":bin/miniruby",
+        ":ruby_lib_staged",
+        "lib/irb.rb",
+        "tool/mkconfig.rb",
+        "config.status",
+        "version.h",
+    ],
+    outs = [ "rbconfig.rb" ],
+    cmd = """
+cp $(location config.status) config.status
+$(location bin/miniruby) \
+        -I $$(dirname $(location lib/irb.rb)) \
+        $(location tool/mkconfig.rb) \
+        -cross_compiling=no \
+        -arch=x86_64-darwin18 \
+        -version=2.4.3 \
+        -install_name=ruby \
+        -so_name=ruby \
+        -unicode_version=9.0.0 \
+    > $(location rbconfig.rb)
+""",
+)
 
 genrule(
     name = "prelude",
@@ -992,8 +1020,13 @@ cp $(location ext/digest/sha2/lib/sha2.rb) $(location lib/digest/sha2.rb)
 
 filegroup(
     name = "ruby_lib",
+    srcs = [ "lib/rbconfig.rb", ":ruby_lib_staged" ],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ruby_lib_staged",
     srcs = [
-        "lib/rbconfig.rb",
         "lib/pathname.rb",
         "lib/bigdecimal/jacobian.rb",
         "lib/bigdecimal/ludcmp.rb",
@@ -1022,7 +1055,7 @@ filegroup(
         "lib/date.rb",
         "lib/digest.rb",
     ] + glob([ "lib/**/*.rb" ]),
-    visibility = ["//visibility:public"],
+    visibility = ["//visibility:private"],
 )
 
 
