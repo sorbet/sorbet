@@ -5,13 +5,9 @@
 # Hard-coded files
 # * probes.h
 # * enc/encinit.c
-# * rbconfig.h
 
 # Templated files
 # * verconf.h is just a templated version of what ruby produces
-
-# Build assumptions
-# * configure is not run
 
 
 # configuration ################################################################
