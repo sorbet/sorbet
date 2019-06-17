@@ -203,7 +203,7 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
     if ((dir = opendir(string(path).c_str())) == nullptr) {
         switch (errno) {
             case ENOTDIR:
-                throw sorbet::FileNotDirException();
+                throw sorbet::FileNotDirException(fmt::format("File `{}` is not a directory", path));
             default:
                 // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
                 throw sorbet::FileNotFoundException(fmt::format("File `{}` not found", path));

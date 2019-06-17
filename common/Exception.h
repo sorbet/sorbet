@@ -23,7 +23,7 @@ public:
 
 class FileNotDirException : SorbetException {
 public:
-    FileNotDirException() : SorbetException("File is not a directory") {}
+    FileNotDirException(const std::string &message) : SorbetException(message) {}
 };
 
 class FileReadException : SorbetException {
