@@ -154,6 +154,7 @@ NameDef names[] = {
     {"merchant_prop"},
     {"encrypted_prop"},
     {"array"},
+    {"delegate"},
     {"type"},
     {"optional"},
     {"immutable"},
@@ -172,6 +173,9 @@ NameDef names[] = {
     {"HashMutator", "HashMutator", true},
     {"ArrayMutator", "ArrayMutator", true},
     {"DocumentMutator", "DocumentMutator", true},
+
+    {"prefix"},
+    {"to"},
 
     {"describe"},
     {"it"},

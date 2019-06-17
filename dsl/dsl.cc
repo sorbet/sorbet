@@ -6,6 +6,7 @@
 #include "dsl/ClassNew.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
+#include "dsl/Delegate.h"
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
@@ -80,6 +81,12 @@ public:
                     }
 
                     nodes = Private::replaceDSL(ctx, send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = Delegate::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
