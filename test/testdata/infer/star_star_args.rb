@@ -37,8 +37,8 @@ class Main
 
         one_kwarg(foo: "bad", a: "bad") # error: `String("bad")` does not match `Integer` for argument `foo`
         one_kwarg(foo: 1, a: 1) # error: `Integer(1)` does not match `String` for argument `args`
-        one_kwarg(foo: "bad", a: 1) # error: `String("bad")` does not match `Integer` for argument `foo`
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Integer(1)` does not match `String` for argument `args`
+        one_kwarg(foo: "bad", a: 1) # error: `Integer(1)` does not match `String` for argument `args`
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `String("bad")` does not match `Integer` for argument `foo`
         with_type
         with_type(a: 1)
         with_type(a: "bad") # error: `String("bad")` does not match `Integer` for argument `args`
