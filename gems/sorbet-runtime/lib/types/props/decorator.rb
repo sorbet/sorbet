@@ -140,20 +140,6 @@ class T::Props::Decorator
         return
       end
 
-      # If nil write check is needed, we check at prop set time, not at serialization time. We have to do the
-      # separate check here because the later check uses T.nilable type for the check.
-      if rules[:notify_on_nil_write]
-        Opus::Error.soft(
-          'nil value written to prop with :notify_on_nil_write set',
-          notify: rules[:notify_on_nil_write],
-          storytime: {
-            klass: self.class.name,
-            prop: prop,
-            type: rules[:type],
-            type_object: rules[:type_object],
-          },
-        )
-      end
       if rules[:raise_on_nil_write]
         raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
         "(instance of #{val.class}) - need a #{type}")
@@ -341,7 +327,7 @@ class T::Props::Decorator
   def prop_defined(name, cls, rules={})
     # TODO(jerry): Create similar soft assertions against false
     if rules[:optional] == true
-      Opus::Error.hard(
+      T::Configuration.hard_assert_handler(
         'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
         storytime: {
           name: name,
@@ -351,7 +337,7 @@ class T::Props::Decorator
         },
       )
     elsif rules[:optional] == false
-      Opus::Error.hard(
+      T::Configuration.hard_assert_handler(
         'Use of `optional: :false` is deprecated as it\'s the default value.',
         storytime: {
           name: name,
@@ -361,7 +347,7 @@ class T::Props::Decorator
         },
       )
     elsif rules[:optional] == :on_load
-      Opus::Error.hard(
+      T::Configuration.hard_assert_handler(
         'Use of `optional: :on_load` is deprecated. You probably want `T.nilable(...)` with :raise_on_nil_write instead.',
         storytime: {
           name: name,
@@ -371,7 +357,7 @@ class T::Props::Decorator
         },
       )
     elsif rules[:optional] == :existing
-      Opus::Error.hard(
+      T::Configuration.hard_assert_handler(
         'Use of `optional: :existing` is not allowed: you should use use T.nilable (http://go/optional)',
         storytime: {
           name: name,
@@ -419,11 +405,12 @@ class T::Props::Decorator
     # specify their PII nature, as long as every class into which they
     # are ultimately included does.
     #
-    # TODO This is broken because `contains_pii?` is only defined on Opus::Sensitivity::PIIable
-    if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !@class.contains_pii?
-      raise ArgumentError.new(
-        'Cannot include a pii prop in a class that declares `contains_no_pii`'
-      )
+    if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::PIIable)
+      if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !@class.contains_pii?
+        raise ArgumentError.new(
+          'Cannot include a pii prop in a class that declares `contains_no_pii`'
+        )
+      end
     end
 
     needs_clone =
@@ -613,22 +600,26 @@ class T::Props::Decorator
   private def validate_not_missing_sensitivity(prop_name, rules)
     if rules[:sensitivity].nil?
       if rules[:redaction]
-        Opus::Error.hard("#{@class}##{prop_name} has a 'redaction:' annotation but no " \
+        T::Configuration.hard_assert_handler(
+          "#{@class}##{prop_name} has a 'redaction:' annotation but no " \
           "'sensitivity:' annotation. This is probably wrong, because if a " \
           "prop needs redaction then it is probably sensitive. Add a " \
           "sensitivity annotation like 'sensitivity: Opus::Sensitivity::PII." \
-          "whatever', or explicitly override this check with 'sensitivity: []'.")
+          "whatever', or explicitly override this check with 'sensitivity: []'."
+        )
       end
       # TODO(PRIVACYENG-982) Ideally we'd also check for 'password' and possibly
       # other terms, but this interacts badly with ProtoDefinedDocument because
       # the proto syntax currently can't declare "sensitivity: []"
       if prop_name =~ /\bsecret\b/
-        Opus::Error.hard("#{@class}##{prop_name} has the word 'secret' in its name, but no " \
+        T::Configuration.hard_assert_handler(
+          "#{@class}##{prop_name} has the word 'secret' in its name, but no " \
           "'sensitivity:' annotation. This is probably wrong, because if a " \
           "prop is named 'secret' then it is probably sensitive. Add a " \
           "sensitivity annotation like 'sensitivity: Opus::Sensitivity::NonPII." \
           "security_token', or explicitly override this check with " \
-          "'sensitivity: []'.")
+          "'sensitivity: []'."
+        )
       end
     end
   end
@@ -733,14 +724,19 @@ class T::Props::Decorator
     @class.send(:define_method, force_fk_method) do |allow_direct_mutation: nil|
       loaded_foreign = send(fk_method, allow_direct_mutation: allow_direct_mutation)
       if !loaded_foreign
-        Opus::Error.hard('Failed to load foreign model', storytime: {method: force_fk_method, class: self.class})
+        T::Configuration.hard_assert_handler(
+          'Failed to load foreign model',
+          storytime: {method: force_fk_method, class: self.class}
+        )
       end
       T.must(loaded_foreign)
     end
 
     @class.send(:define_method, "#{prop_name}_record") do |allow_direct_mutation: nil|
-      Opus::Error.soft("Using deprecated 'model.#{prop_name}_record' foreign key syntax. You should replace this with 'model.#{prop_name}_'",
-        notify: 'vasi')
+      T::Configuration.soft_assert_handler(
+        "Using deprecated 'model.#{prop_name}_record' foreign key syntax. You should replace this with 'model.#{prop_name}_'",
+        notify: 'vasi'
+      )
       send(fk_method, allow_direct_mutation: allow_direct_mutation)
     end
   end

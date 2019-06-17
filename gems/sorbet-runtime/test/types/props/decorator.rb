@@ -265,18 +265,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
   end
 
-  class OwnedTestingModel < Opus::DB::Model::AbstractModel
-    owner Opus::Project.storage
-
-    prop :foo, String
-  end
-
-  it 'notifies both the model and project owners on deserialization errors' do
-    Opus::Error.expects(:hard).with(anything, has_entry(project: Opus::Project.storage))
-    Opus::Error.expects(:hard).with(anything, Not(has_entry(project: Opus::Project.storage)))
-    OwnedTestingModel.from_hash({})
-  end
-
   class ImmutablePropStruct
     include T::Props::WeakConstructor
 

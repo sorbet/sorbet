@@ -18,7 +18,7 @@ filegroup(
 
 filegroup(
     name = "runtime-stubs",
-    srcs = ["test/test_helper.rb"],
+    srcs = ["test/test_helper.rb"] + glob(["test/*.rbi"]),
 )
 
 sh_test(
@@ -26,7 +26,7 @@ sh_test(
     srcs = ["test/typecheck-runtime.sh"],
     args = [
         "$(locations runtime-files)",
-        "$(location runtime-stubs)",
+        "$(locations runtime-stubs)",
     ],
     data = [
         ":runtime-files",

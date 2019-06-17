@@ -28,12 +28,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     m
   end
 
-  class MyPIISerializable
-    include T::Props::Serializable
-    extend Opus::Sensitivity::PIIable
-    prop :pii, T::Hash[String, String], sensitivity: %w{name email_address}
-  end
-
   class DefaultsStruct
     include T::Props::Serializable
     include T::Props::WeakConstructor
@@ -94,13 +88,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       str = obj.inspect
       assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
-    end
-
-    it 'redacts PII' do
-      obj = MyPIISerializable.new
-      obj.pii = {"private" => "s3cr3t"}
-      str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MyPIISerializable pii=<REDACTED name, email_address>>', str)
     end
   end
 
@@ -173,32 +160,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
-  class MigratingNilFieldModel < T::Struct
-    prop :foo, T.nilable(Integer), notify_on_nil_write: 'storage'
-    prop :bar, T.nilable(String), notify_on_nil_write: Opus::Project.storage
-  end
-
-  describe 'notify_on_nil_write' do
-    it 'requires a string or project value' do
-      assert_prop_error(/must be a string or project/) do
-        prop :foo, T.nilable(String), notify_on_nil_write: 1
-      end
-    end
-
-    it 'it soft asserts on nil writes' do
-      foo = MigratingNilFieldModel.new
-      ex = assert_raises do
-        foo.serialize
-      end
-      assert_includes(ex.message, 'nil value written to prop with :notify_on_nil_write set')
-    end
-
-    it 'does not assert when strict=false' do
-      foo = MigratingNilFieldModel.new
-      foo.serialize(false)
-    end
-  end
-
   class MigratingNilFieldModel2 < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
@@ -226,17 +187,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'does not assert when strict=false' do
       foo = MigratingNilFieldModel2.new
       foo.serialize(false)
-    end
-  end
-
-  describe 'raise_on_nil_write and notify_on_nil_write' do
-    it 'does not allow both to be specified at once' do
-      ex = assert_raises do
-        Class.new(T::Struct) do
-          prop :foo, T.nilable(String), raise_on_nil_write: true, notify_on_nil_write: 'storage'
-        end
-      end
-      assert_match(/You can only specify one of `raise_on_nil_write` and `notify_on_nil_write`/, ex.message)
     end
   end
 

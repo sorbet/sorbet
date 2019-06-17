@@ -22,14 +22,20 @@ module T::Configuration
   #     puts error.message
   #   end
   def self.inline_type_error_handler=(value)
-    if !value.nil? && !value.respond_to?(:call)
-      raise ArgumentError.new("Provided value must respond to :call")
-    end
+    validate_lambda_given!(value)
     @inline_type_error_handler = value
   end
 
-  def self.inline_type_error_handler
-    @inline_type_error_handler
+  private_class_method def self.inline_type_error_handler_default(error)
+    raise error
+  end
+
+  def self.inline_type_error_handler(error)
+    if @inline_type_error_handler
+      @inline_type_error_handler.call(error)
+    else
+      inline_type_error_handler_default(error)
+    end
   end
 
   # Set a handler to handle errors that occur when the builder methods in the
@@ -55,14 +61,20 @@ module T::Configuration
   #     puts error.message
   #   end
   def self.sig_builder_error_handler=(value)
-    if !value.nil? && !value.respond_to?(:call)
-      raise ArgumentError.new("Provided value must respond to :call")
-    end
+    validate_lambda_given!(value)
     @sig_builder_error_handler = value
   end
 
-  def self.sig_builder_error_handler
-    @sig_builder_error_handler
+  private_class_method def self.sig_builder_error_handler_default(error, location)
+    T::Private::Methods.sig_error(location, error.message)
+  end
+
+  def self.sig_builder_error_handler(error, location)
+    if @sig_builder_error_handler
+      @sig_builder_error_handler.call(error, location)
+    else
+      sig_builder_error_handler_default(error, location)
+    end
   end
 
   # Set a handler to handle sig validation errors.
@@ -99,14 +111,37 @@ module T::Configuration
   #     puts error.message
   #   end
   def self.sig_validation_error_handler=(value)
-    if !value.nil? && !value.respond_to?(:call)
-      raise ArgumentError.new("Provided value must respond to :call")
-    end
+    validate_lambda_given!(value)
     @sig_validation_error_handler = value
   end
 
-  def self.sig_validation_error_handler
-    @sig_validation_error_handler
+  private_class_method def self.sig_validation_error_handler_default(error, opts)
+    # if this method overrides a generated signature, report that one instead
+    bad_method = opts[:method]
+    if !opts[:declaration].generated
+      super_signature = opts[:super_signature]
+      raise error if !super_signature&.generated
+      bad_method = super_signature.method
+    end
+
+    method_file, method_line = bad_method.source_location
+    T::Configuration.log_info_handler(
+      "SIG-DECLARE-FAILED",
+      {
+        definition_file: method_file,
+        definition_line: method_line,
+        kind: "Delete",
+        message: error.message,
+      },
+    )
+  end
+
+  def self.sig_validation_error_handler(error, opts)
+    if @sig_validation_error_handler
+      @sig_validation_error_handler.call(error, opts)
+    else
+      sig_validation_error_handler_default(error, opts)
+    end
   end
 
   # Set a handler for type errors that result from calling a method.
@@ -140,13 +175,194 @@ module T::Configuration
   #     puts opts[:message]
   #   end
   def self.call_validation_error_handler=(value)
-    if !value.nil? && !value.respond_to?(:call)
-      raise ArgumentError.new("Provided value must respond to :call")
-    end
+    validate_lambda_given!(value)
     @call_validation_error_handler = value
   end
 
-  def self.call_validation_error_handler
-    @call_validation_error_handler
+  private_class_method def self.call_validation_error_handler_default(signature, opts)
+    method_file, method_line = signature.method.source_location
+    location = opts[:location]
+    suffix = "Caller: #{location.path}:#{location.lineno}\n" \
+      "Definition: #{method_file}:#{method_line}"
+
+    error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n#{suffix}"
+
+    if signature.generated
+      got = opts[:value].class
+      got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
+      T::Configuration.log_info_handler(
+        "SIG-CHECK-FAILED",
+        {
+          caller_file: location.path,
+          caller_line: location.lineno,
+          definition_file: method_file,
+          definition_line: method_line,
+          kind: opts[:kind],
+          name: opts[:name],
+          expected: opts[:type].name,
+          got: got,
+        },
+      )
+    elsif signature.soft_notify
+      T::Configuration.soft_assert_handler(
+        "TypeError: #{error_message}",
+        {notify: signature.soft_notify}
+      )
+    else
+      begin
+        raise TypeError.new(error_message)
+      rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+        T::Private::ErrorHandler.handle_inline_type_error(e)
+      end
+    end
+  end
+
+  def self.call_validation_error_handler(signature, opts)
+    if @call_validation_error_handler
+      @call_validation_error_handler.call(signature, opts)
+    else
+      call_validation_error_handler_default(signature, opts)
+    end
+  end
+
+  # Set a handler for logging
+  #
+  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
+  #   report (pass nil to reset to default behavior)
+  #
+  # Parameters passed to value.call:
+  #
+  # @param [String] str Message to be logged
+  # @param [Hash] extra A hash containing additional parameters to be passed along to the logger.
+  #
+  # @example
+  #   T::Configuration.log_info_handler = lambda do |str, extra|
+  #     puts "#{str}, context: #{extra}"
+  #   end
+  def self.log_info_handler=(value)
+    validate_lambda_given!(value)
+    @log_info_handler = value
+  end
+
+  private_class_method def self.log_info_handler_default(str, extra)
+    puts "#{str}, extra: #{extra}" # rubocop:disable PrisonGuard/NoBarePuts
+  end
+
+  def self.log_info_handler(str, extra)
+    if @log_info_handler
+      @log_info_handler.call(str, extra)
+    else
+      log_info_handler_default(str, extra)
+    end
+  end
+
+  # Set a handler for soft assertions
+  #
+  # These generally shouldn't stop execution of the program, but rather inform
+  # some party of the assertion to action on later.
+  #
+  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
+  #   report (pass nil to reset to default behavior)
+  #
+  # Parameters passed to value.call:
+  #
+  # @param [String] str Assertion message
+  # @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
+  #
+  # @example
+  #   T::Configuration.soft_assert_handler = lambda do |str, extra|
+  #     puts "#{str}, context: #{extra}"
+  #   end
+  def self.soft_assert_handler=(value)
+    validate_lambda_given!(value)
+    @soft_assert_handler = value
+  end
+
+  private_class_method def self.soft_assert_handler_default(str, extra)
+    puts "#{str}, extra: #{extra}" # rubocop:disable PrisonGuard/NoBarePuts
+  end
+
+  def self.soft_assert_handler(str, extra)
+    if @soft_assert_handler
+      @soft_assert_handler.call(str, extra)
+    else
+      soft_assert_handler_default(str, extra)
+    end
+  end
+
+  # Set a handler for hard assertions
+  #
+  # These generally should stop execution of the program, and optionally inform
+  # some party of the assertion.
+  #
+  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
+  #   report (pass nil to reset to default behavior)
+  #
+  # Parameters passed to value.call:
+  #
+  # @param [String] str Assertion message
+  # @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
+  #
+  # @example
+  #   T::Configuration.hard_assert_handler = lambda do |str, extra|
+  #     raise "#{str}, context: #{extra}"
+  #   end
+  def self.hard_assert_handler=(value)
+    validate_lambda_given!(value)
+    @hard_assert_handler = value
+  end
+
+  private_class_method def self.hard_assert_handler_default(str, _)
+    raise str
+  end
+
+  def self.hard_assert_handler(str, extra)
+    if @hard_assert_handler
+      @hard_assert_handler.call(str, extra)
+    else
+      hard_assert_handler_default(str, extra)
+    end
+  end
+
+  # Set a list of class strings that are to be considered scalar.
+  #   (pass nil to reset to default behavior)
+  #
+  # @param [String] value Class name.
+  #
+  # @example
+  #   T::Configuration.scalar_types = ["NilClass", "TrueClass", "FalseClass", ...]
+  def self.scalar_types=(values)
+    if values.nil?
+      @scalar_tyeps = values
+    else
+      bad_values = values.select {|v| v.class != String}
+      unless bad_values.empty?
+        raise ArgumentError.new("Provided values must all be class name strings.")
+      end
+
+      @scalar_types = Set.new(values).freeze
+    end
+  end
+
+  @default_scalar_types = Set.new(%w{
+    NilClass
+    TrueClass
+    FalseClass
+    Integer
+    Float
+    String
+    Symbol
+    Time
+  }).freeze
+
+  def self.scalar_types
+    @scalar_types || @default_scalar_types
+  end
+
+
+  private_class_method def self.validate_lambda_given!(value)
+    if !value.nil? && !value.respond_to?(:call)
+      raise ArgumentError.new("Provided value must respond to :call")
+    end
   end
 end

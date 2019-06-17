@@ -6,8 +6,7 @@ module Opus::Types::Test
     before do
       @mod = Module.new do
         extend T::Sig
-        # Make it public for testing only
-        public_class_method :sig
+        # Make it public for testing only public_class_method :sig
       end
     end
 
@@ -191,6 +190,29 @@ module Opus::Types::Test
             :bar
           end
           assert_equal(:bar, @mod.foo(1))
+        end
+      end
+    end
+
+    describe 'scalar_types' do
+      describe 'when overridden' do
+        before do
+          T::Configuration.scalar_types = ['foo']
+        end
+
+        after do
+          T::Configuration.scalar_types = nil
+        end
+
+        it 'contains the correct values' do
+          assert_equal(T::Configuration.scalar_types, Set.new(['foo']))
+        end
+
+        it 'requires string values' do
+          ex = assert_raises(ArgumentError) do
+            T::Configuration.scalar_types = [1, 2, 3]
+          end
+          assert_includes(ex.message, "Provided values must all be class name strings.")
         end
       end
     end
