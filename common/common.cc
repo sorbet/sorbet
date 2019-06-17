@@ -42,7 +42,7 @@ string sorbet::FileOps::read(string_view filename) {
         fclose(fp);
         if (readBytes != contents.size()) {
             // Error reading file?
-            throw sorbet::FileNotFoundException();
+            throw sorbet::FileReadException(fmt::format("Error reading `{}`: size mismatch", filename));
         }
         return contents;
     }
