@@ -127,6 +127,15 @@ class Index extends React.Component {
               feel free to open a PR to add it to this list!
             </p>
           </div>
+          <div>
+            <h1>Legal</h1>
+            <ul>
+              <li>
+                <a href="/docs/legal/trademark-policy">Trademark Policy</a>
+              </li>
+            </ul>
+            <p></p>
+          </div>
         </PageSection>
       </div>
     );
