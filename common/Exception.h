@@ -10,23 +10,23 @@
 
 namespace sorbet {
 extern std::shared_ptr<spdlog::logger> fatalLogger;
-class SorbetException : std::logic_error {
+class SorbetException : public std::logic_error {
 public:
     SorbetException(const std::string &message) : logic_error(message) {}
     SorbetException(const char *message) : logic_error(message) {}
 };
 
-class FileNotFoundException : SorbetException {
+class FileNotFoundException : public SorbetException {
 public:
     FileNotFoundException(const std::string &message) : SorbetException(message) {}
 };
 
-class FileNotDirException : SorbetException {
+class FileNotDirException : public SorbetException {
 public:
     FileNotDirException(const std::string &message) : SorbetException(message) {}
 };
 
-class FileReadException : SorbetException {
+class FileReadException : public SorbetException {
 public:
     FileReadException(const std::string &message) : SorbetException(message) {}
 };

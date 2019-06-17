@@ -25,7 +25,7 @@ void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_
             }
         }
     } catch (FileNotFoundException e) {
-        logger->error("File Not Found: {}", filename);
+        logger->error(e.what());
         throw EarlyReturnWithCode(11);
     }
 }
