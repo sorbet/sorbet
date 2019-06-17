@@ -110,7 +110,7 @@ public:
     std::pair<Loc, u4> findStartOfLine(const GlobalState &ctx) const;
 
     // For a given Loc, returns a zero-length version that starts at the same location.
-    Loc zeroLength() const {
+    Loc copyWithZeroLength() const {
         return Loc(file(), beginPos(), beginPos());
     }
 };
