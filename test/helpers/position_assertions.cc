@@ -293,7 +293,7 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
 
     // Sort assertions in (filename, range, message) order
     fast_sort(assertions, [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-        return errorComparison(a->filename, *a->range, a->toString(), b->filename, *b->range, b->toString()) == -1;
+        return errorComparison(a->filename, *a->range, a->toString(), b->filename, *b->range, b->toString()) < 0;
     });
 
     return assertions;
@@ -455,7 +455,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         }
 
         fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
-            return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") == -1;
+            return errorComparison(a->uri, *a->range, "", b->uri, *b->range, "") < 0;
         });
 
         auto expectedLocationsIt = allLocs.begin();
@@ -598,7 +598,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                               string errorPrefix) {
     // Sort input error assertions so they are in (filename, line, column) order.
     fast_sort(errorAssertions, [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool {
-        return errorComparison(a->filename, *a->range, a->message, b->filename, *b->range, b->message) == -1;
+        return errorComparison(a->filename, *a->range, a->message, b->filename, *b->range, b->message) < 0;
     });
 
     auto assertionsIt = errorAssertions.begin();
@@ -614,7 +614,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
         // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
         fast_sort(diagnostics, [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
-            return errorComparison(filename, *a->range, a->message, filename, *b->range, b->message) == -1;
+            return errorComparison(filename, *a->range, a->message, filename, *b->range, b->message) < 0;
         });
 
         auto diagnosticsIt = diagnostics.begin();

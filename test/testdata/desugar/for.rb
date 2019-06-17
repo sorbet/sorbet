@@ -2,8 +2,8 @@
 
 class A
     def self.each
-  # ^^^^^^^^^^^^^ error: does not mention a block parameter
-  # ^^^^^^^^^^^^^ error: does not have a `sig`
+  # ^^^^^^^^^^^^^ error: This function does not have a `sig`
+  # ^^^^^^^^^^^^^ error: Method `each` uses `yield` but does not mention a block parameter
         yield 1,2,3,4,5
         yield 6,7,8,9,0
     end
