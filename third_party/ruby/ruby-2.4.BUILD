@@ -3,9 +3,9 @@
 # caveats ######################################################################
 
 # Hard-coded files
-# * config.h
 # * probes.h
-# * config.status
+# * enc/encinit.c
+# * rbconfig.h
 
 # Templated files
 # * verconf.h is just a templated version of what ruby produces
@@ -14,11 +14,39 @@
 # * configure is not run
 
 
+# configuration ################################################################
+
+genrule(
+    name = "run_configure",
+    outs = [
+        "include/ruby/config.h",
+        "config.status",
+    ],
+    srcs = glob([
+        "configure",
+        "tool/*",
+        "*.h",
+        "include/**/*.h",
+        "**/Makefile.in",
+        "template/*",
+    ]),
+    cmd = """
+CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) > /dev/null
+find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
+cp config.status $(location config.status)
+""",
+)
+
 # shared headers ###############################################################
 
 cc_library(
     name = "ruby_headers",
-    srcs = glob([ "include/**/*.h" ]),
+    srcs = glob([
+        "include/**/*.h",
+    ]),
+    hdrs = [
+        "include/ruby/config.h",
+    ],
     includes = [ "include" ],
     visibility = [ "//visibility:public" ],
 )
@@ -33,7 +61,6 @@ cc_library(
         "enc/unicode/9.0.0/*.h",
     ]),
     hdrs = glob([
-        "config.h",
         "*.h",
         "*.inc",
         "enc/shift_jis.c",

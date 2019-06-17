@@ -242,7 +242,6 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "ruby-2.4.3",
         build_file = "//third_party/ruby:ruby-2.4.BUILD",
         patches = [
-            "//third_party/ruby:config.h.patch",
             "//third_party/ruby:probes.h.patch",
             "//third_party/ruby:rbconfig.rb.patch",
             "//third_party/ruby:enc.encinit.c.patch",
