@@ -19,7 +19,8 @@ fi
 
 git_commit_count=$(git rev-list --count HEAD)
 prefix="0.4"
-release_version="v$prefix.$git_commit_count.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
+release_version="0.4.${git_commit_count}"
+long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 
 echo "--- Dowloading artifacts"
 rm -rf release
@@ -133,10 +134,10 @@ popd
 
 
 echo "--- making a github release"
-echo releasing "${release_version}"
-git tag -f "${release_version}"
+echo releasing "${long_release_version}"
+git tag -f "${long_release_version}"
 if [ "$dryrun" = "" ]; then
-    git push origin "${release_version}"
+    git push origin "${long_release_version}"
 fi
 
 mkdir release
@@ -158,6 +159,6 @@ source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
 end
 \`\`\`"
 if [ "$dryrun" = "" ]; then
-    echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${release_version}" -- "${files[@]}"
+    echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd
