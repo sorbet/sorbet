@@ -15,7 +15,7 @@ if [[ "linux" == "$platform" ]]; then
   RUBY_TESTS=""
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
-  RUBY_TESTS="@ruby_2_4_3//:smoke_test"
+  RUBY_TESTS="@ruby_2_4_3//..."
 fi
 
 export JOB_NAME=test-static-sanitized
