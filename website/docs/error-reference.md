@@ -368,6 +368,41 @@ list.each do |elem|
 end
 ```
 
+**But my variable does not change its type, it is always a `Boolean`!**
+
+In Ruby, there is no `Boolean` type. Instead, there are `FalseClass` and
+`TrueClass` types, the union of which defines
+[`T::Boolean` type as a union type](class-types.md#booleans).
+
+When Sorbet encounters a variable declaration like `x = true`, it infers the
+type of `x` as `TrueClass`. An assignment to `x` later on in the same block such
+as `x = false` would imply that the variable is reassigned to a different type
+(namely, to `FalseClass` in this case).
+
+For this reason, a loop such as the following triggers an error:
+
+```ruby
+# Declares `found_valid` with type `FalseClass`
+found_valid = false
+
+list.each do |elem|
+  # Might change the type of `found_valid` to `TrueClass`
+  found_valid = true if valid?(elem) # error: Changing the type of a variable in a loop
+end
+```
+
+The fix, again, is to use `T.let` to widen the type to `T::Boolean`:
+
+```ruby
+# Declare `found_valid` with type `T::Boolean`
+found_valid = T.let(false, T::Boolean)
+
+list.each do |elem|
+  # Does not change the type of `found_valid`
+  found_valid = true if valid?(elem) # ok
+end
+```
+
 ## 7002
 
 This is a standard type mismatch. A method's `sig` declares one type, but the
