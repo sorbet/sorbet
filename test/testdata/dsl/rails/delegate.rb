@@ -26,6 +26,10 @@ class GoodUsages
   end
 end
 
+class WorksWithoutExtendingTSig
+  delegate :foo, :bar, to: :thing
+end
+
 class IgnoredUsages
   local = 0
   not_delegate :thing, to: :nop # error: Method `not_delegate` does not exist
