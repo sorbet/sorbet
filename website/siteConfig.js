@@ -107,8 +107,9 @@ const siteConfig = {
   cleanUrl: true,
 
   // Open Graph and Twitter card images.
-  ogImage: 'img/sorbet-logo-purple-sparkles.svg',
-  twitterImage: 'img/sorbet-logo-purple-sparkles.svg',
+  // (these images can't be SVGs)
+  ogImage: 'img/sorbet-logo-card@2x.png',
+  twitterImage: 'img/sorbet-logo-card@2x.png',
 
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
