@@ -4,7 +4,33 @@
 //
 
 // List of projects/orgs using your project for the users page.
-const users = [];
+const users = [
+  {
+    caption: 'Shopify',
+    image: 'img/shopify-logo.svg',
+    infoLink: 'https://www.shopify.com/',
+  },
+  {
+    caption: 'Coinbase',
+    image: 'img/coinbase-logo.png',
+    infoLink: 'https://www.coinbase.com/',
+  },
+  {
+    caption: 'Atrium',
+    image: 'img/atrium-logo.jpg',
+    infoLink: 'https://www.atrium.co/',
+  },
+  {
+    caption: 'CZI',
+    image: 'img/czi-logo.svg',
+    infoLink: 'https://medium.com/czi-technology',
+  },
+  {
+    caption: 'Gusto',
+    image: 'img/gusto-logo.png',
+    infoLink: 'https://gusto.com/',
+  },
+];
 
 const siteConfig = {
   title: 'Sorbet',
