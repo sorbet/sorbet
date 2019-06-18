@@ -136,13 +136,13 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     InlinedVector<core::SymbolRef, 4> overridenMethods;
 
     if (method.data(gs)->isAbstract() && method.data(gs)->isPrivate()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicOverload)) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Abstract method `{}` cannot be private", method.show(gs));
         }
     }
 
     if (method.data(gs)->isAbstract() && method.data(gs)->isProtected()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicOverload)) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Abstract method `{}` cannot be protected", method.show(gs));
         }
     }
