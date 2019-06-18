@@ -30,6 +30,11 @@ const users = [
     image: 'img/gusto-logo.png',
     infoLink: 'https://gusto.com/',
   },
+  {
+    caption: 'Kickstarter',
+    image: 'img/kickstarter-logo.png',
+    infoLink: 'https://www.kickstarter.com/',
+  },
 ];
 
 const siteConfig = {
