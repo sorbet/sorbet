@@ -26,6 +26,6 @@
  * shade of gray. This makes codeblocks more visible in those gray on gray
  * situations.
  */
-.PageSection code {
+.PageSection--gray code {
   border: 1px solid #ffffff;
 }
