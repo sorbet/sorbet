@@ -1,6 +1,7 @@
 #ifndef FLAT_FILE_MAPPER_H
 #define FLAT_FILE_MAPPER_H
 #include "spdlog/spdlog.h"
+#include <cxxopts.hpp>
 #include <vector>
 
 namespace sorbet::realmain::options {
@@ -16,16 +17,17 @@ class FileFlatMapper {
     std::vector<char *> args;
     // Pointers into those args will be passed in argv
     std::vector<std::string> stringArgs;
+    cxxopts::Options options;
 
     void readArgsFromFile(std::string_view filename);
 
 public:
-    FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger);
+    FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger, cxxopts::Options options);
 
     /*
      * Parse the config CLI args, config files and default `sorbet/config` file
      */
-    void parseConfig();
+    cxxopts::ParseResult parseConfig();
 
     ~FileFlatMapper();
 };
