@@ -1,4 +1,4 @@
-#include "FileFlatMapper.h"
+#include "ConfigParser.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/common.h"
@@ -7,7 +7,7 @@
 using namespace std;
 namespace sorbet::realmain::options {
 
-void FileFlatMapper::readArgsFromFile(string_view filename) {
+void ConfigParser::readArgsFromFile(string_view filename) {
     try {
         string argsP = FileOps::read(filename);
         string_view argsPView = argsP;
@@ -30,7 +30,7 @@ void FileFlatMapper::readArgsFromFile(string_view filename) {
     }
 }
 
-cxxopts::ParseResult FileFlatMapper::parseConfig() {
+cxxopts::ParseResult ConfigParser::parseConfig() {
     if (argc > 0) {
         // $0 / $PROGRAM_NAME should always be first
         stringArgs.emplace_back(argv[0]);
@@ -77,10 +77,10 @@ cxxopts::ParseResult FileFlatMapper::parseConfig() {
     return opts;
 }
 
-FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger, cxxopts::Options options)
+ConfigParser::ConfigParser(int &argc, char **&argv, shared_ptr<spdlog::logger> logger, cxxopts::Options options)
     : logger(logger), origArgc(argc), origArgv(argv), argc(argc), argv(argv), options(options) {}
 
-FileFlatMapper::~FileFlatMapper() {
+ConfigParser::~ConfigParser() {
     argc = origArgc;
     argv = origArgv;
 }

@@ -1,8 +1,8 @@
 cc_library(
     name = "options",
     srcs = [
-        "FileFlatMapper.cc",
-        "FileFlatMapper.h",
+        "ConfigParser.cc",
+        "ConfigParser.h",
         "options.cc",
     ],
     hdrs = ["options.h"],

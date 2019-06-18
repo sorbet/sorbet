@@ -7,7 +7,7 @@
 #include "common/Timer.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
-#include "main/options/FileFlatMapper.h"
+#include "main/options/ConfigParser.h"
 #include "main/options/options.h"
 #include "options.h"
 #include "sys/stat.h"
@@ -483,9 +483,9 @@ void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
     cxxopts::Options options = buildOptions();
-    FileFlatMapper flatMapper(argc, argv, logger, options);
+    ConfigParser configParser(argc, argv, logger, options);
     try {
-        cxxopts::ParseResult raw = flatMapper.parseConfig();
+        cxxopts::ParseResult raw = configParser.parseConfig();
         if (raw["simulate-crash"].as<bool>()) {
             Exception::raise("simulated crash");
         }
