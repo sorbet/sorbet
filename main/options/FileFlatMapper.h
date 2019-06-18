@@ -8,6 +8,7 @@ namespace sorbet::realmain::options {
  *  Steals the original arguments and will put them back on destruction.
  * */
 class FileFlatMapper {
+    std::shared_ptr<spdlog::logger> logger;
     int origArgc;
     char **origArgv;
     int &argc;
@@ -16,7 +17,7 @@ class FileFlatMapper {
     // Pointers into those args will be passed in argv
     std::vector<std::string> stringArgs;
 
-    void readArgsFromFile(std::shared_ptr<spdlog::logger> logger, std::string_view filename);
+    void readArgsFromFile(std::string_view filename);
 
 public:
     FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger);

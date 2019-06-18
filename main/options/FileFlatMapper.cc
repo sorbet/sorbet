@@ -7,7 +7,7 @@
 using namespace std;
 namespace sorbet::realmain::options {
 
-void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename) {
+void FileFlatMapper::readArgsFromFile(string_view filename) {
     try {
         string argsP = FileOps::read(filename);
         string_view argsPView = argsP;
@@ -19,7 +19,7 @@ void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_
                 // skip empty line
                 continue;
             } else if (arg[0] == '@') {
-                readArgsFromFile(logger, arg.substr(min(arg.find_first_not_of("@"), arg.size())));
+                readArgsFromFile(arg.substr(min(arg.find_first_not_of("@"), arg.size())));
             } else {
                 stringArgs.emplace_back(string(arg));
             }
@@ -31,7 +31,7 @@ void FileFlatMapper::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_
 }
 
 FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger)
-    : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
+    : logger(logger), origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
     if (argc > 0) {
         // $0 / $PROGRAM_NAME should always be first
         stringArgs.emplace_back(argv[0]);
@@ -41,12 +41,12 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logge
     auto configFilename = "sorbet/config";
     if (FileOps::exists(configFilename)) {
         // TODO(jez) Recurse upwards to find file in parent directory
-        readArgsFromFile(logger, configFilename);
+        readArgsFromFile(configFilename);
     }
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '@') {
-            readArgsFromFile(logger, argv[i] + 1);
+            readArgsFromFile(argv[i] + 1);
         } else {
             stringArgs.emplace_back(argv[i]);
         }
