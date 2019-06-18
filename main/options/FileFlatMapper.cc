@@ -30,8 +30,7 @@ void FileFlatMapper::readArgsFromFile(string_view filename) {
     }
 }
 
-FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger)
-    : logger(logger), origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
+void FileFlatMapper::parseConfig() {
     if (argc > 0) {
         // $0 / $PROGRAM_NAME should always be first
         stringArgs.emplace_back(argv[0]);
@@ -58,6 +57,9 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logge
     argc = args.size();
     argv = args.data();
 }
+
+FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger)
+    : logger(logger), origArgc(argc), origArgv(argv), argc(argc), argv(argv) {}
 
 FileFlatMapper::~FileFlatMapper() {
     argc = origArgc;

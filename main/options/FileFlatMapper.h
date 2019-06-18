@@ -22,6 +22,11 @@ class FileFlatMapper {
 public:
     FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger);
 
+    /*
+     * Parse the config CLI args, config files and default `sorbet/config` file
+     */
+    void parseConfig();
+
     ~FileFlatMapper();
 };
 } // namespace sorbet::realmain::options

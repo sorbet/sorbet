@@ -482,7 +482,7 @@ void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
     FileFlatMapper flatMapper(argc, argv, logger);
-
+    flatMapper.parseConfig();
     cxxopts::Options options = buildOptions();
     try {
         cxxopts::ParseResult raw = options.parse(argc, argv);
