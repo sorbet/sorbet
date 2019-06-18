@@ -5,8 +5,8 @@ if [ "HEAD" == "${BUILDKITE_COMMIT}" ]; then
   echo "not using commit marks as this is HEAD build"
 else
   if [ "$BUILDKITE_COMMAND_EXIT_STATUS" -ne 0 ]; then
-    .buildkite/hooks/gh-status stripe/sorbet "${BUILDKITE_COMMIT}" failure "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" "${BUILDKITE_LABEL}"
+    .buildkite/hooks/gh-status sorbet/sorbet "${BUILDKITE_COMMIT}" failure "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" "${BUILDKITE_LABEL}"
   else
-    .buildkite/hooks/gh-status stripe/sorbet "${BUILDKITE_COMMIT}" success "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" "${BUILDKITE_LABEL}"
+    .buildkite/hooks/gh-status sorbet/sorbet "${BUILDKITE_COMMIT}" success "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" "${BUILDKITE_LABEL}"
   fi
 fi

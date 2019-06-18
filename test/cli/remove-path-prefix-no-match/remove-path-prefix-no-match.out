@@ -1,7 +1,7 @@
 test/cli/remove-path-prefix-no-match/remove-path-prefix-no-match.rb:2: `String("s")` does not match `Integer` for argument `arg0` https://srb.help/7002
      2 |1 + "s"
         ^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L104: Method `Integer#+` has specified `arg0` as `Integer`
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L104: Method `Integer#+` has specified `arg0` as `Integer`
      104 |        arg0: Integer,
                   ^^^^
   Got String("s") originating from:

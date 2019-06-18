@@ -684,6 +684,6 @@ end
 # ---------------------------------------------
 ```
 
-[report an issue]: https://github.com/stripe/sorbet/issues
+[report an issue]: https://github.com/sorbet/sorbet/issues
 
 <script src="/js/error-reference.js"></script>

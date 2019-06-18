@@ -4,5 +4,5 @@ set -euo pipefail
 if [ "HEAD" == "${BUILDKITE_COMMIT}" ]; then
   echo "not using commit marks as this is HEAD build"
 else
-  .buildkite/hooks/gh-status stripe/sorbet "${BUILDKITE_COMMIT}" pending "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" "${BUILDKITE_LABEL}"
+  .buildkite/hooks/gh-status sorbet/sorbet "${BUILDKITE_COMMIT}" pending "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" "${BUILDKITE_LABEL}"
 fi

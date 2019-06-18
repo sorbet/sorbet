@@ -1074,8 +1074,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                 if (ident->what._name == core::Names::selfRestore()) {
                                     // this is a restoration of `self` variable.
                                     // our current analysis isn't smart enogh to see that it's safe to do this by
-                                    // construction either https://github.com/stripe/sorbet/issues/222 or
-                                    // https://github.com/stripe/sorbet/issues/224 should allow us to remove this case
+                                    // construction either https://github.com/sorbet/sorbet/issues/222 or
+                                    // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this case
                                     break;
                                 }
                             }

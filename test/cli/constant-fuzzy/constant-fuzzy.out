@@ -1,36 +1,36 @@
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/enumerator.rbi#L124: Did you mean: `Enumerator::Yielder`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L124: Did you mean: `Enumerator::Yielder`?
      124 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
      3 |class Ripper
         ^^^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/fiber.rbi#L3: Did you mean: `Fiber`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#L3: Did you mean: `Fiber`?
      3 |class Fiber < Object
         ^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/stdlib/date.rbi#L3: Did you mean: `Date`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/date.rbi#L3: Did you mean: `Date`?
      3 |class Date
         ^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/integer.rbi#L3: Did you mean: `Integer`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L3: Did you mean: `Integer`?
      3 |class Integer < Numeric
         ^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/core/io.rbi#L3: Did you mean: `IO`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L3: Did you mean: `IO`?
      3 |class IO < Object
         ^^^^^^^^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
      6 |module Net
         ^^^^^^^^^^
-    https://github.com/stripe/sorbet/tree/master/rbi/stdlib/set.rbi#L3: Did you mean: `Set`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L3: Did you mean: `Set`?
      3 |class Set < Object
         ^^^^^^^^^^^^^^^^^^
 
