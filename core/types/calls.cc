@@ -134,7 +134,8 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
                                SymbolRef method, const TypeAndOrigins &argTpe, const SymbolData argSym,
                                const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, bool mayBeSetter = false) {
     auto ref = argSym->ref(ctx);
-    TypePtr expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
+    TypePtr expectedType =
+        Types::resultTypeAsSeenFrom(ctx, argSym->resultType, method.data(ctx)->owner, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(ctx, ref);
     }
@@ -238,7 +239,9 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx)->arguments()[i], inClass, targs);
+                auto argType =
+                    Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx)->arguments()[i].data(ctx)->resultType,
+                                                candidate.data(ctx)->owner, inClass, targs);
                 if (argType->isFullyDefined() && !Types::isSubType(ctx, arg->type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -747,7 +750,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         SymbolRef bspec = data->arguments().back();
         ENFORCE(bspec.data(ctx)->isBlockArgument(), "The last symbol must be the block arg: {}", data->show(ctx));
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
+        TypePtr blockType =
+            Types::resultTypeAsSeenFrom(ctx, bspec.data(ctx)->resultType, method.data(ctx)->owner, symbol, targs);
         if (!blockType) {
             blockType = Types::untyped(ctx, bspec);
         }
@@ -773,7 +777,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         } else if (args.args.size() == 2 && method.data(ctx)->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType = Types::resultTypeAsSeenFrom(ctx, method, symbol, targs);
+            resultType =
+                Types::resultTypeAsSeenFrom(ctx, method.data(ctx)->resultType, method.data(ctx)->owner, symbol, targs);
         }
     }
     if (args.block == nullptr) {
@@ -836,13 +841,15 @@ TypePtr getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vec
         if (arg.data(ctx)->isRepeated()) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     data->toString(ctx));
-            return Types::arrayOf(ctx, Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
+            return Types::arrayOf(ctx,
+                                  Types::resultTypeAsSeenFrom(ctx, arg.data(ctx)->resultType,
+                                                              arg.data(ctx)->owner.data(ctx)->owner, klass, targs));
         }
         ENFORCE(!arg.data(ctx)->isKeyword(), "getCallArguments does not support kwargs: {}", data->toString(ctx));
         if (arg.data(ctx)->isBlockArgument()) {
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
+        args.emplace_back(Types::resultTypeAsSeenFrom(ctx, arg.data(ctx)->resultType, data->owner, klass, targs));
     }
     return TupleType::build(ctx, args);
 }

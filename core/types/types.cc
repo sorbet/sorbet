@@ -551,17 +551,20 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
     return currentAlignment;
 }
 
-TypePtr Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, SymbolRef inWhat, const vector<TypePtr> &targs) {
-    const sorbet::core::SymbolData original = what.data(ctx);
-    SymbolRef originalOwner = what.data(ctx)->enclosingClass(ctx);
-
-    if (originalOwner.data(ctx)->typeMembers().empty() || (original->resultType == nullptr)) {
-        return original->resultType;
+TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
+                                    const vector<TypePtr> &targs) {
+    SymbolRef originalOwner = fromWhat;
+    ENFORCE(fromWhat.data(ctx)->isClass());
+    ENFORCE(inWhat.data(ctx)->isClass());
+    ENFORCE(inWhat == fromWhat || inWhat.data(ctx)->derivesFrom(ctx, fromWhat) ||
+            fromWhat.data(ctx)->derivesFrom(ctx, inWhat));
+    if (originalOwner.data(ctx)->typeMembers().empty() || (what == nullptr)) {
+        return what;
     }
 
     auto currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
-    return instantiate(ctx, original->resultType, currentAlignment, targs);
+    return instantiate(ctx, what, currentAlignment, targs);
 }
 
 TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {

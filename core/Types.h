@@ -112,7 +112,7 @@ public:
     static bool canBeFalsy(Context ctx, const TypePtr &what);
     enum Combinator { OR, AND };
 
-    static TypePtr resultTypeAsSeenFrom(Context ctx, SymbolRef what, SymbolRef inWhat,
+    static TypePtr resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                         const std::vector<TypePtr> &targs);
 
     static InlinedVector<SymbolRef, 4> alignBaseTypeArgs(Context ctx, SymbolRef what, const std::vector<TypePtr> &targs,

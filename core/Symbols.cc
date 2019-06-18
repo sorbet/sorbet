@@ -150,7 +150,7 @@ TypePtr Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstr
     ENFORCE(isMethodArgument());
     auto klass = owner.data(ctx)->owner;
     ENFORCE(klass.data(ctx)->isClass());
-    auto instantiated = Types::resultTypeAsSeenFrom(ctx, ref(ctx), klass, klass.data(ctx)->selfTypeArgs(ctx));
+    auto instantiated = Types::resultTypeAsSeenFrom(ctx, resultType, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, this->owner);
     }
