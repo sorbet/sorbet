@@ -134,6 +134,19 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(klass.data(gs)->isClass());
     auto klassData = klass.data(gs);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
+
+    if (method.data(gs)->isAbstract() && method.data(gs)->isPrivate()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicOverload)) {
+            e.setHeader("Abstract method `{}` cannot be private", method.show(gs));
+        }
+    }
+
+    if (method.data(gs)->isAbstract() && method.data(gs)->isProtected()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicOverload)) {
+            e.setHeader("Abstract method `{}` cannot be protected", method.show(gs));
+        }
+    }
+
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(gs)->findMemberTransitive(gs, name);
         if (superMethod.exists()) {

@@ -136,7 +136,7 @@ module PrivateMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  private def bad; end # XXXXX
+  private def bad; end # error: Abstract method `PrivateMethodInInterface#bad` cannot be private
 end
 
 module ProtectedMethodInInterface
@@ -145,7 +145,7 @@ module ProtectedMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  protected def bad; end # XXXXX
+  protected def bad; end # error: Abstract method `ProtectedMethodInInterface#bad` cannot be protected
 end
 
 module GoodInterface

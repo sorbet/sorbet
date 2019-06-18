@@ -46,6 +46,7 @@ constexpr ErrorClass RevealTypeInUntypedFile{5039, StrictLevel::False};
 
 constexpr ErrorClass OverloadNotAllowed{5040, StrictLevel::False};
 constexpr ErrorClass SubclassingNotAllowed{5041, StrictLevel::False};
+constexpr ErrorClass NonPublicOverload{5042, StrictLevel::True};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
