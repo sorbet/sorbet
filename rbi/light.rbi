@@ -455,6 +455,14 @@ class Array < Object
   def sum(arg0=T.unsafe(0), &blk); end
   sig {returns(String)}
   def to_s(); end
+
+  sig do
+    type_parameters(:U).params(
+        arg0: T::Array[T.type_parameter(:U)],
+    )
+    .returns(T::Array[[Elem, T.nilable(T.type_parameter(:U))]])
+  end
+  def zip(*arg0); end
 end
 class BasicObject
   sig {returns(T::Boolean)}

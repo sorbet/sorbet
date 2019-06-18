@@ -737,7 +737,7 @@ class Array < Object
     type_parameters(:U).params(
         arg0: T::Array[T.type_parameter(:U)],
     )
-    .returns(T::Array[[Elem, T.type_parameter(:U)]])
+    .returns(T::Array[[Elem, T.nilable(T.type_parameter(:U))]])
   end
   def zip(*arg0); end
 
