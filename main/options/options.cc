@@ -483,9 +483,8 @@ void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
     cxxopts::Options options = buildOptions();
-    ConfigParser configParser(argc, argv, logger, options);
     try {
-        cxxopts::ParseResult raw = configParser.parseConfig();
+        cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
         if (raw["simulate-crash"].as<bool>()) {
             Exception::raise("simulated crash");
         }
