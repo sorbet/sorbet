@@ -48,5 +48,6 @@
       "talks/strange-loop-2018",
       "talks/ruby-kaigi-2019"
     ]
-  }
+  },
+  "legal": { "Legal": [ "legal/trademark-policy" ] }
 }
