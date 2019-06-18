@@ -145,8 +145,7 @@ optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableConte
     auto getType = ASTUtil::dupType(type.get());
     ENFORCE(getType != nullptr);
 
-    // From this point, we can't `return std::nullopt` anymore since we're going to be
-    // consuming the tree.
+    // From this point, we can't `return std::nullopt` anymore since we're going to be consuming the tree.
 
     ChalkODMProp::NodesAndProp ret;
 
