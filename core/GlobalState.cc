@@ -1166,7 +1166,8 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    bool report = (what == errors::Internal::InternalError) || (reportForFile && !this->silenceErrors);
+    bool report = (what == errors::Internal::InternalError) || (what == errors::Internal::FileNotFound) ||
+                  (reportForFile && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
 }
 

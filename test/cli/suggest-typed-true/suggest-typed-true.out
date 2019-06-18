@@ -2,7 +2,7 @@
 -------------------------
 --suggest-typed must also include `--typed=strict`
 -------------------------
-does-not-exist.rb: File Not Found https://srb.help/1001
+does-not-exist.rb: File Not Found https://srb.help/1004
 Errors: 1
 -------------------------
 suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022

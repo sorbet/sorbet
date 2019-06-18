@@ -444,7 +444,7 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
 
     auto &fileData = file.data(*gs);
     if (!fileFound) {
-        if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+        if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
             e.setHeader("File Not Found");
         }
     }
