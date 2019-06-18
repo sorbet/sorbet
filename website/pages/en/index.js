@@ -30,7 +30,7 @@ def main(name)
 end
 
 main("Sorbet") # ok!
-main()   # error: Not enough arguments provided for method \`main\`
+main()   # error: Not enough arguments provided
 man("")  # error: Method \`man\` does not exist
 \`\`\`
 `;
