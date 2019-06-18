@@ -120,15 +120,23 @@
   padding-right: 20px;
 }
 
-.logos {
+.StripeCallout {
   display: flex;
-  flex-direction: row;
-  margin: 0;
+  align-items: center;
+  justify-content: space-around;
 }
 
-.logos img {
-  height: 50px;
-  margin-right: 20px;
+.StripeCallout-Logo {
+  max-height: 175px;
+}
+
+.StripeCallout-Description {
+  flex-basis: 50%;
+}
+
+.productShowcaseSection img {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Responsive styles*/
@@ -146,6 +154,10 @@
 }
 @media only screen and (max-width: 700px) {
   .pageSectionColumns {
+    flex-direction: column;
+  }
+
+  .StripeCallout {
     flex-direction: column;
   }
 

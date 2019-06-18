@@ -20,3 +20,12 @@
 .PageSection--short {
   padding: 2em 0;
 }
+
+/*
+ * Sometimes the background is gray, but codeblocks are a slightly different
+ * shade of gray. This makes codeblocks more visible in those gray on gray
+ * situations.
+ */
+.PageSection code {
+  border: 1px solid #ffffff;
+}

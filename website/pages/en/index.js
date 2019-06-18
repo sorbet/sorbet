@@ -35,11 +35,31 @@ man("")  # error: Method \`man\` does not exist
 \`\`\`
 `;
 
+const gettingStarted = `
+\`\`\`ruby
+# -- Gemfile --
+
+gem 'sorbet', :group => :development
+gem 'sorbet-runtime'
+\`\`\`
+
+\`\`\`bash
+# Install the gems
+❯ bundle install
+
+# Initialize Sorbet
+❯ srb init
+
+# Type check the project
+❯ srb tc
+\`\`\`
+`;
+
 // TODO(jez) No inline style
 const Button = (props) => (
   <a
     className="button"
-    style={{marginRight: '10px'}}
+    style={{marginRight: '10px', marginBottom: '10px'}}
     href={props.href}
     target={props.target}
   >
@@ -54,6 +74,17 @@ class Index extends React.Component {
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
     const langPart = `${language ? `${language}/` : ''}`;
     const docUrl = (doc) => `${baseUrl}${docsPart}${langPart}${doc}`;
+
+    const showcase = siteConfig.users.map((user) => (
+      <a className="link" href={user.infoLink} key={user.infoLink}>
+        <img
+          src={`${baseUrl}${user.image}`}
+          alt={user.caption}
+          title={user.caption}
+        />
+        <span className="caption">{user.caption}</span>
+      </a>
+    ));
 
     return (
       <div>
@@ -134,6 +165,27 @@ class Index extends React.Component {
           </div>
         </PageSection>
         <PageSection gray>
+          <h2>Get started quickly</h2>
+          <div className="row">
+            <div className="column">
+              <p>
+                Sorbet is designed to get you started quickly. Add and install a
+                few gems, initialize Sorbet, and type check your project. Sorbet
+                also knows what's in a project's Gemfile, so it knows how to
+                make or create <a href={docUrl('rbi')}>type definition files</a>{' '}
+                for any gems a project uses.
+              </p>
+              <p>
+                For more information on how to get started with Sorbet, see the{' '}
+                <a href={docUrl('adopting')}>Getting Started</a> guide.
+              </p>
+            </div>
+            <div className="column">
+              <MarkdownBlock>{gettingStarted}</MarkdownBlock>
+            </div>
+          </div>
+        </PageSection>
+        <PageSection>
           <h2>Designed to be interactive</h2>
           <div className="row">
             <div className="column">
@@ -164,30 +216,36 @@ class Index extends React.Component {
             alt="GIF of autocomplete in editor"
           />
         </PageSection>
-        <PageSection short>
-          <div className="pageSectionColumns">
-            <p className="logos">
-              <a href="https://stripe.com/">
-                <img src={`${baseUrl}img/stripe-logo.svg`} alt="Stripe Logo" />
-              </a>
-              <a href="https://coinbase.com/">
-                <img
-                  src={`${baseUrl}img/coinbase-logo.png`}
-                  alt="Coinbase Logo"
-                  style={{
-                    position: 'relative',
-                    top: '-4px',
-                  }}
-                />
-              </a>
-              <a href="https://engineering.gusto.com/">
-                <img src={`${baseUrl}img/gusto-logo.svg`} alt="Gusto Logo" />
-              </a>
+        <PageSection gray>
+          <div className="StripeCallout">
+            <img
+              className="StripeCallout-Logo"
+              src={`${baseUrl}img/stripe-logo.svg`}
+            />
+            <div className="StripeCallout-Description">
+              Sorbet is built <a href="https://stripe.com">at Stripe</a>, where
+              the vast majority of code is written in Ruby. We've developed
+              Sorbet to run fast, model Ruby accurately, and power
+              language-aware editor features for hundreds of developers across
+              millions of lines of actual Ruby code.
+            </div>
+          </div>
+        </PageSection>
+        <PageSection>
+          <div className="productShowcaseSection">
+            <h2>Who is Using Sorbet?</h2>
+            <p>
+              More than just Stripe, Sorbet has been tested by dozens of
+              companies, projects, and individuals including...
             </p>
-            <p style={{flex: 1, margin: 0}}>
-              Sorbet is currently used by many companies and projects.{' '}
-              <a href="mailto:sorbet@stripe.com">Email us</a> if you'd like your
-              logo to appear here.
+            <div className="logos">{showcase}</div>
+            <p>
+              Are you using Sorbet and want to be mentioned here?{' '}
+              <a href="mailto:sorbet@stripe.com">Email us</a> or{' '}
+              <a href="https://github.com/sorbet/sorbet/edit/master/website/siteConfig.js">
+                send a PR
+              </a>
+              !
             </p>
           </div>
         </PageSection>
