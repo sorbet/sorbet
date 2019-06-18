@@ -84,55 +84,16 @@ else
 fi
 git checkout -f "$current_rev"
 
-echo "--- releasing stripe.dev/sorbet-repo (gem repo)"
-if [ ! -d "sorbet-repo" ]; then
-  git clone git@github.com:stripe/sorbet-repo.git
-fi
-pushd sorbet-repo
-git fetch origin gh-pages
-git reset --hard origin/gh-pages
-git clean -fdx
-git checkout gh-pages
-mkdir -p super-secret-private-beta/gems/
-cp -R ../_out_/gems/*.gem super-secret-private-beta/gems/
-gem install builder
-pushd super-secret-private-beta
-gem generate_index
-popd
-git add super-secret-private-beta/
-git commit -m "Updated gems - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-if [ "$dryrun" = "" ]; then
-    git push origin gh-pages
-
-    # For some reason, GitHub Pages won't automatically build for us on push
-    # We have a ticket open with GitHub to investigate why.
-    # For now, we trigger a build manually.
-    curl \
-      -X POST \
-      --netrc \
-      -H "Accept: application/vnd.github.mister-fantastic-preview+json" \
-      "https://api.github.com/repos/stripe/sorbet.run/pages/builds"
-fi
-popd
-rm -rf sorbet-repo
-
 echo "--- publishing gems to RubyGems.org"
-gem_tmpdir="$(mktemp -d)"
-# We want this to expand right now, not later.
-# shellcheck disable=SC2064
-trap "rm -rf '$gem_tmpdir'" EXIT
-cp .buildkite/dummy.gemspec "$gem_tmpdir/sorbet.gemspec"
 
-pushd "$gem_tmpdir"
-sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
-gem build sorbet.gemspec
+printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
+chmod 600 "$HOME/.gem/credentials"
+
 if [ "$dryrun" = "" ]; then
-  printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
-  chmod 600 "$HOME/.gem/credentials"
-  gem push sorbet*.gem
+  for gem_archive in ../_out_/gems/*.gem; do
+    gem push "$gem_archive"
+  done
 fi
-popd
-
 
 echo "--- making a github release"
 echo releasing "${long_release_version}"
