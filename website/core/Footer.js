@@ -17,6 +17,8 @@ class Footer extends React.Component {
             <a href="en/community">Community</a>
             {' · '}
             <a href="blog/">Blog</a>
+            {' · '}
+            <a href="https://twitter.com/sorbet_ruby">Twitter</a>
           </p>
         </div>
       </footer>
