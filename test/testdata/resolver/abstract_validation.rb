@@ -43,8 +43,6 @@ end
 
 AbstractClass.foo # error: Invoking abstract class method AbstractClass.foo
 
-AbstractClass.new.bar
-
 # it fails if a concrete module doesn't implement abstract methods
   module M2
 # ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#bar`
@@ -73,7 +71,7 @@ end
 
 
   # it fails when instantiating the class
-  AbstractClass.new # XXXXX
+  AbstractClass.new # error: Instantiating abstract class `AbstractClass`
 
   # it handles splats and kwargs
 class SplatParent
