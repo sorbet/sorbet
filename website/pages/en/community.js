@@ -67,7 +67,7 @@ class Index extends React.Component {
                 },
                 {
                   title: `Report issues`,
-                  content: `Found a bug? We track issues [on GitHub](https://github.com/stripe/sorbet/issues). Since we have limited time to dedicate to issue triage, you'll be asked to articulate a specific problem or explicit steps to reproduce the bug.`,
+                  content: `Found a bug? We track issues [on GitHub](https://github.com/sorbet/sorbet/issues). Since we have limited time to dedicate to issue triage, you'll be asked to articulate a specific problem or explicit steps to reproduce the bug.`,
                 },
               ]}
             />

@@ -76,7 +76,7 @@ if [ "$dirty" != "" ]; then
         -X POST \
         --netrc \
         -H "Accept: application/vnd.github.mister-fantastic-preview+json" \
-        "https://api.github.com/repos/stripe/sorbet/pages/builds"
+        "https://api.github.com/repos/sorbet/sorbet/pages/builds"
   fi
   echo "pushed an update"
 else
@@ -160,6 +160,6 @@ source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
 end
 \`\`\`"
 if [ "$dryrun" = "" ]; then
-    echo "$release_notes" | ../.buildkite/tools/gh-release.sh stripe/sorbet "${long_release_version}" -- "${files[@]}"
+    echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd

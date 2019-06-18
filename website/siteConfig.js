@@ -12,7 +12,7 @@ const siteConfig = {
   url: 'https://sorbet.org',
   cname: 'sorbet.org',
   baseUrl: '/',
-  editUrl: 'https://github.com/stripe/sorbet/edit/master/website/docs/',
+  editUrl: 'https://github.com/sorbet/sorbet/edit/master/website/docs/',
 
   // Used for publishing and more
   projectName: 'sorbet',
@@ -92,6 +92,8 @@ const siteConfig = {
 
   algolia: {
     apiKey: 'fa1ec885ab70787d636759b88e509b92',
+    // This name must match the index name here:
+    // https://github.com/algolia/docsearch-configs/blob/master/configs/stripe_sorbet.json
     indexName: 'stripe_sorbet',
     algoliaOptions: {}, // Optional, if provided by Algolia
   },

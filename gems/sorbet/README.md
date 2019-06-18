@@ -176,7 +176,7 @@ of a test using the `gems/` folder.
 > **Note**: It's currently not possible to test the contents of
 > `sorbet/rbi/hidden-definitions`.
 >
-> See <https://github.com/stripe/sorbet/issues/593>.
+> See <https://github.com/sorbet/sorbet/issues/593>.
 
 ### Updating tests
 
