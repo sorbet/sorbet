@@ -25,7 +25,7 @@ sig {params(<span class="hljs-symbol">name:</span> String).returns(Integer)}
 <span class="hljs-keyword">end</span>
 
 main(<span class="hljs-string">"Sorbet"</span>) <span class="hljs-comment"># ok!</span>
-main()   <span class="hljs-comment"># error: Not enough arguments provided for method `main`</span>
+main()   <span class="hljs-comment"># error: Not enough arguments provided</span>
 man(<span class="hljs-string">""</span>)  <span class="hljs-comment"># error: Method `man` does not exist</span>
 </code></pre>
 </span></div></div></div></div></div><div class="PageSection PageSection--gray"><div class="PageSection-Wrapper"><h2>Get started quickly</h2><div class="row"><div class="column"><p>Sorbet is designed to get you started quickly. Add and install a few gems, initialize Sorbet, and type check your project. Sorbet also knows what&#x27;s in a project&#x27;s Gemfile, so it knows how to make or create <a href="/docs/en/rbi">type definition files</a> for any gems a project uses.</p><p>For more information on how to get started with Sorbet, see the <a href="/docs/en/adopting">Getting Started</a> guide.</p></div><div class="column"><div><span><pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- Gemfile --</span>
