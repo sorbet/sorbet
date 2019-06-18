@@ -35,6 +35,10 @@ This page contains tips and tricks for common errors from `srb`.
 
 Sorbet has crashed. Please [report an issue]!
 
+## 1004
+
+Sorbet couldn't find a file.
+
 ## 2001
 
 There was a Ruby syntax error. Sorbet was unable to parse the source code. If
