@@ -5,9 +5,19 @@
 #include <vector>
 
 namespace sorbet::realmain::options {
-/** read @file arguments and put them explicitly
- *  Steals the original arguments and will put them back on destruction.
- * */
+/**
+ * Parse configuration for Sorbet
+ *
+ * Sorbet's configuration is split into three supports in order of precedence:
+ *
+ * 1. CLI options: passed directly to Sorbet such `sorbet --typed=false`
+ * 2. File options: written in files passed to Sorbet such as `sorbet @my_config`
+ * 3. Default config file options: written in `sorbet/config`
+ *
+ * This class parses and merges all these options and handle the precedence between them.
+ *
+ * See `ConfigParser::parseConfig()`.
+ */
 class ConfigParser {
     std::shared_ptr<spdlog::logger> logger;
     int origArgc;
@@ -19,9 +29,15 @@ class ConfigParser {
     std::vector<std::string> stringArgs;
     cxxopts::Options options;
 
+    /**
+     * Read `@file` arguments and put them explicitly into `stringArgs`
+     */
     void readArgsFromFile(std::string_view filename);
 
 public:
+    /**
+     * Steal the original `argc` and `argv` and will put them back on destruction
+     */
     ConfigParser(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger, cxxopts::Options options);
 
     /**
