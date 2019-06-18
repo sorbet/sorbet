@@ -122,6 +122,7 @@ public:
         }
 
         // cerr << "preTransformClassDef(" << original->toString(ctx) << ")\n";
+        // fake change
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
