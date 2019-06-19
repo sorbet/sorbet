@@ -151,14 +151,15 @@ CheckSize(NotSupported, 40, 8);
 
 class LoadArg final : public Instruction {
 public:
-    core::SymbolRef arg;
+    core::SymbolRef method;
+    u2 argId;
 
-    LoadArg(core::SymbolRef arg) : arg(arg) {
+    LoadArg(core::SymbolRef method, int argId) : method(method), argId(argId) {
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(LoadArg, 16, 8);
+CheckSize(LoadArg, 24, 8);
 
 class LoadYieldParams final : public Instruction {
 public:
