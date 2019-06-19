@@ -30,3 +30,13 @@
   - `Parent` / `Child`: classes with inheritance relationship
 - Don't e.g. use `foo` to mean a local variable, or `f` to mean an arbitrary
   method, or `A` mean an module.
+
+- All non-title headings should be sentence case, always.
+  - ❌ Some Non-Title Heading
+  - ✅ Some non-title heading
+- All non-doc titles should be sentence case
+  - see above
+  - this includes blog posts
+- All doc titles should be title case
+  - ❌ Some page title
+  - ✅ Some Page Title
