@@ -11,28 +11,28 @@ namespace sorbet::definition_validator {
 
 struct Signature {
     struct {
-        absl::InlinedVector<core::SymbolRef, 4> required;
-        absl::InlinedVector<core::SymbolRef, 4> optional;
-        core::SymbolRef rest;
+        absl::InlinedVector<core::NameRef, 4> required;
+        absl::InlinedVector<core::NameRef, 4> optional;
+        std::optional<const core::ArgInfo*> rest;
     } pos, kw;
-    core::SymbolRef blk;
+    bool syntheticBlk;
 } left, right;
 
 Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method) {
     Signature sig;
-    for (auto arg : method.data(gs)->arguments()) {
-        if (arg.data(gs)->isBlockArgument()) {
-            sig.blk = arg;
+    for (auto &arg : method.data(gs)->arguments()) {
+        if (arg.flags.isBlock) {
+            sig.syntheticBlk = arg.isSyntheticBlockArgument();
             continue;
         }
 
-        auto &dst = arg.data(gs)->isKeyword() ? sig.kw : sig.pos;
-        if (arg.data(gs)->isRepeated()) {
-            dst.rest = arg;
-        } else if (arg.data(gs)->isOptional()) {
-            dst.optional.push_back(arg);
+        auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
+        if (arg.flags.isRepeated) {
+            dst.rest = std::optional<const core::ArgInfo*>{&arg};
+        } else if (arg.flags.isDefault) {
+            dst.optional.push_back(arg.name);
         } else {
-            dst.required.push_back(arg);
+            dst.required.push_back(arg.name);
         }
     }
     return sig;
@@ -52,7 +52,7 @@ void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef sup
     auto left = decomposeSignature(gs, superMethod);
     auto right = decomposeSignature(gs, method);
 
-    if (!right.pos.rest.exists()) {
+    if (!right.pos.rest) {
         auto leftPos = left.pos.required.size() + left.pos.optional.size();
         auto rightPos = right.pos.required.size() + right.pos.optional.size();
         if (leftPos > rightPos) {
@@ -64,11 +64,13 @@ void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef sup
         }
     }
 
-    if (left.pos.rest.exists() && !right.pos.rest.exists()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of abstract method `{}` must accept *`{}`", superMethod.data(gs)->show(gs),
-                        left.pos.rest.data(gs)->argumentName(gs));
-            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+    if (auto leftRest = left.pos.rest) {
+        if (!right.pos.rest) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of abstract method `{}` must accept *`{}`", superMethod.data(gs)->show(gs),
+                            (*leftRest)->show(gs));
+                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            }
         }
     }
 
@@ -80,44 +82,42 @@ void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef sup
         }
     }
 
-    if (!right.kw.rest.exists()) {
+    if (!right.kw.rest) {
         for (auto req : left.kw.required) {
-            auto nm = req.data(gs)->name;
-            if (absl::c_any_of(right.kw.required, [&](auto &r) { return r.data(gs)->name == nm; }))
+            if (absl::c_any_of(right.kw.required, [&](const auto &r) { return r == req; }))
                 continue;
-            if (absl::c_any_of(right.kw.optional, [&](auto &r) { return r.data(gs)->name == nm; }))
+            if (absl::c_any_of(right.kw.optional, [&](const auto &r) { return r == req; }))
                 continue;
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
-                            superMethod.data(gs)->show(gs), req.data(gs)->argumentName(gs));
+                            superMethod.data(gs)->show(gs), req.show(gs));
                 e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
             }
         }
     }
 
-    if (left.kw.rest.exists() && !right.kw.rest.exists()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of abstract method `{}` must accept **`{}`", superMethod.data(gs)->show(gs),
-                        left.kw.rest.data(gs)->argumentName(gs));
-            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+    if (auto leftRest = left.kw.rest) {
+        if (!right.kw.rest) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of abstract method `{}` must accept **`{}`", superMethod.data(gs)->show(gs),
+                            (*leftRest)->show(gs));
+                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            }
         }
     }
 
     for (auto extra : right.kw.required) {
-        if (absl::c_any_of(left.kw.required, [&](auto l) { return l.data(gs)->name == extra.data(gs)->name; })) {
+        if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l == extra; })) {
             continue;
         }
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of abstract method `{}` contains extra required keyword argument `{}`",
-                        superMethod.data(gs)->show(gs), extra.data(gs)->argumentName(gs));
+                        superMethod.data(gs)->show(gs), extra.toString(gs));
             e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
         }
     }
 
-    ENFORCE(left.blk.exists() && right.blk.exists(), "Broken assumption: every method has a block argument.");
-    // TODO This is a raw string comparison on argument names
-    if (left.blk.data(gs)->argumentName(gs) != core::Names::blkArg().data(gs)->shortName(gs) &&
-        right.blk.data(gs)->argumentName(gs) == core::Names::blkArg().data(gs)->shortName(gs)) {
+    if (!left.syntheticBlk && right.syntheticBlk) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of abstract method `{}` must explicitly name a block argument",
                         superMethod.data(gs)->show(gs));
