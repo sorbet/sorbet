@@ -74,6 +74,10 @@ public:
         bool isDefault = false;
         bool isShadow = false;
         bool isBlock = false;
+
+    private:
+        friend class Symbol;
+        friend class serialize::SerializerImpl;
         void setFromU1(u1 flags);
         u1 toU1() const;
     };
