@@ -83,11 +83,11 @@ class SplatParent
 end
 
 class SplatChild1 < SplatParent
-  def foo(*args); end # XXX should fail with no **kwargs error
+  def foo(*args); end # error: Implementation of abstract method `SplatParent#foo` must accept **`opts`
 end
 
 class SplatChild2 < SplatParent
-  def foo(**opts); end # XXX should fail with no *args error
+  def foo(**opts); end # error: Implementation of abstract method `SplatParent#foo` must accept *`args`
 end
 
 
