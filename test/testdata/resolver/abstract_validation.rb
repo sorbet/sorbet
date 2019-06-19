@@ -38,7 +38,7 @@ module M1
   extend T::Helpers
   abstract!
   sig {abstract.returns(Object)}
-  def self.foo; end # XXXXX
+  def self.foo; end # error: Static methods in a module cannot be abstract
 end
 
 AbstractClass.foo # error: Invoking abstract class method AbstractClass.foo

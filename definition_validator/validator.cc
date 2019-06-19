@@ -147,6 +147,15 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
+    if (method.data(gs)->isAbstract() && klassData->isClass() && klassData->isSingletonClass(gs)) {
+        auto attached = klassData->attachedClass(gs);
+        if (attached.exists() && attached.data(gs)->isClassModule()) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadAbstractMethod)) {
+                e.setHeader("Static methods in a module cannot be abstract");
+            }
+        }
+    }
+
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(gs)->findMemberTransitive(gs, name);
         if (superMethod.exists()) {
