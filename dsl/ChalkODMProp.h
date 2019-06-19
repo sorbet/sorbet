@@ -7,33 +7,23 @@ namespace sorbet::dsl {
 /**
  * This class desugars things of the form
  *
- *   prop :foo, String
+ *   prop :foo, Type
  *
  * into
  *
- *   sig {returns(T.nilable(String))}
- *   def foo; T.cast(nil, T.nilable(String)); end
- *   sig {params(arg0: String).returns(NilClass)}
- *   def foo=(arg0); end
+ *   sig {returns(Type)}
+ *   def foo; ...; end
+ *   sig {params(x: Type).returns(Type)}
+ *   def foo=(x); ...; end
  *   class Mutator < Chalk::ODM::Mutator
- *     sig {params(arg0: String).returns(NilClass)}
- *     def foo=(arg0); end
+ *     sig {returns(Type)}
+ *     def foo(x); end
+ *     sig {params(x: Type).returns(Type)}
+ *     def foo=(x); end
  *   end
  *
- * We try to implement a simple approximation of the functionality that
- * Chalk::ODM::Document.prop has. This isn't full fidelity, but we're trying to
- * straddle the line between complexity and usefulness. Specifically:
- *
- * Any `prop` method call in a class body whose shape matches is considered.
- * `const ...` is the same as `prop ..., immutable: true`.
- * The getter will return `T.nilable(TheType)` and the setter will take `TheType`.
- * In the last param if there is a:
- *   type: TheType - overrides the second param.
- *   array: TheType - overrides the second param and makes it an `Array[TheValue]`.
- *   default: - the getter isn't nilable anymore.
- *   factory: - same as default:.
- *
- * Any deviation from this expected shape stops the desugaring.
+ * We try to implement a simple approximation of the functionality that Chalk::ODM::Document.prop has. Any deviation
+ * from the expected shape stops the desugaring.
  *
  * Most other `replaceDSL`s return just nodes, but we also want to keep track of the prop information so that at the end
  * of the DSL pass on the classDef, we can construct an `initialize` method with good static types.
