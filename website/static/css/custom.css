@@ -134,11 +134,6 @@
   flex-basis: 50%;
 }
 
-.productShowcaseSection img {
-  display: flex;
-  flex-direction: column;
-}
-
 /* Responsive styles*/
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
