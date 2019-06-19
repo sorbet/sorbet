@@ -551,13 +551,18 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
     return currentAlignment;
 }
 
+/**
+ * fromWhat - where the generic type was written
+ * inWhat   - where the generic type is observed
+ */
 TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                     const vector<TypePtr> &targs) {
     SymbolRef originalOwner = fromWhat;
     ENFORCE(fromWhat.data(ctx)->isClass());
     ENFORCE(inWhat.data(ctx)->isClass());
     ENFORCE(inWhat == fromWhat || inWhat.data(ctx)->derivesFrom(ctx, fromWhat) ||
-            fromWhat.data(ctx)->derivesFrom(ctx, inWhat));
+                fromWhat.data(ctx)->derivesFrom(ctx, inWhat),
+            "\n{}\nis unrelated to\n\n{}", fromWhat.data(ctx)->toString(ctx), inWhat.data(ctx)->toString(ctx));
     if (originalOwner.data(ctx)->typeMembers().empty() || (what == nullptr)) {
         return what;
     }
