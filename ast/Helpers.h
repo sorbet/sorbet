@@ -293,8 +293,7 @@ public:
                 return Unsafe(loc, Nil(loc));
             }
         }
-        return Send2(loc, Constant(loc, core::Symbols::T()), core::Names::cast(), Unsafe(loc, Nil(loc)),
-                     std::move(type));
+        return Send2(loc, T(loc), core::Names::cast(), Unsafe(loc, Nil(loc)), std::move(type));
     }
 
     static std::unique_ptr<Expression> T(core::Loc loc) {
