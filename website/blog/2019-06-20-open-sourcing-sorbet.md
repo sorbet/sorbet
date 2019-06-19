@@ -1,6 +1,6 @@
 ---
 id: open-sourcing-sorbet
-title: Open-sourcing Sorbet: A Fast, Powerful Type Checker for Ruby
+title: Open-sourcing Sorbet: a fast, powerful type checker for Ruby
 ---
 
 We're excited to announce that Sorbet is now [open source] and you can try it
