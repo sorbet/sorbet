@@ -30,6 +30,17 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     return protoName;
 }
 
+com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ArgInfo &arg) {
+    com::stripe::rubytyper::Symbol::ArgumentInfo argProto;
+    *argProto.mutable_name() = toProto(gs, arg.name);
+    argProto.set_iskeyword(arg.flags.isKeyword);
+    argProto.set_isrepeated(arg.flags.isRepeated);
+    argProto.set_isdefault(arg.flags.isDefault);
+    argProto.set_isshadow(arg.flags.isShadow);
+    argProto.set_isblock(arg.flags.isBlock);
+
+    return argProto;
+}
 com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef sym) {
     com::stripe::rubytyper::Symbol symbolProto;
     const auto data = sym.data(gs);
@@ -45,8 +56,6 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::FIELD);
     } else if (data->isMethod()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::METHOD);
-    } else if (data->isMethodArgument()) {
-        symbolProto.set_kind(com::stripe::rubytyper::Symbol::ARGUMENT);
     } else if (data->isTypeMember()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
     } else if (data->isTypeArgument()) {
@@ -59,8 +68,8 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
                 symbolProto.add_mixins(thing._id);
             }
         } else {
-            for (auto thing : data->arguments()) {
-                symbolProto.add_arguments(thing._id);
+            for (auto &thing : data->arguments()) {
+                *symbolProto.add_arguments() = toProto(gs, thing);
             }
         }
 

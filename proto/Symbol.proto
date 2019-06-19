@@ -10,7 +10,7 @@ message Symbol {
         STATIC_FIELD = 2;
         FIELD = 3;
         METHOD = 4;
-        ARGUMENT = 5;
+//        ARGUMENT = 5;
         TYPE_MEMBER = 6;
         TYPE_ARGUMENT = 7;
     }
@@ -37,6 +37,15 @@ message Symbol {
         BLOCK = 4;
     }
 
+    message ArgumentInfo {
+        Name name = 1;
+        bool isKeyword = 2;
+        bool isRepeated = 3;
+        bool isDefault = 4;
+        bool isShadow = 5;
+        bool isBlock = 6;
+    }
+
     int32 id = 1;
 
     Name name = 2;
@@ -55,7 +64,8 @@ message Symbol {
 
     // METHOD
 //    repeated int32 typeArguments = 9;
-    repeated int32 arguments = 10;
+//    repeated int32 arguments = 10;
+    repeated ArgumentInfo arguments = 17;
 
     // METHOD_ARGUMENT
 //    repeated Flag flags = 11;
