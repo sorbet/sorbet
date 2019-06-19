@@ -560,12 +560,17 @@ TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWha
     SymbolRef originalOwner = fromWhat;
     ENFORCE(fromWhat.data(ctx)->isClass());
     ENFORCE(inWhat.data(ctx)->isClass());
-    ENFORCE(inWhat == fromWhat || inWhat.data(ctx)->derivesFrom(ctx, fromWhat) ||
-                fromWhat.data(ctx)->derivesFrom(ctx, inWhat),
-            "\n{}\nis unrelated to\n\n{}", fromWhat.data(ctx)->toString(ctx), inWhat.data(ctx)->toString(ctx));
+
+    // TODO: the ENFORCE below should be above this conditional, but there is
+    // currently a problem with the handling of `module_function` that causes it
+    // to fail reliably. https://github.com/sorbet/sorbet/issues/904
     if (originalOwner.data(ctx)->typeMembers().empty() || (what == nullptr)) {
         return what;
     }
+
+    ENFORCE(inWhat == fromWhat || inWhat.data(ctx)->derivesFrom(ctx, fromWhat) ||
+                fromWhat.data(ctx)->derivesFrom(ctx, inWhat),
+            "\n{}\nis unrelated to\n\n{}", fromWhat.data(ctx)->toString(ctx), inWhat.data(ctx)->toString(ctx));
 
     auto currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
