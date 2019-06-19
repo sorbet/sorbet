@@ -803,6 +803,17 @@ string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResul
     }
 }
 
+// Returns `true` if `line` matches a full line of text in `text`.
+bool containsLine(string_view text, string_view line) {
+    auto pos = text.find(line);
+    if (pos == string::npos) {
+        return false;
+    }
+    const bool startsOnNewLine = pos == 0 || text.at(pos - 1) == '\n';
+    const bool endsLine = pos + line.size() == text.size() || text.at(pos + line.size()) == '\n';
+    return startsOnNewLine && endsLine;
+}
+
 void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                            int &nextId, string_view uriPrefix, string errorPrefix) {
     auto uri = filePathToUri(uriPrefix, filename);
@@ -819,7 +830,8 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto &hoverResponse = get<variant<JSONNullObject, unique_ptr<Hover>>>(*response.result);
     auto hoverContents = hoverToString(hoverResponse);
 
-    if (hoverContents.find(this->message) == string::npos) {
+    // Match a full line. Makes it possible to disambiguate `String` and `T.nilable(String)`.
+    if (!containsLine(hoverContents, this->message)) {
         auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
         ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
             << fmt::format("{}Expected hover contents:\n{}\nFound hover contents:\n{}", errorPrefix,

@@ -7,8 +7,8 @@ class Foo
     # ^ hover: sig {returns(Integer)}
     # N.B. Checking two positions on below function call as they used to return different strings.
     baz("1")
-  # ^ hover: params(arg0: String).returns(Integer)
-   # ^ hover: params(arg0: String).returns(Integer)
+  # ^ hover: sig {params(arg0: String).returns(Integer)}
+   # ^ hover: sig {params(arg0: String).returns(Integer)}
   end
 
   sig {params(a: String).void}
@@ -19,10 +19,10 @@ class Foo
   sig {params(arg0: String).returns(Integer)}
   def baz(arg0)
     no_args_and_void
-  # ^ hover: void
+  # ^ hover: sig {void}
     Foo::bat(1)
-  # ^ hover: Foo
-       # ^ hover: params(i: Integer).returns(Integer)
+  # ^ hover: T.class_of(Foo)
+       # ^ hover: sig {params(i: Integer).returns(Integer)}
            # ^ hover: Integer(1)
     arg0.to_i
   end
