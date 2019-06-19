@@ -655,8 +655,7 @@ bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
 }
 
 bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    Exception::raise(
-        "SelfTypeParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
+    return false;
 }
 
 TypePtr LambdaParam::getCallArguments(Context ctx, NameRef name) {
