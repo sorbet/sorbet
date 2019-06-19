@@ -57,11 +57,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
     } else {
         auto enclosingClass = cfg->symbol.data(ctx)->enclosingClass(ctx);
-        methodReturnType =
-            core::Types::instantiate(ctx,
-                                     core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol, enclosingClass,
-                                                                       enclosingClass.data(ctx)->selfTypeArgs(ctx)),
-                                     *constr);
+        methodReturnType = core::Types::instantiate(
+            ctx,
+            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType, cfg->symbol.data(ctx)->owner,
+                                              enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx)),
+            *constr);
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
     }
 

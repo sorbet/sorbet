@@ -813,7 +813,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     if (data->resultType.get() != nullptr) {
                         if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol, ctx.owner.data(ctx)->enclosingClass(ctx),
+                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner,
+                                ctx.owner.data(ctx)->enclosingClass(ctx),
                                 ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
                             tp.type = data->resultType;
