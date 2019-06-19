@@ -21,9 +21,9 @@ const users = [
     infoLink: 'https://www.atrium.co/',
   },
   {
-    caption: 'CZI',
+    caption: 'Chan Zuckerberg Initiative',
     image: 'img/czi-logo.svg',
-    infoLink: 'https://medium.com/czi-technology',
+    infoLink: 'https://chanzuckerberg.com/',
   },
   {
     caption: 'Gusto',

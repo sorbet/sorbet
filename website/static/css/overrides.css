@@ -99,6 +99,36 @@ sup {
 }
 
 /*
+ * This is needed to the logos to play nicely with company names that wrap, so
+ * that the images line up with each other.
+ */
+.productShowcaseSection .logos {
+  align-items: flex-start;
+}
+
+/*
+ * Lets us stack the images + captions in a column.
+ */
+.productShowcaseSection .link {
+  display: flex;
+  flex-direction: column;
+
+  /* 110px for the image + (2 x 20px) for the padding. */
+  max-width: 150px;
+}
+
+/*
+ * Lets us stack the image + captions in a column,
+ * at a mobile width breakpoint.
+ */
+@media only screen and (max-width: 735px) {
+  .productShowcaseSection .link {
+    /* 64px for the image + (2 x 20px) for the padding. */
+    max-width: 104px;
+  }
+}
+
+/*
  * NOTE: This file is for overrides.
  *
  * Before adding to this file, consider whether this is an override of an
