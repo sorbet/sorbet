@@ -59,9 +59,8 @@ public:
         static constexpr u4 METHOD = 0x4000'0000;
         static constexpr u4 FIELD = 0x2000'0000;
         static constexpr u4 STATIC_FIELD = 0x1000'0000;
-        static constexpr u4 METHOD_ARGUMENT = 0x0800'0000;
-        static constexpr u4 TYPE_ARGUMENT = 0x0400'0000;
-        static constexpr u4 TYPE_MEMBER = 0x0200'0000;
+        static constexpr u4 TYPE_ARGUMENT = 0x0800'0000;
+        static constexpr u4 TYPE_MEMBER = 0x0400'0000;
 
         // --- Applies to all types of Symbols ---
 
@@ -76,12 +75,6 @@ public:
         static constexpr u4 CLASS_ABSTRACT = 0x0000'0040;
         static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
         static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
-
-        // Method argument flags
-        static constexpr u4 ARGUMENT_OPTIONAL = 0x0000'0010;
-        static constexpr u4 ARGUMENT_KEYWORD = 0x0000'0020;
-        static constexpr u4 ARGUMENT_REPEATED = 0x0000'0040;
-        static constexpr u4 ARGUMENT_BLOCK = 0x0000'0080;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -112,16 +105,6 @@ public:
     u4 hash(const GlobalState &gs) const;
     u4 methodShapeHash(const GlobalState &gs) const;
 
-    inline InlinedVector<SymbolRef, 4> &arguments() {
-        ENFORCE(!isClass());
-        return argumentsOrMixins;
-    }
-
-    inline const InlinedVector<SymbolRef, 4> &arguments() const {
-        ENFORCE(!isClass());
-        return argumentsOrMixins;
-    }
-
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 
     // selfType and externalType return the type of an instance of this Symbol
@@ -132,12 +115,12 @@ public:
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE(isClass());
-        return argumentsOrMixins;
+        return mixins_;
     }
 
     inline const InlinedVector<SymbolRef, 4> &mixins() const {
         ENFORCE(isClass());
-        return argumentsOrMixins;
+        return mixins_;
     }
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
@@ -196,20 +179,6 @@ public:
         return (flags & Symbol::Flags::TYPE_ARGUMENT) != 0;
     }
 
-    inline bool isMethodArgument() const {
-        return (flags & Symbol::Flags::METHOD_ARGUMENT) != 0;
-    }
-
-    inline bool isOptional() const {
-        ENFORCE(isMethodArgument());
-        return (flags & Symbol::Flags::ARGUMENT_OPTIONAL) != 0;
-    }
-
-    inline bool isRepeated() const {
-        ENFORCE(isMethodArgument());
-        return (flags & Symbol::Flags::ARGUMENT_REPEATED) != 0;
-    }
-
     inline bool isOverloaded() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERLOADED) != 0;
@@ -244,18 +213,6 @@ public:
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_GENERATED_SIG) != 0;
     }
-
-    inline bool isKeyword() const {
-        ENFORCE(isMethodArgument());
-        return (flags & Symbol::Flags::ARGUMENT_KEYWORD) != 0;
-    }
-
-    inline bool isBlockArgument() const {
-        ENFORCE(isMethodArgument());
-        return (flags & Symbol::Flags::ARGUMENT_BLOCK) != 0;
-    }
-
-    bool isSyntheticBlockArgument() const;
 
     inline bool isCovariant() const {
         ENFORCE(isTypeArgument() || isTypeMember());
@@ -399,21 +356,6 @@ public:
         flags |= Symbol::Flags::TYPE_FIXED;
     }
 
-    inline void setOptional() {
-        ENFORCE(isMethodArgument());
-        flags |= Symbol::Flags::ARGUMENT_OPTIONAL;
-    }
-
-    inline void setKeyword() {
-        ENFORCE(isMethodArgument());
-        flags |= Symbol::Flags::ARGUMENT_KEYWORD;
-    }
-
-    inline void setRepeated() {
-        ENFORCE(isMethodArgument());
-        flags |= Symbol::Flags::ARGUMENT_REPEATED;
-    }
-
     inline void setOverloaded() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_OVERLOADED;
@@ -462,11 +404,6 @@ public:
     inline void unsetHasGeneratedSig() {
         ENFORCE(isMethod());
         flags &= ~Symbol::Flags::METHOD_GENERATED_SIG;
-    }
-
-    inline void setBlockArgument() {
-        ENFORCE(isMethodArgument());
-        flags |= Symbol::Flags::ARGUMENT_BLOCK;
     }
 
     inline void setPublic() {
@@ -518,12 +455,6 @@ public:
     inline bool isDSLSynthesized() const {
         return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
     }
-
-    /*
-     * Given a METHOD_ARGUMENT symbol, return its type as observed by the method
-     * body that defined that argument
-     */
-    TypePtr argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
@@ -577,7 +508,7 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClassOrRebind; // methods and method arugments store rebind here
+    SymbolRef superClassOrRebind; // method arugments store rebind here
 
     inline SymbolRef superClass() const {
         ENFORCE(isClass());
@@ -589,14 +520,14 @@ public:
         superClassOrRebind = claz;
     }
 
-    inline SymbolRef rebind() const {
-        ENFORCE(isMethodArgument() || isMethod());
-        return superClassOrRebind;
+    inline void setReBind(SymbolRef rebind) {
+        ENFORCE(isMethod());
+        superClassOrRebind = rebind;
     }
 
-    inline void setReBind(SymbolRef rebind) {
-        ENFORCE(isMethodArgument() || isMethod());
-        superClassOrRebind = rebind;
+    SymbolRef rebind() const {
+        ENFORCE(isMethod());
+        return superClassOrRebind;
     }
 
     u4 flags = Flags::NONE;
@@ -604,9 +535,23 @@ public:
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
-    UnorderedMap<NameRef, SymbolRef>
-        members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
-    // optimize for absence
+    UnorderedMap<NameRef, SymbolRef> members_;
+    std::vector<ArgInfo> arguments_;
+
+    UnorderedMap<NameRef, SymbolRef> &members() {
+        return members_;
+    };
+    const UnorderedMap<NameRef, SymbolRef> &members() const {
+        return members_;
+    };
+
+    std::vector<ArgInfo> &arguments() {
+        return arguments_;
+    }
+
+    const std::vector<ArgInfo> &arguments() const {
+        return arguments_;
+    }
 
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
@@ -615,7 +560,6 @@ public:
     SymbolRef enclosingMethod(const GlobalState &gs) const;
 
     SymbolRef enclosingClass(const GlobalState &gs) const;
-    std::string argumentName(const GlobalState &gs) const;
 
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.

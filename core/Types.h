@@ -66,6 +66,41 @@ public:
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };
 
+class ArgInfo {
+public:
+    struct ArgFlags {
+        bool isKeyword = false;
+        bool isRepeated = false;
+        bool isDefault = false;
+        bool isShadow = false;
+        bool isBlock = false;
+        void setFromU1(u1 flags);
+        u1 toU1() const;
+    };
+    ArgFlags flags;
+    NameRef name;
+    SymbolRef rebind;
+    Loc loc;
+    TypePtr type;
+
+    /*
+     * Return type as observed by the method
+     * body that defined that argument
+     */
+    TypePtr argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
+
+    bool isSyntheticBlockArgument() const;
+    std::string toString(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
+    std::string argumentName(const GlobalState &gs) const;
+    ArgInfo(const ArgInfo &) = delete;
+    ArgInfo() = default;
+    ArgInfo(ArgInfo &&) noexcept = default;
+    ArgInfo &operator=(ArgInfo &&) noexcept = default;
+    ArgInfo deepCopy() const;
+};
+CheckSize(ArgInfo, 40, 8);
+
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
     return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
 }
@@ -609,23 +644,17 @@ class SendAndBlockLink {
     SendAndBlockLink(const SendAndBlockLink &) = default;
 
 public:
-    struct ArgInfo {
-        bool isKeyword;
-        bool isRepeated;
-        bool isDefault;
-        bool isShadow;
-    };
     SendAndBlockLink(SendAndBlockLink &&) = default;
     TypePtr receiver;
     NameRef fun;
-    std::vector<ArgInfo> argInfos;
+    std::vector<ArgInfo::ArgFlags> argInfos;
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
     SymbolRef blockSpec; // used only by LoadSelf to change type of self inside method.
     TypePtr sendTp;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo> &&argInfos);
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argInfos);
     std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
