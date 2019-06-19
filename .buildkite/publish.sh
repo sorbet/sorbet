@@ -155,9 +155,7 @@ files=()
 while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
 release_notes="To use Sorbet add this line to your Gemfile:
 \`\`\`
-source 'https://stripe.dev/sorbet-repo/super-secret-private-beta/' do
-  gem 'sorbet', '$prefix.$git_commit_count'
-end
+gem 'sorbet', '$prefix.$git_commit_count'
 \`\`\`"
 if [ "$dryrun" = "" ]; then
     echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
