@@ -585,7 +585,7 @@ private:
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
-    InlinedVector<SymbolRef, 4> argumentsOrMixins;
+    InlinedVector<SymbolRef, 4> mixins_;
 
     /** For Class or module - ordered type members of the class,
      * for method - ordered type generic type arguments of the class
