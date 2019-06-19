@@ -66,8 +66,8 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
     const auto &objectScope = core::Symbols::Object().data(ctx);
     ASSERT_EQ(core::Symbols::root(), objectScope->owner);
 
-    ASSERT_EQ(4, objectScope->members.size());
-    auto methodSym = objectScope->members.at(ctx.state.enterNameUTF8("hello_world"));
+    ASSERT_EQ(4, objectScope->members().size());
+    auto methodSym = objectScope->members().at(ctx.state.enterNameUTF8("hello_world"));
     const auto &symbol = methodSym.data(ctx);
     ASSERT_EQ(core::Symbols::Object(), symbol->owner);
     ASSERT_EQ(1, symbol->arguments().size());
@@ -87,10 +87,8 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
         newtree = namer::Namer::run(ctx, move(localTree));
     }
     auto helloWorldMethod = 1;
-    auto blockArg = 1;
     auto staticInit = 1;
-    auto staticInitBlockArg = 1;
-    auto extraSymbols = helloWorldMethod + blockArg + staticInit + staticInitBlockArg;
+    auto extraSymbols = helloWorldMethod + staticInit;
 
     ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
@@ -113,10 +111,10 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
     const auto &rootScope =
         core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
-    ASSERT_EQ(3, rootScope->members.size());
-    auto fooSym = rootScope->members.at(ctx.state.enterNameConstant("Foo"));
+    ASSERT_EQ(3, rootScope->members().size());
+    auto fooSym = rootScope->members().at(ctx.state.enterNameConstant("Foo"));
     const auto &fooInfo = fooSym.data(ctx);
-    ASSERT_EQ(1, fooInfo->members.size());
+    ASSERT_EQ(1, fooInfo->members().size());
 }
 
 TEST_F(NamerFixture, InsideClass) { // NOLINT
@@ -131,12 +129,12 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
     const auto &rootScope =
         core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
-    ASSERT_EQ(3, rootScope->members.size());
-    auto fooSym = rootScope->members.at(ctx.state.enterNameConstant("Foo"));
+    ASSERT_EQ(3, rootScope->members().size());
+    auto fooSym = rootScope->members().at(ctx.state.enterNameConstant("Foo"));
     const auto &fooInfo = fooSym.data(ctx);
-    ASSERT_EQ(2, fooInfo->members.size());
+    ASSERT_EQ(2, fooInfo->members().size());
 
-    auto barSym = fooInfo->members.at(ctx.state.enterNameUTF8("bar"));
+    auto barSym = fooInfo->members().at(ctx.state.enterNameUTF8("bar"));
     ASSERT_EQ(fooSym, barSym.data(ctx)->owner);
 }
 
