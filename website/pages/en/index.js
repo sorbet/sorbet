@@ -126,7 +126,7 @@ class Index extends React.Component {
                     'Sorbet is multithreaded, scaling linearly across cores on your CPU. It checks your types in seconds, giving you feedback as you code.\n\n[Get started with Sorbet →](docs/adopting)',
                 },
                 {
-                  title: 'IDE Ready',
+                  title: 'IDE-ready',
                   content:
                     "Sorbet works with your favorite editor to provide IDE features like autocomplete and jump to definition. It's easy to add to your CI setup.\n\n[Try Sorbet online →](https://sorbet.run)",
                 },
@@ -140,7 +140,7 @@ class Index extends React.Component {
           </Container>
         </div>
         <PageSection>
-          <h2>A Taste of Sorbet</h2>
+          <h2>A taste of Sorbet</h2>
           <div className="row">
             <div className="column">
               <p>
@@ -233,7 +233,7 @@ class Index extends React.Component {
         </PageSection>
         <PageSection>
           <div className="productShowcaseSection">
-            <h2>Who is Using Sorbet?</h2>
+            <h2>Who is using Sorbet?</h2>
             <p>
               More than just Stripe, Sorbet has been tested by dozens of
               companies, projects, and individuals including...
