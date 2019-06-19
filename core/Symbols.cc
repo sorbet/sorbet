@@ -941,7 +941,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         }
     }
     for (const auto &arg : arguments_) {
-        // If an argument's resultType changes, then the sig has changed.<Plug>(MUcompleteTry)
+        // If an argument's resultType changes, then the sig has changed.
         auto type = arg.type;
         if (!type) {
             type = Types::untypedUntracked();
