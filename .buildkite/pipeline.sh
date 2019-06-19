@@ -9,8 +9,8 @@ if [[ "$BUILDKITE_PULL_REQUEST" == "false" ]]; then
   whitelisted=1
 fi
 
-if [[ "$BUILDKITE_PULL_REQUEST_REPO" == "git://github.com/stripe/sorbet.git" ]]; then
-  # whitelist folks with write access to github.com/stripe/sorbet
+if [[ "$BUILDKITE_PULL_REQUEST_REPO" == "git://github.com/sorbet/sorbet.git" ]]; then
+  # whitelist folks with write access to github.com/sorbet/sorbet
   whitelisted=1
 fi
 
