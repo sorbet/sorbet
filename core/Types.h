@@ -641,7 +641,7 @@ public:
 CheckSize(MetaType, 24, 8);
 
 class SendAndBlockLink {
-    SendAndBlockLink(const SendAndBlockLink &) = default;
+    SendAndBlockLink(const SendAndBlockLink &);
 
 public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
@@ -651,7 +651,7 @@ public:
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
-    SymbolRef blockSpec; // used only by LoadSelf to change type of self inside method.
+    ArgInfo blockSpec; // used only by LoadSelf to change type of self inside method.
     TypePtr sendTp;
 
     SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argInfos);
