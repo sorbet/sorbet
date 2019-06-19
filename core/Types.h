@@ -647,14 +647,14 @@ public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
     TypePtr receiver;
     NameRef fun;
-    std::vector<ArgInfo::ArgFlags> argInfos;
+    std::vector<ArgInfo::ArgFlags> argFlags;
     std::shared_ptr<TypeConstraint> constr;
     TypePtr returnTp;
     TypePtr blockPreType;
     ArgInfo blockSpec; // used only by LoadSelf to change type of self inside method.
     TypePtr sendTp;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argInfos);
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags);
     std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };

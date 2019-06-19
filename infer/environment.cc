@@ -880,7 +880,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkArgs = insn->link->argInfos;
+                auto &blkArgs = insn->link->argFlags;
                 auto *tuple = core::cast_type<core::TupleType>(params.get());
                 if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
                     tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
