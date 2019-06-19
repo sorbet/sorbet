@@ -568,12 +568,9 @@ public:
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         exitScope();
-
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol.data(ctx)->loc(), method->symbol);
-            scopeStack.back().moduleFunctionActive = false;
         }
-
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
