@@ -64,10 +64,10 @@ public:
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u2 num,
-                                     const std::vector<SymbolRef> &argsToKeep);
+                                     const std::vector<int> &argsToKeep);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+    ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
     SymbolRef staticInitForFile(Loc loc);
     SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
