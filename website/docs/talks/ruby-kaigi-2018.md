@@ -1,7 +1,7 @@
 ---
 id: ruby-kaigi-2018
-title: 'A practical type system for Ruby at Stripe'
-sidebar_label: 'RubyKaigi 2018'
+title: A practical type system for Ruby at Stripe
+sidebar_label: RubyKaigi 2018
 ---
 
 - [→ Talk page](https://rubykaigi.org/2018/presentations/DarkDimius.html#may31)
