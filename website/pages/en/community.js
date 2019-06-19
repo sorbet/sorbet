@@ -75,7 +75,7 @@ class Index extends React.Component {
         </div>
         <PageSection short>
           <div>
-            <h1>Talks</h1>
+            <h1 id="talks">Talks</h1>
             <p>
               The Sorbet team has given a number of talks that are available
               online:
@@ -101,7 +101,7 @@ class Index extends React.Component {
             />
           </div>
           <div>
-            <h1>Projects</h1>
+            <h1 id="projects">Projects</h1>
             <p>
               These are some community-maintained projects built on top of or
               alongside the core Sorbet tooling:
@@ -128,7 +128,7 @@ class Index extends React.Component {
             </p>
           </div>
           <div>
-            <h1>Legal</h1>
+            <h1 id="legal">Legal</h1>
             <ul>
               <li>
                 <a href="/docs/legal/trademark-policy">Trademark Policy</a>

@@ -1,7 +1,7 @@
 ---
 id: strange-loop-2018
-title: 'Gradual typing of Ruby at Scale'
-sidebar_label: 'Strange Loop 2018'
+title: Gradual typing of Ruby at Scale
+sidebar_label: Strange Loop 2018
 ---
 
 - [→ Talk page](https://www.thestrangeloop.com/2018/gradual-typing-of-ruby-at-scale.html)
