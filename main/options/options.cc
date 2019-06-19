@@ -10,6 +10,7 @@
 #include "main/options/ConfigParser.h"
 #include "main/options/options.h"
 #include "options.h"
+#include "sys/stat.h"
 #include "third_party/licences/licences.h"
 #include "version/version.h"
 
@@ -257,9 +258,10 @@ cxxopts::Options buildOptions() {
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
     // Common user options in order of use
-    options.add_options()("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options()("e", "Parse an inline ruby string",
                           cxxopts::value<string>()->default_value(empty.inlineInput), "string");
+    options.add_options()("dir", "Input directory", cxxopts::value<vector<string>>());
+    options.add_options()("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
@@ -401,7 +403,7 @@ cxxopts::Options buildOptions() {
 
     // Positional params
     options.parse_positional("files");
-    options.positional_help("[<file 1> <file 2> ...]");
+    options.positional_help("<path 1> <path 2> ...");
     return options;
 }
 
@@ -479,6 +481,18 @@ void Options::flushPrinters() {
     }
 }
 
+void addFilesFromDir(Options &opts, string_view dir) {
+    UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
+    auto fileNormalized = stripTrailingSlashes(dir);
+    opts.rawInputDirNames.emplace_back(fileNormalized);
+    // Expand directory into list of files.
+    auto containedFiles = opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true,
+                                                  opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+    opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
+    opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
+                               std::make_move_iterator(containedFiles.end()));
+}
+
 void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
@@ -503,28 +517,45 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
-            opts.rawInputFileNames = raw["files"].as<vector<string>>();
-            opts.inputFileNames = opts.rawInputFileNames;
+            auto rawFiles = raw["files"].as<vector<string>>();
+            UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
+            struct stat s;
+            for (auto &file : rawFiles) {
+                if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
+                    addFilesFromDir(opts, file);
+                } else {
+                    opts.rawInputFileNames.push_back(file);
+                    opts.inputFileNames.push_back(file);
+                }
+            }
+        }
+
+        if (raw.count("file") > 0) {
+            auto files = raw["file"].as<vector<string>>();
+            opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
+            opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
         }
 
         if (raw.count("dir") > 0) {
             auto rawDirs = raw["dir"].as<vector<string>>();
             for (auto &dir : rawDirs) {
-                UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
-                auto fileNormalized = stripTrailingSlashes(dir);
-                if (opts.pathPrefix.empty() && rawDirs.size() == 1 && opts.rawInputFileNames.size() == 0) {
-                    // If Sorbet is provided with a single input directory, the
-                    // default path prefix is that directory.
-                    opts.pathPrefix = fmt::format("{}/", fileNormalized);
+                // Since we don't stat here, we're unsure if the directory exists / is a directory.
+                try {
+                    addFilesFromDir(opts, dir);
+                } catch (sorbet::FileNotFoundException) {
+                    logger->error("Directory `{}` not found", dir);
+                    throw EarlyReturnWithCode(1);
+                } catch (sorbet::FileNotDirException) {
+                    logger->error("Path `{}` is not a directory", dir);
+                    throw EarlyReturnWithCode(1);
                 }
-                opts.rawInputDirNames.emplace_back(fileNormalized);
-                // Expand directory into list of files.
-                auto containedFiles = opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true,
-                                                              opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
-                opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
-                opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
-                                           std::make_move_iterator(containedFiles.end()));
             }
+        }
+
+        if (opts.pathPrefix.empty() && opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.size() == 0) {
+            // If Sorbet is provided with a single input directory, the
+            // default path prefix is that directory.
+            opts.pathPrefix = fmt::format("{}/", opts.rawInputDirNames.at(0));
         }
         fast_sort(opts.inputFileNames);
         opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),

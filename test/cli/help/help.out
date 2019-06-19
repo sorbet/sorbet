@@ -4,15 +4,16 @@ You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] [<file 1> <file 2> ...]
+  sorbet [OPTION...] <path 1> <path 2> ...
 
-      --dir arg  Input directory
-  -e, string     Parse an inline ruby string (default: )
-  -q, --quiet    Silence all non-critical errors
-  -v, --verbose  Verbosity level [0-3]
-  -h,            Show short help
-      --help     Show long help
-      --version  Show version
+  -e, string      Parse an inline ruby string (default: )
+      --dir arg   Input directory
+      --file arg  Input file
+  -q, --quiet     Silence all non-critical errors
+  -v, --verbose   Verbosity level [0-3]
+  -h,             Show short help
+      --help      Show long help
+      --version   Show version
 
 
 ----- Abbreviated help output with empty config file: --------------------
@@ -21,30 +22,32 @@ You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] [<file 1> <file 2> ...]
+  sorbet [OPTION...] <path 1> <path 2> ...
 
-      --dir arg  Input directory
-  -e, string     Parse an inline ruby string (default: )
-  -q, --quiet    Silence all non-critical errors
-  -v, --verbose  Verbosity level [0-3]
-  -h,            Show short help
-      --help     Show long help
-      --version  Show version
+  -e, string      Parse an inline ruby string (default: )
+      --dir arg   Input directory
+      --file arg  Input file
+  -q, --quiet     Silence all non-critical errors
+  -v, --verbose   Verbosity level [0-3]
+  -h,             Show short help
+      --help      Show long help
+      --version   Show version
 
 
 ----- Full help output: --------------------------------------------------
 
 Typechecker for Ruby
 Usage:
-  sorbet [OPTION...] [<file 1> <file 2> ...]
+  sorbet [OPTION...] <path 1> <path 2> ...
 
-      --dir arg  Input directory
-  -e, string     Parse an inline ruby string (default: )
-  -q, --quiet    Silence all non-critical errors
-  -v, --verbose  Verbosity level [0-3]
-  -h,            Show short help
-      --help     Show long help
-      --version  Show version
+  -e, string      Parse an inline ruby string (default: )
+      --dir arg   Input directory
+      --file arg  Input file
+  -q, --quiet     Silence all non-critical errors
+  -v, --verbose   Verbosity level [0-3]
+  -h,             Show short help
+      --help      Show long help
+      --version   Show version
 
  advanced options:
       --configatron-dir path    Path to configatron yaml folders
