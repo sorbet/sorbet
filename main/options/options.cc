@@ -260,8 +260,6 @@ cxxopts::Options buildOptions() {
     // Common user options in order of use
     options.add_options()("e", "Parse an inline ruby string",
                           cxxopts::value<string>()->default_value(empty.inlineInput), "string");
-    options.add_options()("dir", "Input directory", cxxopts::value<vector<string>>());
-    options.add_options()("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
@@ -280,6 +278,8 @@ cxxopts::Options buildOptions() {
                        stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 
     // Advanced options
+    options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
+    options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
