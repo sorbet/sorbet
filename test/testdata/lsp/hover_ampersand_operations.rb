@@ -5,6 +5,7 @@ class Dog
 
   sig {returns(String)}
   attr_reader :breed
+              # ^ sig {returns(String)}
 end
 
 def main
@@ -20,6 +21,23 @@ def main
   dog = Dog.new
   breed = dog&.breed
 # ^ hover: T.nilable(String)
+        # ^ hover: Dog
             # ^ hover: sig {returns(String)}
              # ^ hover: sig {returns(String)}
+  
+  maybeDog = T.let(nil, T.nilable(Dog))
+  maybeBreed = maybeDog&.breed
+# ^ hover: T.nilable(String)
+             # ^ hover: T.nilable(Dog)
+                      # ^ hover: sig {returns(String)}
+                       # ^ hover: sig {returns(String)}
+  breed2 = T.let(nil, T.nilable(String))
+  breed2 ||= maybeDog&.breed
+# ^ hover: T.nilable(String)
+                    # ^ hover: sig {returns(String)}
+                     # ^ hover: sig {returns(String)}
+  breed2 &&= maybeDog&.breed
+  # ^ hover: T.nilable(String)
+                    # ^ hover: sig {returns(String)}
+                     # ^ hover: sig {returns(String)}
 end
