@@ -146,13 +146,13 @@ string SymbolRef::show(const GlobalState &gs) const {
     return dataAllowingNone(gs)->show(gs);
 }
 
-TypePtr Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
-    ENFORCE(isMethodArgument());
-    auto klass = owner.data(ctx)->owner;
+TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+    auto owner = ctx.owner;
+    auto klass = owner.data(ctx)->enclosingClass(ctx);
     ENFORCE(klass.data(ctx)->isClass());
-    auto instantiated = Types::resultTypeAsSeenFrom(ctx, resultType, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+    auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
-        instantiated = core::Types::untyped(ctx, this->owner);
+        instantiated = core::Types::untyped(ctx, owner);
     }
     if (owner.data(ctx)->isGenericMethod()) {
         instantiated = core::Types::instantiate(ctx, instantiated, constr);
@@ -162,10 +162,10 @@ TypePtr Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstr
         // this method. It's not solved and you shouldn't try to instantiate types against itt
     }
 
-    if (!isRepeated()) {
+    if (!flags.isRepeated) {
         return instantiated;
     }
-    if (isKeyword()) {
+    if (flags.isKeyword) {
         return Types::hashOf(ctx, instantiated);
     }
     return Types::arrayOf(ctx, instantiated);
@@ -180,9 +180,9 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
 }
 
 SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
-    histogramInc("find_member_scope_size", members.size());
-    auto fnd = members.find(name);
-    if (fnd == members.end()) {
+    histogramInc("find_member_scope_size", members().size());
+    auto fnd = members().find(name);
+    if (fnd == members().end()) {
         return Symbols::noSymbol();
     }
     return fnd->second;
@@ -418,7 +418,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         result.distance = 1 + (currentName.size() / 2);
     }
 
-    for (auto pair : members) {
+    for (auto pair : members()) {
         auto thisName = pair.first;
         if (thisName.data(gs)->kind != NameKind::UTF8) {
             continue;
@@ -458,10 +458,6 @@ string Symbol::toStringFullName(const GlobalState &gs) const {
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
     string owner = includeOwner ? this->owner.data(gs)->toStringFullName(gs) : "";
 
-    if (this->isMethodArgument()) {
-        return fmt::format("{}{}", owner, this->argumentName(gs));
-    }
-
     return fmt::format("{}{}", owner, this->name.showRaw(gs));
 }
 
@@ -471,9 +467,6 @@ string Symbol::showFullName(const GlobalState &gs) const {
 
     bool needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
     string separator = needsColonColon ? "::" : "#";
-    if (this->isMethodArgument()) {
-        return fmt::format("{}{}{}", owner, separator, this->argumentName(gs));
-    }
 
     return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
 }
@@ -511,8 +504,6 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         type = "field"sv;
     } else if (this->isMethod()) {
         type = "method"sv;
-    } else if (this->isMethodArgument()) {
-        type = "argument"sv;
     } else if (this->isTypeMember()) {
         type = "type-member"sv;
     } else if (this->isTypeArgument()) {
@@ -567,31 +558,10 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                            }));
 
         } else {
-            fmt::format_to(buf, " ({})", fmt::map_join(this->arguments(), ", ", [&](auto symb) {
-                               return symb.data(gs)->argumentName(gs);
+            fmt::format_to(buf, " ({})", fmt::map_join(this->arguments(), ", ", [&](const auto &symb) {
+                               return symb.argumentName(gs);
                            }));
         }
-    }
-    if (this->isMethodArgument()) {
-        vector<pair<u4, string_view>> methodFlags = {
-            {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"sv},
-            {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"sv},
-            {Symbol::Flags::ARGUMENT_REPEATED, "repeated"sv},
-            {Symbol::Flags::ARGUMENT_BLOCK, "block"sv},
-        };
-        fmt::format_to(buf, "<");
-        bool first = true;
-        for (auto &flag : methodFlags) {
-            if ((this->flags & flag.first) != 0) {
-                if (first) {
-                    first = false;
-                } else {
-                    fmt::format_to(buf, ", ");
-                }
-                fmt::format_to(buf, "{}", flag.second);
-            }
-        }
-        fmt::format_to(buf, ">");
     }
     if (this->resultType && !isClass()) {
         fmt::format_to(buf, " -> {}",
@@ -608,7 +578,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         }
     }
 
-    if (this->isMethodArgument() || this->isMethod()) {
+    if (this->isMethod()) {
         if (this->rebind().exists()) {
             fmt::format_to(buf, " rebindTo {}",
                            showRaw ? this->rebind().data(gs)->toStringFullName(gs)
@@ -631,7 +601,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
 
             if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
                 bool hadPrintableChild = false;
-                for (auto childPair : pair.second.data(gs)->members) {
+                for (auto childPair : pair.second.data(gs)->members()) {
                     if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
                         hadPrintableChild = true;
                         break;
@@ -647,11 +617,49 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             fmt::format_to(buf, "{}", move(str));
         }
     } else {
-        for (auto arg : arguments()) {
-            auto str = arg.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        for (auto &arg : arguments()) {
+            auto str = arg.toString(gs);
             ENFORCE(!str.empty());
-            fmt::format_to(buf, "{}", move(str));
+            printTabs(buf, tabs + 1);
+            fmt::format_to(buf, "{}\n", move(str));
         }
+    }
+
+    return to_string(buf);
+}
+
+string ArgInfo::show(const GlobalState &gs) const {
+    return fmt::format("{}", this->argumentName(gs));
+}
+
+string ArgInfo::toString(const GlobalState &gs) const {
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "argument {}", show(gs));
+    vector<string_view> flagTexts;
+    if (flags.isDefault) {
+        flagTexts.emplace_back("optional"sv);
+    }
+    if (flags.isKeyword) {
+        flagTexts.emplace_back("keyword"sv);
+    }
+    if (flags.isRepeated) {
+        flagTexts.emplace_back("repeated"sv);
+    }
+    if (flags.isBlock) {
+        flagTexts.emplace_back("block"sv);
+    }
+    if (flags.isShadow) {
+        flagTexts.emplace_back("shadow"sv);
+    }
+    fmt::format_to(buf, "<{}>", fmt::join(flagTexts, ", "));
+    if (this->type) {
+        fmt::format_to(buf, " -> {}", this->type->show(gs));
+    }
+
+    fmt::format_to(buf, " @ {}", loc.showRaw(gs));
+
+    if (this->rebind.exists()) {
+        fmt::format_to(buf, " rebindTo {}", this->rebind.data(gs)->showFullName(gs));
     }
 
     return to_string(buf);
@@ -676,22 +684,17 @@ string Symbol::show(const GlobalState &gs) const {
 
     auto needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
 
-    if (this->isMethodArgument()) {
-        return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
-                           this->argumentName(gs));
-    }
     return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
                        this->name.data(gs)->show(gs));
 }
 
-string Symbol::argumentName(const GlobalState &gs) const {
-    ENFORCE(isMethodArgument());
-    if (isKeyword()) {
+string ArgInfo::argumentName(const GlobalState &gs) const {
+    if (flags.isKeyword) {
         return (string)name.data(gs)->shortName(gs);
     } else {
         // positional arg
-        if (loc().exists()) {
-            return loc().source(gs);
+        if (loc.exists()) {
+            return loc.source(gs);
         } else {
             return (string)name.data(gs)->shortName(gs);
         }
@@ -733,11 +736,11 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     SymbolData singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
-    singletonInfo->members[Names::attached()] = selfRef;
+    singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
-    selfRef.data(gs)->members[Names::singleton()] = singleton;
+    selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
 }
 
@@ -792,27 +795,70 @@ SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
     return this->ref(gs);
 }
 
-bool Symbol::isSyntheticBlockArgument() const {
+bool ArgInfo::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
-    return isBlockArgument() && !loc().exists();
+    return flags.isBlock && !loc.exists();
+}
+
+ArgInfo ArgInfo::deepCopy() const {
+    ArgInfo result;
+    result.flags = this->flags;
+    result.type = this->type;
+    result.loc = this->loc;
+    result.name = this->name;
+    result.rebind = this->rebind;
+    return result;
+}
+
+u1 ArgInfo::ArgFlags::toU1() const {
+    u1 flags = 0;
+    if (isKeyword) {
+        flags += 1;
+    }
+    if (isRepeated) {
+        flags += 2;
+    }
+    if (isDefault) {
+        flags += 4;
+    }
+    if (isShadow) {
+        flags += 8;
+    }
+    if (isBlock) {
+        flags += 16;
+    }
+    return flags;
+}
+
+void ArgInfo::ArgFlags::setFromU1(u1 flags) {
+    isKeyword = flags & 1;
+    isRepeated = flags & 2;
+    isDefault = flags & 4;
+    isShadow = flags & 8;
+    isBlock = flags & 16;
 }
 
 Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     Symbol result;
     result.owner = this->owner;
     result.flags = this->flags;
-    result.argumentsOrMixins = this->argumentsOrMixins;
+    result.mixins_ = this->mixins_;
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name.id());
     result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
     if (keepGsId) {
-        result.members = this->members;
+        result.members_ = this->members_;
     } else {
-        result.members.reserve(this->members.size());
-        for (auto &mem : this->members) {
-            result.members[NameRef(to, mem.first.id())] = mem.second;
+        result.members_.reserve(this->members().size());
+        for (auto &mem : this->members_) {
+            result.members_[NameRef(to, mem.first.id())] = mem.second;
         }
+    }
+    result.arguments_.reserve(this->arguments_.size());
+    for (auto &mem : this->arguments_) {
+        auto &store = result.arguments_.emplace_back(mem.deepCopy());
+        store.name = NameRef(to, mem.name.id());
     }
     result.superClassOrRebind = this->superClassOrRebind;
     result.uniqueCounter = this->uniqueCounter;
@@ -837,14 +883,10 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
     SymbolRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2;
-        if (isMethodArgument()) {
-            current2 = const_cast<GlobalState &>(gs).enterMethodArgumentSymbol(this->loc(), this->owner, this->name);
-        } else {
-            current2 = const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
-        }
+        SymbolRef current2 =
+            const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
         ENFORCE(current == current2);
-        for (auto &e : members) {
+        for (auto &e : members()) {
             ENFORCE(e.first.exists(), "symbol without a name in scope");
             ENFORCE(e.second.exists(), "name corresponding to a <none> in scope");
         }
@@ -893,15 +935,19 @@ u4 Symbol::hash(const GlobalState &gs) const {
             result = mix(result, _hash(e.second.data(gs)->name.data(gs)->shortName(gs)));
         }
     }
-    for (const auto &e : argumentsOrMixins) {
+    for (const auto &e : mixins_) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            if (e.data(gs)->isMethodArgument()) {
-                auto resultType = e.data(gs)->resultType;
-                // If an argument's resultType changes, then the sig has changed.
-                result = mix(result, !resultType ? 0 : resultType->hash(gs));
-            }
             result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
         }
+    }
+    for (const auto &arg : arguments_) {
+        // If an argument's resultType changes, then the sig has changed.<Plug>(MUcompleteTry)
+        auto type = arg.type;
+        if (!type) {
+            type = Types::untypedUntracked();
+        }
+        result = mix(result, type);
+        result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
@@ -924,14 +970,12 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
 
-    for (const auto &e : argumentsOrMixins) {
-        if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            // Changing name of keyword arg is a shape change.
-            // (N.B.: Is always <arg>/<blk> for positional/block args; renaming one of those is not a shape change.)
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
-            // Changing an argument from e.g. keyword to position-based is a shape change.
-            result = mix(result, e.data(gs)->flags);
-        }
+    for (const auto &e : arguments()) {
+        // Changing name of keyword arg is a shape change.
+        // (N.B.: Is always <arg>/<blk> for positional/block args; renaming one of those is not a shape change.)
+        result = mix(result, _hash(e.name.data(gs)->shortName(gs)));
+        // Changing an argument from e.g. keyword to position-based is a shape change.
+        result = mix(result, e.flags.toU1());
     }
 
     return result;
@@ -976,8 +1020,8 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
 
 vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
     vector<pair<NameRef, SymbolRef>> result;
-    result.reserve(members.size());
-    for (const auto &e : members) {
+    result.reserve(members().size());
+    for (const auto &e : members()) {
         result.emplace_back(e);
     }
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
