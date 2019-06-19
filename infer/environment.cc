@@ -863,7 +863,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                  *
                  * For now we can at least enforce a little consistency.
                  */
-                ENFORCE(ctx.owner == i->method);
+                // ENFORCE(ctx.owner == i->method); TODO: re-enable when https://github.com/sorbet/sorbet/issues/904 is
+                // fixed
 
                 auto argType = i->argument(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
                 tp.type = std::move(argType);
