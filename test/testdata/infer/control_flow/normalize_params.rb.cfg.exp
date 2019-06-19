@@ -6,7 +6,7 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_1" [shape = parallelogram];
 
     "bb::Test#normalize_params_0" [
-        label = "block[id=0]()\l<self>: Test = cast(<self>: NilClass, Test);\lv: T.untyped = load_arg(Test#normalize_params#v)\l<statTemp>$5: T.class_of(Hash) = alias <C Hash>\l<ifTemp>$3: T.untyped = v: T.untyped.is_a?(<statTemp>$5: T.class_of(Hash))\l<ifTemp>$3: T.untyped\l"
+        label = "block[id=0]()\l<self>: Test = cast(<self>: NilClass, Test);\lv: T.untyped = load_arg(v)\l<statTemp>$5: T.class_of(Hash) = alias <C Hash>\l<ifTemp>$3: T.untyped = v: T.untyped.is_a?(<statTemp>$5: T.class_of(Hash))\l<ifTemp>$3: T.untyped\l"
     ];
 
     "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_2" [style="bold"];

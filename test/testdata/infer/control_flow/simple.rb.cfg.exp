@@ -6,7 +6,7 @@ subgraph "cluster_::ControlFlow#orZero0" {
     "bb::ControlFlow#orZero0_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero0#a)\la: T.nilable(Integer)\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero0_0" -> "bb::ControlFlow#orZero0_2" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::ControlFlow#orZero0a" {
     "bb::ControlFlow#orZero0a_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0a_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: Integer = load_arg(ControlFlow#orZero0a#a)\la: Integer\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: Integer = load_arg(a)\la: Integer\l"
     ];
 
     "bb::ControlFlow#orZero0a_0" -> "bb::ControlFlow#orZero0a_2" [style="bold"];
@@ -66,7 +66,7 @@ subgraph "cluster_::ControlFlow#orZero0n" {
     "bb::ControlFlow#orZero0n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0n_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero0n#a)\lb: T::Boolean = a: T.nilable(Integer).!()\lb: T::Boolean\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\lb: T::Boolean = a: T.nilable(Integer).!()\lb: T::Boolean\l"
     ];
 
     "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_2" [style="bold"];
@@ -96,7 +96,7 @@ subgraph "cluster_::ControlFlow#orZero1n" {
     "bb::ControlFlow#orZero1n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero1n_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero1n#a)\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: T::Boolean = a: T.nilable(Integer).is_a?(<statTemp>$6: T.class_of(Integer))\lb: T::Boolean = <statTemp>$4: T::Boolean.!()\lb: T::Boolean\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: T::Boolean = a: T.nilable(Integer).is_a?(<statTemp>$6: T.class_of(Integer))\lb: T::Boolean = <statTemp>$4: T::Boolean.!()\lb: T::Boolean\l"
     ];
 
     "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_2" [style="bold"];
@@ -126,7 +126,7 @@ subgraph "cluster_::ControlFlow#orZero2" {
     "bb::ControlFlow#orZero2_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero2_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero2#a)\la: T.nilable(Integer)\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero2_0" -> "bb::ControlFlow#orZero2_4" [style="bold"];
@@ -156,7 +156,7 @@ subgraph "cluster_::ControlFlow#orZero3" {
     "bb::ControlFlow#orZero3_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero3_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero3#a)\la: T.nilable(Integer)\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero3_0" -> "bb::ControlFlow#orZero3_2" [style="bold"];
@@ -200,7 +200,7 @@ subgraph "cluster_::ControlFlow#orZero3n" {
     "bb::ControlFlow#orZero3n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero3n_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero3n#a)\la: T.nilable(Integer)\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero3n_0" -> "bb::ControlFlow#orZero3n_2" [style="bold"];
@@ -247,7 +247,7 @@ subgraph "cluster_::ControlFlow#orZero4" {
     "bb::ControlFlow#orZero4_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero4_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero4#a)\la: T.nilable(Integer)\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero4_0" -> "bb::ControlFlow#orZero4_2" [style="bold"];
@@ -291,7 +291,7 @@ subgraph "cluster_::ControlFlow#orZero5" {
     "bb::ControlFlow#orZero5_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero5_0" [
-        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(ControlFlow#orZero5#a)\la: T.nilable(Integer)\l"
+        label = "block[id=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero5_0" -> "bb::ControlFlow#orZero5_2" [style="bold"];
