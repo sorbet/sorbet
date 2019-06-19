@@ -56,7 +56,7 @@ com::stripe::rubytyper::Instruction Proto::toProto(const core::GlobalState &gs, 
         [&](const Unanalyzable *i) { proto.set_kind(com::stripe::rubytyper::Instruction::UNANALYZABLE); },
         [&](const LoadArg *i) {
             proto.set_kind(com::stripe::rubytyper::Instruction::LOAD_ARG);
-            proto.set_load_arg_name(i->method.data(gs)->arguments()[i->argId].argumentName(gs));
+            proto.set_load_arg_name(i->argument(gs).argumentName(gs));
         },
         [&](const Cast *i) {
             proto.set_kind(com::stripe::rubytyper::Instruction::CAST);

@@ -866,7 +866,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 ENFORCE(ctx.owner == i->method);
 
                 auto argType =
-                    i->method.data(ctx)->arguments()[i->argId].argumentTypeAsSeenByImplementation(ctx, constr);
+                    i->argument(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
                 tp.type = std::move(argType);
                 tp.origins.emplace_back(bind.loc);
             },

@@ -157,6 +157,8 @@ public:
     LoadArg(core::SymbolRef method, int argId) : method(method), argId(argId) {
         categoryCounterInc("cfg", "loadarg");
     };
+
+    const core::ArgInfo &argument(const core::GlobalState &gs) const;
     virtual std::string toString(core::Context ctx);
 };
 CheckSize(LoadArg, 24, 8);

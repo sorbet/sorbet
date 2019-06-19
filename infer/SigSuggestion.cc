@@ -262,7 +262,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
             InlinedVector<core::NameRef, 1> newInsert;
 
             if (auto load = cfg::cast_instruction<cfg::LoadArg>(bind.value.get())) {
-                newInsert.emplace_back(load->method.data(ctx)->arguments()[load->argId].name);
+                newInsert.emplace_back(load->argument(ctx).name);
             } else if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                 auto fnd = blockLocals.find(ident->what);
                 if (fnd != blockLocals.end()) {
