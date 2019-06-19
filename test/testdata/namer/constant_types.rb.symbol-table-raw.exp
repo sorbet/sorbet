@@ -18,5 +18,5 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/
     } @ Loc {file=test/testdata/namer/constant_types.rb start=9:3 end=9:4}
   class <S <C <U Constants>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/constant_types.rb start=3:8 end=3:17}
     method <S <C <U Constants>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=10:4}
-      argument <S <C <U Constants>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/constant_types.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/constant_types.rb start=??? end=???}
 

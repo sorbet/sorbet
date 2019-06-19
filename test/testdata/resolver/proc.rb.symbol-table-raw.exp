@@ -1,72 +1,22 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <C <U TestProc>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=3:15}
     method <C <U TestProc>><U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=30:3 end=30:22}
-      argument <C <U TestProc>><U bad>x<> -> AppliedType {
-        klass = <C <U Proc0>>
-        targs = [
-          <C <U Return>> = T.untyped
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=24:7 end=24:8}
-      argument <C <U TestProc>><U bad>y<> -> AppliedType {
-        klass = <C <U Proc0>>
-        targs = [
-          <C <U Return>> = Integer
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=25:7 end=25:8}
-      argument <C <U TestProc>><U bad>z<> -> AppliedType {
-        klass = <C <U Proc1>>
-        targs = [
-          <C <U Return>> = T.untyped
-          <C <U Arg0>> = Integer
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=26:7 end=26:8}
-      argument <C <U TestProc>><U bad>w<> -> AppliedType {
-        klass = <C <U Proc1>>
-        targs = [
-          <C <U Return>> = Integer
-          <C <U Arg0>> = T.untyped
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=27:7 end=27:8}
-      argument <C <U TestProc>><U bad><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
+      argument x<> -> T.proc.returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=24:7 end=24:8}
+      argument y<> -> T.proc.returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=25:7 end=25:8}
+      argument z<> -> T.proc.params(arg0: Integer).returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=26:7 end=26:8}
+      argument w<> -> T.proc.params(arg0: T.untyped).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=27:7 end=27:8}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
     method <C <U TestProc>><U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=34:3 end=34:13}
-      argument <C <U TestProc>><U foo>x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=33:15 end=33:16}
-      argument <C <U TestProc>><U foo><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
+      argument x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=33:15 end=33:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
     method <C <U TestProc>><U foo1> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=41:3 end=41:14}
-      argument <C <U TestProc>><U foo1>x<> -> AppliedType {
-        klass = <C <U Proc1>>
-        targs = [
-          <C <U Return>> = Integer
-          <C <U Arg0>> = Integer
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=38:7 end=38:8}
-      argument <C <U TestProc>><U foo1><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
+      argument x<> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=38:7 end=38:8}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
     method <C <U TestProc>><U good1> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=10:3 end=10:18}
-      argument <C <U TestProc>><U good1>blk<block> -> AppliedType {
-        klass = <C <U Proc1>>
-        targs = [
-          <C <U Return>> = Integer
-          <C <U Arg0>> = Integer
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=7:12 end=7:15}
+      argument blk<block> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=7:12 end=7:15}
     method <C <U TestProc>><U good2> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=18:3 end=18:18}
-      argument <C <U TestProc>><U good2>blk<block> -> AppliedType {
-        klass = <C <U Proc1>>
-        targs = [
-          <C <U Return>> = AppliedType {
-              klass = <C <U Array>>
-              targs = [
-                <C <U Elem>> = Integer
-              ]
-            }
-          <C <U Arg0>> = AppliedType {
-              klass = <C <U Array>>
-              targs = [
-                <C <U Elem>> = String
-              ]
-            }
-        ]
-      } @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
+      argument blk<block> -> T.proc.params(arg0: T::Array[String]).returns(T::Array[Integer]) @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
   class <S <C <U TestProc>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
     method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=42:4}
-      argument <S <C <U TestProc>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
 

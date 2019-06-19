@@ -1,26 +1,26 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/module_function.rb start=2:1 end=33:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=33:4}
-      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
   class <C <U C>> < <C <U Object>> (<C <U Funcs>>) @ Loc {file=test/testdata/namer/module_function.rb start=19:1 end=19:8}
     method <C <U C>><U test_calls> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=22:3 end=22:17}
-      argument <C <U C>><U test_calls><blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
   class <S <C <U C>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/module_function.rb start=19:7 end=19:8}
     method <S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=19:1 end=33:4}
-      argument <S <C <U C>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
   class <C <U Funcs>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     method <C <U Funcs>><U f> (x, <blk>) -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=6:3 end=6:11}
-      argument <C <U Funcs>><U f>x<> -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=5:15 end=5:16}
-      argument <C <U Funcs>><U f><blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument x<> -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=5:15 end=5:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <C <U Funcs>><U g> (s, <blk>) -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=11:19 end=11:27}
-      argument <C <U Funcs>><U g>s<> -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=10:15 end=10:16}
-      argument <C <U Funcs>><U g><blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument s<> -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=10:15 end=10:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <C <U Funcs>><U h> (s, <blk>) -> String @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
-      argument <C <U Funcs>><U h>s<> -> String @ Loc {file=test/testdata/namer/module_function.rb start=15:15 end=15:16}
-      argument <C <U Funcs>><U h><blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument s<> -> String @ Loc {file=test/testdata/namer/module_function.rb start=15:15 end=15:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
   class <S <C <U Funcs>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:8 end=2:13}
     method <S <C <U Funcs>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=17:4}
-      argument <S <C <U Funcs>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <S <C <U Funcs>> $1><U f> () -> AliasType { symbol = <C <U Funcs>><U f> } @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}
     method <S <C <U Funcs>> $1><U g> () -> AliasType { symbol = <C <U Funcs>><U g> } @ Loc {file=test/testdata/namer/module_function.rb start=11:3 end=11:35}
     method <S <C <U Funcs>> $1><U h> () -> AliasType { symbol = <C <U Funcs>><U h> } @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}

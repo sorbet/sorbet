@@ -1,8 +1,8 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}
-      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed}
     method <C <U Object>><U a_method> (<blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=5:3 end=5:15}
-      argument <C <U Object>><U a_method><blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
 

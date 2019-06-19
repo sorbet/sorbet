@@ -8,17 +8,17 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/
                 1 = String | NilClass
               } @ Loc {file=test/testdata/infer/lub_tuples.rb start=6:5 end=6:45}
           method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U cond> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=10:3 end=10:11}
-            argument <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U cond><blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
+            argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
           method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U determined_build_group_status_and_which> : private (<blk>) -> TupleType {
             0 = TrueClass | FalseClass
             1 = String | NilClass
           } @ Loc {file=test/testdata/infer/lub_tuples.rb start=13:11 end=13:54}
-            argument <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U determined_build_group_status_and_which><blk><block> -> T.untyped @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
+            argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
           method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U initialize> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=5:3 end=5:19}
-            argument <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U initialize><blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
+            argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
         class <C <U Opus>><C <U CIBot>><C <U Tasks>><S <C <U NotifySlackBuildComplete>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:51}
           method <C <U Opus>><C <U CIBot>><C <U Tasks>><S <C <U NotifySlackBuildComplete>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:1 end=16:4}
-            argument <C <U Opus>><C <U CIBot>><C <U Tasks>><S <C <U NotifySlackBuildComplete>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
+            argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
       class <C <U Opus>><C <U CIBot>><S <C <U Tasks>> $1> < <C <U Module>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:25}
     class <C <U Opus>><S <C <U CIBot>> $1> < <C <U Module>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:18}
 

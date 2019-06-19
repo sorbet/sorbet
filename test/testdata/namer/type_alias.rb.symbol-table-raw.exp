@@ -3,12 +3,12 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/
     class <C <U A>><C <U C1>> < <C <U Object>> () @ Loc {file=test/testdata/namer/type_alias.rb start=5:3 end=5:11}
     class <C <U A>><S <C <U C1>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/type_alias.rb start=5:9 end=5:11}
       method <C <U A>><S <C <U C1>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/type_alias.rb start=5:3 end=5:16}
-        argument <C <U A>><S <C <U C1>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
+        argument <blk><block> @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
     static-field <C <U A>><C <U C2>> -> AliasType { symbol = <C <U A>><C <U C1>> } @ Loc {file=test/testdata/namer/type_alias.rb start=6:3 end=6:5}
     method <C <U A>><U f> (x, <blk>) -> NilClass @ Loc {file=test/testdata/namer/type_alias.rb start=9:3 end=9:11}
-      argument <C <U A>><U f>x<> -> A::C1 @ Loc {file=test/testdata/namer/type_alias.rb start=8:15 end=8:16}
-      argument <C <U A>><U f><blk><block> -> T.untyped @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
+      argument x<> -> A::C1 @ Loc {file=test/testdata/namer/type_alias.rb start=8:15 end=8:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
   class <S <C <U A>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/type_alias.rb start=2:8 end=2:9}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/type_alias.rb start=2:1 end=11:4}
-      argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/type_alias.rb start=??? end=???}
 

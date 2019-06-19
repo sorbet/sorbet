@@ -1,25 +1,25 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/infer/infer1.rb start=2:1 end=50:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=2:1 end=50:4}
-      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed}
     method <C <U Object>><U baz1> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=2:1 end=2:9}
-      argument <C <U Object>><U baz1><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz2> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=7:1 end=7:9}
-      argument <C <U Object>><U baz2><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz3> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=12:1 end=12:9}
-      argument <C <U Object>><U baz3><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz4> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=16:1 end=16:9}
-      argument <C <U Object>><U baz4><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz5> (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=20:1 end=20:15}
-      argument <C <U Object>><U baz5>cond<> @ Loc {file=test/testdata/infer/infer1.rb start=20:10 end=20:14}
-      argument <C <U Object>><U baz5><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument cond<> @ Loc {file=test/testdata/infer/infer1.rb start=20:10 end=20:14}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz6> (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=29:1 end=29:15}
-      argument <C <U Object>><U baz6>cond<> @ Loc {file=test/testdata/infer/infer1.rb start=29:10 end=29:14}
-      argument <C <U Object>><U baz6><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument cond<> @ Loc {file=test/testdata/infer/infer1.rb start=29:10 end=29:14}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz7> (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=38:1 end=38:15}
-      argument <C <U Object>><U baz7>cond<> @ Loc {file=test/testdata/infer/infer1.rb start=38:10 end=38:14}
-      argument <C <U Object>><U baz7><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument cond<> @ Loc {file=test/testdata/infer/infer1.rb start=38:10 end=38:14}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
     method <C <U Object>><U baz8> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=46:1 end=46:9}
-      argument <C <U Object>><U baz8><blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
 

@@ -4,26 +4,26 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/
     field <C <U TestAttr>><U @v2> -> String @ Loc {file=test/testdata/dsl/attr.rb start=8:5 end=8:8}
     field <C <U TestAttr>><U @v6> -> String @ Loc {file=test/testdata/dsl/attr.rb start=9:5 end=9:8}
     method <C <U TestAttr>><U initialize> (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/dsl/attr.rb start=6:3 end=6:17}
-      argument <C <U TestAttr>><U initialize><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v1> (<blk>) -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=13:3 end=13:11}
-      argument <C <U TestAttr>><U v1><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v1=> (v1, <blk>) -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=15:3 end=15:18}
-      argument <C <U TestAttr>><U v1=>v1<> -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=14:15 end=14:17}
-      argument <C <U TestAttr>><U v1=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument v1<> -> Integer @ Loc {file=test/testdata/dsl/attr.rb start=14:15 end=14:17}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v2> (<blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:3 end=18:20}
-      argument <C <U TestAttr>><U v2><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v2=> (v2, <blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:3 end=18:20}
-      argument <C <U TestAttr>><U v2=>v2<> -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:18 end=18:20}
-      argument <C <U TestAttr>><U v2=><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument v2<> -> String @ Loc {file=test/testdata/dsl/attr.rb start=18:18 end=18:20}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v3> (<blk>) -> String @ Loc {file=test/testdata/dsl/attr.rb start=21:3 end=21:18}
-      argument <C <U TestAttr>><U v3><blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v4=> (v4, <blk>) @ Loc {file=test/testdata/dsl/attr.rb start=23:3 end=23:23}
-      argument <C <U TestAttr>><U v4=>v4<> @ Loc {file=test/testdata/dsl/attr.rb start=23:16 end=23:18}
-      argument <C <U TestAttr>><U v4=><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument v4<> @ Loc {file=test/testdata/dsl/attr.rb start=23:16 end=23:18}
+      argument <blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
     method <C <U TestAttr>><U v5=> (v5, <blk>) @ Loc {file=test/testdata/dsl/attr.rb start=23:3 end=23:23}
-      argument <C <U TestAttr>><U v5=>v5<> @ Loc {file=test/testdata/dsl/attr.rb start=23:21 end=23:23}
-      argument <C <U TestAttr>><U v5=><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument v5<> @ Loc {file=test/testdata/dsl/attr.rb start=23:21 end=23:23}
+      argument <blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
   class <S <C <U TestAttr>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr.rb start=2:7 end=2:15}
     method <S <C <U TestAttr>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr.rb start=2:1 end=26:4}
-      argument <S <C <U TestAttr>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/dsl/attr.rb start=??? end=???}
 
