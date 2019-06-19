@@ -146,10 +146,6 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
  */
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
-    if (!ctx.state.lspQuery.isEmpty()) {
-        return;
-    }
-
     vector<UnorderedMap<core::LocalVariable, core::LocalVariable>> outAliases;
 
     outAliases.resize(cfg.maxBasicBlockId);
@@ -233,6 +229,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
     if (!ctx.state.lspQuery.isEmpty()) {
         return;
     }
+
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
