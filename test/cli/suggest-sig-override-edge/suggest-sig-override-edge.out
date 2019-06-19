@@ -49,16 +49,16 @@ class ChildForcesOverridable < ParentNeedsOverridable
   sig {generated.override.returns(NilClass)}
   def just_returns; end
 
-  sig {generated.params(x: T.untyped).override.void}
+  sig {generated.params(x: Integer).override.void}
   def x_to_void(x); end
 
-  sig {generated.params(x: T.untyped).override.returns(NilClass)}
+  sig {generated.params(x: Integer).override.returns(NilClass)}
   def x_to_returns(x); end
 
-  sig {generated.params(x: T.untyped).override.void}
+  sig {generated.params(x: Integer).override.void}
   def multiline_x_to_void(x); end
 
-  sig {generated.params(x: T.untyped).override.returns(NilClass)}
+  sig {generated.params(x: Integer).override.returns(NilClass)}
   def multiline_x_to_returns(x); end
 end
 
