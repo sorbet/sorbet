@@ -12,11 +12,11 @@ module T::Types
 
     # @override Base
     def valid?(obj)
-      obj.is_a?(Enumerator) && super
+      obj.is_a?(T::Enumerator) && super
     end
 
     def new(*args, &blk) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
-      T.unsafe(Enumerator).new(*args, &blk)
+      T.unsafe(T::Enumerator).new(*args, &blk)
     end
   end
 end

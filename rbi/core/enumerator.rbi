@@ -21,7 +21,7 @@ class Enumerator < Object
     )
     .returns(T.untyped)
   end
-  sig {returns(Enumerator[[Elem, Integer]])}
+  sig {returns(T::Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
   sig do
@@ -35,7 +35,7 @@ class Enumerator < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(Enumerator[[Elem, T.type_parameter(:U)]])
+    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
   end
   def each_with_object(arg0, &blk); end
 
@@ -83,7 +83,7 @@ class Enumerator < Object
     )
     .returns(T.untyped)
   end
-  sig {returns(Enumerator[[Elem, Integer]])}
+  sig {returns(T::Enumerator[[Elem, Integer]])}
   def with_index(&blk); end
 
   sig do
@@ -97,7 +97,7 @@ class Enumerator < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(Enumerator[[Elem, T.type_parameter(:U)]])
+    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
   end
   def with_object(arg0, &blk); end
 end

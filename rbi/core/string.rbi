@@ -250,7 +250,7 @@ class String < Object
     )
     .returns(String)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def each_byte(&blk); end
 
   sig do
@@ -259,7 +259,7 @@ class String < Object
     )
     .returns(String)
   end
-  sig {returns(Enumerator[String])}
+  sig {returns(T::Enumerator[String])}
   def each_char(&blk); end
 
   sig do
@@ -268,7 +268,7 @@ class String < Object
     )
     .returns(String)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
 
   sig do
@@ -282,7 +282,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   def each_line(arg0=T.unsafe(nil), &blk); end
 
@@ -349,7 +349,7 @@ class String < Object
     params(
         arg0: T.any(Regexp, String),
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   sig do
     params(
@@ -377,7 +377,7 @@ class String < Object
     params(
         arg0: T.any(Regexp, String),
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   def gsub!(arg0, arg1=T.unsafe(nil), &blk); end
 
@@ -806,7 +806,7 @@ class String < Object
         arg0: String,
         arg1: T.type_parameter(:Bool),
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   sig do
     type_parameters(:Bool).params(
