@@ -188,6 +188,9 @@ end
 module T::Enumerable
   def self.[](type); end
 end
+module T::Enumerator
+  def self.[](type); end
+end
 class T::DeprecatedInheritableStruct
   def prop(name, type, rules={}); end
   def const(name, type, rules={}); end

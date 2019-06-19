@@ -48,16 +48,9 @@ class Enumerator < Object
   def feed(arg0); end
 
   sig do
-    type_parameters(:U).params(
+    params(
         arg0: Integer,
-        blk: T.proc.params(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
-    )
-    .returns(Object)
-  end
-  sig do
-    type_parameters(:U).params(
-        arg0: Proc,
-        blk: T.proc.params(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
+        blk: T.proc.params(arg0: Enumerator::Yielder).void,
     )
     .void
   end
@@ -122,4 +115,19 @@ class Enumerator::Lazy < Enumerator
 end
 
 class Enumerator::Yielder < Object
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .void
+  end
+  def <<(arg0); end
+
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .void
+  end
+  def yield(arg0); end
 end
