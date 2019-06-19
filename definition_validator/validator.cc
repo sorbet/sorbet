@@ -13,7 +13,7 @@ struct Signature {
     struct {
         absl::InlinedVector<core::NameRef, 4> required;
         absl::InlinedVector<core::NameRef, 4> optional;
-        std::optional<const core::ArgInfo*> rest;
+        std::optional<const core::ArgInfo *> rest;
     } pos, kw;
     bool syntheticBlk;
 } left, right;
@@ -28,7 +28,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
 
         auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
         if (arg.flags.isRepeated) {
-            dst.rest = std::optional<const core::ArgInfo*>{&arg};
+            dst.rest = std::optional<const core::ArgInfo *>{&arg};
         } else if (arg.flags.isDefault) {
             dst.optional.push_back(arg.name);
         } else {
