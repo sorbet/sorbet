@@ -14,12 +14,11 @@ written in Ruby. We've spent the last year and a half developing and adopting
 Sorbet internally, and we're finally confident that Sorbet is not just an
 experimental, internal project—we're ready to share Sorbet with the entire Ruby
 community. In fact, we've had more than 30 companies beta test Sorbet and
-provide feedback. Overwhelmingly, the one question they all asked was, "How long
-do I have to wait for this to be released?"
+provide feedback.
 
 <!--truncate-->
 
-Today, the wait is over! This release includes:
+Today's release includes:
 
 - The core static type checker
 - Tooling to create new Sorbet projects
@@ -30,7 +29,7 @@ Today, the wait is over! This release includes:
 [central repository]: https://github.com/sorbet/sorbet-typed
 
 ... and much more. We're excited for you to play around with Sorbet, integrate
-it into your codebases, and give us your feedback. We've received immeasurable
+it into your codebases, and share your feedback. We've received immeasurable
 value from the Ruby community already: this is our way of giving back.
 
 ## Getting started
