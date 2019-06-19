@@ -186,7 +186,7 @@ private:
 
         auto isAbstract = klass.data(gs)->isClassAbstract();
         if (isAbstract) {
-            for (auto mem : klass.data(gs)->members) {
+            for (auto mem : klass.data(gs)->members()) {
                 if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
                     abstract.emplace_back(mem.second);
                 }

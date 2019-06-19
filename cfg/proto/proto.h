@@ -20,7 +20,7 @@ public:
     static com::stripe::rubytyper::Block::BlockExit toProto(const core::GlobalState &gs, const BlockExit &ex);
     static com::stripe::rubytyper::Block toProto(const core::GlobalState &gs, const BasicBlock &bb);
 
-    static com::stripe::rubytyper::CFG::Argument argumentToProto(const core::GlobalState &gs, core::SymbolRef sym);
+    static com::stripe::rubytyper::CFG::Argument argumentToProto(const core::GlobalState &gs, const core::ArgInfo &sym);
     static com::stripe::rubytyper::CFG toProto(const core::GlobalState &gs, const CFG &cfg);
     static com::stripe::rubytyper::MultiCFG toMulti(const com::stripe::rubytyper::CFG &cfg);
 };

@@ -279,7 +279,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (s->block != nullptr) {
                     vector<ast::ParsedArg> blockArgs = ast::ArgParsing::parseArgs(cctx.ctx, s->block->args);
-                    vector<core::SendAndBlockLink::ArgInfo> argInfos;
+                    vector<core::ArgInfo::ArgFlags> argInfos;
                     for (auto &e : blockArgs) {
                         auto &target = argInfos.emplace_back();
                         target.isKeyword = e.keyword;

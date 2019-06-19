@@ -56,7 +56,7 @@ com::stripe::rubytyper::Instruction Proto::toProto(const core::GlobalState &gs, 
         [&](const Unanalyzable *i) { proto.set_kind(com::stripe::rubytyper::Instruction::UNANALYZABLE); },
         [&](const LoadArg *i) {
             proto.set_kind(com::stripe::rubytyper::Instruction::LOAD_ARG);
-            proto.set_load_arg_name(i->arg.data(gs)->argumentName(gs));
+            proto.set_load_arg_name(i->method.data(gs)->arguments()[i->argId].argumentName(gs));
         },
         [&](const Cast *i) {
             proto.set_kind(com::stripe::rubytyper::Instruction::CAST);
@@ -101,13 +101,12 @@ com::stripe::rubytyper::Block Proto::toProto(const core::GlobalState &gs, const 
     return proto;
 }
 
-com::stripe::rubytyper::CFG::Argument Proto::argumentToProto(const core::GlobalState &gs, core::SymbolRef sym) {
+com::stripe::rubytyper::CFG::Argument Proto::argumentToProto(const core::GlobalState &gs, const core::ArgInfo &sym) {
     com::stripe::rubytyper::CFG::Argument proto;
 
-    core::SymbolData s = sym.data(gs);
-    proto.set_name(s->argumentName(gs));
-    if (s->resultType) {
-        *proto.mutable_type() = core::Proto::toProto(gs, s->resultType);
+    proto.set_name(sym.argumentName(gs));
+    if (sym.type) {
+        *proto.mutable_type() = core::Proto::toProto(gs, sym.type);
     }
     return proto;
 }
@@ -123,7 +122,7 @@ com::stripe::rubytyper::CFG Proto::toProto(const core::GlobalState &gs, const CF
         *proto.mutable_return_type() = core::Proto::toProto(gs, sym->resultType);
     }
 
-    for (auto arg : sym->arguments()) {
+    for (auto &arg : sym->arguments()) {
         *proto.add_arguments() = argumentToProto(gs, arg);
     }
 

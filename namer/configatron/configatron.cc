@@ -122,8 +122,8 @@ struct Path {
                 auto method = gs.enterMethodSymbol(core::Loc::none(), classSym, gs.enterNameUTF8(child->selector));
                 child->enter(gs, method, owner);
 
-                core::SymbolRef blkArg = gs.enterMethodArgumentSymbol(core::Loc::none(), method, core::Names::blkArg());
-                blkArg.data(gs)->setBlockArgument();
+                auto &blkArg = gs.enterMethodArgumentSymbol(core::Loc::none(), method, core::Names::blkArg());
+                blkArg.flags.isBlock = true;
             }
             //            cout << classSym.toStringWithTabs(gs, 1, 1);
         }
@@ -210,7 +210,7 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
         gs.enterMethodSymbol(core::Loc::none(), core::Symbols::Kernel(), gs.enterNameUTF8("configatron"));
     rootNode->enter(gs, configatron, core::Symbols::root());
 
-    core::SymbolRef blkArg = gs.enterMethodArgumentSymbol(core::Loc::none(), configatron, core::Names::blkArg());
-    blkArg.data(gs)->setBlockArgument();
+    auto &blkArg = gs.enterMethodArgumentSymbol(core::Loc::none(), configatron, core::Names::blkArg());
+    blkArg.flags.isBlock = true;
 }
 } // namespace sorbet::namer

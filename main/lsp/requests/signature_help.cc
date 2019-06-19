@@ -18,17 +18,17 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     vector<unique_ptr<ParameterInformation>> parameters;
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
     string methodDocumentation = "(";
-    auto args = method.data(gs)->arguments();
+    auto &args = method.data(gs)->arguments();
     int i = 0;
-    for (auto arg : args) {
+    for (const auto &arg : args) {
         // label field is populated with the name of the variable.
         // Not sure why VSCode does not display this for now.
-        auto parameter = make_unique<ParameterInformation>(arg.data(gs)->argumentName(gs));
+        auto parameter = make_unique<ParameterInformation>(arg.argumentName(gs));
         if (i == activeParameter) {
             // this bolds the active parameter in markdown
-            methodDocumentation += "**_" + arg.data(gs)->argumentName(gs) + "_**";
+            methodDocumentation += "**_" + arg.argumentName(gs) + "_**";
         } else {
-            methodDocumentation += arg.data(gs)->argumentName(gs);
+            methodDocumentation += arg.argumentName(gs);
         }
         if (i != args.size() - 1) {
             methodDocumentation += ", ";

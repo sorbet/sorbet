@@ -37,7 +37,7 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     data->setSuperClass(SymbolRef(this, superclass));
 
     if (symRef._id > Symbols::root()._id) {
-        Symbols::root().dataAllowingNone(*this)->members[nameId] = symRef;
+        Symbols::root().dataAllowingNone(*this)->members()[nameId] = symRef;
     }
     return symRef;
 }

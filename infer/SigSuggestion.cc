@@ -103,7 +103,7 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     // The high level idea is the following: we will use a covariant type parameter to extract the type from dispatch
     // logic
     auto constr = make_shared<core::TypeConstraint>();
-    vector<core::SendAndBlockLink::ArgInfo> argInfos;
+    vector<core::ArgInfo::ArgFlags> argInfos;
     argInfos.emplace_back().isRepeated = true;
     auto linkCopy = send.link ? send.link->duplicate() : make_shared<core::SendAndBlockLink>(send.fun, move(argInfos));
 
@@ -164,10 +164,9 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     return constr->getInstantiation(probeTypeSym);
 }
 
-void extractSendArgumentKnowledge(
-    core::Context ctx, core::Loc bindLoc, cfg::Send *snd,
-    const UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>> &blockLocals,
-    UnorderedMap<core::SymbolRef, core::TypePtr> &blockArgRequirements) {
+void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Send *snd,
+                                  const UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>> &blockLocals,
+                                  UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements) {
     InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
     InlinedVector<const core::TypeAndOrigins *, 2> args;
 
@@ -223,18 +222,14 @@ void extractSendArgumentKnowledge(
     }
 }
 
-UnorderedMap<core::SymbolRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol,
-                                                                unique_ptr<cfg::CFG> &cfg) {
+UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol,
+                                                              unique_ptr<cfg::CFG> &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
-    vector<UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>>> localsStoringArguments;
+    vector<UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>>> localsStoringArguments;
     localsStoringArguments.resize(cfg->maxBasicBlockId);
 
-    // what methods have been called on arguments, per basic block
-    vector<UnorderedMap<core::SymbolRef, InlinedVector<core::NameRef, 1>>> methodsCalledOnArguments;
-    methodsCalledOnArguments.resize(cfg->maxBasicBlockId);
-
     // indicates what type should an argument have for basic block to execute
-    vector<UnorderedMap<core::SymbolRef, core::TypePtr>> argTypesForBBToPass;
+    vector<UnorderedMap<core::NameRef, core::TypePtr>> argTypesForBBToPass;
     argTypesForBBToPass.resize(cfg->maxBasicBlockId);
 
     // This loop computes per-block requirements... Should be a method on its own
@@ -243,11 +238,9 @@ UnorderedMap<core::SymbolRef, core::TypePtr> guessArgumentTypes(core::Context ct
         if (bb == cfg->deadBlock()) {
             continue;
         }
-        UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>> &blockLocals =
+        UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>> &blockLocals =
             localsStoringArguments[bb->id];
-        UnorderedMap<core::SymbolRef, InlinedVector<core::NameRef, 1>> &blockMethodsCalledOnArguments =
-            methodsCalledOnArguments[bb->id];
-        UnorderedMap<core::SymbolRef, core::TypePtr> &blockArgRequirements = argTypesForBBToPass[bb->id];
+        UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements = argTypesForBBToPass[bb->id];
 
         for (auto bbparent : bb->backEdges) {
             for (auto kv : localsStoringArguments[bbparent->id]) {
@@ -266,26 +259,16 @@ UnorderedMap<core::SymbolRef, core::TypePtr> guessArgumentTypes(core::Context ct
             if (bb->firstDeadInstructionIdx >= 0 && i >= bb->firstDeadInstructionIdx) {
                 break;
             }
-            InlinedVector<core::SymbolRef, 1> newInsert;
+            InlinedVector<core::NameRef, 1> newInsert;
 
             if (auto load = cfg::cast_instruction<cfg::LoadArg>(bind.value.get())) {
-                newInsert.emplace_back(load->arg);
+                newInsert.emplace_back(load->method.data(ctx)->arguments()[load->argId].name);
             } else if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                 auto fnd = blockLocals.find(ident->what);
                 if (fnd != blockLocals.end()) {
                     newInsert.insert(newInsert.end(), fnd->second.begin(), fnd->second.end());
                 }
             } else if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                // See if we can learn about what functions are expected to exist on arguments
-                auto fnd = blockLocals.find(snd->recv.variable);
-                if (fnd != blockLocals.end()) {
-                    for (auto &arg : fnd->second) {
-                        if (!absl::c_linear_search(blockMethodsCalledOnArguments[arg], snd->fun)) {
-                            blockMethodsCalledOnArguments[arg].push_back(snd->fun);
-                        }
-                    }
-                }
-
                 // see if we have at least a single call argument that is a method argument
                 bool shouldFindArgumentTypes = false;
                 for (auto &arg : snd->args) {
@@ -316,7 +299,7 @@ UnorderedMap<core::SymbolRef, core::TypePtr> guessArgumentTypes(core::Context ct
         changed = false;
         for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
             cfg::BasicBlock *bb = *it;
-            UnorderedMap<core::SymbolRef, core::TypePtr> entryRequirements;
+            UnorderedMap<core::NameRef, core::TypePtr> entryRequirements;
             for (auto bbparent : bb->backEdges) {
                 if (bbparent->firstDeadInstructionIdx >= 0 && bb != cfg->deadBlock()) {
                     continue;
@@ -445,13 +428,13 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         guessedReturnType = methodReturnType;
     }
 
-    auto isBadArg = [&](const core::SymbolRef &arg) -> bool {
+    auto isBadArg = [&](const core::ArgInfo &arg) -> bool {
         return
             // runtime does not support rest args and key-rest args
-            arg.data(ctx)->isRepeated() ||
+            arg.flags.isRepeated ||
 
             // sometimes variable does not have a name e.g. `def initialize (*)`
-            arg.data(ctx)->name.data(ctx)->shortName(ctx).empty();
+            arg.name.data(ctx)->shortName(ctx).empty();
     };
     bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
     if (hasBadArg) {
@@ -471,9 +454,8 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         }
 
         for (const auto &arg : closestMethod.data(ctx)->arguments()) {
-            auto argType = arg.data(ctx)->resultType;
-            if (argType && !argType->isUntyped()) {
-                guessedArgumentTypes[arg] = arg.data(ctx)->resultType;
+            if (arg.type && !arg.type->isUntyped()) {
+                guessedArgumentTypes[arg.name] = arg.type;
             }
         }
     }
@@ -488,14 +470,14 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
-                                methodSymbol.data(ctx)->arguments()[0].data(ctx)->name == core::Names::blkArg();
+                                methodSymbol.data(ctx)->arguments()[0].name == core::Names::blkArg();
 
     if (!onlyArgumentIsBlkArg) {
         fmt::format_to(ss, "params(");
 
         bool first = true;
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
-            if (argSym.data(ctx)->name == core::Names::blkArg()) {
+            if (argSym.name == core::Names::blkArg()) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;
@@ -504,10 +486,10 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                 fmt::format_to(ss, ", ");
             }
             first = false;
-            auto argType = guessedArgumentTypes[argSym];
+            auto argType = guessedArgumentTypes[argSym.name];
             core::TypePtr chosenType;
 
-            auto oldType = argSym.data(ctx)->resultType;
+            auto oldType = argSym.type;
             if (!oldType || oldType->isUntyped()) {
                 if (!argType || argType->isBottom()) {
                     chosenType = core::Types::untypedUntracked();
@@ -520,9 +502,9 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                 chosenType = oldType;
             }
             if (!ctx.state.suggestRuntimeProfiledType || !chosenType->isUntyped()) {
-                fmt::format_to(ss, "{}: {}", argSym.data(ctx)->argumentName(ctx), chosenType->show(ctx));
+                fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType->show(ctx));
             } else {
-                fmt::format_to(ss, "{}: ::T::Utils::RuntimeProfiled", argSym.data(ctx)->argumentName(ctx));
+                fmt::format_to(ss, "{}: ::T::Utils::RuntimeProfiled", argSym.argumentName(ctx));
             }
         }
         fmt::format_to(ss, ").");

@@ -74,14 +74,14 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     if (method.data(gs)->isMethod()) {
         for (auto &argSym : method.data(gs)->arguments()) {
             string s;
-            if (argSym.data(gs)->isBlockArgument()) {
+            if (argSym.flags.isBlock) {
                 continue;
             }
-            if (argSym.data(gs)->isKeyword()) {
-                absl::StrAppend(&s, argSym.data(gs)->name.data(gs)->shortName(gs), ": ");
+            if (argSym.flags.isKeyword) {
+                absl::StrAppend(&s, argSym.name.data(gs)->shortName(gs), ": ");
             }
-            if (argSym.data(gs)->resultType) {
-                absl::StrAppend(&s, "${", i++, ":", argSym.data(gs)->resultType->show(gs), "}");
+            if (argSym.type) {
+                absl::StrAppend(&s, "${", i++, ":", argSym.type->show(gs), "}");
             } else {
                 absl::StrAppend(&s, "${", i++, "}");
             }
