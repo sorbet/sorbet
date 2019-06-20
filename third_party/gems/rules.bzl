@@ -40,13 +40,13 @@ def _read_file(repo_ctx, label):
 def _format_package(info):
     return "{}-{}".format(info["name"], info["version"])
 
-def _fetch_gem(repo_ctx, cache_dir, package_name, sha256):
+def _fetch_gem(repo_ctx, package_name, sha256):
     """
     Download a specific version of a gem from rubygems.org and place it in
     `cache_dir`. Returns the sha256 value of the downloaded archive.
     """
 
-    output = "{}/{}.gem".format(cache_dir, package_name)
+    output = "cache/{}.gem".format(package_name)
 
     url = "https://rubygems.org/downloads/{}.gem".format(package_name)
 
@@ -57,32 +57,6 @@ def _fetch_gem(repo_ctx, cache_dir, package_name, sha256):
     result = repo_ctx.download(output = output, url = url, sha256 = sha256)
 
     return result.sha256
-
-def _generate_vendor_cache(repo_ctx, gemfile_lock, deps):
-    """
-    Generates a BUILD file in the same location as the Gemfile.lock file in the
-    original repository, that will produce the vendor/cache directory populated
-    with the required gems. Returns the path to the generated vendor/cache
-    directory.
-    """
-
-    package = _label_to_path(Label(gemfile_lock))
-
-    # the name of all the gems in the vendor/cache tree
-    gemfiles = ", ".join(["\"{}.gem\"".format(_format_package(dep)) for dep in deps])
-
-    cache_dir = "{}/vendor/cache".format(package)
-
-    repo_ctx.template(
-        "{}/BUILD".format(cache_dir),
-        Label("//third_party/gems:vendor_cache.BUILD"),
-        substitutions = {
-            "%{gemfiles}": gemfiles,
-        },
-        executable = False,
-    )
-
-    return cache_dir
 
 BUNDLER_VERSIONS = {
     "2.0.1": {
@@ -205,7 +179,6 @@ def _setup_tests(repo_ctx):
     )
 
 def _impl(repo_ctx):
-    known_shas = {}
     fetched = False
     gemfile_deps = {}
 
@@ -215,23 +188,30 @@ def _impl(repo_ctx):
 
     _setup_bundler(repo_ctx)
 
-    # parse all gemfiles, and unique dependencies
+    gems_to_fetch = {}
+
+    for gem, sha256 in repo_ctx.attr.gems:
+        gems_to_fetch[gem] = sha256
+
+    # collect all requested gems
     for gemfile_lock in repo_ctx.attr.gemfile_locks:
         deps = _parse_gemfile_lock(_read_file(repo_ctx, Label(gemfile_lock)))
-
-        cache_dir = _generate_vendor_cache(repo_ctx, gemfile_lock, deps)
 
         # fetch all the deps, sharing known sha256 values between downloads
         for dep in deps:
             package_name = _format_package(dep)
 
-            # fall back on environmentally provided gem shas
-            sha256 = known_shas.get(package_name, repo_ctx.attr.gems.get(package_name))
-            if sha256 == None:
+            if gems_to_fetch.get(package_name) == None:
+                gems_to_fetch[package_name] = ""
+
+                # there is a gem present in a Gemfile.lock that wasn't mentioned
+                # in gems, so we know that the `gems` attr need to be fixed
                 fetched = True
 
-            sha256 = _fetch_gem(repo_ctx, cache_dir, package_name, sha256)
-            known_shas[package_name] = sha256
+    # fetch all the gems
+    known_shas = {}
+    for package_name in gems_to_fetch:
+        known_shas[package_name] = _fetch_gem(repo_ctx, package_name, gems_to_fetch[package_name])
 
     # When we've fetched gems that lack sha256 value, emit attributes that would
     # make this hermetic.
