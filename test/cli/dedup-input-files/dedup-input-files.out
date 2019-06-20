@@ -14,3 +14,11 @@ Errors: 1
 No errors! Great job.
 ------------------------------
 No errors! Great job.
+------------------------------
+foo/foo.rb:4: Method `Foo#foo` redefined without matching argument count. Expected: `1`, got: `2` https://srb.help/4010
+     4 |  def foo(a, b); end
+          ^^^^^^^^^^^^^
+    foo/stdlib.rbi:10: Previous definition
+    10 |  def foo(a); end
+          ^^^^^^^^^^
+Errors: 1

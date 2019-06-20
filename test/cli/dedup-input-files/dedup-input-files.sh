@@ -25,3 +25,8 @@ echo ------------------------------
 
 # Dedup config files
 "$cwd/main/sorbet" --silence-dev-message --no-config @sorbet/config @sorbet/config 2>&1
+
+echo ------------------------------
+
+# Dedup files and keep ordering
+"$cwd/main/sorbet" --silence-dev-message --no-config foo/stdlib.rbi foo/foo.rb foo/stdlib.rbi foo/foo.rb 2>&1
