@@ -177,7 +177,7 @@ class Pathname < Object
     )
     .returns(T.untyped)
   end
-  sig {returns(T::Enumerator[String])}
+  sig {returns(Enumerator[String])}
   def each_filename(&blk); end
 
   sig do
@@ -193,7 +193,7 @@ class Pathname < Object
         sep: String,
         limit: Integer,
     )
-    .returns(T::Enumerator[String])
+    .returns(Enumerator[String])
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
@@ -242,7 +242,7 @@ class Pathname < Object
     params(
         ignore_error: T::Boolean,
     )
-    .returns(T::Enumerator[Pathname])
+    .returns(Enumerator[Pathname])
   end
   def find(ignore_error, &blk); end
 

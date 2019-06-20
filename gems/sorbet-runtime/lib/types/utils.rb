@@ -14,8 +14,6 @@ module T::Utils
       T::Hash[T.untyped, T.untyped]
     elsif val == ::Enumerable
       T::Enumerable[T.untyped]
-    elsif val == ::Enumerator
-      T::Enumerator[T.untyped]
     elsif val == ::Range
       T::Range[T.untyped]
     elsif val.is_a?(Module)

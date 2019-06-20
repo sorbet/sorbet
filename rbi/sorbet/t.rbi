@@ -95,9 +95,6 @@ end
 module T::Enumerable
   def self.[](type); end
 end
-module T::Enumerator
-  def self.[](type); end
-end
 
 module T::CFGExport
 end

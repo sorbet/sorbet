@@ -42,14 +42,6 @@ module T::Types
           return false if !key_type.valid?(key) || !value_type.valid?(val)
         end
         return true
-      when Enumerator::Lazy
-        # Users don't want these walked
-        return true
-      when Enumerator
-        obj.each do |elem|
-          return false unless @type.valid?(elem)
-        end
-        return true
       when Range
         @type.valid?(obj.first) && @type.valid?(obj.last)
       when Set
@@ -125,8 +117,6 @@ module T::Types
         T::Hash[inferred_key, inferred_val]
       when Range
         T::Range[type_from_instances([obj.first, obj.last])]
-      when Enumerator
-        T::Enumerator[type_from_instances(obj)]
       when Set
         T::Set[type_from_instances(obj)]
       when IO

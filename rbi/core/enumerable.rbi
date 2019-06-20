@@ -40,12 +40,12 @@ module Enumerable
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def collect(&blk); end
 
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T::Enumerator[T.type_parameter(:U)]),
+        blk: T.proc.params(arg0: Elem).returns(Enumerator[T.type_parameter(:U)]),
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
@@ -77,7 +77,7 @@ module Enumerable
     params(
         n: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def cycle(n=T.unsafe(nil), &blk); end
 
@@ -92,7 +92,7 @@ module Enumerable
     params(
         ifnone: Proc,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def detect(ifnone=T.unsafe(nil), &blk); end
 
@@ -110,7 +110,7 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def drop_while(&blk); end
 
   sig do
@@ -124,7 +124,7 @@ module Enumerable
     params(
         n: Integer,
     )
-    .returns(T::Enumerator[T::Array[Elem]])
+    .returns(Enumerator[T::Array[Elem]])
   end
   def each_cons(n, &blk); end
 
@@ -134,7 +134,7 @@ module Enumerable
     )
     .returns(T::Enumerable[Elem])
   end
-  sig {returns(T::Enumerator[[Elem, Integer]])}
+  sig {returns(Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
   sig {returns(T::Array[Elem])}
@@ -146,7 +146,7 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def find_all(&blk); end
 
   sig do
@@ -161,7 +161,7 @@ module Enumerable
     )
     .returns(T.nilable(Integer))
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def find_index(value=T.unsafe(nil), &blk); end
 
   sig {returns(T.nilable(Elem))}
@@ -194,7 +194,7 @@ module Enumerable
     )
     .returns(T::Hash[T.type_parameter(:U), T::Array[Elem]])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def group_by(&blk); end
 
   sig do
@@ -255,7 +255,7 @@ module Enumerable
   end
   def max(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(Comparable),
@@ -266,7 +266,7 @@ module Enumerable
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   sig do
     params(
@@ -299,7 +299,7 @@ module Enumerable
   end
   def min(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(Comparable),
@@ -310,7 +310,7 @@ module Enumerable
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   sig do
     params(
@@ -335,7 +335,7 @@ module Enumerable
     params(
         blk: T.proc.params(arg0: Elem).returns(Comparable),
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def minmax_by(&blk); end
 
@@ -363,7 +363,7 @@ module Enumerable
     )
     .returns([T::Array[Elem], T::Array[Elem]])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def partition(&blk); end
 
   sig do
@@ -372,16 +372,16 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def reject(&blk); end
 
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def reverse_each(&blk); end
 
   sig {returns(T::Array[Elem])}
@@ -399,7 +399,7 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def sort_by(&blk); end
 
   sig do
@@ -416,7 +416,7 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def take_while(&blk); end
 
   # Implemented in C++
@@ -434,7 +434,7 @@ module Enumerable
     params(
         n: Integer,
     )
-    .returns(T::Enumerator[T::Array[Elem]])
+    .returns(Enumerator[T::Array[Elem]])
   end
   def each_slice(n, &blk); end
 
@@ -449,7 +449,7 @@ module Enumerable
     params(
         ifnone: Proc,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def find(ifnone=T.unsafe(nil), &blk); end
 
@@ -472,7 +472,7 @@ module Enumerable
     )
     .returns(T.type_parameter(:U))
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def flat_map(&blk); end
 
   sig do
@@ -481,7 +481,7 @@ module Enumerable
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def map(&blk); end
 
   sig do
@@ -526,7 +526,7 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def select(&blk); end
 
   sig {returns(T::Array[Elem])}

@@ -188,9 +188,6 @@ end
 module T::Enumerable
   def self.[](type); end
 end
-module T::Enumerator
-  def self.[](type); end
-end
 class T::DeprecatedInheritableStruct
   def prop(name, type, rules={}); end
   def const(name, type, rules={}); end
@@ -314,7 +311,7 @@ class Array < Object
     .returns(T::Array[T.any(Elem, T.type_parameter(:T))])
   end
   def concat(arrays); end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -393,7 +390,7 @@ class Array < Object
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def map(&blk); end
   sig do
     params(
@@ -408,7 +405,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def select(&blk); end
   sig {returns(T::Array[Elem])}
   def to_a(); end
@@ -796,7 +793,7 @@ module Enumerable
     .returns(T::Boolean)
   end
   def include?(arg0); end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(Comparable),
@@ -807,7 +804,7 @@ module Enumerable
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   sig do
     params(
@@ -838,7 +835,7 @@ module Enumerable
     .returns(T::Array[Elem])
   end
   def min(arg0=T.unsafe(nil), &blk); end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(Comparable),
@@ -849,7 +846,7 @@ module Enumerable
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   sig do
     params(
@@ -864,7 +861,7 @@ module Enumerable
     params(
         blk: T.proc.params(arg0: Elem).returns(Comparable),
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def minmax_by(&blk); end
   sig do
@@ -873,7 +870,7 @@ module Enumerable
     )
     .returns([T::Array[Elem], T::Array[Elem]])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def partition(&blk); end
   sig {returns(T::Hash[T.untyped, T.untyped])}
   def to_h(); end
@@ -883,7 +880,7 @@ module Enumerable
     )
     .returns(T.type_parameter(:U))
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def flat_map(&blk); end
   sig do
     type_parameters(:U).params(
@@ -891,7 +888,7 @@ module Enumerable
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def map(&blk); end
   sig do
     type_parameters(:Any).params(
@@ -926,7 +923,7 @@ module Enumerable
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def select(&blk); end
   sig {returns(T::Array[Elem])}
   def to_a(); end
@@ -1204,7 +1201,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def each(&blk); end
   sig {returns(T::Boolean)}
   def empty?(); end
@@ -1460,7 +1457,7 @@ class Integer < Numeric
     )
     .returns(Integer)
   end
-  sig {returns(T::Enumerator[Integer])}
+  sig {returns(Enumerator[Integer])}
   def times(&blk); end
   sig {returns(Float)}
   def to_f(); end
@@ -1504,7 +1501,7 @@ class IO < Object
         sep: String,
         limit: Integer,
     )
-    .returns(T::Enumerator[String])
+    .returns(Enumerator[String])
   end
   def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
   sig {returns(T.nilable(Integer))}
@@ -1655,7 +1652,7 @@ module Kernel
   sig {returns(T::Boolean)}
   def block_given?(); end
   sig {params(blk: T.proc.params.returns(T.untyped)).returns(T.untyped)}
-  sig {returns(T::Enumerator[T.untyped])}
+  sig {returns(Enumerator[T.untyped])}
   def loop(&blk); end
   sig do
     params(
@@ -1963,7 +1960,7 @@ class Range < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def each(&blk); end
   sig {returns(Elem)}
   sig do

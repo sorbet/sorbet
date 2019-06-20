@@ -94,7 +94,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def delete_if(&blk); end
 
   sig do
@@ -103,7 +103,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def each(&blk); end
 
   sig do
@@ -112,7 +112,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def each_key(&blk); end
 
   sig do
@@ -121,7 +121,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def each_pair(&blk); end
 
   sig do
@@ -130,7 +130,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def each_value(&blk); end
 
   sig {returns(T::Boolean)}
@@ -201,7 +201,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   def keep_if(&blk); end
 
   sig do
@@ -260,7 +260,7 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def rehash(); end
 
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(Enumerator[[K, V]])}
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),

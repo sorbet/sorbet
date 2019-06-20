@@ -136,7 +136,7 @@ class Array < Object
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def collect(&blk); end
 
   sig do
@@ -150,7 +150,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def combination(arg0, &blk); end
 
@@ -195,7 +195,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def cycle(arg0=T.unsafe(nil), &blk); end
 
@@ -228,7 +228,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def delete_if(&blk); end
 
   sig do
@@ -245,10 +245,10 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def drop_while(&blk); end
 
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -263,7 +263,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def each_index(&blk); end
 
   sig {returns(T::Boolean)}
@@ -368,7 +368,7 @@ class Array < Object
     )
     .returns(T.nilable(Integer))
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def index(arg0=T.unsafe(nil), &blk); end
 
   sig {returns(Object)}
@@ -433,7 +433,7 @@ class Array < Object
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def map(&blk); end
 
   sig do
@@ -442,7 +442,7 @@ class Array < Object
     )
     .returns(T::Array[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def map!(&blk); end
 
   sig do
@@ -457,7 +457,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   sig do
     params(
@@ -507,7 +507,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def reject(&blk); end
 
   sig do
@@ -516,7 +516,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def reject!(&blk); end
 
   sig do
@@ -530,7 +530,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def repeated_combination(arg0, &blk); end
 
@@ -545,7 +545,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Enumerator[Elem])
   end
   def repeated_permutation(arg0, &blk); end
 
@@ -561,7 +561,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def reverse_each(&blk); end
 
   sig do
@@ -576,7 +576,7 @@ class Array < Object
     )
     .returns(T.nilable(Integer))
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def rindex(arg0=T.unsafe(nil), &blk); end
 
   sig do
@@ -610,7 +610,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def select(&blk); end
 
   sig do
@@ -619,7 +619,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def select!(&blk); end
 
   sig {returns(T.nilable(Elem))}
@@ -682,7 +682,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def sort_by!(&blk); end
 
   sig do
@@ -699,7 +699,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def take_while(&blk); end
 
   sig {returns(T::Array[Elem])}
