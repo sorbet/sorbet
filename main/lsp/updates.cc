@@ -43,8 +43,9 @@ LSPLoop::ShowOperation::~ShowOperation() {
 core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     Timer timeit(logger, "updateFile");
     core::FileRef fref;
-    if (!file)
+    if (!file) {
         return fref;
+    }
     fref = initialGS->findFileByPath(file->path());
     if (fref.exists()) {
         initialGS = core::GlobalState::replaceFile(move(initialGS), fref, move(file));

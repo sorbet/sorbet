@@ -283,23 +283,22 @@ bool Type::isBottom() const {
     return t != nullptr && t->symbol == Symbols::bottom();
 }
 
-LiteralType::LiteralType(int64_t val) : ProxyType(), value(val), literalKind(LiteralTypeKind::Integer) {
+LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
     categoryCounterInc("types.allocated", "literaltype");
 }
 
-LiteralType::LiteralType(double val) : ProxyType(), floatval(val), literalKind(LiteralTypeKind::Float) {
+LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKind::Float) {
     categoryCounterInc("types.allocated", "literaltype");
 }
 
 LiteralType::LiteralType(SymbolRef klass, NameRef val)
-    : ProxyType(), value(val._id),
-      literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
+    : value(val._id), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
 LiteralType::LiteralType(bool val)
-    : ProxyType(), value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
+    : value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
     categoryCounterInc("types.allocated", "literaltype");
 }
 
@@ -321,8 +320,8 @@ TypePtr LiteralType::underlying() const {
     Exception::raise("should never be reached");
 }
 
-TupleType::TupleType(const TypePtr &underlying, vector<TypePtr> elements)
-    : ProxyType(), elems(move(elements)), underlying_(underlying) {
+TupleType::TupleType(TypePtr underlying, vector<TypePtr> elements)
+    : elems(move(elements)), underlying_(std::move(underlying)) {
     categoryCounterInc("types.allocated", "tupletype");
 }
 
@@ -358,12 +357,12 @@ void TupleType::_sanityCheck(Context ctx) {
     ENFORCE(applied->klass == Symbols::Array());
 }
 
-ShapeType::ShapeType() : ProxyType(), underlying_(Types::hashOfUntyped()) {
+ShapeType::ShapeType() : underlying_(Types::hashOfUntyped()) {
     categoryCounterInc("types.allocated", "shapetype");
 }
 
-ShapeType::ShapeType(const TypePtr &underlying, vector<TypePtr> keys, vector<TypePtr> values)
-    : ProxyType(), keys(move(keys)), values(move(values)), underlying_(underlying) {
+ShapeType::ShapeType(TypePtr underlying, vector<TypePtr> keys, vector<TypePtr> values)
+    : keys(move(keys)), values(move(values)), underlying_(std::move(underlying)) {
     DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(cast_type<LiteralType>(k.get()) != nullptr); };);
     categoryCounterInc("types.allocated", "shapetype");
 }
@@ -775,7 +774,7 @@ TypePtr TupleType::elementType() const {
 SelfType::SelfType() {
     categoryCounterInc("types.allocated", "selftype");
 };
-AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(targs) {
+AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
 }
 

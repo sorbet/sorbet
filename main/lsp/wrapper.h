@@ -52,7 +52,7 @@ public:
     options::Options opts;
 
     LSPWrapper(std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
-    LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&opts,
+    LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&options,
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
 
     /**

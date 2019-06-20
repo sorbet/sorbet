@@ -169,7 +169,7 @@ class LSPLoop {
     TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
 
-    LSPResult pushDiagnostics(TypecheckRun filesTypechecked);
+    LSPResult pushDiagnostics(TypecheckRun run);
 
     std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
@@ -179,7 +179,7 @@ class LSPLoop {
     std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef);
     std::string remoteName2Local(std::string_view uri);
     std::string localName2Remote(std::string_view uri);
-    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, const Position &pos, const core::GlobalState &gs);
+    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs);
 
     /** Used to implement textDocument/documentSymbol
      * Returns `nullptr` if symbol kind is not supported by LSP
@@ -194,7 +194,7 @@ class LSPLoop {
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params);
     LSPResult handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                               const DocumentSymbolParams &d);
+                                               const DocumentSymbolParams &params);
     LSPResult handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                      const WorkspaceSymbolParams &params);
     LSPResult handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
@@ -216,7 +216,7 @@ class LSPLoop {
      * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.
      * If `collectThreadCounters` is `true`, it also merges in thread-local counters into the QueueState counters.
      */
-    static void enqueueRequest(const std::shared_ptr<spd::logger> &logger, LSPLoop::QueueState &queue,
+    static void enqueueRequest(const std::shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
                                std::unique_ptr<LSPMessage> msg, bool collectThreadCounters = false);
 
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);

@@ -45,7 +45,7 @@ class GlobalState final {
     friend struct NameRefDebugCheck;
 
 public:
-    GlobalState(const std::shared_ptr<ErrorQueue> &errorQueue);
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
 
     void initEmpty();
     void installIntrinsics();

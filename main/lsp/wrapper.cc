@@ -24,7 +24,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
     // Determine boolean before moving messages.
-    bool foundPostInitializationRequest = messages.size() > 0;
+    bool foundPostInitializationRequest = !messages.empty();
     if (!initialized) {
         foundPostInitializationRequest = false;
         for (auto &message : messages) {
@@ -47,8 +47,8 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
     return move(result.responses);
 }
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &message) {
-    return getLSPResponsesFor(*LSPMessage::fromClient(message));
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json) {
+    return getLSPResponsesFor(*LSPMessage::fromClient(json));
 }
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,

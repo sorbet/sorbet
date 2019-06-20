@@ -838,7 +838,7 @@ vector<Expectations> listDir(const char *name) {
                 auto pos = s.rfind('.', s.length() - 10);
                 if (pos != string::npos) {
                     int version = stoi(s.substr(pos + 1, s.length() - 9));
-                    current.sourceFileUpdates[version].push_back(make_pair(absl::StrCat(s.substr(0, pos), ".rb"), s));
+                    current.sourceFileUpdates[version].emplace_back(absl::StrCat(s.substr(0, pos), ".rb"), s);
                 } else {
                     cout << "Ignoring " << s << ": No version number provided (expected .[number].rbupdate).\n";
                 }

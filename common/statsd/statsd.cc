@@ -30,7 +30,7 @@ class StatsdClientWrapper {
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
             packet = packet + '\n' + newLine;
         } else {
-            if (packet.size() > 0) {
+            if (!packet.empty()) {
                 statsd_send(link, packet.c_str());
                 packet = move(newLine);
             } else {
@@ -45,7 +45,7 @@ public:
         : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {}
 
     ~StatsdClientWrapper() {
-        if (packet.size() > 0) {
+        if (!packet.empty()) {
             statsd_send(link, packet.c_str());
         }
         statsd_finalize(link);

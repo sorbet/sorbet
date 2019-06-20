@@ -11,8 +11,8 @@ WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view 
                                  vector<string> extensions,
                                  function<void(unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate,
                                  std::function<void(int)> processExit)
-    : logger(logger), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)), extensions(extensions),
-      processUpdate(processUpdate), processExit(processExit),
+    : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
+      extensions(std::move(extensions)), processUpdate(std::move(processUpdate)), processExit(std::move(processExit)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
 
 WatchmanProcess::~WatchmanProcess() {

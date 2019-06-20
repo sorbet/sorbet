@@ -478,7 +478,7 @@ public:
     core::TypePtr type;
     std::unique_ptr<Expression> arg;
 
-    Cast(core::Loc loc, const core::TypePtr &ty, std::unique_ptr<Expression> arg, core::NameRef cast);
+    Cast(core::Loc loc, core::TypePtr ty, std::unique_ptr<Expression> arg, core::NameRef cast);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

@@ -86,8 +86,8 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static u4 pos2Offset(const File &source, Detail pos);
-    static Detail offset2Pos(const File &source, u4 off);
+    static u4 pos2Offset(const File &file, Detail pos);
+    static Detail offset2Pos(const File &file, u4 off);
     static Loc fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
     std::pair<u4, u4> getAs2u4() const {
         auto low = (((u4)storage.beginLoc) << 8) + ((((u4)storage.fileRef) >> 8) & ((1 << 8) - 1));
@@ -107,7 +107,7 @@ public:
     // - the Loc corresponding to the first non-whitespace character on this line, and
     // - how many characters of the start of this line are whitespace.
     //
-    std::pair<Loc, u4> findStartOfLine(const GlobalState &ctx) const;
+    std::pair<Loc, u4> findStartOfLine(const GlobalState &gs) const;
 
     // For a given Loc, returns a zero-length version that starts at the same location.
     Loc copyWithZeroLength() const {

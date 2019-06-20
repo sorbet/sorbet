@@ -84,10 +84,12 @@ void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef sup
 
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
-            if (absl::c_any_of(right.kw.required, [&](const auto &r) { return r == req; }))
+            if (absl::c_any_of(right.kw.required, [&](const auto &r) { return r == req; })) {
                 continue;
-            if (absl::c_any_of(right.kw.optional, [&](const auto &r) { return r == req; }))
+            }
+            if (absl::c_any_of(right.kw.optional, [&](const auto &r) { return r == req; })) {
                 continue;
+            }
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
                             superMethod.data(gs)->show(gs), req.show(gs));

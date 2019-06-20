@@ -173,7 +173,7 @@ public:
      */
     static TypePtr approximate(Context ctx, const TypePtr &what, const TypeConstraint &tc);
 
-    static TypePtr dropLiteral(const TypePtr &type);
+    static TypePtr dropLiteral(const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
     static TypePtr glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
@@ -535,7 +535,7 @@ public:
     std::vector<TypePtr> values;
     const TypePtr underlying_;
     ShapeType();
-    ShapeType(const TypePtr &underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
+    ShapeType(TypePtr underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -562,7 +562,7 @@ public:
     std::vector<TypePtr> elems;
     const TypePtr underlying_;
 
-    TupleType(const TypePtr &underlying, std::vector<TypePtr> elements);
+    TupleType(TypePtr underlying, std::vector<TypePtr> elements);
     static TypePtr build(Context ctx, std::vector<TypePtr> elements);
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
@@ -668,7 +668,12 @@ public:
     TypePtr type;
     InlinedVector<Loc, 2> origins;
     std::vector<ErrorLine> origins2Explanations(Context ctx) const;
-    ~TypeAndOrigins();
+    ~TypeAndOrigins() noexcept;
+    TypeAndOrigins() = default;
+    TypeAndOrigins(const TypeAndOrigins &) = default;
+    TypeAndOrigins(TypeAndOrigins &&) = default;
+    TypeAndOrigins &operator=(const TypeAndOrigins &) = default;
+    TypeAndOrigins &operator=(TypeAndOrigins &&) = default;
 };
 CheckSize(TypeAndOrigins, 40, 8);
 

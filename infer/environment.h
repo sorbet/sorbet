@@ -157,7 +157,7 @@ public:
     void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter);
 
-    void setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins);
+    void setTypeAndOrigin(core::LocalVariable symbol, const core::TypeAndOrigins &typeAndOrigins);
 
     /*
      * Create an Environment out of this one that holds if final condition in

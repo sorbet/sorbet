@@ -35,7 +35,7 @@ int printDocumentSymbols(string_view filePath) {
         return 0;
     } else {
         cout << "Sorbet returned invalid response for documentSymbols:\n";
-        if (responses.size() == 0) {
+        if (responses.empty()) {
             cout << "(nothing)\n";
         } else {
             for (auto &response : responses) {

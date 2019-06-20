@@ -184,8 +184,8 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
     _sanityCheck();
 }
 
-Cast::Cast(core::Loc loc, const core::TypePtr &ty, unique_ptr<Expression> arg, core::NameRef cast)
-    : Expression(loc), cast(cast), type(ty), arg(std::move(arg)) {
+Cast::Cast(core::Loc loc, core::TypePtr ty, unique_ptr<Expression> arg, core::NameRef cast)
+    : Expression(loc), cast(cast), type(std::move(ty)), arg(std::move(arg)) {
     categoryCounterInc("trees", "cast");
     _sanityCheck();
 }

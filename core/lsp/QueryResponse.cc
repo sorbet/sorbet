@@ -6,27 +6,27 @@ using namespace std;
 namespace sorbet::core::lsp {
 
 SendResponse::SendResponse(core::DispatchResult::ComponentVec dispatchComponents,
-                           const std::shared_ptr<core::TypeConstraint> &constraint, core::Loc termLoc,
-                           core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
-    : dispatchComponents(std::move(dispatchComponents)), constraint(constraint), termLoc(termLoc), name(name),
-      receiver(receiver), retType(retType) {}
+                           std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc, core::NameRef name,
+                           core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
+    : dispatchComponents(std::move(dispatchComponents)), constraint(std::move(constraint)), termLoc(termLoc),
+      name(name), receiver(std::move(receiver)), retType(std::move(retType)) {}
 
 IdentResponse::IdentResponse(core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable,
                              core::TypeAndOrigins retType)
-    : owner(owner), termLoc(termLoc), variable(variable), retType(retType) {}
+    : owner(owner), termLoc(termLoc), variable(variable), retType(std::move(retType)) {}
 
 LiteralResponse::LiteralResponse(core::SymbolRef owner, core::Loc termLoc, core::TypeAndOrigins retType)
-    : owner(owner), termLoc(termLoc), retType(retType) {}
+    : owner(owner), termLoc(termLoc), retType(std::move(retType)) {}
 
 ConstantResponse::ConstantResponse(core::SymbolRef owner, core::DispatchResult::ComponentVec dispatchComponents,
                                    core::Loc termLoc, core::NameRef name, core::TypeAndOrigins receiver,
                                    core::TypeAndOrigins retType)
-    : owner(owner), dispatchComponents(std::move(dispatchComponents)), termLoc(termLoc), name(name), receiver(receiver),
-      retType(retType) {}
+    : owner(owner), dispatchComponents(std::move(dispatchComponents)), termLoc(termLoc), name(name),
+      receiver(std::move(receiver)), retType(std::move(retType)) {}
 
 DefinitionResponse::DefinitionResponse(core::DispatchResult::ComponentVec dispatchComponents, core::Loc termLoc,
                                        core::NameRef name, core::TypeAndOrigins retType)
-    : dispatchComponents(std::move(dispatchComponents)), termLoc(termLoc), name(name), retType(retType) {}
+    : dispatchComponents(std::move(dispatchComponents)), termLoc(termLoc), name(name), retType(std::move(retType)) {}
 
 void QueryResponse::pushQueryResponse(core::Context ctx, QueryResponseVariant response) {
     ctx.state.errorQueue->pushQueryResponse(make_unique<QueryResponse>(std::move(response)));

@@ -1285,7 +1285,7 @@ TypePtr MetaType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &p
     Exception::raise("should never happen");
 }
 
-MetaType::MetaType(const TypePtr &wrapped) : ProxyType(), wrapped(move(wrapped)) {
+MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
     categoryCounterInc("types.allocated", "metattype");
 }
 

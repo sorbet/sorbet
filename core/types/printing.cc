@@ -162,21 +162,21 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
  */
 struct OrInfo {
     /// True when the leaves of the OrType contains a NilClass.
-    bool containsNil;
+    bool containsNil{false};
 
     /// True when the leaves of the OrType contains a FalseClass.
-    bool containsFalse;
+    bool containsFalse{false};
 
     /// True when the leaves of the OrType contains a TrueClass.
-    bool containsTrue;
+    bool containsTrue{false};
 
     /// True when the leaves of the OrType contains a type that is none of the
     /// obove cases is present (Integer, for example).
-    bool containsOther;
+    bool containsOther{false};
 
     /// True when there are more than one non-NilClass types present in the
     /// leaves of the OrTYpe.
-    bool containsMultiple;
+    bool containsMultiple{false};
 
     bool isBoolean() const {
         return containsTrue && containsFalse && !containsOther;
@@ -186,9 +186,7 @@ struct OrInfo {
         this->containsMultiple = true;
     }
 
-    OrInfo()
-        : containsNil(false), containsFalse(false), containsTrue(false), containsOther(false), containsMultiple(false) {
-    }
+    OrInfo() {}
 
     static OrInfo nilInfo() {
         OrInfo res;

@@ -11,7 +11,7 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     string contents = "";
     for (auto &dispatchComponent : dispatchComponents) {
         if (dispatchComponent.method.exists()) {
-            if (contents.size() > 0) {
+            if (!contents.empty()) {
                 contents += " ";
             }
             contents += methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint);

@@ -31,7 +31,7 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) const {
     return result;
 }
 
-TypeAndOrigins::~TypeAndOrigins() {
+TypeAndOrigins::~TypeAndOrigins() noexcept {
     histogramInc("TypeAndOrigins.origins.size", origins.size());
 }
 

@@ -86,8 +86,7 @@ protected:
 
     std::vector<std::unique_ptr<LSPMessage>> send(std::vector<std::unique_ptr<LSPMessage>> messages);
 
-    void assertDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
-                           std::vector<ExpectedDiagnostic> diagnostics);
+    void assertDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages, std::vector<ExpectedDiagnostic> expected);
 
     /**
      * ProtocolTest maintains the latest diagnostics for files received over a session, as LSP is not required to

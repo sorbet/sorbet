@@ -23,8 +23,8 @@ string Return::toString(core::Context ctx) {
     return fmt::format("return {}", this->what.toString(ctx));
 }
 
-BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what)
-    : link(link), what(what) {
+BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what)
+    : link(std::move(link)), what(what) {
     categoryCounterInc("cfg", "blockreturn");
 }
 
@@ -32,8 +32,8 @@ string BlockReturn::toString(core::Context ctx) {
     return fmt::format("blockreturn<{}> {}", this->link->fun.toString(ctx), this->what.toString(ctx));
 }
 
-LoadSelf::LoadSelf(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable fallback)
-    : link(link), fallback(fallback) {
+LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, core::LocalVariable fallback)
+    : link(std::move(link)), fallback(fallback) {
     categoryCounterInc("cfg", "loadself");
 }
 
@@ -42,9 +42,9 @@ string LoadSelf::toString(core::Context ctx) {
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-           const InlinedVector<core::LocalVariable, 2> &args, const InlinedVector<core::Loc, 2> &argLocs,
+           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(argLocs), link(move(link)) {
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), link(move(link)) {
     this->args.resize(args.size());
     int i = 0;
     for (const auto &e : args) {

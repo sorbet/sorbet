@@ -108,7 +108,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
     if (!opts.disableWatchman) {
-        if (opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.size() == 0) {
+        if (opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.empty()) {
             // The lambda below intentionally does not capture `this`.
             watchmanProcess = make_unique<watchman::WatchmanProcess>(
                 logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
@@ -290,13 +290,13 @@ bool tryPreMerge(LSPMessage &current, SorbetWorkspaceEditCounts &counts,
 unique_ptr<LSPMessage> performMerge(const UnorderedSet<string> &updatedFiles,
                                     vector<unique_ptr<SorbetWorkspaceEdit>> &consecutiveWorkspaceEdits,
                                     unique_ptr<SorbetWorkspaceEditCounts> &counts) {
-    if (updatedFiles.size() > 0) {
+    if (!updatedFiles.empty()) {
         consecutiveWorkspaceEdits.push_back(make_unique<SorbetWorkspaceEdit>(
             SorbetWorkspaceEditType::FileSystem,
             make_unique<WatchmanQueryResponse>("", "", false,
                                                vector<string>(updatedFiles.begin(), updatedFiles.end()))));
     }
-    if (consecutiveWorkspaceEdits.size() > 0) {
+    if (!consecutiveWorkspaceEdits.empty()) {
         auto notif = make_unique<NotificationMessage>(
             "2.0", LSPMethod::SorbetWorkspaceEdit,
             make_unique<SorbetWorkspaceEditParams>(move(counts), move(consecutiveWorkspaceEdits)));
@@ -364,8 +364,7 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 }
 
 void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
-    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
-        auto &current = *it;
+    for (auto &current : pendingRequests) {
         if (current->isRequest()) {
             auto &request = current->asRequest();
             if (request.id == cancelParams.id) {
@@ -377,7 +376,6 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
     }
     // Else... it's too late; we have either already processed it, or are currently processing it. Swallow cancellation
     // and ignore.
-    return;
 }
 
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
