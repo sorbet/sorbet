@@ -41,7 +41,7 @@ compute_md5() {
 }
 
 typecheck() {
-  args=""
+  args=("$@")
   cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet/gem-rbis"
 
   if [ -f Gemfile.lock ]; then
@@ -51,13 +51,12 @@ typecheck() {
     if [ ! -f "$cache_file" ]; then
       $0 rbi find-gem-rbis > /dev/null
     fi
-    args="@$cache_file "
+    args+=("@$cache_file")
   fi
-  args="$args$@"
 
   if [ -n "$SRB_SORBET_EXE" ]; then
     # shellcheck disable=SC2086
-    "$SRB_SORBET_EXE" $args
+    "$SRB_SORBET_EXE" "${args[@]}"
   else
     # We're using bash string operations here to avoid forking.
     # Using dirname / basename / etc. would mean ~15ms for each call.
@@ -73,7 +72,7 @@ typecheck() {
     sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
 
     # shellcheck disable=SC2086
-    "${sorbet[0]}" $args
+    "${sorbet[0]}" "${args[@]}"
   fi
 }
 
