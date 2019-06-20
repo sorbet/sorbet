@@ -10,7 +10,7 @@
 #   |_| \__, | .__/ \___||___/
 #       |___/|_|
 #
-# Docs at http://go/types.
+# Docs at https://sorbet.org/docs/sigs
 #
 # Types that you can pass to `sig`:
 #

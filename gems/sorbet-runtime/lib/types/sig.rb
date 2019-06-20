@@ -3,7 +3,7 @@
 # rubocop:disable PrisonGuard/NoTopLevelDeclarations, PrisonGuard/PackageMatchesDirectory
 
 # Used as a mixin to any class so that you can call `sig`.
-# Docs at http://go/types
+# Docs at https://sorbet.org/docs/sigs
 module T::Sig
   module WithoutRuntime
     # At runtime, does nothing, but statically it is treated exactly the same
