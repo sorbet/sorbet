@@ -283,23 +283,22 @@ bool Type::isBottom() const {
     return t != nullptr && t->symbol == Symbols::bottom();
 }
 
-LiteralType::LiteralType(int64_t val) : ProxyType(), value(val), literalKind(LiteralTypeKind::Integer) {
+LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
     categoryCounterInc("types.allocated", "literaltype");
 }
 
-LiteralType::LiteralType(double val) : ProxyType(), floatval(val), literalKind(LiteralTypeKind::Float) {
+LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKind::Float) {
     categoryCounterInc("types.allocated", "literaltype");
 }
 
 LiteralType::LiteralType(SymbolRef klass, NameRef val)
-    : ProxyType(), value(val._id),
-      literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
+    : value(val._id), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
 LiteralType::LiteralType(bool val)
-    : ProxyType(), value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
+    : value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
     categoryCounterInc("types.allocated", "literaltype");
 }
 

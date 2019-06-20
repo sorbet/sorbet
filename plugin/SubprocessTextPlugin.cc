@@ -13,7 +13,7 @@ struct Namespace {
     NamespaceType type;
     InlinedVector<core::NameRef, 3> components;
 
-    Namespace(const unique_ptr<ast::ClassDef> &klass) : components() {
+    Namespace(const unique_ptr<ast::ClassDef> &klass) {
         type = (klass->kind == ast::ClassDefKind::Module ? Module : Class);
         fillComponents(klass->name.get());
     }
@@ -45,7 +45,7 @@ struct SpawningWalker {
     vector<shared_ptr<core::File>> subprocessResults;
     InlinedVector<Namespace, 5> nesting;
 
-    SpawningWalker() : nesting() {}
+    SpawningWalker() {}
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
         if (klass->symbol == core::Symbols::root()) {

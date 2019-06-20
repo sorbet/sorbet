@@ -138,7 +138,7 @@ class LocalNameInserter {
     //   [].map { # $1 }
     // end
     // [].each { # $2 }
-    u4 blockCounter;
+    u4 blockCounter{0};
 
     core::LocalVariable enterLocal(core::NameRef name) {
         auto &frame = scopeStack.back();
@@ -251,7 +251,7 @@ public:
     }
 
 private:
-    LocalNameInserter() : blockCounter(0) {
+    LocalNameInserter() {
         // Setup a block frame that's outside of a method context as the base of
         // the scope stack.
         pushBlockFrame(false);
