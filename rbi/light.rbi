@@ -191,11 +191,11 @@ end
 module T::Enumerator
   def self.[](type); end
 end
-class T::DeprecatedInheritableStruct
+class T::InexactStruct
   def prop(name, type, rules={}); end
   def const(name, type, rules={}); end
 end
-class T::Struct < T::DeprecatedInheritableStruct; end
+class T::Struct < T::InexactStruct; end
 T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
 module Comparable
 end

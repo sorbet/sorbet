@@ -102,10 +102,10 @@ end
 module T::CFGExport
 end
 
-class T::DeprecatedInheritableStruct
+class T::InexactStruct
   def prop(name, type, rules={}); end
   def const(name, type, rules={}); end
 end
-class T::Struct < T::DeprecatedInheritableStruct; end
+class T::Struct < T::InexactStruct; end
 
 T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
