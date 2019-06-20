@@ -6,7 +6,7 @@ title: Typed Structs
 > TODO: This page is still a fragment. Contributions welcome!
 
 While Sorbet supports using Hashes and Structs, it isn't always possible to
-define these models well.
+model them statically.
 
 The `sorbet-runtime` gem ships with an alternative to using Ruby's `Hash` or
 `Struct` classes that is more well supported: `T::Struct`. It works like this:
