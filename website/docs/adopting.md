@@ -4,12 +4,6 @@ title: Adopting Sorbet in an Existing Codebase
 sidebar_label: Adopting Sorbet
 ---
 
-> **Heads up**: Sorbet is still in a private beta while we iron out the
-> onboarding experience. You'll only be able to follow these instructions if
-> you've been given access to the private beta.
->
-> Interested in signing up? Email us at <sorbet@stripe.com>.
-
 ## Step 1: Install dependencies
 
 There are two components to Sorbet: the command line interface and runtime
