@@ -85,6 +85,20 @@ bool isStringLit(DesugarContext dctx, unique_ptr<Expression> &expr) {
     return (lit = cast_tree<Literal>(expr.get())) && lit->isString(dctx.ctx);
 }
 
+unique_ptr<Expression> mergeStrings(DesugarContext dctx, core::Loc loc,
+                                    InlinedVector<unique_ptr<Expression>, 4> stringsAccumulated) {
+    if (stringsAccumulated.size() == 1) {
+        return move(stringsAccumulated[0]);
+    } else {
+        return MK::String(
+            loc,
+            dctx.ctx.state.enterNameUTF8(fmt::format(
+                "{}", fmt::map_join(stringsAccumulated.begin(), stringsAccumulated.end(), "", [&](const auto &expr) {
+                    return cast_tree<Literal>(expr.get())->asString(dctx.ctx).data(dctx.ctx)->shortName(dctx.ctx);
+                }))));
+    }
+}
+
 unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser::NodeVec nodes) {
     if (nodes.empty()) {
         return MK::String(loc, core::Names::empty());
@@ -93,13 +107,18 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     auto end = nodes.end();
     unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
+    InlinedVector<unique_ptr<Expression>, 4> stringsAccumulated;
+    bool allStringsSoFar;
     if (isStringLit(dctx, first) || isa_tree<EmptyTree>(first.get())) {
-        res = std::move(first);
+        stringsAccumulated.emplace_back(std::move(first));
+        allStringsSoFar = true;
     } else {
         auto pieceLoc = first->loc;
         res = MK::Send0(pieceLoc, std::move(first), core::Names::to_s());
+        allStringsSoFar = false;
     }
     ++it;
+
     for (; it != end; ++it) {
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
@@ -107,21 +126,21 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
             auto pieceLoc = narg->loc;
             narg = MK::Send0(pieceLoc, std::move(narg), core::Names::to_s());
         }
-        if (isStringLit(dctx, res) && isStringLit(dctx, narg)) {
-            auto leftName = cast_tree<Literal>(narg.get())->asString(dctx.ctx);
-            auto rightName = cast_tree<Literal>(res.get())->asString(dctx.ctx);
-            auto newName = leftName.prepend(dctx.ctx, rightName.data(dctx.ctx)->shortName(dctx.ctx));
-            res = MK::String(loc, newName);
-        } else if (isStringLit(dctx, res) && isa_tree<EmptyTree>(narg.get())) {
-            // no op
-        } else if (isa_tree<EmptyTree>(res.get()) && isStringLit(dctx, narg)) {
-            res = move(narg);
-        } else if (isa_tree<EmptyTree>(res.get()) && isa_tree<EmptyTree>(narg.get())) {
+        if (allStringsSoFar && isStringLit(dctx, narg)) {
+            stringsAccumulated.emplace_back(std::move(narg));
+        } else if (isa_tree<EmptyTree>(narg.get())) {
             // no op
         } else {
+            if (allStringsSoFar) {
+                allStringsSoFar = false;
+                res = mergeStrings(dctx, loc, std::move(stringsAccumulated));
+            }
             res = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
         }
     };
+    if (allStringsSoFar) {
+        res = mergeStrings(dctx, loc, std::move(stringsAccumulated));
+    }
     return res;
 }
 
