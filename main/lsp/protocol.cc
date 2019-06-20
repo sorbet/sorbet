@@ -364,8 +364,7 @@ void mergeFileChanges(deque<unique_ptr<LSPMessage>> &pendingRequests) {
 }
 
 void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
-    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
-        auto &current = *it;
+    for (auto &current : pendingRequests) {
         if (current->isRequest()) {
             auto &request = current->asRequest();
             if (request.id == cancelParams.id) {
