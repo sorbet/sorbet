@@ -234,7 +234,7 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
     closedir(dir);
 }
 
-vector<string> sorbet::FileOps::listFilesInDir(string_view path, UnorderedSet<string> extensions, bool recursive,
+vector<string> sorbet::FileOps::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
                                                const std::vector<std::string> &absoluteIgnorePatterns,
                                                const std::vector<std::string> &relativeIgnorePatterns) {
     vector<string> result;

@@ -482,12 +482,11 @@ void Options::flushPrinters() {
 }
 
 void addFilesFromDir(Options &opts, string_view dir) {
-    UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
     auto fileNormalized = stripTrailingSlashes(dir);
     opts.rawInputDirNames.emplace_back(fileNormalized);
     // Expand directory into list of files.
-    auto containedFiles = opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true,
-                                                  opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+    auto containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
+                                                  opts.relativeIgnorePatterns);
     opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
     opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
                                std::make_move_iterator(containedFiles.end()));
