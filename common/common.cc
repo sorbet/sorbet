@@ -104,7 +104,7 @@ int sorbet::FileOps::readFd(int fd, std::vector<char> &output, int timeoutMs) {
     // ms => left over ms => converted to microseconds
     timeout.tv_usec = (timeoutMs % 1000) * 1000;
 
-    auto rv = select(fd + 1, &set, NULL, NULL, &timeout);
+    auto rv = select(fd + 1, &set, nullptr, nullptr, &timeout);
     if (rv == -1) {
         throw sorbet::FileReadException(fmt::format("Error during select(): {}", errno));
     } else if (rv == 0) {
