@@ -367,11 +367,11 @@ public:
     }
 
     static SymbolRef Enumerator() {
-        return SymbolRef(nullptr, 77);
+        return SymbolRef(nullptr, 74);
     }
 
     static SymbolRef T_Enumerator() {
-        return SymbolRef(nullptr, 78);
+        return SymbolRef(nullptr, 75);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
