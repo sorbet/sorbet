@@ -3,6 +3,7 @@
 set -euo pipefail
 
 whitelisted=0
+# try to tamper
 
 if [[ "$BUILDKITE_PULL_REQUEST" == "false" ]]; then
   # whitelist commits that are triggered in branch builds of github.com/stripe/sorbet
