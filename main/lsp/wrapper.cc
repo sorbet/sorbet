@@ -24,7 +24,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
     // Determine boolean before moving messages.
-    bool foundPostInitializationRequest = messages.size() > 0;
+    bool foundPostInitializationRequest = !messages.empty();
     if (!initialized) {
         foundPostInitializationRequest = false;
         for (auto &message : messages) {

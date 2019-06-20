@@ -29,7 +29,7 @@ void LSPTest::parseTestFile() {
         lspWrapper->opts.skipDSLPasses = true;
         // Some autogen tests assume that some errors will occur from the resolver step, others assume the resolver
         // won't run.
-        if (RangeAssertion::getErrorAssertions(assertions).size() > 0) {
+        if (!RangeAssertion::getErrorAssertions(assertions).empty()) {
             // ...and stop after the resolver phase if there are errors
             lspWrapper->opts.stopAfterPhase = realmain::options::Phase::RESOLVER;
         } else {

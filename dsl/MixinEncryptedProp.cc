@@ -39,7 +39,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::replaceDSL(core::Mutable
     if (send->fun._id != core::Names::encrypted_prop()._id) {
         return empty;
     }
-    if (send->args.size() < 1) {
+    if (send->args.empty()) {
         return empty;
     }
 

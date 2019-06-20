@@ -376,7 +376,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
             return;
         }
 
-        if (locations.size() == 0) {
+        if (locations.empty()) {
             ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
                 "Sorbet did not find a definition for location that references symbol `{}`.\nExpected definition "
                 "of:\n{}\nTo be:\n{}",
@@ -725,7 +725,7 @@ string BooleanPropertyAssertion::toString() const {
 shared_ptr<FastPathAssertion> FastPathAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                       string_view assertionContents, string_view assertionType) {
     optional<vector<string>> expectedFiles;
-    if (assertionContents.size() > 0) {
+    if (!assertionContents.empty()) {
         expectedFiles = absl::StrSplit(assertionContents, ',');
         fast_sort(*expectedFiles);
     }
@@ -796,7 +796,7 @@ string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResul
     } else {
         auto &hover = get<unique_ptr<Hover>>(hoverResult);
         string_view value = hover->contents->value;
-        if (value.size() == 0) {
+        if (value.empty()) {
             return NOTHING_LABEL;
         }
         return value;

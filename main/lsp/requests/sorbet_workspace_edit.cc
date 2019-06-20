@@ -104,7 +104,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryRe
 }
 
 LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates) {
-    if (updates.size() > 0) {
+    if (!updates.empty()) {
         vector<shared_ptr<core::File>> files;
         files.reserve(updates.size());
         for (auto &update : updates) {

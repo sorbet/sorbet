@@ -510,7 +510,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
                     auto fileNormalized = stripTrailingSlashes(file);
-                    if (opts.pathPrefix == "" && rawFiles.size() == 1) {
+                    if (opts.pathPrefix.empty() && rawFiles.size() == 1) {
                         // If Sorbet is provided with a single input directory, the
                         // default path prefix is that directory.
                         opts.pathPrefix = fmt::format("{}/", fileNormalized);
@@ -560,7 +560,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             logger->error("You may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
         }
-        if (opts.autocorrect && opts.inlineInput != "") {
+        if (opts.autocorrect && !opts.inlineInput.empty()) {
             logger->error("You may not use autocorrect with inline input.");
             throw EarlyReturnWithCode(1);
         }

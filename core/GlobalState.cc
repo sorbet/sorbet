@@ -645,7 +645,7 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
     SymbolRef res = enterMethodSymbol(loc, owner, name);
     ENFORCE(res != original);
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
-        ENFORCE(res.data(*this)->arguments().size() == 0);
+        ENFORCE(res.data(*this)->arguments().empty());
         res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
         const auto &originalArguments = original.data(*this)->arguments();
         int i = -1;

@@ -937,7 +937,7 @@ private:
             }
         }
 
-        if (lets.size() > 0) {
+        if (!lets.empty()) {
             auto loc = mdef->rhs->loc;
             mdef->rhs = ast::MK::InsSeq(loc, std::move(lets), std::move(mdef->rhs));
         }

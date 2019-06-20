@@ -73,7 +73,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             return empty;
         }
         name = sym->asSymbol(ctx);
-        ENFORCE(sym->loc.source(ctx).size() > 0 && sym->loc.source(ctx)[0] == ':');
+        ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
         nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
     }
 
