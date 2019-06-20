@@ -106,11 +106,16 @@ Early in our project we've defined some guidelines for how working with sorbet s
 
     - `brew install bazel autoconf coreutils parallel`
 
-2.  Build Sorbet
+2.  Clone this repository
+
+    - `git clone https://github.com/sorbet/sorbet.git`
+    - `cd sorbet`
+
+3.  Build Sorbet
 
     - `bazel build //main:sorbet --config=dbg`
 
-3.  Run Sorbet!
+4.  Run Sorbet!
 
     - `bazel-bin/main/sorbet -e "42 + 'hello'"`
 
