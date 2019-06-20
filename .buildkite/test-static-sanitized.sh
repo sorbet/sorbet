@@ -25,8 +25,11 @@ echo will run with $CONFIG_OPTS
 
 err=0
 
-if [ ! -z "$MAC_TESTS" ]; then
+if [ -n "$MAC_TESTS" ]; then
   # NOTE: running ruby/gem testing without the sanitized flags
+
+  # we actually want word splitting here
+  # shellcheck disable=SC2086
   ./bazel test $MAC_TESTS --config=buildfarm --test_summary=terse || err=$?
 fi
 

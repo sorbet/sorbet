@@ -13,8 +13,10 @@ if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/
   fi
 fi
 if [[ -f "${RUNFILES_DIR:-/dev/null}/bazel_tools/tools/bash/runfiles/runfiles.bash" ]]; then
+  # shellcheck disable=SC1090
   source "${RUNFILES_DIR}/bazel_tools/tools/bash/runfiles/runfiles.bash"
 elif [[ -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
+  # shellcheck disable=SC1090
   source "$(grep -m1 "^bazel_tools/tools/bash/runfiles/runfiles.bash " \
             "$RUNFILES_MANIFEST_FILE" | cut -d ' ' -f 2-)"
 else
@@ -24,21 +26,29 @@ fi
 # --- end runfiles.bash initialization ---
 
 # put bundle in the path
-export PATH="$(dirname $(rlocation %{workspace}/bundler/bundle)):$PATH"
+# shellcheck disable=SC1083
+PATH="$(dirname "$(rlocation %{workspace}/bundler/bundle)"):$PATH"
+export PATH
 
 # bundle requires $HOME
-export HOME=$PWD
+HOME=$PWD
+export HOME
 
 # ensure that bundle works
 bundle --help
 
-cp $(rlocation %{workspace}/test/Gemfile) .
-cp $(rlocation %{workspace}/test/Gemfile.lock) .
+
+# shellcheck disable=SC1083
+cp "$(rlocation %{workspace}/test/Gemfile)" .
+
+# shellcheck disable=SC1083
+cp "$(rlocation %{workspace}/test/Gemfile.lock)" .
 
 mkdir vendor
 
-VENDOR_CACHE=$(dirname $(rlocation %{workspace}/test/vendor/cache/cantor-1.2.1.gem))
-ln -s $VENDOR_CACHE vendor/cache
+# shellcheck disable=SC1083
+VENDOR_CACHE=$(dirname "$(rlocation %{workspace}/test/vendor/cache/cantor-1.2.1.gem)")
+ln -s "$VENDOR_CACHE" vendor/cache
 
 # setup 'cantor'
 bundle install --deployment --local

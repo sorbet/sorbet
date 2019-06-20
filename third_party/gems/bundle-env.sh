@@ -13,8 +13,10 @@ if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/
   fi
 fi
 if [[ -f "${RUNFILES_DIR:-/dev/null}/bazel_tools/tools/bash/runfiles/runfiles.bash" ]]; then
+  # shellcheck disable=SC1090
   source "${RUNFILES_DIR}/bazel_tools/tools/bash/runfiles/runfiles.bash"
 elif [[ -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
+  # shellcheck disable=SC1090
   source "$(grep -m1 "^bazel_tools/tools/bash/runfiles/runfiles.bash " \
             "$RUNFILES_MANIFEST_FILE" | cut -d ' ' -f 2-)"
 else
@@ -23,5 +25,10 @@ else
 fi
 # --- end runfiles.bash initialization ---
 
-export BUNDLER_ROOT=$(dirname $(rlocation %{workspace}/%{bundler}/%{site_ruby}/lib/bundler.rb))
-export RUBYLIB="${BUNDLER_ROOT}:${RUBYLIB:-}"
+
+# shellcheck disable=SC1083
+BUNDLER_ROOT="$(dirname "$(rlocation %{workspace}/%{bundler}/%{site_ruby}/lib/bundler.rb)")"
+export BUNDLER_ROOT
+
+RUBYLIB="${BUNDLER_ROOT}:${RUBYLIB:-}"
+export RUBYLIB
