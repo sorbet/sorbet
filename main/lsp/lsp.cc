@@ -98,7 +98,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     if (enableTypecheckInfo) {
         vector<string> pathsTypechecked;
         for (auto &f : filesTypechecked) {
-            pathsTypechecked.push_back(string(f.data(gs).path()));
+            pathsTypechecked.emplace_back(f.data(gs).path());
         }
         auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(pathsTypechecked));
         responses.push_back(make_unique<LSPMessage>(

@@ -140,19 +140,19 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     string accessFlagString = "";
     if (sym->isMethod()) {
         if (sym->hasGeneratedSig()) {
-            flags.push_back("generated");
+            flags.emplace_back("generated");
         }
         if (sym->isAbstract()) {
-            flags.push_back("abstract");
+            flags.emplace_back("abstract");
         }
         if (sym->isOverridable()) {
-            flags.push_back("overridable");
+            flags.emplace_back("overridable");
         }
         if (sym->isOverride()) {
-            flags.push_back("override");
+            flags.emplace_back("override");
         }
         if (sym->isImplementation()) {
-            flags.push_back("implementation");
+            flags.emplace_back("implementation");
         }
         if (sym->isPrivate()) {
             accessFlagString = "private ";
