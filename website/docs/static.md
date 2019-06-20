@@ -136,7 +136,7 @@ T::Hash[Symbol, Integer]
 For example, it's possible that we don't care about what's stored in the `env`,
 only that we access things in the `env` with `Symbol` keys. Right now though, an
 `env` of `{user: 'jez'}` is a type error. In this case, we may want to _opt out_
-of some static checks on this speficic argument, without opting out the method
+of some static checks on this specific argument, without opting out the method
 entirely. In this case, we can use [`T.untyped`](untyped.md):
 
 ```ruby
