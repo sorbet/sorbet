@@ -1,2 +1,16 @@
 dummy: File Not Found https://srb.help/1004
 Errors: 1
+------------------------------
+No errors! Great job.
+------------------------------
+foo/stdlib.rbi:10: Method `Foo#foo` redefined without matching argument count. Expected: `2`, got: `1` https://srb.help/4010
+    10 |  def foo(a); end
+          ^^^^^^^^^^
+    foo/foo.rb:4: Previous definition
+     4 |  def foo(a, b); end
+          ^^^^^^^^^^^^^
+Errors: 1
+------------------------------
+No errors! Great job.
+------------------------------
+No errors! Great job.
