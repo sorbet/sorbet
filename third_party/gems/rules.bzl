@@ -60,7 +60,7 @@ def _fetch_gem(repo_ctx, package_name, sha256):
 
 BUNDLER_VERSIONS = {
     "2.0.1": {
-        "sha256": "",
+        "sha256": "c7e38039993c9c2edc27397aef4a3370a4b35c7fae3d93e434e501c4bd7656ea",
     },
 }
 
