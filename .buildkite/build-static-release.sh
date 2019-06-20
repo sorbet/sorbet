@@ -54,13 +54,13 @@ if [[ "mac" == "$platform" ]]; then
   (
     cd srb-init-smoke-test
     SRB_YES=1 rbenv exec srb init
-    rbenv exec srb tc
+    rbenv exec srb tc -e 'puts 1'
 
     rm -rf sorbet/
 
     touch Gemfile
     SRB_YES=1 rbenv exec srb init
-    rbenv exec srb tc
+    rbenv exec srb tc -e 'puts 1'
   )
   rm -rf srb-init-smoke-test
 
