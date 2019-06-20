@@ -48,7 +48,7 @@ class Index extends React.Component {
                 <p style={{paddingTop: '1em'}}>
                   Follow us{' '}
                   <a href="https://twitter.com/sorbet_ruby">on Twitter</a> for
-                  announcemnts!
+                  announcements!
                 </p>
               </div>
             </div>
