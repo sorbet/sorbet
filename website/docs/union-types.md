@@ -24,14 +24,14 @@ class A
 end
 
 # 10 and "Hello, world" both have type `T.any(Integer, String)`
-A.f(10)
-A.f("Hello, world")
+A.foo(10)
+A.foo("Hello, world")
 
 # error: `TrueClass` does not match `T.any(Integer, String)`
-A.f(true)
+A.foo(true)
 ```
 
-<a href="https://sorbet.run/#%23%20typed%3A%20True%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(Integer%2CString)).void%7D%0A%20%20def%20self.foo(x)%3B%20end%0Aend%0A%0A%23%2010%20and%20%22Hello%2C%20world%22%20both%20have%20type%20%60T.any(Integer%2C%20String)%60%0AA.f(10)%0AA.f(%22Hello%2C%20world%22)%0A%0A%23%20%60TrueClass%60%20does%20not%20match%20%60T.any(Integer%2C%20String)%60%0AA.f(true)">
+<a href="https://sorbet.run/#%23%20typed%3A%20True%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(Integer%2CString)).void%7D%0A%20%20def%20self.foo(x)%3B%20end%0Aend%0A%0A%23%2010%20and%20%22Hello%2C%20world%22%20both%20have%20type%20%60T.any(Integer%2C%20String)%60%0AA.foo(10)%0AA.foo(%22Hello%2C%20world%22)%0A%0A%23%20%60TrueClass%60%20does%20not%20match%20%60T.any(Integer%2C%20String)%60%0AA.foo(true)">
   → View on sorbet.run
 </a>
 
