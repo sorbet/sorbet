@@ -84,7 +84,7 @@ struct ParsedFile {
     void classlist(core::Context ctx, std::vector<std::string> &out);
 
 private:
-    std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef def);
+    std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
     friend class MsgpackWriter;
 };
 

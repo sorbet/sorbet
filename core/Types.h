@@ -173,7 +173,7 @@ public:
      */
     static TypePtr approximate(Context ctx, const TypePtr &what, const TypeConstraint &tc);
 
-    static TypePtr dropLiteral(const TypePtr &type);
+    static TypePtr dropLiteral(const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
     static TypePtr glb(Context ctx, const TypePtr &t1, const TypePtr &t2);

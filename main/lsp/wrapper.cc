@@ -47,8 +47,8 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
     return move(result.responses);
 }
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &message) {
-    return getLSPResponsesFor(*LSPMessage::fromClient(message));
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json) {
+    return getLSPResponsesFor(*LSPMessage::fromClient(json));
 }
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,

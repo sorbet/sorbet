@@ -89,7 +89,7 @@ public:
     /**
      * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
      */
-    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
                          std::vector<std::shared_ptr<ErrorAssertion>> errorAssertions,
                          std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
                          std::string errorPrefix = "");
