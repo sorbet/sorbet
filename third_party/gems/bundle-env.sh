@@ -4,7 +4,7 @@
 # //bundler:bundler scripts.
 
 # --- begin runfiles.bash initialization ---
-# Copy-pasted from Bazel's Bash runfiles library (tools/bash/runfiles/runfiles.bash).
+# Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
 set -euo pipefail
 if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
   if [[ -f "$0.runfiles_manifest" ]]; then
