@@ -28,10 +28,4 @@ Gem::Specification.new do |s|
 
   For more docs see: https://sorbet.org/docs/adopting
 }
-
-  # TODO this is temporary, to prevent leaking publicly.
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
-  # to allow pushing to a single host or delete this section to allow pushing to any host.
-  raise 'RubyGems 2.0 or newer is required to protect against public gem pushes.' unless s.respond_to?(:metadata)
-  s.metadata['allowed_push_host'] = ''
 end
