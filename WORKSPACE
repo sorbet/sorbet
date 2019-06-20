@@ -34,6 +34,9 @@ load("//third_party/gems:rules.bzl", "gemfile_lock_deps")
 
 gemfile_lock_deps(
     name = "gems",
+
+    # TODO: figure out how to discover these labels during the loading phase,
+    # rather that listing them out explicitly.
     gemfile_locks = [
         "//gems/sorbet/test/snapshot:{}/src/Gemfile.lock".format(test)
         for test in [
