@@ -23,5 +23,25 @@ else
 fi
 # --- end runfiles.bash initialization ---
 
-export BUNDLER_ROOT=$(dirname $(rlocation %{workspace}/%{bundler}/%{site_ruby}/lib/bundler.rb))
-export RUBYLIB="${BUNDLER_ROOT}:${RUBYLIB:-}"
+# put bundle in the path
+export PATH="$(dirname $(rlocation %{workspace}/bundler/bundle)):$PATH"
+
+# bundle requires $HOME
+export HOME=$PWD
+
+# ensure that bundle works
+bundle --help
+
+cp $(rlocation %{workspace}/test/Gemfile) .
+cp $(rlocation %{workspace}/test/Gemfile.lock) .
+
+mkdir vendor
+
+VENDOR_CACHE=$(dirname $(rlocation %{workspace}/test/vendor/cache/cantor-1.2.1.gem))
+ln -s $VENDOR_CACHE vendor/cache
+
+# setup 'cantor'
+bundle install --deployment --local
+
+# test that the environment is correct
+bundle exec ruby -e 'require "cantor"; puts "success"'

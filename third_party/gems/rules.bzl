@@ -1,3 +1,5 @@
+load("//third_party/gems:gemfile.bzl", _parse_gemfile_lock = "parse_gemfile_lock")
+
 def _label_to_path(label):
     """
     Given a Label, turn it into a path by keeping the directory part of the
@@ -39,47 +41,6 @@ def _read_file(repo_ctx, label):
 
 def _format_package(info):
     return "{}-{}".format(info["name"], info["version"])
-
-
-def _parse_package(line):
-    """
-    Parse an exact package specification from a single line of a Gemfile.lock.
-    If the line did not contain an exact specification (something of the form
-    `package (version)`, return None.
-    """
-
-    prefix = line[0:4]
-    if not prefix.isspace():
-        return None
-
-    suffix = line[4:]
-    if suffix[0].isspace():
-        return None
-
-    version_start = suffix.find(' (')
-    if version_start < 0:
-        return None
-
-    package = suffix[0:version_start]
-    version = suffix[version_start+2:-1]
-
-    return { "name": package, "version": version }
-
-
-def _parse_gemfile_lock(content):
-    """
-    Find lines in the content of a Gemfile.lock that look like package
-    constraints.
-    """
-
-    packages = []
-
-    for line in content.splitlines():
-        info = _parse_package(line)
-        if info != None:
-            packages.append(info)
-
-    return packages
 
 
 def _fetch_gem(repo_ctx, cache_dir, package_name, sha256):
@@ -199,11 +160,68 @@ def _setup_bundler(repo_ctx):
     )
 
 
+def _setup_build_defs(repo_ctx):
+    """
+    Install build_defs provided by this package.
+    """
+
+    # gemfile parsing and vendor/cache setup
+    repo_ctx.template(
+        "tools/build_defs/gemfile.bzl",
+        Label("//third_party/gems:gemfile.bzl"),
+        executable = False,
+    )
+
+
+def _setup_tests(repo_ctx):
+    """
+    Download requirements for testing the bundler implementation.
+    """
+
+    # one gem to support the testing
+    repo_ctx.download(
+        output = "test/vendor/cache/cantor-1.2.1.gem",
+        url = "https://rubygems.org/downloads/cantor-1.2.1.gem",
+        sha256 = "f9c2c3d2ff23f07908990a891d4d4d53e6ad157f3fe8194ce06332fa4037d8bb",
+    )
+
+    repo_ctx.template(
+        "test/BUILD",
+        Label("//third_party/gems/test:test.BUILD"),
+        executable = False,
+    )
+
+    repo_ctx.template(
+        "test/smoke_test.sh",
+        Label("//third_party/gems/test:smoke_test.sh"),
+        executable = True,
+        substitutions = {
+            "%{workspace}": repo_ctx.name,
+        },
+    )
+
+    repo_ctx.template(
+        "test/Gemfile",
+        Label("//third_party/gems/test:Gemfile"),
+        executable = False,
+    )
+
+    repo_ctx.template(
+        "test/Gemfile.lock",
+        Label("//third_party/gems/test:Gemfile.lock"),
+        executable = False,
+    )
+
+
 def _impl(repo_ctx):
 
     known_shas = {}
     fetched = False
     gemfile_deps = {}
+
+    _setup_build_defs(repo_ctx)
+
+    _setup_tests(repo_ctx)
 
     _setup_bundler(repo_ctx)
 
