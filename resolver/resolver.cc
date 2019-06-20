@@ -1014,7 +1014,6 @@ private:
                     lastSigs.emplace_back(send);
                     return;
                 }
-                return;
             },
 
             [&](ast::MethodDef *mdef) {

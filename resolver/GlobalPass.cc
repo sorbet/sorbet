@@ -320,7 +320,6 @@ void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationI
             fullLinearizationSlowImpl(gs, computeLinearization(gs, info.superClass), acc);
         }
     }
-    return;
 };
 InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizationSlow(core::GlobalState &gs) {
     InlinedVector<core::SymbolRef, 4> res;

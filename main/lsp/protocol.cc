@@ -377,7 +377,6 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
     }
     // Else... it's too late; we have either already processed it, or are currently processing it. Swallow cancellation
     // and ignore.
-    return;
 }
 
 void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
