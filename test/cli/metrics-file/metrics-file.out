@@ -1,1 +1,8 @@
+No errors! Great job.
  "status": "Success",
+------------------------------
+No errors! Great job.
+Cannot write metrics file at `foo/bar/metrics2.json`
+------------------------------
+No errors! Great job.
+Cannot write metrics file at `baz/metrics3.json`

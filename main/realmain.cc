@@ -529,7 +529,13 @@ int realmain(int argc, char *argv[]) {
         metrics.set_status(status);
 
         auto json = core::Proto::toJSON(metrics);
-        opts.fs->writeFile(opts.metricsFile, json);
+
+        // Create output directory if it doesn't exist
+        try {
+            opts.fs->writeFile(opts.metricsFile, json);
+        } catch (FileNotFoundException e) {
+            logger->error("Cannot write metrics file at `{}`", opts.metricsFile);
+        }
     }
     if (gs->hadCriticalError()) {
         returnCode = 10;
