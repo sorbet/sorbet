@@ -121,7 +121,7 @@ class Enumerator::Yielder < Object
     )
     .void
   end
-  def <<(arg0); end
+  def <<(*arg0); end
 
   sig do
     params(
@@ -129,5 +129,5 @@ class Enumerator::Yielder < Object
     )
     .void
   end
-  def yield(arg0); end
+  def yield(*arg0); end
 end
