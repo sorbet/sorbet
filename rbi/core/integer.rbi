@@ -492,7 +492,7 @@ class Integer < Numeric
     params(
         limit: Integer,
     )
-    .returns(Enumerator[Integer])
+    .returns(T::Enumerator[Integer])
   end
   def downto(limit, &blk); end
 
@@ -736,7 +736,7 @@ class Integer < Numeric
     )
     .returns(Integer)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def times(&blk); end
 
   sig {returns(Complex)}
@@ -771,7 +771,7 @@ class Integer < Numeric
     params(
         arg0: Integer,
     )
-    .returns(Enumerator[Integer])
+    .returns(T::Enumerator[Integer])
   end
   def upto(arg0, &blk); end
 

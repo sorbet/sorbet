@@ -56,7 +56,7 @@ class Range < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[Elem])}
+  sig {returns(T::Enumerator[Elem])}
   def each(&blk); end
 
   sig {returns(Elem)}
@@ -165,7 +165,7 @@ class Range < Object
     params(
         n: Integer,
     )
-    .returns(Enumerator[Elem])
+    .returns(T::Enumerator[Elem])
   end
   def step(n=T.unsafe(nil), &blk); end
 

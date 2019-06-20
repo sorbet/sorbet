@@ -695,6 +695,8 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 corrected = core::Symbols::T_Hash();
             } else if (recvi->symbol == core::Symbols::Enumerable()) {
                 corrected = core::Symbols::T_Enumerable();
+            } else if (recvi->symbol == core::Symbols::Enumerator()) {
+                corrected = core::Symbols::T_Enumerator();
             } else if (recvi->symbol == core::Symbols::Range()) {
                 corrected = core::Symbols::T_Range();
             } else if (recvi->symbol == core::Symbols::Set()) {

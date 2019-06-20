@@ -114,7 +114,7 @@ class IO < Object
         sep: String,
         limit: Integer,
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
@@ -124,7 +124,7 @@ class IO < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def each_byte(&blk); end
 
   sig do
@@ -133,7 +133,7 @@ class IO < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[String])}
+  sig {returns(T::Enumerator[String])}
   def each_char(&blk); end
 
   sig do
@@ -142,7 +142,7 @@ class IO < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
 
   sig {returns(T::Boolean)}
@@ -599,7 +599,7 @@ class IO < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def bytes(&blk); end
 
   sig do
@@ -608,7 +608,7 @@ class IO < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[String])}
+  sig {returns(T::Enumerator[String])}
   def chars(&blk); end
 
   sig do
@@ -617,7 +617,7 @@ class IO < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[Integer])}
+  sig {returns(T::Enumerator[Integer])}
   def codepoints(&blk); end
 
   sig do
@@ -633,7 +633,7 @@ class IO < Object
         sep: String,
         limit: Integer,
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
@@ -653,7 +653,7 @@ class IO < Object
         sep: String,
         limit: Integer,
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
