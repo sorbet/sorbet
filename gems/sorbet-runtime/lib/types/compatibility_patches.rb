@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: ignore
 
 require_relative 'private/methods/_methods'
 
@@ -22,17 +22,17 @@ require_relative 'private/methods/_methods'
 #
 # We work around this by forcing re-wrapping before rspec stores a reference
 # to the method.
-# if defined? ::RSpec::Mocks::AnyInstance
-#   module T
-#     module CompatibilityPatches
-#       module RecorderExtensions
-#         def observe!(method_name)
-#           method = @klass.instance_method(method_name.to_sym)
-#           T::Private::Methods.maybe_run_sig_block_for_method(method)
-#           super(method_name)
-#         end
-#       end
-#       ::RSpec::Mocks::AnyInstance::Recorder.prepend(RecorderExtensions)
-#     end
-#   end
-# end
+if defined? ::RSpec::Mocks::AnyInstance
+  module T
+    module CompatibilityPatches
+      module RecorderExtensions
+        def observe!(method_name)
+          method = @klass.instance_method(method_name.to_sym)
+          T::Private::Methods.maybe_run_sig_block_for_method(method)
+          super(method_name)
+        end
+      end
+      ::RSpec::Mocks::AnyInstance::Recorder.prepend(RecorderExtensions)
+    end
+  end
+end
