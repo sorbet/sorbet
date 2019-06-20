@@ -7,7 +7,7 @@
 #include "common/Timer.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
-#include "main/options/FileFlatMapper.h"
+#include "main/options/ConfigParser.h"
 #include "main/options/options.h"
 #include "options.h"
 #include "sys/stat.h"
@@ -303,6 +303,7 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
                                     "{always,never,[auto]}");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
+    options.add_options("advanced")("no-config", "Do not load the content of the `sorbet/config` file");
     options.add_options("advanced")("disable-watchman",
                                     "When in language-server-protocol mode, disable file watching via Watchman");
     options.add_options("advanced")("watchman-path",
@@ -481,11 +482,9 @@ void Options::flushPrinters() {
 void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
-    FileFlatMapper flatMapper(argc, argv, logger);
-
     cxxopts::Options options = buildOptions();
     try {
-        cxxopts::ParseResult raw = options.parse(argc, argv);
+        cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
         if (raw["simulate-crash"].as<bool>()) {
             Exception::raise("simulated crash");
         }

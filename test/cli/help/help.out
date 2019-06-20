@@ -66,6 +66,8 @@ Usage:
       --color {always,never,[auto]}
                                 Use color output (default: auto)
       --lsp                     Start in language-server-protocol mode
+      --no-config               Do not load the content of the
+                                `sorbet/config` file
       --disable-watchman        When in language-server-protocol mode,
                                 disable file watching via Watchman
       --watchman-path arg       Path to watchman executable. Defaults to
