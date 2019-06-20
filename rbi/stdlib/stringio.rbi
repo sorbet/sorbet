@@ -64,7 +64,7 @@ class StringIO
         sep: String,
         limit: Integer,
     )
-    .returns(T::Enumerator[String])
+    .returns(Enumerator[String])
   end
   def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
@@ -74,7 +74,7 @@ class StringIO
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[Integer])}
+  sig {returns(Enumerator[Integer])}
   def each_byte(&blk); end
 
   sig do
@@ -83,7 +83,7 @@ class StringIO
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[String])}
+  sig {returns(Enumerator[String])}
   def each_char(&blk); end
 
   sig do
@@ -92,7 +92,7 @@ class StringIO
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[Integer])}
+  sig {returns(Enumerator[Integer])}
   def each_codepoint(&blk); end
 
   sig {returns(T::Boolean)}
@@ -376,7 +376,7 @@ class StringIO
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[Integer])}
+  sig {returns(Enumerator[Integer])}
   def bytes(&blk); end
 
   sig do
@@ -385,7 +385,7 @@ class StringIO
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[String])}
+  sig {returns(Enumerator[String])}
   def chars(&blk); end
 
   sig do
@@ -394,7 +394,7 @@ class StringIO
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[Integer])}
+  sig {returns(Enumerator[Integer])}
   def codepoints(&blk); end
 
   sig do
@@ -410,7 +410,7 @@ class StringIO
         sep: String,
         limit: Integer,
     )
-    .returns(T::Enumerator[String])
+    .returns(Enumerator[String])
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
@@ -430,7 +430,7 @@ class StringIO
         sep: String,
         limit: Integer,
     )
-    .returns(T::Enumerator[String])
+    .returns(Enumerator[String])
   end
   def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 end

@@ -325,8 +325,6 @@ string AppliedType::show(const GlobalState &gs) const {
         fmt::format_to(buf, "T::Hash");
     } else if (this->klass == Symbols::Enumerable()) {
         fmt::format_to(buf, "T::Enumerable");
-    } else if (this->klass == Symbols::Enumerator()) {
-        fmt::format_to(buf, "T::Enumerator");
     } else if (this->klass == Symbols::Range()) {
         fmt::format_to(buf, "T::Range");
     } else if (this->klass == Symbols::Set()) {

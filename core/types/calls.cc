@@ -1066,8 +1066,6 @@ public:
             attachedClass = Symbols::Hash();
         } else if (attachedClass == Symbols::T_Enumerable()) {
             attachedClass = Symbols::Enumerable();
-        } else if (attachedClass == Symbols::T_Enumerator()) {
-            attachedClass = Symbols::Enumerator();
         } else if (attachedClass == Symbols::T_Range()) {
             attachedClass = Symbols::Range();
         } else if (attachedClass == Symbols::T_Set()) {
@@ -1896,7 +1894,6 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T_Array(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Hash(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerable(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Enumerator(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Range(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
 

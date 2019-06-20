@@ -334,7 +334,6 @@ NameDef names[] = {
     // construction
     {"DeclBuilderForProcs", "<DeclBuilderForProcs>", true},
     {"Enumerable", "Enumerable", true},
-    {"Enumerator", "Enumerator", true},
     {"Set", "Set", true},
     {"Struct", "Struct", true},
     {"File", "File", true},

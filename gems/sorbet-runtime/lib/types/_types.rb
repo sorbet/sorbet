@@ -221,12 +221,6 @@ module T
     end
   end
 
-  module Enumerator
-    def self.[](type)
-      T::Types::TypedEnumerator.new(type)
-    end
-  end
-
   module Range
     def self.[](type)
       T::Types::TypedRange.new(type)

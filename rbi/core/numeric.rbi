@@ -258,7 +258,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(T::Enumerator[Numeric])
+    .returns(Enumerator[Numeric])
   end
   sig do
     params(
@@ -273,7 +273,7 @@ class Numeric < Object
         arg0: Numeric,
         arg1: Numeric,
     )
-    .returns(T::Enumerator[Numeric])
+    .returns(Enumerator[Numeric])
   end
   def step(arg0, arg1=T.unsafe(nil), &blk); end
 

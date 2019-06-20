@@ -103,7 +103,7 @@ class Set < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator[Elem])}
   def each(&blk); end
 
   sig {returns(T::Boolean)}
