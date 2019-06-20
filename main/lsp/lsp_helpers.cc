@@ -171,11 +171,11 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     }
 
     string flagString = "";
-    if (flags.size() > 0) {
+    if (!flags.empty()) {
         flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
     string paramsString = "";
-    if (typeAndArgNames.size() > 0) {
+    if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
     return fmt::format("{}sig {{{}{}{}}}", accessFlagString, flagString, paramsString, methodReturnType);
