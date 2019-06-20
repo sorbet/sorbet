@@ -158,22 +158,6 @@ module T::Utils
     "#{start_part}#{ellipsis}#{end_part}"
   end
 
-  module Props
-    def self.required_prop?(prop_rules)
-      # Clients should never reference :_tnilable as the implementation can change.
-      !prop_rules[:_tnilable]
-    end
-
-    def self.optional_prop?(prop_rules)
-      # Clients should never reference :_tnilable as the implementation can change.
-      !!prop_rules[:_tnilable]
-    end
-
-    def self.merge_serialized_optional_rule(prop_rules)
-      {'_tnilable' => true}.merge(prop_rules.merge('_tnilable' => true))
-    end
-  end
-
   module Nilable
     # :is_union_type, T::Boolean: whether the type is an T::Types::Union type
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.

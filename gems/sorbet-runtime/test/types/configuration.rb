@@ -6,7 +6,8 @@ module Opus::Types::Test
     before do
       @mod = Module.new do
         extend T::Sig
-        # Make it public for testing only public_class_method :sig
+        # Make it public for testing only
+        public_class_method :sig
       end
     end
 
@@ -59,7 +60,7 @@ module Opus::Types::Test
     describe 'sig_builder_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig {returns(Symbol).void}
+          @mod.sig {generated.returns(Symbol).checked(:always)}
           def @mod.foo
             :bar
           end
@@ -68,7 +69,7 @@ module Opus::Types::Test
           end
           assert_includes(
             ex.message,
-            "You can't call .void after calling .returns."
+            "You can't use .checked with .generated."
           )
         end
       end
@@ -86,11 +87,11 @@ module Opus::Types::Test
 
         it 'handles a sig builder error' do
           CustomReceiver.expects(:receive).once.with do |error, location|
-            error.message == "You can't call .void after calling .returns." &&
+            error.message == "You can't use .checked with .generated." &&
               error.is_a?(T::Private::Methods::DeclBuilder::BuilderError) &&
               location.is_a?(Thread::Backtrace::Location)
           end
-          @mod.sig {returns(Symbol).void}
+          @mod.sig {generated.returns(Symbol).checked(:always)}
           def @mod.foo
             :bar
           end
