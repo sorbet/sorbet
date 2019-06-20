@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# A templated wrapper for the `bundle` command that will work with `bazel run`
+# and as an `sh_binary` source.
+
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library (tools/bash/runfiles/runfiles.bash).
 set -euo pipefail

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# A template script to unpack the internals of the bundler gem into a local tree
+# that looks like the site_ruby tree that the tracepoint tracer is expecting to
+# find
+
 set -euo pipefail
 
 cd "%{bundler}"

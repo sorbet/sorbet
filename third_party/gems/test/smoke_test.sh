@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This tests that the bundler wrapper produced by the `@gems` package is able to
+# install a gem, and provide an environment with that gem in scope.
+
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library (tools/bash/runfiles/runfiles.bash).
 set -euo pipefail

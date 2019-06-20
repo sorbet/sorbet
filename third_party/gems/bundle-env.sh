@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Environment bootstrapping script template for the //bundler:bundle and
+# //bundler:bundler scripts.
+
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library (tools/bash/runfiles/runfiles.bash).
 set -euo pipefail
