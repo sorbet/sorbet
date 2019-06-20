@@ -25,10 +25,10 @@ gem 'sorbet-runtime'
 To test that everything is working so far, we can run these commands:
 
 ```plaintext
-❯ srb
+❯ bundle exec srb
 [help output]
 
-❯ srb typecheck -e 'puts "Hello, world!"'
+❯ bundle exec srb typecheck -e 'puts "Hello, world!"'
 No errors! Great job.
 
 ❯ bundle exec ruby -e 'puts(require "sorbet-runtime")'
