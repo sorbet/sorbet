@@ -50,4 +50,5 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
 
     return methodDef;
 }
+
 } // namespace sorbet::realmain::lsp

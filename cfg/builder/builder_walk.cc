@@ -334,7 +334,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};
                         InlinedVector<core::Loc, 2> locs{zeroLengthLoc};
                         bodyBlock->exprs.emplace_back(
-                            argLoc, zeroLengthLoc,
+                            argLoc, arg.loc,
                             make_unique<Send>(argTemp, core::Names::squareBrackets(), s->block->loc, idxVec, locs));
                     }
 
