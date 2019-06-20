@@ -475,9 +475,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
     }
 }
 
-void Environment::setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins) {
+void Environment::setTypeAndOrigin(core::LocalVariable symbol, const core::TypeAndOrigins &typeAndOrigins) {
     ENFORCE(typeAndOrigins.type.get() != nullptr);
-    vars[symbol].typeAndOrigins = std::move(typeAndOrigins);
+    vars[symbol].typeAndOrigins = typeAndOrigins;
 }
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
@@ -1120,7 +1120,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             propagateKnowledge(ctx, bind.bind.variable, i->what, knowledgeFilter);
         }
 
-        return tp.type;
+        return move(tp.type);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = ctx.state.beginError(bind.loc, core::errors::Internal::InternalError)) {
