@@ -457,7 +457,7 @@ For each binding in each basic block, we
 In particular, we visit each binding once to decide on its type. There is no
 backsolving for types or iterating until a fixed point. Since the CFG can have
 cycles, we require that within a cycle of basic blocks a variable's type cannot
-be widened or changed. (See <http://go/e/7001>.)
+be widened or changed. (See <http://srb.help/7001>.)
 
 The inference pass itself is largely just traversing the the CFG for each method
 and processing bindings. It delegates much of the implementation of the type
