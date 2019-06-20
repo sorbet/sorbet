@@ -670,10 +670,10 @@ public:
     std::vector<ErrorLine> origins2Explanations(Context ctx) const;
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
-    TypeAndOrigins(const TypeAndOrigins&) = default;
-    TypeAndOrigins(TypeAndOrigins&&) = default;
-    TypeAndOrigins &operator=(const TypeAndOrigins&) = default;
-    TypeAndOrigins &operator=(TypeAndOrigins&&) = default;
+    TypeAndOrigins(const TypeAndOrigins &) = default;
+    TypeAndOrigins(TypeAndOrigins &&) = default;
+    TypeAndOrigins &operator=(const TypeAndOrigins &) = default;
+    TypeAndOrigins &operator=(TypeAndOrigins &&) = default;
 };
 CheckSize(TypeAndOrigins, 40, 8);
 
