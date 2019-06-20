@@ -1,0 +1,4 @@
+ruby_extra_args:
+  - "--disable-gems"
+triggers:
+  delegate: test/cli/metrics-file/sorbet/plugin.rb

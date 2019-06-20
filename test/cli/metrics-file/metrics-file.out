@@ -6,3 +6,9 @@ Cannot write metrics file at `foo/bar/metrics2.json`
 ------------------------------
 No errors! Great job.
 Cannot write metrics file at `baz/metrics3.json`
+------------------------------
+No errors! Great job.
+   "name": "ruby_typer.unknown..types.input.files",
+   "value": 1
+   "name": "ruby_typer.unknown..types.input.files.sigil.true",
+   "value": 1
