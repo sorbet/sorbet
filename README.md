@@ -14,7 +14,7 @@ might also want to:
 
 - Read the [public Sorbet docs](https://sorbet.org/docs/overview)
   - Or even [edit the docs](#writing-docs)
-- Watch the [talks we've given](https://sorbet.org/docs/talks/talks) about Sorbet
+- Watch the [talks we've given](https://sorbet.org/en/community#talks) about Sorbet
 - Try the [Sorbet playground](https://sorbet.run) online
 
 If you are at Stripe, you might also want to see <http://go/types/internals> for
