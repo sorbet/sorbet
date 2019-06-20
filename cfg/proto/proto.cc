@@ -41,8 +41,8 @@ com::stripe::rubytyper::Instruction Proto::toProto(const core::GlobalState &gs, 
             if (i->link) {
                 *proto.mutable_send()->mutable_block() = com::stripe::rubytyper::Instruction::Block();
             }
-            for (size_t j = 0; j < i->args.size(); ++j) {
-                *proto.mutable_send()->add_arguments() = toProto(gs, i->args[j]);
+            for (const auto &arg : i->args) {
+                *proto.mutable_send()->add_arguments() = toProto(gs, arg);
             }
         },
         [&](const Return *i) {
