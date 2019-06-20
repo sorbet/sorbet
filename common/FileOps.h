@@ -18,7 +18,7 @@ public:
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
      */
-    static std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions,
+    static std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                                    bool recursive,
                                                    const std::vector<std::string> &absoluteIgnorePatterns,
                                                    const std::vector<std::string> &relativeIgnorePatterns);

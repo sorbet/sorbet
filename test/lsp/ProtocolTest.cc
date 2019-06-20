@@ -43,7 +43,7 @@ void MockFileSystem::deleteFile(string_view filename) {
     }
 }
 
-vector<string> MockFileSystem::listFilesInDir(string_view path, UnorderedSet<string> extensions, bool recursive,
+vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
                                               const std::vector<std::string> &absoluteIgnorePatterns,
                                               const std::vector<std::string> &relativeIgnorePatterns) const {
     Exception::raise("Not implemented.");

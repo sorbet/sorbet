@@ -26,8 +26,8 @@ public:
     std::string readFile(std::string_view path) const override;
     void writeFile(std::string_view filename, std::string_view text) override;
     void deleteFile(std::string_view filename);
-    std::vector<std::string> listFilesInDir(std::string_view path, UnorderedSet<std::string> extensions, bool recursive,
-                                            const std::vector<std::string> &absoluteIgnorePatterns,
+    std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
+                                            bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
                                             const std::vector<std::string> &relativeIgnorePatterns) const override;
 };
 
