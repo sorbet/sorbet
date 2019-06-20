@@ -45,7 +45,7 @@ typecheck() {
   cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/sorbet/gem-rbis"
 
   if [ -f Gemfile.lock ]; then
-    [ -d "$cache_dir" ] || mkdir "$cache_dir"
+    [ -d "$cache_dir" ] || mkdir -p "$cache_dir"
     cache_hash=$(compute_md5 Gemfile.lock | awk '{ print $1 }')
     cache_file="${cache_dir}/${cache_hash}"
     if [ ! -f "$cache_file" ]; then
