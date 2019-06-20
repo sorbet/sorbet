@@ -431,7 +431,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
                 buf << ", ";
             }
             first = false;
-            buf << a.data(gs)->argumentName(gs);
+            buf << a.argumentName(gs);
         }
     }
     buf << ")" << '\n';

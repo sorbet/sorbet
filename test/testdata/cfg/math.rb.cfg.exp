@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:Example>#calculate" {
     "bb::<Class:Example>#calculate_1" [shape = parallelogram];
 
     "bb::<Class:Example>#calculate_0" [
-        label = "block[id=0]()\l<self>: T.class_of(Example) = cast(<self>: NilClass, T.class_of(Example));\lis_add: T::Boolean = load_arg(Example.calculate#is_add)\la: Integer = load_arg(Example.calculate#a)\lb: Integer = load_arg(Example.calculate#b)\lis_add: T::Boolean\l"
+        label = "block[id=0]()\l<self>: T.class_of(Example) = cast(<self>: NilClass, T.class_of(Example));\lis_add: T::Boolean = load_arg(is_add)\la: Integer = load_arg(a)\lb: Integer = load_arg(b)\lis_add: T::Boolean\l"
     ];
 
     "bb::<Class:Example>#calculate_0" -> "bb::<Class:Example>#calculate_2" [style="bold"];

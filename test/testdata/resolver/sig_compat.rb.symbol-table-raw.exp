@@ -1,10 +1,10 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_compat.rb start=4:1 end=4:8}
     method <C <U A>><U f> (a, b, <blk>) -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=11:3 end=11:14}
-      argument <C <U A>><U f>a<> -> Integer @ Loc {file=test/testdata/resolver/sig_compat.rb start=7:7 end=7:8}
-      argument <C <U A>><U f>b<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=8:7 end=8:8}
-      argument <C <U A>><U f><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=??? end=???}
+      argument a<> -> Integer @ Loc {file=test/testdata/resolver/sig_compat.rb start=7:7 end=7:8}
+      argument b<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=8:7 end=8:8}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_compat.rb start=??? end=???}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_compat.rb start=4:7 end=4:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_compat.rb start=4:1 end=13:4}
-      argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/sig_compat.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/sig_compat.rb start=??? end=???}
 

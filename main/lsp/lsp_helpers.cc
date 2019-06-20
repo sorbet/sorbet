@@ -103,9 +103,6 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (data->isClass() && data->superClass() == core::Symbols::StubModule()) {
         return true;
     }
-    if (data->isMethodArgument() && data->isBlockArgument()) {
-        return true;
-    }
     if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
         data->name.data(gs)->unique.original == core::Names::staticInit()) {
         return true;
@@ -132,7 +129,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     }
 
     if (!retType) {
-        retType = getResultType(gs, method, receiver, constraint);
+        retType = getResultType(gs, method.data(gs)->resultType, method, receiver, constraint);
     }
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(gs), ")");
@@ -165,9 +162,10 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         }
         for (auto &argSym : method.data(gs)->arguments()) {
             // Don't display synthetic arguments (like blk).
-            if (!argSym.data(gs)->isSyntheticBlockArgument()) {
-                typeAndArgNames.emplace_back(absl::StrCat(argSym.data(gs)->argumentName(gs), ": ",
-                                                          getResultType(gs, argSym, receiver, constraint)->show(gs)));
+            if (!argSym.isSyntheticBlockArgument()) {
+                typeAndArgNames.emplace_back(
+                    absl::StrCat(argSym.argumentName(gs), ": ",
+                                 getResultType(gs, argSym.type, method, receiver, constraint)->show(gs)));
             }
         }
     }
@@ -183,17 +181,17 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     return fmt::format("{}sig {{{}{}{}}}", accessFlagString, flagString, paramsString, methodReturnType);
 }
 
-core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
-                            const shared_ptr<core::TypeConstraint> &constr) {
-    core::Context ctx(gs, core::Symbols::root());
-    auto resultType = ofWhat.data(gs)->resultType;
+core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
+                            core::TypePtr receiver, const shared_ptr<core::TypeConstraint> &constr) {
+    core::Context ctx(gs, inWhat);
+    auto resultType = type;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
         receiver = proxy->underlying();
     }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver.get())) {
         /* instantiate generic classes */
-        resultType = core::Types::resultTypeAsSeenFrom(
-            ctx, ofWhat.data(ctx)->resultType, ofWhat.data(ctx)->enclosingClass(ctx), applied->klass, applied->targs);
+        resultType = core::Types::resultTypeAsSeenFrom(ctx, resultType, inWhat.data(ctx)->enclosingClass(ctx),
+                                                       applied->klass, applied->targs);
     }
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
@@ -225,8 +223,6 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
         return SymbolKind::Field;
     } else if (sym->isStaticField()) {
         return SymbolKind::Constant;
-    } else if (sym->isMethodArgument()) {
-        return SymbolKind::Variable;
     } else if (sym->isTypeMember()) {
         return SymbolKind::TypeParameter;
     } else if (sym->isTypeArgument()) {

@@ -2,83 +2,83 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/desugar/scla
   field <U $c> @ Loc {file=test/testdata/desugar/sclass.rb start=19:1 end=19:3}
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}
-      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=2:8}
   class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:7 end=2:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=3:4}
-      argument <S <C <U A>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=11:1 end=11:8}
   class <S <C <U B>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
     method <S <C <U B>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=11:1 end=17:4}
-      argument <S <C <U B>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U B>> $1><U b> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=13:9 end=13:14}
-      argument <S <C <U B>> $1><U b><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U B>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
     method <S <S <C <U B>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=16:8}
-      argument <S <S <C <U B>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U D>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=26:1 end=26:8}
   class <S <C <U D>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=27:5 end=27:10}
     method <S <C <U D>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=26:1 end=34:4}
-      argument <S <C <U D>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U D>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
     method <S <S <C <U D>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=27:5 end=33:8}
-      argument <S <S <C <U D>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <S <C <U D>> $1> $1><U d> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=29:13 end=29:18}
-      argument <S <S <C <U D>> $1> $1><U d><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <S <C <U D>> $1> $1> $1> < <S <S <S <C <U Object>> $1> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
     method <S <S <S <C <U D>> $1> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=32:12}
-      argument <S <S <S <C <U D>> $1> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U E>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=36:1 end=36:8}
   class <S <C <U E>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
     method <S <C <U E>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=36:1 end=45:4}
-      argument <S <C <U E>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U E>> $1><U e> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=39:13 end=39:18}
-      argument <S <C <U E>> $1><U e><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U E>> $1><U wrapper> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=38:9 end=38:20}
-      argument <S <C <U E>> $1><U wrapper><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U E>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
     method <S <S <C <U E>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=43:8}
-      argument <S <S <C <U E>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U F>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=47:1 end=47:8}
   class <S <C <U F>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
     method <S <C <U F>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=47:1 end=58:4}
-      argument <S <C <U F>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     field <S <C <U F>> $1><U @f> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=50:11 end=50:13}
     method <S <C <U F>> $1><U f=> (f, <blk>) -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=56:9 end=56:23}
-      argument <S <C <U F>> $1><U f=>f<> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=55:21 end=55:22}
-      argument <S <C <U F>> $1><U f=><blk><block> -> T.untyped @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument f<> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=55:21 end=55:22}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U F>> $1><U initialize> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=49:9 end=49:23}
-      argument <S <C <U F>> $1><U initialize><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U F>> $1> $1> < <S <S <C <U Object>> $1> $1> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
     method <S <S <C <U F>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=57:8}
-      argument <S <S <C <U F>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U G>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=60:1 end=60:8}
     method <C <U G>><U wrapper> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=61:5 end=61:16}
-      argument <C <U G>><U wrapper><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <C <U G>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
     method <S <C <U G>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=60:1 end=72:4}
-      argument <S <C <U G>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U G>> $1><U g> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=69:5 end=69:15}
-      argument <S <C <U G>> $1><U g><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U G>> $1><U inner> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=63:13 end=63:22}
-      argument <S <C <U G>> $1><U inner><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U G>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
     method <S <S <C <U G>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=66:12}
-      argument <S <S <C <U G>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U H>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=74:1 end=74:8}
   class <S <C <U H>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
     method <S <C <U H>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=74:1 end=82:4}
-      argument <S <C <U H>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     class <S <C <U H>> $1><C <U H2>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=76:17}
     class <S <C <U H>> $1><S <C <U H2>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:15 end=76:17}
       method <S <C <U H>> $1><S <C <U H2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=80:12}
-        argument <S <C <U H>> $1><S <C <U H2>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+        argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
       method <S <C <U H>> $1><S <C <U H2>> $1><U h> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=77:13 end=77:23}
-        argument <S <C <U H>> $1><S <C <U H2>> $1><U h><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+        argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U H>> $1> $1> < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
     method <S <S <C <U H>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=81:8}
-      argument <S <S <C <U H>> $1> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed}
     method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=84:1 end=84:9}
-      argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
 

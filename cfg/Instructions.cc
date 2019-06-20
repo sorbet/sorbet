@@ -100,7 +100,11 @@ string Send::toString(core::Context ctx) {
 }
 
 string LoadArg::toString(core::Context ctx) {
-    return fmt::format("load_arg({})", this->arg.data(ctx)->show(ctx));
+    return fmt::format("load_arg({})", this->argument(ctx).argumentName(ctx));
+}
+
+const core::ArgInfo &LoadArg::argument(const core::GlobalState &gs) const {
+    return this->method.data(gs)->arguments()[this->argId];
 }
 
 string LoadYieldParams::toString(core::Context ctx) {

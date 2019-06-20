@@ -808,8 +808,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType(ctx);
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
-                } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) ||
-                           data->isMethodArgument() || data->isTypeMember()) {
+                } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
                     if (data->resultType.get() != nullptr) {
                         if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
@@ -864,9 +863,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                  *
                  * For now we can at least enforce a little consistency.
                  */
-                ENFORCE(ctx.owner == i->arg.data(ctx)->owner);
+                // ENFORCE(ctx.owner == i->method); TODO: re-enable when https://github.com/sorbet/sorbet/issues/904 is
+                // fixed
 
-                auto argType = i->arg.data(ctx)->argumentTypeAsSeenByImplementation(ctx, constr);
+                auto argType = i->argument(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
                 tp.type = std::move(argType);
                 tp.origins.emplace_back(bind.loc);
             },
@@ -880,7 +880,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkArgs = insn->link->argInfos;
+                auto &blkArgs = insn->link->argFlags;
                 auto *tuple = core::cast_type<core::TupleType>(params.get());
                 if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
                     tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
@@ -955,8 +955,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadSelf *l) {
-                if (l->link->blockSpec.exists() && l->link->blockSpec.data(ctx)->rebind().exists()) {
-                    tp.type = l->link->blockSpec.data(ctx)->rebind().data(ctx)->externalType(ctx);
+                if (l->link->blockSpec.rebind.exists()) {
+                    tp.type = l->link->blockSpec.rebind.data(ctx)->externalType(ctx);
                     tp.origins.emplace_back(bind.loc);
 
                 } else {

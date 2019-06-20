@@ -6,7 +6,7 @@ subgraph "cluster_::Object#f" {
     "bb::Object#f_1" [shape = parallelogram];
 
     "bb::Object#f_0" [
-        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\lx: T.any(Concrete, Other) = load_arg(Object#f#x)\l<statTemp>$6: T.class_of(Concrete) = alias <C Concrete>\l<ifTemp>$5: T::Boolean = <statTemp>$6: T.class_of(Concrete).===(x: T.any(Concrete, Other))\l<ifTemp>$5: T::Boolean\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\lx: T.any(Concrete, Other) = load_arg(x)\l<statTemp>$6: T.class_of(Concrete) = alias <C Concrete>\l<ifTemp>$5: T::Boolean = <statTemp>$6: T.class_of(Concrete).===(x: T.any(Concrete, Other))\l<ifTemp>$5: T::Boolean\l"
     ];
 
     "bb::Object#f_0" -> "bb::Object#f_2" [style="bold"];

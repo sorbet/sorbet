@@ -741,8 +741,11 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo> &&argInfos)
-    : fun(fun), argInfos(argInfos), constr(make_shared<TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
+    : fun(fun), argFlags(argFlags), constr(make_shared<TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(const SendAndBlockLink &orig)
+    : receiver(orig.receiver), fun(orig.fun), argFlags(orig.argFlags), constr(orig.constr), returnTp(orig.returnTp),
+      blockPreType(orig.blockPreType), blockSpec(orig.blockSpec.deepCopy()), sendTp(orig.sendTp) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
@@ -751,7 +754,7 @@ shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
 
 optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
-    for (auto &arg : argInfos) {
+    for (auto &arg : argFlags) {
         if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
             arity = std::nullopt;
             break;

@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<Class:A>#send_beta_invitation_0" [
-        label = "block[id=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\linvite: T.untyped = load_arg(A.send_beta_invitation#invite)\l<statTemp>$6: Integer(1) = 1\l<ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)\l<ifTemp>$5: T::Boolean\l"
+        label = "block[id=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\linvite: T.untyped = load_arg(invite)\l<statTemp>$6: Integer(1) = 1\l<ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)\l<ifTemp>$5: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];

@@ -73,13 +73,11 @@ class NameInserter {
         return existing;
     }
 
-    pair<core::SymbolRef, unique_ptr<ast::Expression>> arg2Symbol(core::MutableContext ctx, int pos,
-                                                                  ast::ParsedArg parsedArg) {
+    unique_ptr<ast::Expression> arg2Symbol(core::MutableContext ctx, int pos, ast::ParsedArg parsedArg) {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
-            core::SymbolRef sym = ctx.owner.data(ctx)->arguments()[pos];
             auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
-            return make_pair(sym, move(localExpr));
+            return move(localExpr);
         }
 
         core::NameRef name;
@@ -90,25 +88,25 @@ class NameInserter {
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
-        core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
+        auto &argInfo = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
         unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
-        core::SymbolData data = sym.data(ctx);
         if (parsedArg.default_) {
-            data->setOptional();
+            argInfo.flags.isDefault = true;
             localExpr = make_unique<ast::OptionalArg>(parsedArg.loc, move(localExpr), move(parsedArg.default_));
         }
+
         if (parsedArg.keyword) {
-            data->setKeyword();
+            argInfo.flags.isKeyword = true;
         }
         if (parsedArg.block) {
-            data->setBlockArgument();
+            argInfo.flags.isBlock = true;
         }
         if (parsedArg.repeated) {
-            data->setRepeated();
+            argInfo.flags.isRepeated = true;
         }
 
-        return make_pair(sym, move(localExpr));
+        return move(localExpr);
     }
 
     struct LocalFrame {
@@ -187,9 +185,6 @@ class NameInserter {
                      core::SymbolRef method) {
         core::SymbolRef alias = ctx.state.enterMethodSymbol(loc, owner, newName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(method);
-        for (auto &arg : alias.data(ctx)->arguments()) {
-            arg.data(ctx)->owner = method;
-        }
     }
 
     void aliasModuleFunction(core::MutableContext ctx, core::Loc loc, core::SymbolRef method) {
@@ -361,12 +356,12 @@ public:
         bool inShadows = false;
         bool intrinsic = isIntrinsic(ctx, ctx.owner);
         bool swapArgs = intrinsic && (ctx.owner.data(ctx)->arguments().size() == 1);
-        core::SymbolRef swappedArg;
+        core::ArgInfo swappedArg;
         if (swapArgs) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.
-            ENFORCE(ctx.owner.data(ctx)->arguments()[0].data(ctx)->isBlockArgument());
-            swappedArg = ctx.owner.data(ctx)->arguments()[0];
+            ENFORCE(ctx.owner.data(ctx)->arguments()[0].flags.isBlock);
+            swappedArg = move(ctx.owner.data(ctx)->arguments()[0]);
             ctx.owner.data(ctx)->arguments().clear();
         }
 
@@ -384,13 +379,12 @@ public:
 
                 if (swapArgs && arg.block) {
                     // see commnent on if (swapArgs) above
-                    ctx.owner.data(ctx)->arguments().emplace_back(swappedArg);
+                    ctx.owner.data(ctx)->arguments().emplace_back(move(swappedArg));
                 }
 
-                auto [sym, expr] = arg2Symbol(ctx, i, move(arg));
+                auto expr = arg2Symbol(ctx, i, move(arg));
                 args.emplace_back(move(expr));
                 ENFORCE(i < ctx.owner.data(ctx)->arguments().size());
-                ENFORCE(swapArgs || (ctx.owner.data(ctx)->arguments()[i] == sym));
             }
         }
 
@@ -485,39 +479,39 @@ public:
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
-            auto symArg = sym.data(ctx)->arguments()[i].data(ctx);
+            auto &symArg = sym.data(ctx)->arguments()[i];
 
-            if (symArg->isKeyword() != methodArg.keyword) {
+            if (symArg.flags.isKeyword != methodArg.keyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isKeyword", symArg->isKeyword(), methodArg.keyword);
+                        sym.data(ctx)->show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;
             }
-            if (symArg->isBlockArgument() != methodArg.block) {
+            if (symArg.flags.isBlock != methodArg.block) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isBlock", symArg->isBlockArgument(), methodArg.block);
+                        sym.data(ctx)->show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;
             }
-            if (symArg->isRepeated() != methodArg.repeated) {
+            if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isRepeated", symArg->isRepeated(), methodArg.repeated);
+                        sym.data(ctx)->show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;
             }
-            if (symArg->isKeyword() && symArg->name != methodArg.local._name) {
+            if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), symArg->name.show(ctx), methodArg.local._name.show(ctx));
+                                sym.data(ctx)->show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return false;

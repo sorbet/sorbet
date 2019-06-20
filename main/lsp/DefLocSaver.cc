@@ -29,7 +29,7 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
             // localExp should never be null, but guard against the possibility.
             if (localExp) {
                 if (lspQuery.matchesLoc(localExp->loc)) {
-                    tp.type = argType.data(ctx)->resultType;
+                    tp.type = argType.type;
                     tp.origins.emplace_back(localExp->loc);
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::IdentResponse(methodDef->symbol, localExp->loc, localExp->localVariable, tp));

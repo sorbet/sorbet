@@ -279,15 +279,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (s->block != nullptr) {
                     vector<ast::ParsedArg> blockArgs = ast::ArgParsing::parseArgs(cctx.ctx, s->block->args);
-                    vector<core::SendAndBlockLink::ArgInfo> argInfos;
+                    vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgs) {
-                        auto &target = argInfos.emplace_back();
+                        auto &target = argFlags.emplace_back();
                         target.isKeyword = e.keyword;
                         target.isRepeated = e.repeated;
                         target.isDefault = e.default_ != nullptr;
                         target.isShadow = e.shadow;
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argInfos));
+                    auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argFlags));
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());

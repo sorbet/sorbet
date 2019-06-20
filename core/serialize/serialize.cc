@@ -29,6 +29,7 @@ public:
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const Name &what);
     static void pickle(Pickler &p, Type *what);
+    static void pickle(Pickler &p, const ArgInfo &a);
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what);
     static void pickle(Pickler &p, core::Loc loc);
@@ -38,6 +39,7 @@ public:
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
     static TypePtr unpickleType(UnPickler &p, GlobalState *gs);
+    static ArgInfo unpickleArgInfo(UnPickler &p, GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static Loc unpickleLoc(UnPickler &p, FileRef file);
@@ -415,24 +417,59 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
     }
 }
 
+void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
+    p.putU4(a.name._id);
+    p.putU4(a.rebind._id);
+    pickle(p, a.loc);
+    p.putU1(a.flags.toU1());
+    pickle(p, a.type.get());
+}
+
+ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, GlobalState *gs) {
+    ArgInfo result;
+    result.name = core::NameRef(*gs, p.getU4());
+    result.rebind = core::SymbolRef(gs, p.getU4());
+    {
+        core::Loc loc;
+        auto low = p.getU4();
+        auto high = p.getU4();
+        loc.setFrom2u4(low, high);
+        result.loc = loc;
+    }
+    {
+        u1 flags = p.getU1();
+        result.flags.setFromU1(flags);
+    }
+    result.type = unpickleType(p, gs);
+    return result;
+}
+
 void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.owner._id);
     p.putU4(what.name._id);
     p.putU4(what.superClassOrRebind._id);
     p.putU4(what.flags);
     p.putU4(what.uniqueCounter);
-    p.putU4(what.argumentsOrMixins.size());
-    for (SymbolRef s : what.argumentsOrMixins) {
-        p.putU4(s._id);
+    if (!what.isMethod()) {
+        p.putU4(what.mixins_.size());
+        for (SymbolRef s : what.mixins_) {
+            p.putU4(s._id);
+        }
     }
     p.putU4(what.typeParams.size());
     for (SymbolRef s : what.typeParams) {
         p.putU4(s._id);
     }
-    p.putU4(what.members.size());
+    if (what.isMethod()) {
+        p.putU4(what.arguments().size());
+        for (const auto &a : what.arguments()) {
+            pickle(p, a);
+        }
+    }
+    p.putU4(what.members().size());
     vector<pair<u4, u4>> membersSorted;
 
-    for (const auto &member : what.members) {
+    for (const auto &member : what.members()) {
         membersSorted.emplace_back(member.first.id(), member.second._id);
     }
     fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
@@ -456,10 +493,12 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     result.superClassOrRebind = SymbolRef(gs, p.getU4());
     result.flags = p.getU4();
     result.uniqueCounter = p.getU4();
-    int argumentsOrMixinsSize = p.getU4();
-    result.argumentsOrMixins.reserve(argumentsOrMixinsSize);
-    for (int i = 0; i < argumentsOrMixinsSize; i++) {
-        result.argumentsOrMixins.emplace_back(SymbolRef(gs, p.getU4()));
+    if (!result.isMethod()) {
+        int mixinsSize = p.getU4();
+        result.mixins_.reserve(mixinsSize);
+        for (int i = 0; i < mixinsSize; i++) {
+            result.mixins_.emplace_back(SymbolRef(gs, p.getU4()));
+        }
     }
     int typeParamsSize = p.getU4();
 
@@ -468,8 +507,14 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
         result.typeParams.emplace_back(SymbolRef(gs, p.getU4()));
     }
 
+    if (result.isMethod()) {
+        int argsSize = p.getU4();
+        for (int i = 0; i < argsSize; i++) {
+            result.arguments().emplace_back(unpickleArgInfo(p, gs));
+        }
+    }
     int membersSize = p.getU4();
-    result.members.reserve(membersSize);
+    result.members().reserve(membersSize);
     for (int i = 0; i < membersSize; i++) {
         auto name = NameRef(*gs, p.getU4());
         auto sym = SymbolRef(gs, p.getU4());
@@ -477,7 +522,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
             ENFORCE(name.exists());
             ENFORCE(sym.exists());
         }
-        result.members[name] = sym;
+        result.members()[name] = sym;
     }
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();

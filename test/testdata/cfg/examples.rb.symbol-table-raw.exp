@@ -1,25 +1,25 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <C <U Examples>> < <C <U Object>> () @ Loc {file=test/testdata/cfg/examples.rb start=2:1 end=2:15}
     method <C <U Examples>><U i_like_exps> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=11:5 end=11:22}
-      argument <C <U Examples>><U i_like_exps><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U i_like_ifs> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=3:3 end=3:19}
-      argument <C <U Examples>><U i_like_ifs><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U return_in_one_branch1> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=19:5 end=19:32}
-      argument <C <U Examples>><U return_in_one_branch1><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U return_in_one_branch2> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=27:5 end=27:32}
-      argument <C <U Examples>><U return_in_one_branch2><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U take_arguments> (i, <blk>) @ Loc {file=test/testdata/cfg/examples.rb start=84:5 end=84:26}
-      argument <C <U Examples>><U take_arguments>i<> @ Loc {file=test/testdata/cfg/examples.rb start=84:24 end=84:25}
-      argument <C <U Examples>><U take_arguments><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument i<> @ Loc {file=test/testdata/cfg/examples.rb start=84:24 end=84:25}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U variables> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=36:5 end=36:20}
-      argument <C <U Examples>><U variables><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U variables_and_loop> (cond, <blk>) @ Loc {file=test/testdata/cfg/examples.rb start=53:5 end=53:33}
-      argument <C <U Examples>><U variables_and_loop>cond<> @ Loc {file=test/testdata/cfg/examples.rb start=53:28 end=53:32}
-      argument <C <U Examples>><U variables_and_loop><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument cond<> @ Loc {file=test/testdata/cfg/examples.rb start=53:28 end=53:32}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
     method <C <U Examples>><U variables_loop_if> (cond, <blk>) @ Loc {file=test/testdata/cfg/examples.rb start=72:5 end=72:32}
-      argument <C <U Examples>><U variables_loop_if>cond<> @ Loc {file=test/testdata/cfg/examples.rb start=72:27 end=72:31}
-      argument <C <U Examples>><U variables_loop_if><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument cond<> @ Loc {file=test/testdata/cfg/examples.rb start=72:27 end=72:31}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
   class <S <C <U Examples>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/examples.rb start=2:7 end=2:15}
     method <S <C <U Examples>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=2:1 end=92:4}
-      argument <S <C <U Examples>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
 

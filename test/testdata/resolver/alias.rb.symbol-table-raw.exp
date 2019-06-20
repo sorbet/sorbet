@@ -18,15 +18,15 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/
           Symbol(:"postal_code") => String | NilClass
           Symbol(:"country") => String | NilClass
         } @ Loc {file=test/testdata/resolver/alias.rb start=28:3 end=28:14}
-      argument <C <U Foo>><U address><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
     method <C <U Foo>><U any> (<blk>) @ Loc {file=test/testdata/resolver/alias.rb start=32:3 end=32:10}
-      argument <C <U Foo>><U any><blk><block> @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
     method <C <U Foo>><U bar> (a, <blk>) -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=7:3 end=7:13}
-      argument <C <U Foo>><U bar>a<> -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=6:15 end=6:16}
-      argument <C <U Foo>><U bar><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument a<> -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=6:15 end=6:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
     method <C <U Foo>><U react> (<blk>) -> String @ Loc {file=test/testdata/resolver/alias.rb start=14:3 end=14:12}
-      argument <C <U Foo>><U react><blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
   class <S <C <U Foo>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/alias.rb start=2:7 end=2:10}
     method <S <C <U Foo>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=33:4}
-      argument <S <C <U Foo>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
 

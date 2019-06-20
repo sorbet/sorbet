@@ -3,7 +3,7 @@ class ::<root> < ::Object () @ (https://github.com/sorbet/sorbet/tree/master/baz
   class ::Foo < ::Object () @ -e:1
   class ::<Class:Foo> < ::<Class:Object> () @ -e:1
     method ::<Class:Foo>#<static-init> (<blk>) @ -e:1
-      argument ::<Class:Foo>#<static-init>#<blk><block> @ -e
+      argument <blk><block> @ Loc {file=-e start=??? end=???}
 
 -e:2: This function does not have a `sig` https://srb.help/7017
      2 |def foo; end

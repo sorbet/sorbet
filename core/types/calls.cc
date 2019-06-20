@@ -131,13 +131,11 @@ bool isSetter(Context ctx, NameRef fun) {
 }
 
 unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc, SymbolRef inClass,
-                               SymbolRef method, const TypeAndOrigins &argTpe, const SymbolData argSym,
+                               SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
                                const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, bool mayBeSetter = false) {
-    auto ref = argSym->ref(ctx);
-    TypePtr expectedType =
-        Types::resultTypeAsSeenFrom(ctx, argSym->resultType, method.data(ctx)->owner, inClass, targs);
+    TypePtr expectedType = Types::resultTypeAsSeenFrom(ctx, argSym.type, method.data(ctx)->owner, inClass, targs);
     if (!expectedType) {
-        expectedType = Types::untyped(ctx, ref);
+        expectedType = Types::untyped(ctx, method);
     }
 
     expectedType = Types::replaceSelfType(ctx, expectedType, selfType);
@@ -147,14 +145,14 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(ctx, method.data(ctx)->name)) {
-            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym->argumentName(ctx),
+            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(ctx),
                         expectedType->show(ctx));
         } else {
             e.setHeader("`{}` does not match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
-                        argSym->argumentName(ctx));
+                        argSym.argumentName(ctx));
             e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym->loc(), "Method `{}` has specified `{}` as `{}`", method.data(ctx)->show(ctx),
-                                argSym->argumentName(ctx), expectedType->show(ctx)),
+                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(ctx)->show(ctx),
+                                argSym.argumentName(ctx), expectedType->show(ctx)),
             }));
         }
         e.addErrorSection(
@@ -170,9 +168,9 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRef method, SymbolRef arg) {
+unique_ptr<Error> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRef method, const ArgInfo &arg) {
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx)->name.show(ctx),
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(ctx),
                     method.data(ctx)->show(ctx));
         return e.build();
     }
@@ -182,7 +180,7 @@ unique_ptr<Error> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRe
 
 int getArity(Context ctx, SymbolRef method) {
     ENFORCE(!method.data(ctx)->arguments().empty(), "Every method should have at least a block arg.");
-    ENFORCE(method.data(ctx)->arguments().back().data(ctx)->isBlockArgument(), "Last arg should be the block arg.");
+    ENFORCE(method.data(ctx)->arguments().back().flags.isBlock, "Last arg should be the block arg.");
 
     // Don't count the block arg in the arity
     return method.data(ctx)->arguments().size() - 1;
@@ -239,9 +237,8 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
                     continue;
                 }
 
-                auto argType =
-                    Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx)->arguments()[i].data(ctx)->resultType,
-                                                candidate.data(ctx)->owner, inClass, targs);
+                auto argType = Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx)->arguments()[i].type,
+                                                           candidate.data(ctx)->owner, inClass, targs);
                 if (argType->isFullyDefined() && !Types::isSubType(ctx, arg->type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -259,9 +256,9 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             SymbolRef candidate = *it;
-            auto args = candidate.data(ctx)->arguments();
+            const auto &args = candidate.data(ctx)->arguments();
             ENFORCE(!args.empty(), "Should at least have a block argument.");
-            auto mentionsBlockArg = !args.back().data(ctx)->isSyntheticBlockArgument();
+            auto mentionsBlockArg = !args.back().isSyntheticBlockArgument();
             if (mentionsBlockArg != hasBlock) {
                 it = leftCandidates.erase(it);
                 continue;
@@ -339,12 +336,12 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
 string prettyArity(Context ctx, SymbolRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
-    for (auto arg : method.data(ctx)->arguments()) {
-        if (arg.data(ctx)->isKeyword() || arg.data(ctx)->isBlockArgument()) {
+    for (const auto &arg : method.data(ctx)->arguments()) {
+        if (arg.flags.isKeyword || arg.flags.isBlock) {
             // ignore
-        } else if (arg.data(ctx)->isOptional()) {
+        } else if (arg.flags.isDefault) {
             ++optional;
-        } else if (arg.data(ctx)->isRepeated()) {
+        } else if (arg.flags.isRepeated) {
             repeated = true;
         } else {
             ++required;
@@ -530,15 +527,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     if (data->isGenericMethod()) {
         constr->defineDomain(ctx, data->typeArguments());
     }
-    bool hasKwargs = absl::c_any_of(data->arguments(), [&ctx](SymbolRef arg) { return arg.data(ctx)->isKeyword(); });
+    bool hasKwargs = absl::c_any_of(data->arguments(), [](const auto &arg) { return arg.flags.isKeyword; });
 
     // p -> params, i.e., what was mentioned in the defintiion
     auto pit = data->arguments().begin();
     auto pend = data->arguments().end();
 
     ENFORCE(pit != pend, "Should at least have the block arg.");
-    ENFORCE((pend - 1)->data(ctx)->isBlockArgument(),
-            "Last arg should be the block arg: " + (pend - 1)->data(ctx)->show(ctx));
+    ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: " + (pend - 1)->show(ctx));
     // We'll type check the block arg separately from the rest of the args.
     --pend;
 
@@ -547,12 +543,12 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     auto aend = args.args.end();
 
     while (pit != pend && ait != aend) {
-        const SymbolData spec = pit->data(ctx);
+        const ArgInfo &spec = *pit;
         auto &arg = *ait;
-        if (spec->isKeyword()) {
+        if (spec.flags.isKeyword) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && (spec->isOptional() || spec->isRepeated()) &&
+        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
             Types::approximate(ctx, arg->type, *constr)->derivesFrom(ctx, Symbols::Hash())) {
             break;
         }
@@ -563,15 +559,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             result.components.front().errors.emplace_back(std::move(e));
         }
 
-        if (!spec->isRepeated()) {
+        if (!spec.flags.isRepeated) {
             ++pit;
         }
         ++ait;
     }
 
     if (pit != pend) {
-        if (!(pit->data(ctx)->isKeyword() || pit->data(ctx)->isOptional() || pit->data(ctx)->isRepeated() ||
-              pit->data(ctx)->isBlockArgument())) {
+        if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.get() != thisType) {
                     e.setHeader(
@@ -606,7 +601,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         // find keyword arguments and advance `pend` before them; We'll walk
         // `kwit` ahead below
         auto kwit = pit;
-        while (!kwit->data(ctx)->isKeyword()) {
+        while (!kwit->flags.isKeyword) {
             kwit++;
         }
         pend = kwit;
@@ -617,10 +612,10 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             --aend;
 
             while (kwit != data->arguments().end()) {
-                const SymbolData spec = kwit->data(ctx);
-                if (spec->isBlockArgument()) {
+                const ArgInfo &spec = *kwit;
+                if (spec.flags.isBlock) {
                     break;
-                } else if (spec->isRepeated()) {
+                } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type<LiteralType>(it->get());
                         SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
@@ -650,17 +645,17 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type<LiteralType>(litType.get());
                     return cast_type<ClassType>(lit->underlying().get())->symbol == Symbols::Symbol() &&
-                           lit->value == spec->name._id;
+                           lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
-                    if (!spec->isOptional()) {
-                        if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec->ref(ctx))) {
+                    if (!spec.flags.isDefault) {
+                        if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec)) {
                             result.components.front().errors.emplace_back(std::move(e));
                         }
                     }
                     continue;
                 }
-                consumed.insert(spec->name);
+                consumed.insert(spec.name);
                 TypeAndOrigins tpe;
                 tpe.origins = args.args.back()->origins;
                 auto offset = arg - hash->keys.begin();
@@ -698,7 +693,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         // We have keyword arguments, but we didn't consume a hash at the
         // end. Report an error for each missing required keyword arugment.
         for (auto &spec : data->arguments()) {
-            if (!spec.data(ctx)->isKeyword() || spec.data(ctx)->isOptional() || spec.data(ctx)->isRepeated()) {
+            if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                 continue;
             }
             if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec)) {
@@ -731,14 +726,13 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(data->arguments(), [&ctx, &consumed](SymbolRef arg) {
-                    return arg.exists() && arg.data(ctx)->isKeyword() && arg.data(ctx)->isOptional() &&
-                           consumed.count(arg.data(ctx)->name) == 0;
+                auto firstKeyword = absl::c_find_if(data->arguments(), [&consumed](const ArgInfo &arg) {
+                    return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
                 if (firstKeyword != data->arguments().end()) {
                     e.addErrorLine(args.locs.call,
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   data->show(ctx), firstKeyword->data(ctx)->argumentName(ctx));
+                                   data->show(ctx), firstKeyword->argumentName(ctx));
                 }
             }
             result.components.front().errors.emplace_back(e.build());
@@ -747,13 +741,12 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
     if (args.block != nullptr) {
         ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: {}", data->show(ctx));
-        SymbolRef bspec = data->arguments().back();
-        ENFORCE(bspec.data(ctx)->isBlockArgument(), "The last symbol must be the block arg: {}", data->show(ctx));
+        const auto &bspec = data->arguments().back();
+        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", data->show(ctx));
 
-        TypePtr blockType =
-            Types::resultTypeAsSeenFrom(ctx, bspec.data(ctx)->resultType, method.data(ctx)->owner, symbol, targs);
+        TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec.type, data->owner, symbol, targs);
         if (!blockType) {
-            blockType = Types::untyped(ctx, bspec);
+            blockType = Types::untyped(ctx, method);
         }
 
         args.block->returnTp = Types::getProcReturnType(ctx, blockType);
@@ -761,7 +754,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                                        : Types::approximate(ctx, blockType, *constr);
 
         args.block->blockPreType = blockType;
-        args.block->blockSpec = bspec;
+        args.block->blockSpec = bspec.deepCopy();
     }
 
     TypePtr resultType = nullptr;
@@ -791,8 +784,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             }
         }
         ENFORCE(!data->arguments().empty(), "Every method should at least have a block arg.");
-        ENFORCE(data->arguments().back().data(ctx)->isBlockArgument(), "The last arg should be the block arg.");
-        auto blockType = data->arguments().back().data(ctx)->resultType;
+        ENFORCE(data->arguments().back().flags.isBlock, "The last arg should be the block arg.");
+        auto blockType = data->arguments().back().type;
         if (blockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blockType)) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(ctx));
@@ -837,19 +830,17 @@ TypePtr getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vec
 
     vector<TypePtr> args;
     args.reserve(data->arguments().size());
-    for (auto arg : data->arguments()) {
-        if (arg.data(ctx)->isRepeated()) {
+    for (const auto &arg : data->arguments()) {
+        if (arg.flags.isRepeated) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     data->toString(ctx));
-            return Types::arrayOf(ctx,
-                                  Types::resultTypeAsSeenFrom(ctx, arg.data(ctx)->resultType,
-                                                              arg.data(ctx)->owner.data(ctx)->owner, klass, targs));
+            return Types::arrayOf(ctx, Types::resultTypeAsSeenFrom(ctx, arg.type, data->owner, klass, targs));
         }
-        ENFORCE(!arg.data(ctx)->isKeyword(), "getCallArguments does not support kwargs: {}", data->toString(ctx));
-        if (arg.data(ctx)->isBlockArgument()) {
+        ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", data->toString(ctx));
+        if (arg.flags.isBlock) {
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(ctx, arg.data(ctx)->resultType, data->owner, klass, targs));
+        args.emplace_back(Types::resultTypeAsSeenFrom(ctx, arg.type, data->owner, klass, targs));
     }
     return TupleType::build(ctx, args);
 }
@@ -1324,8 +1315,8 @@ private:
         return std::nullopt;
     }
 
-    static std::vector<SendAndBlockLink::ArgInfo> argInfoByArity(std::optional<int> fixedArity) {
-        std::vector<SendAndBlockLink::ArgInfo> res;
+    static std::vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
+        std::vector<ArgInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();
@@ -1346,14 +1337,13 @@ private:
             return;
         }
 
-        auto methodArgs = dispatchComp.method.data(ctx)->arguments();
+        const auto &methodArgs = dispatchComp.method.data(ctx)->arguments();
         ENFORCE(!methodArgs.empty());
-        SymbolRef bspec = methodArgs.back();
-        ENFORCE(bspec.exists() && bspec.data(ctx)->isBlockArgument());
+        const auto &bspec = methodArgs.back();
+        ENFORCE(bspec.flags.isBlock);
         e.addErrorSection(ErrorSection({
-            ErrorLine::from(bspec.data(ctx)->loc(), "Method `{}` has specified `{}` as `{}`",
-                            dispatchComp.method.data(ctx)->show(ctx), bspec.data(ctx)->argumentName(ctx),
-                            blockType->show(ctx)),
+            ErrorLine::from(bspec.loc, "Method `{}` has specified `{}` as `{}`",
+                            dispatchComp.method.data(ctx)->show(ctx), bspec.argumentName(ctx), blockType->show(ctx)),
         }));
     }
 
@@ -1413,12 +1403,12 @@ private:
                 continue;
             }
 
-            auto methodArgs = dispatchComp.method.data(ctx)->arguments();
+            const auto &methodArgs = dispatchComp.method.data(ctx)->arguments();
             ENFORCE(!methodArgs.empty());
-            SymbolRef bspec = methodArgs.back();
-            ENFORCE(bspec.exists() && bspec.data(ctx)->isBlockArgument());
+            const auto &bspec = methodArgs.back();
+            ENFORCE(bspec.flags.isBlock);
 
-            auto bspecType = bspec.data(ctx)->resultType;
+            auto bspecType = bspec.type;
             if (bspecType) {
                 // This subtype check is here to discover the correct generic bounds.
                 Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);

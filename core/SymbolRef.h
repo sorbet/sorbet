@@ -330,52 +330,40 @@ public:
         return SymbolRef(nullptr, 64);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub_blk() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
         return SymbolRef(nullptr, 65);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
+    static SymbolRef T_Helpers() {
         return SymbolRef(nullptr, 66);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_arg0() {
+    static SymbolRef DeclBuilderForProcs() {
         return SymbolRef(nullptr, 67);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub_blk() {
+    static SymbolRef DeclBuilderForProcsSingleton() {
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef T_Helpers() {
+    static SymbolRef Net() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef DeclBuilderForProcs() {
+    static SymbolRef Net_IMAP() {
         return SymbolRef(nullptr, 70);
     }
 
-    static SymbolRef DeclBuilderForProcsSingleton() {
+    static SymbolRef Net_Protocol() {
         return SymbolRef(nullptr, 71);
     }
 
-    static SymbolRef Net() {
+    static SymbolRef T_CFGExport() {
         return SymbolRef(nullptr, 72);
     }
 
-    static SymbolRef Net_IMAP() {
-        return SymbolRef(nullptr, 73);
-    }
-
-    static SymbolRef Net_Protocol() {
-        return SymbolRef(nullptr, 74);
-    }
-
-    static SymbolRef T_CFGExport() {
-        return SymbolRef(nullptr, 75);
-    }
-
     static SymbolRef T_Sig_WithoutRuntime() {
-        return SymbolRef(nullptr, 76);
+        return SymbolRef(nullptr, 73);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#each" {
     "bb::<Class:A>#each_1" [shape = parallelogram];
 
     "bb::<Class:A>#each_0" [
-        label = "block[id=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\l<blk>: T.untyped = load_arg(A.each#<blk>)\l<statTemp>$5: Integer(1) = 1\l<statTemp>$6: Integer(2) = 2\l<statTemp>$7: Integer(3) = 3\l<statTemp>$8: Integer(4) = 4\l<statTemp>$9: Integer(5) = 5\l<statTemp>$3: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1), <statTemp>$6: Integer(2), <statTemp>$7: Integer(3), <statTemp>$8: Integer(4), <statTemp>$9: Integer(5))\l<statTemp>$11: Integer(6) = 6\l<statTemp>$12: Integer(7) = 7\l<statTemp>$13: Integer(8) = 8\l<statTemp>$14: Integer(9) = 9\l<statTemp>$15: Integer(0) = 0\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$11: Integer(6), <statTemp>$12: Integer(7), <statTemp>$13: Integer(8), <statTemp>$14: Integer(9), <statTemp>$15: Integer(0))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\l<blk>: T.untyped = load_arg(<blk>)\l<statTemp>$5: Integer(1) = 1\l<statTemp>$6: Integer(2) = 2\l<statTemp>$7: Integer(3) = 3\l<statTemp>$8: Integer(4) = 4\l<statTemp>$9: Integer(5) = 5\l<statTemp>$3: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1), <statTemp>$6: Integer(2), <statTemp>$7: Integer(3), <statTemp>$8: Integer(4), <statTemp>$9: Integer(5))\l<statTemp>$11: Integer(6) = 6\l<statTemp>$12: Integer(7) = 7\l<statTemp>$13: Integer(8) = 8\l<statTemp>$14: Integer(9) = 9\l<statTemp>$15: Integer(0) = 0\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$11: Integer(6), <statTemp>$12: Integer(7), <statTemp>$13: Integer(8), <statTemp>$14: Integer(9), <statTemp>$15: Integer(0))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#each_0" -> "bb::<Class:A>#each_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::<Class:E>#e=" {
     "bb::<Class:E>#e=_1" [shape = parallelogram];
 
     "bb::<Class:E>#e=_0" [
-        label = "block[id=0]()\l@e$3: T.untyped = alias <C <undeclared-field-stub>>\l<self>: T.class_of(E) = cast(<self>: NilClass, T.class_of(E));\le: T.untyped = load_arg(E.e=#e)\l@e$3: T.untyped = e\l<returnMethodTemp>$2: T.untyped = @e$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l@e$3: T.untyped = alias <C <undeclared-field-stub>>\l<self>: T.class_of(E) = cast(<self>: NilClass, T.class_of(E));\le: T.untyped = load_arg(e)\l@e$3: T.untyped = e\l<returnMethodTemp>$2: T.untyped = @e$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:E>#e=_0" -> "bb::<Class:E>#e=_1" [style="bold"];

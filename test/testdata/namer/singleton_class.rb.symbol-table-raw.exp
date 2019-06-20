@@ -1,16 +1,16 @@
 class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=8:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=8:4}
-      argument <S <C <U <root>>> $1><N <U <static-init>> $3><blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
   class <C <U A>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:8}
     class <C <U A>><C <U B>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:11}
       class <C <U A>><C <U B>><C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=2:14}
       class <C <U A>><C <U B>><S <C <U C>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:14}
         method <C <U A>><C <U B>><S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=3:4}
-          argument <C <U A>><C <U B>><S <C <U C>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
+          argument <blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
     class <C <U A>><S <C <U B>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:11}
   class <S <C <U A>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:8}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed}
     method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/namer/singleton_class.rb start=5:1 end=5:9}
-      argument <C <U Object>><U main><blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
 

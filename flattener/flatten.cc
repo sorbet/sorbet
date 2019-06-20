@@ -89,7 +89,7 @@ public:
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
-        ENFORCE(sym.data(ctx)->arguments().back().data(ctx)->isBlockArgument(),
+        ENFORCE(sym.data(ctx)->arguments().back().flags.isBlock,
                 "Last argument symbol is not a block arg: {}" + sym.data(ctx)->show(ctx));
 
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,

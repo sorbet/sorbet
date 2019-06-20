@@ -9,5 +9,5 @@ class <C <U <root>>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/
     } @ Loc {file=test/testdata/todo/block_in_class.rb start=3:3 end=3:4}
   class <S <C <U C>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/block_in_class.rb start=2:7 end=2:8}
     method <S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/todo/block_in_class.rb start=2:1 end=4:4}
-      argument <S <C <U C>> $1><U <static-init>><blk><block> @ Loc {file=test/testdata/todo/block_in_class.rb start=??? end=???}
+      argument <blk><block> @ Loc {file=test/testdata/todo/block_in_class.rb start=??? end=???}
 
