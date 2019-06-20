@@ -1,6 +1,6 @@
 #include "test/LSPTest.h"
 
-#include <signal.h>
+#include <csignal>
 
 #include "main/lsp/json_types.h"
 #include "payload/payload.h"
