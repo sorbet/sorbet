@@ -21,7 +21,7 @@ class Enumerator < Object
     )
     .returns(T.untyped)
   end
-  sig {returns(Enumerator[[Elem, Integer]])}
+  sig {returns(T::Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
   sig do
@@ -35,7 +35,7 @@ class Enumerator < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(Enumerator[[Elem, T.type_parameter(:U)]])
+    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
   end
   def each_with_object(arg0, &blk); end
 
@@ -48,16 +48,9 @@ class Enumerator < Object
   def feed(arg0); end
 
   sig do
-    type_parameters(:U).params(
+    params(
         arg0: Integer,
-        blk: T.proc.params(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
-    )
-    .returns(Object)
-  end
-  sig do
-    type_parameters(:U).params(
-        arg0: Proc,
-        blk: T.proc.params(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
+        blk: T.proc.params(arg0: Enumerator::Yielder).void,
     )
     .void
   end
@@ -90,7 +83,7 @@ class Enumerator < Object
     )
     .returns(T.untyped)
   end
-  sig {returns(Enumerator[[Elem, Integer]])}
+  sig {returns(T::Enumerator[[Elem, Integer]])}
   def with_index(&blk); end
 
   sig do
@@ -104,7 +97,7 @@ class Enumerator < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(Enumerator[[Elem, T.type_parameter(:U)]])
+    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
   end
   def with_object(arg0, &blk); end
 end
@@ -122,4 +115,19 @@ class Enumerator::Lazy < Enumerator
 end
 
 class Enumerator::Yielder < Object
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .void
+  end
+  def <<(arg0); end
+
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .void
+  end
+  def yield(arg0); end
 end

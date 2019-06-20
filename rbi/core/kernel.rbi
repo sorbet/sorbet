@@ -145,7 +145,7 @@ module Kernel
         method: Symbol,
         args: BasicObject,
     )
-    .returns(Enumerator[T.untyped])
+    .returns(T::Enumerator[T.untyped])
   end
   sig do
     params(
@@ -153,7 +153,7 @@ module Kernel
         args: BasicObject,
         blk: BasicObject,
     )
-    .returns(Enumerator[T.untyped])
+    .returns(T::Enumerator[T.untyped])
   end
   def enum_for(method=T.unsafe(nil), *args, &blk); end
 
@@ -388,7 +388,7 @@ module Kernel
         method: Symbol,
         args: BasicObject,
     )
-    .returns(Enumerator[T.untyped])
+    .returns(T::Enumerator[T.untyped])
   end
   sig do
     params(
@@ -396,7 +396,7 @@ module Kernel
         args: BasicObject,
         blk: BasicObject,
     )
-    .returns(Enumerator[T.untyped])
+    .returns(T::Enumerator[T.untyped])
   end
   def to_enum(method=T.unsafe(nil), *args, &blk); end
 
@@ -632,7 +632,7 @@ module Kernel
   def load(filename, arg0=T.unsafe(nil)); end
 
   sig {params(blk: T.proc.params.returns(T.untyped)).returns(T.untyped)}
-  sig {returns(Enumerator[T.untyped])}
+  sig {returns(T::Enumerator[T.untyped])}
   def loop(&blk); end
 
   sig do
