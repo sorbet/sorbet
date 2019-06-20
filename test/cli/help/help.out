@@ -44,6 +44,8 @@ Usage:
       --version  Show version
 
  advanced options:
+      --dir arg                 Input directory
+      --file arg                Input file
       --configatron-dir path    Path to configatron yaml folders
       --configatron-file path   Path to configatron yaml files
       --web-trace-file file     Web trace file. For use with chrome

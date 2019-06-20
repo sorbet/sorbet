@@ -278,6 +278,8 @@ cxxopts::Options buildOptions() {
                        stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 
     // Advanced options
+    options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
+    options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
@@ -479,6 +481,18 @@ void Options::flushPrinters() {
     }
 }
 
+void addFilesFromDir(Options &opts, string_view dir) {
+    UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
+    auto fileNormalized = stripTrailingSlashes(dir);
+    opts.rawInputDirNames.emplace_back(fileNormalized);
+    // Expand directory into list of files.
+    auto containedFiles = opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true,
+                                                  opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+    opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
+    opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
+                               std::make_move_iterator(containedFiles.end()));
+}
+
 void readOptions(Options &opts, int argc, char *argv[],
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
@@ -508,30 +522,44 @@ void readOptions(Options &opts, int argc, char *argv[],
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    auto fileNormalized = stripTrailingSlashes(file);
-                    if (opts.pathPrefix.empty() && rawFiles.size() == 1) {
-                        // If Sorbet is provided with a single input directory, the
-                        // default path prefix is that directory.
-                        opts.pathPrefix = fmt::format("{}/", fileNormalized);
-                    }
-                    opts.rawInputDirNames.emplace_back(fileNormalized);
-                    // Expand directory into list of files.
-                    auto containedFiles =
-                        opts.fs->listFilesInDir(fileNormalized, acceptableExtensions, true, opts.absoluteIgnorePatterns,
-                                                opts.relativeIgnorePatterns);
-                    opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
-                    opts.inputFileNames.insert(opts.inputFileNames.end(),
-                                               std::make_move_iterator(containedFiles.begin()),
-                                               std::make_move_iterator(containedFiles.end()));
+                    addFilesFromDir(opts, file);
                 } else {
                     opts.rawInputFileNames.push_back(file);
                     opts.inputFileNames.push_back(file);
                 }
             }
-            fast_sort(opts.inputFileNames);
-            opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
-                                      opts.inputFileNames.end());
         }
+
+        if (raw.count("file") > 0) {
+            auto files = raw["file"].as<vector<string>>();
+            opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
+            opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
+        }
+
+        if (raw.count("dir") > 0) {
+            auto rawDirs = raw["dir"].as<vector<string>>();
+            for (auto &dir : rawDirs) {
+                // Since we don't stat here, we're unsure if the directory exists / is a directory.
+                try {
+                    addFilesFromDir(opts, dir);
+                } catch (sorbet::FileNotFoundException) {
+                    logger->error("Directory `{}` not found", dir);
+                    throw EarlyReturnWithCode(1);
+                } catch (sorbet::FileNotDirException) {
+                    logger->error("Path `{}` is not a directory", dir);
+                    throw EarlyReturnWithCode(1);
+                }
+            }
+        }
+
+        if (opts.pathPrefix.empty() && opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.size() == 0) {
+            // If Sorbet is provided with a single input directory, the
+            // default path prefix is that directory.
+            opts.pathPrefix = fmt::format("{}/", opts.rawInputDirNames.at(0));
+        }
+        fast_sort(opts.inputFileNames);
+        opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
+                                  opts.inputFileNames.end());
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();

@@ -17,6 +17,7 @@ class Sorbet::Private::CreateConfig
     FileUtils.mkdir_p(SORBET_DIR)
 
     File.open(SORBET_CONFIG_FILE, 'w') do |f|
+      f.puts('--dir')
       f.puts('.')
     end
   end
