@@ -67,7 +67,7 @@ class Dir < Object
         dir: String,
         arg0: Encoding,
     )
-    .returns(Enumerator[String])
+    .returns(T::Enumerator[String])
   end
   def self.foreach(dir, arg0=T.unsafe(nil), &blk); end
 
@@ -153,7 +153,7 @@ class Dir < Object
     )
     .returns(T.self_type)
   end
-  sig {returns(Enumerator[String])}
+  sig {returns(T::Enumerator[String])}
   def each(&blk); end
 
   sig {returns(Integer)}

@@ -21,3 +21,7 @@ end
 def zan(x)
   T::Set[Integer].new
 end
+
+def gaz(x)
+  T::Enumerator[Integer].new {|x| x << 1}
+end
