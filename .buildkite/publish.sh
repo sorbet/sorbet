@@ -90,7 +90,7 @@ printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/cre
 chmod 600 "$HOME/.gem/credentials"
 
 if [ "$dryrun" = "" ]; then
-  for gem_archive in ../_out_/gems/*.gem; do
+  for gem_archive in _out_/gems/*.gem; do
     gem push "$gem_archive"
   done
 fi
