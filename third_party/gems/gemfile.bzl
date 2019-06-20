@@ -1,4 +1,3 @@
-
 def _parse_package(line):
     """
     Parse an exact package specification from a single line of a Gemfile.lock.
@@ -14,15 +13,14 @@ def _parse_package(line):
     if suffix[0].isspace():
         return None
 
-    version_start = suffix.find(' (')
+    version_start = suffix.find(" (")
     if version_start < 0:
         return None
 
     package = suffix[0:version_start]
-    version = suffix[version_start+2:-1]
+    version = suffix[version_start + 2:-1]
 
-    return { "name": package, "version": version }
-
+    return {"name": package, "version": version}
 
 def parse_gemfile_lock(content):
     """

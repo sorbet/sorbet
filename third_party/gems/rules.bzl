@@ -16,7 +16,6 @@ def _label_to_path(label):
 
     return base
 
-
 def _read_file(repo_ctx, label):
     """
     Bazel-0.21.0 lacks `repo_ctx.read`, so this simulates it by briefly
@@ -38,10 +37,8 @@ def _read_file(repo_ctx, label):
 
     return result.stdout
 
-
 def _format_package(info):
     return "{}-{}".format(info["name"], info["version"])
-
 
 def _fetch_gem(repo_ctx, cache_dir, package_name, sha256):
     """
@@ -61,7 +58,6 @@ def _fetch_gem(repo_ctx, cache_dir, package_name, sha256):
 
     return result.sha256
 
-
 def _generate_vendor_cache(repo_ctx, gemfile_lock, deps):
     """
     Generates a BUILD file in the same location as the Gemfile.lock file in the
@@ -73,7 +69,7 @@ def _generate_vendor_cache(repo_ctx, gemfile_lock, deps):
     package = _label_to_path(Label(gemfile_lock))
 
     # the name of all the gems in the vendor/cache tree
-    gemfiles = ", ".join([ "\"{}.gem\"".format(_format_package(dep)) for dep in deps ])
+    gemfiles = ", ".join(["\"{}.gem\"".format(_format_package(dep)) for dep in deps])
 
     cache_dir = "{}/vendor/cache".format(package)
 
@@ -88,13 +84,11 @@ def _generate_vendor_cache(repo_ctx, gemfile_lock, deps):
 
     return cache_dir
 
-
 BUNDLER_VERSIONS = {
     "2.0.1": {
         "sha256": "",
     },
 }
-
 
 def _setup_bundler(repo_ctx):
     """
@@ -136,7 +130,7 @@ def _setup_bundler(repo_ctx):
         substitutions = substitutions,
     )
 
-    repo_ctx.execute([ "./setup_bundler.sh" ])
+    repo_ctx.execute(["./setup_bundler.sh"])
 
     repo_ctx.template(
         "bundler/BUILD",
@@ -159,7 +153,6 @@ def _setup_bundler(repo_ctx):
         substitutions = substitutions,
     )
 
-
 def _setup_build_defs(repo_ctx):
     """
     Install build_defs provided by this package.
@@ -171,7 +164,6 @@ def _setup_build_defs(repo_ctx):
         Label("//third_party/gems:gemfile.bzl"),
         executable = False,
     )
-
 
 def _setup_tests(repo_ctx):
     """
@@ -212,9 +204,7 @@ def _setup_tests(repo_ctx):
         executable = False,
     )
 
-
 def _impl(repo_ctx):
-
     known_shas = {}
     fetched = False
     gemfile_deps = {}
@@ -255,7 +245,6 @@ def _impl(repo_ctx):
     else:
         return None
 
-
 gemfile_lock_deps = repository_rule(
     implementation = _impl,
     local = True,
@@ -264,20 +253,17 @@ gemfile_lock_deps = repository_rule(
             default = [],
             doc = "Gemfile.lock files to download the dependencies of",
         ),
-
         "gems": attr.string_dict(
             default = {},
             doc = "Specific gem versions and sha256 values",
         ),
-
         "bundler_version": attr.string(
             default = "2.0.1",
             doc = "The version of bundler to install",
         ),
-
         "debug": attr.bool(
             default = False,
             doc = "Emit debug prints",
-        )
+        ),
     },
 )
