@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: false
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 module Opus::Types::Test
   class TypesTest < Critic::Unit::UnitTest
@@ -323,39 +325,6 @@ module Opus::Types::Test
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Hash[Symbol, Integer], got T::Hash[Symbol, Float]"
         assert_equal(expected_error, msg)
-      end
-    end
-
-    describe "TypedEnumerator" do
-      it 'describes enumerators' do
-        t = T::Enumerator[Integer]
-        assert_equal(
-          "T::Enumerator[Integer]",
-          t.describe_obj([1,2,3].each))
-      end
-
-      it 'works if the type is right' do
-        type = T::Enumerator[Integer]
-        value = [1,2,3].each
-        msg = type.error_message_for_obj(value)
-        assert_nil(msg)
-      end
-
-      it 'fails if the type is wrong' do
-        type = T::Enumerator[Float]
-        value = [1,2,3].each
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Enumerator[Float], " \
-                         "got T::Enumerator[Integer]"
-        assert_equal(expected_error, msg)
-      end
-
-      it 'can have its metatype instantiated' do
-        assert_equal([1,2,3], T::Enumerator[Integer].new do |x|
-          x << 1
-          x << 2
-          x << 3
-        end.to_a)
       end
     end
 

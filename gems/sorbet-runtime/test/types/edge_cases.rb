@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-require_relative '../test_helper'
+# typed: ignore
+require_relative '../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it 'can type ==' do
@@ -138,106 +140,19 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal(:foo, klass.new.foo)
   end
 
-  it 'handles class scope change when hooked from class << self' do
+  it 'handles class scope change when not already hooked' do
     klass = Class.new do
+      T::Hooks.install(self)
       class << self
         extend T::Sig
-
+        extend T::Helpers
         sig {returns(Symbol)}
         def foo
           :foo
         end
       end
-
-      extend T::Sig
-      sig {returns(Symbol)}
-      def bar
-        :bar
-      end
     end
     assert_equal(:foo, klass.foo)
-    assert_equal(:bar, klass.new.bar)
-  end
-
-  it 'checks for type error in class << self' do
-    klass = Class.new do
-      class << self
-        extend T::Sig
-
-        sig {returns(Symbol)}
-        def bad_return
-          1
-        end
-      end
-    end
-
-    assert_raises(TypeError) do
-      klass.bad_return
-    end
-  end
-
-  it 'checks for type error for self.foo in class << self' do
-    klass = Class.new do
-      class << self
-        extend T::Sig
-
-        sig {returns(Symbol)}
-        def self.bad_return
-          1
-        end
-
-        def sanity; end
-      end
-    end
-
-    klass.sanity
-    assert_raises(TypeError) do
-      klass.singleton_class.bad_return
-    end
-  end
-
-  it 'calls original singleton_method_added when registering hooks' do
-    klass = Class.new do
-      class << self
-        def singleton_method_added(name)
-          @called ||= []
-          @called << name
-        end
-      end
-
-      extend T::Sig
-      sig {returns(Symbol)}
-      def foo; end
-
-      def self.post_hook; end
-    end
-
-    assert_equal(
-      [
-        :singleton_method_added,
-        :method_added,
-        # hook registration overwrites this method but it should
-        # still call the original defined above
-        :singleton_method_added,
-        :post_hook,
-      ],
-      klass.instance_variable_get(:@called)
-    )
-  end
-
-  it "does not make sig available to attached class" do
-    assert_raises(NoMethodError) do
-      Class.new do
-        class << self
-          extend T::Sig
-          sig {void}
-          def jojo; end
-        end
-
-        sig {void} # this shouldn't work since sig is not available
-        def self.post; end
-      end
-    end
   end
 
   it 'keeps raising for bad sigs' do

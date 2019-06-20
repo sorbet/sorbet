@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-require_relative '../../test_helper'
+# typed: false
+require_relative '../../../../../extn'
+Opus::AutogenLoader.init(__FILE__)
 
 class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   def assert_prop_error(match=nil, error: ArgumentError, mixin: T::Props, &blk)
