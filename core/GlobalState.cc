@@ -45,8 +45,9 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
-    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue), lspQuery(lsp::Query::noQuery()) {
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
+    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
+      lspQuery(lsp::Query::noQuery()) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int maxNameCount = 8192;

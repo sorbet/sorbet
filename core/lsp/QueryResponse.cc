@@ -6,10 +6,10 @@ using namespace std;
 namespace sorbet::core::lsp {
 
 SendResponse::SendResponse(core::DispatchResult::ComponentVec dispatchComponents,
-                           const std::shared_ptr<core::TypeConstraint> &constraint, core::Loc termLoc,
-                           core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
-    : dispatchComponents(std::move(dispatchComponents)), constraint(constraint), termLoc(termLoc), name(name),
-      receiver(receiver), retType(retType) {}
+                           std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc, core::NameRef name,
+                           core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
+    : dispatchComponents(std::move(dispatchComponents)), constraint(std::move(constraint)), termLoc(termLoc),
+      name(name), receiver(std::move(receiver)), retType(std::move(retType)) {}
 
 IdentResponse::IdentResponse(core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable,
                              core::TypeAndOrigins retType)

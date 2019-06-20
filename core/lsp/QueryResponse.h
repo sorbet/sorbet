@@ -11,7 +11,7 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(core::DispatchResult::ComponentVec dispatchComponents,
-                 const std::shared_ptr<core::TypeConstraint> &constraint, core::Loc termLoc, core::NameRef name,
+                 std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc, core::NameRef name,
                  core::TypeAndOrigins receiver, core::TypeAndOrigins retType);
     core::DispatchResult::ComponentVec dispatchComponents;
     const std::shared_ptr<core::TypeConstraint> constraint;

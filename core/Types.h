@@ -535,7 +535,7 @@ public:
     std::vector<TypePtr> values;
     const TypePtr underlying_;
     ShapeType();
-    ShapeType(const TypePtr &underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
+    ShapeType(TypePtr underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -562,7 +562,7 @@ public:
     std::vector<TypePtr> elems;
     const TypePtr underlying_;
 
-    TupleType(const TypePtr &underlying, std::vector<TypePtr> elements);
+    TupleType(TypePtr underlying, std::vector<TypePtr> elements);
     static TypePtr build(Context ctx, std::vector<TypePtr> elements);
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
