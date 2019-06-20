@@ -176,7 +176,7 @@ additional checks. Now <code>srb</code> reports this:</p>
 <p>For example, it’s possible that we don’t care about what’s stored in the <code>env</code>,
 only that we access things in the <code>env</code> with <code>Symbol</code> keys. Right now though, an
 <code>env</code> of <code>{user: 'jez'}</code> is a type error. In this case, we may want to <em>opt out</em>
-of some static checks on this speficic argument, without opting out the method
+of some static checks on this specific argument, without opting out the method
 entirely. In this case, we can use <a href="/docs/untyped"><code>T.untyped</code></a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
