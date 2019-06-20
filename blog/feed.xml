@@ -4,7 +4,7 @@
         <title>Sorbet Blog</title>
         <link>https://sorbet.org/blog</link>
         <description>The best place to stay up-to-date with the latest Sorbet news and events.</description>
-        <lastBuildDate>Thu, 16 May 2019 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 20 Jun 2019 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,22 @@
             <link>https://sorbet.org/blog</link>
         </image>
         <copyright>© 2019 Stripe</copyright>
+        <item>
+            <title><![CDATA[Open-sourcing Sorbet: a fast, powerful type checker for Ruby]]></title>
+            <link>https://sorbet.org/blog/2019/06/20/open-sourcing-sorbet.html</link>
+            <guid>https://sorbet.org/blog/2019/06/20/open-sourcing-sorbet.html</guid>
+            <pubDate>Thu, 20 Jun 2019 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>We’re excited to announce that Sorbet is now <a href="https://github.com/sorbet/sorbet">open source</a> and you can try it
+today. Sorbet is a fast, powerful type checker designed for Ruby. It scales to
+codebases with millions of lines of code and can be adopted incrementally.</p>
+<p>We designed Sorbet to be used at Stripe, where the vast majority of our code is
+written in Ruby. We’ve spent the last year and a half developing and adopting
+Sorbet internally, and we’re finally confident that Sorbet is not just an
+experimental, internal project—we’re ready to share Sorbet with the entire Ruby
+community. In fact, we’ve had more than 30 companies beta test Sorbet and
+provide feedback.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[State of Sorbet Spring 2019]]></title>
             <link>https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html</link>
