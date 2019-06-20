@@ -85,7 +85,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-         const InlinedVector<core::LocalVariable, 2> &args, const InlinedVector<core::Loc, 2> &argLocs,
+         const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs,
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(core::Context ctx);
@@ -106,7 +106,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
     VariableUseSite what;
 
-    BlockReturn(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what);
+    BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
 CheckSize(BlockReturn, 56, 8);
@@ -115,7 +115,7 @@ class LoadSelf final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
     core::LocalVariable fallback;
-    LoadSelf(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable fallback);
+    LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable fallback);
     virtual std::string toString(core::Context ctx);
 };
 CheckSize(LoadSelf, 40, 8);
