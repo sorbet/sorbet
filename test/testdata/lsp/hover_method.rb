@@ -35,4 +35,10 @@ class Foo
   sig {void}
   def no_args_and_void
   end
+
+  sig {returns(T.noreturn)}
+  def always_raises
+    # ^ sig {returns(T.noreturn)}
+    raise RuntimeError
+  end
 end

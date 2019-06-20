@@ -1,5 +1,6 @@
 # typed: true
 class BigFoo; extend T::Sig
+    # ^ hover: T.class_of(BigFoo)
   class LittleFoo1; extend T::Sig
   sig {params(num: Integer).returns(Integer)}
     def bar(num)
@@ -22,7 +23,10 @@ class BigFoo; extend T::Sig
 
   sig {generated.params(num1: Integer, num2: String).returns(Integer)}
   def self.bar(num1, num2)
+              # ^ hover: Integer
+                   # ^ hover: String
     4 + num1 + num2.to_i
+           # ^ hover: sig {params(arg0: Integer).returns(Integer)}
   end
 
   sig {generated.void}
@@ -55,6 +59,9 @@ class BigFoo; extend T::Sig
   end
 end
 
+module Mod
+end
+
 def main
   BigFoo.bar(10, "hello")
         # ^ hover: sig {generated.params(num1: Integer, num2: String).returns(Integer)}
@@ -64,4 +71,31 @@ def main
         # ^ hover: sig {generated.void}
   l = BigFoo.anotherFunc
 # ^ hover: [Integer, String] (2-tuple)
+
+  # Test primitive types
+  n = nil
+# ^ hover: NilClass
+  t = true 
+# ^ hover: TrueClass
+  f = false 
+# ^ hover: FalseClass
+  r = //
+# ^ hover: Regexp
+  s = "hello"
+# ^ hover: String("hello")
+  i = 1
+# ^ hover: Integer(1)
+  fl = 1.0
+# ^ hover: Float(1.000000)
+  sym = :test
+# ^ hover: Symbol(:"test")
+  Mod
+# ^ hover: T.class_of(Mod)
+  rational = Rational(2, 3)
+# ^ hover: Rational
+  range = (-1..-5)
+# ^ hover: T::Range[Integer]
+
+  raise "error message"
+# ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end
