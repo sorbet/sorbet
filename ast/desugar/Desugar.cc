@@ -110,7 +110,7 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
         if (isStringLit(dctx, res) && isStringLit(dctx, narg)) {
             auto leftName = cast_tree<Literal>(narg.get())->asString(dctx.ctx);
             auto rightName = cast_tree<Literal>(res.get())->asString(dctx.ctx);
-            auto newName = leftName.prepend(dctx.ctx, rightName.show(dctx.ctx));
+            auto newName = leftName.prepend(dctx.ctx, rightName.data(dctx.ctx)->shortName(dctx.ctx));
             res = MK::String(loc, newName);
         } else if (isStringLit(dctx, res) && isa_tree<EmptyTree>(narg.get())) {
             // no op
