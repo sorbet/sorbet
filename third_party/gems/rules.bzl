@@ -153,13 +153,13 @@ def _setup_tests(repo_ctx):
 
     repo_ctx.template(
         "test/BUILD",
-        Label("//third_party/gems/test:test.BUILD"),
+        Label("//third_party/gems:test/test.BUILD"),
         executable = False,
     )
 
     repo_ctx.template(
         "test/smoke_test.sh",
-        Label("//third_party/gems/test:smoke_test.sh"),
+        Label("//third_party/gems:test/smoke_test.sh"),
         executable = True,
         substitutions = {
             "{{workspace}}": repo_ctx.name,
@@ -168,13 +168,13 @@ def _setup_tests(repo_ctx):
 
     repo_ctx.template(
         "test/Gemfile",
-        Label("//third_party/gems/test:Gemfile"),
+        Label("//third_party/gems:test/Gemfile"),
         executable = False,
     )
 
     repo_ctx.template(
         "test/Gemfile.lock",
-        Label("//third_party/gems/test:Gemfile.lock"),
+        Label("//third_party/gems:test/Gemfile.lock"),
         executable = False,
     )
 
