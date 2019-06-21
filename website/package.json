@@ -1,4 +1,5 @@
 {
+  "private": true,
   "scripts": {
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
