@@ -1,0 +1,34 @@
+class <C <U <root>>> < <C <U Object>> () @ (Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=37:12}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed})
+  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $3> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=37:12}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:1 end=7:12}
+  class <S <C <U A>> $1> < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:7 end=7:8}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:1 end=8:4}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  static-field-type-alias <C <U Alias>> -> Object @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=18:1 end=18:6}
+  class <C <U B>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=13:1 end=13:24}
+  class <S <C <U B>> $1> < <C <U Sorbet>><C <U Private>><C <U Static>><S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=13:7 end=13:8}
+    method <S <C <U B>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=13:1 end=14:4}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  class <C <U C>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=19:1 end=19:16}
+  class <S <C <U C>> $1> < <C <U Sorbet>><C <U Private>><C <U Static>><S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=19:7 end=19:8}
+    method <S <C <U C>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=19:1 end=20:4}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  class <C <U D>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=24:1 end=24:12}
+  class <S <C <U D>> $1> < <C <U Sorbet>><C <U Private>><C <U Static>><S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=24:7 end=24:8}
+    method <S <C <U D>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=24:1 end=25:4}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  static-field <C <U DynamicParent>> -> T.untyped @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=12:1 end=12:14}
+  class <C <U F>> < <C <U G>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=29:12}
+  class <S <C <U F>> $1> < <S <C <U G>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:7 end=29:8}
+    method <S <C <U F>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=30:4}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  class <C <U G>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=34:1 end=34:12}
+  class <S <C <U G>> $1> < <C <U Sorbet>><C <U Private>><C <U Static>><S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=34:7 end=34:8}
+    method <S <C <U G>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=34:1 end=35:4}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi start=removed end=removed}
+    method <C <U Object>><U make_a_class> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=3:17}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
+
