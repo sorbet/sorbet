@@ -3,6 +3,7 @@
 
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/FileOps.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
@@ -687,15 +688,11 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
     }
 }
 
-void ParsedFile::subclasses(core::Context ctx, map<string, set<string>> &out) {
-    // Ignore files in dirs we don't care about
-    if (path.find("test/") == 0 || path.find("scripts/") == 0 || path.find("lib/identification/scripts/") == 0 ||
-        path.find("ruby_benchmarks/") == 0 || path.find("/test/") != string_view::npos ||
-        path.find("/benchmark/") != string_view::npos) {
-        // Ignoring 'test/' also ignores the Sorbet CLI test input files :(
-        if (!(path.find("test/cli/autogen-subclasses") == 0)) {
-            return;
-        }
+void ParsedFile::subclasses(core::Context ctx, set<string> &parentClasses, vector<string> &absolutePathsToIgnore,
+                            vector<string> &relativePathsToIgnore, map<string, set<string>> &out) {
+    // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
+    if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
+        return;
     }
 
     auto nameToString = [&](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); };

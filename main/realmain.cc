@@ -204,7 +204,8 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 if (opts.print.AutogenSubclasses.enabled) {
                     Timer timeit(logger, "autogenSubclasses");
-                    pf.subclasses(ctx, serialized.subclasses);
+                    pf.subclasses(ctx, opts.autogenSubclassesParents, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                  opts.autogenSubclassesRelativeIgnorePatterns, serialized.subclasses);
                 }
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
