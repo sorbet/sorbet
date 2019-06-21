@@ -43,10 +43,10 @@ def _format_package(info):
 def _fetch_gem(repo_ctx, package_name, sha256):
     """
     Download a specific version of a gem from rubygems.org and place it in
-    `cache_dir`. Returns the sha256 value of the downloaded archive.
+    `//gems`. Returns the sha256 value of the downloaded archive.
     """
 
-    output = "cache/{}.gem".format(package_name)
+    output = "gems/{}.gem".format(package_name)
 
     url = "https://rubygems.org/downloads/{}.gem".format(package_name)
 
