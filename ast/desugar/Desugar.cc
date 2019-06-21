@@ -248,7 +248,7 @@ unique_ptr<Expression> unsupportedNode(DesugarContext dctx, parser::Node *node) 
 }
 
 unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::Mlhs *lhs, unique_ptr<Expression> rhs) {
-    InsSeq::STATS_store stats(2); // we fill these holes at the end
+    InsSeq::STATS_store stats;
 
     core::NameRef tempRhs =
         dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
@@ -311,9 +311,8 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
 
     auto expanded = MK::Send3(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::expandSplat(),
                               MK::Local(loc, tempRhs), MK::Int(loc, before), MK::Int(loc, after));
-    // space reserved above
-    stats[0] = MK::Assign(loc, tempRhs, std::move(rhs));
-    stats[1] = MK::Assign(loc, tempExpanded, std::move(expanded));
+    stats.insert(stats.begin(), MK::Assign(loc, tempExpanded, std::move(expanded)));
+    stats.insert(stats.begin(), MK::Assign(loc, tempRhs, std::move(rhs)));
 
     return MK::InsSeq(loc, std::move(stats), MK::Local(loc, tempRhs));
 }
