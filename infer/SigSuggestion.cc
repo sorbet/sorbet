@@ -175,6 +175,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
         auto &t = typeAndOriginsOwner.emplace_back(make_unique<core::TypeAndOrigins>());
         t->type = arg.type;
         t->origins.emplace_back(core::Loc::none());
+        args.emplace_back(t.get());
     }
 
     core::CallLocs locs{
