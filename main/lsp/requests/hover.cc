@@ -30,12 +30,6 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string str) {
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
-    if (!opts.lspHoverEnabled) {
-        response->error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidRequest, "The `Hover` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(gs), move(response));
-    }
-
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     auto result =
