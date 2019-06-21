@@ -108,6 +108,14 @@ private:
 
         AncestorResolutionItem(const AncestorResolutionItem &rhs) = delete;
         const AncestorResolutionItem &operator=(const AncestorResolutionItem &rhs) = delete;
+
+        inline core::SymbolRef symbolForStubbing() const {
+            if (isSuperclass) {
+                return core::Symbols::StubSuperClass();
+            } else {
+                return core::Symbols::StubMixin();
+            }
+        }
     };
 
     struct ClassAliasResolutionItem {
@@ -363,14 +371,6 @@ private:
         }
 
         core::SymbolRef resolved;
-        const auto stubResolved = [&resolved, &job]() {
-            if (job.isSuperclass) {
-                resolved = core::Symbols::StubSuperClass();
-            } else {
-                resolved = core::Symbols::StubMixin();
-            }
-        };
-
         if (ancestorSym.data(ctx)->isTypeAlias()) {
             if (!lastRun) {
                 return false;
@@ -378,7 +378,7 @@ private:
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins may not be type aliases");
             }
-            stubResolved();
+            resolved = job.symbolForStubbing();
         } else {
             resolved = ancestorSym.data(ctx)->dealias(ctx);
         }
@@ -390,7 +390,7 @@ private:
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
             }
-            stubResolved();
+            resolved = job.symbolForStubbing();
         }
 
         if (resolved == job.klass) {
@@ -398,7 +398,7 @@ private:
                 e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
                 e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
             }
-            stubResolved();
+            resolved = job.symbolForStubbing();
         } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
@@ -406,7 +406,7 @@ private:
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
                 e.addErrorLine(resolved.data(ctx)->loc(), "Other definition");
             }
-            stubResolved();
+            resolved = job.symbolForStubbing();
         }
 
         if (job.isSuperclass) {
