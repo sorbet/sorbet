@@ -29,8 +29,7 @@ fi
 # --- end runfiles.bash initialization ---
 
 
-# shellcheck disable=SC1083
-BUNDLER_ROOT="$(dirname "$(rlocation %{workspace}/%{bundler}/%{site_ruby}/lib/bundler.rb)")"
+BUNDLER_ROOT="$(dirname "$(rlocation "%{workspace}/%{bundler}/%{site_ruby}/lib/bundler.rb")")"
 export BUNDLER_ROOT
 
 RUBYLIB="${BUNDLER_ROOT}:${RUBYLIB:-}"

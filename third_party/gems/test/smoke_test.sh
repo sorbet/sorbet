@@ -29,8 +29,7 @@ fi
 # --- end runfiles.bash initialization ---
 
 # put bundle in the path
-# shellcheck disable=SC1083
-PATH="$(dirname "$(rlocation %{workspace}/bundler/bundle)"):$PATH"
+PATH="$(dirname "$(rlocation "%{workspace}/bundler/bundle")"):$PATH"
 export PATH
 
 # bundle requires $HOME
@@ -41,16 +40,13 @@ export HOME
 bundle --help
 
 
-# shellcheck disable=SC1083
-cp "$(rlocation %{workspace}/test/Gemfile)" .
+cp "$(rlocation "%{workspace}/test/Gemfile")" .
 
-# shellcheck disable=SC1083
-cp "$(rlocation %{workspace}/test/Gemfile.lock)" .
+cp "$(rlocation "%{workspace}/test/Gemfile.lock")" .
 
 mkdir vendor
 
-# shellcheck disable=SC1083
-VENDOR_CACHE=$(dirname "$(rlocation %{workspace}/test/vendor/cache/cantor-1.2.1.gem)")
+VENDOR_CACHE=$(dirname "$(rlocation "%{workspace}/test/vendor/cache/cantor-1.2.1.gem")")
 ln -s "$VENDOR_CACHE" vendor/cache
 
 # setup 'cantor'
