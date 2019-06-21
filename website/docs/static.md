@@ -67,8 +67,10 @@ Each strictness level reports all errors at lower levels, plus new errors:
 
 - At `# typed: strong`, Sorbet no longer allows [`T.untyped`](untyped.md) as the
   intermediate result of any method call. This effectively means that Sorbet
-  knew the type statically for 100% of calls within a file. It's currently
-  impossible to write code with no errors at this strictness level.
+  knew the type statically for 100% of calls within a file. Currently, this
+  sigil is rarely used—usually the only files that are `# typed: strong` are RBI
+  files and files with empty class definitions. Most Ruby files that actually do
+  interesting things will have errors in `# typed: strong`.
 
 To recap: adding one of these comments to the top of a Ruby file controls which
 errors `srb` reports or silences in that file. The strictness level only affects
