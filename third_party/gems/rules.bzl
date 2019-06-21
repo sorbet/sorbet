@@ -132,6 +132,13 @@ def _setup_build_defs(repo_ctx):
     Install build_defs provided by this package.
     """
 
+    # BUILD file that re-exports gemfile.bzl
+    repo_ctx.template(
+        "tools/build_defs/BUILD",
+        Label("//third_party/gems:build_defs.BUILD"),
+        executable = False,
+    )
+
     # gemfile parsing and vendor/cache setup
     repo_ctx.template(
         "tools/build_defs/gemfile.bzl",
