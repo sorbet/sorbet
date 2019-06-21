@@ -139,6 +139,24 @@ def _setup_build_defs(repo_ctx):
         executable = False,
     )
 
+def _setup_gem_export(repo_ctx, fetched_gems):
+    """
+    Install a BUILD file in //gems to re-export all fetched gems.
+    """
+
+    # build up a string that contains all the quoted gem package file names, for
+    # use with the `exports_files` rule in the `gems.BUILD` template.
+    quoted_gems = ", ".join([ "\"{}.gem\"".format(package_name) for package_name in fetched_gems ])
+
+    repo_ctx.template(
+        "gems/BUILD",
+        Label("//third_party/gems:gems.BUILD"),
+        substitutions = {
+            "{{quoted_gems}}": quoted_gems,
+        },
+        executable = False,
+    )
+
 def _setup_tests(repo_ctx):
     """
     Download requirements for testing the bundler implementation.
@@ -212,6 +230,9 @@ def _impl(repo_ctx):
     known_shas = {}
     for package_name in gems_to_fetch:
         known_shas[package_name] = _fetch_gem(repo_ctx, package_name, gems_to_fetch[package_name])
+
+    # generate a build file that exports all the gems
+    _setup_gem_export(repo_ctx, known_shas)
 
     # When we've fetched gems that lack sha256 value, emit attributes that would
     # make this hermetic.
