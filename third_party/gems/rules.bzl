@@ -91,10 +91,10 @@ def _setup_bundler(repo_ctx):
     site_bin = "bin"
 
     substitutions = {
-        "%{workspace}": repo_ctx.name,
-        "%{bundler}": bundler,
-        "%{site_ruby}": site_ruby,
-        "%{site_bin}": site_bin,
+        "{{workspace}}": repo_ctx.name,
+        "{{bundler}}": bundler,
+        "{{site_ruby}}": site_ruby,
+        "{{site_bin}}": site_bin,
     }
 
     repo_ctx.template(
@@ -162,7 +162,7 @@ def _setup_tests(repo_ctx):
         Label("//third_party/gems/test:smoke_test.sh"),
         executable = True,
         substitutions = {
-            "%{workspace}": repo_ctx.name,
+            "{{workspace}}": repo_ctx.name,
         },
     )
 

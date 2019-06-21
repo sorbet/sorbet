@@ -29,7 +29,7 @@ fi
 # --- end runfiles.bash initialization ---
 
 # put bundle in the path
-PATH="$(dirname "$(rlocation "%{workspace}/bundler/bundle")"):$PATH"
+PATH="$(dirname "$(rlocation "{{workspace}}/bundler/bundle")"):$PATH"
 export PATH
 
 # bundle requires $HOME
@@ -40,13 +40,13 @@ export HOME
 bundle --help
 
 
-cp "$(rlocation "%{workspace}/test/Gemfile")" .
+cp "$(rlocation "{{workspace}}/test/Gemfile")" .
 
-cp "$(rlocation "%{workspace}/test/Gemfile.lock")" .
+cp "$(rlocation "{{workspace}}/test/Gemfile.lock")" .
 
 mkdir vendor
 
-VENDOR_CACHE=$(dirname "$(rlocation "%{workspace}/test/vendor/cache/cantor-1.2.1.gem")")
+VENDOR_CACHE=$(dirname "$(rlocation "{{workspace}}/test/vendor/cache/cantor-1.2.1.gem")")
 ln -s "$VENDOR_CACHE" vendor/cache
 
 # setup 'cantor'

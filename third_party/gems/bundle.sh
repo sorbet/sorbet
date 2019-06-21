@@ -29,6 +29,6 @@ fi
 # --- end runfiles.bash initialization ---
 
 # shellcheck disable=SC1090
-source "$(rlocation "%{workspace}/%{bundler}/bundle-env")"
+source "$(rlocation "{{workspace}}/{{bundler}}/bundle-env")"
 
-exec "$(rlocation "%{workspace}/%{bundler}/%{site_bin}/bundler")" "$@"
+exec "$(rlocation "{{workspace}}/{{bundler}}/{{site_bin}}/bundler")" "$@"
