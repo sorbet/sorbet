@@ -773,7 +773,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 for (auto &comp : dispatched.components) {
                     if (comp.method.exists() && comp.method.data(ctx)->owner.exists() &&
                         comp.method.data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
-                        !comp.method.data(ctx)->owner.data(ctx)->isClassAbstract() &&
                         comp.method.data(ctx)->isMethod() && comp.method.data(ctx)->isAbstract()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::AbstractMethodInvoked)) {
                             e.setHeader("Invoking abstract class method {}", comp.method.show(ctx),

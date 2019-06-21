@@ -40,6 +40,7 @@ struct ParsedSig {
         bool void_ = false;
         bool checked = false;
         bool final = false;
+        bool unsafeImplementation = false;
     } seen;
 
     TypeArgSpec &enterTypeArgByName(core::NameRef name);

@@ -239,6 +239,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 case core::Names::implementation()._id:
                     sig.seen.implementation = true;
                     break;
+                case core::Names::unsafe_implementation()._id:
+                    sig.seen.unsafeImplementation = true;
+                    break;
                 case core::Names::overridable()._id:
                     sig.seen.overridable = true;
                     break;

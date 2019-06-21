@@ -87,6 +87,7 @@ public:
         static constexpr u4 METHOD_FINAL = 0x0000'0800;
         static constexpr u4 METHOD_OVERRIDE = 0x0000'1000;
         static constexpr u4 METHOD_IMPLEMENTATION = 0x0000'2000;
+        static constexpr u4 METHOD_UNSAFE_IMPL = 0x0000'4000;
 
         // Type flags
         static constexpr u4 TYPE_COVARIANT = 0x0000'0010;
@@ -192,6 +193,11 @@ public:
     inline bool isImplementation() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_IMPLEMENTATION) != 0;
+    }
+
+    inline bool isUnsafeImplementation() const {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_UNSAFE_IMPL) != 0;
     }
 
     inline bool isGenericMethod() const {
@@ -369,6 +375,11 @@ public:
     inline void setImplementation() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_IMPLEMENTATION;
+    }
+
+    inline void setUnsafeImplementation() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_UNSAFE_IMPL;
     }
 
     inline void setGenericMethod() {

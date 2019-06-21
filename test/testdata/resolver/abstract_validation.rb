@@ -69,10 +69,6 @@ end
   def self.foo; end
 end
 
-
-  # it fails when instantiating the class
-  AbstractClass.new # error: Instantiating abstract class `AbstractClass`
-
   # it handles splats and kwargs
 class SplatParent
   extend T::Sig
