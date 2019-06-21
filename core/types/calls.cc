@@ -1031,12 +1031,6 @@ public:
         DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
         auto dispatched = instanceTy->dispatchCall(ctx, innerArgs);
 
-        if (self.data(ctx)->isClassAbstract()) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::AbstractClassInstantiated)) {
-                e.setHeader("Instantiating abstract class `{}`", instanceTy->show(ctx));
-            }
-        }
-
         // This dispatch call will set return type in linkType to result of initialize.
         // Need to override it
         if (args.block) {
