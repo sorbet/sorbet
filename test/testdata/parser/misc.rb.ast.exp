@@ -8,17 +8,19 @@ class <emptyTree><<C <root>>> < ()
   $gv = 1
 
   begin
-    <assignTemp>$2 = ::<Magic>.<expand-splat>([nil, nil], 2, 0)
-    <self>.x().var=(<assignTemp>$2.[](0))
-    y = <assignTemp>$2.[](1)
+    <assignTemp>$2 = [nil, nil]
+    <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
+    <self>.x().var=(<assignTemp>$3.[](0))
+    y = <assignTemp>$3.[](1)
     <assignTemp>$2
   end
 
   begin
-    <assignTemp>$3 = ::<Magic>.<expand-splat>(<self>.zaaaz(), 2, 0)
-    baaaar = <assignTemp>$3.[](0)
-    naaar = <assignTemp>$3.[](1)
-    <assignTemp>$3
+    <assignTemp>$4 = <self>.zaaaz()
+    <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
+    baaaar = <assignTemp>$5.[](0)
+    naaar = <assignTemp>$5.[](1)
+    <assignTemp>$4
   end
 
   xaaaaz = [<self>.yayayaya(), <self>.tutututu()]
@@ -41,8 +43,8 @@ class <emptyTree><<C <root>>> < ()
   end
 
   begin
-    <assignTemp>$4 = <self>.x()
-    if y.===(<assignTemp>$4)
+    <assignTemp>$6 = <self>.x()
+    if y.===(<assignTemp>$6)
       1
     else
       <self>.z()
@@ -66,20 +68,21 @@ class <emptyTree><<C <root>>> < ()
   end
 
   begin
-    ||$5 = true
-    if ||$5
-      ||$5
+    ||$7 = true
+    if ||$7
+      ||$7
     else
       false
     end
   end
 
-  <self>.arr().each() do |*forTemp$6|
+  <self>.arr().each() do |*forTemp$8|
     begin
       begin
-        <assignTemp>$7 = ::<Magic>.<expand-splat>(forTemp$6, 1, 0)
-        x = <assignTemp>$7.[](0)
-        <assignTemp>$7
+        <assignTemp>$9 = forTemp$8
+        <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 1, 0)
+        x = <assignTemp>$10.[](0)
+        <assignTemp>$9
       end
       <emptyTree>
     end
@@ -154,14 +157,16 @@ class <emptyTree><<C <root>>> < ()
   end
 
   begin
-    <assignTemp>$8 = ::<Magic>.<expand-splat>(1, 2, 0)
-    a = <assignTemp>$8.[](0)
+    <assignTemp>$11 = 1
+    <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 2, 0)
+    a = <assignTemp>$12.[](0)
     begin
-      <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8.[](1), 1, 0)
-      x = <assignTemp>$9.[](0)
-      <assignTemp>$9
+      <assignTemp>$13 = <assignTemp>$12.[](1)
+      <assignTemp>$14 = ::<Magic>.<expand-splat>(<assignTemp>$13, 1, 0)
+      x = <assignTemp>$14.[](0)
+      <assignTemp>$13
     end
-    <assignTemp>$8
+    <assignTemp>$11
   end
 
   4
@@ -185,9 +190,10 @@ rescue <emptyTree>::<C E> => x
   nil
 
   begin
-    <assignTemp>$10 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
-    x = <assignTemp>$10.slice(::Range.new(0, -1, false))
-    <assignTemp>$10
+    <assignTemp>$15 = y.to_a()
+    <assignTemp>$16 = ::<Magic>.<expand-splat>(<assignTemp>$15, 0, 0)
+    x = <assignTemp>$16.slice(::Range.new(0, -1, false))
+    <assignTemp>$15
   end
 
   "foo".concat(<self>.bar().to_s()).intern()

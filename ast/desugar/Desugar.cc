@@ -250,7 +250,9 @@ unique_ptr<Expression> unsupportedNode(DesugarContext dctx, parser::Node *node) 
 unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::Mlhs *lhs, unique_ptr<Expression> rhs) {
     InsSeq::STATS_store stats;
 
-    core::NameRef tempName =
+    core::NameRef tempRhs =
+        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
+    core::NameRef tempExpanded =
         dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
 
     int i = 0;
@@ -277,7 +279,7 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
                                        MK::Int(lhloc, left), MK::Int(lhloc, -right), std::move(exclusive));
                 stats.emplace_back(
                     MK::Assign(lhloc, std::move(lh),
-                               MK::Send1(loc, MK::Local(loc, tempName), core::Names::slice(), std::move(index))));
+                               MK::Send1(loc, MK::Local(loc, tempExpanded), core::Names::slice(), std::move(index))));
             }
             i = -right;
         } else {
@@ -286,7 +288,7 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
             } else {
                 ++before;
             }
-            auto val = MK::Send1(loc, MK::Local(loc, tempName), core::Names::squareBrackets(), MK::Int(loc, i));
+            auto val = MK::Send1(loc, MK::Local(loc, tempExpanded), core::Names::squareBrackets(), MK::Int(loc, i));
 
             if (auto *mlhs = parser::cast_node<parser::Mlhs>(c.get())) {
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, std::move(val)));
@@ -308,10 +310,13 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
     }
 
     auto expanded = MK::Send3(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::expandSplat(),
-                              std::move(rhs), MK::Int(loc, before), MK::Int(loc, after));
-    stats.insert(stats.begin(), MK::Assign(loc, tempName, std::move(expanded)));
+                              MK::Local(loc, tempRhs), MK::Int(loc, before), MK::Int(loc, after));
+    stats.insert(stats.begin(), MK::Assign(loc, tempExpanded, std::move(expanded)));
+    stats.insert(stats.begin(), MK::Assign(loc, tempRhs, std::move(rhs)));
 
-    return MK::InsSeq(loc, std::move(stats), MK::Local(loc, tempName));
+    // Regardless of how we destructure an assignment, Ruby evaluates the expression to the entire right hand side,
+    // not any individual component of the destructured assignment.
+    return MK::InsSeq(loc, std::move(stats), MK::Local(loc, tempRhs));
 }
 
 bool locReported = false;

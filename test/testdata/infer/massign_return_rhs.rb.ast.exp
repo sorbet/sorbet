@@ -1,0 +1,39 @@
+class <emptyTree><<C <root>>> < ()
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <self>.sig() do ||
+    <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>)))
+  end
+
+  def foo<<C <todo sym>>>(&<blk>)
+    nil
+  end
+
+  if begin
+      <assignTemp>$2 = <self>.foo()
+      <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
+      a = <assignTemp>$3.[](0)
+      b = <assignTemp>$3.[](1)
+      <assignTemp>$2
+    end
+    <self>.puts(1)
+  else
+    <self>.puts(2)
+  end
+
+  <emptyTree>::<C T>.reveal_type(begin
+      <assignTemp>$4 = <self>.foo()
+      <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
+      a = <assignTemp>$5.[](0)
+      b = <assignTemp>$5.[](1)
+      <assignTemp>$4
+    end)
+
+  <emptyTree>::<C T>.reveal_type(begin
+      <assignTemp>$6 = 100
+      <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 1, 1)
+      c = <assignTemp>$7.[](0)
+      d = <assignTemp>$7.[](-1)
+      <assignTemp>$6
+    end)
+end
