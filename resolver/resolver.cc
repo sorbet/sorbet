@@ -356,6 +356,14 @@ private:
         }
     }
 
+    static core::SymbolRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
+        if (item.isSuperclass) {
+            return core::Symbols::StubSuperClass();
+        } else {
+            return core::Symbols::StubMixin();
+        }
+    }
+
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
         if (!ancestorSym.exists()) {
@@ -370,7 +378,7 @@ private:
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins may not be type aliases");
             }
-            resolved = core::Symbols::StubAncestor();
+            resolved = stubSymbolForAncestor(job);
         } else {
             resolved = ancestorSym.data(ctx)->dealias(ctx);
         }
@@ -382,7 +390,7 @@ private:
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
             }
-            resolved = core::Symbols::StubAncestor();
+            resolved = stubSymbolForAncestor(job);
         }
 
         if (resolved == job.klass) {
@@ -390,7 +398,7 @@ private:
                 e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
                 e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
             }
-            resolved = core::Symbols::StubAncestor();
+            resolved = stubSymbolForAncestor(job);
         } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
@@ -398,7 +406,7 @@ private:
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
                 e.addErrorLine(resolved.data(ctx)->loc(), "Other definition");
             }
-            resolved = core::Symbols::StubAncestor();
+            resolved = stubSymbolForAncestor(job);
         }
 
         if (job.isSuperclass) {
