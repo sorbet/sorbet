@@ -1,4 +1,4 @@
-<p align="center">
+<p align="center">dd
   <img alt="Sorbet logo" width="200" src="docs/logo/sorbet-logo-purple-sparkles.svg">
 </p>
 
