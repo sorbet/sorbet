@@ -37,7 +37,6 @@ def _parse_package(line):
 
     return {"name": package, "version": version}
 
-
 def _parse_top_section(line):
     """
     Returns a top-level section name ("PATH", "GEM", "PLATFORMS",
@@ -50,7 +49,6 @@ def _parse_top_section(line):
 
     return line
 
-
 def parse_gemfile_lock(content):
     """
     Find lines in the content of a Gemfile.lock that look like package
@@ -62,7 +60,6 @@ def parse_gemfile_lock(content):
     inside_GEM = False
 
     for line in content.splitlines():
-
         top_section = _parse_top_section(line)
         if top_section != None:
             # toggle gem specification parsing when the parser is within the GEM
