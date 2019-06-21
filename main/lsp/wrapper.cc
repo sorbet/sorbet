@@ -92,7 +92,6 @@ int LSPWrapper::getTypecheckCount() const {
 }
 
 void LSPWrapper::enableAllExperimentalFeatures() {
-    enableExperimentalFeature(LSPExperimentalFeature::Hover);
     enableExperimentalFeature(LSPExperimentalFeature::GoToDefinition);
     enableExperimentalFeature(LSPExperimentalFeature::FindReferences);
     enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
@@ -103,9 +102,6 @@ void LSPWrapper::enableAllExperimentalFeatures() {
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
     switch (feature) {
-        case LSPExperimentalFeature::Hover:
-            opts.lspHoverEnabled = true;
-            break;
         case LSPExperimentalFeature::GoToDefinition:
             opts.lspGoToDefinitionEnabled = true;
             break;
