@@ -245,8 +245,8 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             for (auto &f : changedFiles) {
                 ++i;
                 auto fref = updateFile(f);
-                if (globalStateHashes.size() <= fref.id()) {
-                    // New file
+                const bool newFile = globalStateHashes.size() <= fref.id();
+                if (newFile) {
                     ENFORCE(!takeFastPath);
                     globalStateHashes.resize(fref.id() + 1);
                 } else if (takeFastPath) {
@@ -262,7 +262,10 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                     finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
                     subset.emplace_back(fref);
                 }
-                globalStateHashes[fref.id()] = hashes[i];
+                // Ignore invalid hash states (caused by syntax errors).
+                if (newFile || hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID) {
+                    globalStateHashes[fref.id()] = hashes[i];
+                }
             }
             fast_sort(changedHashes);
             changedHashes.resize(

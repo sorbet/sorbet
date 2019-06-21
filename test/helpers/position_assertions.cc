@@ -94,8 +94,8 @@ string prettyPrintRangeComment(string_view sourceLine, const Range &range, strin
         return "";
     }
     string sourceLineNumber = fmt::format("{}", range.start->line + 1);
-    EXPECT_EQ(range.start->line, range.end->line) << "Multi-line ranges are not supported at this time.";
     if (range.start->line != range.end->line) {
+        // Multi-line ranges are not supported at this time.
         return string(comment);
     }
 

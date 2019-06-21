@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: syntax_error_fast_path.rb
+
+class A extend T::Sig
+  sig {void}
+  def bar
+    y = T.let(nil, T.nilable(String))
+  end
+
+  def foo(y)
+
+  end
+end
