@@ -23,5 +23,5 @@ main/sorbet --silence-dev-message \
             test/cli/metrics-file/test.rb 2>&1
 
 grep -A1 "\"ruby_typer.unknown..types.input.files\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.files.sigil.false\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.files.sigil.true\"" metrics4.json
+grep -A1 "\"ruby_typer.unknown..types.input.files.pragma.false\"" metrics4.json
+grep -A1 "\"ruby_typer.unknown..types.input.files.pragma.true\"" metrics4.json

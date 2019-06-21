@@ -41,7 +41,7 @@ constexpr ErrorClass ReassignsTypeAlias{5034, StrictLevel::False};
 constexpr ErrorClass BadMethodOverride{5035, StrictLevel::False};
 constexpr ErrorClass EnumerableParentTypeNotDeclared{5036, StrictLevel::Strict};
 constexpr ErrorClass BadAliasMethod{5037, StrictLevel::True};
-constexpr ErrorClass SigInFileWithoutSigil{5038, StrictLevel::False};
+constexpr ErrorClass SigInFileWithoutPragma{5038, StrictLevel::False};
 constexpr ErrorClass RevealTypeInUntypedFile{5039, StrictLevel::False};
 
 constexpr ErrorClass OverloadNotAllowed{5040, StrictLevel::False};

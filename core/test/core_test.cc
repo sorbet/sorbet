@@ -79,7 +79,7 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"", StrictLevel::None},
         {"# typed: true", StrictLevel::True},
         {"\n# typed: true\n", StrictLevel::True},
-        {"not a typed: sigil\n# typed: true\n", StrictLevel::True},
+        {"not a typed: pragma\n# typed: true\n", StrictLevel::True},
         {"typed:\n# typed: nonsense\n", StrictLevel::None},
         {"# typed: strict\n", StrictLevel::Strict},
         {"# typed: strong\n", StrictLevel::Strong},
@@ -90,12 +90,12 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"#    typed:      true\n", StrictLevel::True},
         {"typed: true\n", StrictLevel::None},
 
-        // We no longer support the old sigil
+        // We no longer support the old pragma
         {"# @typed", StrictLevel::None},
         {"\n# @typed\n", StrictLevel::None},
     };
     for (auto &tc : cases) {
-        EXPECT_EQ(tc.strict, File::fileSigil(tc.src));
+        EXPECT_EQ(tc.strict, File::filePragma(tc.src));
     }
 }
 

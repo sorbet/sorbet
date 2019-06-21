@@ -105,17 +105,17 @@ actions:
 
     # Run type suggestion once, and then generate the todo.rbi again.
     #
-    # The first time we suggest typed sigils, a few files may be ignored if they
+    # The first time we suggest typed pragmas, a few files may be ignored if they
     # use Ruby features Sorbet does not support. However, since we ran the
     # todo.rbi generation before they were ignored, we discovered the constants
     # that they defined and did not add the constants to todo.rbi file.
     #
-    # Regenerating after one run of sigil suggestion will put those constants
+    # Regenerating after one run of pragma suggestion will put those constants
     # into the todo.rbi file.
     Sorbet::Private::SuggestTyped.suggest_typed
     Sorbet::Private::TodoRBI.main
 
-    # Put some `typed:` sigils
+    # Put some `typed:` pragmas
     make_step(Sorbet::Private::SuggestTyped).call
 
     puts "
@@ -182,7 +182,7 @@ If instead you want to explore your files locally, here are some things to try:
     gems                Generate arity-only type definitions by requiring the gem
     hidden-definitions  Load all your code and generate type definitions for any dynamic code
     todo                Run Sorbet and generate constants which Sorbet errors on
-    suggest-typed       Put the highest `typed:` sigil in each of your files
+    suggest-typed       Put the highest `typed:` pragma in each of your files
     find-gem-rbis       Find all `rbi/` direcotries in your gems and list them in `~/.cache/sorbet`
     "
 

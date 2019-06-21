@@ -16,7 +16,7 @@ class Sorbet::Private::SuggestTyped
         return true
       end
     end
-    puts "Adding `typed:` sigils did not converge after 100 tries."
+    puts "Adding `typed:` pragmas did not converge after 100 tries."
     false
   end
 

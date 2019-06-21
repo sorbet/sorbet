@@ -30,7 +30,7 @@ constexpr auto RESET_STYLE = rang::style::reset;
  * You need to reset color to "previous color that was there", not white.
  * Otherwise you'll cancel color that was wrapping you.
  */
-constexpr string_view REVERT_COLOR_SIGIL = "@@<<``\t\v\b\r\aYOU_FORGOT_TO_CALL restoreColors"sv;
+constexpr string_view REVERT_COLOR_PRAGMA = "@@<<``\t\v\b\r\aYOU_FORGOT_TO_CALL restoreColors"sv;
 
 string _replaceAll(string_view inWhat, string_view from, string_view to) {
     return absl::StrReplaceAll(inWhat, {{from, to}});
@@ -47,7 +47,7 @@ bool Error::isCritical() const {
 string restoreColors(string_view formatted, rang::fg color) {
     stringstream buf;
     buf << color;
-    return _replaceAll(formatted, REVERT_COLOR_SIGIL, buf.str());
+    return _replaceAll(formatted, REVERT_COLOR_PRAGMA, buf.str());
 }
 
 string ErrorLine::toString(const GlobalState &gs, bool color) const {
@@ -158,16 +158,16 @@ unique_ptr<Error> ErrorBuilder::build() {
     return err;
 }
 
-string ErrorColors::coloredPatternReplace = (string)coloredPatternSigil;
+string ErrorColors::coloredPatternReplace = (string)coloredPatternPragma;
 
 void ErrorColors::enableColors() {
     rang::setControlMode(rang::control::Force);
     stringstream buf;
-    buf << INTERPOLATION_COLOR << "{}" << REVERT_COLOR_SIGIL;
+    buf << INTERPOLATION_COLOR << "{}" << REVERT_COLOR_PRAGMA;
     coloredPatternReplace = buf.str();
 }
 void ErrorColors::disableColors() {
-    coloredPatternReplace = coloredPatternSigil;
+    coloredPatternReplace = coloredPatternPragma;
     rang::setControlMode(rang::control::Off);
 }
 

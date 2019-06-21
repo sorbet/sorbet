@@ -17,7 +17,7 @@ message File {
         Stdlib = 11;
     }
     string path = 1;
-    StrictLevel sigil = 2;
+    StrictLevel pragma = 2;
     StrictLevel strict = 3;
     StrictLevel min_error_level = 4;
 }

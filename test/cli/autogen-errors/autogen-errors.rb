@@ -1,4 +1,4 @@
-# this sigil is ignored in autogen mode
+# this pragma is ignored in autogen mode
 # # typed: strong
 class Foo < Bar
 end

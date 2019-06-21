@@ -99,7 +99,7 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
     }
 }
 
-string levelToSigil(core::StrictLevel level) {
+string levelToPragma(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::None:
             Exception::raise("Should never happen");
@@ -127,7 +127,7 @@ string levelToSigil(core::StrictLevel level) {
 core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     auto source = file.data(*gs).source();
 
-    if (file.data(*gs).originalSigil == core::StrictLevel::None) {
+    if (file.data(*gs).originalPragma == core::StrictLevel::None) {
         if (source.length() >= 2 && source[0] == '#' && source[1] == '!') {
             int newline = source.find("\n", 0);
             return core::Loc(file, newline + 1, newline + 1);
@@ -387,7 +387,7 @@ int realmain(int argc, char *argv[]) {
                 prodCounterInc("types.input.lines");
                 prodCounterInc("types.input.files");
                 auto input = opts.inlineInput;
-                if (core::File::fileSigil(opts.inlineInput) == core::StrictLevel::None) {
+                if (core::File::filePragma(opts.inlineInput) == core::StrictLevel::None) {
                     // put it at the end so as to not upset line numbers
                     input += "\n# typed: true";
                 }
@@ -433,19 +433,19 @@ int realmain(int argc, char *argv[]) {
                 if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
-                if (file.data(*gs).originalSigil > core::StrictLevel::Max) {
-                    // don't change the sigil on "special" files
+                if (file.data(*gs).originalPragma > core::StrictLevel::Max) {
+                    // don't change the pragma on "special" files
                     continue;
                 }
                 auto minErrorLevel = levelMinusOne(file.data(*gs).minErrorLevel());
-                if (file.data(*gs).originalSigil == minErrorLevel) {
+                if (file.data(*gs).originalPragma == minErrorLevel) {
                     continue;
                 }
                 auto loc = findTyped(gs, file);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
-                    auto sigil = levelToSigil(minErrorLevel);
-                    e.setHeader("You could add `# typed: {}`", sigil);
-                    e.addAutocorrect(core::AutocorrectSuggestion(loc, fmt::format("# typed: {}\n", sigil)));
+                    auto pragma = levelToPragma(minErrorLevel);
+                    e.setHeader("You could add `# typed: {}`", pragma);
+                    e.addAutocorrect(core::AutocorrectSuggestion(loc, fmt::format("# typed: {}\n", pragma)));
                 }
             }
         }

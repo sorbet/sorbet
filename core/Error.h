@@ -28,14 +28,14 @@ public:
 };
 
 class ErrorColors {
-    static constexpr std::string_view coloredPatternSigil = "`{}`";
+    static constexpr std::string_view coloredPatternPragma = "`{}`";
     static std::string coloredPatternReplace;
     static std::string replaceAll(std::string_view inWhat, std::string_view from, std::string_view to);
 
 public:
     ErrorColors() = delete;
     template <typename... Args> static std::string format(std::string_view msg, const Args &... args) {
-        return fmt::format(replaceAll(msg, coloredPatternSigil, coloredPatternReplace), args...);
+        return fmt::format(replaceAll(msg, coloredPatternPragma, coloredPatternReplace), args...);
     }
     static void enableColors();
     static void disableColors();

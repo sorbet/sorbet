@@ -27,7 +27,7 @@ vector<int> findLineBreaks(string_view s) {
     return res;
 }
 
-StrictLevel File::fileSigil(string_view source) {
+StrictLevel File::filePragma(string_view source) {
     /*
      * StrictLevel::None: <none>
      * StrictLevel::False: # typed: false
@@ -98,8 +98,8 @@ StrictLevel File::fileSigil(string_view source) {
 }
 
 File::File(string &&path_, string &&source_, Type sourceType)
-    : sourceType(sourceType), path_(path_), source_(source_), originalSigil(fileSigil(this->source_)),
-      strictLevel(originalSigil) {}
+    : sourceType(sourceType), path_(path_), source_(source_), originalPragma(filePragma(this->source_)),
+      strictLevel(originalPragma) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -160,7 +160,7 @@ bool File::isRBI() const {
 }
 
 bool File::isStdlib() const {
-    return fileSigil(source()) == StrictLevel::Stdlib;
+    return filePragma(source()) == StrictLevel::Stdlib;
 }
 
 vector<int> &File::lineBreaks() const {

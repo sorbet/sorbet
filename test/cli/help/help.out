@@ -157,7 +157,7 @@ Usage:
       --counter counter         Print internal counter
       --statsd-host host        StatsD sever hostname (default: )
       --counters                Print all internal counters
-      --suggest-typed           Suggest which typed: sigils to add or upgrade
+      --suggest-typed           Suggest which typed: pragmas to add or upgrade
       --statsd-prefix prefix    StatsD prefix (default: ruby_typer.unknown)
       --statsd-port port        StatsD server port (default: 8200)
       --metrics-file file       File to export metrics to (default: )

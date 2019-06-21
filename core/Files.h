@@ -74,7 +74,7 @@ public:
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;
 
-    static StrictLevel fileSigil(std::string_view source);
+    static StrictLevel filePragma(std::string_view source);
 
     std::string_view path() const;
     std::string_view source() const;
@@ -103,7 +103,7 @@ private:
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
 
 public:
-    const StrictLevel originalSigil;
+    const StrictLevel originalPragma;
     StrictLevel strictLevel;
 };
 

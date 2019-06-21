@@ -385,7 +385,7 @@ cxxopts::Options buildOptions() {
     if (sorbet::debug_mode) {
         options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
     }
-    options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
+    options.add_options("dev")("suggest-typed", "Suggest which typed: pragmas to add or upgrade");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value(empty.statsdPrefix), "prefix");
     options.add_options("dev")("statsd-port", "StatsD server port",

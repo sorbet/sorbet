@@ -1,4 +1,4 @@
-digraph "sigil.rb" {
+digraph "pragma.rb" {
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;

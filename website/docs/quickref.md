@@ -9,7 +9,7 @@ title: Quick Reference
 ## Enabling type checking
 
 To [enable static checking](static.md) with `srb`, add this line (called a
-sigil) to the top of your Ruby file:
+pragma) to the top of your Ruby file:
 
 ```ruby
 # typed: true

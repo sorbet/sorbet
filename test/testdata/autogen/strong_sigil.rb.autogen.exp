@@ -1,4 +1,4 @@
-# ParsedFile: test/testdata/autogen/strong_sigil.rb
+# ParsedFile: test/testdata/autogen/strong_pragma.rb
 requires: []
 ## defs:
 [def id=0]
@@ -16,5 +16,5 @@ requires: []
  name=[A]
  nesting=[]
  resolved=[A]
- loc=test/testdata/autogen/strong_sigil.rb:2
+ loc=test/testdata/autogen/strong_pragma.rb:2
  is_defining_ref=1

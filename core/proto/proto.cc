@@ -319,7 +319,7 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs) {
         auto path_view = file.data(gs).path();
         string path(path_view.begin(), path_view.end());
         entry->set_path(path);
-        entry->set_sigil(strictToProto(file.data(gs).originalSigil));
+        entry->set_pragma(strictToProto(file.data(gs).originalPragma));
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
         entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
     }

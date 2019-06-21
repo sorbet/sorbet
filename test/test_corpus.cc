@@ -404,7 +404,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
+        if (resolvedTree.tree != nullptr && file.data(ctx).originalPragma >= core::StrictLevel::True) {
             checkTree();
             CFGCollectorAndTyper collector;
             ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));

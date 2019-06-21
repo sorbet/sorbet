@@ -25,14 +25,14 @@ When run at the command line, `srb` roughly works like this:
 3.  Display all errors to the user.
 
 However, in step (3), most kinds of errors are _silenced_ by default, instead of
-being reported. To opt into _more_ checks, we use `# typed:` **sigils**[^sigil].
-A `# typed:` sigil is a comment placed at the top of a Ruby file, indicating to
+being reported. To opt into _more_ checks, we use `# typed:` **pragmas**[^pragma].
+A `# typed:` pragma is a comment placed at the top of a Ruby file, indicating to
 `srb` which errors to report and which to silence. These are the available
-sigils, each defining a **strictness level**:
+pragmas, each defining a **strictness level**:
 
 <!-- prettier-ignore-start -->
 
-[^sigil]: Google defines sigil as, "an inscribed or painted symbol considered to
+[^pragma]: Google defines pragma as, "an inscribed or painted symbol considered to
 have magical power," and we like to think of types as pretty magical 🙂
 
 <!-- prettier-ignore-end -->
@@ -52,7 +52,7 @@ Each strictness level reports all errors at lower levels, plus new errors:
 - At `# typed: false`, only errors related to syntax, constant resolution and
   correctness of `sig`s are reported. Fixing these errors is the baseline for
   adopting Sorbet in a new codebase, and provides value even before adding type
-  annotations. `# typed: false` is the **default** for files without sigils.
+  annotations. `# typed: false` is the **default** for files without pragmas.
 
 - At `# typed: true`, things that would normally be called "type errors" are
   reported. This includes calling a non-existent method, calling a method with
@@ -163,7 +163,7 @@ all) errors relating to that argument.
 
 ## Call-site granularity: `T.unsafe`
 
-Using sigils and method signatures are the primary ways we opt _into_ static
+Using pragmas and method signatures are the primary ways we opt _into_ static
 checks, and using `T.untyped` we can opt a specific argument _out of_ static
 checks.
 
