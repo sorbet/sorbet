@@ -441,7 +441,7 @@ Some notes about how to read these:
 
 ### Infer
 
-Infer is the last pass. It operates directly on a [`cfg::CFG`]. In pariticular,
+Infer is the last pass. It operates directly on a [`cfg::CFG`]. In particular,
 when the CFG is created, each binding has `nullptr` for the local's type. By the
 end of inference, reachable bindings within basic blocks will have had their
 types directly filled in.
