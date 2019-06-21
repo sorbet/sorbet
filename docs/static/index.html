@@ -121,8 +121,10 @@ etc.</p></li>
 TypeScript’s <code>noImplicitAny</code> flag.</p></li>
 <li><p>At <code># typed: strong</code>, Sorbet no longer allows <a href="/docs/untyped"><code>T.untyped</code></a> as the
 intermediate result of any method call. This effectively means that Sorbet
-knew the type statically for 100% of calls within a file. It’s currently
-impossible to write code with no errors at this strictness level.</p></li>
+knew the type statically for 100% of calls within a file. Currently, this
+sigil is rarely used—usually the only files that are <code># typed: strong</code> are RBI
+files and files with empty class definitions. Most Ruby files that actually do
+interesting things will have errors in <code># typed: strong</code>.</p></li>
 </ul>
 <p>To recap: adding one of these comments to the top of a Ruby file controls which
 errors <code>srb</code> reports or silences in that file. The strictness level only affects
