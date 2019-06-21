@@ -314,6 +314,8 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
     stats.insert(stats.begin(), MK::Assign(loc, tempExpanded, std::move(expanded)));
     stats.insert(stats.begin(), MK::Assign(loc, tempRhs, std::move(rhs)));
 
+    // Regardless of how we destructure an assignment, Ruby evaluates the expression to the entire right hand side,
+    // not any individual component of the destructured assignment.
     return MK::InsSeq(loc, std::move(stats), MK::Local(loc, tempRhs));
 }
 
