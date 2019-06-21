@@ -154,7 +154,6 @@ optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableConte
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
-
         // e.g. `const :foo, type, computed_by: :method_name`
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
@@ -170,7 +169,6 @@ optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableConte
                 }
             }
         }
-
         if (foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
             foreign = move(foreignTree);
