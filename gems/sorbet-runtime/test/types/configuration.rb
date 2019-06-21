@@ -6,8 +6,7 @@ module Opus::Types::Test
     before do
       @mod = Module.new do
         extend T::Sig
-        # Make it public for testing only
-        public_class_method :sig
+        # Make it public for testing only public_class_method :sig
       end
     end
 
