@@ -19,6 +19,10 @@ module T::Types
       raise NotImplementedError
     end
 
+    def ===(obj)
+      valid?(obj)
+    end
+
     # @return [T::Boolean] This method must be implemented to return whether the subclass is a subtype
     # of `type`. This should only be called by `subtype_of?`, which guarantees that `type` will be
     # a "single" type, by which we mean it won't be a Union or an Intersection (c.f.
