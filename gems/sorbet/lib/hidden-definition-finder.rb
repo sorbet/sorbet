@@ -114,7 +114,7 @@ class Sorbet::Private::HiddenMethodFinder
     )
     File.write(SOURCE_CONSTANTS, io.read)
     io.close
-    raise "Your source can't be read by Sorbet.\nYou can try `srb tc --print=symbol-table-json -vvvv --max-threads 1` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
+    raise "Your source can't be read by Sorbet.\nYou can try `rm sorbet/config; find . -type f | xargs -L 1 -t srb tc --error-white-list 1000` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     # Change dir to deal with you having a sorbet/config in your cwd

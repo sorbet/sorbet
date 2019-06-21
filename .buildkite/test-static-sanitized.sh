@@ -12,10 +12,10 @@ esac
 
 if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
-  RUBY_TESTS=""
+  MAC_TESTS=""
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
-  RUBY_TESTS="@ruby_2_4_3//..."
+  MAC_TESTS="@ruby_2_4_3//... @gems//..."
 fi
 
 export JOB_NAME=test-static-sanitized
@@ -25,9 +25,12 @@ echo will run with $CONFIG_OPTS
 
 err=0
 
-if [ ! -z "$RUBY_TESTS" ]; then
-  # NOTE: runnihng ruby testing without the sanitized flags
-  ./bazel test $RUBY_TESTS --config=buildfarm --test_summary=terse || err=$?
+if [ -n "$MAC_TESTS" ]; then
+  # NOTE: running ruby/gem testing without the sanitized flags
+
+  # we actually want word splitting here
+  # shellcheck disable=SC2086
+  ./bazel test $MAC_TESTS --config=buildfarm --test_summary=terse || err=$?
 fi
 
 ./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?

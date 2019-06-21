@@ -297,18 +297,24 @@ The same thing holds for type templates.
 
 ## 5023
 
-Some modules require specific functionality in the receiving class to work. For example `Enumerable` needs a `each` method in the target class.
+Some modules require specific functionality in the receiving class to work. For
+example `Enumerable` needs a `each` method in the target class.
 
-Failing example in [sorbet.run](https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0Aend):
+Failing example in
+[sorbet.run](https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0Aend):
+
 ```
 class Example
   include Enumerable
 end
 ```
 
-To fix this, implement the required abstract methods in your class to provide the required functionality.
+To fix this, implement the required abstract methods in your class to provide
+the required functionality.
 
-Passing example in [sorbet.run](https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each(%26blk)%0A%0A%20%20end%0Aend):
+Passing example in
+[sorbet.run](<https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each(%26blk)%0A%0A%20%20end%0Aend>):
+
 ```
 class Example
   include Enumerable

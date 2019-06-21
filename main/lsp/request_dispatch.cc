@@ -93,6 +93,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             LSPResult result = pushDiagnostics(runSlowPath(move(changedFiles)));
             ENFORCE(result.gs);
             if (!disableFastPath) {
+                ShowOperation stateHashOp(*this, "GlobalStateHash", "Finishing initialization...");
                 this->globalStateHashes = computeStateHashes(result.gs->getFiles());
             }
             initialized = true;
