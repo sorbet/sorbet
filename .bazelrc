@@ -13,8 +13,8 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --crosstool_top=@llvm_toolchain//:toolchain
-test --crosstool_top=@llvm_toolchain//:toolchain
+build --crosstool_top=@llvm_toolchain//:toolchain --cxxopt=-D_LIBCPP_ENABLE_NODISCARD
+test --crosstool_top=@llvm_toolchain//:toolchain --cxxopt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
