@@ -200,6 +200,24 @@ private:
         return entry;
     }
 
+    // if/when we get final classes, we can just mark subclasses of `T::Struct` as final and essentially subsume the
+    // logic here.
+    void validateTStructNotGrandparent(const core::GlobalState &gs, core::SymbolRef sym) {
+        auto parent = sym.data(gs)->superClass();
+        if (!parent.exists()) {
+            return;
+        }
+        auto grandparent = parent.data(gs)->superClass();
+        if (!grandparent.exists() || grandparent != core::Symbols::T_Struct()) {
+            return;
+        }
+        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::SubclassingNotAllowed)) {
+            auto parentName = parent.data(gs)->show(gs);
+            e.setHeader("Subclassing `{}` is not allowed", parentName);
+            e.addErrorLine(parent.data(gs)->loc(), "`{}` is a subclass of `T::Struct`", parentName);
+        }
+    }
+
     void validateAbstract(const core::GlobalState &gs, core::SymbolRef sym) {
         if (sym.data(gs)->isClassAbstract()) {
             return;
@@ -234,6 +252,7 @@ public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         auto sym = classDef->symbol;
         validateAbstract(ctx.state, sym);
+        validateTStructNotGrandparent(ctx.state, sym);
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateAbstract(ctx.state, singleton);
         return classDef;
