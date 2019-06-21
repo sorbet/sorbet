@@ -235,7 +235,7 @@ public:
         return SymbolRef(nullptr, 41);
     }
 
-    // Used to mark the presence of an mixin that we were unable to
+    // Used to mark the presence of a mixin that we were unable to
     // statically resolve to a module
     static SymbolRef StubMixin() {
         return SymbolRef(nullptr, 42);
