@@ -376,6 +376,10 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = core::StrictLevel::False;
     }
 
+    return level;
+}
+
+void incrementStrictLevelCounter(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::None:
             Exception::raise("Should never happen");
@@ -408,8 +412,6 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
             prodCounterInc("types.input.files.sigil.stdlib");
             break;
     }
-
-    return level;
 }
 
 void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
@@ -453,7 +455,9 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
         fileData.sourceType = core::File::PayloadGeneration;
     }
 
-    fileData.strictLevel = decideStrictLevel(*gs, file, opts);
+    auto level = decideStrictLevel(*gs, file, opts);
+    fileData.strictLevel = level;
+    incrementStrictLevelCounter(level);
 }
 
 struct IndexResult {

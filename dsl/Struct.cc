@@ -17,6 +17,9 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     if (empty) {
         return ast::MK::EmptyTree();
     }
+    if (node->isSelfReference()) {
+        return ast::MK::EmptyTree();
+    }
     auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(node);
     ENFORCE(cnst);
     auto newScope = dupName(cnst->scope.get());

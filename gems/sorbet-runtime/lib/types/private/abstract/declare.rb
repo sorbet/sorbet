@@ -18,6 +18,10 @@ module T::Private::Abstract::Declare
     mod.extend(T::InterfaceWrapper::Helpers)
 
     if mod.is_a?(Class)
+      if mod < T::Struct
+        raise "#{mod.name} is a subclass of T::Struct and cannot be declared abstract"
+      end
+
       if type == :interface
         # Since `interface!` is just `abstract!` with some extra validation, we could technically
         # allow this, but it's unclear there are good use cases, and it might be confusing.

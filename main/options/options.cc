@@ -517,7 +517,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
             auto rawFiles = raw["files"].as<vector<string>>();
-            UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {

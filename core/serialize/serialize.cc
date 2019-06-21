@@ -413,7 +413,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
             return make_type<SelfType>();
         }
         default:
-            Exception::raise("Uknown type tag {}", tag);
+            Exception::raise("Unknown type tag {}", tag);
     }
 }
 
