@@ -146,7 +146,7 @@ def _setup_gem_export(repo_ctx, fetched_gems):
 
     # build up a string that contains all the quoted gem package file names, for
     # use with the `exports_files` rule in the `gems.BUILD` template.
-    quoted_gems = ", ".join([ "\"{}.gem\"".format(package_name) for package_name in fetched_gems ])
+    quoted_gems = ", ".join(["\"{}.gem\"".format(package_name) for package_name in fetched_gems])
 
     repo_ctx.template(
         "gems/BUILD",
