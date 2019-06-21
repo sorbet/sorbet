@@ -95,6 +95,12 @@ def main
 # ^ hover: Rational
   range = (-1..-5)
 # ^ hover: T::Range[Integer]
+  tup = [1, 2]
+# ^ hover: [Integer(1), Integer(2)] (2-tuple)
+  arr = T.let(tup, T::Array[Integer])
+# ^ hover: T::Array[Integer]
+  hash = Hash.new("default")
+# ^ hover: T::Hash[T.untyped, T.untyped]
 
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
