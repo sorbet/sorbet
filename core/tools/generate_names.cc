@@ -340,7 +340,7 @@ NameDef names[] = {
     {"File", "File", true},
     {"Static", "Static", true},
     {"StubModule", "StubModule", true},
-    {"StubSuperClass", "StubSuperclass", true},
+    {"StubSuperClass", "StubSuperClass", true},
     {"StubMixin", "StubMixin", true},
     {"Configatron", "Configatron", true},
     {"Store", "Store", true},
