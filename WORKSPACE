@@ -36,7 +36,9 @@ gemfile_lock_deps(
     name = "gems",
 
     # TODO: figure out how to discover these labels during the loading phase,
-    # rather that listing them out explicitly.
+    # rather that listing them out explicitly. `glob` doesn't work here, so
+    # we'll need to do something special within the `gemfile_lock_deps`
+    # repository rule.
     gemfile_locks = [
         "//gems/sorbet/test/snapshot:{}/src/Gemfile.lock".format(test)
         for test in [
@@ -47,7 +49,7 @@ gemfile_lock_deps(
             "partial/explosive-object",
             "partial/fake-object",
             "partial/fake-rails",
-            # "partial/local_gem",
+            "partial/local_gem",
             "partial/non-utf-8-file",
             "partial/partially-sigged",
             "partial/rails-double-require",
