@@ -120,6 +120,12 @@ class Index extends React.Component {
                   description:
                     'A set of tools to make Sorbet work with Rails seamlessly',
                 },
+                {
+                  title: 'Sord',
+                  link: 'https://github.com/AaronC81/sord',
+                  description:
+                    'A tool to generate RBIs from YARD documentation',
+                },
               ]}
             />
             <p>
