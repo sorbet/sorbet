@@ -182,11 +182,13 @@ public:
     void prune(core::Context, const AutoloaderConfig &);
     bool prunable(core::Context, const AutoloaderConfig &) const;
 
+    void merge(DefTree rhs);
+
     DefTree() = default;
     DefTree(const DefTree &) = delete;
     DefTree(DefTree &&) = default;
     DefTree &operator=(const DefTree &) = delete;
-    DefTree &operator=(DefTree &&) = delete;
+    DefTree &operator=(DefTree &&) = default;
 
 private:
     core::FileRef file() const;

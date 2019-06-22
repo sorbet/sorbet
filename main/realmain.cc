@@ -158,10 +158,10 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
-        vector<autogen::NamedDefinition> defs;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
+    autogen::DefTree defTree;
 };
 
 void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
@@ -173,7 +173,8 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         fileq->push(move(i), 1);
     }
 
-    workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, fileq, resultq]() {
+    autogen::AutoloaderConfig autoloaderCfg;
+    workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
@@ -204,9 +205,13 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 {
                     // TODO only on printer settings
+                    // TODO path filtering early out
                     Timer timeit(logger, "autogenNamedDefs");
                     for (auto &def : pf.defs) {
-                        serialized.defs.emplace_back(pf.toNamed(ctx, def.id));
+                        if (def.id.id() == 0) {
+                            continue;
+                        }
+                        out.defTree.addDef(ctx, autoloaderCfg, pf.toNamed(ctx, def.id));
                     }
                 }
 
@@ -218,6 +223,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         resultq->push(move(out), n);
     });
 
+    autogen::DefTree root;
     AutogenResult out;
     vector<pair<int, AutogenResult::Serialized>> merged;
     for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
@@ -227,11 +233,10 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         }
         counterConsume(move(out.counters));
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
+        root.merge(move(out.defTree));
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
-    autogen::DefTree root;
-    autogen::AutoloaderConfig autoloaderCfg;
     {
         Timer timeit(logger, "autogenAutoloaderDefTree");
         for (auto &elem : merged) {
@@ -241,13 +246,13 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             if (opts.print.AutogenMsgPack.enabled) {
                 opts.print.AutogenMsgPack.print(elem.second.msgpack);
             }
-            auto &defs = elem.second.defs;
-            for (auto &def : defs) {
-                if (def.def.id.id() == 0) {
-                    continue; // TODO what's going on with these
-                }
-                root.addDef(ctx, autoloaderCfg, def);
-            }
+            // auto &defs = elem.second.defs;
+            // for (auto &def : defs) {
+            //     if (def.def.id.id() == 0) {
+            //         continue; // TODO what's going on with these
+            //     }
+            //     root.addDef(ctx, autoloaderCfg, def);
+            // }
         }
     }
     {
