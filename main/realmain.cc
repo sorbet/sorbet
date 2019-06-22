@@ -202,9 +202,12 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     Timer timeit(logger, "autogenClasslist");
                     pf.classlist(ctx, serialized.classlist);
                 }
-                for (auto &def : pf.defs) {
-                    // TODO weird empty defs appearing
-                    serialized.defs.emplace_back(pf.toNamed(ctx, def.id));
+                {
+                    // TODO only on printer settings
+                    Timer timeit(logger, "autogenNamedDefs");
+                    for (auto &def : pf.defs) {
+                        serialized.defs.emplace_back(pf.toNamed(ctx, def.id));
+                    }
                 }
 
                 out.prints.emplace_back(make_pair(idx, serialized));
