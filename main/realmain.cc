@@ -203,7 +203,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     Timer timeit(logger, "autogenClasslist");
                     pf.classlist(ctx, serialized.classlist);
                 }
-                {
+                if (opts.print.AutogenAutoloader.enabled) {
                     // TODO only on printer settings
                     // TODO path filtering early out
                     Timer timeit(logger, "autogenNamedDefs");
@@ -233,35 +233,30 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         }
         counterConsume(move(out.counters));
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
-        root.merge(move(out.defTree));
+        if (opts.print.AutogenAutoloader.enabled) {
+            Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
+            root.merge(move(out.defTree));
+        }
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
-    {
-        Timer timeit(logger, "autogenAutoloaderDefTree");
-        for (auto &elem : merged) {
-            if (opts.print.Autogen.enabled) {
-                opts.print.Autogen.print(elem.second.strval);
-            }
-            if (opts.print.AutogenMsgPack.enabled) {
-                opts.print.AutogenMsgPack.print(elem.second.msgpack);
-            }
-            // auto &defs = elem.second.defs;
-            // for (auto &def : defs) {
-            //     if (def.def.id.id() == 0) {
-            //         continue; // TODO what's going on with these
-            //     }
-            //     root.addDef(ctx, autoloaderCfg, def);
-            // }
+    for (auto &elem : merged) {
+        if (opts.print.Autogen.enabled) {
+            opts.print.Autogen.print(elem.second.strval);
+        }
+        if (opts.print.AutogenMsgPack.enabled) {
+            opts.print.AutogenMsgPack.print(elem.second.msgpack);
         }
     }
-    {
-        Timer timeit(logger, "autogenAutoloaderPrune");
-        root.prune(ctx, autoloaderCfg);
-    }
     if (opts.print.AutogenAutoloader.enabled) {
-        Timer timeit(logger, "autogenAutoloaderWrite");
-        root.writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
+        {
+            Timer timeit(logger, "autogenAutoloaderPrune");
+            root.prune(ctx, autoloaderCfg);
+        }
+        {
+            Timer timeit(logger, "autogenAutoloaderWrite");
+            root.writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
+        }
     }
 
     if (opts.print.AutogenClasslist.enabled) {
