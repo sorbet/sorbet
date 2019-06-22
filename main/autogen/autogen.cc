@@ -846,6 +846,21 @@ bool DefTree::prunable(core::Context ctx, const AutoloaderConfig &alCfg) const {
     return true;
 }
 
+void DefTree::merge(DefTree rhs) {
+    ENFORCE(nameParts == rhs.nameParts, "Name mismatch for DefTree::merge");
+    namedDefs.insert(namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
+                     make_move_iterator(rhs.namedDefs.end()));
+    nonBehaviorDefs.insert(nonBehaviorDefs.end(), make_move_iterator(rhs.nonBehaviorDefs.begin()),
+                           make_move_iterator(rhs.nonBehaviorDefs.end()));
+    for (auto &[name, tree] : rhs.children) {
+        if (children.find(name) == children.end()) {
+            children[name] = move(tree);
+        } else {
+            children[name]->merge(move(*tree));
+        }
+    }
+}
+
 bool DefTree::hasDifferentFile(core::FileRef file) const {
     bool res = false;
     auto visit = [&](const DefTree &node) -> bool {
