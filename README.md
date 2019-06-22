@@ -25,6 +25,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 ## Table of Contents
 
 - [Sorbet user-facing design principles](#sorbet-user-facing-design-principles)
+- [Project Prerequisites] (#project-prerequisites)
 - [Quickstart](#quickstart)
 - [Learning how Sorbet works](#learning-how-sorbet-works)
 - [Building Sorbet](#building-sorbet)
@@ -99,6 +100,25 @@ Early in our project we've defined some guidelines for how working with sorbet s
     In order to make adoption possible at scale, we cannot require every team or
     project to adopt Sorbet all at once. Sorbet needs to support teams adopting
     it at different paces.
+    
+
+## Project Prerequisites
+
+### Ruby
+#### Sorbet tests the current major versions plus the 2 previous major
+versions (as on 6/22/2019: Ruby 2.6, 2.5, 2.4).
+
+###Operating Systems:
+#### Linux: Sorbet tests on Ubuntu 18 but expect it to work on
+almost everything using i686i.
+
+#### Mac OS: We test on OSX Mojave but we publish gems from Darwin
+version 14 (Yosemite) to 18 (Mojave) so we expect it to work on
+the older versions since it is a statically linked binary.
+
+#### Windows: We do not work on Windows so we do not have test
+experience on this platform. We welcome community help with this.
+
 
 ## Quickstart
 
