@@ -223,7 +223,6 @@ bazel-bin/main/sorbet foo.rb
 Running `bazel-bin/main/sorbet --help` will show lots of options. These are
 the common ones for contributors:
 
-
 - `-p <IR>`
   - Asks sorbet to print out any given intermediate representation.
   - See `--help` for available values of `<IR>`.
