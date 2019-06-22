@@ -86,3 +86,15 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 ```ruby
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
+
+## What platforms does Sorbet support?
+
+The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.4. We
+expect it to work on Ruby 2.3 through 2.6.
+
+The static check is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
+Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
+distributions. We use static linking on both platforms, so it should not depend
+on system libraries.
+
+There is currently no Windows support.
