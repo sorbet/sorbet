@@ -164,8 +164,8 @@ struct AutoloaderConfig { // TODO dynamic loading
 
 class DefTree {
 public:
-    std::string name;                                             // TODO switch to refs
-    UnorderedMap<std::string, std::unique_ptr<DefTree>> children; // TODO switch to refs
+    std::string name; // TODO switch to refs
+    UnorderedMap<std::string, std::unique_ptr<DefTree>> children;
     std::vector<NamedDefinition> namedDefs;
     std::vector<NamedDefinition> nonBehaviorDefs;
     std::vector<core::NameRef> nameParts;
