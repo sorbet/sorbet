@@ -95,7 +95,7 @@ unique_ptr<Expression> mergeStrings(DesugarContext dctx, core::Loc loc,
             dctx.ctx.state.enterNameUTF8(fmt::format(
                 "{}", fmt::map_join(stringsAccumulated.begin(), stringsAccumulated.end(), "", [&](const auto &expr) {
                     if (isa_tree<EmptyTree>(expr.get()))
-                        return std::basic_string_view("");
+                        return ""sv;
                     else
                         return cast_tree<Literal>(expr.get())->asString(dctx.ctx).data(dctx.ctx)->shortName(dctx.ctx);
                 }))));
