@@ -244,7 +244,8 @@ class Index extends React.Component {
               <a href="https://github.com/sorbet/sorbet/edit/master/website/siteConfig.js">
                 send a PR
               </a>
-              !
+              ! You can also see all the projects using Sorbet{' '}
+              <a href="https://github.com/topics/sorbet">on GitHub</a>.
             </p>
           </div>
         </PageSection>

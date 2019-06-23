@@ -134,6 +134,14 @@ class Index extends React.Component {
             </p>
           </div>
           <div>
+            <h1 id="users">Users</h1>
+            <p>
+              To get a feel for what Sorbet looks like in the wild, browse the
+              GitHub projects with{' '}
+              <a href="https://github.com/topics/sorbet">the topic sorbet</a>.
+            </p>
+          </div>
+          <div>
             <h1 id="legal">Legal</h1>
             <ul>
               <li>
