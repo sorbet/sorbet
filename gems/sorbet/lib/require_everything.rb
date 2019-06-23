@@ -151,16 +151,15 @@ class Sorbet::Private::RequireEverything
 
   def rails_load_paths
     rails = Object.const_get(:Rails)
-    _all_load_paths_method = rails.application.method(:_all_load_paths)
 
     # As per changes made to change the arity of this method:
     # https://github.com/rails/rails/commit/b6e17b6a4b67ccc9fac5fe16741c3db720f00959
     # This sets the `add_autoload_paths_to_load_path` parameter to `true` which will
     # provide parity with older versions of Rails prior to the mentioned commit.
-    if _all_load_paths_method.parameters == [:req, :add_autoload_paths_to_load_path]
-      _all_load_paths_method.call(true)
+    if Gem::Version.new(rails.version) > Gem::Version.new('6.0.0-rc')
+      rails.application.send(:_all_load_paths, true)
     else
-      _all_load_paths_method.call
+      rails.application.send(:_all_load_paths)
     end
   end
 
