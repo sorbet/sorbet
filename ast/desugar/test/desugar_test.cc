@@ -30,14 +30,3 @@ TEST(DesugarTest, SimpleDesugar) { // NOLINT
     sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
     auto o1 = sorbet::ast::desugar::node2Tree(ctx, move(ast));
 }
-
-TEST(DesugarTest, EmptyTreeDesugar) { // NOLINT
-    sorbet::core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    sorbet::core::UnfreezeNameTable nameTableAccess(gs);
-    sorbet::core::UnfreezeFileTable ft(gs);
-
-    auto ast = sorbet::parser::Parser::run(gs, "<test>", "\"#{}:\"");
-    sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
-    auto o1 = sorbet::ast::desugar::node2Tree(ctx, move(ast));
-}
