@@ -467,7 +467,9 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         return false;
     }
 
-    fmt::format_to(ss, "sig {{generated.");
+    // Note: Before running any substantial codemod to add generated sigs at Stripe, be sure to insert `generated.`
+    // in all the suggested sigs. (Either change this line below and recompile, or post-process using sed).
+    fmt::format_to(ss, "sig {{");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&

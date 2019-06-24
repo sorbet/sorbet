@@ -16,7 +16,7 @@ suggest-sig-garbage.rb:5: This function does not have a `sig` https://srb.help/7
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:5: Inserted `sig {generated.params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
+    suggest-sig-garbage.rb:5: Inserted `sig {params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
 `
      5 |def hazTwoArgs(a, b); 1; end;
         ^
@@ -29,7 +29,7 @@ suggest-sig-garbage.rb:7: This function does not have a `sig` https://srb.help/7
      7 |def baz
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:7: Inserted `sig {generated.returns(T.any(T::Array[T.untyped], String))}
+    suggest-sig-garbage.rb:7: Inserted `sig {returns(T.any(T::Array[T.untyped], String))}
 `
      7 |def baz
         ^
@@ -38,7 +38,7 @@ suggest-sig-garbage.rb:18: This function does not have a `sig` https://srb.help/
     18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:18: Inserted `sig {generated.void}
+    suggest-sig-garbage.rb:18: Inserted `sig {void}
 `
     18 |def bla; give_me_void; end
         ^
@@ -51,7 +51,7 @@ suggest-sig-garbage.rb:20: This function does not have a `sig` https://srb.help/
     20 |def bbq
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:20: Inserted `sig {generated.void}
+    suggest-sig-garbage.rb:20: Inserted `sig {void}
 `
     20 |def bbq
         ^
@@ -60,7 +60,7 @@ suggest-sig-garbage.rb:28: This function does not have a `sig` https://srb.help/
     28 |def idk(a); a / a + a * a; end
         ^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:28: Inserted `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:28: Inserted `sig {params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
 `
     28 |def idk(a); a / a + a * a; end
         ^
@@ -69,7 +69,7 @@ suggest-sig-garbage.rb:30: This function does not have a `sig` https://srb.help/
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:30: Inserted `sig {generated.returns(Integer)}
+    suggest-sig-garbage.rb:30: Inserted `sig {returns(Integer)}
 `
     30 |def give_me_literal; 1; end;
         ^
@@ -78,7 +78,7 @@ suggest-sig-garbage.rb:32: This function does not have a `sig` https://srb.help/
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:32: Inserted `sig {generated.returns(T::Array[T::Array[Integer]])}
+    suggest-sig-garbage.rb:32: Inserted `sig {returns(T::Array[T::Array[Integer]])}
 `
     32 |def give_me_literal_nested; [[1]]; end;
         ^
@@ -87,7 +87,7 @@ suggest-sig-garbage.rb:34: This function does not have a `sig` https://srb.help/
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:34: Inserted `sig {generated.returns(NilClass)}
+    suggest-sig-garbage.rb:34: Inserted `sig {returns(NilClass)}
 `
     34 |private def root_private; end
         ^
@@ -96,7 +96,7 @@ suggest-sig-garbage.rb:36: This function does not have a `sig` https://srb.help/
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:36: Inserted `sig {generated.returns(NilClass)}
+    suggest-sig-garbage.rb:36: Inserted `sig {returns(NilClass)}
 `
     36 |protected def root_protected; end
         ^
@@ -105,7 +105,7 @@ suggest-sig-garbage.rb:46: This function does not have a `sig` https://srb.help/
     46 |def foo(a)
         ^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:46: Inserted `sig {generated.params(a: Integer).returns(Integer)}
+    suggest-sig-garbage.rb:46: Inserted `sig {params(a: Integer).returns(Integer)}
 `
     46 |def foo(a)
         ^
@@ -114,7 +114,7 @@ suggest-sig-garbage.rb:56: This function does not have a `sig` https://srb.help/
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:56: Inserted `sig {generated.params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
+    suggest-sig-garbage.rb:56: Inserted `sig {params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
 `
     56 |def fooCond(a, cond)
         ^
@@ -123,7 +123,7 @@ suggest-sig-garbage.rb:64: This function does not have a `sig` https://srb.help/
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:64: Inserted `sig {generated.params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
+    suggest-sig-garbage.rb:64: Inserted `sig {params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
 `
     64 |def fooWhile(a, cond1, cond2)
         ^
@@ -132,7 +132,7 @@ suggest-sig-garbage.rb:74: This function does not have a `sig` https://srb.help/
     74 |def takesBlock
         ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:74: Inserted `sig {generated.returns(Integer)}
+    suggest-sig-garbage.rb:74: Inserted `sig {returns(Integer)}
 `
     74 |def takesBlock
         ^
@@ -141,7 +141,7 @@ suggest-sig-garbage.rb:79: This function does not have a `sig` https://srb.help/
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:79: Inserted `sig {generated.returns(T::Array[T.untyped])}
+    suggest-sig-garbage.rb:79: Inserted `sig {returns(T::Array[T.untyped])}
 `
     79 |def list_ints_or_empty_list
         ^
@@ -162,7 +162,7 @@ suggest-sig-garbage.rb:84: This function does not have a `sig` https://srb.help/
     84 |def dead(x)
         ^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:84: Inserted `sig {generated.params(x: Integer).void}
+    suggest-sig-garbage.rb:84: Inserted `sig {params(x: Integer).void}
 `
     84 |def dead(x)
         ^
@@ -171,7 +171,7 @@ suggest-sig-garbage.rb:92: This function does not have a `sig` https://srb.help/
     92 |def with_block
         ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:92: Inserted `sig {generated.returns(NilClass)}
+    suggest-sig-garbage.rb:92: Inserted `sig {returns(NilClass)}
 `
     92 |def with_block
         ^
@@ -188,7 +188,7 @@ suggest-sig-garbage.rb:118: This function does not have a `sig` https://srb.help
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:118: Inserted `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
+    suggest-sig-garbage.rb:118: Inserted `sig {params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
 `
      118 |def cantRun(a)
           ^
@@ -197,7 +197,7 @@ suggest-sig-garbage.rb:125: This function does not have a `sig` https://srb.help
      125 |def fooCondGeneratedCurly(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:124: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:124: Replaced with `sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 `
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
@@ -206,7 +206,7 @@ suggest-sig-garbage.rb:139: This function does not have a `sig` https://srb.help
      139 |def fooCondGeneratedDo(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:134: Replaced with `sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:134: Replaced with `sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 `
      134 |sig do
      135 |  params(a: T.untyped, cond: T::Boolean).
@@ -219,7 +219,7 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` https://srb.help
      148 |def updatesUntypedToProfiled(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:147: Replaced with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:147: Replaced with `sig {params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 `
      147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
      148 |def updatesUntypedToProfiled(a, cond)
@@ -228,7 +228,7 @@ suggest-sig-garbage.rb:152: This function does not have a `sig` https://srb.help
      152 |def recur
           ^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:152: Inserted `sig {generated.returns(::T::Utils::RuntimeProfiled)}
+    suggest-sig-garbage.rb:152: Inserted `sig {returns(::T::Utils::RuntimeProfiled)}
 `
      152 |def recur
           ^
@@ -237,7 +237,7 @@ suggest-sig-garbage.rb:41: This function does not have a `sig` https://srb.help/
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:41: Inserted `sig {generated.returns(NilClass)}
+    suggest-sig-garbage.rb:41: Inserted `sig {returns(NilClass)}
   `
     41 |  private def a_private; end
           ^
@@ -246,7 +246,7 @@ suggest-sig-garbage.rb:43: This function does not have a `sig` https://srb.help/
     43 |  protected def a_protected; end
                     ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:43: Inserted `sig {generated.returns(NilClass)}
+    suggest-sig-garbage.rb:43: Inserted `sig {returns(NilClass)}
   `
     43 |  protected def a_protected; end
           ^
@@ -271,7 +271,7 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` https://srb.help
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-garbage.rb:112: Inserted `sig {generated.params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
+    suggest-sig-garbage.rb:112: Inserted `sig {params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
@@ -296,10 +296,10 @@ Errors: 39
 
 extend T::Sig
 
-sig {generated.params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
+sig {params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
 def hazTwoArgs(a, b); 1; end;
 
-sig {generated.returns(T.any(T::Array[T.untyped], String))}
+sig {returns(T.any(T::Array[T.untyped], String))}
 def baz
   if someCondition
     []
@@ -311,10 +311,10 @@ end
 sig {void}
 def give_me_void; end
 
-sig {generated.void}
+sig {void}
 def bla; give_me_void; end
 
-sig {generated.void}
+sig {void}
 def bbq
   if someCondition
     give_me_void
@@ -323,32 +323,32 @@ def bbq
   end
 end
 
-sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
+sig {params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
 def idk(a); a / a + a * a; end
 
-sig {generated.returns(Integer)}
+sig {returns(Integer)}
 def give_me_literal; 1; end;
 
-sig {generated.returns(T::Array[T::Array[Integer]])}
+sig {returns(T::Array[T::Array[Integer]])}
 def give_me_literal_nested; [[1]]; end;
 
-sig {generated.returns(NilClass)}
+sig {returns(NilClass)}
 private def root_private; end
 
-sig {generated.returns(NilClass)}
+sig {returns(NilClass)}
 protected def root_protected; end
 
 class A
   extend T::Sig
 
-  sig {generated.returns(NilClass)}
+  sig {returns(NilClass)}
   private def a_private; end
 
-  sig {generated.returns(NilClass)}
+  sig {returns(NilClass)}
   protected def a_protected; end
 end
 
-sig {generated.params(a: Integer).returns(Integer)}
+sig {params(a: Integer).returns(Integer)}
 def foo(a)
  1 + a
 end
@@ -359,7 +359,7 @@ def takesInt(a); end;
 sig {params(a: String).void}
 def takesString(a); end;
 
-sig {generated.params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
+sig {params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
 def fooCond(a, cond)
   if cond
     takesInt(a)
@@ -368,7 +368,7 @@ def fooCond(a, cond)
   end
 end
 
-sig {generated.params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
+sig {params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
 def fooWhile(a, cond1, cond2)
   while cond2
     if cond1
@@ -379,19 +379,19 @@ def fooWhile(a, cond1, cond2)
   end
 end
 
-sig {generated.returns(Integer)}
+sig {returns(Integer)}
 def takesBlock
   yield 1
   2
 end
 
-sig {generated.returns(T::Array[T.untyped])}
+sig {returns(T::Array[T.untyped])}
 def list_ints_or_empty_list
   x = T.let(1, T.nilable(Integer))
   x.nil? ? [x] : []
 end
 
-sig {generated.params(x: Integer).void}
+sig {params(x: Integer).void}
 def dead(x)
   if true || qux || blah
     takesInt(x)
@@ -400,7 +400,7 @@ def dead(x)
   end
 end
 
-sig {generated.returns(NilClass)}
+sig {returns(NilClass)}
 def with_block
   yield
   nil
@@ -422,21 +422,21 @@ class TestCarash
   def self.blar(merchant:)
   end
 
-  sig {generated.params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
+  sig {params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
   def self.load_account_business_profile(merchant)
     blar(merchant: merchant)
     1
   end
 end
 
-sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
+sig {params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
 def cantRun(a)
   takesInt(a)
   takesString(a)
   1
 end
 
-sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -446,7 +446,7 @@ def fooCondGeneratedCurly(a, cond)
 end
 
 
-sig {generated.params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedDo(a, cond)
   if cond
     takesInt(a)
@@ -455,12 +455,12 @@ def fooCondGeneratedDo(a, cond)
   end
 end
 
-sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
+sig {params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 def updatesUntypedToProfiled(a, cond)
   a.baz
 end
 
-sig {generated.returns(::T::Utils::RuntimeProfiled)}
+sig {returns(::T::Utils::RuntimeProfiled)}
 def recur
   recur
 end
