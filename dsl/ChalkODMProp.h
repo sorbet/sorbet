@@ -34,7 +34,6 @@ public:
     struct Prop {};
 
     struct NodesAndProp {
-        // invariant: !nodes.empty().
         std::vector<std::unique_ptr<ast::Expression>> nodes;
         Prop prop;
     };
