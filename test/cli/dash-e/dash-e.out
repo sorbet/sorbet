@@ -9,7 +9,7 @@ class ::<root> < ::Object () @ (https://github.com/sorbet/sorbet/tree/master/baz
      2 |def foo; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    -e:2: Insert `sig {generated.returns(NilClass)}
+    -e:2: Insert `sig {returns(NilClass)}
 `
      2 |def foo; end
         ^
