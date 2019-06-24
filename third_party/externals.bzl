@@ -138,10 +138,12 @@ package(default_visibility = ["//visibility:public"])
         build_file = "//third_party:parser.BUILD",
     )
 
+    # NOTE: using this branch:
+    # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     git_repository(
         name = "com_grail_bazel_toolchain",
         remote = "https://github.com/DarkDimius/bazel-toolchain.git",
-        commit = "7110338e4804c49073b41abc1dcda6b14405ef8a",
+        commit = "fc345f29d7a2b5dd431be006b36be1b3d3936987",
     )
 
     git_repository(
