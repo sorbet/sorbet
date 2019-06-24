@@ -9,4 +9,4 @@ assets for the logo).
 
 - Looking for the <https://sorbet.run> (Sorbet playground) sources?
 
-  [→ https://github.com/stripe/sorbet.run](https://github.com/stripe/sorbet.run)
+  [→ https://github.com/sorbet/sorbet.run](https://github.com/sorbet/sorbet.run)
