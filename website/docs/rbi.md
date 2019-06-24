@@ -181,6 +181,13 @@ the source folders for every gem in a project. If any gems have a top-level
 `rbi/` or `rbis/` folder, `srb` will collect the paths to any such folders into
 a file (`sorbet/rbi_list`) and mention this file in the `sorbet/config` file.
 
+If you add a gem that have a `rbi/` or `rbis/` folder, rerunning `sorbet-typed` 
+command will update the `sorbet/rbi_list`.
+
+```bash
+srb rbi sorbet-typed
+```
+
 ## The Hidden Definition RBI
 
 When typechecking an existing Ruby project with Sorbet, usually type annotations
