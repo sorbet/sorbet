@@ -778,17 +778,11 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     return what;
 }
 
-class DefinionLinesBlacklistEnforcer {
-    core::FileRef file;
-    int prohibitedLinesStart;
-    int prohibitedLinesEnd;
-
-public:
-    DefinionLinesBlacklistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
-        : file(file), prohibitedLinesStart(prohibitedLinesStart), prohibitedLinesEnd(prohibitedLinesEnd) {
-        ENFORCE(prohibitedLinesStart < prohibitedLinesEnd);
-        ENFORCE(file.exists());
-    };
+class DefinitionLinesBlacklistEnforcer {
+private:
+    const core::FileRef file;
+    const int prohibitedLinesStart;
+    const int prohibitedLinesEnd;
 
     bool isWhiteListed(core::Context ctx, core::SymbolRef sym) {
         // allow <static-init> and others
@@ -805,9 +799,15 @@ public:
         if (isWhiteListed(ctx, sym)) {
             return;
         }
-        ENFORCE(prohibitedLinesStart < prohibitedLinesEnd);
         checkLoc(ctx, sym.data(ctx)->loc());
     }
+
+public:
+    DefinitionLinesBlacklistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
+        : file(file), prohibitedLinesStart(prohibitedLinesStart), prohibitedLinesEnd(prohibitedLinesEnd) {
+        ENFORCE(prohibitedLinesStart < prohibitedLinesEnd);
+        ENFORCE(file.exists());
+    };
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         checkSym(ctx, original->symbol);
@@ -821,7 +821,7 @@ public:
 
 ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
                                                         int prohibitedLinesStart, int prohibitedLinesEnd) {
-    DefinionLinesBlacklistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
+    DefinitionLinesBlacklistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
     what.tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), enforcer, move(what.tree));
     return what;
 }
@@ -859,7 +859,9 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
         if (opts.stressIncrementalResolver) {
             for (auto &f : what) {
-                int prohibitedLines = f.file.data(*gs).source().size();
+                // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no locations
+                // appear before file's old EOF.
+                const int prohibitedLines = f.file.data(*gs).source().size();
                 auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
                 auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
                                                        f.file.data(*gs).sourceType);
