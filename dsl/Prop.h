@@ -29,18 +29,11 @@ namespace sorbet::dsl {
  * of the DSL pass on the classDef, we can construct an `initialize` method with good static types.
  *
  */
-class ChalkODMProp final {
+class Prop final {
 public:
-    struct Prop {};
+    static void patchDSL(core::MutableContext ctx, ast::ClassDef *klass);
 
-    struct NodesAndProp {
-        std::vector<std::unique_ptr<ast::Expression>> nodes;
-        Prop prop;
-    };
-
-    static std::optional<NodesAndProp> replaceDSL(core::MutableContext ctx, ast::Send *send);
-
-    ChalkODMProp() = delete;
+    Prop() = delete;
 };
 
 } // namespace sorbet::dsl

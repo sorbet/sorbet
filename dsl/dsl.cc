@@ -2,7 +2,6 @@
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
-#include "dsl/ChalkODMProp.h"
 #include "dsl/ClassNew.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
@@ -12,6 +11,7 @@
 #include "dsl/MixinEncryptedProp.h"
 #include "dsl/OpusEnum.h"
 #include "dsl/Private.h"
+#include "dsl/Prop.h"
 #include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Rails.h"
 #include "dsl/Struct.h"
@@ -29,10 +29,10 @@ public:
         Command::patchDSL(ctx, classDef.get());
         Rails::patchDSL(ctx, classDef.get());
         OpusEnum::patchDSL(ctx, classDef.get());
+        Prop::patchDSL(ctx, classDef.get());
 
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
-        vector<ChalkODMProp::Prop> props;
         for (auto &stat : classDef->rhs) {
             typecase(
                 stat.get(),
@@ -57,15 +57,6 @@ public:
                 },
 
                 [&](ast::Send *send) {
-                    // This one is different: it returns nodes and a prop.
-                    auto nodesAndProp = ChalkODMProp::replaceDSL(ctx, send);
-                    if (nodesAndProp.has_value()) {
-                        ENFORCE(!nodesAndProp->nodes.empty(), "nodesAndProp with value must not have nodes be empty");
-                        replaceNodes[stat.get()] = std::move(nodesAndProp->nodes);
-                        props.push_back(std::move(nodesAndProp->prop));
-                        return;
-                    }
-
                     auto nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
