@@ -1,0 +1,37 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C Nilable><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"foo" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).void()
+    end
+
+    def initialize<<C <todo sym>>>(foo: = ::T.unsafe(nil), &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new().foo())
+
+  <emptyTree>::<C Nilable>.new({:"foo" => "no"})
+
+  <emptyTree>::<C Nilable>.new({:"foo" => 3, :"bar" => 4})
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new({:"foo" => 3}).foo())
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new({:"foo" => nil}).foo())
+end

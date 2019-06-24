@@ -1,0 +1,51 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C SomeDefault><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"foo" => <emptyTree>::<C Integer>, :"bar" => <emptyTree>::<C T>::<C Boolean>}).void()
+    end
+
+    def initialize<<C <todo sym>>>(foo:, bar: = ::T.unsafe(nil), &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
+    def bar<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Boolean>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C T>::<C Boolean>}).returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
+    def bar=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Boolean>)
+    end
+  end
+
+  <emptyTree>::<C SomeDefault>.new({:"foo" => 1})
+
+  <emptyTree>::<C SomeDefault>.new({:"foo" => 2, :"bar" => true})
+
+  <emptyTree>::<C SomeDefault>.new({:"foo" => 3, :"bar" => false})
+
+  <emptyTree>::<C SomeDefault>.new()
+end
