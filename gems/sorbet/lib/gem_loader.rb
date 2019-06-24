@@ -371,6 +371,9 @@ class Sorbet::Private::GemLoader
       my_require 'sequel'
       my_require 'sequel/sql'
     end,
+    'sequel_pg' => proc do
+      my_require 'sequel'
+    end,
     'will_paginate' => proc do
       my_require 'will_paginate'
       my_require 'will_paginate/collection'
