@@ -30,7 +30,7 @@ buildkite-agent artifact download "_out_/**/*" .
 echo "--- releasing sorbet.run"
 
 rm -rf sorbet.run
-git clone git@github.com:stripe/sorbet.run.git
+git clone git@github.com:sorbet/sorbet.run.git
 tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
 mv sorbet-wasm.wasm sorbet.run/docs
 mv sorbet-wasm.js sorbet.run/docs
