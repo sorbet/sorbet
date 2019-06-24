@@ -13,13 +13,13 @@ namespace sorbet::dsl {
  *
  *   sig {returns(Type)}
  *   def foo; ...; end
- *   sig {params(x: Type).returns(Type)}
- *   def foo=(x); ...; end
+ *   sig {params(arg0: Type).returns(Type)}
+ *   def foo=(arg0); ...; end
  *   class Mutator < Chalk::ODM::Mutator
  *     sig {returns(Type)}
- *     def foo(x); end
- *     sig {params(x: Type).returns(Type)}
- *     def foo=(x); end
+ *     def foo(arg0); end
+ *     sig {params(arg0: Type).returns(Type)}
+ *     def foo=(arg0); end
  *   end
  *
  * We try to implement a simple approximation of the functionality that Chalk::ODM::Document.prop has. Any deviation
