@@ -20,10 +20,6 @@ struct NodesAndPropInfo {
 };
 
 optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send) {
-    if (ctx.state.runningUnderAutogen) {
-        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
-        return std::nullopt;
-    }
     bool isImmutable = false; // Are there no setters?
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
@@ -312,6 +308,10 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 } // namespace
 
 void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+    if (ctx.state.runningUnderAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return;
+    }
     UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
     vector<PropInfo> props;
     for (auto &stat : klass->rhs) {
