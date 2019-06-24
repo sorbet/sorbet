@@ -12,7 +12,7 @@ Begin {
         args = [
         ]
       }
-      method = <U !>
+      method = <U call>
       args = [
         Integer {
           val = "1"

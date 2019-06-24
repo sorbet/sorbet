@@ -391,7 +391,8 @@ public:
 
         core::NameRef method;
         if (selector == nullptr) {
-            method = core::Names::bang();
+            // when the selector is missing, this is a use of the `call` method.
+            method = core::Names::call();
         } else {
             method = gs_.enterNameUTF8(selector->string());
         }
