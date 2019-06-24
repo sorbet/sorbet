@@ -11,12 +11,10 @@ using namespace std;
 
 namespace sorbet::dsl {
 
-vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
-    vector<unique_ptr<ast::Expression>> empty;
-
+optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     if (ctx.state.runningUnderAutogen) {
         // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
-        return empty;
+        return std::nullopt;
     }
 
     bool isImmutable = false; // Are there no setters?
@@ -59,18 +57,18 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             break;
 
         default:
-            return empty;
+            return std::nullopt;
     }
 
     if ((!name.exists() && send->args.empty()) || send->args.size() > 3) {
-        return empty;
+        return std::nullopt;
     }
     auto loc = send->loc;
 
     if (!name.exists()) {
         auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
         if (!sym || !sym->isSymbol(ctx)) {
-            return empty;
+            return std::nullopt;
         }
         name = sym->asSymbol(ctx);
         ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
@@ -92,7 +90,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (rules == nullptr) {
         if (type == nullptr) {
             // No type, and rules isn't a hash: This isn't a T::Props prop
-            return empty;
+            return std::nullopt;
         }
         if (send->args.size() == 3) {
             // Three args. We need name, type, and either rules, or, for
@@ -100,7 +98,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             if (auto thunk = thunkBody(ctx, send->args.back().get())) {
                 foreign = std::move(thunk);
             } else {
-                return empty;
+                return std::nullopt;
             }
         }
     }
@@ -126,11 +124,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (type == nullptr) {
         auto [arrayLit, arrayType] = ASTUtil::extractHashValue(ctx, *rules, core::Names::array());
         if (!arrayType.get()) {
-            return empty;
+            return std::nullopt;
         }
         if (!ASTUtil::dupType(arrayType.get())) {
             ASTUtil::putBackHashValue(ctx, *rules, move(arrayLit), move(arrayType));
-            return empty;
+            return std::nullopt;
         } else {
             type = ast::MK::Send1(loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
                                   core::Names::squareBrackets(), std::move(arrayType));
@@ -140,24 +138,22 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (auto *snd = ast::cast_tree<ast::Send>(type.get())) {
         if (snd->fun == core::Names::coerce()) {
             // TODO: either support T.coerce or remove it from pay-server
-            return empty;
+            return std::nullopt;
         }
     }
     ENFORCE(type != nullptr, "No obvious type AST for this prop");
     auto getType = ASTUtil::dupType(type.get());
     ENFORCE(getType != nullptr);
 
-    // From this point, we can't `return empty` anymore since we're going to be
-    // consuming the tree.
+    // From this point, we can't `return std::nullopt` anymore since we're going to be consuming the tree.
 
-    vector<unique_ptr<ast::Expression>> stats;
+    ChalkODMProp::NodesAndProp ret;
 
     // Compute the getters
     if (rules) {
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
-
         // e.g. `const :foo, type, computed_by: :method_name`
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
@@ -169,11 +165,10 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                     // error that value is not a symbol
                     auto typeSymbol =
                         ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
-                    stats.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
+                    ret.nodes.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
                 }
             }
         }
-
         if (foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
             foreign = move(foreignTree);
@@ -183,7 +178,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         }
     }
 
-    stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
+    ret.nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
 
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
@@ -195,9 +190,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
                                                  computedByMethodName, std::move(unsafeNil));
         auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
                                                      ASTUtil::dupType(getType.get()));
-        stats.emplace_back(mkGet(loc, name, std::move(assertTypeMatches)));
+        ret.nodes.emplace_back(mkGet(loc, name, std::move(assertTypeMatches)));
     } else {
-        stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+        ret.nodes.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -205,10 +200,10 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     // Compute the setter
     if (!isImmutable) {
         auto setType = ASTUtil::dupType(type.get());
-        stats.emplace_back(ast::MK::Sig(
+        ret.nodes.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        stats.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+        ret.nodes.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
     }
 
     // Compute the `_` foreign accessor
@@ -225,7 +220,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         }
 
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
-        stats.emplace_back(
+        ret.nodes.emplace_back(
             ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
 
         // def $fk_method(**opts)
@@ -236,12 +231,13 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        stats.emplace_back(ast::MK::Method1(loc, loc, fk_method, std::move(arg),
-                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
+        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fk_method, std::move(arg),
+                                                ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+                                                ast::MethodDef::DSLSynthesized));
 
         // sig {params(opts: T.untyped).returns($foreign)}
-        stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
-                                         std::move(nonNilType)));
+        ret.nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
+                                             std::move(nonNilType)));
 
         // def $fk_method_bang(**opts)
         //  T.unsafe(nil)
@@ -250,8 +246,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         auto fk_method_bang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
         unique_ptr<ast::Expression> arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        stats.emplace_back(ast::MK::Method1(loc, loc, fk_method_bang, std::move(arg2),
-                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
+        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fk_method_bang, std::move(arg2),
+                                                ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+                                                ast::MethodDef::DSLSynthesized));
     }
 
     // Compute the Mutator
@@ -297,12 +294,13 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = core::Names::Constants::Mutator();
-            stats.emplace_back(ast::MK::Class(loc, loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
-                                              std::move(ancestors), std::move(rhs), ast::ClassDefKind::Class));
+            ret.nodes.emplace_back(ast::MK::Class(loc, loc,
+                                                  ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
+                                                  std::move(ancestors), std::move(rhs), ast::ClassDefKind::Class));
         }
     }
 
-    return stats;
+    return ret;
 }
 
 }; // namespace sorbet::dsl

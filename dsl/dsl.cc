@@ -32,6 +32,7 @@ public:
 
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
+        vector<ChalkODMProp::Prop> props;
         for (auto &stat : classDef->rhs) {
             typecase(
                 stat.get(),
@@ -56,13 +57,16 @@ public:
                 },
 
                 [&](ast::Send *send) {
-                    auto nodes = ChalkODMProp::replaceDSL(ctx, send);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
+                    // This one is different: it returns nodes and a prop.
+                    auto nodesAndProp = ChalkODMProp::replaceDSL(ctx, send);
+                    if (nodesAndProp.has_value()) {
+                        ENFORCE(!nodesAndProp->nodes.empty(), "nodesAndProp with value must not have nodes be empty");
+                        replaceNodes[stat.get()] = std::move(nodesAndProp->nodes);
+                        props.push_back(std::move(nodesAndProp->prop));
                         return;
                     }
 
-                    nodes = MixinEncryptedProp::replaceDSL(ctx, send);
+                    auto nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
@@ -113,12 +117,12 @@ public:
         classDef->rhs.reserve(oldRHS.size());
 
         for (auto &stat : oldRHS) {
-            if (replaceNodes.find(stat.get()) != replaceNodes.end()) {
+            if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
+                classDef->rhs.emplace_back(std::move(stat));
+            } else {
                 for (auto &newNode : replaceNodes.at(stat.get())) {
                     classDef->rhs.emplace_back(std::move(newNode));
                 }
-            } else {
-                classDef->rhs.emplace_back(std::move(stat));
             }
         }
         return classDef;
