@@ -17,7 +17,7 @@ namespace sorbet::dsl {
  *   def foo=(arg0); ...; end
  *   class Mutator < Chalk::ODM::Mutator
  *     sig {returns(Type)}
- *     def foo(arg0); end
+ *     def foo; end
  *     sig {params(arg0: Type).returns(Type)}
  *     def foo=(arg0); end
  *   end
