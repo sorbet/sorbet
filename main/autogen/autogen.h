@@ -83,14 +83,17 @@ struct ParsedFile {
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
     void classlist(core::Context ctx, std::vector<std::string> &out);
-    void subclasses(core::Context ctx, std::set<std::string> &parentClasses,
-                    std::vector<std::string> &absolutePathsToIgnore, std::vector<std::string> &relativePathsToIgnore,
-                    std::map<std::string, std::set<std::string>> &out);
+    void subclasses(core::Context ctx, std::vector<std::string> &absolutePathsToIgnore,
+                    std::vector<std::string> &relativePathsToIgnore,
+                    std::map<std::string, std::set<std::pair<std::string, Definition::Type>>> &out);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
     friend class MsgpackWriter;
 };
+
+void descendantsOf(std::map<std::string, std::set<std::pair<std::string, Definition::Type>>> &childMap,
+                   std::string &parent, std::set<std::pair<std::string, Definition::Type>> &out);
 
 class Autogen final {
 public:

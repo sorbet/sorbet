@@ -158,7 +158,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
-        map<string, set<string>> subclasses;
+        map<string, set<pair<string, autogen::Definition::Type>>> subclasses;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -204,7 +204,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 if (opts.print.AutogenSubclasses.enabled) {
                     Timer timeit(logger, "autogenSubclasses");
-                    pf.subclasses(ctx, opts.autogenSubclassesParents, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                    pf.subclasses(ctx, opts.autogenSubclassesAbsoluteIgnorePatterns,
                                   opts.autogenSubclassesRelativeIgnorePatterns, serialized.subclasses);
                 }
                 out.prints.emplace_back(make_pair(idx, serialized));
@@ -250,7 +250,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         Timer timeit(logger, "autogenSubclassesPrint");
 
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
-        map<string, set<string>> mergedSubclasses;
+        map<string, set<pair<string, autogen::Definition::Type>>> mergedSubclasses;
         for (auto &el : merged) {
             for (auto const &[parentName, children] : el.second.subclasses) {
                 if (parentName.empty()) {
@@ -261,11 +261,25 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             }
         }
 
+        // Generate descendants for each passed-in superclass
+        map<string, set<pair<string, autogen::Definition::Type>>> descendantsMap;
+        for (string parent : opts.autogenSubclassesParents) {
+            set<pair<string, autogen::Definition::Type>> descendants;
+            sorbet::autogen::descendantsOf(mergedSubclasses, parent, descendants);
+            descendantsMap[parent] = descendants;
+        }
+
         vector<string> mergedSubclasseslist;
-        for (auto const &[parentName, children] : mergedSubclasses) {
-            mergedSubclasseslist.insert(mergedSubclasseslist.end(), parentName);
-            for (auto const child : children) {
-                mergedSubclasseslist.insert(mergedSubclasseslist.end(), fmt::format(" {}", child));
+        for (string parent : opts.autogenSubclassesParents) {
+            if (!descendantsMap.count(parent)) {
+                continue;
+            }
+            mergedSubclasseslist.insert(mergedSubclasseslist.end(), parent);
+            for (auto const &entry : descendantsMap[parent]) {
+                if (entry.second != autogen::Definition::Type::Class) {
+                    continue;
+                }
+                mergedSubclasseslist.insert(mergedSubclasseslist.end(), fmt::format(" {}", entry.first));
             }
         }
         opts.print.AutogenSubclasses.fmt("{}\n",

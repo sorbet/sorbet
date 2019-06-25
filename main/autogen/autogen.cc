@@ -688,8 +688,9 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
     }
 }
 
-void ParsedFile::subclasses(core::Context ctx, set<string> &parentClasses, vector<string> &absolutePathsToIgnore,
-                            vector<string> &relativePathsToIgnore, map<string, set<string>> &out) {
+void ParsedFile::subclasses(core::Context ctx, vector<string> &absolutePathsToIgnore,
+                            vector<string> &relativePathsToIgnore,
+                            map<string, set<pair<string, Definition::Type>>> &out) {
     // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
     if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
         return;
@@ -708,9 +709,22 @@ void ParsedFile::subclasses(core::Context ctx, set<string> &parentClasses, vecto
         string parentName = fmt::format("{}", fmt::map_join(ref.resolved, "::", nameToString));
 
         // Add child class to the set identified by its parent
-        string childName = fmt::format("{},{}", fmt::map_join(showFullName(ctx, defn), "::", nameToString),
-                                       defn.data(*this).typeAsStringView());
-        out[parentName].insert(childName);
+        string childName = fmt::format("{}", fmt::map_join(showFullName(ctx, defn), "::", nameToString));
+
+        out[parentName].insert(make_pair(childName, defn.data(*this).type));
+    }
+}
+
+void descendantsOf(map<string, set<pair<string, Definition::Type>>> &childMap, string &parentName,
+                   set<pair<string, Definition::Type>> &out) {
+    if (!childMap.count(parentName)) {
+        return;
+    }
+    set<pair<string, Definition::Type>> &childNames = childMap[parentName];
+
+    out.insert(childNames.begin(), childNames.end());
+    for (auto childName : childMap[parentName]) {
+        autogen::descendantsOf(childMap, childName.first, out);
     }
 }
 

@@ -161,7 +161,7 @@ struct Options {
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
     // A list of parent classes to be used in `-p autogen-subclasses`
-    std::set<std::string> autogenSubclassesParents;
+    std::vector<std::string> autogenSubclassesParents;
     // Ignore patterns beginning from the root of an input folder.
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
