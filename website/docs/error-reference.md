@@ -479,7 +479,8 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
 
     See the [RBI](rbi.md) docs for how to regenerate the `*.rbi` files.
 
-1.  <a class="anchor" aria-hidden="true" id="include-kernel"></a>Sorbet will complain about this code:
+1.  <a class="anchor" aria-hidden="true" id="include-kernel"></a>Sorbet will
+    complain about this code:
 
     ```ruby
     module MyModule; end
