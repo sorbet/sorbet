@@ -346,6 +346,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) {
         gs->runningUnderAutogen = true;
     }
+    if (opts.censorRawLocsWithinPayload) {
+        gs->censorRawLocsWithinPayload = true;
+    }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
     }
