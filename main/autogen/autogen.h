@@ -173,15 +173,16 @@ private:
 
 class DefTree {
 public:
-    std::string name; // TODO switch to refs
-    UnorderedMap<std::string, std::unique_ptr<DefTree>> children;
+    UnorderedMap<core::NameRef, std::unique_ptr<DefTree>> children;
     std::vector<NamedDefinition> namedDefs;
     std::vector<NamedDefinition> nonBehaviorDefs;
     std::vector<core::NameRef> nameParts;
 
     bool root() const;
+    core::NameRef name() const;
     void addDef(core::Context, const AutoloaderConfig &, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
+    std::string fullName(core::Context) const;
 
     void writeAutoloads(core::Context ctx, const AutoloaderConfig &, std::string path);
     std::string autoloads(core::Context ctx, const AutoloaderConfig &);
@@ -205,8 +206,8 @@ private:
     void requires(core::Context ctx, const AutoloaderConfig &, fmt::memory_buffer &buf);
     bool hasDifferentFile(core::FileRef) const;
     bool hasDef() const;
-    NamedDefinition &definition();
-    Definition::Type definitionType();
+    NamedDefinition &definition(core::Context);
+    Definition::Type definitionType(core::Context);
 };
 
 struct Reference {
