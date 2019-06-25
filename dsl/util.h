@@ -9,6 +9,7 @@ namespace sorbet::dsl {
 class ASTUtil {
 public:
     static std::unique_ptr<ast::Expression> dupType(const ast::Expression *orig);
+    static bool hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name);
     static bool hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name);
 
     /** Removes the key, value matching key with symbol `name` from hash and returns it */
