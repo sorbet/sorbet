@@ -67,7 +67,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
     return ast::MK::UnresolvedConstant(cons->loc, std::move(scope), cons->cnst);
 }
 
-bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
+bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
     int i = -1;
     for (const auto &keyExpr : hash.keys) {
         i++;

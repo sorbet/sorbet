@@ -116,7 +116,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
     }
 
     if (type == nullptr) {
-        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::enum_())) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::enum_())) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
             type = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
@@ -154,11 +154,11 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
     // Compute the getters
     if (rules) {
-        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::immutable())) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
         // e.g. `const :foo, type, computed_by: :method_name`
-        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::computedBy())) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
             if (auto *lit = ast::cast_tree<ast::Literal>(val.get())) {
                 if (lit->isSymbol(ctx)) {
