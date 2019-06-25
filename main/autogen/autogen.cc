@@ -698,11 +698,12 @@ void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alCon
         if (def.id.id() == 0) {
             continue;
         }
-        root.addDef(ctx, alConfig, toNamed(ctx, def.id));
+        NamedDefinition namedDef = toNamed(ctx, def.id);
+        root.addDef(ctx, alConfig, move(namedDef));
     }
 }
 
-void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const NamedDefinition &ndef) {
+void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefinition ndef) {
     if (!alCfg.include(ndef)) {
         return;
     }
@@ -717,9 +718,9 @@ void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const Nam
         node = &*child; // TODO yuck
     }
     if (ndef.def.defines_behavior) {
-        node->namedDefs.emplace_back(ndef);
+        node->namedDefs.emplace_back(move(ndef));
     } else {
-        node->nonBehaviorDefs.emplace_back(ndef);
+        node->nonBehaviorDefs.emplace_back(move(ndef));
     }
 }
 
