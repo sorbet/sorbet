@@ -181,7 +181,7 @@ anticipate this to be the preferred way to include RBI files into a project.
 last run. If there are changes (or if it has never run with this specific hash
 before) it will check every gem to see if they have a `rbi/` directory. If so,
 they will all be written out to a `~/.cache/sorbet/gem-rbis/<hash>` file and
-used when typechecking your code. These are not included in the normal `sorbet/`
+used when typechecking the code. These are not included in the normal `sorbet/`
 files because they will be machine dependent so we don't want those ending up in
 version control.
 
