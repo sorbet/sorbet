@@ -58,7 +58,7 @@ subgraph "cluster_::<Class:Example>#<static-init>" {
     "bb::<Class:Example>#<static-init>_2" -> "bb::<Class:Example>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Example>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$5: T.class_of(Example))\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Example) = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: T.class_of(Example))\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:Example>#<static-init>_3" -> "bb::<Class:Example>#<static-init>_1" [style="bold"];

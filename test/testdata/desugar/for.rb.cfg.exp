@@ -180,7 +180,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_22" -> "bb::<Class:Main>#main_23" [style="tapered"];
 
     "bb::<Class:Main>#main_23" [
-        label = "block[id=23](<selfRestore>$163: T.class_of(Main))\l<returnMethodTemp>$2: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$163\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=23](<selfRestore>$163: T.class_of(Main))\l<returnMethodTemp>$2: T.untyped = Solve<each>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_23" -> "bb::<Class:Main>#main_1" [style="bold"];
