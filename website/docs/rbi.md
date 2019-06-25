@@ -178,7 +178,7 @@ include those definitions when typechecking a project. In the future, we
 anticipate this to be the preferred way to include RBI files into a project.
 
 `srb tc` will automatically check your `Gemfile.lock` for changes since it was
-last run. If there are changes (or if it has never ran with this specific hash
+last run. If there are changes (or if it has never run with this specific hash
 before) it will check every gem to see if they have a `rbi/` directory. If so,
 they will all be written out to a `~/.cache/sorbet/gem-rbis/<hash>` file and
 used when typechecking your code. These are not included in the normal `sorbet/`
