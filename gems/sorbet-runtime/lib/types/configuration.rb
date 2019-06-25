@@ -2,6 +2,21 @@
 # frozen_string_literal: true
 
 module T::Configuration
+  # Announces to Sorbet that we are currently in a test environment, so it
+  # should treat any sigs which are marked `.checked(:tests)` as if they were
+  # just a normal sig.
+  #
+  # If this method is not called, sigs marked `.checked(:tests)` will not be
+  # checked. In fact, such methods won't even be wrapped--the runtime will put
+  # back the original method.
+  #
+  # Note: Due to the way sigs are evaluated and methods are wrapped, this
+  # method MUST be called before any code calls `sig`. This method raises if
+  # it has been called too late.
+  def self.enable_checking_for_sigs_marked_checked_tests
+    T::Private::RuntimeLevels.enable_checking_in_tests
+  end
+
   # Set a handler to handle `TypeError`s raised by any in-line type assertions,
   # including `T.must`, `T.let`, `T.cast`, and `T.assert_type!`.
   #
