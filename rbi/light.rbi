@@ -1565,6 +1565,10 @@ module Kernel
   end
   def catch(tag=Object.new, &blk); end
   sig do
+    returns(Class)
+  end
+  def class; end
+  sig do
     params(
         symbol: T.any(Symbol, String),
         method: T.any(Proc, Method, UnboundMethod)
