@@ -62,7 +62,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         opts = ast::cast_tree<ast::Hash>(send->args[2].get());
     }
     if (opts != nullptr) {
-        if (ASTUtil::hasTruthyHashValue(ctx, *opts, core::Names::default_())) {
+        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
         }
         if (ASTUtil::hasTruthyHashValue(ctx, *opts, core::Names::implied())) {
