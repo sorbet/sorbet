@@ -54,7 +54,17 @@ module Kernel
   def catch(tag=Object.new, &blk); end
 
   sig do
-    returns(Class)
+    # In a perfect world this should be:
+    #
+    #   returns(T.class_of(T.self_type))
+    #
+    # but that doesn't work (yet). Even making it:
+    #
+    #   returns(Class)
+    #
+    # is very surprising since users expect their methods to be present.
+    # So we settle for untyped.
+    returns(T.untyped)
   end
   def class; end
 
