@@ -111,7 +111,9 @@ Also see the [Community] page for more community-maintained projects!
 
 ## Can I convert from YARD docs to Sorbet signatures?
 
-[Sord](https://github.com/AaronC81/sord) is a community-maintained project which
-can generate Sorbet RBI files from YARD docs.
+[Sord] is a community-maintained project which can generate Sorbet RBI files
+from YARD docs.
 
 Also see the [Community] page for more community-maintained projects!
+
+[sord]: https://github.com/AaronC81/sord
