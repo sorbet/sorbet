@@ -98,3 +98,22 @@ distributions. We use static linking on both platforms, so it should not depend
 on system libraries.
 
 There is currently no Windows support.
+
+## Does Sorbet support ActiveRecord (and Rails?)
+
+[sorbet-rails] is a community-maintained project which can help generate RBI
+files for certain Rails constructs.
+
+Also see the [Community] page for more community-maintained projects!
+
+[sorbet-rails]: https://github.com/chanzuckerberg/sorbet-rails
+[community]: /en/community
+
+## Can I convert from YARD docs to Sorbet signatures?
+
+[Sord] is a community-maintained project which can generate Sorbet RBI files
+from YARD docs.
+
+Also see the [Community] page for more community-maintained projects!
+
+[sord]: https://github.com/AaronC81/sord
