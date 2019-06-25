@@ -467,7 +467,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             } else {
                 if (symbol.data(ctx)->isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
-                    if (objMeth.exists()) {
+                    if (objMeth.exists() && objMeth.data(ctx)->owner.data(ctx)->isClassModule()) {
                         e.addErrorSection(
                             ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
                                                              objMeth.data(ctx)->owner.data(ctx)->name.show(ctx))));
