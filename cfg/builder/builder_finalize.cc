@@ -239,8 +239,25 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 continue;
             }
 
-            auto fnd = RnW.reads.find(bind.bind.variable);
-            if (fnd == RnW.reads.end()) {
+            auto fnd = RnW.reads[it->id].find(bind.bind.variable);
+            bool wasRead = fnd != RnW.reads[it->id].end(); // read in the same block
+            if (!wasRead) {
+                for (const auto &arg : it->bexit.thenb->args) {
+                    if (arg.variable == bind.bind.variable) {
+                        wasRead = true;
+                        break;
+                    }
+                }
+            }
+            if (!wasRead) {
+                for (const auto &arg : it->bexit.elseb->args) {
+                    if (arg.variable == bind.bind.variable) {
+                        wasRead = true;
+                        break;
+                    }
+                }
+            }
+            if (!wasRead) {
                 // These are all instructions with no side effects, which can be
                 // deleted if the assignment is dead. It would be slightly
                 // shorter to list the converse set -- those which *do* have
@@ -261,38 +278,35 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
 }
 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
-    for (const auto [what, where] : RnW.reads) {
-        const auto minIt = cfg.minLoops.find(what);
-        int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
-
-        for (const BasicBlock *bb : where) {
+    for (const auto &bb : cfg.basicBlocks) {
+        for (const core::LocalVariable what : RnW.reads[bb->id]) {
+            const auto minIt = cfg.minLoops.find(what);
+            int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
             }
+            cfg.minLoops[what] = curMin;
         }
-        cfg.minLoops[what] = curMin;
     }
-
-    for (const auto [what, where] : RnW.writes) {
-        const auto minIt = cfg.minLoops.find(what);
-        const auto maxIt = cfg.maxLoopWrite.find(what);
-        int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
-        int curMax = maxIt != cfg.maxLoopWrite.end() ? maxIt->second : 0;
-
-        for (const BasicBlock *bb : where) {
+    for (const auto &bb : cfg.basicBlocks) {
+        for (const core::LocalVariable what : RnW.writes[bb->id]) {
+            const auto minIt = cfg.minLoops.find(what);
+            const auto maxIt = cfg.maxLoopWrite.find(what);
+            int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
+            int curMax = maxIt != cfg.maxLoopWrite.end() ? maxIt->second : 0;
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
             }
             if (curMax < bb->outerLoops) {
                 curMax = bb->outerLoops;
             }
+            cfg.minLoops[what] = curMin;
+            cfg.maxLoopWrite[what] = curMax;
         }
-        cfg.minLoops[what] = curMin;
-        cfg.maxLoopWrite[what] = curMax;
     }
 }
 
-void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg) {
+void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
@@ -305,40 +319,9 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    vector<UnorderedSet<core::LocalVariable>> readsByBlock(cfg.maxBasicBlockId);
-    vector<UnorderedSet<core::LocalVariable>> writesByBlock(cfg.maxBasicBlockId);
-    vector<UnorderedSet<core::LocalVariable>> deadByBlock(cfg.maxBasicBlockId);
-
-    for (auto &rds : RnW.reads) {
-        auto &wts = RnW.writes[rds.first];
-        histogramInc("cfgbuilder.readsPerBlock", rds.second.size());
-        if (rds.second.size() == 1 && wts.size() == 1 && *(rds.second.begin()) == *(wts.begin())) {
-            wts.clear();
-            rds.second.clear(); // remove symref that never escapes a block.
-        } else if (wts.empty()) {
-            rds.second.clear();
-        }
-    }
-
-    for (auto &wts : RnW.writes) {
-        histogramInc("cfgbuilder.writesPerBlock", wts.second.size());
-        auto &rds = RnW.reads[wts.first];
-        if (rds.empty()) {
-            wts.second.clear();
-        }
-        for (BasicBlock *bb : rds) {
-            readsByBlock[bb->id].insert(wts.first);
-        }
-        for (BasicBlock *bb : wts.second) {
-            writesByBlock[bb->id].insert(wts.first);
-        }
-    }
-
-    for (auto &dead : RnW.dead) {
-        for (BasicBlock *bb : dead.second) {
-            deadByBlock[bb->id].insert(dead.first);
-        }
-    }
+    const vector<UnorderedSet<core::LocalVariable>> &readsByBlock = RnW.reads;
+    const vector<UnorderedSet<core::LocalVariable>> &writesByBlock = RnW.writes;
+    const vector<UnorderedSet<core::LocalVariable>> &deadByBlock = RnW.dead;
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
     vector<UnorderedSet<core::LocalVariable>> upperBounds1(cfg.maxBasicBlockId);
