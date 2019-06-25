@@ -749,7 +749,7 @@ void AutoloaderConfig::enterNames(core::GlobalState &gs) {
 
 void DefTree::prettyPrint(core::Context ctx, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
-    fmt::print("{} [{}]\n", name, fmt::map_join(namedDefs, ", ", fileRefToString));
+    fmt::print("{} [{}]\n", name().show(ctx), fmt::map_join(namedDefs, ", ", fileRefToString));
     for (auto &[name, tree] : children) {
         for (int i = 0; i < level; ++i) {
             fmt::print("  ");
@@ -758,17 +758,20 @@ void DefTree::prettyPrint(core::Context ctx, int level) {
     }
 }
 
+string DefTree::fullName(core::Context ctx) const {
+    return fmt::format("{}",
+                       fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(ctx); }));
+}
+
 void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const NamedDefinition &ndef) {
     if (!alCfg.include(ndef)) {
         return;
     }
     auto *node = this;
     for (const auto &part : ndef.nameParts) {
-        auto &child = node->children[part.show(ctx)];
+        auto &child = node->children[part];
         if (!child) {
             child = make_unique<DefTree>();
-            child->name = part.show(ctx);
-
             child->nameParts = node->nameParts; // NOTE: this could be tracked recursively with push/pop
             child->nameParts.emplace_back(part);
         }
@@ -896,13 +899,17 @@ bool DefTree::root() const {
     return nameParts.empty();
 }
 
+core::NameRef DefTree::name() const {
+    ENFORCE(!nameParts.empty());
+    return nameParts.back();
+}
+
 void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path) {
-    // fmt::print("writeAutoloads {} '{}'\n", name, path);
-    string filename = root() ? "root.rb" : fmt::format("{}.rb", name);
-    FileOps::write(join(path, filename), autoloads(ctx, alCfg));
+    string name = root() ? "root" : this->name().show(ctx);
+    FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx, alCfg));
     if (!children.empty()) {
-        auto subdir = join(path, name);
-        if (!name.empty()) {
+        auto subdir = join(path, root() ? "" : name);
+        if (!root()) {
             create_dir(subdir);
         }
         for (auto &[_, child] : children) {
@@ -915,7 +922,7 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
     if (root() || !hasDef()) {
         return;
     }
-    auto &ndef = definition();
+    auto &ndef = definition(ctx);
     vector<string> reqs;
     for (auto reqRef : ndef.requires) {
         if (alCfg.includeRequire(reqRef)) {
@@ -931,10 +938,9 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
 }
 
 void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
-    if (hasDef() && definitionType() == Definition::Class) {
-        // if (!namedDefs.empty() && namedDefs[0].def.type == Definition::Class) {
+    if (hasDef() && definitionType(ctx) == Definition::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
-        auto &def = definition();
+        auto &def = definition(ctx);
         if (!def.parentName.empty()) {
             fmt::format_to(buf, " < {}",
                            fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
@@ -966,7 +972,7 @@ string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
     }
 
     string fullName = "nil";
-    auto type = definitionType();
+    auto type = definitionType(ctx);
     if (type == Definition::Module || type == Definition::Class) {
         fullName = root() ? "Object" : fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string {
                                                        return nr.show(ctx);
@@ -977,12 +983,12 @@ string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
         }
         if (!children.empty()) {
             fmt::format_to(buf, "\nOpus::Require.autoload_map({}, {{\n", fullName);
-            vector<string> childNames;
+            vector<pair<core::NameRef, string>> childNames;
             std::transform(children.begin(), children.end(), back_inserter(childNames),
-                           [](const auto &pair) -> string { return pair.first; });
-            fast_sort(childNames);
-            for (const auto &childName : childNames) {
-                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", childName, children[childName]->path(ctx));
+                           [ctx](const auto &pair) { return make_pair(pair.first, pair.first.show(ctx)); });
+            fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
+            for (const auto &pair : childNames) {
+                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", pair.second, children[pair.first]->path(ctx));
             }
             fmt::format_to(buf, "}})\n", fullName);
         }
@@ -994,24 +1000,24 @@ string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
     return to_string(buf);
 }
 
-Definition::Type DefTree::definitionType() {
-    // if (namedDefs.empty()) {
+Definition::Type DefTree::definitionType(core::Context ctx) {
     if (!hasDef()) {
         return Definition::Module;
     }
-    return definition().def.type;
+    return definition(ctx).def.type;
 }
 
 bool DefTree::hasDef() const {
     return !(namedDefs.empty() && nonBehaviorDefs.empty());
 }
 
-NamedDefinition &DefTree::definition() {
+NamedDefinition &DefTree::definition(core::Context ctx) {
     if (!namedDefs.empty()) {
-        ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", name, namedDefs.size());
+        ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", fullName(ctx),
+                namedDefs.size());
         return namedDefs[0];
     } else {
-        ENFORCE(!nonBehaviorDefs.empty(), "Could not find any defintions for '{}'", name);
+        ENFORCE(!nonBehaviorDefs.empty(), "Could not find any defintions for '{}'", fullName(ctx));
         return nonBehaviorDefs[0];
     }
 }
