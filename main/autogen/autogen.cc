@@ -677,7 +677,6 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
 }
 
 NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
-    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
     auto names = showFullName(ctx, def);
     vector<core::NameRef> parentName;
     if (def.data(*this).parent_ref.exists()) {
@@ -688,8 +687,7 @@ NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
             parentName = parentRef.name;
         }
     }
-    return {def.data(*this), fmt::format("{}", fmt::map_join(names, "::", nameToString)), names, parentName, requires,
-            tree.file};
+    return {def.data(*this), names, parentName, requires, tree.file};
 }
 
 void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, DefTree &root) {
@@ -702,10 +700,6 @@ void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alCon
         }
         root.addDef(ctx, alConfig, toNamed(ctx, def.id));
     }
-}
-
-std::string_view NamedDefinition::toString(core::Context ctx) const {
-    return fmt::format("DEF {} ({}) {}", name, def.type, fileRef.data(ctx).path());
 }
 
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
