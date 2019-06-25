@@ -164,7 +164,8 @@ struct AutogenResult {
     autogen::DefTree defTree;
 };
 
-void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+void runAutogen(core::Context ctx, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
+                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -173,7 +174,6 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         fileq->push(move(i), 1);
     }
 
-    autogen::AutoloaderConfig autoloaderCfg;
     workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
@@ -435,6 +435,7 @@ int realmain(int argc, char *argv[]) {
             core::MutableContext ctx(*gs, core::Symbols::root());
 
             indexed = pipeline::name(*gs, move(indexed), opts);
+            autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
@@ -445,9 +446,10 @@ int realmain(int argc, char *argv[]) {
                     errs.emplace_back(*gs, file);
                 }
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), *workers);
+                autoloaderCfg.enterNames(*gs);
             }
 
-            runAutogen(ctx, opts, *workers, indexed);
+            runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);
         } else {
             indexed = pipeline::resolve(gs, move(indexed), opts, *workers);
             indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);

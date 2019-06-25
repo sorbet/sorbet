@@ -22,3 +22,6 @@ module Foo
   end
 end
 
+module DontInclude
+  1
+end

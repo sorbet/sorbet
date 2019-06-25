@@ -708,17 +708,13 @@ std::string_view NamedDefinition::toString(core::Context ctx) const {
     return fmt::format("DEF {} ({}) {}", name, def.type, fileRef.data(ctx).path());
 }
 
-bool AutoloaderConfig::include(core::Context ctx, const NamedDefinition &nd) const {
-    return !nd.nameParts.empty() && topLevelNamespaces.find(nd.nameParts[0].show(ctx)) != topLevelNamespaces.end();
-}
-
-static const string_view requiredSuffix = ".rb";
-inline bool hasRequiredSuffix(string_view path) {
-    return path.size() > requiredSuffix.size() && equal(path.rbegin(), path.rend(), requiredSuffix.rbegin());
+bool AutoloaderConfig::include(const NamedDefinition &nd) const {
+    ENFORCE(entered);
+    return !nd.nameParts.empty() && topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end();
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {
-    if (hasRequiredSuffix(path)) {
+    if (!absl::EndsWith(path, ".rb")) {
         return false;
     }
     for (const auto &pat : excludePatterns) {
@@ -729,8 +725,26 @@ bool AutoloaderConfig::includePath(string_view path) const {
     return true;
 }
 
-bool AutoloaderConfig::includeRequire(const string &require) const {
-    return excludedRequires.find(require) == excludedRequires.end();
+bool AutoloaderConfig::includeRequire(core::NameRef req) const {
+    ENFORCE(entered);
+    return excludedRequireRefs.find(req) == excludedRequireRefs.end();
+}
+
+void AutoloaderConfig::enterNames(core::GlobalState &gs) {
+    ENFORCE(!entered);
+    entered = true;
+    for (auto &str : topLevelNamespaces) {
+        topLevelNamespaceRefs.emplace(gs.enterNameConstant(str));
+    }
+    for (auto &str : excludedRequires) {
+        excludedRequireRefs.emplace(gs.enterNameUTF8(str));
+    }
+    for (auto &nameParts : sameFileModules) {
+        vector<core::NameRef> &refs = sameFileModuleNames.emplace_back();
+        for (auto &name : nameParts) {
+            refs.emplace_back(gs.enterNameConstant(name));
+        }
+    }
 }
 
 void DefTree::prettyPrint(core::Context ctx, int level) {
@@ -745,7 +759,7 @@ void DefTree::prettyPrint(core::Context ctx, int level) {
 }
 
 void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const NamedDefinition &ndef) {
-    if (!alCfg.include(ctx, ndef)) {
+    if (!alCfg.include(ndef)) {
         return;
     }
     auto *node = this;
@@ -822,7 +836,7 @@ void DefTree::prune(core::Context ctx, const AutoloaderConfig &alCfg) {
     if (!namedDefs.empty()) {
         definingFile = file();
     }
-    if (!prunable(ctx, alCfg)) {
+    if (!prunable(alCfg)) {
         return;
     }
 
@@ -838,19 +852,10 @@ void DefTree::prune(core::Context ctx, const AutoloaderConfig &alCfg) {
     }
 }
 
-bool DefTree::prunable(core::Context ctx, const AutoloaderConfig &alCfg) const {
-    for (const auto &parts : alCfg.sameFileModules) {
-        if (nameParts.size() != parts.size()) {
-            continue;
-        }
-        bool match = true;
-        for (int i = 0; i < parts.size(); ++i) {
-            if (parts[i] != nameParts[i].show(ctx)) {
-                match = false;
-                break;
-            }
-        }
-        if (match) {
+bool DefTree::prunable(const AutoloaderConfig &alCfg) const {
+    ENFORCE(alCfg.entered);
+    for (const auto &parts : alCfg.sameFileModuleNames) {
+        if (nameParts == parts) {
             return false;
         }
     }
@@ -913,8 +918,8 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
     auto &ndef = definition();
     vector<string> reqs;
     for (auto reqRef : ndef.requires) {
-        string req = reqRef.show(ctx);
-        if (alCfg.includeRequire(req)) {
+        if (alCfg.includeRequire(reqRef)) {
+            string req = reqRef.show(ctx);
             reqs.emplace_back(req);
         }
     }
