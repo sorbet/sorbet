@@ -174,7 +174,7 @@ folder, and start modifying it by hand.
 
 We expect that as adoption grows, gems will include their external interfaces
 RBI files in an `rbi/` directory. When they do this, Sorbet will automatically
-include those definitions when typechecking your code. In the future, we
+include those definitions when typechecking a project. In the future, we
 anticipate this to be the preferred way to include RBI files into a project.
 
 `srb tc` will automatically check your `Gemfile.lock` for changes since it was
