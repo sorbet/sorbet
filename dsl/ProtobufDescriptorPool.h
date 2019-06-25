@@ -13,6 +13,8 @@ namespace sorbet::dsl {
  * into
  *
  *   class A
+ *     include ::Google::Protobuf::MessageExts
+ *     extend ::Google::Protobuf::MessageExts::ClassMethods
  *     ::Google::Protobuf::DescriptorPool.generated_pool.lookup("...").msgclass
  *   end
  *

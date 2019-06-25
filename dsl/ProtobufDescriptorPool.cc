@@ -53,6 +53,16 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::replaceDSL(core::Mut
     rhs.emplace_back(asgn->rhs->deepCopy());
 
     if (sendMsgclass->fun == core::Names::msgclass()) {
+        // ::Google::Protobuf::MessageExts::ClassMethods
+        auto root = ast::MK::Constant(asgn->loc, core::Symbols::root());
+        auto g = ast::MK::UnresolvedConstant(asgn->loc, std::move(root), core::Names::Constants::Google());
+        auto gp = ast::MK::UnresolvedConstant(asgn->loc, std::move(g), core::Names::Constants::Protobuf());
+        auto gpme = ast::MK::UnresolvedConstant(asgn->loc, std::move(gp), core::Names::Constants::MessageExts());
+        auto gpmecm = ast::MK::UnresolvedConstant(asgn->loc, gpme->deepCopy(), core::Names::Constants::ClassMethods());
+
+        rhs.emplace_back(ast::MK::Send1(asgn->loc, ast::MK::Self(asgn->loc), core::Names::include(), std::move(gpme)));
+        rhs.emplace_back(ast::MK::Send1(asgn->loc, ast::MK::Self(asgn->loc), core::Names::extend(), std::move(gpmecm)));
+
         auto arg0 = ast::MK::Local(asgn->loc, core::Names::arg0());
         auto arg = ast::MK::OptionalArg(asgn->loc, std::move(arg0), ast::MK::Hash0(asgn->loc));
         rhs.emplace_back(

@@ -206,6 +206,8 @@ NameDef names[] = {
     {"Google", "Google", true},
     {"Protobuf", "Protobuf", true},
     {"DescriptorPool", "DescriptorPool", true},
+    {"MessageExts", "MessageExts", true},
+    {"ClassMethods", "ClassMethods", true},
     {"generatedPool", "generated_pool"},
     {"lookup"},
     {"msgclass"},
