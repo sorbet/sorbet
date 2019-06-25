@@ -692,13 +692,24 @@ NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
             tree.file};
 }
 
+void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, DefTree &root) {
+    if (!alConfig.includePath(path)) {
+        return;
+    }
+    for (auto &def : defs) {
+        if (def.id.id() == 0) {
+            continue;
+        }
+        root.addDef(ctx, alConfig, toNamed(ctx, def.id));
+    }
+}
+
 std::string_view NamedDefinition::toString(core::Context ctx) const {
     return fmt::format("DEF {} ({}) {}", name, def.type, fileRef.data(ctx).path());
 }
 
 bool AutoloaderConfig::include(core::Context ctx, const NamedDefinition &nd) const {
-    return !nd.nameParts.empty() && topLevelNamespaces.find(nd.nameParts[0].show(ctx)) != topLevelNamespaces.end() &&
-           includePath(nd.fileRef.data(ctx).path());
+    return !nd.nameParts.empty() && topLevelNamespaces.find(nd.nameParts[0].show(ctx)) != topLevelNamespaces.end();
 }
 
 static const string_view requiredSuffix = ".rb";
