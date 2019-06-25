@@ -720,11 +720,11 @@ void descendantsOf(map<string, set<pair<string, Definition::Type>>> &childMap, s
     if (!childMap.count(parentName)) {
         return;
     }
-    set<pair<string, Definition::Type>> &childNames = childMap[parentName];
+    set<pair<string, Definition::Type>> &children = childMap[parentName];
 
-    out.insert(childNames.begin(), childNames.end());
-    for (auto childName : childMap[parentName]) {
-        autogen::descendantsOf(childMap, childName.first, out);
+    out.insert(children.begin(), children.end());
+    for (auto child : children) {
+        autogen::descendantsOf(childMap, child.first, out);
     }
 }
 

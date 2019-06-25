@@ -263,27 +263,28 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
 
         // Generate descendants for each passed-in superclass
         map<string, set<pair<string, autogen::Definition::Type>>> descendantsMap;
-        for (string parent : opts.autogenSubclassesParents) {
+        for (string parentName : opts.autogenSubclassesParents) {
             set<pair<string, autogen::Definition::Type>> descendants;
-            sorbet::autogen::descendantsOf(mergedSubclasses, parent, descendants);
-            descendantsMap[parent] = descendants;
+            sorbet::autogen::descendantsOf(mergedSubclasses, parentName, descendants);
+            descendantsMap[parentName] = descendants;
         }
 
-        vector<string> mergedSubclasseslist;
-        for (string parent : opts.autogenSubclassesParents) {
-            if (!descendantsMap.count(parent)) {
+        // Serialize DescendantsMap for output
+        vector<string> descendantsMapSerialized;
+        for (string parentName : opts.autogenSubclassesParents) {
+            if (!descendantsMap.count(parentName)) {
                 continue;
             }
-            mergedSubclasseslist.insert(mergedSubclasseslist.end(), parent);
-            for (auto const &entry : descendantsMap[parent]) {
+            descendantsMapSerialized.insert(descendantsMapSerialized.end(), parentName);
+            for (auto const &entry : descendantsMap[parentName]) {
                 if (entry.second != autogen::Definition::Type::Class) {
                     continue;
                 }
-                mergedSubclasseslist.insert(mergedSubclasseslist.end(), fmt::format(" {}", entry.first));
+                descendantsMapSerialized.insert(descendantsMapSerialized.end(), fmt::format(" {}", entry.first));
             }
         }
-        opts.print.AutogenSubclasses.fmt("{}\n",
-                                         fmt::join(mergedSubclasseslist.begin(), mergedSubclasseslist.end(), "\n"));
+        opts.print.AutogenSubclasses.fmt(
+            "{}\n", fmt::join(descendantsMapSerialized.begin(), descendantsMapSerialized.end(), "\n"));
     }
 } // namespace sorbet::realmain
 
