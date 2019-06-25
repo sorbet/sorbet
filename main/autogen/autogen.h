@@ -58,7 +58,6 @@ struct Definition {
 
 struct NamedDefinition {
     Definition def;
-    // std::string name;
     std::vector<core::NameRef> nameParts;
     std::vector<core::NameRef> parentName;
     std::vector<core::NameRef> requires;

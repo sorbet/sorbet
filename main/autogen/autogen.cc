@@ -702,6 +702,27 @@ void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alCon
     }
 }
 
+void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const NamedDefinition &ndef) {
+    if (!alCfg.include(ndef)) {
+        return;
+    }
+    auto *node = this;
+    for (const auto &part : ndef.nameParts) {
+        auto &child = node->children[part];
+        if (!child) {
+            child = make_unique<DefTree>();
+            child->nameParts = node->nameParts; // NOTE: this could be tracked recursively with push/pop
+            child->nameParts.emplace_back(part);
+        }
+        node = &*child; // TODO yuck
+    }
+    if (ndef.def.defines_behavior) {
+        node->namedDefs.emplace_back(ndef);
+    } else {
+        node->nonBehaviorDefs.emplace_back(ndef);
+    }
+}
+
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
     ENFORCE(entered);
     return !nd.nameParts.empty() && topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end();
@@ -755,27 +776,6 @@ void DefTree::prettyPrint(core::Context ctx, int level) {
 string DefTree::fullName(core::Context ctx) const {
     return fmt::format("{}",
                        fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(ctx); }));
-}
-
-void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const NamedDefinition &ndef) {
-    if (!alCfg.include(ndef)) {
-        return;
-    }
-    auto *node = this;
-    for (const auto &part : ndef.nameParts) {
-        auto &child = node->children[part];
-        if (!child) {
-            child = make_unique<DefTree>();
-            child->nameParts = node->nameParts; // NOTE: this could be tracked recursively with push/pop
-            child->nameParts.emplace_back(part);
-        }
-        node = &*child; // TODO yuck
-    }
-    if (ndef.def.defines_behavior) {
-        node->namedDefs.emplace_back(ndef);
-    } else {
-        node->nonBehaviorDefs.emplace_back(ndef);
-    }
 }
 
 static const string_view PREAMBLE = R"EOS(# frozen_string_literal: true
