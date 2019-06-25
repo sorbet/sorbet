@@ -148,18 +148,27 @@ struct AutoloaderConfig { // TODO dynamic loading
     };
 
     std::vector<std::vector<std::string>> sameFileModules = {
-        {"Opus", "Autogen", "Event"}, // TODO how do I compare refs?
+        {"Opus", "Autogen", "Event"},
     };
 
-    bool include(core::Context, const NamedDefinition &) const;
+    bool include(const NamedDefinition &) const;
     bool includePath(std::string_view path) const;
-    bool includeRequire(const std::string &require) const;
+    bool includeRequire(core::NameRef req) const;
 
     AutoloaderConfig() = default;
     AutoloaderConfig(const AutoloaderConfig &) = delete;
     AutoloaderConfig(AutoloaderConfig &&) = default;
     AutoloaderConfig &operator=(const AutoloaderConfig &) = delete;
     AutoloaderConfig &operator=(AutoloaderConfig &&) = delete;
+
+    void enterNames(core::GlobalState &gs);
+
+private:
+    bool entered = false;
+    UnorderedSet<core::NameRef> topLevelNamespaceRefs;
+    UnorderedSet<core::NameRef> excludedRequireRefs;
+    std::vector<std::vector<core::NameRef>> sameFileModuleNames;
+    friend class DefTree;
 };
 
 class DefTree {
@@ -180,7 +189,7 @@ public:
     std::string path(core::Context ctx);
 
     void prune(core::Context, const AutoloaderConfig &);
-    bool prunable(core::Context, const AutoloaderConfig &) const;
+    bool prunable(const AutoloaderConfig &) const;
 
     void merge(DefTree rhs);
 
