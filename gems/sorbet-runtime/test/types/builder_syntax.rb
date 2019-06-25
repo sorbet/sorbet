@@ -292,7 +292,7 @@ module Opus::Types::Test
             mod.test_method(1) # invocation ensures it's wrapped
 
             err = assert_raises(RuntimeError) do
-              T::Utils.DANGER_enable_checking_in_tests
+              T::Configuration.enable_checking_for_sigs_marked_checked_tests
             end
             assert_match(/Toggle `:tests`-level runtime type checking earlier/, err.message)
           end

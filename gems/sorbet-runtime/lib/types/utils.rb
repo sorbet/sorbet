@@ -110,10 +110,6 @@ module T::Utils
     end
   end
 
-  def self.DANGER_enable_checking_in_tests
-    T::Private::RuntimeLevels.enable_checking_in_tests
-  end
-
   # Returns the arity of a method, unwrapping the sig if needed
   def self.arity(method)
     arity = method.arity # rubocop:disable PrisonGuard/NoArity
