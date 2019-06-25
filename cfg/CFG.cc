@@ -96,15 +96,6 @@ void CFG::sanityCheck(core::Context ctx) {
             ENFORCE(bb->bexit.cond.variable.exists());
         }
     }
-
-    // check that synthetic variable that is read is ever written to.
-    ReadsAndWrites RnW = CFG::findAllReadsAndWrites(ctx);
-    for (auto &el : RnW.reads) {
-        if (!el.first.isSyntheticTemporary(ctx)) {
-            continue;
-        }
-        //        ENFORCE(writes.find(el.first) != writes.end());
-    }
 }
 
 string CFG::toString(core::Context ctx) {
