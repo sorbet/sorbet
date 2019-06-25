@@ -64,8 +64,7 @@ void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         }
 
         auto loc = asgn->rhs->loc;
-        auto T = ast::MK::Constant(loc, core::Symbols::T());
-        asgn->rhs = ast::MK::Send2(loc, move(T), core::Names::let(), move(asgn->rhs), ast::MK::Self(loc));
+        asgn->rhs = ast::MK::Send2(loc, ast::MK::T(loc), core::Names::let(), move(asgn->rhs), ast::MK::Self(loc));
     }
 }
 

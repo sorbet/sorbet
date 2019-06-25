@@ -1,4 +1,4 @@
-#include "dsl/ChalkODMProp.h"
+#include "dsl/Prop.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -10,13 +10,16 @@
 using namespace std;
 
 namespace sorbet::dsl {
+namespace {
 
-optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
-    if (ctx.state.runningUnderAutogen) {
-        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
-        return std::nullopt;
-    }
+struct PropInfo {};
 
+struct NodesAndPropInfo {
+    vector<unique_ptr<ast::Expression>> nodes;
+    PropInfo propInfo;
+};
+
+optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send) {
     bool isImmutable = false; // Are there no setters?
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
@@ -147,7 +150,7 @@ optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableConte
 
     // From this point, we can't `return std::nullopt` anymore since we're going to be consuming the tree.
 
-    ChalkODMProp::NodesAndProp ret;
+    NodesAndPropInfo ret;
 
     // Compute the getters
     if (rules) {
@@ -301,6 +304,41 @@ optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableConte
     }
 
     return ret;
+}
+} // namespace
+
+void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+    if (ctx.state.runningUnderAutogen) {
+        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
+        return;
+    }
+    UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
+    vector<PropInfo> props;
+    for (auto &stat : klass->rhs) {
+        auto *send = ast::cast_tree<ast::Send>(stat.get());
+        if (send == nullptr) {
+            continue;
+        }
+        auto nodesAndPropInfo = processProp(ctx, send);
+        if (!nodesAndPropInfo.has_value()) {
+            continue;
+        }
+        ENFORCE(!nodesAndPropInfo->nodes.empty(), "nodesAndPropInfo with value must have nodes be non empty");
+        replaceNodes[stat.get()] = std::move(nodesAndPropInfo->nodes);
+        props.emplace_back(nodesAndPropInfo->propInfo);
+    }
+    auto oldRHS = std::move(klass->rhs);
+    klass->rhs.clear();
+    klass->rhs.reserve(oldRHS.size());
+    for (auto &stat : oldRHS) {
+        if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
+            klass->rhs.emplace_back(std::move(stat));
+        } else {
+            for (auto &newNode : replaceNodes.at(stat.get())) {
+                klass->rhs.emplace_back(std::move(newNode));
+            }
+        }
+    }
 }
 
 }; // namespace sorbet::dsl
