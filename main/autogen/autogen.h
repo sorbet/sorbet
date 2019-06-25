@@ -58,13 +58,11 @@ struct Definition {
 
 struct NamedDefinition {
     Definition def;
-    std::string name;
+    // std::string name;
     std::vector<core::NameRef> nameParts;
     std::vector<core::NameRef> parentName;
     std::vector<core::NameRef> requires;
     core::FileRef fileRef;
-
-    std::string_view toString(core::Context ctx) const;
 
     // NamedDefinition() = default;
     // NamedDefinition(const NamedDefinition &) = delete;
