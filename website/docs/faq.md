@@ -101,8 +101,17 @@ There is currently no Windows support.
 
 ## Does Sorbet support ActiveRecord (and Rails?)
 
-There is an open-source gem which could help you to integrate Sorbet into a Rails project: [sorbet-rails](https://github.com/chanzuckerberg/sorbet-rails)
+[sorbet-rails] is a community-maintained project which can help generate RBI
+files for certain Rails constructs.
+
+Also see the [Community] page for more community-maintained projects!
+
+[sorbet-rails]: https://github.com/chanzuckerberg/sorbet-rails
+[community]: /en/community
 
 ## Can I convert from YARD docs to Sorbet signatures?
 
-There is a community-maintained project which allows you to generate Sorbet RBI files from YARD docs: [Sord](https://github.com/AaronC81/sord).
+[Sord](https://github.com/AaronC81/sord) is a community-maintained project which
+can generate Sorbet RBI files from YARD docs.
+
+Also see the [Community] page for more community-maintained projects!
