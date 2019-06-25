@@ -388,6 +388,8 @@ cc_binary(
         ":ext/zlib",
         ":ext/date",
         ":ext/digest",
+        ":ext/psych",
+        ":ext/strscan",
     ],
 
     copts = [
@@ -603,10 +605,12 @@ void Init_ext(void)
     init(Init_date_core, "date_core");
     init(Init_bubblebabble, "digest/bubblebabble");
     init(Init_sha1, "digest/sha1");
-    init(Init_sha1, "digest/sha2.so");
+    init(Init_sha2, "digest/sha2.so");
     init(Init_rmd160, "digest/rmd160");
     init(Init_md5, "digest/md5");
     init(Init_digest, "digest.so");
+    init(Init_psych, "psych.so");
+    init(Init_strscan, "strscan");
 }
 EOF
 """,
@@ -874,6 +878,67 @@ cc_library(
     deps = [
         ":ruby_headers",
     ],
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-DHAVE_SHA256_TRANSFORM",
+        "-DHAVE_SHA512_TRANSFORM",
+        "-DHAVE_TYPE_SHA256_CTX",
+        "-DHAVE_TYPE_SHA512_CTX",
+        "-DHAVE_SYS_CDEFS_H",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "ext/psych",
+    srcs = [
+        "ext/psych/psych.c",
+        "ext/psych/psych_emitter.c",
+        "ext/psych/psych_parser.c",
+        "ext/psych/psych_to_ruby.c",
+        "ext/psych/psych_yaml_tree.c",
+        "ext/psych/yaml/api.c",
+        "ext/psych/yaml/dumper.c",
+        "ext/psych/yaml/emitter.c",
+        "ext/psych/yaml/loader.c",
+        "ext/psych/yaml/parser.c",
+        "ext/psych/yaml/reader.c",
+        "ext/psych/yaml/scanner.c",
+        "ext/psych/yaml/writer.c",
+    ] + glob([ "ext/psych/**/*.h" ]),
+    includes = [
+        "ext/psych",
+        "ext/psych/yaml",
+        "include/ruby",
+    ],
+    copts = [
+        "-DHAVE_DLFCN_H",
+        "-DHAVE_INTTYPES_H",
+        "-DHAVE_MEMORY_H",
+        "-DHAVE_STDINT_H",
+        "-DHAVE_STDLIB_H",
+        "-DHAVE_STRINGS_H",
+        "-DHAVE_STRING_H",
+        "-DHAVE_SYS_STAT_H",
+        "-DHAVE_SYS_TYPES_H",
+        "-DHAVE_UNISTD_H",
+        "-DHAVE_CONFIG_H",
+    ],
+    deps = [
+        ":ruby_headers",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "ext/strscan",
+    srcs = [
+        "ext/strscan/strscan.c",
+    ],
+    deps = [
+        ":ruby_headers",
+        ":ruby_private_headers",
+    ],
     linkstatic = 1,
 )
 
@@ -1014,6 +1079,130 @@ cp $(location ext/digest/sha2/lib/sha2.rb) $(location lib/digest/sha2.rb)
 """,
 )
 
+genrule(
+    name = "ruby_ext/psych",
+    srcs = glob([
+        "ext/psych/lib/psych.rb",
+        "ext/psych/lib/psych/core_ext.rb",
+        "ext/psych/lib/psych/visitors/depth_first.rb",
+        "ext/psych/lib/psych/visitors/json_tree.rb",
+        "ext/psych/lib/psych/visitors/emitter.rb",
+        "ext/psych/lib/psych/visitors/visitor.rb",
+        "ext/psych/lib/psych/visitors/yaml_tree.rb",
+        "ext/psych/lib/psych/visitors/to_ruby.rb",
+        "ext/psych/lib/psych/scalar_scanner.rb",
+        "ext/psych/lib/psych/versions.rb",
+        "ext/psych/lib/psych/omap.rb",
+        "ext/psych/lib/psych/set.rb",
+        "ext/psych/lib/psych/nodes.rb",
+        "ext/psych/lib/psych/streaming.rb",
+        "ext/psych/lib/psych/nodes/node.rb",
+        "ext/psych/lib/psych/nodes/mapping.rb",
+        "ext/psych/lib/psych/nodes/document.rb",
+        "ext/psych/lib/psych/nodes/stream.rb",
+        "ext/psych/lib/psych/nodes/sequence.rb",
+        "ext/psych/lib/psych/nodes/scalar.rb",
+        "ext/psych/lib/psych/nodes/alias.rb",
+        "ext/psych/lib/psych/parser.rb",
+        "ext/psych/lib/psych/class_loader.rb",
+        "ext/psych/lib/psych/tree_builder.rb",
+        "ext/psych/lib/psych/json/ruby_events.rb",
+        "ext/psych/lib/psych/json/tree_builder.rb",
+        "ext/psych/lib/psych/json/stream.rb",
+        "ext/psych/lib/psych/json/yaml_events.rb",
+        "ext/psych/lib/psych/coder.rb",
+        "ext/psych/lib/psych/stream.rb",
+        "ext/psych/lib/psych/syntax_error.rb",
+        "ext/psych/lib/psych/y.rb",
+        "ext/psych/lib/psych/visitors.rb",
+        "ext/psych/lib/psych/deprecated.rb",
+        "ext/psych/lib/psych/handler.rb",
+        "ext/psych/lib/psych/handlers/recorder.rb",
+        "ext/psych/lib/psych/handlers/document_stream.rb",
+        "ext/psych/lib/psych/exception.rb",
+    ]),
+    outs = [
+        "lib/psych.rb",
+        "lib/psych/core_ext.rb",
+        "lib/psych/visitors/depth_first.rb",
+        "lib/psych/visitors/json_tree.rb",
+        "lib/psych/visitors/emitter.rb",
+        "lib/psych/visitors/visitor.rb",
+        "lib/psych/visitors/yaml_tree.rb",
+        "lib/psych/visitors/to_ruby.rb",
+        "lib/psych/scalar_scanner.rb",
+        "lib/psych/versions.rb",
+        "lib/psych/omap.rb",
+        "lib/psych/set.rb",
+        "lib/psych/nodes.rb",
+        "lib/psych/streaming.rb",
+        "lib/psych/nodes/node.rb",
+        "lib/psych/nodes/mapping.rb",
+        "lib/psych/nodes/document.rb",
+        "lib/psych/nodes/stream.rb",
+        "lib/psych/nodes/sequence.rb",
+        "lib/psych/nodes/scalar.rb",
+        "lib/psych/nodes/alias.rb",
+        "lib/psych/parser.rb",
+        "lib/psych/class_loader.rb",
+        "lib/psych/tree_builder.rb",
+        "lib/psych/json/ruby_events.rb",
+        "lib/psych/json/tree_builder.rb",
+        "lib/psych/json/stream.rb",
+        "lib/psych/json/yaml_events.rb",
+        "lib/psych/coder.rb",
+        "lib/psych/stream.rb",
+        "lib/psych/syntax_error.rb",
+        "lib/psych/y.rb",
+        "lib/psych/visitors.rb",
+        "lib/psych/deprecated.rb",
+        "lib/psych/handler.rb",
+        "lib/psych/handlers/recorder.rb",
+        "lib/psych/handlers/document_stream.rb",
+        "lib/psych/exception.rb",
+    ],
+    cmd = """
+cp  $(location ext/psych/lib/psych.rb)                          $(location lib/psych.rb)
+cp  $(location ext/psych/lib/psych/core_ext.rb)                 $(location lib/psych/core_ext.rb)
+cp  $(location ext/psych/lib/psych/visitors/depth_first.rb)     $(location lib/psych/visitors/depth_first.rb)
+cp  $(location ext/psych/lib/psych/visitors/json_tree.rb)       $(location lib/psych/visitors/json_tree.rb)
+cp  $(location ext/psych/lib/psych/visitors/emitter.rb)         $(location lib/psych/visitors/emitter.rb)
+cp  $(location ext/psych/lib/psych/visitors/visitor.rb)         $(location lib/psych/visitors/visitor.rb)
+cp  $(location ext/psych/lib/psych/visitors/yaml_tree.rb)       $(location lib/psych/visitors/yaml_tree.rb)
+cp  $(location ext/psych/lib/psych/visitors/to_ruby.rb)         $(location lib/psych/visitors/to_ruby.rb)
+cp  $(location ext/psych/lib/psych/scalar_scanner.rb)           $(location lib/psych/scalar_scanner.rb)
+cp  $(location ext/psych/lib/psych/versions.rb)                 $(location lib/psych/versions.rb)
+cp  $(location ext/psych/lib/psych/omap.rb)                     $(location lib/psych/omap.rb)
+cp  $(location ext/psych/lib/psych/set.rb)                      $(location lib/psych/set.rb)
+cp  $(location ext/psych/lib/psych/nodes.rb)                    $(location lib/psych/nodes.rb)
+cp  $(location ext/psych/lib/psych/streaming.rb)                $(location lib/psych/streaming.rb)
+cp  $(location ext/psych/lib/psych/nodes/node.rb)               $(location lib/psych/nodes/node.rb)
+cp  $(location ext/psych/lib/psych/nodes/mapping.rb)            $(location lib/psych/nodes/mapping.rb)
+cp  $(location ext/psych/lib/psych/nodes/document.rb)           $(location lib/psych/nodes/document.rb)
+cp  $(location ext/psych/lib/psych/nodes/stream.rb)             $(location lib/psych/nodes/stream.rb)
+cp  $(location ext/psych/lib/psych/nodes/sequence.rb)           $(location lib/psych/nodes/sequence.rb)
+cp  $(location ext/psych/lib/psych/nodes/scalar.rb)             $(location lib/psych/nodes/scalar.rb)
+cp  $(location ext/psych/lib/psych/nodes/alias.rb)              $(location lib/psych/nodes/alias.rb)
+cp  $(location ext/psych/lib/psych/parser.rb)                   $(location lib/psych/parser.rb)
+cp  $(location ext/psych/lib/psych/class_loader.rb)             $(location lib/psych/class_loader.rb)
+cp  $(location ext/psych/lib/psych/tree_builder.rb)             $(location lib/psych/tree_builder.rb)
+cp  $(location ext/psych/lib/psych/json/ruby_events.rb)         $(location lib/psych/json/ruby_events.rb)
+cp  $(location ext/psych/lib/psych/json/tree_builder.rb)        $(location lib/psych/json/tree_builder.rb)
+cp  $(location ext/psych/lib/psych/json/stream.rb)              $(location lib/psych/json/stream.rb)
+cp  $(location ext/psych/lib/psych/json/yaml_events.rb)         $(location lib/psych/json/yaml_events.rb)
+cp  $(location ext/psych/lib/psych/coder.rb)                    $(location lib/psych/coder.rb)
+cp  $(location ext/psych/lib/psych/stream.rb)                   $(location lib/psych/stream.rb)
+cp  $(location ext/psych/lib/psych/syntax_error.rb)             $(location lib/psych/syntax_error.rb)
+cp  $(location ext/psych/lib/psych/y.rb)                        $(location lib/psych/y.rb)
+cp  $(location ext/psych/lib/psych/visitors.rb)                 $(location lib/psych/visitors.rb)
+cp  $(location ext/psych/lib/psych/deprecated.rb)               $(location lib/psych/deprecated.rb)
+cp  $(location ext/psych/lib/psych/handler.rb)                  $(location lib/psych/handler.rb)
+cp  $(location ext/psych/lib/psych/handlers/recorder.rb)        $(location lib/psych/handlers/recorder.rb)
+cp  $(location ext/psych/lib/psych/handlers/document_stream.rb) $(location lib/psych/handlers/document_stream.rb)
+cp  $(location ext/psych/lib/psych/exception.rb)                $(location lib/psych/exception.rb)
+"""
+)
+
 filegroup(
     name = "ruby_lib",
     srcs = [ "lib/rbconfig.rb", ":ruby_lib_staged" ],
@@ -1023,33 +1212,13 @@ filegroup(
 filegroup(
     name = "ruby_lib_staged",
     srcs = [
-        "lib/pathname.rb",
-        "lib/bigdecimal/jacobian.rb",
-        "lib/bigdecimal/ludcmp.rb",
-        "lib/bigdecimal/math.rb",
-        "lib/bigdecimal/newton.rb",
-        "lib/bigdecimal/util.rb",
-        "lib/json.rb",
-        "lib/json/add/bigdecimal.rb",
-        "lib/json/add/complex.rb",
-        "lib/json/add/core.rb",
-        "lib/json/add/date.rb",
-        "lib/json/add/date_time.rb",
-        "lib/json/add/exception.rb",
-        "lib/json/add/ostruct.rb",
-        "lib/json/add/range.rb",
-        "lib/json/add/rational.rb",
-        "lib/json/add/regexp.rb",
-        "lib/json/add/struct.rb",
-        "lib/json/add/symbol.rb",
-        "lib/json/add/time.rb",
-        "lib/json/common.rb",
-        "lib/json/ext.rb",
-        "lib/json/generic_object.rb",
-        "lib/json/version.rb",
-        "lib/socket.rb",
-        "lib/date.rb",
-        "lib/digest.rb",
+        ":ruby_ext/pathname",
+        ":ruby_ext/bigdecimal",
+        ":ruby_ext/json",
+        ":ruby_ext/socket",
+        ":ruby_ext/date",
+        ":ruby_ext/digest",
+        ":ruby_ext/psych",
     ] + glob([ "lib/**/*.rb" ]),
     visibility = ["//visibility:private"],
 )
