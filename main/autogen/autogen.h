@@ -63,11 +63,11 @@ struct NamedDefinition {
     std::vector<core::NameRef> requires;
     core::FileRef fileRef;
 
-    // NamedDefinition() = default;
-    // NamedDefinition(const NamedDefinition &) = delete;
-    // NamedDefinition(NamedDefinition &&) = default;
-    // NamedDefinition &operator=(const NamedDefinition &) = delete;
-    // NamedDefinition &operator=(NamedDefinition &&) = delete;
+    NamedDefinition() = default;
+    NamedDefinition(const NamedDefinition &) = delete;
+    NamedDefinition(NamedDefinition &&) = default;
+    NamedDefinition &operator=(const NamedDefinition &) = delete;
+    NamedDefinition &operator=(NamedDefinition &&) = default;
 };
 
 /*
@@ -177,7 +177,7 @@ public:
 
     bool root() const;
     core::NameRef name() const;
-    void addDef(core::Context, const AutoloaderConfig &, const NamedDefinition &);
+    void addDef(core::Context, const AutoloaderConfig &, NamedDefinition);
     void prettyPrint(core::Context ctx, int level = 0);
     std::string fullName(core::Context) const;
 
