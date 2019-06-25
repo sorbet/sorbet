@@ -172,14 +172,18 @@ folder, and start modifying it by hand.
 
 ### RBIs within gems
 
-The last way to include RBI files for a gem into a project is for the gem itself
-to ship with RBI files. In the future, we anticipate this to be the preferred
-way to include RBI files into a project.
+We expect that as adoption grows, gems will include their external interfaces
+RBI files in an `rbi/` directory. When they do this, Sorbet will automatically
+include those definitions when typechecking a project. In the future, we
+anticipate this to be the preferred way to include RBI files into a project.
 
-The way this works is that when `srb` will load a project's `Gemfile` to find
-the source folders for every gem in a project. If any gems have a top-level
-`rbi/` folder, `srb` will collect the paths to any such folders into a file
-(`sorbet/rbi_list`) and mention this file in the `sorbet/config` file.
+`srb tc` will automatically check the `Gemfile.lock` for changes since it was
+last run. If there are changes (or if it has never run with this specific hash
+before) it will check every gem to see if they have a `rbi/` directory. If so,
+they will all be written out to a `~/.cache/sorbet/gem-rbis/<hash>` file and
+used when typechecking the code. These are not included in the normal `sorbet/`
+files because they will be machine dependent so we don't want those ending up in
+version control.
 
 ## The Hidden Definition RBI
 
