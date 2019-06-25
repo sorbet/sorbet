@@ -372,7 +372,13 @@ class Sorbet::Private::GemLoader
       my_require 'sequel/sql'
     end,
     'sequel_pg' => proc do
-      my_require 'sequel'
+      # sequel_pg assumes that it was required by the adapter class in sequel
+      # (i.e., it's not mean to be required manually). But also, sequel lazily
+      # loads the adapter class depending on the scheme of the database being
+      # connected to. Since 'srb init' never only requires and never connects,
+      # we need to manually load the adapter class ourself, which will then
+      # transitively load sequel_pg
+      my_require 'sequel/adapters/postgres'
     end,
     'will_paginate' => proc do
       my_require 'will_paginate'
