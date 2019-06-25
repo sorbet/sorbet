@@ -204,15 +204,8 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     pf.classlist(ctx, serialized.classlist);
                 }
                 if (opts.print.AutogenAutoloader.enabled) {
-                    // TODO only on printer settings
-                    // TODO path filtering early out
                     Timer timeit(logger, "autogenNamedDefs");
-                    for (auto &def : pf.defs) {
-                        if (def.id.id() == 0) {
-                            continue;
-                        }
-                        out.defTree.addDef(ctx, autoloaderCfg, pf.toNamed(ctx, def.id));
-                    }
+                    pf.addDefinitions(ctx, autoloaderCfg, out.defTree);
                 }
 
                 out.prints.emplace_back(make_pair(idx, serialized));
