@@ -65,6 +65,7 @@ public:
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };
+CheckSize(TypePtr, 16, 8);
 
 class ArgInfo {
 public:
