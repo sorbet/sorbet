@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Sorbet::Private::UserInput
-  def prompt_for_confirmation!(prompt)
+  def self.prompt_for_confirmation!(prompt)
     if ENV['SRB_YES'] != nil
       puts "SRB_YES set, continuing"
       return true

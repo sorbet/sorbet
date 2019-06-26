@@ -17,7 +17,11 @@ class Sorbet::Private::CreateConfig
   def self.main
     FileUtils.mkdir_p(SORBET_DIR)
 
-    if File.exist?(SORBET_CONFIG_FILE) && prompt_for_confirmation!("#{SORBET_CONFIG_FILE} already exists. Overwrite?")
+    create_file =
+      !File.exist?(SORBET_CONFIG_FILE) ||
+        Sorbet::Private::UserInput.prompt_for_confirmation!("#{SORBET_CONFIG_FILE} already exists. Overwrite?")
+
+    if create_file
       File.open(SORBET_CONFIG_FILE, 'w') do |f|
         f.puts('--dir')
         f.puts('.')

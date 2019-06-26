@@ -15,8 +15,6 @@ require_relative '../lib/todo-rbi'
 require_relative '../lib/user_input'
 
 module Sorbet::Private::Main
-  extend Sorbet::Private::UserInput
-
   def self.emojify(emoji, msg)
     if STDOUT.isatty && RUBY_PLATFORM =~ /darwin/
       "#{emoji} #{msg}"
@@ -70,7 +68,7 @@ actions:
     #{cyan("# typed: true")}, depending on how many errors were found in that file.)
 
 "
-    if !prompt_for_confirmation!(emojify("❔", "Would you like to continue?"))
+    if !Sorbet::Private::UserInput.prompt_for_confirmation!(emojify("❔", "Would you like to continue?"))
       puts "\nAborting"
       Kernel.exit(1)
     end
