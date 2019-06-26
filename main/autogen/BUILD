@@ -15,6 +15,7 @@ cc_library(
         "//ast",
         "//ast/treemap",
         "//core",
+        "//main/options",
         "@com_github_d_bahr_crcpp",
         "@com_github_msgpack_msgpack",
     ],
