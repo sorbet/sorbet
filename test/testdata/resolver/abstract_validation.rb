@@ -116,7 +116,7 @@ module PrivateMethodInInterface
   extend T::Sig
   extend T::Helpers
   interface!
-  include UntypedMixin # XXXXX
+  include UntypedMixin # including untyped mixin in typed interface
 
   sig {abstract.returns(Object)}
   def good; end
@@ -153,6 +153,6 @@ module BadTypedImpl
   extend T::Sig
   extend T::Helpers
 
-  sig {implementation.returns(Integer)} # XXXXX
+  sig {implementation.returns(Integer)} # incompatible return type: Integer
   def foo; 1; end
 end
