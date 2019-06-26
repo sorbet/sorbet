@@ -195,7 +195,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       foo = OptionalArrayClass.props.fetch(:foo)
       assert_equal(T::Types::TypedArray, foo.fetch(:type).class, T::Types::TypedArray)
       assert_equal(Integer, foo.fetch(:array), Integer)
-      assert(T::Utils::Props.optional_prop?(foo))
+      assert(T::Props::Utils.optional_prop?(foo))
     end
 
     it "validates setting 'optional' argument when defining with 'optional' keyword" do
