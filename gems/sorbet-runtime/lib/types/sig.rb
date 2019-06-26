@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: true
+# typed: strict
 
 # Used as a mixin to any class so that you can call `sig`.
 # Docs at https://sorbet.org/docs/sigs
