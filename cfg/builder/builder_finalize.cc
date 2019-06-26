@@ -372,11 +372,12 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             changed = false;
             for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
                 BasicBlock *bb = *it;
-                int sz = upperBounds2[bb->id].size();
+                auto &upperBoundsForBlock = upperBounds2[bb->id];
+                int sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        upperBounds2[bb->id].insert(writesByBlock[edge->id].begin(), writesByBlock[edge->id].end());
-                        upperBounds2[bb->id].insert(upperBounds2[edge->id].begin(), upperBounds2[edge->id].end());
+                        upperBoundsForBlock.insert(writesByBlock[edge->id].begin(), writesByBlock[edge->id].end());
+                        upperBoundsForBlock.insert(upperBounds2[edge->id].begin(), upperBounds2[edge->id].end());
                     }
                 }
                 changed = changed || (upperBounds2[bb->id].size() != sz);
