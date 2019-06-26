@@ -173,7 +173,7 @@ module T::Private::Methods
       case decl.mode
       when Modes.standard
         decl.mode = Modes.override
-        decl.override_allow_incompatible = allow_incompatible
+        decl.override_allow_incompatible = true
       when Modes.override
         # this is probably fine
       else
