@@ -785,8 +785,8 @@ private:
     const int prohibitedLinesEnd;
 
     bool isWhiteListed(core::Context ctx, core::SymbolRef sym) {
-        // allow <static-init> and others
-        return false;
+        return sym.data(ctx)->name == core::Names::staticInit() ||
+               sym.data(ctx)->name == core::Names::Constants::Root();
     }
 
     void checkLoc(core::Context ctx, core::Loc loc) {
@@ -805,7 +805,8 @@ private:
 public:
     DefinitionLinesBlacklistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
         : file(file), prohibitedLinesStart(prohibitedLinesStart), prohibitedLinesEnd(prohibitedLinesEnd) {
-        ENFORCE(prohibitedLinesStart < prohibitedLinesEnd);
+        // Can be equal if file was empty.
+        ENFORCE(prohibitedLinesStart <= prohibitedLinesEnd);
         ENFORCE(file.exists());
     };
 
