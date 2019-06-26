@@ -972,42 +972,42 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
 
     "bb::TestRescue#parse_ruby_bug_12402_2_1" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_3" [
-        label = "block[id=3](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped)\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$18: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$19: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$18: T.class_of(StandardError))\l<isaCheckTemp>$19: T.untyped\l"
+        label = "block[id=3](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped, []$4: Integer(0))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$18: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$19: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$18: T.class_of(StandardError))\l<isaCheckTemp>$19: T.untyped\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_3" -> "bb::TestRescue#parse_ruby_bug_12402_2_8" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_3" -> "bb::TestRescue#parse_ruby_bug_12402_2_9" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_4" [
-        label = "block[id=4](<statTemp>$9: T.untyped, <self>: TestRescue, []$3: T.untyped)\l<statTemp>$15: T.untyped = <self>: TestRescue.bar()\l<statTemp>$12: T.noreturn = <self>: TestRescue.raise(<statTemp>$15: T.untyped)\l<rescueEndTemp>$17 = <unanalyzable>\l<rescueEndTemp>$17\l"
+        label = "block[id=4](<statTemp>$9: T.untyped, <self>: TestRescue, []$3: T.untyped, []$4: Integer(0))\l<statTemp>$15: T.untyped = <self>: TestRescue.bar()\l<statTemp>$12: T.noreturn = <self>: TestRescue.raise(<statTemp>$15: T.untyped)\l<rescueEndTemp>$17 = <unanalyzable>\l<rescueEndTemp>$17\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_4" -> "bb::TestRescue#parse_ruby_bug_12402_2_3" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_4" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_6" [
-        label = "block[id=6](<statTemp>$9: NilClass, <statTemp>$12: NilClass, <gotoDeadTemp>$20: NilClass, []$3: NilClass)\l<gotoDeadTemp>$20\l"
+        label = "block[id=6](<statTemp>$9: NilClass, <statTemp>$12: NilClass, <gotoDeadTemp>$20: NilClass, []$3: NilClass, []$4: NilClass)\l<gotoDeadTemp>$20\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_6" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_6" -> "bb::TestRescue#parse_ruby_bug_12402_2_10" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_8" [
-        label = "block[id=8](<statTemp>$9: T.untyped, []$3: T.untyped)\l<statTemp>$12: NilClass = nil\l<gotoDeadTemp>$20: NilClass\l"
+        label = "block[id=8](<statTemp>$9: T.untyped, []$3: T.untyped, []$4: Integer(0))\l<statTemp>$12: NilClass = nil\l<gotoDeadTemp>$20: NilClass\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_10" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_9" [
-        label = "block[id=9](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped)\l<gotoDeadTemp>$20: TrueClass(true) = true\l<gotoDeadTemp>$20: TrueClass(true)\l"
+        label = "block[id=9](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped, []$4: Integer(0))\l<gotoDeadTemp>$20: TrueClass(true) = true\l<gotoDeadTemp>$20: TrueClass(true)\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_9" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_9" -> "bb::TestRescue#parse_ruby_bug_12402_2_10" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_10" [
-        label = "block[id=10](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped)\l<statTemp>$8: T.untyped = <statTemp>$9: T.untyped.+(<statTemp>$12: NilClass)\l<returnMethodTemp>$2: T.untyped = []$3: T.untyped.[]=([]$4: NilClass, <statTemp>$8: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=10](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped, []$4: Integer(0))\l<statTemp>$8: T.untyped = <statTemp>$9: T.untyped.+(<statTemp>$12: NilClass)\l<returnMethodTemp>$2: T.untyped = []$3: T.untyped.[]=([]$4: Integer(0), <statTemp>$8: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_10" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
