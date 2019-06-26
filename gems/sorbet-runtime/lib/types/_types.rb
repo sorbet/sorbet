@@ -178,6 +178,11 @@ module T
   #
   # sig {params(arg: T.nilable(A), msg: T.nilable(String)).returns(A)}
   def self.must(arg, msg=nil)
+    # Avoid a method call by inlining the behavior of
+    # > return arg unless arg.nil?
+    return arg if arg
+    return arg if arg == False
+
     begin
       if msg
         if !T.unsafe(msg).is_a?(String)
@@ -186,11 +191,9 @@ module T
       else
         msg = "Passed `nil` into T.must"
       end
-      raise TypeError.new(msg) if arg.nil?
-      arg
+      raise TypeError.new(msg)
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Private::ErrorHandler.handle_inline_type_error(e)
-      arg
     end
   end
 
