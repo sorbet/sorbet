@@ -11,7 +11,6 @@ class Sorbet::Private::CreateConfig
   SORBET_DIR = 'sorbet'
   SORBET_CONFIG_FILE = "#{SORBET_DIR}/config"
 
-  extend Sorbet::Private::UserInput
   include Sorbet::Private::StepInterface
 
   def self.main
