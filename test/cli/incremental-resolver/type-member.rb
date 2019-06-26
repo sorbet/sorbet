@@ -3,5 +3,6 @@
 class A
   extend T::Generic
 
-  Elem = type_member
+  # TODO(jvilk): Restore after fixing https://github.com/sorbet/sorbet/issues/1064
+  # Elem = type_member
 end
