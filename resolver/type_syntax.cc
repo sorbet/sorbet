@@ -233,18 +233,41 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 case core::Names::abstract()._id:
                     sig.seen.abstract = true;
                     break;
-                case core::Names::override_()._id:
-                    if (send->args.size() == 1) {
-                        
+                case core::Names::override_()._id: {
+                    sig.seen.override_ = true;
+
+                    if (send->args.size() > 1) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
+                                        "0-1", send->args.size());
+                        }
                     }
 
-                    sig.seen.override_ = true;
+                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                    if (hash == nullptr) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
+                        }
+                        break;
+                    }
+
+                    int i = 0;
+                    for (auto &key : hash->keys) {
+                        auto &value = hash->values[i++];
+                        auto lit = ast::cast_tree<ast::Literal>(key.get());
+                        if (lit && lit->isSymbol(ctx)) {
+                            auto val = ast::cast_tree<ast::Literal>(value.get());
+                            if (val && val->isTrue(ctx)) {
+                                sig.seen.incompatibleOverride = true;
+                            }
+                        }
+                    }
+
                     break;
+                }
                 case core::Names::implementation()._id:
                     sig.seen.implementation = true;
-                    break;
-                case core::Names::incompatible_override()._id:
-                    sig.seen.incompatibleOverride = true;
                     break;
                 case core::Names::overridable()._id:
                     sig.seen.overridable = true;
