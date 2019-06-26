@@ -289,7 +289,8 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
         }
     }
     for (const auto &bb : cfg.basicBlocks) {
-        for (const core::LocalVariable what : RnW.writes[bb->id]) {
+        for (const auto &expr : bb->exprs) {
+            auto what = expr.bind.variable;
             const auto minIt = cfg.minLoops.find(what);
             const auto maxIt = cfg.maxLoopWrite.find(what);
             int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
@@ -342,8 +343,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                                                upperBounds1[bb->bexit.thenb->id].end());
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    upperBounds1[bb->id].insert(upperBounds1[bb->bexit.elseb->id].begin(),
-                                                upperBounds1[bb->bexit.elseb->id].end());
+                    upperBoundsForBlock.insert(upperBounds1[bb->bexit.elseb->id].begin(),
+                                               upperBounds1[bb->bexit.elseb->id].end());
                 }
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
@@ -353,11 +354,11 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                     // inner condition when we get a better type inference
                     // algorithm.
                     if (bb->outerLoops <= cfg.minLoops[dead]) {
-                        upperBounds1[bb->id].erase(dead);
+                        upperBoundsForBlock.erase(dead);
                     }
                 }
 
-                changed = changed || (upperBounds1[bb->id].size() != sz);
+                changed = changed || (upperBoundsForBlock.size() != sz);
             }
         }
     }
