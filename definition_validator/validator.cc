@@ -135,6 +135,8 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     auto klassData = klass.data(gs);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
 
+    // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
+    // interfaces
     if (klassData->isClassInterface() && method.data(gs)->isPrivate()) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be private", method.show(gs));
