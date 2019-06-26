@@ -47,6 +47,8 @@ pushd gems/sorbet
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
 gem build sorbet.gemspec
 if [[ "mac" == "$platform" ]]; then
+  rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
+  trap 'rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static' EXIT
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
   rbenv exec gem install sorbet-*.gem
 
@@ -66,8 +68,6 @@ if [[ "mac" == "$platform" ]]; then
 
   rbenv exec bundle
   rbenv exec bundle exec rake test
-
-  rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 fi
 popd
 
