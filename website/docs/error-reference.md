@@ -613,9 +613,9 @@ See also: [5028](#5028), [6002](#6002).
 
 ## 7018
 
-At `typed: strong`, Sorbet no longer allows `T.untyped` as the intermediate result
-of any method call. This effectively means that Sorbet knew the type statically
-for 100% of calls within a file. Currently, this sigil is rarely used — usually
+At `typed: strong`, Sorbet no longer allows `T.untyped` as the intermediate
+result of any method call. This effectively means that Sorbet knew the type
+statically for 100% of calls within a file. This sigil is rarely used—usually
 the only files that are `# typed: strong` are RBI files and files with empty
 class definitions. Most Ruby files that actually do interesting things will have
 errors in `# typed: strong`.
