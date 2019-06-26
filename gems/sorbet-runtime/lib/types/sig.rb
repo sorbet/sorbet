@@ -11,7 +11,7 @@ module T::Sig
 
     # At runtime, does nothing, but statically it is treated exactly the same
     # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
-    T::Sig::WithoutRuntime.sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void} # rubocop:disable PrisonGuard/PrivateModule
+    T::Sig::WithoutRuntime.sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
     def self.sig(&blk); end # rubocop:disable PrisonGuard/BanBuiltinMethodOverride, Lint/DuplicateMethods
   end
 
