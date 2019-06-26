@@ -13,7 +13,7 @@ class T::Private::Methods::DeclBuilder
   def implementation; end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
-  def unsafe_implementation; end
+  def incompatible_override; end
 
   sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::DeclBuilder)}
   def override(allow_incompatible: false); end

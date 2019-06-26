@@ -177,7 +177,7 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
             }
         }
         if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
-            !method.data(gs)->isUnsafeImplementation()) {
+            !method.data(gs)->isIncompatibleOverride()) {
             validateCompatibleOverride(gs, overridenMethod, method);
         }
     }

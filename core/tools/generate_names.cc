@@ -94,7 +94,7 @@ NameDef names[] = {
     {"implementation"},
     {"override_", "override"},
     {"overridable"},
-    {"unsafe_implementation"},
+    {"incompatible_override"},
 
     // Sig builders
     {"bind"},

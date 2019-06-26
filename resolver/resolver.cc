@@ -829,8 +829,8 @@ private:
         if (sig.seen.implementation) {
             method.data(ctx)->setImplementation();
         }
-        if (sig.seen.unsafeImplementation) {
-            method.data(ctx)->setUnsafeImplementation();
+        if (sig.seen.incompatibleOverride) {
+            method.data(ctx)->setIncompatibleOverride();
         }
         if (sig.seen.generated) {
             method.data(ctx)->setHasGeneratedSig();
