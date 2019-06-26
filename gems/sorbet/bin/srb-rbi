@@ -12,8 +12,11 @@ require_relative '../lib/fetch-rbis'
 require_relative '../lib/find-gem-rbis'
 require_relative '../lib/suggest-typed'
 require_relative '../lib/todo-rbi'
+require_relative '../lib/user_input'
 
 module Sorbet::Private::Main
+  extend Sorbet::Private::UserInput
+
   def self.emojify(emoji, msg)
     if STDOUT.isatty && RUBY_PLATFORM =~ /darwin/
       "#{emoji} #{msg}"
@@ -67,25 +70,9 @@ actions:
     #{cyan("# typed: true")}, depending on how many errors were found in that file.)
 
 "
-    if ENV['SRB_YES'] != nil
-      puts "SRB_YES set, continuing"
-    else
-      STDOUT.write(emojify("❔", "Would you like to continue? [Y/n] "))
-      if STDIN.isatty && STDOUT.isatty
-        begin
-          input = Kernel.gets&.strip
-          if input.nil? || (input != '' && input != 'y' && input != 'Y')
-            puts "\nAborting"
-            Kernel.exit(1)
-          end
-        rescue Interrupt
-          puts "\nAborting"
-          Kernel.exit(1)
-        end
-      else
-        puts "\nNot running interactivly. Set SRB_YES=1 environment variable to proceed"
-        Kernel.exit(1)
-      end
+    if !prompt_for_confirmation!(emojify("❔", "Would you like to continue?"))
+      puts "\nAborting"
+      Kernel.exit(1)
     end
 
     # Create sorbet/config file
