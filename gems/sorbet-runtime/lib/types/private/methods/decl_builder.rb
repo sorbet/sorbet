@@ -167,6 +167,23 @@ module T::Private::Methods
       self
     end
 
+    def incompatible_override
+      check_live!
+
+      case decl.mode
+      when Modes.standard
+        decl.mode = Modes.override
+        decl.override_allow_incompatible = allow_incompatible
+      when Modes.override
+        # this is probably fine
+      else
+        raise BuilderError.new("`.override` cannot be combined with any of `.abstract`, `.implementation`, or "\
+              "`.overridable`.")
+      end
+
+      self
+    end
+
     def override(allow_incompatible: false)
       check_live!
 
