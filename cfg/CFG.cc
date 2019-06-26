@@ -28,7 +28,6 @@ CFG::CFG() {
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
-    Timer timeit(ctx.state.tracer(), "findAllReadsAndWrites");
     CFG::ReadsAndWrites target;
     target.reads.resize(maxBasicBlockId);
     target.writes.resize(maxBasicBlockId);
@@ -90,8 +89,6 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     UnorderedMap<core::LocalVariable, pair<int, int>> usageCounts;
 
     {
-        Timer timeit(ctx.state.tracer(), "privates1");
-
         for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
             for (auto &el : readsAndWrites[blockId]) {
                 usageCounts.try_emplace(el, make_pair(0, blockId)).first->second.first += 1;
@@ -99,7 +96,6 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         }
     }
     {
-        Timer timeit(ctx.state.tracer(), "privates2");
         for (const auto &[local, usages] : usageCounts) {
             if (usages.first == 1) {
                 target.writes[usages.second].erase(local);
