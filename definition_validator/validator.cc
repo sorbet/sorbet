@@ -13,8 +13,8 @@ namespace sorbet::definition_validator {
 
 struct Signature {
     struct {
-        absl::InlinedVector<core::NameRef, 4> required;
-        absl::InlinedVector<core::NameRef, 4> optional;
+        absl::InlinedVector<const core::ArgInfo*, 4> required;
+        absl::InlinedVector<const core::ArgInfo*, 4> optional;
         std::optional<const core::ArgInfo *> rest;
     } pos, kw;
     bool syntheticBlk;
@@ -32,12 +32,60 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
         if (arg.flags.isRepeated) {
             dst.rest = std::optional<const core::ArgInfo *>{&arg};
         } else if (arg.flags.isDefault) {
-            dst.optional.push_back(arg.name);
+            dst.optional.push_back(&arg);
         } else {
-            dst.required.push_back(arg.name);
+            dst.required.push_back(&arg);
         }
     }
     return sig;
+}
+
+// This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `T.untyped` or if
+// either one is not fully defined.
+bool checkSubtype(const core::Context ctx, core::TypePtr sub, core::TypePtr super) {
+    if (!sub || !super) {
+        return true;
+    }
+
+    if (!super->isFullyDefined() || !sub->isFullyDefined()) {
+        return true;
+    }
+
+    return core::Types::isSubType(ctx, sub, super);
+}
+
+
+void matchPositional(
+    const core::Context ctx,
+    absl::InlinedVector<const core::ArgInfo*, 4> &superArgs, core::SymbolRef superMethod,
+    absl::InlinedVector<const core::ArgInfo*, 4> &methodArgs, core::SymbolRef method) {
+
+    // make sure the required positional arguments are compatible
+    auto superPos = superArgs.begin();
+    auto superEnd = superArgs.end();
+
+    auto methodPos = methodArgs.begin();
+    auto methodEnd = methodArgs.end();
+
+    while (superPos != superEnd && methodPos != methodEnd) {
+        auto superArgType = (*superPos)->type;
+        auto methodArgType = (*methodPos)->type;
+
+        if (!checkSubtype(ctx, superArgType, methodArgType)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Parameter `{}` of type `{}` not compatible with type of abstract method `{}`",
+                            (*methodPos)->show(ctx),
+                            methodArgType->show(ctx),
+                            superMethod.data(ctx)->show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "The corresponding parameter `{}` was declared here with type `{}`",
+                               (*superPos)->show(ctx),
+                               superArgType->show(ctx));
+            }
+        }
+
+        superPos ++;
+        methodPos ++;
+    }
 }
 
 // Eventually this should check the appropriate subtype relationships on types,
@@ -84,20 +132,60 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
         }
     }
 
+    // match types of required positional arguments
+    matchPositional(ctx, left.pos.required, superMethod, right.pos.required, method);
+    // match types of optional positional arguments
+    matchPositional(ctx, left.pos.optional, superMethod, right.pos.optional, method);
+
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
-            if (absl::c_any_of(right.kw.required, [&](const auto &r) { return r == req; })) {
-                continue;
+            auto corresponding = absl::c_find_if(right.kw.required, [&](const auto &r) { return r->name == req->name; });
+            if (corresponding == right.kw.required.end()) {
+                corresponding = absl::c_find_if(right.kw.optional, [&](const auto &r) { return r->name == req->name; });
             }
-            if (absl::c_any_of(right.kw.optional, [&](const auto &r) { return r == req; })) {
-                continue;
-            }
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
-                            superMethod.data(ctx)->show(ctx), req.show(ctx));
-                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+
+            // if there is a corresponding parameter, make sure it has the right type
+            if (corresponding != right.kw.required.end() && corresponding != right.kw.optional.end()) {
+                if (!checkSubtype(ctx, req->type, (*corresponding)->type)) {
+                    if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                        e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of abstract method `{}`",
+                                    (*corresponding)->show(ctx),
+                                    (*corresponding)->type->show(ctx),
+                                    superMethod.data(ctx)->show(ctx));
+                        e.addErrorLine(superMethod.data(ctx)->loc(), "The corresponding parameter `{}` was declared here with type `{}`",
+                                       req->show(ctx),
+                                       req->type->show(ctx));
+                    }
+                }
+            } else {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
+                                superMethod.data(ctx)->show(ctx), req->name.show(ctx));
+                    e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                }
             }
         }
+
+        // make sure that optional parameters expect a compatible type, as well
+        for (auto opt : left.kw.optional) {
+            auto corresponding = absl::c_find_if(right.kw.optional, [&](const auto &r) { return r->name == opt->name; });
+
+            // if there is a corresponding parameter, make sure it has the right type
+            if (corresponding != right.kw.optional.end()) {
+                if (!checkSubtype(ctx, opt->type, (*corresponding)->type)) {
+                    if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                        e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of abstract method `{}`",
+                                    (*corresponding)->show(ctx),
+                                    (*corresponding)->type->show(ctx),
+                                    superMethod.data(ctx)->show(ctx));
+                        e.addErrorLine(superMethod.data(ctx)->loc(), "The corresponding parameter `{}` was declared here with type `{}`",
+                                       opt->show(ctx),
+                                       opt->type->show(ctx));
+                    }
+                }
+            }
+        }
+
     }
 
     if (auto leftRest = left.kw.rest) {
@@ -107,16 +195,26 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                             (*leftRest)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
+        } else if (!checkSubtype(ctx, (*leftRest)->type, (*right.kw.rest)->type)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Parameter **`{}` of type `{}` not compatible with type of abstract method `{}`",
+                            (*right.kw.rest)->show(ctx),
+                            (*right.kw.rest)->type->show(ctx),
+                            superMethod.data(ctx)->show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "The corresponding parameter **`{}` was declared here with type `{}`",
+                               (*left.kw.rest)->show(ctx),
+                               (*left.kw.rest)->type->show(ctx));
+            }
         }
     }
 
     for (auto extra : right.kw.required) {
-        if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l == extra; })) {
+        if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l->name == extra->name; })) {
             continue;
         }
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of abstract method `{}` contains extra required keyword argument `{}`",
-                        superMethod.data(ctx)->show(ctx), extra.toString(ctx));
+                        superMethod.data(ctx)->show(ctx), extra->name.toString(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
     }
@@ -130,17 +228,11 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
     }
 
     {
+        // make sure the return types are compatible
         auto superReturn = superMethod.data(ctx)->resultType;
-        if (!superReturn) {
-            superReturn = core::Types::untyped(ctx, superMethod);
-        }
-
         auto methodReturn = method.data(ctx)->resultType;
-        if (!methodReturn) {
-            methodReturn = core::Types::untyped(ctx, method);
-        }
 
-        if (!superMethod.data(ctx)->isGenericMethod() && superReturn->isFullyDefined() && methodReturn->isFullyDefined() && !core::Types::isSubType(ctx, methodReturn, superReturn)) {
+        if (!checkSubtype(ctx, methodReturn, superReturn)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Return type `{}` does not match return type of abstract method `{}`",
                             methodReturn->show(ctx),
@@ -149,7 +241,6 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                                superReturn->show(ctx));
             }
         }
-
     }
 }
 
