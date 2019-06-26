@@ -81,6 +81,7 @@ struct AutoloaderConfig {
     bool includeRequire(core::NameRef req) const;
 
     std::string rootDir;
+    std::string preamble;
     UnorderedSet<core::NameRef> topLevelNamespaceRefs;
     UnorderedSet<core::NameRef> excludedRequireRefs;
     std::vector<std::vector<core::NameRef>> sameFileModuleNames;
