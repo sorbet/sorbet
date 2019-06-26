@@ -443,7 +443,8 @@ int realmain(int argc, char *argv[]) {
                     errs.emplace_back(*gs, file);
                 }
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), *workers);
-                autoloaderCfg.enterNames(*gs);
+                autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
+                // autoloaderCfg.enterNames(*gs);
             }
 
             runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);

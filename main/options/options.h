@@ -92,8 +92,20 @@ enum Phase {
     INFERENCER,
 };
 
+struct AutoloaderConfig {
+    // Top-level modules to include in autoloader output
+    std::vector<std::string> modules;
+    std::string rootDir;
+    std::vector<std::string> requireExcludes;
+    std::vector<std::vector<std::string>> sameFileModules;
+
+    std::vector<std::string> absoluteIgnorePatterns;
+    std::vector<std::string> relativeIgnorePatterns;
+};
+
 struct Options {
     Printers print;
+    AutoloaderConfig autoloaderConfig;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 

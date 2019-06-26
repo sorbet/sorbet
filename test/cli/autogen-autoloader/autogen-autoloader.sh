@@ -5,6 +5,9 @@ rm -rf output
 mkdir -p output
 
 main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader:output \
+  --autogen-autoloader-modules={Foo,Yabba} \
+  --autogen-autoloader-exclude-require=byebug \
+  --autogen-autoloader-ignore=scripts/ \
   test/cli/autogen-autoloader/{foo,bar,bar2,errors}.rb \
   test/cli/autogen-autoloader/scripts/baz.rb 2>&1
 
