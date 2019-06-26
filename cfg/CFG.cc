@@ -61,7 +61,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockReadsAndWrites.insert(v->recv.variable);
                 for (auto &arg : v->args) {
                     blockReads.insert(arg.variable);
-                    blockReadsAndWrites.insert(v->recv.variable);
+                    blockReadsAndWrites.insert(arg.variable);
                 }
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 blockReads.insert(v->what.variable);
