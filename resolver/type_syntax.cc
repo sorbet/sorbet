@@ -246,7 +246,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     if (send->args.size() == 1) {
                         auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                         if (hash == nullptr) {
-                            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            if (auto e =
+                                    ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                                 auto paramsStr = send->fun.show(ctx);
                                 e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                             }
