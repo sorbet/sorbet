@@ -149,7 +149,7 @@ class T::Props::Decorator
     # T::Props::CustomType is not a real object based class so that we can not run real type check call.
     # T::Props::CustomType.valid?() is only a helper function call.
     valid =
-      if type.is_a?(T::Props::CustomType) && T::Utils::Props.optional_prop?(rules)
+      if type.is_a?(T::Props::CustomType) && T::Props::Utils.optional_prop?(rules)
         type.valid?(val)
       else
         type_object.valid?(val)
@@ -371,8 +371,8 @@ class T::Props::Decorator
     if T::Utils::Nilable.is_union_with_nilclass(cls)
       # :_tnilable is introduced internally for performance purpose so that clients do not need to call
       # T::Utils::Nilable.is_tnilable(cls) again.
-      # It is strictly internal: clients should always use T::Utils::Props.required_prop?() or
-      # T::Utils::Props.optional_prop?() for checking whether a field is required or optional.
+      # It is strictly internal: clients should always use T::Props::Utils.required_prop?() or
+      # T::Props::Utils.optional_prop?() for checking whether a field is required or optional.
       rules[:_tnilable] = true
     end
 
