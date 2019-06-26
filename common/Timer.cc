@@ -36,9 +36,13 @@ FlowId Timer::getFlowEdge() {
 
 Timer::~Timer() {
     auto clock = chrono::steady_clock::now();
-    auto dur = std::chrono::duration<double, std::milli>(clock - start);
-    log.debug("{}: {}ms", this->name.str, dur.count());
-    sorbet::timingAdd(this->name, start, clock, move(args), self, prev);
+    auto dur = clock - start;
+    if (dur > std::chrono::microseconds(250)) {
+        // the trick ^^^ is to skip double comparison in the common case and use the most efficient represnetation.
+        auto dur = std::chrono::duration<double, std::milli>(clock - start);
+        log.debug("{}: {}ms", this->name.str, dur.count());
+        sorbet::timingAdd(this->name, start, clock, move(args), self, prev);
+    }
 }
 
 } // namespace sorbet
