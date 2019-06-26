@@ -41,8 +41,6 @@ module M1
   def self.foo; end # error: Static methods in a module cannot be abstract
 end
 
-AbstractClass.foo # error: Invoking abstract class method AbstractClass.foo
-
 # it fails if a concrete module doesn't implement abstract methods
   module M2
 # ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#bar`
@@ -130,7 +128,7 @@ module PrivateMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  private def bad; end # error: Abstract method `PrivateMethodInInterface#bad` cannot be private
+  private def bad; end # error: Interface method `PrivateMethodInInterface#bad` cannot be private
 end
 
 module ProtectedMethodInInterface
@@ -139,7 +137,7 @@ module ProtectedMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  protected def bad; end # error: Abstract method `ProtectedMethodInInterface#bad` cannot be protected
+  protected def bad; end # error: Interface method `ProtectedMethodInInterface#bad` cannot be protected
 end
 
 module GoodInterface

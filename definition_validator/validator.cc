@@ -143,7 +143,7 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
 
     if (klassData->isClassInterface() && method.data(gs)->isProtected()) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Abstract method `{}` cannot be protected", method.show(gs));
+            e.setHeader("Interface method `{}` cannot be protected", method.show(gs));
         }
     }
 
