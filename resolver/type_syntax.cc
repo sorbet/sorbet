@@ -234,6 +234,10 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     sig.seen.abstract = true;
                     break;
                 case core::Names::override_()._id:
+                    if (send->args.size() == 1) {
+                        
+                    }
+
                     sig.seen.override_ = true;
                     break;
                 case core::Names::implementation()._id:
