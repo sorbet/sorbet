@@ -96,6 +96,7 @@ struct AutoloaderConfig {
     // Top-level modules to include in autoloader output
     std::vector<std::string> modules;
     std::string rootDir;
+    std::string preamble;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
 

@@ -346,6 +346,7 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("autogen-autoloader-exclude-require", "TODO", cxxopts::value<vector<string>>());
     options.add_options("advanced")("autogen-autoloader-ignore", "TODO", cxxopts::value<vector<string>>());
     options.add_options("advanced")("autogen-autoloader-modules", "TODO", cxxopts::value<vector<string>>());
+    options.add_options("advanced")("autogen-autoloader-preamble", "TODO", cxxopts::value<string>()->default_value(""));
     options.add_options("advanced")("autogen-autoloader-root", "TODO",
                                     cxxopts::value<string>()->default_value("autoloader"));
     options.add_options("advanced")("autogen-autoloader-samefile", "TODO", cxxopts::value<vector<string>>());
@@ -529,7 +530,8 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
             cfg.sameFileModules.emplace_back(absl::StrSplit(fullName, "::"));
         }
     }
-    raw["autogen-autoloader-root"].as<string>();
+    cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
+    cfg.rootDir = raw["autogen-autoloader-root"].as<string>();
     return true;
 }
 
