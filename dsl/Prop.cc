@@ -12,7 +12,38 @@ using namespace std;
 namespace sorbet::dsl {
 namespace {
 
-struct PropInfo {};
+// these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
+// either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
+// users, but we don't know that information in the DSL passes.
+bool isT(ast::Expression *expr) {
+    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
+        return false;
+    }
+    auto scope = t->scope.get();
+    if (ast::isa_tree<ast::EmptyTree>(scope)) {
+        return true;
+    }
+    auto root = ast::cast_tree<ast::ConstantLit>(scope);
+    return root != nullptr && root->symbol == core::Symbols::root();
+}
+
+bool isTNilable(ast::Expression *expr) {
+    auto *nilable = ast::cast_tree<ast::Send>(expr);
+    return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv.get());
+}
+
+bool isTStruct(ast::Expression *expr) {
+    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope.get());
+}
+
+struct PropInfo {
+    core::NameRef name;
+    core::Loc loc;
+    unique_ptr<ast::Expression> type;
+    optional<unique_ptr<ast::Expression>> default_;
+};
 
 struct NodesAndPropInfo {
     vector<unique_ptr<ast::Expression>> nodes;
@@ -151,6 +182,21 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
     // From this point, we can't `return std::nullopt` anymore since we're going to be consuming the tree.
 
     NodesAndPropInfo ret;
+    ret.propInfo.name = name;
+    ret.propInfo.loc = send->loc;
+    ret.propInfo.type = ASTUtil::dupType(type.get());
+    if (isTNilable(type.get())) {
+        ret.propInfo.default_ = ast::MK::Nil(ret.propInfo.loc);
+    } else if (rules == nullptr) {
+        ret.propInfo.default_ = std::nullopt;
+    } else if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
+        ret.propInfo.default_ = ast::MK::Unsafe(ret.propInfo.loc, ast::MK::Nil(ret.propInfo.loc));
+    } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
+        auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
+        ret.propInfo.default_ = std::move(val);
+    } else {
+        ret.propInfo.default_ = std::nullopt;
+    }
 
     // Compute the getters
     if (rules) {
@@ -312,6 +358,13 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
         return;
     }
+    auto synthesizeInitialize = false;
+    for (auto &a : klass->ancestors) {
+        if (isTStruct(a.get())) {
+            synthesizeInitialize = true;
+            break;
+        }
+    }
     UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
     vector<PropInfo> props;
     for (auto &stat : klass->rhs) {
@@ -325,11 +378,35 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         }
         ENFORCE(!nodesAndPropInfo->nodes.empty(), "nodesAndPropInfo with value must have nodes be non empty");
         replaceNodes[stat.get()] = std::move(nodesAndPropInfo->nodes);
-        props.emplace_back(nodesAndPropInfo->propInfo);
+        props.emplace_back(std::move(nodesAndPropInfo->propInfo));
     }
     auto oldRHS = std::move(klass->rhs);
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
+    if (synthesizeInitialize) {
+        // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
+        ast::MethodDef::ARGS_store args;
+        ast::Hash::ENTRY_store sigKeys;
+        ast::Hash::ENTRY_store sigVals;
+        args.reserve(props.size());
+        sigKeys.reserve(props.size());
+        sigVals.reserve(props.size());
+        for (auto &prop : props) {
+            auto loc = prop.loc;
+            auto arg = ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name));
+            if (prop.default_.has_value()) {
+                arg = ast::MK::OptionalArg(loc, std::move(arg), std::move(*(prop.default_)));
+            }
+            args.emplace_back(std::move(arg));
+            sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
+            sigVals.emplace_back(std::move(prop.type));
+        }
+        auto loc = klass->loc;
+        klass->rhs.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
+        klass->rhs.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(args),
+                                                ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
+    }
+    // this is cargo-culted from dsl.cc.
     for (auto &stat : oldRHS) {
         if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
             klass->rhs.emplace_back(std::move(stat));

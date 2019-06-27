@@ -192,6 +192,7 @@ module T::Enumerator
   def self.[](type); end
 end
 class T::InexactStruct
+  def initialize(rules={}); end
   def prop(name, type, rules={}); end
   def const(name, type, rules={}); end
 end

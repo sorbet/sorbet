@@ -18,6 +18,7 @@ require 'sorbet-runtime'
 class MyStruct < T::Struct
   prop :x, Integer
   const :y, T.nilable(String)
+  const :z, Float, default: 0.5
 end
 ```
 
@@ -25,29 +26,32 @@ This is basically the same as having written code like this:
 
 ```ruby
 class MyStruct < T::Struct
-  def initialize(x:, y: nil)
-    @x = x
-    @y = y
+  sig {params(x: Integer, y: String, z: Float).void}
+  def initialize(x:, y: nil, z: 0.5)
+    ...
   end
 
   sig {returns(Integer)}
-  def x; @x; end
+  def x; ...; end
 
-  sig {params(x: Integer).returns(Integer)}
-  def x=(x); @x = x; end
+  sig {params(arg0: Integer).returns(Integer)}
+  def x=(arg0); ...; end
 
   sig {returns(T.nilable(String))}
-  def y; @y; end
+  def y; ...; end
+
+  sig {returns(Float)}
+  def z; ...; end
 end
 ```
 
 It can be used like this:
 
 ```ruby
-my_struct = MyStruct.new(x: 0)
-puts my_struct.x # => 0
-puts my_struct.y # => nil
+my_struct = MyStruct.new(x: 3)
+my_struct.x # => 3
+my_struct.y # => nil
+my_struct.z # => 0.5
+my_struct.x = 4
+my_struct.x # => 4
 ```
-
-> **Note**: `T::Struct` does not currently statically type check the call to the
-> constructor. This is planned but not yet implemented.
