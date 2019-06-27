@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 # typed: true
-# rubocop:disable PrisonGuard/NoTopLevelDeclarations, PrisonGuard/PackageMatchesDirectory
 
 # Used as a mixin to any class so that you can call `sig`.
 # Docs at https://sorbet.org/docs/sigs
@@ -24,5 +23,3 @@ module T::Sig
     T::Private::Methods.declare_sig(self, &blk)
   end
 end
-
-# rubocop:enable PrisonGuard/NoTopLevelDeclarations, PrisonGuard/PackageMatchesDirectory
