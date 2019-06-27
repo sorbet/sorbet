@@ -49,7 +49,7 @@ It can be used like this:
 
 ```ruby
 my_struct = MyStruct.new(x: 0)
-puts my_struct.x # => 0
-puts my_struct.y # => nil
-puts my_struct.z # => 0.5
+my_struct.x # => 0
+my_struct.y # => nil
+my_struct.z # => 0.5
 ```
