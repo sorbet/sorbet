@@ -157,7 +157,7 @@ sig {params(<span class="hljs-symbol">x:</span> Integer).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doesnt_take_nil</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
 sig {params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symbol">options:</span> T::Hash[Symbol, Integer]).void}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(options)</span></span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(key, options)</span></span>
   val = T.must(options[key])
   doesnt_take_nil(val) <span class="hljs-comment"># ok</span>
 <span class="hljs-keyword">end</span>
