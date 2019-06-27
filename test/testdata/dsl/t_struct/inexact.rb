@@ -6,4 +6,5 @@ class Inexact < T::InexactStruct
 end
 
 Inexact.new
-Inexact.new(foo: 3, bar: "hey") # error: Wrong number of arguments for constructor. Expected: `0`, got: `1`
+Inexact.new(foo: 3, bar: "hey")
+Inexact.new(foo: false, quz: [1, 2, 5])
