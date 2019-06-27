@@ -676,8 +676,7 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
 }
 
 void ParsedFile::subclasses(core::Context ctx, vector<string> &absolutePathsToIgnore,
-                            vector<string> &relativePathsToIgnore,
-                            map<string, set<pair<string, Definition::Type>>> &out) {
+                            vector<string> &relativePathsToIgnore, AutogenSubclassMap &out) {
     // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
     if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
         return;
@@ -702,17 +701,57 @@ void ParsedFile::subclasses(core::Context ctx, vector<string> &absolutePathsToIg
     }
 }
 
-void descendantsOf(map<string, set<pair<string, Definition::Type>>> &childMap, string &parentName,
-                   set<pair<string, Definition::Type>> &out) {
+// Generate all descendants of a parent class
+// Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
+void descendantsOf(const AutogenSubclassMap &childMap, const string &parentName, AutogenSubclassSet &out) {
     if (!childMap.count(parentName)) {
         return;
     }
-    set<pair<string, Definition::Type>> &children = childMap[parentName];
+    const AutogenSubclassSet &children = childMap.at(parentName);
 
     out.insert(children.begin(), children.end());
     for (auto child : children) {
-        autogen::descendantsOf(childMap, child.first, out);
+        descendantsOf(childMap, child.first, out);
     }
+}
+
+void maybeInsertChild(const string &parentName, const AutogenSubclassSet &children, AutogenSubclassMap &out) {
+    if (parentName.empty()) {
+        // Child < NonexistentParent
+        return;
+    }
+    out[parentName].insert(children.begin(), children.end());
+}
+
+// Manually patch the child map to account for inheritance that happens at runtime `self.included`
+// Please do not add to this list.
+void patchChildMap(AutogenSubclassMap &childMap) {
+    childMap["Opus::SafeMachine"].insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
+                                         childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
+
+    childMap["Chalk::SafeMachine"].insert(childMap["Opus::SafeMachine"].begin(), childMap["Opus::SafeMachine"].end());
+
+    childMap["Chalk::ODM::Model"].insert(make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
+}
+
+unique_ptr<vector<string>> serializeSubclassMap(AutogenSubclassMap &descendantsMap, vector<string> &parentNames) {
+    unique_ptr<vector<string>> descendantsMapSerialized = make_unique<vector<string>>();
+
+    for (const auto &parentName : parentNames) {
+        if (!descendantsMap.count(parentName)) {
+            // TODO(gwu) Should we throw here?
+            continue;
+        }
+        descendantsMapSerialized->emplace_back(parentName);
+        for (auto const &entry : descendantsMap[parentName]) {
+            if (entry.second != autogen::Definition::Type::Class) {
+                continue;
+            }
+            descendantsMapSerialized->emplace_back(fmt::format(" {}", entry.first));
+        }
+    }
+
+    return descendantsMapSerialized;
 }
 
 } // namespace sorbet::autogen

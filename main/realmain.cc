@@ -158,7 +158,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
-        map<string, set<pair<string, autogen::Definition::Type>>> subclasses;
+        autogen::AutogenSubclassMap subclasses;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -250,52 +250,28 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         Timer timeit(logger, "autogenSubclassesPrint");
 
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
-        map<string, set<pair<string, autogen::Definition::Type>>> mergedSubclasses;
+        autogen::AutogenSubclassMap childMap;
         for (auto &el : merged) {
             for (auto const &[parentName, children] : el.second.subclasses) {
-                if (parentName.empty()) {
-                    // Child < NonexistentParent
-                    continue;
-                }
-                mergedSubclasses[parentName].insert(children.begin(), children.end());
+                autogen::maybeInsertChild(parentName, children, childMap);
             }
         }
 
-        // Manual overrides necessary b/c of self.included
-        mergedSubclasses["Opus::SafeMachine"].insert(
-            mergedSubclasses["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
-            mergedSubclasses["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
-
-        mergedSubclasses["Chalk::SafeMachine"].insert(mergedSubclasses["Opus::SafeMachine"].begin(),
-                                                      mergedSubclasses["Opus::SafeMachine"].end());
-
-        mergedSubclasses["Chalk::ODM::Model"].insert(
-            make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
+        autogen::patchChildMap(childMap);
 
         // Generate descendants for each passed-in superclass
-        map<string, set<pair<string, autogen::Definition::Type>>> descendantsMap;
+        autogen::AutogenSubclassMap descendantsMap;
         for (string parentName : opts.autogenSubclassesParents) {
-            set<pair<string, autogen::Definition::Type>> descendants;
-            sorbet::autogen::descendantsOf(mergedSubclasses, parentName, descendants);
-            descendantsMap[parentName] = descendants;
+            autogen::AutogenSubclassSet descendants;
+            autogen::descendantsOf(childMap, parentName, descendants);
+            descendantsMap.emplace(parentName, descendants);
         }
 
-        // Serialize DescendantsMap for output
-        vector<string> descendantsMapSerialized;
-        for (string parentName : opts.autogenSubclassesParents) {
-            if (!descendantsMap.count(parentName)) {
-                continue;
-            }
-            descendantsMapSerialized.insert(descendantsMapSerialized.end(), parentName);
-            for (auto const &entry : descendantsMap[parentName]) {
-                if (entry.second != autogen::Definition::Type::Class) {
-                    continue;
-                }
-                descendantsMapSerialized.insert(descendantsMapSerialized.end(), fmt::format(" {}", entry.first));
-            }
-        }
+        unique_ptr<vector<string>> descendantsMapSerialized =
+            autogen::serializeSubclassMap(descendantsMap, opts.autogenSubclassesParents);
+
         opts.print.AutogenSubclasses.fmt(
-            "{}\n", fmt::join(descendantsMapSerialized.begin(), descendantsMapSerialized.end(), "\n"));
+            "{}\n", fmt::join(descendantsMapSerialized->begin(), descendantsMapSerialized->end(), "\n"));
     }
 } // namespace sorbet::realmain
 

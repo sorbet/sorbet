@@ -91,8 +91,15 @@ private:
     friend class MsgpackWriter;
 };
 
-void descendantsOf(std::map<std::string, std::set<std::pair<std::string, Definition::Type>>> &childMap,
-                   std::string &parent, std::set<std::pair<std::string, Definition::Type>> &out);
+typedef std::pair<std::string, Definition::Type> AutogenSubclassEntry;
+typedef std::set<AutogenSubclassEntry> AutogenSubclassSet;
+typedef std::map<std::string, AutogenSubclassSet> AutogenSubclassMap;
+
+void maybeInsertChild(const std::string &parentName, const AutogenSubclassSet &children, AutogenSubclassMap &out);
+void patchChildMap(AutogenSubclassMap &childMap);
+void descendantsOf(const AutogenSubclassMap &childMap, const std::string &parent, AutogenSubclassSet &out);
+std::unique_ptr<std::vector<std::string>> serializeSubclassMap(AutogenSubclassMap &descendantsMap,
+                                                               std::vector<std::string> &parentNames);
 
 class Autogen final {
 public:
