@@ -86,7 +86,7 @@ sig {params(x: Integer).void}
 def doesnt_take_nil(x); end
 
 sig {params(key: Symbol, options: T::Hash[Symbol, Integer]).void}
-def foo(options)
+def foo(key, options)
   val = options[key]
   doesnt_take_nil(val) # error: `T.nilable(Integer)` doesn't match `Integer` for argument `x`
 end
