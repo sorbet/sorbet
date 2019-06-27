@@ -8,4 +8,4 @@ main/sorbet --silence-dev-message --stop-after=namer -p autogen-subclasses \
   --autogen-subclasses-parent=Opus::SafeMachine \
   --autogen-subclasses-parent=Chalk::ODM::Model \
   --autogen-subclasses-ignore=test \
-  test/cli/autogen-subclasses/a.rb
+  test/cli/autogen-subclasses-ignore/a.rb
