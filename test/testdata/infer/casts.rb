@@ -14,7 +14,7 @@ class TestCasts
 
     s = T.cast(6, String)
     s + "hi"
-    s + 3 # error: `Integer(3)` does not match `String` for argument `arg0`
+    s + 3 # error: Expected `String` but found `Integer(3)` for argument `arg0`
 
     s = T.cast(6, Integer) # error: Useless cast
     s = T.cast(6, T.untyped) # error: Please use `T.unsafe(...)`

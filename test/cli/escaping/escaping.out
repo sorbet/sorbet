@@ -1,4 +1,4 @@
-test/cli/escaping/escaping.rb:9: `String("\n")` does not match `Integer` for argument `a` https://srb.help/7002
+test/cli/escaping/escaping.rb:9: Expected `Integer` but found `String("\n")` for argument `a` https://srb.help/7002
      9 |foo( #error: `String("\n")` does not match
     10 |'
     11 |'

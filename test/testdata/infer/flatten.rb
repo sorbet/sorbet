@@ -39,5 +39,5 @@ T.assert_type!(xsss.flatten(2), T::Array[Integer])
 
 xs.flatten(1 + 1) # error: You must pass an Integer literal to specify a depth
 
-xs.flatten(true) # error: `TrueClass` does not match `Integer` for argument `depth`
+xs.flatten(true) # error: Expected `Integer` but found `TrueClass` for argument `depth`
          # ^^^^ error: You must pass an Integer literal to specify a depth with Array#flatten
