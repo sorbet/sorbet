@@ -42,7 +42,7 @@ struct PropInfo {
     core::NameRef name;
     core::Loc loc;
     unique_ptr<ast::Expression> type;
-    bool optional;
+    optional<unique_ptr<ast::Expression>> default_;
 };
 
 struct NodesAndPropInfo {
@@ -185,9 +185,18 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
     ret.propInfo.name = name;
     ret.propInfo.loc = send->loc;
     ret.propInfo.type = ASTUtil::dupType(type.get());
-    ret.propInfo.optional = isTNilable(type.get()) ||
-                            (rules != nullptr && (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_()) ||
-                                                  ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())));
+    if (isTNilable(type.get())) {
+        ret.propInfo.default_ = ast::MK::Nil(ret.propInfo.loc);
+    } else if (rules == nullptr) {
+        ret.propInfo.default_ = std::nullopt;
+    } else if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
+        ret.propInfo.default_ = ast::MK::Unsafe(ret.propInfo.loc, ast::MK::Nil(ret.propInfo.loc));
+    } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
+        auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
+        ret.propInfo.default_ = std::move(val);
+    } else {
+        ret.propInfo.default_ = std::nullopt;
+    }
 
     // Compute the getters
     if (rules) {
@@ -385,8 +394,8 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         for (auto &prop : props) {
             auto loc = prop.loc;
             auto arg = ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name));
-            if (prop.optional) {
-                arg = ast::MK::OptionalArg(loc, std::move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)));
+            if (prop.default_.has_value()) {
+                arg = ast::MK::OptionalArg(loc, std::move(arg), std::move(*(prop.default_)));
             }
             args.emplace_back(std::move(arg));
             sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
