@@ -137,6 +137,21 @@ module Enumerable
   sig {returns(T::Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
+  sig do
+    type_parameters(:U).params(
+        arg0: T.type_parameter(:U),
+        blk: T.proc.params(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject),
+    )
+    .returns(T.type_parameter(:U))
+  end
+  sig do
+    type_parameters(:U).params(
+        arg0: T.type_parameter(:U),
+    )
+    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
+  end
+  def each_with_object(arg0, &blk); end
+
   sig {returns(T::Array[Elem])}
   def entries(); end
 

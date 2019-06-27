@@ -28,8 +28,8 @@ JEMALLOC_BUILD_COMMAND = """
   export CFLAGS=$(CC_FLAGS)
   export CXXFLAGS=$(CC_FLAGS)
   export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
-  export EXTRA_CFLAGS="-stdlib=libc++ $${LTOFLAGS}"
-  export EXTRA_CXXFLAGS="$${EXTRA_CFLAGS}"
+  export EXTRA_CFLAGS="$${LTOFLAGS}"
+  export EXTRA_CXXFLAGS="-stdlib=libc++ $${EXTRA_CFLAGS}"
   export LDFLAGS="$${LTOFLAGS} $$([ "$$(uname)" = "Linux" ] && echo " -fuse-ld=lld")"
   pushd $$(dirname $(location autogen.sh)) && \
     ./autogen.sh --without-export --disable-shared --enable-static && \

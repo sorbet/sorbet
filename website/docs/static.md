@@ -113,7 +113,7 @@ def log_env(env, key)
   puts "LOG: #{key} => #{env[key]}"
 end
 
-log_env({timeout_len: 2000}, 'timeout_len') # => `String("timeout_len")` doesn't match `Symbol`
+log_env({timeout_len: 2000}, 'timeout_len') # => Expected `Symbol` but found `String("timeout_len")`
 ```
 
 In this example, we add a line like `sig {...}` above the `def log_env` line.
@@ -122,7 +122,7 @@ of a method. By adding the `sig` to `log_env`, we opted this method into
 additional checks. Now `srb` reports this:
 
 ```plaintext
-`String("timeout_len")` doesn't match `Symbol` for argument `key`
+Expected `Symbol` but found `String("timeout_len")` for argument `key`
 ```
 
 ## Argument-level granularity: `T.untyped`

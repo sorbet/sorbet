@@ -33,7 +33,7 @@ sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
 if [[ "mac" == "$platform" ]]; then
     # Our binary should work on almost all OSes. The oldest v8 publishes is -14
     # so I'm going with that for now.
-    for i in {14..18}; do
+    for i in {14..19}; do
         sed -i.bak "s/Gem::Platform::CURRENT/'universal-darwin-$i'/" sorbet-static.gemspec
         gem build sorbet-static.gemspec
         mv sorbet-static.gemspec.bak sorbet-static.gemspec
@@ -47,6 +47,8 @@ pushd gems/sorbet
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet.gemspec
 gem build sorbet.gemspec
 if [[ "mac" == "$platform" ]]; then
+  rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
+  trap 'rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static' EXIT
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
   rbenv exec gem install sorbet-*.gem
 
@@ -66,8 +68,6 @@ if [[ "mac" == "$platform" ]]; then
 
   rbenv exec bundle
   rbenv exec bundle exec rake test
-
-  rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 fi
 popd
 

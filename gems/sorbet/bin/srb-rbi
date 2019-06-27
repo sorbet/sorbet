@@ -134,7 +134,7 @@ We recommend skimming these docs to get a feel for how to use Sorbet:
 
 If instead you want to explore your files locally, here are some things to try:
 
-- Upgrade a file marked # typed: false to # typed: true.
+- Upgrade a file marked #{cyan("# typed: false")} to #{cyan("# typed: true")}.
   Then, run #{cyan("srb tc")} and try to fix any errors.
 - Add signatures to your methods with `sig`.
   For how, read: #{cyan("https://sorbet.org/docs/sigs")}

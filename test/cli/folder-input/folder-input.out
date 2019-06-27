@@ -1,4 +1,4 @@
-test/cli/folder-input/foo.rb:4: `String("foo.rb")` does not match `Integer` for argument `arg0` https://srb.help/7002
+test/cli/folder-input/foo.rb:4: Expected `Integer` but found `String("foo.rb")` for argument `arg0` https://srb.help/7002
      4 |1 + "foo.rb"
         ^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L104: Method `Integer#+` has specified `arg0` as `Integer`
@@ -9,7 +9,7 @@ test/cli/folder-input/foo.rb:4: `String("foo.rb")` does not match `Integer` for 
      4 |1 + "foo.rb"
             ^^^^^^^^
 
-test/cli/folder-input/input/bar.rb:3: `String("bar.rb")` does not match `Integer` for argument `arg0` https://srb.help/7002
+test/cli/folder-input/input/bar.rb:3: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
      3 |1 + "bar.rb"
         ^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L104: Method `Integer#+` has specified `arg0` as `Integer`
@@ -20,7 +20,7 @@ test/cli/folder-input/input/bar.rb:3: `String("bar.rb")` does not match `Integer
      3 |1 + "bar.rb"
             ^^^^^^^^
 
-test/cli/folder-input/input/subfolder/baz.rb:4: `String("baz.rb")` does not match `Integer` for argument `arg0` https://srb.help/7002
+test/cli/folder-input/input/subfolder/baz.rb:4: Expected `Integer` but found `String("baz.rb")` for argument `arg0` https://srb.help/7002
      4 |1 + "baz.rb"
         ^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L104: Method `Integer#+` has specified `arg0` as `Integer`

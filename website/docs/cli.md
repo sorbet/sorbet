@@ -133,6 +133,6 @@ This will be the output using the `--typed-override` flag:
 
 ```plaintext
 ❯ srb tc --typed-override=foo.yaml foo.rb
-foo.rb:3: `Symbol(:"symbol")` doesn't match `String` for argument `arg0`
+foo.rb:3: Expected `String` but found `Symbol(:"symbol")` for argument `arg0`
 ...
 ```
