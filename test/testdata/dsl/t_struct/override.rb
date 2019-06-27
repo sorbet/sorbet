@@ -7,7 +7,7 @@ class Override < T::Struct
 
   sig {params(foo: Integer).void}
   def initialize(foo:)
-    @foo = foo.to_s
+    puts "override"
   end
 end
 

@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < ()
     end
 
     def initialize<<C <todo sym>>>(foo:, &<blk>)
-      @foo = foo.to_s()
+      <self>.puts("override")
     end
   end
 
