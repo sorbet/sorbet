@@ -973,7 +973,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
         }
         if (opts.print.SymbolTableJson.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root());
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
                 core::Proto::toJSON(root, cout);
             } else {

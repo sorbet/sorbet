@@ -41,7 +41,7 @@ com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &g
 
     return argProto;
 }
-com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef sym) {
+com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef sym, bool showFull) {
     com::stripe::rubytyper::Symbol symbolProto;
     const auto data = sym.data(gs);
 
@@ -94,7 +94,20 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             continue;
         }
 
-        *symbolProto.add_children() = toProto(gs, pair.second);
+        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+            bool hadPrintableChild = false;
+            for (auto childPair : pair.second.data(gs)->members()) {
+                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                    hadPrintableChild = true;
+                    break;
+                }
+            }
+            if (!hadPrintableChild) {
+                continue;
+            }
+        }
+
+        *symbolProto.add_children() = toProto(gs, pair.second, showFull);
     }
 
     return symbolProto;
