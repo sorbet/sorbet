@@ -27,7 +27,7 @@ end
 A.foo(10)
 A.foo("Hello, world")
 
-# error: `TrueClass` does not match `T.any(Integer, String)`
+# error: Expected `T.any(Integer, String)` but found `TrueClass`
 A.foo(true)
 ```
 

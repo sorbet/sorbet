@@ -6,7 +6,7 @@ sig{params(a: Integer).void}
 def foo(a)
 end
 
-foo( #error: `String("\n")` does not match
+foo( # error: Expected `Integer` but found `String("\n")`
 '
 '
 )

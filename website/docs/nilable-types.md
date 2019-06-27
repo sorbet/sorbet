@@ -45,7 +45,7 @@ end
 
 sig {params(x: T.nilable(String)).void}
 def foo(x)
-  must_be_given_string(x) # error: `T.nilable(String)` doesn't match `String` for argument `x`
+  must_be_given_string(x) # error: Expected `String` but found `T.nilable(String)` for argument `x`
   if x
     must_be_given_string(x) # ok
   end
@@ -88,7 +88,7 @@ def doesnt_take_nil(x); end
 sig {params(key: Symbol, options: T::Hash[Symbol, Integer]).void}
 def foo(options)
   val = options[key]
-  doesnt_take_nil(val) # error: `T.nilable(Integer)` doesn't match `Integer` for argument `x`
+  doesnt_take_nil(val) # error: Expected `Integer` but found `T.nilable(Integer)` for argument `x`
 end
 ```
 

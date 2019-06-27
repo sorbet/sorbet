@@ -1,5 +1,5 @@
 test/cli/escaping/escaping.rb:9: Expected `Integer` but found `String("\n")` for argument `a` https://srb.help/7002
-     9 |foo( #error: `String("\n")` does not match
+     9 |foo( # error: Expected `Integer` but found `String("\n")`
     10 |'
     11 |'
     12 |)
