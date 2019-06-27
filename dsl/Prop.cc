@@ -183,14 +183,12 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
     NodesAndPropInfo ret;
     ret.propInfo.name = name;
     ret.propInfo.type = ASTUtil::dupType(type.get());
-    ret.propInfo.optional = isTNilable(type.get());
+    ret.propInfo.optional = isTNilable(type.get()) ||
+                            (rules != nullptr && (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_()) ||
+                                                  ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())));
 
     // Compute the getters
     if (rules) {
-        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_()) ||
-            ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
-            ret.propInfo.optional = true;
-        }
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
