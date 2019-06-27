@@ -241,6 +241,10 @@ class Sorbet::Private::Serialize
       return
     end
     parameters = from_method(method)
+    # a hack for appeasing Sorbet in the presence of the Enumerable interface
+    if name == 'each' && !parameters.any? {|(kind, _)| kind == :block}
+      parameters.push([:block, "blk"])
+    end
     ret << serialize_sig(parameters) if with_sig
     args = parameters.map do |(kind, param_name)|
       to_sig(kind, param_name)
