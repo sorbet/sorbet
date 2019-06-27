@@ -11,7 +11,7 @@ module T::Private::Methods::SignatureValidation
       # but in practice, you never call them polymorphically. Conceptually, they're standard
       # methods (this is consistent with how they're treated in other languages, e.g. Java)
       if signature.mode != Modes.standard
-        raise "Constructor methods should always be declared using `sig`."
+        raise "`initialize` should not use `.abstract` or `.implementation` or any other inheritance modifiers."
       end
       return
     end

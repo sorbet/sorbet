@@ -84,22 +84,22 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
 
   describe 'required/optional prop test' do
     it 'Test optional: false' do
-      assert_equal(true, T::Utils::Props.required_prop?(TestStruct.props[:foo0]))
+      assert_equal(true, T::Props::Utils.required_prop?(TestStruct.props[:foo0]))
       assert_nil(TestStruct.props[:foo0][:optional])
 
-      assert_equal(true, T::Utils::Props.required_prop?(TestStruct.props[:foo1]))
+      assert_equal(true, T::Props::Utils.required_prop?(TestStruct.props[:foo1]))
       assert_nil(TestStruct.props[:foo1][:optional])
 
-      assert_equal(true, T::Utils::Props.required_prop?(TestStruct.props[:foo2]))
+      assert_equal(true, T::Props::Utils.required_prop?(TestStruct.props[:foo2]))
       assert_nil(TestStruct.props[:foo2][:optional])
 
-      assert_equal(true, T::Utils::Props.optional_prop?(TestStruct.props[:foo3]))
+      assert_equal(true, T::Props::Utils.optional_prop?(TestStruct.props[:foo3]))
       assert_nil(TestStruct.props[:foo3][:optional])
 
-      assert_equal(true, T::Utils::Props.optional_prop?(TestStruct.props[:foo4]))
+      assert_equal(true, T::Props::Utils.optional_prop?(TestStruct.props[:foo4]))
       assert_nil(TestStruct.props[:foo4][:optional])
 
-      assert_equal(true, T::Utils::Props.optional_prop?(TestStruct.props[:foo5]))
+      assert_equal(true, T::Props::Utils.optional_prop?(TestStruct.props[:foo5]))
       assert_nil(TestStruct.props[:foo5][:optional])
     end
 
