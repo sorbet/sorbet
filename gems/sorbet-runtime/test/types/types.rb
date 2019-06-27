@@ -331,19 +331,19 @@ module Opus::Types::Test
         t = T::Enumerator[Integer]
         assert_equal(
           "T::Enumerator[Integer]",
-          t.describe_obj([1,2,3].each))
+          t.describe_obj([1, 2, 3].each))
       end
 
       it 'works if the type is right' do
         type = T::Enumerator[Integer]
-        value = [1,2,3].each
+        value = [1, 2, 3].each
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
       end
 
       it 'fails if the type is wrong' do
         type = T::Enumerator[Float]
-        value = [1,2,3].each
+        value = [1, 2, 3].each
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerator[Float], " \
                          "got T::Enumerator[Integer]"
@@ -351,7 +351,7 @@ module Opus::Types::Test
       end
 
       it 'can have its metatype instantiated' do
-        assert_equal([1,2,3], T::Enumerator[Integer].new do |x|
+        assert_equal([1, 2, 3], T::Enumerator[Integer].new do |x|
           x << 1
           x << 2
           x << 3
