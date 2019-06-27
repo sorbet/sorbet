@@ -306,15 +306,13 @@ module T::Private::Methods
 
     if mod.singleton_class?
       install_singleton_method_added_hook(mod)
-      install_singleton_method_added_hook(mod.singleton_class)
     else
       original_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :method_added) do |name|
         T::Private::Methods._on_method_added(self, name)
         original_method.bind(self).call(name)
       end
-
-      install_singleton_method_added_hook(mod.singleton_class)
     end
+    install_singleton_method_added_hook(mod.singleton_class)
   end
 
   private_class_method def self.install_singleton_method_added_hook(singleton_klass)
