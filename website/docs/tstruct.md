@@ -34,8 +34,8 @@ class MyStruct < T::Struct
   sig {returns(Integer)}
   def x; ...; end
 
-  sig {params(x: Integer).returns(Integer)}
-  def x=(x); ...; end
+  sig {params(arg0: Integer).returns(Integer)}
+  def x=(arg0); ...; end
 
   sig {returns(T.nilable(String))}
   def y; ...; end
