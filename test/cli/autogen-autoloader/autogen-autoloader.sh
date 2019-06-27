@@ -20,3 +20,8 @@ for file in $(find output -type f | sort); do
   printf "\n--- %s\n" "$file"
   cat "$file"
 done
+
+echo
+echo "--- missing output directory"
+main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader \
+  test/cli/autogen-autoloader/scripts/baz.rb 2>&1

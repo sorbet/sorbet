@@ -715,7 +715,7 @@ void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefi
             child->nameParts = node->nameParts; // NOTE: this could be tracked recursively with push/pop
             child->nameParts.emplace_back(part);
         }
-        node = &*child; // TODO yuck
+        node = &*child; // TODO There must be a better way to do this
     }
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(move(ndef));
@@ -818,7 +818,6 @@ core::FileRef DefTree::file() const {
 
 static const core::FileRef EMPTY_FILE;
 void DefTree::prune(core::Context ctx, const AutoloaderConfig &alCfg) {
-    // auto definingFile = file();
     core::FileRef definingFile = EMPTY_FILE;
     if (!namedDefs.empty()) {
         definingFile = file();
@@ -827,13 +826,11 @@ void DefTree::prune(core::Context ctx, const AutoloaderConfig &alCfg) {
         return;
     }
 
-    // fmt::print("PRUNING FOR {} {}\n", name, definingFile.id());
     for (auto it = children.begin(); it != children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
             child->prune(ctx, alCfg);
         } else {
-            // fmt::print("  {} {}\n", child->name, child->file().id());
             children.erase(it);
         }
     }
@@ -866,7 +863,6 @@ void DefTree::merge(DefTree rhs) {
 bool DefTree::hasDifferentFile(core::FileRef file) const {
     bool res = false;
     auto visit = [&](const DefTree &node) -> bool {
-        // fmt::print("  {} {} {}\n", fileRef.id(), node.file().id(), node.name);
         auto f = node.file();
         if (file != f && f != EMPTY_FILE) {
             res = true;
