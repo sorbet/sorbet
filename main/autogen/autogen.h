@@ -108,8 +108,9 @@ public:
     void prettyPrint(core::Context ctx, int level = 0);
     std::string fullName(core::Context) const;
 
-    void writeAutoloads(core::Context ctx, const AutoloaderConfig &, std::string path);
-    std::string autoloads(core::Context ctx, const AutoloaderConfig &);
+    void writeAutoloads(core::Context ctx, const AutoloaderConfig &, std::string path,
+                        std::shared_ptr<spdlog::logger> logger);
+    std::string autoloads(core::Context ctx, const AutoloaderConfig &, std::shared_ptr<spdlog::logger> logger);
 
     std::string path(core::Context ctx);
 
