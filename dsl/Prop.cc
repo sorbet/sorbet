@@ -373,7 +373,7 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
     if (synthesizeInitialize) {
-        // we define ours synthesized initialize first so that if the user wrote one themselves, it overrides ours.
+        // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
         auto loc = klass->loc;
         ast::MethodDef::ARGS_store args;
         ast::Hash::ENTRY_store sigKeys;
