@@ -105,7 +105,7 @@ class Sorbet::Private::HiddenMethodFinder
       [
         File.realpath("#{__dir__}/../bin/srb"),
         'tc',
-        '--print=symbol-table-json',
+        '--print=symbol-table-full-json',
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
@@ -123,7 +123,7 @@ class Sorbet::Private::HiddenMethodFinder
         'tc',
         # Make sure we don't load a sorbet/config in your cwd
         '--no-config',
-        '--print=symbol-table-json',
+        '--print=symbol-table-full-json',
         # Method redefined with mismatched argument is ok since sometime
         # people monkeypatch over method
         '--error-black-list=4010',

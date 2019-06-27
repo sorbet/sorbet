@@ -17,7 +17,7 @@ echo "--- checking diff ---"
 diff -r out fileout | sort
 
 # Makes sure all these options don't crash us
-for p in symbol-table-json symbol-table-full symbol-table-full-raw cfg-proto; do
+for p in symbol-table-json symbol-table-full symbol-table-full-raw symbol-table-full-json cfg-proto; do
     main/sorbet --silence-dev-message -p "$p" -e '1' > /dev/null
 done
 
