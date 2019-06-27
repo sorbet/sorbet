@@ -174,7 +174,9 @@ build:static-libs --linkopt=-fno-pie --copt=-fno-pie --cxxopt=-fno-pie
 build --define unsanitized=true
 # sanitize build: run with ASAN and UBSAN. Catches most memory and
 # undefined-behavior errors, substantially larger and slower binary.
-build:sanitize --config=asan --config=ubsan
+build:sanitize --config=asan --config=ubsan --config=libcpp-checked-mode
+
+build:libcpp-checked-mode --copt=-D_LIBCPP_DEBUG=1
 
 build:asan --copt=-fsanitize=address --copt=-fsanitize-address-use-after-scope
 build:asan --cxxopt=-fsanitize=address --cxxopt=-fsanitize-address-use-after-scope
