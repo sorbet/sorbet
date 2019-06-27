@@ -21,19 +21,6 @@ Reference &ReferenceRef::data(ParsedFile &pf) {
     return pf.refs[_id];
 }
 
-string_view Definition::typeAsStringView() {
-    switch (type) {
-        case Definition::Module:
-            return "module"sv;
-        case Definition::Class:
-            return "class"sv;
-        case Definition::Casgn:
-            return "casgn"sv;
-        case Definition::Alias:
-            return "alias"sv;
-    }
-}
-
 class AutogenWalk {
     vector<Definition> defs;
     vector<Reference> refs;

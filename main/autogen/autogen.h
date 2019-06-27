@@ -47,7 +47,6 @@ struct Definition {
     DefinitionRef id;
 
     Type type;
-    std::string_view typeAsStringView();
     bool defines_behavior;
     bool is_empty;
 
