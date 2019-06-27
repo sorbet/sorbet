@@ -72,8 +72,8 @@ struct Reference {
 };
 
 typedef std::pair<std::string, Definition::Type> AutogenSubclassEntry;
-typedef std::set<AutogenSubclassEntry> AutogenSubclassSet;
-typedef std::map<std::string, AutogenSubclassSet> AutogenSubclassMap;
+typedef UnorderedSet<AutogenSubclassEntry> AutogenSubclassSet;
+typedef UnorderedMap<std::string, AutogenSubclassSet> AutogenSubclassMap;
 
 struct ParsedFile {
     ast::ParsedFile tree;

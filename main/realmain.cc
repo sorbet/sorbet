@@ -264,6 +264,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         autogen::patchChildMap(childMap);
 
         // Generate descendants for each passed-in superclass
+        fast_sort(opts.autogenSubclassesParents);
         autogen::AutogenSubclassMap descendantsMap;
         for (string parentName : opts.autogenSubclassesParents) {
             autogen::AutogenSubclassSet descendants;

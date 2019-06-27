@@ -752,16 +752,23 @@ unique_ptr<vector<string>> serializeSubclassMap(AutogenSubclassMap &descendantsM
 
     for (const auto &parentName : parentNames) {
         if (!descendantsMap.count(parentName)) {
-            // TODO(gwu) Should we throw here?
             continue;
         }
+
         descendantsMapSerialized->emplace_back(parentName);
+
+        vector<string> serializedChildren;
         for (auto const &entry : descendantsMap[parentName]) {
             if (entry.second != autogen::Definition::Type::Class) {
                 continue;
             }
-            descendantsMapSerialized->emplace_back(fmt::format(" {}", entry.first));
+            serializedChildren.emplace_back(fmt::format(" {}", entry.first));
         }
+
+        fast_sort(serializedChildren);
+        descendantsMapSerialized->insert(descendantsMapSerialized->end(),
+                                         make_move_iterator(serializedChildren.begin()),
+                                         make_move_iterator(serializedChildren.end()));
     }
 
     return descendantsMapSerialized;
