@@ -37,7 +37,7 @@ genrule(
         "template/*",
     ]),
     cmd = """
-CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) > /dev/null
+CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --without-gmp > /dev/null
 find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
 cp config.status $(location config.status)
 """,
