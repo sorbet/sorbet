@@ -251,12 +251,12 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
 
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
         autogen::AutogenSubclassMap childMap;
-        for (auto &el : merged) {
+        for (const auto &el : merged) {
             if (!el.second.subclasses) {
                 continue;
             }
 
-            for (auto const &[parentName, children] : *el.second.subclasses) {
+            for (const auto &[parentName, children] : *el.second.subclasses) {
                 autogen::maybeInsertChild(parentName, children, childMap);
             }
         }
@@ -266,7 +266,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         // Generate descendants for each passed-in superclass
         fast_sort(opts.autogenSubclassesParents);
         autogen::AutogenSubclassMap descendantsMap;
-        for (string parentName : opts.autogenSubclassesParents) {
+        for (const string &parentName : opts.autogenSubclassesParents) {
             autogen::AutogenSubclassSet descendants;
             autogen::descendantsOf(childMap, parentName, descendants);
             descendantsMap.emplace(parentName, descendants);

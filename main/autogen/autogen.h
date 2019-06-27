@@ -97,8 +97,8 @@ private:
 void maybeInsertChild(const std::string &parentName, const AutogenSubclassSet &children, AutogenSubclassMap &out);
 void patchChildMap(AutogenSubclassMap &childMap);
 void descendantsOf(const AutogenSubclassMap &childMap, const std::string &parent, AutogenSubclassSet &out);
-std::unique_ptr<std::vector<std::string>> serializeSubclassMap(AutogenSubclassMap &descendantsMap,
-                                                               std::vector<std::string> &parentNames);
+std::unique_ptr<std::vector<std::string>> serializeSubclassMap(const AutogenSubclassMap &descendantsMap,
+                                                               const std::vector<std::string> &parentNames);
 
 class Autogen final {
 public:

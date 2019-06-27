@@ -723,7 +723,7 @@ void descendantsOf(const AutogenSubclassMap &childMap, const string &parentName,
     const AutogenSubclassSet &children = childMap.at(parentName);
 
     out.insert(children.begin(), children.end());
-    for (auto child : children) {
+    for (const AutogenSubclassEntry &child : children) {
         descendantsOf(childMap, child.first, out);
     }
 }
@@ -747,10 +747,11 @@ void patchChildMap(AutogenSubclassMap &childMap) {
     childMap["Chalk::ODM::Model"].insert(make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
 }
 
-unique_ptr<vector<string>> serializeSubclassMap(AutogenSubclassMap &descendantsMap, vector<string> &parentNames) {
+unique_ptr<vector<string>> serializeSubclassMap(const AutogenSubclassMap &descendantsMap,
+                                                const vector<string> &parentNames) {
     unique_ptr<vector<string>> descendantsMapSerialized = make_unique<vector<string>>();
 
-    for (const auto &parentName : parentNames) {
+    for (const string &parentName : parentNames) {
         if (!descendantsMap.count(parentName)) {
             continue;
         }
@@ -758,7 +759,7 @@ unique_ptr<vector<string>> serializeSubclassMap(AutogenSubclassMap &descendantsM
         descendantsMapSerialized->emplace_back(parentName);
 
         vector<string> serializedChildren;
-        for (auto const &entry : descendantsMap[parentName]) {
+        for (const AutogenSubclassEntry &entry : descendantsMap.at(parentName)) {
             if (entry.second != autogen::Definition::Type::Class) {
                 continue;
             }
