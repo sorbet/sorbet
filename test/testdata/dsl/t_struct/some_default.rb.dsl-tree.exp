@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < ()
       <self>.params({:"foo" => <emptyTree>::<C Integer>, :"bar" => <emptyTree>::<C T>::<C Boolean>}).void()
     end
 
-    def initialize<<C <todo sym>>>(foo:, bar: = ::T.unsafe(nil), &<blk>)
+    def initialize<<C <todo sym>>>(foo:, bar: = false, &<blk>)
       <emptyTree>
     end
 
