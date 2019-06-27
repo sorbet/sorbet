@@ -6,6 +6,7 @@ require_relative '../real_stdlib'
 
 require 'set'
 require 'fileutils'
+require 'delegate'
 
 
 module Sorbet::Private
