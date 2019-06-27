@@ -883,60 +883,23 @@ core::NameRef DefTree::name() const {
     return nameParts.back();
 }
 
-void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path) {
+void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path,
+                             shared_ptr<spdlog::logger> logger) {
     string name = root() ? "root" : this->name().show(ctx);
-    FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx, alCfg));
+    FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx, alCfg, logger));
     if (!children.empty()) {
         auto subdir = join(path, root() ? "" : name);
         if (!root()) {
             create_dir(subdir);
         }
         for (auto &[_, child] : children) {
-            child->writeAutoloads(ctx, alCfg, subdir);
+            child->writeAutoloads(ctx, alCfg, subdir, logger);
         }
     }
 }
 
-void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) {
-    if (root() || !hasDef()) {
-        return;
-    }
-    auto &ndef = definition(ctx);
-    vector<string> reqs;
-    for (auto reqRef : ndef.requires) {
-        if (alCfg.includeRequire(reqRef)) {
-            string req = reqRef.show(ctx);
-            reqs.emplace_back(req);
-        }
-    }
-    fast_sort(reqs);
-    auto last = unique(reqs.begin(), reqs.end());
-    for (auto it = reqs.begin(); it != last; ++it) {
-        fmt::format_to(buf, "require '{}'\n", *it);
-    }
-}
-
-void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
-    if (hasDef() && definitionType(ctx) == Definition::Class) {
-        fmt::format_to(buf, "\nclass {}", fullName);
-        auto &def = definition(ctx);
-        if (!def.parentName.empty()) {
-            fmt::format_to(buf, " < {}",
-                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
-        }
-    } else {
-        fmt::format_to(buf, "\nmodule {}", fullName);
-    }
-    // TODO aliases? casgn?
-    fmt::format_to(buf, "\nend\n");
-}
-
-string DefTree::path(core::Context ctx) {
-    auto toPath = [&](const auto &fr) -> string { return fr.show(ctx); };
-    return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
-}
-
-string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
+string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg, shared_ptr<spdlog::logger> logger) {
+    Timer timeit(logger, "autogenAutoloaderAutoloads");
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
 
@@ -977,6 +940,45 @@ string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
         fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, definingFile.data(ctx).path());
     }
     return to_string(buf);
+}
+
+void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) {
+    if (root() || !hasDef()) {
+        return;
+    }
+    auto &ndef = definition(ctx);
+    vector<string> reqs;
+    for (auto reqRef : ndef.requires) {
+        if (alCfg.includeRequire(reqRef)) {
+            string req = reqRef.show(ctx);
+            reqs.emplace_back(req);
+        }
+    }
+    fast_sort(reqs);
+    auto last = unique(reqs.begin(), reqs.end());
+    for (auto it = reqs.begin(); it != last; ++it) {
+        fmt::format_to(buf, "require '{}'\n", *it);
+    }
+}
+
+void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
+    if (hasDef() && definitionType(ctx) == Definition::Class) {
+        fmt::format_to(buf, "\nclass {}", fullName);
+        auto &def = definition(ctx);
+        if (!def.parentName.empty()) {
+            fmt::format_to(buf, " < {}",
+                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
+        }
+    } else {
+        fmt::format_to(buf, "\nmodule {}", fullName);
+    }
+    // TODO aliases? casgn?
+    fmt::format_to(buf, "\nend\n");
+}
+
+string DefTree::path(core::Context ctx) {
+    auto toPath = [&](const auto &fr) -> string { return fr.show(ctx); };
+    return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
 }
 
 Definition::Type DefTree::definitionType(core::Context ctx) {
