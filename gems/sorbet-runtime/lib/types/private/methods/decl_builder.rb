@@ -131,9 +131,6 @@ module T::Private::Methods
     end
 
     def generated
-      if T.unsafe(true)
-        raise "The .generated API is unstable, so we don't want it used until we redesign it. To change Sorbet's runtime behavior, see https://sorbet.org/docs/tconfiguration"
-      end
       check_live!
 
       if !decl.generated.equal?(ARG_NOT_PROVIDED)

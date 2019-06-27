@@ -165,18 +165,6 @@ module Opus::Types::Test
           assert_match(/\.soft API is unstable/, err.message)
         end
 
-        it 'raises when using generated.' do
-          err = assert_raises(RuntimeError) do
-            mod = Module.new do
-              extend T::Sig
-              sig {generated.void}
-              def self.test_method; end
-            end
-            mod.test_method
-          end
-          assert_match(/\.generated API is unstable/, err.message)
-        end
-
         it 'raises RuntimeError with invalid level' do
           skip
           err = assert_raises(ArgumentError) do
