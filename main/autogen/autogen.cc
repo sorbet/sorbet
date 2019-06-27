@@ -680,7 +680,8 @@ vector<string> ParsedFile::listAllClasses(const core::Context ctx) {
     return out;
 }
 
-optional<AutogenSubclassMap> ParsedFile::listAllSubclasses(const core::Context ctx, const vector<string> &absolutePathsToIgnore,
+optional<AutogenSubclassMap> ParsedFile::listAllSubclasses(const core::Context ctx,
+                                                           const vector<string> &absolutePathsToIgnore,
                                                            const vector<string> &relativePathsToIgnore) {
     // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
     if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
