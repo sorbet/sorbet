@@ -178,12 +178,8 @@ module T
   #
   # sig {params(arg: T.nilable(A), msg: T.nilable(String)).returns(A)}
   def self.must(arg, msg=nil)
-    # an alternrate implementation could be:
-    # > return arg if arg
-    # > return arg if arg == False
-    # as this would skiop a method call for nil? in the common case. However, as
-    # nil? could be overridden on arg, we don't do that.
-    return arg unless arg.nil?
+    return arg if arg
+    return arg if arg == false
 
     begin
       if msg
