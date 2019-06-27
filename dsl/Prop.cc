@@ -40,6 +40,7 @@ bool isTStruct(ast::Expression *expr) {
 
 struct PropInfo {
     core::NameRef name;
+    core::Loc loc;
     unique_ptr<ast::Expression> type;
     bool optional;
 };
@@ -182,6 +183,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
     NodesAndPropInfo ret;
     ret.propInfo.name = name;
+    ret.propInfo.loc = send->loc;
     ret.propInfo.type = ASTUtil::dupType(type.get());
     ret.propInfo.optional = isTNilable(type.get()) ||
                             (rules != nullptr && (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_()) ||
@@ -374,7 +376,6 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.reserve(oldRHS.size());
     if (synthesizeInitialize) {
         // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
-        auto loc = klass->loc;
         ast::MethodDef::ARGS_store args;
         ast::Hash::ENTRY_store sigKeys;
         ast::Hash::ENTRY_store sigVals;
@@ -382,6 +383,7 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         sigKeys.reserve(props.size());
         sigVals.reserve(props.size());
         for (auto &prop : props) {
+            auto loc = prop.loc;
             auto arg = ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name));
             if (prop.optional) {
                 arg = ast::MK::OptionalArg(loc, std::move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)));
@@ -390,6 +392,7 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
             sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
             sigVals.emplace_back(std::move(prop.type));
         }
+        auto loc = klass->loc;
         klass->rhs.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
         klass->rhs.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(args),
                                                 ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
