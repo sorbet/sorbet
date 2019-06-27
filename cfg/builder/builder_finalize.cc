@@ -328,6 +328,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     vector<UnorderedSet<core::LocalVariable>> upperBounds1(cfg.maxBasicBlockId);
     bool changed = true;
     {
+        Timer timeit(ctx.state.tracer(), "upperBounds1");
         for (BasicBlock *bb : cfg.forwardsTopoSort) {
             auto &upperBoundsForBlock = upperBounds1[bb->id];
             upperBoundsForBlock.insert(readsByBlock[bb->id].begin(), readsByBlock[bb->id].end());
@@ -366,6 +367,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
 
     changed = true;
     {
+        Timer timeit(ctx.state.tracer(), "upperBounds2");
         while (changed) {
             changed = false;
             for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -383,6 +385,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         }
     }
     {
+        Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
             auto set2 = upperBounds2[it->id];
