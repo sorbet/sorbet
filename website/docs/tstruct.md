@@ -28,22 +28,20 @@ This is basically the same as having written code like this:
 class MyStruct < T::Struct
   sig {params(x: Integer, y: String, z: Float).void}
   def initialize(x:, y: nil, z: 0.5)
-    @x = x
-    @y = y
-    @z = z
+    ...
   end
 
   sig {returns(Integer)}
-  def x; @x; end
+  def x; ...; end
 
   sig {params(x: Integer).returns(Integer)}
-  def x=(x); @x = x; end
+  def x=(x); ...; end
 
   sig {returns(T.nilable(String))}
-  def y; @y; end
+  def y; ...; end
 
   sig {returns(Float)}
-  def z; @z; end
+  def z; ...; end
 end
 ```
 
