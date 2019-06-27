@@ -628,34 +628,6 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cself\u003e",
-      "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Example)"
-      }
-     },
-     "instruction": {
-      "kind": "IDENT",
-      "ident": {
-       "unique_name": "\u003cselfRestore\u003e$5"
-      }
-     },
-     "location": {
-      "path": "test/testdata/cfg/math.rb",
-      "position": {
-       "start": {
-        "line": 6,
-        "column": 3
-       },
-       "end": {
-        "line": 6,
-        "column": 76
-       }
-      }
-     }
-    },
-    {
-     "bind": {
       "unique_name": "\u003cfinalReturn\u003e",
       "type": {
        "kind": "CLASS",

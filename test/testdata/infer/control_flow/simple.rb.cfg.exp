@@ -488,7 +488,7 @@ subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
     "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_35" [style="tapered"];
 
     "bb::<Class:ControlFlow>#<static-init>_35" [
-        label = "block[id=35](<selfRestore>$147: T.class_of(ControlFlow))\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$147\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=35](<selfRestore>$147: T.class_of(ControlFlow))\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:ControlFlow>#<static-init>_35" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];

@@ -59,7 +59,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_2" -> "bb::Bar#baz_3" [style="tapered"];
 
     "bb::Bar#baz_3" [
-        label = "block[id=3](<selfRestore>$7: Bar)\l<returnMethodTemp>$2: T.untyped = Solve<super>\l<self>: Bar = <selfRestore>$7\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$7: Bar)\l<returnMethodTemp>$2: T.untyped = Solve<super>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];

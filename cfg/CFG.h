@@ -111,14 +111,14 @@ public:
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
-        UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> reads;
-        UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> writes;
+        std::vector<UnorderedSet<core::LocalVariable>> reads;
+        std::vector<UnorderedSet<core::LocalVariable>> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> dead;
+        std::vector<UnorderedSet<core::LocalVariable>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 

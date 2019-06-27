@@ -47,7 +47,7 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_7" [style="tapered"];
 
     "bb::Test#normalize_params_7" [
-        label = "block[id=7](<selfRestore>$15: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<map>\l<self>: Test = <selfRestore>$15\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$15: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<map>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_11" [style="bold"];
