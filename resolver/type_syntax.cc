@@ -259,9 +259,11 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                             auto &value = hash->values[i++];
                             auto lit = ast::cast_tree<ast::Literal>(key.get());
                             if (lit && lit->isSymbol(ctx)) {
-                                auto val = ast::cast_tree<ast::Literal>(value.get());
-                                if (val && val->isTrue(ctx)) {
-                                    sig.seen.incompatibleOverride = true;
+                                if (lit->asSymbol(ctx) == core::Names::allow_incompatible()) {
+                                    auto val = ast::cast_tree<ast::Literal>(value.get());
+                                    if (val && val->isTrue(ctx)) {
+                                        sig.seen.incompatibleOverride = true;
+                                    }
                                 }
                             }
                         }
