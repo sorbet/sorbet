@@ -9,6 +9,16 @@
 # Templated files
 # * verconf.h is just a templated version of what ruby produces
 
+config_setting(
+    name = "darwin",
+    values = {"host_cpu": "darwin"},
+)
+
+config_setting(
+    name = "linux",
+    values = {"host_cpu": "k8"},
+)
+
 
 # configuration ################################################################
 
@@ -69,6 +79,34 @@ cc_library(
     ],
     visibility = [ "//visibility:private" ],
 )
+
+cc_library(
+  name = "ruby_crypt",
+  hdrs = [
+    "missing/crypt.h",
+    "missing/des_tables.c",
+  ],
+  srcs = [
+    "missing/crypt.c",
+  ],
+  deps = [ ":ruby_headers" ],
+  visibility = [ "//visibility:private" ],
+)
+
+RUBY_COPTS = [
+    "-DRUBY_EXPORT",
+    "-D_XOPEN_SOURCE",
+    "-Wno-constant-logical-operand",
+    "-Wno-parentheses",
+    "-D_REENTRANT",
+
+    # TODO: is this really necessary?
+    "-Wno-string-plus-int",
+] + select({
+    ":linux": [],
+    ":darwin": ["-D_DARWIN_C_SOURCE"],
+})
+
 
 
 # miniruby #####################################################################
@@ -169,9 +207,16 @@ cc_binary(
         "enc/unicode.c",
         "enc/utf_8.c",
         "enc/trans/newline.c",
-        "missing/explicit_bzero.c",
-        "missing/setproctitle.c",
-    ] + glob([
+    ] + select({
+      ":linux": [
+          "missing/explicit_bzero.c",
+          "missing/setproctitle.c",
+          "missing/strlcpy.c",
+          "missing/strlcat.c",
+          "addr2line.c",
+      ],
+      ":darwin": [],
+    }) + glob([
         "ccan/**/*.h",
     ]),
 
@@ -181,30 +226,34 @@ cc_binary(
         ":ruby_private_headers",
     ],
 
-    copts = [
-        "-DRUBY_EXPORT",
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
+    copts = RUBY_COPTS,
 
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
-    ],
-
-    linkopts = [
+    linkopts = select({
+      ":linux": [
+        "-lpthread",
+        "-lcrypt",
+      ],
+      ":darwin": [
         "-framework",
         "Foundation",
         "-lpthread",
-    ],
+      ],
+    }),
 
-    includes = [ "include", "enc/unicode/9.0.0" ],
+    includes = [ "include", "enc/unicode/9.0.0" ] + select({
+      ":linux": ["missing"],
+      ":darwin": []
+    }),
 
     visibility = ["//visibility:public"],
 )
 
 # full ruby ####################################################################
+
+ARCH = select({
+    ":linux": "x86_64-unknown-linux",
+    ":darwin": "x86_64-darwin18",
+})
 
 # TODO: don't hardcode the arch string
 # TODO: don't hardcode the ruby version
@@ -225,7 +274,7 @@ $(location bin/miniruby) \
         -I $$(dirname $(location lib/irb.rb)) \
         $(location tool/mkconfig.rb) \
         -cross_compiling=no \
-        -arch=x86_64-darwin18 \
+        -arch=""" + ARCH + """\
         -version=2.4.3 \
         -install_name=ruby \
         -so_name=ruby \
@@ -368,7 +417,14 @@ cc_binary(
         "vm_trace.c",
         "missing/explicit_bzero.c",
         "missing/setproctitle.c",
-    ] + glob([
+    ] + select({
+        ":linux": [
+            "missing/strlcpy.c",
+            "missing/strlcat.c",
+            "addr2line.c",
+        ],
+        ":darwin": [],
+    }) + glob([
         "ccan/**/*.h",
     ]),
 
@@ -390,27 +446,20 @@ cc_binary(
         ":ext/digest",
         ":ext/psych",
         ":ext/strscan",
-    ],
+    ] + select({
+        ":linux": [":ruby_crypt"],
+        ":darwin": [],
+    }),
 
-    copts = [
-        "-DRUBY_EXPORT",
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
-
-        "-DRUBY",
-
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
-    ],
-
-    linkopts = [
-        "-framework",
-        "Foundation",
-        "-lpthread",
-    ],
+    linkopts = select({
+        ":linux": ["-lpthread"],
+        ":darwin": [
+            "-framework",
+            "Foundation",
+            "-lpthread",
+        ],
+    }),
+    copts = RUBY_COPTS,
 
     visibility = ["//visibility:public"],
 )
@@ -485,20 +534,9 @@ cc_library(
         ":ruby_headers",
         ":ruby_private_headers",
     ],
-    copts = [
-        "-DRUBY_EXPORT",
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
-
+    copts = RUBY_COPTS + [
         # IMPORTANT: without this no Init functions are generated
         "-DEXTSTATIC=1",
-
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
-
         # for r "enc/gb2312.c"
         "-Wno-implicit-function-declaration",
     ],
@@ -555,18 +593,9 @@ cc_library(
         ":ruby_headers",
         ":ruby_private_headers",
     ],
-    copts = [
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
-
+    copts = RUBY_COPTS + [
         # IMPORTANT: without this no Init functions are generated
         "-DRUBY", "-DONIG_ENC_REGISTER=rb_enc_register",
-
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
 
         # for r "enc/gb2312.c"
         "-Wno-implicit-function-declaration",
@@ -729,75 +758,203 @@ cc_library(
         "ext/socket/unixserver.c",
         "ext/socket/unixsocket.c",
     ],
-    copts = [
-        "-DHAVE_SYS_UIO_H",
-        "-DHAVE_NETINET_IN_SYSTM_H",
-        "-DHAVE_NETINET_TCP_H",
-        "-DHAVE_NETINET_TCP_FSM_H",
-        "-DHAVE_NETINET_UDP_H",
-        "-DHAVE_ARPA_INET_H",
-        "-DHAVE_NET_ETHERNET_H",
-        "-DHAVE_SYS_UN_H",
-        "-DHAVE_IFADDRS_H",
-        "-DHAVE_SYS_IOCTL_H",
-        "-DHAVE_SYS_SOCKIO_H",
-        "-DHAVE_NET_IF_H",
-        "-DHAVE_SYS_PARAM_H",
-        "-DHAVE_SYS_UCRED_H",
-        "-DHAVE_NET_IF_DL_H",
-        "-DHAVE_ARPA_NAMESER_H",
-        "-DHAVE_RESOLV_H",
-        "-DHAVE_STRUCT_SOCKADDR_SA_LEN",
-        "-DHAVE_ST_SA_LEN",
-        "-DHAVE_STRUCT_SOCKADDR_IN_SIN_LEN",
-        "-DHAVE_ST_SIN_LEN",
-        "-DHAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN",
-        "-DHAVE_ST_SIN6_LEN",
-        "-DHAVE_TYPE_STRUCT_SOCKADDR_UN",
-        "-DHAVE_STRUCT_SOCKADDR_UN_SUN_LEN",
-        "-DHAVE_ST_SUN_LEN",
-        "-DHAVE_TYPE_STRUCT_SOCKADDR_DL",
-        "-DHAVE_TYPE_STRUCT_SOCKADDR_STORAGE",
-        "-DHAVE_TYPE_STRUCT_ADDRINFO",
-        "-DHAVE_TYPE_SOCKLEN_T",
-        "-DHAVE_TYPE_STRUCT_IN_PKTINFO",
-        "-DHAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST",
-        "-DHAVE_ST_IPI_SPEC_DST",
-        "-DHAVE_TYPE_STRUCT_IN6_PKTINFO",
-        "-DHAVE_TYPE_STRUCT_IP_MREQ",
-        "-DHAVE_TYPE_STRUCT_IP_MREQN",
-        "-DHAVE_TYPE_STRUCT_IPV6_MREQ",
-        "-DHAVE_STRUCT_MSGHDR_MSG_CONTROL",
-        "-DHAVE_ST_MSG_CONTROL",
-        "-DHAVE_SOCKET",
-        "-DHAVE_SENDMSG",
-        "-DHAVE_RECVMSG",
-        "-DHAVE_FREEHOSTENT",
-        "-DHAVE_FREEADDRINFO",
-        "-DHAVE_GAI_STRERROR",
-        "-DGAI_STRERROR_CONST",
-        "-DHAVE_INET_NTOP",
-        "-DHAVE_INET_PTON",
-        "-DHAVE_GETSERVBYPORT",
-        "-DHAVE_GETIFADDRS",
-        "-DHAVE_GETPEEREID",
-        "-DHAVE_IF_INDEXTONAME",
-        "-DNEED_IF_INDEXTONAME_DECL",
-        "-DHAVE_IF_NAMETOINDEX",
-        "-DNEED_IF_NAMETOINDEX_DECL",
-        "-DHAVE_GETIPNODEBYNAME",
-        "-DHAVE_GETHOSTBYNAME2",
-        "-DHAVE_SOCKETPAIR",
-        "-DHAVE_GETHOSTNAME",
-        "-DENABLE_IPV6",
-        "-DINET6",
-        "-DHAVE_CONST_AF_UNIX",
-        "-DHAVE_CONST_SCM_RIGHTS",
-        "-DHAVE_GETNAMEINFO",
-        "-DHAVE_GETADDRINFO",
-        "-Wno-dangling-else",
-        "-Wno-unused-const-variable",
-    ],
+    copts = select({
+        ":linux": [
+            "-DHAVE_NETINET_IN_SYSTM_H",
+            "-DHAVE_NETINET_TCP_H",
+            "-DHAVE_NETINET_UDP_H",
+            "-DHAVE_ARPA_INET_H",
+            "-DHAVE_NETPACKET_PACKET_H",
+            "-DHAVE_NET_ETHERNET_H",
+            "-DHAVE_SYS_UN_H",
+            "-DHAVE_IFADDRS_H",
+            "-DHAVE_SYS_IOCTL_H",
+            "-DHAVE_NET_IF_H",
+            "-DHAVE_SYS_PARAM_H",
+            "-DHAVE_ARPA_NAMESER_H",
+            "-DHAVE_RESOLV_H",
+            "-DHAVE_TYPE_STRUCT_SOCKADDR_UN",
+            "-DHAVE_TYPE_STRUCT_SOCKADDR_STORAGE",
+            "-DHAVE_TYPE_STRUCT_ADDRINFO",
+            "-DHAVE_TYPE_SOCKLEN_T",
+            "-DHAVE_TYPE_STRUCT_IN_PKTINFO",
+            "-DHAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST",
+            "-DHAVE_ST_IPI_SPEC_DST",
+            "-DHAVE_TYPE_STRUCT_IN6_PKTINFO",
+            "-DHAVE_TYPE_STRUCT_IP_MREQ",
+            "-DHAVE_TYPE_STRUCT_IP_MREQN",
+            "-DHAVE_TYPE_STRUCT_IPV6_MREQ",
+            "-DHAVE_STRUCT_MSGHDR_MSG_CONTROL",
+            "-DHAVE_ST_MSG_CONTROL",
+            "-DHAVE_TYPE_STRUCT_TCP_INFO",
+            "-DHAVE_CONST_TCP_ESTABLISHED",
+            "-DHAVE_CONST_TCP_SYN_SENT",
+            "-DHAVE_CONST_TCP_SYN_RECV",
+            "-DHAVE_CONST_TCP_FIN_WAIT1",
+            "-DHAVE_CONST_TCP_FIN_WAIT2",
+            "-DHAVE_CONST_TCP_TIME_WAIT",
+            "-DHAVE_CONST_TCP_CLOSE",
+            "-DHAVE_CONST_TCP_CLOSE_WAIT",
+            "-DHAVE_CONST_TCP_LAST_ACK",
+            "-DHAVE_CONST_TCP_LISTEN",
+            "-DHAVE_CONST_TCP_CLOSING",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_STATE",
+            "-DHAVE_ST_TCPI_STATE",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_CA_STATE",
+            "-DHAVE_ST_TCPI_CA_STATE",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RETRANSMITS",
+            "-DHAVE_ST_TCPI_RETRANSMITS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_PROBES",
+            "-DHAVE_ST_TCPI_PROBES",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_BACKOFF",
+            "-DHAVE_ST_TCPI_BACKOFF",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_OPTIONS",
+            "-DHAVE_ST_TCPI_OPTIONS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RTO",
+            "-DHAVE_ST_TCPI_RTO",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_ATO",
+            "-DHAVE_ST_TCPI_ATO",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SND_MSS",
+            "-DHAVE_ST_TCPI_SND_MSS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_MSS",
+            "-DHAVE_ST_TCPI_RCV_MSS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_UNACKED",
+            "-DHAVE_ST_TCPI_UNACKED",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SACKED",
+            "-DHAVE_ST_TCPI_SACKED",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LOST",
+            "-DHAVE_ST_TCPI_LOST",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RETRANS",
+            "-DHAVE_ST_TCPI_RETRANS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_FACKETS",
+            "-DHAVE_ST_TCPI_FACKETS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_DATA_SENT",
+            "-DHAVE_ST_TCPI_LAST_DATA_SENT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_ACK_SENT",
+            "-DHAVE_ST_TCPI_LAST_ACK_SENT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_DATA_RECV",
+            "-DHAVE_ST_TCPI_LAST_DATA_RECV",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_ACK_RECV",
+            "-DHAVE_ST_TCPI_LAST_ACK_RECV",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_PMTU",
+            "-DHAVE_ST_TCPI_PMTU",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_SSTHRESH",
+            "-DHAVE_ST_TCPI_RCV_SSTHRESH",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RTT",
+            "-DHAVE_ST_TCPI_RTT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RTTVAR",
+            "-DHAVE_ST_TCPI_RTTVAR",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SND_SSTHRESH",
+            "-DHAVE_ST_TCPI_SND_SSTHRESH",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SND_CWND",
+            "-DHAVE_ST_TCPI_SND_CWND",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_ADVMSS",
+            "-DHAVE_ST_TCPI_ADVMSS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_REORDERING",
+            "-DHAVE_ST_TCPI_REORDERING",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_RTT",
+            "-DHAVE_ST_TCPI_RCV_RTT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_SPACE",
+            "-DHAVE_ST_TCPI_RCV_SPACE",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_TOTAL_RETRANS",
+            "-DHAVE_ST_TCPI_TOTAL_RETRANS",
+            "-DHAVE_SOCKET",
+            "-DHAVE_SENDMSG",
+            "-DHAVE_RECVMSG",
+            "-DHAVE_FREEADDRINFO",
+            "-DHAVE_GAI_STRERROR",
+            "-DGAI_STRERROR_CONST",
+            "-DHAVE_ACCEPT4",
+            "-DHAVE_INET_NTOP",
+            "-DHAVE_INET_PTON",
+            "-DHAVE_GETSERVBYPORT",
+            "-DHAVE_GETIFADDRS",
+            "-DHAVE_IF_INDEXTONAME",
+            "-DNEED_IF_INDEXTONAME_DECL",
+            "-DHAVE_IF_NAMETOINDEX",
+            "-DNEED_IF_NAMETOINDEX_DECL",
+            "-DHAVE_GETHOSTBYNAME2",
+            "-DHAVE_SOCKETPAIR",
+            "-DHAVE_GETHOSTNAME",
+            "-DENABLE_IPV6",
+            "-DHAVE_CONST_AF_UNIX",
+            "-DHAVE_CONST_SCM_RIGHTS",
+            "-DFD_PASSING_WORK_WITH_RECVMSG_MSG_PEEK",
+            "-DHAVE_GETNAMEINFO",
+            "-DHAVE_GETADDRINFO",
+            "-Wno-dangling-else",
+            "-Wno-unused-const-variable",
+        ],
+        ":darwin": [
+            "-DHAVE_SYS_UIO_H",
+            "-DHAVE_NETINET_IN_SYSTM_H",
+            "-DHAVE_NETINET_TCP_H",
+            "-DHAVE_NETINET_TCP_FSM_H",
+            "-DHAVE_NETINET_UDP_H",
+            "-DHAVE_ARPA_INET_H",
+            "-DHAVE_NET_ETHERNET_H",
+            "-DHAVE_SYS_UN_H",
+            "-DHAVE_IFADDRS_H",
+            "-DHAVE_SYS_IOCTL_H",
+            "-DHAVE_SYS_SOCKIO_H",
+            "-DHAVE_NET_IF_H",
+            "-DHAVE_SYS_PARAM_H",
+            "-DHAVE_SYS_UCRED_H",
+            "-DHAVE_NET_IF_DL_H",
+            "-DHAVE_ARPA_NAMESER_H",
+            "-DHAVE_RESOLV_H",
+            "-DHAVE_STRUCT_SOCKADDR_SA_LEN",
+            "-DHAVE_ST_SA_LEN",
+            "-DHAVE_STRUCT_SOCKADDR_IN_SIN_LEN",
+            "-DHAVE_ST_SIN_LEN",
+            "-DHAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN",
+            "-DHAVE_ST_SIN6_LEN",
+            "-DHAVE_TYPE_STRUCT_SOCKADDR_UN",
+            "-DHAVE_STRUCT_SOCKADDR_UN_SUN_LEN",
+            "-DHAVE_ST_SUN_LEN",
+            "-DHAVE_TYPE_STRUCT_SOCKADDR_DL",
+            "-DHAVE_TYPE_STRUCT_SOCKADDR_STORAGE",
+            "-DHAVE_TYPE_STRUCT_ADDRINFO",
+            "-DHAVE_TYPE_SOCKLEN_T",
+            "-DHAVE_TYPE_STRUCT_IN_PKTINFO",
+            "-DHAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST",
+            "-DHAVE_ST_IPI_SPEC_DST",
+            "-DHAVE_TYPE_STRUCT_IN6_PKTINFO",
+            "-DHAVE_TYPE_STRUCT_IP_MREQ",
+            "-DHAVE_TYPE_STRUCT_IP_MREQN",
+            "-DHAVE_TYPE_STRUCT_IPV6_MREQ",
+            "-DHAVE_STRUCT_MSGHDR_MSG_CONTROL",
+            "-DHAVE_ST_MSG_CONTROL",
+            "-DHAVE_SOCKET",
+            "-DHAVE_SENDMSG",
+            "-DHAVE_RECVMSG",
+            "-DHAVE_FREEHOSTENT",
+            "-DHAVE_FREEADDRINFO",
+            "-DHAVE_GAI_STRERROR",
+            "-DGAI_STRERROR_CONST",
+            "-DHAVE_INET_NTOP",
+            "-DHAVE_INET_PTON",
+            "-DHAVE_GETSERVBYPORT",
+            "-DHAVE_GETIFADDRS",
+            "-DHAVE_GETPEEREID",
+            "-DHAVE_IF_INDEXTONAME",
+            "-DNEED_IF_INDEXTONAME_DECL",
+            "-DHAVE_IF_NAMETOINDEX",
+            "-DNEED_IF_NAMETOINDEX_DECL",
+            "-DHAVE_GETIPNODEBYNAME",
+            "-DHAVE_GETHOSTBYNAME2",
+            "-DHAVE_SOCKETPAIR",
+            "-DHAVE_GETHOSTNAME",
+            "-DENABLE_IPV6",
+            "-DINET6",
+            "-DHAVE_CONST_AF_UNIX",
+            "-DHAVE_CONST_SCM_RIGHTS",
+            "-DHAVE_GETNAMEINFO",
+            "-DHAVE_GETADDRINFO",
+            "-Wno-dangling-else",
+            "-Wno-unused-const-variable",
+        ]
+    }),
     deps = [ ":ruby_headers", ":ruby_private_headers" ],
     linkstatic = 1,
 )
