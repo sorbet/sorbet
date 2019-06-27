@@ -18,6 +18,7 @@ require 'sorbet-runtime'
 class MyStruct < T::Struct
   prop :x, Integer
   const :y, T.nilable(String)
+  const :z, Float, default: 0.5
 end
 ```
 
@@ -25,10 +26,11 @@ This is basically the same as having written code like this:
 
 ```ruby
 class MyStruct < T::Struct
-  sig {params(x: Integer, y: String).void}
-  def initialize(x:, y: nil)
+  sig {params(x: Integer, y: String, z: Float).void}
+  def initialize(x:, y: nil, z: 0.5)
     @x = x
     @y = y
+    @z = z
   end
 
   sig {returns(Integer)}
@@ -39,6 +41,9 @@ class MyStruct < T::Struct
 
   sig {returns(T.nilable(String))}
   def y; @y; end
+
+  sig {returns(Float)}
+  def z; @z; end
 end
 ```
 
