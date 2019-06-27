@@ -99,11 +99,10 @@ module T::Configuration
   # successfully built, but the built sig is incompatible with other sigs in
   # some way.
   #
-  # By default, sig validation errors cause an exception to be raised. One
-  # exception is for `generated` sigs, for which a message will be logged
-  # instead of raising. Setting sig_validation_error_handler to an object that
-  # implements :call (e.g. proc or lambda) allows users to customize the
-  # behavior when a method signature's build fails.
+  # By default, sig validation errors cause an exception to be raised.
+  # Setting sig_validation_error_handler to an object that implements :call
+  # (e.g. proc or lambda) allows users to customize the behavior when a method
+  # signature's build fails.
   #
   # @param [Lambda, Proc, Object, nil] value Proc that handles the error (pass
   #   nil to reset to default behavior)
@@ -131,24 +130,7 @@ module T::Configuration
   end
 
   private_class_method def self.sig_validation_error_handler_default(error, opts)
-    # if this method overrides a generated signature, report that one instead
-    bad_method = opts[:method]
-    if !opts[:declaration].generated
-      super_signature = opts[:super_signature]
-      raise error if !super_signature&.generated
-      bad_method = super_signature.method
-    end
-
-    method_file, method_line = bad_method.source_location
-    T::Configuration.log_info_handler(
-      "SIG-DECLARE-FAILED",
-      {
-        definition_file: method_file,
-        definition_line: method_line,
-        kind: "Delete",
-        message: error.message,
-      },
-    )
+    raise error
   end
 
   def self.sig_validation_error_handler(error, opts)
@@ -162,11 +144,9 @@ module T::Configuration
   # Set a handler for type errors that result from calling a method.
   #
   # By default, errors from calling a method cause an exception to be raised.
-  # One exception is for `generated` sigs, for which a message will be logged
-  # instead of raising. Setting call_validation_error_handler to an object that
-  # implements :call (e.g. proc or lambda) allows users to customize the
-  # behavior when a method is called with invalid parameters, or returns an
-  # invalid value.
+  # Setting call_validation_error_handler to an object that implements :call
+  # (e.g. proc or lambda) allows users to customize the behavior when a method
+  # is called with invalid parameters, or returns an invalid value.
   #
   # @param [Lambda, Proc, Object, nil] value Proc that handles the error
   #   report (pass nil to reset to default behavior)
@@ -197,39 +177,12 @@ module T::Configuration
   private_class_method def self.call_validation_error_handler_default(signature, opts)
     method_file, method_line = signature.method.source_location
     location = opts[:location]
-    suffix = "Caller: #{location.path}:#{location.lineno}\n" \
+
+    error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n" \
+      "Caller: #{location.path}:#{location.lineno}\n" \
       "Definition: #{method_file}:#{method_line}"
 
-    error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n#{suffix}"
-
-    if signature.generated
-      got = opts[:value].class
-      got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
-      T::Configuration.log_info_handler(
-        "SIG-CHECK-FAILED",
-        {
-          caller_file: location.path,
-          caller_line: location.lineno,
-          definition_file: method_file,
-          definition_line: method_line,
-          kind: opts[:kind],
-          name: opts[:name],
-          expected: opts[:type].name,
-          got: got,
-        },
-      )
-    elsif signature.soft_notify
-      T::Configuration.soft_assert_handler(
-        "TypeError: #{error_message}",
-        {notify: signature.soft_notify}
-      )
-    else
-      begin
-        raise TypeError.new(error_message)
-      rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Private::ErrorHandler.handle_inline_type_error(e)
-      end
-    end
+    raise TypeError.new(error_message)
   end
 
   def self.call_validation_error_handler(signature, opts)
