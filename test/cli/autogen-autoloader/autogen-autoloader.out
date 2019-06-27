@@ -199,3 +199,6 @@ Opus::Require.autoload_map(Object, {
   Foo: "autoloader/Foo.rb",
   Yabba: "autoloader/Yabba.rb",
 })
+
+--- missing output directory
+--print=autogen-autoloader requires an output path to be specified
