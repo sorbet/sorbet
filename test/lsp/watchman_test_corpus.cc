@@ -12,7 +12,7 @@ using namespace sorbet::realmain::lsp;
 TEST_F(ProtocolTest, UpdateFileOnFileSystem) {
     assertDiagnostics(initializeLSP(), {});
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
-    ExpectedDiagnostic d = {"foo.rb", 3, "does not match `Integer`"};
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
     assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
 }
 
@@ -30,7 +30,7 @@ TEST_F(ProtocolTest, CreateAndDeleteEmptyFile) {
 TEST_F(ProtocolTest, DeleteFileWithErrors) {
     assertDiagnostics(initializeLSP(), {});
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
-    ExpectedDiagnostic d = {"foo.rb", 3, "does not match `Integer`"};
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
     assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
 
     deleteFileFromFS("foo.rb");
@@ -47,7 +47,7 @@ TEST_F(ProtocolTest, DeleteFileUnknownToSorbet) {
 TEST_F(ProtocolTest, IgnoresFileUpdatesWhileFileIsOpen) {
     assertDiagnostics(initializeLSP(), {});
 
-    ExpectedDiagnostic d = {"foo.rb", 3, "does not match `Integer`"};
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
     assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
 
@@ -62,7 +62,7 @@ TEST_F(ProtocolTest, IgnoresFileUpdatesWhileFileIsOpen) {
 // If file closes and is not on disk, Sorbet clears diagnostics.
 TEST_F(ProtocolTest, HandlesClosedAndDeletedFile) {
     assertDiagnostics(initializeLSP(), {});
-    ExpectedDiagnostic d = {"foo.rb", 3, "does not match `Integer`"};
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
     assertDiagnostics(
         send(*openFile("foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n")), {d});
     assertDiagnostics(send(*closeFile("foo.rb")), {});
@@ -83,9 +83,9 @@ TEST_F(ProtocolTest, MergesMultipleWatchmanUpdates) {
     string buggyFileContents = "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n";
     writeFilesToFS({{"foo.rb", buggyFileContents}, {"bar.rb", buggyFileContents}, {"baz.rb", buggyFileContents}});
     assertDiagnostics(send(move(requests)), {
-                                                {"foo.rb", 3, "does not match `Integer`"},
-                                                {"bar.rb", 3, "does not match `Integer`"},
-                                                {"baz.rb", 3, "does not match `Integer`"},
+                                                {"foo.rb", 3, "Expected `Integer`"},
+                                                {"bar.rb", 3, "Expected `Integer`"},
+                                                {"baz.rb", 3, "Expected `Integer`"},
                                             });
 
     // getTypecheckCount tracks the number of times typechecking has run on the same clone from LSPLoop's

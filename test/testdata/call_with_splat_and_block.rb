@@ -50,5 +50,5 @@ end
 
 sig { params(blk: T.proc.params(arg0: Integer).returns(Integer)).void }
 def baz_splat(&blk)
-  foo_splat(*[1, "a"], &blk) # error: `T.proc.params(arg0: Integer).returns(Integer)` does not match `T.proc.params(arg0: Integer).returns(String)` for block argument
+  foo_splat(*[1, "a"], &blk) # error: Expected `T.proc.params(arg0: Integer).returns(String)` but found `T.proc.params(arg0: Integer).returns(Integer)` for block argument
 end

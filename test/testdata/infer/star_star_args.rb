@@ -35,20 +35,20 @@ class Main
         one_kwarg(foo: 1)
         one_kwarg(foo: 1, a: "a")
 
-        one_kwarg(foo: "bad", a: "bad") # error: `String("bad")` does not match `Integer` for argument `foo`
-        one_kwarg(foo: 1, a: 1) # error: `Integer(1)` does not match `String` for argument `args`
-        one_kwarg(foo: "bad", a: 1) # error: `Integer(1)` does not match `String` for argument `args`
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `String("bad")` does not match `Integer` for argument `foo`
+        one_kwarg(foo: "bad", a: "bad") # error: Expected `Integer` but found `String("bad")` for argument `foo`
+        one_kwarg(foo: 1, a: 1) # error: Expected `String` but found `Integer(1)` for argument `args`
+        one_kwarg(foo: "bad", a: 1) # error: Expected `Integer` but found `String("bad")` for argument `foo`
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `Integer(1)` for argument `args`
         with_type
         with_type(a: 1)
-        with_type(a: "bad") # error: `String("bad")` does not match `Integer` for argument `args`
-        with_type(a: "bad", b: "bad2") # error: `String("bad")` does not match `Integer` for argument `args`
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `String("bad2")` does not match `Integer` for argument `args`
+        with_type(a: "bad") # error: Expected `Integer` but found `String("bad")` for argument `args`
+        with_type(a: "bad", b: "bad2") # error: Expected `Integer` but found `String("bad")` for argument `args`
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String("bad2")` for argument `args`
 
         # This should assign `z`, instead of assigning `x={z: :foo}`,
         # which would happen with `y={}`
         opt_and_repeated_kw(z: :foo)
         opt_and_repeated_kw("hi")
-        opt_and_repeated_kw("hi", z: "foo") # error: `String("foo")` does not match `Symbol` for argument `y`
+        opt_and_repeated_kw("hi", z: "foo") # error: Expected `Symbol` but found `String("foo")` for argument `y`
     end
 end

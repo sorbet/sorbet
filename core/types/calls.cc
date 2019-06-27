@@ -148,8 +148,8 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(ctx),
                         expectedType->show(ctx));
         } else {
-            e.setHeader("`{}` does not match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
-                        argSym.argumentName(ctx));
+            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType->show(ctx),
+                        argTpe.type->show(ctx), argSym.argumentName(ctx));
             e.addErrorSection(ErrorSection({
                 ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(ctx)->show(ctx),
                                 argSym.argumentName(ctx), expectedType->show(ctx)),
@@ -1388,8 +1388,8 @@ private:
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, targs);
                 }
             } else if (auto e = ctx.state.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
-                e.setHeader("`{}` does not match `{}` for block argument", passedInBlockType->show(ctx),
-                            link->blockPreType->show(ctx));
+                e.setHeader("Expected `{}` but found `{}` for block argument", link->blockPreType->show(ctx),
+                            passedInBlockType->show(ctx));
                 if (dispatched.components.size() == 1) {
                     Magic_callWithBlock::showLocationOfArgDefn(ctx, e, link->blockPreType, dispatched.components[0]);
                 }

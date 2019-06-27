@@ -35,8 +35,11 @@ srb_path="${BASH_SOURCE[0]}"
 compute_md5() {
   if command -v md5sum > /dev/null; then
     md5sum "$1"
-  else
+  elif command -v md5 > /dev/null; then
     md5 -r "$1"
+  else
+    # this is quite a bit slower
+    ruby -e 'require "digest"; puts Digest::MD5.hexdigest(File.read(ARGV[0]))' "$1"
   fi
 }
 

@@ -6,7 +6,7 @@ test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilC
      4 |foo[0]
         ^^^
 
-test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` does not match `String` for argument `arg0` https://srb.help/7002
+test/cli/suggest_t_must/suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
         ^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L24: Method `String#+` has specified `arg0` as `String`

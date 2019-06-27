@@ -12,5 +12,5 @@ class A
 end
 
 # Each repeated argument is checked as element type
-A.foo(1, 2, '') # error: `String("")` does not match `Integer` for argument `xs`
+A.foo(1, 2, '') # error: Expected `Integer` but found `String("")` for argument `xs`
 A.foo(1, 2, 3)

@@ -114,33 +114,32 @@ class Sorbet::Private::HiddenMethodFinder
     )
     File.write(SOURCE_CONSTANTS, io.read)
     io.close
-    raise "Your source can't be read by Sorbet.\nYou can try `find . -type f | xargs -L 1 -t srb tc --no-config --error-white-list 1000` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
+    raise "Your source can't be read by Sorbet.\nYou can try `find . -type f | xargs -L 1 -t bundle exec srb tc --no-config --error-white-list 1000` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
-    # Change dir to deal with you having a sorbet/config in your cwd
-    Dir.chdir(TMP_PATH) do
-      io = IO.popen(
-        [
-          File.realpath("#{__dir__}/../bin/srb"),
-          'tc',
-          '--print=symbol-table-json',
-          # Method redefined with mismatched argument is ok since sometime
-          # people monkeypatch over method
-          '--error-black-list=4010',
-          # Redefining constant is needed because we serialize things both as
-          # aliases and in-class constants.
-          '--error-black-list=4012',
-          # Invalid nesting is ok because we don't generate all the intermediate
-          # namespaces for aliases
-          '--error-black-list=4015',
-          '--stdout-hup-hack',
-          '--silence-dev-message',
-          '--no-error-count',
-          TMP_RBI,
-        ],
-        err: RBI_CONSTANTS_ERR
-      )
-    end
+    io = IO.popen(
+      [
+        File.realpath("#{__dir__}/../bin/srb"),
+        'tc',
+        # Make sure we don't load a sorbet/config in your cwd
+        '--no-config',
+        '--print=symbol-table-json',
+        # Method redefined with mismatched argument is ok since sometime
+        # people monkeypatch over method
+        '--error-black-list=4010',
+        # Redefining constant is needed because we serialize things both as
+        # aliases and in-class constants.
+        '--error-black-list=4012',
+        # Invalid nesting is ok because we don't generate all the intermediate
+        # namespaces for aliases
+        '--error-black-list=4015',
+        '--stdout-hup-hack',
+        '--silence-dev-message',
+        '--no-error-count',
+        TMP_RBI,
+      ],
+      err: RBI_CONSTANTS_ERR
+    )
     File.write(RBI_CONSTANTS, io.read)
     io.close
     raise "#{TMP_RBI} had unexpected errors. Check this file for a clue: #{RBI_CONSTANTS_ERR}" unless $?.success?

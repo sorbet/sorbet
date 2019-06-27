@@ -12,7 +12,7 @@ class TestClass
           # ^ usage: b
     d = c + 3
       # ^ usage: c
-    
+
     block.call
   # ^^^^^ usage: block
   end
