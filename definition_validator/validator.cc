@@ -134,6 +134,30 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(klass.data(gs)->isClass());
     auto klassData = klass.data(gs);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
+
+    // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
+    // interfaces
+    if (klassData->isClassInterface() && method.data(gs)->isPrivate()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
+            e.setHeader("Interface method `{}` cannot be private", method.show(gs));
+        }
+    }
+
+    if (klassData->isClassInterface() && method.data(gs)->isProtected()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
+            e.setHeader("Interface method `{}` cannot be protected", method.show(gs));
+        }
+    }
+
+    if (method.data(gs)->isAbstract() && klassData->isClass() && klassData->isSingletonClass(gs)) {
+        auto attached = klassData->attachedClass(gs);
+        if (attached.exists() && attached.data(gs)->isClassModule()) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadAbstractMethod)) {
+                e.setHeader("Static methods in a module cannot be abstract");
+            }
+        }
+    }
+
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(gs)->findMemberTransitive(gs, name);
         if (superMethod.exists()) {
@@ -155,7 +179,7 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
             }
         }
         if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
-            (method.data(gs)->isImplementation() || method.data(gs)->isOverride())) {
+            !method.data(gs)->isIncompatibleOverride()) {
             validateCompatibleOverride(gs, overridenMethod, method);
         }
     }
