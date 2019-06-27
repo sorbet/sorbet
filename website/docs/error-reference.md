@@ -442,7 +442,7 @@ This is a standard type mismatch. A method's `sig` declares one type, but the
 actual value didn't match. For example:
 
 ```ruby
-'str' + :sym  # error: `Symbol(:"sym")` doesn't match `String` for argument `arg0`
+'str' + :sym  # error: Expected `String` but found `Symbol(:"sym")` for argument `arg0`
 ```
 
 Even still, sometimes these errors can be rather confusing. Consider using

@@ -16,8 +16,8 @@ class TestChild < TestDSLBuilder
   opt_string "hi"
   get_opt_string
   opt_string # error: Not enough arguments provided
-  opt_string :nope # error: `Symbol(:"nope")` does not match `String` for argument `opt_string`
-  opt_string nil # error: `NilClass` does not match `String` for argument `opt_string`
+  opt_string :nope # error: Expected `String` but found `Symbol(:"nope")` for argument `opt_string`
+  opt_string nil # error: Expected `String` but found `NilClass` for argument `opt_string`
   opt_int_defaulted 17
   implied_string
   no_getter "I'm setting the value"

@@ -10,7 +10,7 @@ sig {params(s: Symbol).void}
 sig {params(s: Float).void}
 def f(s); end
 
-f(0) 
+f(0)
 f('')
-f(:s)  # error: does not match `Integer` for argument `s`
-f(0.0) # error: does not match `Integer` for argument `s`
+f(:s)  # error: Expected `Integer`
+f(0.0) # error: Expected `Integer`
