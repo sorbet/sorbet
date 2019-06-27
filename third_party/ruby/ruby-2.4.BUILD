@@ -86,9 +86,10 @@ cc_library(
     "missing/crypt.h",
     "missing/des_tables.c",
   ],
-  srcs = [
-    "missing/crypt.c",
-  ],
+  srcs = select({
+    ":linux": ["missing/crypt.c"],
+    ":darwin": [],
+  }),
   deps = [ ":ruby_headers" ],
   visibility = [ "//visibility:private" ],
 )
