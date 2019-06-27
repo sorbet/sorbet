@@ -116,7 +116,7 @@ sig {params(x: Integer).void}
 def doesnt_take_nil(x); end
 
 sig {params(key: Symbol, options: T::Hash[Symbol, Integer]).void}
-def foo(options)
+def foo(key, options)
   val = T.must(options[key])
   doesnt_take_nil(val) # ok
 end
