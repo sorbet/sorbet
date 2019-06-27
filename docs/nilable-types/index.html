@@ -97,7 +97,7 @@ sig {params(<span class="hljs-symbol">x:</span> String).void}
 
 sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
-  must_be_given_string(x) <span class="hljs-comment"># error: `T.nilable(String)` doesn't match `String` for argument `x`</span>
+  must_be_given_string(x) <span class="hljs-comment"># error: Expected `String` but found `T.nilable(String)` for argument `x`</span>
   <span class="hljs-keyword">if</span> x
     must_be_given_string(x) <span class="hljs-comment"># ok</span>
   <span class="hljs-keyword">end</span>
@@ -133,7 +133,7 @@ sig {params(<span class="hljs-symbol">x:</span> Integer).void}
 sig {params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symbol">options:</span> T::Hash[Symbol, Integer]).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(key, options)</span></span>
   val = options[key]
-  doesnt_take_nil(val) <span class="hljs-comment"># error: `T.nilable(Integer)` doesn't match `Integer` for argument `x`</span>
+  doesnt_take_nil(val) <span class="hljs-comment"># error: Expected `Integer` but found `T.nilable(Integer)` for argument `x`</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>In this example, <code>foo</code> accepts a Hash with <code>Symbol</code> keys and <code>Integer</code> values.

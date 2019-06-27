@@ -82,7 +82,7 @@ either <code>Integer</code> or <code>String</code> values, but no others.</p>
 A.foo(<span class="hljs-number">10</span>)
 A.foo(<span class="hljs-string">"Hello, world"</span>)
 
-<span class="hljs-comment"># error: `TrueClass` does not match `T.any(Integer, String)`</span>
+<span class="hljs-comment"># error: Expected `T.any(Integer, String)` but found `TrueClass`</span>
 A.foo(<span class="hljs-literal">true</span>)
 </code></pre>
 <p><a href="https://sorbet.run/#%23%20typed%3A%20True%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(Integer%2CString)).void%7D%0A%20%20def%20self.foo(x)%3B%20end%0Aend%0A%0A%23%2010%20and%20%22Hello%2C%20world%22%20both%20have%20type%20%60T.any(Integer%2C%20String)%60%0AA.foo(10)%0AA.foo(%22Hello%2C%20world%22)%0A%0A%23%20%60TrueClass%60%20does%20not%20match%20%60T.any(Integer%2C%20String)%60%0AA.foo(true)">

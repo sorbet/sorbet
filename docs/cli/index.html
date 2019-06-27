@@ -151,7 +151,7 @@ overrides on a file-by-file basis. For example, with this YAML file:</p>
 </code></pre>
 <p>This will be the output using the <code>--typed-override</code> flag:</p>
 <pre><code class="hljs css language-plaintext">❯ srb tc --typed-override=foo.yaml foo.rb
-foo.rb:3: `Symbol(:"symbol")` doesn't match `String` for argument `arg0`
+foo.rb:3: Expected `String` but found `Symbol(:"symbol")` for argument `arg0`
 ...
 </code></pre>
 <hr class="footnotes-sep">
