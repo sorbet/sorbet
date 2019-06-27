@@ -25,6 +25,7 @@ This is basically the same as having written code like this:
 
 ```ruby
 class MyStruct < T::Struct
+  sig {params(x: Integer, y: String).void}
   def initialize(x:, y: nil)
     @x = x
     @y = y
@@ -48,6 +49,3 @@ my_struct = MyStruct.new(x: 0)
 puts my_struct.x # => 0
 puts my_struct.y # => nil
 ```
-
-> **Note**: `T::Struct` does not currently statically type check the call to the
-> constructor. This is planned but not yet implemented.
