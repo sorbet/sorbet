@@ -158,7 +158,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
-        autogen::AutogenSubclassMap subclasses;
+        optional<autogen::AutogenSubclassMap> subclasses;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -200,12 +200,12 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");
-                    pf.classlist(ctx, serialized.classlist);
+                    serialized.classlist = pf.classlist(ctx);
                 }
                 if (opts.print.AutogenSubclasses.enabled) {
                     Timer timeit(logger, "autogenSubclasses");
-                    pf.subclasses(ctx, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                  opts.autogenSubclassesRelativeIgnorePatterns, serialized.subclasses);
+                    serialized.subclasses = pf.subclasses(ctx, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                          opts.autogenSubclassesRelativeIgnorePatterns);
                 }
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
@@ -252,7 +252,11 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
         autogen::AutogenSubclassMap childMap;
         for (auto &el : merged) {
-            for (auto const &[parentName, children] : el.second.subclasses) {
+            if (!el.second.subclasses) {
+                continue;
+            }
+
+            for (auto const &[parentName, children] : *el.second.subclasses) {
                 autogen::maybeInsertChild(parentName, children, childMap);
             }
         }

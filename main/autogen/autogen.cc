@@ -664,7 +664,9 @@ string ParsedFile::toMsgpack(core::Context ctx, int version) {
     return write.pack(ctx, *this);
 }
 
-void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
+vector<string> ParsedFile::classlist(core::Context ctx) {
+    vector<string> out;
+
     for (auto &def : defs) {
         if (def.type != Definition::Class) {
             continue;
@@ -674,16 +676,18 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
                                          return nm.data(ctx)->show(ctx);
                                      })));
     }
+
+    return out;
 }
 
-void ParsedFile::subclasses(core::Context ctx, vector<string> &absolutePathsToIgnore,
-                            vector<string> &relativePathsToIgnore, AutogenSubclassMap &out) {
+optional<AutogenSubclassMap> ParsedFile::subclasses(core::Context ctx, vector<string> &absolutePathsToIgnore,
+                                                    vector<string> &relativePathsToIgnore) {
     // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
     if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
-        return;
+        return nullopt;
     }
 
-    auto nameToString = [&](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); };
+    AutogenSubclassMap out;
 
     for (const Reference &ref : refs) {
         DefinitionRef defn = ref.parent_of;
@@ -706,6 +710,8 @@ void ParsedFile::subclasses(core::Context ctx, vector<string> &absolutePathsToIg
 
         out[parentName].insert(make_pair(childName, defn.data(*this).type));
     }
+
+    return out;
 }
 
 // Generate all descendants of a parent class

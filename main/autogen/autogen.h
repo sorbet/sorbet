@@ -71,6 +71,10 @@ struct Reference {
     DefinitionRef parent_of;
 };
 
+typedef std::pair<std::string, Definition::Type> AutogenSubclassEntry;
+typedef std::set<AutogenSubclassEntry> AutogenSubclassSet;
+typedef std::map<std::string, AutogenSubclassSet> AutogenSubclassMap;
+
 struct ParsedFile {
     ast::ParsedFile tree;
     u4 cksum;
@@ -81,19 +85,14 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
-    void classlist(core::Context ctx, std::vector<std::string> &out);
-    void subclasses(core::Context ctx, std::vector<std::string> &absolutePathsToIgnore,
-                    std::vector<std::string> &relativePathsToIgnore,
-                    std::map<std::string, std::set<std::pair<std::string, Definition::Type>>> &out);
+    std::vector<std::string> classlist(core::Context ctx);
+    std::optional<AutogenSubclassMap> subclasses(core::Context ctx, std::vector<std::string> &absolutePathsToIgnore,
+                                                 std::vector<std::string> &relativePathsToIgnore);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
     friend class MsgpackWriter;
 };
-
-typedef std::pair<std::string, Definition::Type> AutogenSubclassEntry;
-typedef std::set<AutogenSubclassEntry> AutogenSubclassSet;
-typedef std::map<std::string, AutogenSubclassSet> AutogenSubclassMap;
 
 void maybeInsertChild(const std::string &parentName, const AutogenSubclassSet &children, AutogenSubclassMap &out);
 void patchChildMap(AutogenSubclassMap &childMap);
