@@ -200,12 +200,12 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");
-                    serialized.classlist = pf.classlist(ctx);
+                    serialized.classlist = pf.listAllClasses(ctx);
                 }
                 if (opts.print.AutogenSubclasses.enabled) {
                     Timer timeit(logger, "autogenSubclasses");
-                    serialized.subclasses = pf.subclasses(ctx, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                                          opts.autogenSubclassesRelativeIgnorePatterns);
+                    serialized.subclasses = pf.listAllSubclasses(ctx, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                                 opts.autogenSubclassesRelativeIgnorePatterns);
                 }
                 out.prints.emplace_back(make_pair(idx, serialized));
             }

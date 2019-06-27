@@ -85,9 +85,10 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
-    std::vector<std::string> classlist(core::Context ctx);
-    std::optional<AutogenSubclassMap> subclasses(core::Context ctx, std::vector<std::string> &absolutePathsToIgnore,
-                                                 std::vector<std::string> &relativePathsToIgnore);
+    std::vector<std::string> listAllClasses(core::Context ctx);
+    std::optional<AutogenSubclassMap> listAllSubclasses(core::Context ctx,
+                                                        std::vector<std::string> &absolutePathsToIgnore,
+                                                        std::vector<std::string> &relativePathsToIgnore);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
