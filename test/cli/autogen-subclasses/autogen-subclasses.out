@@ -5,3 +5,7 @@ Opus::Mixin
 Opus::Parent
  Opus::Child
  Opus::DupChild
+Opus::SafeMachine
+ FooSafeMachine
+Chalk::ODM::Model
+ Chalk::ODM::Private::Lock

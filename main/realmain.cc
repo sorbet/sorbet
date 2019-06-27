@@ -261,6 +261,17 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             }
         }
 
+        // Manual overrides necessary b/c of self.included
+        mergedSubclasses["Opus::SafeMachine"].insert(
+            mergedSubclasses["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
+            mergedSubclasses["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
+
+        mergedSubclasses["Chalk::SafeMachine"].insert(mergedSubclasses["Opus::SafeMachine"].begin(),
+                                                      mergedSubclasses["Opus::SafeMachine"].end());
+
+        mergedSubclasses["Chalk::ODM::Model"].insert(
+            make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
+
         // Generate descendants for each passed-in superclass
         map<string, set<pair<string, autogen::Definition::Type>>> descendantsMap;
         for (string parentName : opts.autogenSubclassesParents) {

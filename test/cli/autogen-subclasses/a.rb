@@ -26,3 +26,7 @@ end
 class OtherChild < NonexistentParent; end
 
 class Opus::DupChild < Opus::Parent; end # Only appears once in output
+
+class Opus::Risk::Model::Mixins::RiskSafeMachine; end
+
+class FooSafeMachine < Opus::Risk::Model::Mixins::RiskSafeMachine; end
