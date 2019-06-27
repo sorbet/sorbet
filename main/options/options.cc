@@ -608,14 +608,10 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.watchmanPath = raw["watchman-path"].as<string>();
 
         // Certain features only need certain passes
-        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) &&
-            (opts.stopAfterPhase < Phase::NAMER)) {
-            logger->error("-p autogen{} must also include --stop-after=namer",
-                          opts.print.AutogenMsgPack.enabled ? "-msgpack" : ""); // TODO(gwu) Fix this
-            throw EarlyReturnWithCode(1);
-        }
-        if ((opts.print.AutogenSubclasses.enabled) && (opts.stopAfterPhase < Phase::RESOLVER)) {
-            logger->error("-p autogen-subclasses must also include --stop-after=resolver");
+        if ((opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled ||
+             opts.print.AutogenSubclasses.enabled) &&
+            (opts.stopAfterPhase != Phase::NAMER)) {
+            logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
             throw EarlyReturnWithCode(1);
         }
 
