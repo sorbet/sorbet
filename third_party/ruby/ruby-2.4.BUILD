@@ -94,7 +94,6 @@ cc_library(
 )
 
 RUBY_COPTS = [
-    "-DRUBY_EXPORT",
     "-D_XOPEN_SOURCE",
     "-Wno-constant-logical-operand",
     "-Wno-parentheses",
@@ -207,10 +206,10 @@ cc_binary(
         "enc/unicode.c",
         "enc/utf_8.c",
         "enc/trans/newline.c",
+        "missing/explicit_bzero.c",
+        "missing/setproctitle.c",
     ] + select({
       ":linux": [
-          "missing/explicit_bzero.c",
-          "missing/setproctitle.c",
           "missing/strlcpy.c",
           "missing/strlcat.c",
           "addr2line.c",
@@ -226,7 +225,7 @@ cc_binary(
         ":ruby_private_headers",
     ],
 
-    copts = RUBY_COPTS,
+    copts = RUBY_COPTS + ["-DRUBY_EXPORT"],
 
     linkopts = select({
       ":linux": [
@@ -459,7 +458,7 @@ cc_binary(
             "-lpthread",
         ],
     }),
-    copts = RUBY_COPTS,
+    copts = RUBY_COPTS + ["-DRUBY_EXPORT","-DRUBY"],
 
     visibility = ["//visibility:public"],
 )
@@ -535,6 +534,7 @@ cc_library(
         ":ruby_private_headers",
     ],
     copts = RUBY_COPTS + [
+        "-DRUBY_EXPORT",
         # IMPORTANT: without this no Init functions are generated
         "-DEXTSTATIC=1",
         # for r "enc/gb2312.c"
