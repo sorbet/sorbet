@@ -6,4 +6,3 @@ class A extend T::Sig
     x.to_s
   end
 end
-  
