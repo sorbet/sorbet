@@ -346,7 +346,7 @@ cxxopts::Options buildOptions() {
                                "This option must be used in conjunction with -p autogen-subclasses",
                                cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")("autogen-subclasses-ignore",
-                               "Like --ignore, but it only affects `-p autogen-subclasses`. ",
+                               "Like --ignore, but it only affects `-p autogen-subclasses`.",
                                cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
