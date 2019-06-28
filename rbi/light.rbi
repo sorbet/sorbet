@@ -930,6 +930,32 @@ module Enumerable
   def select(&blk); end
   sig {returns(T::Array[Elem])}
   def to_a(); end
+
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject),
+    )
+    .returns(T::Enumerable[Elem])
+  end
+  sig {returns(T::Enumerator[[Elem, Integer]])}
+  def each_with_index(&blk); end
+
+  # TODO: the arg1 type in blk should be `T.type_parameter(:U)`, but because of
+  # issue #38, this won't work.
+  sig do
+    type_parameters(:U).params(
+        arg0: T.type_parameter(:U),
+        blk: T.proc.params(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+    )
+    .returns(T.type_parameter(:U))
+  end
+  sig do
+    type_parameters(:U).params(
+        arg0: T.type_parameter(:U),
+    )
+    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
+  end
+  def each_with_object(arg0, &blk); end
 end
 class Enumerator < Object
   include Enumerable
