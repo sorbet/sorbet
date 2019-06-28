@@ -683,3 +683,4 @@ Here are some sample config setups:
 - Vim
   - [rtags (vim-rtags)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L649-L676)
   - [clangd + clang-format (ALE)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L288-L303)
+
