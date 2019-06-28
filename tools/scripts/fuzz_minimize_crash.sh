@@ -53,6 +53,10 @@ trap handler_int SIGINT
 trap handler_term SIGTERM
 
 mkdir -p "${dir}/../../fuzz_crashers/min/"
+PATH=$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin/
+export PATH
+
+command -v llvm_symbolizer >/dev/null 2>&1 || { echo 'will need llvm_symbolizer' ; exit 1; }
 
 (
     cd "$dir"/../..
