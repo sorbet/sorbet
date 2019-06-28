@@ -2,9 +2,11 @@ cc_library(
     name = "autogen",
     srcs = [
         "autogen.cc",
+        "autoloader.cc",
     ],
     hdrs = [
         "autogen.h",
+        "autoloader.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,

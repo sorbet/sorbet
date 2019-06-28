@@ -14,6 +14,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/autoloader.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
