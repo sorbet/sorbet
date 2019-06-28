@@ -54,7 +54,7 @@ We then use a YAML file to tell Sorbet about this plugin.
 # triggers.yaml
 
 ruby_extra_args:
-  # These options are forwarded to the Ruby
+  # These options are forwarded to Ruby
   - '--disable-gems' # This option speeds up Ruby boot time. Use it if you don't need gems
 triggers:
   macro: macro_plugin.rb # This tells Sorbet to run macro.rb when it sees a call to `macro`
@@ -63,13 +63,33 @@ triggers:
 Let's run Sorbet on our initial example again, this time with our new plugin
 enabled:
 
-```
+```shell
 ❯ srb tc --dsl-plugins triggers.yaml metaprogramming.rb
 No errors! Great job.
 ```
 
 Sorbet executed our plugin and took into consideration its output. The methods
 our plugin defines fixed the error we saw initially.
+
+## Debugging plugins
+
+We can ask Sorbet to print out the output of all plugin calls using
+`--print plugin-generated-code`:
+
+```shell
+❯ srb tc --print plugin-generated-code --dsl-plugins triggers.yaml metaprogramming.rb
+# Path: "metaprogramming.rb//plugin-generated|0":
+class MetaProgramming;
+def bed_time; end
+end;
+# Path: "metaprogramming.rb//plugin-generated|1":
+class MetaProgramming;
+def fun_time; end
+end;
+No errors! Great job.
+```
+
+You can also add debug outputs by printing to `$stderr` within your plugin.
 
 ## Caveats
 
