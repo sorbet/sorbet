@@ -8,6 +8,8 @@ class SubprocessTextPlugin final {
 public:
     static std::pair<std::unique_ptr<ast::Expression>, std::vector<std::shared_ptr<core::File>>>
     run(core::Context ctx, std::unique_ptr<ast::Expression> tree);
+    // Plugin generated files are not stored on disk and have special paths
+    static std::string pluginFilePath(std::string_view sourceFilePath, u4 invocationId);
 
     SubprocessTextPlugin() = delete;
 };

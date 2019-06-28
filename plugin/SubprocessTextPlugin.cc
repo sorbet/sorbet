@@ -105,8 +105,8 @@ struct SpawningWalker {
                     format_to(generatedSource, "{}", "end;");
                 }
 
-                auto path = fmt::format("{}//plugin-generated|{}", klass->loc.file().data(ctx).path(),
-                                        subprocessResults.size());
+                auto path =
+                    SubprocessTextPlugin::pluginFilePath(klass->loc.file().data(ctx).path(), subprocessResults.size());
                 auto file = make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Normal);
                 file->pluginGenerated = true;
                 subprocessResults.emplace_back(move(file));
@@ -135,6 +135,10 @@ SubprocessTextPlugin::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
     }
     SpawningWalker walker;
     return {ast::TreeMap::apply(ctx, walker, move(tree)), move(walker.subprocessResults)};
+}
+
+string SubprocessTextPlugin::pluginFilePath(string_view sourceFilePath, u4 invocationId) {
+    return fmt::format("{}//plugin-generated|{}", sourceFilePath, invocationId);
 }
 
 }; // namespace sorbet::plugin

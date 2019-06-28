@@ -1,0 +1,2 @@
+triggers:
+  hi: test/cli/subprocess-plugin-caching-single-threaded/hi_plugin.rb

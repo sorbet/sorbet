@@ -70,43 +70,68 @@ public:
     }
 };
 
-string fileKey(core::GlobalState &gs, core::FileRef file) {
-    auto path = file.data(gs).path();
-    string key(path.begin(), path.end());
-    key += "//";
+static string hashFileContent(const core::GlobalState &gs, core::FileRef file) {
     auto hashBytes = sorbet::crypto_hashing::hash64(file.data(gs).source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
-    return key;
+    return absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
 }
 
-unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
-                                               const unique_ptr<KeyValueStore> &kvstore) {
+static string cacheKeyForPluginOutput(string_view pluginFilePath, string_view contentHashOfCaller) {
+    return fmt::format("{}//caller//{}", pluginFilePath, contentHashOfCaller);
+}
+
+static string cacheKeyForFile(core::GlobalState &gs, core::FileRef file, string_view fileContentHash) {
+    return fmt::format("{}//{}", file.data(gs).path(), fileContentHash);
+}
+
+struct CacheForFile {
+    unique_ptr<ast::Expression> tree;
+    u4 pluginCallCount;
+};
+
+static optional<CacheForFile> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
+                                                 const unique_ptr<KeyValueStore> &kvstore,
+                                                 string_view fileContentHash) {
     if (kvstore && file.id() < gs.filesUsed()) {
-        string fileHashKey = fileKey(gs, file);
+        string fileHashKey = cacheKeyForFile(gs, file, fileContentHash);
         auto maybeCached = kvstore->read(fileHashKey);
+
         if (maybeCached) {
             prodCounterInc("types.input.files.kvstore.hit");
-            auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
+            auto [cachedTree, pluginCallCount] =
+                core::serialize::Serializer::loadExpressionAndU4(gs, maybeCached, file.id());
             file.data(gs).cachedParseTree = true;
             ENFORCE(cachedTree->loc.file() == file);
-            return cachedTree;
+            return CacheForFile{move(cachedTree), pluginCallCount};
         } else {
             prodCounterInc("types.input.files.kvstore.miss");
         }
     }
-    return nullptr;
+    return nullopt;
 }
 
-void cacheTrees(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore, vector<ast::ParsedFile> &trees) {
+struct FileIndexResult {
+    ast::ParsedFile parsed;
+    vector<shared_ptr<core::File>> newPluginFiles;
+};
+
+static void cacheIndexResults(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore,
+                              vector<FileIndexResult> &results) {
     if (!kvstore) {
         return;
     }
-    for (auto &tree : trees) {
+    for (auto &result : results) {
+        auto &tree = result.parsed;
         if (tree.file.data(gs).cachedParseTree) {
             continue;
         }
-        string fileHashKey = fileKey(gs, tree.file);
-        kvstore->write(fileHashKey, core::serialize::Serializer::storeExpression(gs, tree.tree));
+        const auto fileContentHash = hashFileContent(gs, tree.file);
+        for (auto &pluginFile : result.newPluginFiles) {
+            auto pluginOutputCacheKey = cacheKeyForPluginOutput(pluginFile->path(), fileContentHash);
+            kvstore->writeString(pluginOutputCacheKey, pluginFile->source());
+        }
+        string fileHashKey = cacheKeyForFile(gs, tree.file, fileContentHash);
+        auto pluginCallCount = result.newPluginFiles.size();
+        kvstore->write(fileHashKey, core::serialize::Serializer::storeExpressionAndU4(gs, tree.tree, pluginCallCount));
     }
 }
 
@@ -170,9 +195,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
     Timer timeit(lgs.tracer(), "indexOne");
     try {
-        unique_ptr<ast::Expression> tree = fetchTreeFromCache(lgs, file, kvstore);
+        unique_ptr<ast::Expression> tree;
+        auto cache = fetchTreeFromCache(lgs, file, kvstore, hashFileContent(lgs, file));
 
-        if (!tree) {
+        if (cache) {
+            tree = move(cache->tree);
+        } else {
             // tree isn't cached. Need to start from parser
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
@@ -214,20 +242,44 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
     }
 }
 
-pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::FileRef file) {
-    return {emptyParsedFile(file), vector<shared_ptr<core::File>>()};
+static FileIndexResult emptyPluginFile(core::FileRef file) {
+    return FileIndexResult{emptyParsedFile(file)};
 }
 
-pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const options::Options &opts,
-                                                                          core::GlobalState &gs, core::FileRef file,
-                                                                          unique_ptr<KeyValueStore> &kvstore) {
+static FileIndexResult indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
+                                           unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
-    vector<shared_ptr<core::File>> resultPluginFiles;
+    FileIndexResult fileResult;
 
     Timer timeit(gs.tracer(), "indexOneWithPlugins", {{"file", (string)file.data(gs).path()}});
     try {
-        unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore);
+        unique_ptr<ast::Expression> tree;
+        const auto fileContentHash = hashFileContent(gs, file);
+        auto cache = fetchTreeFromCache(gs, file, kvstore, fileContentHash);
+        if (cache) {
+            vector<shared_ptr<core::File>> cachedPluginFiles;
+            bool allPluginFilesAreCached = true;
+            const auto pluginCallCount = cache->pluginCallCount;
+            for (u4 i = 0; i < pluginCallCount; i++) {
+                string pluginFilePath = plugin::SubprocessTextPlugin::pluginFilePath(file.data(gs).path(), i);
+                string pluginFileCacheKey = cacheKeyForPluginOutput(pluginFilePath, fileContentHash);
+                if (!kvstore->read(pluginFileCacheKey)) {
+                    allPluginFilesAreCached = false;
+                    break;
+                }
+                string pluginFileContent(kvstore->readString(pluginFileCacheKey));
+                auto cached =
+                    make_shared<core::File>(move(pluginFilePath), move(pluginFileContent), core::File::Normal);
+                cached->pluginGenerated = true;
+                cachedPluginFiles.emplace_back(move(cached));
+            }
+
+            if (allPluginFilesAreCached) {
+                tree = move(cache->tree);
+                fileResult.newPluginFiles = move(cachedPluginFiles);
+            }
+        }
 
         if (!tree) {
             // tree isn't cached. Need to start from parser
@@ -248,7 +300,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 core::ErrorRegion errs(gs, file);
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
                 tree = move(pluginTree);
-                resultPluginFiles = move(pluginFiles);
+                fileResult.newPluginFiles = move(pluginFiles);
             }
 
             if (!opts.skipDSLPasses) {
@@ -277,7 +329,8 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
         }
 
         dslsInlined.tree = move(tree);
-        return {move(dslsInlined), resultPluginFiles};
+        fileResult.parsed = move(dslsInlined);
+        return fileResult;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -462,8 +515,8 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
 
 struct IndexResult {
     unique_ptr<core::GlobalState> gs;
-    vector<ast::ParsedFile> trees;
-    vector<shared_ptr<core::File>> pluginGeneratedFiles;
+    vector<FileIndexResult> trees;
+    bool hasAnyPluginFiles = false;
 };
 
 struct IndexThreadResultPack {
@@ -486,28 +539,26 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.gs = move(threadResult.res.gs);
                 ENFORCE(ret.trees.empty());
                 ret.trees = move(threadResult.res.trees);
-                ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
-                cacheTrees(*ret.gs, kvstore, ret.trees);
+                cacheIndexResults(*ret.gs, kvstore, ret.trees);
             } else {
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
                 {
                     Timer timeit(cgs->tracer(), "substituteTrees");
                     for (auto &tree : threadResult.res.trees) {
-                        auto file = tree.file;
+                        auto file = tree.parsed.file;
                         core::ErrorRegion errs(*ret.gs, file);
                         if (!file.data(*ret.gs).cachedParseTree) {
-                            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+                            tree.parsed.tree = ast::Substitute::run(ctx, substitution, move(tree.parsed.tree));
                         }
                     }
                 }
-                cacheTrees(*ret.gs, kvstore, threadResult.res.trees);
+                cacheIndexResults(*ret.gs, kvstore, threadResult.res.trees);
                 ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
                                  make_move_iterator(threadResult.res.trees.end()));
-
-                ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
-                                                make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
-                                                make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
+            }
+            if (threadResult.res.hasAnyPluginFiles) {
+                ret.hasAnyPluginFiles = true;
             }
             progress.reportProgress(input->doneEstimate());
             ret.gs->errorQueue->flushErrors();
@@ -536,11 +587,11 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     readFileWithStrictnessOverrides(localGs, file, opts);
-                    auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, kvstore);
-                    threadResult.res.pluginGeneratedFiles.insert(threadResult.res.pluginGeneratedFiles.end(),
-                                                                 make_move_iterator(pluginFiles.begin()),
-                                                                 make_move_iterator(pluginFiles.end()));
-                    threadResult.res.trees.emplace_back(move(parsedFile));
+                    auto fileResult = indexOneWithPlugins(opts, *localGs, file, kvstore);
+                    if (!fileResult.newPluginFiles.empty()) {
+                        threadResult.res.hasAnyPluginFiles = true;
+                    }
+                    threadResult.res.trees.emplace_back(move(fileResult));
                 }
             }
         }
@@ -558,17 +609,25 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
                              unique_ptr<KeyValueStore> &kvstore) {
-    if (firstPass.pluginGeneratedFiles.empty()) {
+    if (!firstPass.hasAnyPluginFiles) {
         return firstPass;
     }
     Timer timeit(firstPass.gs->tracer(), "indexPluginFiles");
-    auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(firstPass.pluginGeneratedFiles.size());
-    auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(firstPass.pluginGeneratedFiles.size());
+    size_t newFileCount = 0;
+    for (const auto &fileResult : firstPass.trees) {
+        newFileCount += fileResult.newPluginFiles.size();
+    }
+    ENFORCE(newFileCount > 0);
+
+    auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(newFileCount);
+    auto pluginFileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(newFileCount);
     {
         core::UnfreezeFileTable unfreezeFiles(*firstPass.gs);
-        for (const auto &file : firstPass.pluginGeneratedFiles) {
-            auto generatedFile = firstPass.gs->enterFile(file);
-            pluginFileq->push(move(generatedFile), 1);
+        for (auto &fileResult : firstPass.trees) {
+            for (const auto &file : fileResult.newPluginFiles) {
+                auto generatedFile = firstPass.gs->enterFile(file);
+                pluginFileq->push(move(generatedFile), 1);
+            }
         }
     }
     const shared_ptr<core::GlobalState> protoGs = move(firstPass.gs);
@@ -582,7 +641,9 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
             if (result.gotItem()) {
                 core::FileRef file = job;
                 file.data(*localGs).strictLevel = decideStrictLevel(*localGs, file, opts);
-                threadResult.res.trees.emplace_back(indexOne(opts, *localGs, file, kvstore));
+                FileIndexResult fileResult;
+                fileResult.parsed = indexOne(opts, *localGs, file, kvstore);
+                threadResult.res.trees.emplace_back(move(fileResult));
             }
         }
 
@@ -605,9 +666,9 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         core::GlobalSubstitution substitution(*protoGs, *suppliedFilesAndPluginFiles.gs, protoGs.get());
         core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root());
         for (auto &tree : firstPass.trees) {
-            auto file = tree.file;
+            auto file = tree.parsed.file;
             core::ErrorRegion errs(*suppliedFilesAndPluginFiles.gs, file);
-            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+            tree.parsed.tree = ast::Substitute::run(ctx, substitution, move(tree.parsed.tree));
         }
     }
     suppliedFilesAndPluginFiles.trees = move(firstPass.trees);
@@ -631,29 +692,35 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
-        size_t pluginFileCount = 0;
+        vector<FileIndexResult> fileResults;
         for (auto file : files) {
             readFileWithStrictnessOverrides(gs, file, opts);
-            auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *gs, file, kvstore);
-            ret.emplace_back(move(parsedFile));
-            pluginFileCount += pluginFiles.size();
-            for (auto &pluginFile : pluginFiles) {
+            auto fileResult = indexOneWithPlugins(opts, *gs, file, kvstore);
+            for (auto &pluginFile : fileResult.newPluginFiles) {
                 core::FileRef pluginFileRef;
                 {
                     core::UnfreezeFileTable fileTableAccess(*gs);
                     pluginFileRef = gs->enterFile(pluginFile);
                     pluginFileRef.data(*gs).strictLevel = decideStrictLevel(*gs, pluginFileRef, opts);
                 }
-                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore));
+                ast::ParsedFile parsed = indexOne(opts, *gs, pluginFileRef, kvstore);
+                FileIndexResult result;
+                result.parsed = move(parsed);
+                fileResults.emplace_back(move(result));
             }
-            cacheTrees(*gs, kvstore, ret);
+            fileResults.emplace_back(move(fileResult));
         }
-        ENFORCE(files.size() + pluginFileCount == ret.size());
+        cacheIndexResults(*gs, kvstore, fileResults);
+        for (auto &result : fileResults) {
+            ret.emplace_back(move(result.parsed));
+        }
     } else {
         auto firstPass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore);
         auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore);
         gs = move(pluginPass.gs);
-        ret = move(pluginPass.trees);
+        for (auto &tree : pluginPass.trees) {
+            ret.emplace_back(move(tree.parsed));
+        }
     }
 
     fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });

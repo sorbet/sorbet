@@ -1166,10 +1166,27 @@ unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1
     return SerializerImpl::unpickleExpr(up, gs, fileId);
 }
 
+pair<unique_ptr<ast::Expression>, u4> Serializer::loadExpressionAndU4(GlobalState &gs, const u1 *const p, u4 forceId) {
+    serialize::UnPickler up(p, gs.tracer());
+    u4 loaded = up.getU4();
+    FileRef fileId(forceId > 0 ? forceId : loaded);
+    auto expression = SerializerImpl::unpickleExpr(up, gs, fileId);
+    u4 callCount = up.getU4();
+    return make_pair(move(expression), callCount);
+}
+
 vector<u1> Serializer::storeExpression(GlobalState &gs, unique_ptr<ast::Expression> &e) {
     serialize::Pickler pickler;
     pickler.putU4(e->loc.file().id());
     SerializerImpl::pickle(pickler, e->loc.file(), e);
+    return pickler.result(FILE_COMPRESSION_DEGREE);
+}
+
+vector<u1> Serializer::storeExpressionAndU4(GlobalState &gs, unique_ptr<ast::Expression> &e, u4 number) {
+    serialize::Pickler pickler;
+    pickler.putU4(e->loc.file().id());
+    SerializerImpl::pickle(pickler, e->loc.file(), e);
+    pickler.putU4(number);
     return pickler.result(FILE_COMPRESSION_DEGREE);
 }
 
