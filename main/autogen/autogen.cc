@@ -677,16 +677,4 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
     }
 }
 
-void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, DefTree &root) {
-    if (!alConfig.includePath(path)) {
-        return;
-    }
-    for (auto &def : defs) {
-        if (def.id.id() == 0) {
-            continue;
-        }
-        root.addDef(ctx, alConfig, NamedDefinition::fromDef(ctx, *this, def.id));
-    }
-}
-
 } // namespace sorbet::autogen

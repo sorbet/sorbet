@@ -206,7 +206,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
                 }
                 if (opts.print.AutogenAutoloader.enabled) {
                     Timer timeit(logger, "autogenNamedDefs");
-                    pf.addDefinitions(ctx, autoloaderCfg, out.defTree);
+                    autogen::addAutoloaderDefinitions(ctx, autoloaderCfg, pf, out.defTree);
                 }
 
                 out.prints.emplace_back(make_pair(idx, serialized));

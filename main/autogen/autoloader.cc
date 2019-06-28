@@ -57,7 +57,7 @@ NamedDefinition NamedDefinition::fromDef(core::Context ctx, ParsedFile &parsedFi
             parsedFile.tree.file};
 }
 
-void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefinition ndef) {
+void DefTree::addSingleDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefinition ndef) {
     if (!alCfg.include(ndef)) {
         return;
     }
@@ -66,10 +66,10 @@ void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefi
         auto &child = node->children[part];
         if (!child) {
             child = make_unique<DefTree>();
-            child->nameParts = node->nameParts; // NOTE: this could be tracked recursively with push/pop
+            child->nameParts = node->nameParts;
             child->nameParts.emplace_back(part);
         }
-        node = &*child; // TODO There must be a better way to do this
+        node = child.get();
     }
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(move(ndef));
@@ -319,6 +319,19 @@ NamedDefinition &DefTree::definition(core::Context ctx) {
     } else {
         ENFORCE(!nonBehaviorDefs.empty(), "Could not find any defintions for '{}'", fullName(ctx));
         return nonBehaviorDefs[0];
+    }
+}
+
+void addAutoloaderDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, ParsedFile &pf, DefTree &root) {
+    ENFORCE(root.root());
+    if (!alConfig.includePath(pf.path)) {
+        return;
+    }
+    for (auto &def : pf.defs) {
+        if (def.id.id() == 0) {
+            continue;
+        }
+        root.addSingleDef(ctx, alConfig, NamedDefinition::fromDef(ctx, pf, def.id));
     }
 }
 
