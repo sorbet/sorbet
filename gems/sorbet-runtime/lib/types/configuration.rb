@@ -175,14 +175,7 @@ module T::Configuration
   end
 
   private_class_method def self.call_validation_error_handler_default(signature, opts)
-    method_file, method_line = signature.method.source_location
-    location = opts[:location]
-
-    error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n" \
-      "Caller: #{location.path}:#{location.lineno}\n" \
-      "Definition: #{method_file}:#{method_line}"
-
-    raise TypeError.new(error_message)
+    raise TypeError.new(opts[:pretty_message])
   end
 
   def self.call_validation_error_handler(signature, opts)
