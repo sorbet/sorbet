@@ -4,4 +4,6 @@
 # It uses the same pattern rule for gitignore file
 # https://git-scm.com/docs/gitignore#_pattern_format
 
-**/*                  @sorbet/sorbet-on-call
+**/*                  @sorbet/sorbet-reviewer-roundrobin
+
+# This group actually forwards to @sorbet/core reviewers via https://github.com/marketplace/pull-panda
