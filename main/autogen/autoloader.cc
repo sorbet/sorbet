@@ -3,6 +3,7 @@
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "core/GlobalState.h"
+#include "core/Names.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -40,6 +41,20 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     return out;
+}
+
+NamedDefinition NamedDefinition::fromDef(core::Context ctx, ParsedFile &parsedFile, DefinitionRef def) {
+    vector<core::NameRef> parentName;
+    if (def.data(parsedFile).parent_ref.exists()) {
+        auto parentRef = def.data(parsedFile).parent_ref.data(parsedFile);
+        if (!parentRef.resolved.empty()) {
+            parentName = parentRef.resolved;
+        } else {
+            parentName = parentRef.name;
+        }
+    }
+    return {def.data(parsedFile), parsedFile.showFullName(ctx, def), parentName, parsedFile.requires,
+            parsedFile.tree.file};
 }
 
 void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefinition ndef) {

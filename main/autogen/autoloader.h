@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "main/autogen/autogen.h"
 #include "main/options/options.h"
+#include <string_view>
 
 namespace sorbet::autogen {
 
@@ -32,6 +33,8 @@ struct AutoloaderConfig {
 };
 
 struct NamedDefinition {
+    static NamedDefinition fromDef(core::Context, ParsedFile &, DefinitionRef);
+
     Definition def;
     std::vector<core::NameRef> nameParts;
     std::vector<core::NameRef> parentName;

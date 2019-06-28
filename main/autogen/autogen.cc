@@ -677,20 +677,6 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
     }
 }
 
-NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
-    auto names = showFullName(ctx, def);
-    vector<core::NameRef> parentName;
-    if (def.data(*this).parent_ref.exists()) {
-        auto parentRef = def.data(*this).parent_ref.data(*this);
-        if (!parentRef.resolved.empty()) {
-            parentName = parentRef.resolved;
-        } else {
-            parentName = parentRef.name;
-        }
-    }
-    return {def.data(*this), names, parentName, requires, tree.file};
-}
-
 void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, DefTree &root) {
     if (!alConfig.includePath(path)) {
         return;
@@ -699,8 +685,7 @@ void ParsedFile::addDefinitions(core::Context ctx, const AutoloaderConfig &alCon
         if (def.id.id() == 0) {
             continue;
         }
-        NamedDefinition namedDef = toNamed(ctx, def.id);
-        root.addDef(ctx, alConfig, move(namedDef));
+        root.addDef(ctx, alConfig, NamedDefinition::fromDef(ctx, *this, def.id));
     }
 }
 
