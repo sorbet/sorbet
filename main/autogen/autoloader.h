@@ -57,7 +57,7 @@ public:
 
     bool root() const;
     core::NameRef name() const;
-    void addDef(core::Context, const AutoloaderConfig &, NamedDefinition);
+    void addSingleDef(core::Context, const AutoloaderConfig &, NamedDefinition);
     void prettyPrint(core::Context ctx, int level = 0);
     std::string fullName(core::Context) const;
 
@@ -87,6 +87,9 @@ private:
     NamedDefinition &definition(core::Context);
     Definition::Type definitionType(core::Context);
 };
+
+// Add all definitions in a parsed file to a `DefTree` root.
+void addAutoloaderDefinitions(core::Context, const AutoloaderConfig &, ParsedFile &, DefTree &);
 
 } // namespace sorbet::autogen
 #endif // RUBY_TYPER_AUTOGEN_AUTOLOADER_H
