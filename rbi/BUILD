@@ -2,18 +2,7 @@ filegroup(
     name = "rbi",
     srcs = glob(
         ["**/*.rbi"],
-        exclude = ["light.rbi"],
     ) + [":generate_procs_rbi"],
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "light",
-    srcs =
-        [
-            "light.rbi",
-            ":generate_procs_rbi",
-        ],
     visibility = ["//visibility:public"],
 )
 

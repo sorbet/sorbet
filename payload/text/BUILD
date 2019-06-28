@@ -41,19 +41,6 @@ cc_library(
 )
 
 cc_library(
-    name = "light",
-    srcs = [
-        "light.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//visibility:public"],
-    deps = ["text"],
-)
-
-cc_library(
     name = "empty",
     srcs = [
         "empty.cc",
@@ -73,18 +60,6 @@ genrule(
         "text.cc",
     ],
     cmd = "$(location :generate_payload) $(location text.cc) $(locations //rbi)",
-    tools = [
-        ":generate_payload",
-    ],
-)
-
-genrule(
-    name = "generate_light_payload_cc",
-    srcs = ["//rbi:light"],
-    outs = [
-        "light.cc",
-    ],
-    cmd = "$(location :generate_payload) $(location light.cc) $(locations //rbi:light)",
     tools = [
         ":generate_payload",
     ],
