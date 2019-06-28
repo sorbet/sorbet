@@ -11,7 +11,8 @@
       "runtime",
       "rbi",
       "cli",
-      "tconfiguration"
+      "tconfiguration",
+      "metaprogramming-plugins"
     ],
     "Troubleshooting": [
       "troubleshooting",

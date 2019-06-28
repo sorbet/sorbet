@@ -1,0 +1,104 @@
+---
+id: metaprogramming-plugins
+title: Metaprogramming plugins
+---
+
+> **Note**: The plugin system has many drawbacks and is not considered a stable
+> feature. Expect its API to change in the future.
+
+In Ruby, it is possible to dynamically define methods. Consider the following
+example:
+
+```ruby
+# metaprogramming.rb
+# typed: true
+
+class MetaProgramming
+  def self.macro(name)
+    define_method("#{name}_time") { name }
+  end
+
+  macro(:bed)
+  macro(:fun)
+end
+
+hello = MetaProgramming.new
+hello.bed_time # error: Method `bed_time` does not exist on MetaProgramming
+hello.fun_time # error: Method `fun_time` does not exist on MetaProgramming
+```
+
+Sorbet rejects this script since currently, Sorbet does not try to understand
+calls to `define_method` or other similar metaprogramming facilities.
+
+Sorbet has a plugin system for handling metaprogramming patterns similar to the
+one shown in this example. Specifically, we can write a plugin to teach Sorbet
+what the method `macro` does.
+
+Here is a plugin for `macro` in the example above:
+
+```ruby
+# macro_plugin.rb
+
+# Sorbet calls this plugin with command line arguments similar to the following:
+# --class MetaProgramming --method macro --source macro(:bed)
+# we only care about the source here, so we use ARGV[5]
+source = ARGV[5]
+/macro\(:(.*)\)/.match(source) do |match_data|
+  puts "def #{match_data[1]}_time; end"
+end
+```
+
+We then use a YAML file to tell Sorbet about this plugin.
+
+```yaml
+# triggers.yaml
+
+ruby_extra_args:
+  # These options are forwarded to the Ruby
+  - '--disable-gems' # This option speeds up Ruby boot time. Use it if you don't need gems
+triggers:
+  macro: macro_plugin.rb # This tells Sorbet to run macro.rb when it sees a call to `macro`
+```
+
+Let's run Sorbet on our initial example again, this time with our new plugin
+enabled:
+
+```
+❯ srb tc --dsl-plugins triggers.yaml metaprogramming.rb
+No errors! Great job.
+```
+
+Sorbet executed our plugin and took into consideration its output. The methods
+our plugin defines fixed the error we saw initially.
+
+## Caveats
+
+- Sorbet decides which plugin to call using method names only. This might be a
+  problem if different metaprogramming methods use the same name, have similar
+  usages, but behave differently. To illustrate, using the configuration above,
+  the following calls `macro_plugin.rb` twice but results in an error.
+
+```ruby
+class MetaProgramming
+  def self.macro(name)
+    define_method("#{name}_time") { name }
+  end
+
+  macro(:fun)
+end
+
+class DifferentMetaProgramming
+  def self.macro(name)
+    define_method(:different_macro) { name }
+  end
+
+  macro(:not_so_fun)
+end
+
+DifferentMetaProgramming.new.different_macro # error: Method `different_macro` does not exist
+```
+
+- The plugin system spawns many instances of Ruby and is very slow because of
+  it.
+- `--cache-dir` does not play well with the plugin system. On cached runs,
+  Sorbet behaves as if there were no plugins specified.
