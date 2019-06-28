@@ -18,12 +18,12 @@ subgraph "cluster_::<Class:Example>#calculate" {
 
     "bb::<Class:Example>#calculate_1" -> "bb::<Class:Example>#calculate_1" [style="bold"];
     "bb::<Class:Example>#calculate_2" [
-        label = "block[id=2](a: Integer, b: Integer)\l<returnMethodTemp>$2: Integer = a: Integer.+(b: Integer)\l<unconditional>\l"
+        label = "block[id=2](b: Integer, a: Integer)\l<returnMethodTemp>$2: Integer = a: Integer.+(b: Integer)\l<unconditional>\l"
     ];
 
     "bb::<Class:Example>#calculate_2" -> "bb::<Class:Example>#calculate_4" [style="bold"];
     "bb::<Class:Example>#calculate_3" [
-        label = "block[id=3](a: Integer, b: Integer)\l<returnMethodTemp>$2: Integer = a: Integer.-(b: Integer)\l<unconditional>\l"
+        label = "block[id=3](b: Integer, a: Integer)\l<returnMethodTemp>$2: Integer = a: Integer.-(b: Integer)\l<unconditional>\l"
     ];
 
     "bb::<Class:Example>#calculate_3" -> "bb::<Class:Example>#calculate_4" [style="bold"];
