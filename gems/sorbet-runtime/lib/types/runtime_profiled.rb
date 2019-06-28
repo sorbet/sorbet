@@ -2,35 +2,23 @@
 # frozen_string_literal: true
 
 #
-# Hey there!
+# From the static system, T::Utils::RuntimeProfiled is T.untyped.
 #
-# T::Utils::Runtime is just a random class. Chances are[^1] it's not a class
-# that your variables are instances of, which means that using it in a type
-# signature will always create a type error.
+# But from the runtime system, it's a random class (specifically, a class that
+# normal programs currently don't have any instances of).
 #
-# At first, it doesn't seem like a good thing to have a type that's sole
-# purpose is to cause type errors. The trick is that within the ruby-types
-# team, we only use T::Utils::RuntimeProfiled within 'generated' sigs.
+# Thus, T::Utils::RuntimeProfiled can be used to introduce runtime-only type
+# errors. This seems like a bad idea, but it's not. It can be used to gather
+# runtime type information from running code via a custom T::Configuration
+# handler.
 #
-# Unlike normal sigs, generated sigs never raise at runtime. They also log the
-# actual, observed type on type error to a central location. We're using these
-# observed types to refine and expand our type coverage in pay-server.
+# This process has only ever been used at Stripe, and is likely to have rough
+# edges. If you've managed to find your way here and you're curious to try it,
+# please chat with us on Slack. There are no docs.
 #
-# What does this all mean for you?
-#
-# - If you were just curious, that's it! Leave the sig as is, and carry on.
-# - If you wanted to replace this sig with a better, hand-authored one:
-#
-#   1. Remove 'generated' from the sig.
-#   2. Update the sig to your liking
-#
-# Questions? :portal-to: => #ruby-types
-#
-# [^1]: Unless you happen to be calling T::Utils::RuntimeProfiled.new directly...
+# See also: the --suggest-runtime-profiled flag to sorbet.
 #
 
 module T; end
 module T::Utils; end
-# Sorbet guesses this type instead of T.untyped when passed --suggest-runtime-profiled
-
 class T::Utils::RuntimeProfiled; end
