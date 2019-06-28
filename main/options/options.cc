@@ -432,7 +432,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                 cfg.outputPath = outPath;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
-                        logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
+                        logger->error("--print={} is incompatible with --cache-dir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
                 }
