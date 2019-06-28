@@ -37,7 +37,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 if [ "$pass" = "document-symbols" ]; then 
                     echo bazel-bin/test/print_document_symbols "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
                 else
-                    echo bazel-bin/main/sorbet-light --silence-dev-message  --suppress-non-critical --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+                    echo bazel-bin/main/sorbet-light --silence-dev-message  --suppress-non-critical --censor-raw-locs-within-payload --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
                 fi
             fi
         done
