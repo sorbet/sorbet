@@ -27,7 +27,7 @@ cc_binary(
         "//main/autogen",
         "//main/lsp",
         "//namer",
-        "//payload:payload",
+        "//payload",
         "//resolver",
         "//test/helpers",
         "@com_google_googletest//:gtest",
@@ -48,7 +48,7 @@ cc_binary(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//main/lsp",
-        "//payload:payload",
+        "//payload",
         "//test/helpers",
     ],
 )
@@ -70,7 +70,7 @@ cc_test(
         "//core",
         "//core/serialize",
         "//parser",
-        "//payload:payload",
+        "//payload",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
         "@cxxopts",

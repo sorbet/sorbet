@@ -23,7 +23,7 @@ cc_test(
     deps = [
         "//core",
         "//main/lsp",
-        "//payload:payload",
+        "//payload",
         "//test/helpers",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
@@ -47,7 +47,7 @@ cc_test(
     deps = [
         "//core",
         "//main/lsp",
-        "//payload:payload",
+        "//payload",
         "//test/helpers",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
