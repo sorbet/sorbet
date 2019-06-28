@@ -8,10 +8,10 @@ def main
   end
   b = T.let([], T::Array[T.untyped])
   b.map do |foo|
-          # ^ hover: sig {returns(T.untyped)}
+          # ^ hover: sig {params(args: T.untyped).returns(T.untyped)}
   end
   c = T.let([], T::Array[String])
   c.map do |foo|
-          # ^ hover: sig {returns(String)}
+          # ^ hover: sig {params(args: T.untyped).returns(String)}
   end
 end
