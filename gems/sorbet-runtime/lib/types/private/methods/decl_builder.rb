@@ -249,7 +249,7 @@ module T::Private::Methods
         decl.bind = nil
       end
       if decl.checked.equal?(ARG_NOT_PROVIDED)
-        decl.checked = :always
+        decl.checked = T::Private::RuntimeLevels.default_checked_level
       end
       if decl.soft_notify.equal?(ARG_NOT_PROVIDED)
         decl.soft_notify = nil

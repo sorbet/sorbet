@@ -17,6 +17,14 @@ module T::Configuration
     T::Private::RuntimeLevels.enable_checking_in_tests
   end
 
+  # Configure the default checked level for a sig with no explicit `.checked`
+  # builder. When unset, the default checked level is `:always`.
+  #
+  # @param [:never, :tests, :always] default_checked_level
+  def self.default_checked_level=(default_checked_level)
+    T::Private::RuntimeLevels.default_checked_level = default_checked_level
+  end
+
   # Set a handler to handle `TypeError`s raised by any in-line type assertions,
   # including `T.must`, `T.let`, `T.cast`, and `T.assert_type!`.
   #
