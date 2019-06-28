@@ -9,7 +9,7 @@ trap 'rm -f "$COMMAND_FILE"' EXIT
 
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-json flattened-tree flattened-tree-raw autogen document-symbols)
 
-bazel build test/cli:update test/lsp:update //main:sorbet-light //test:print_document_symbols -c opt "$@"
+bazel build test/cli:update test/lsp:update //main:sorbet //test:print_document_symbols -c opt "$@"
 
 # shellcheck disable=SC2207
 rb_src=(
@@ -34,10 +34,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 args=("--stop-after=namer --skip-dsl-passes")
             fi
             if [ -e "$candidate" ]; then
-                if [ "$pass" = "document-symbols" ]; then 
+                if [ "$pass" = "document-symbols" ]; then
                     echo bazel-bin/test/print_document_symbols "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
                 else
-                    echo bazel-bin/main/sorbet-light --silence-dev-message  --suppress-non-critical --censor-raw-locs-within-payload --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+                    echo bazel-bin/main/sorbet --silence-dev-message  --suppress-non-critical --censor-raw-locs-within-payload --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
                 fi
             fi
         done
