@@ -90,12 +90,12 @@ struct ParsedFile {
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
     void classlist(core::Context ctx, std::vector<std::string> &out);
-    NamedDefinition toNamed(core::Context ctx, DefinitionRef def);
     void addDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, DefTree &root);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
     friend class MsgpackWriter;
+    friend struct NamedDefinition;
 };
 
 class Autogen final {
