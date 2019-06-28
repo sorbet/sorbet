@@ -20,6 +20,11 @@ module T::Configuration
   # Configure the default checked level for a sig with no explicit `.checked`
   # builder. When unset, the default checked level is `:always`.
   #
+  # Note: setting this option is potentially dangerous! Sorbet can't check all
+  # code statically. The runtime checks complement the checks that Sorbet does
+  # statically, so that methods don't have to guard themselves from being
+  # called incorrectly by untyped code.
+  #
   # @param [:never, :tests, :always] default_checked_level
   def self.default_checked_level=(default_checked_level)
     T::Private::RuntimeLevels.default_checked_level = default_checked_level
