@@ -20,6 +20,21 @@ config_setting(
 )
 
 
+# configuration variables ######################################################
+
+RUBY_VERSION = "2.4.3"
+RUBY_CORE_VERSION = "2.4.0"
+LIB_PREFIX = "lib/ruby/" + RUBY_CORE_VERSION
+INC_PREFIX = "lib/ruby/include"
+
+ARCH_LINUX = "x86_64-unknown-linux"
+ARCH_DARWIN = "x86_64-darwin18"
+
+ARCH = select({
+    ":linux": ARCH_LINUX,
+    ":darwin": ARCH_DARWIN,
+})
+
 # configuration ################################################################
 
 genrule(
@@ -37,7 +52,7 @@ genrule(
         "template/*",
     ]),
     cmd = """
-CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --without-gmp > /dev/null
+CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-load-relative --without-gmp > /dev/null
 find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
 cp config.status $(location config.status)
 """,
@@ -111,6 +126,11 @@ RUBY_COPTS = [
 
 # miniruby #####################################################################
 
+filegroup(
+    name = "miniruby_lib",
+    srcs = glob([ "lib/**/*.rb" ]),
+)
+
 cc_library(
     name = "miniruby_private_headers",
     hdrs = [
@@ -134,7 +154,7 @@ cc_library(
 cc_binary(
     name = "bin/miniruby",
 
-    data = [ ":ruby_lib_staged" ],
+    data = [ ":miniruby_lib" ],
 
     srcs = [
         "main.c",
@@ -250,44 +270,71 @@ cc_binary(
 
 # full ruby ####################################################################
 
-ARCH = select({
-    ":linux": "x86_64-unknown-linux",
-    ":darwin": "x86_64-darwin18",
+RBCONFIG_LINUX = "/".join([LIB_PREFIX, ARCH_LINUX, "rbconfig.rb"])
+RBCONFIG_DARWIN = "/".join([LIB_PREFIX, ARCH_DARWIN, "rbconfig.rb"])
+
+RBCONFIG = select({
+    ":linux": [RBCONFIG_LINUX],
+    ":darwin": [RBCONFIG_DARWIN],
 })
 
-# TODO: don't hardcode the arch string
-# TODO: don't hardcode the ruby version
 genrule(
-    name = "generate-rbconfig",
+    name = "generate-linux-rbconfig",
     srcs = [
-        ":bin/miniruby",
-        ":ruby_lib_staged",
-        "lib/irb.rb",
+        ":miniruby_lib",
+        "bin/miniruby",
         "tool/mkconfig.rb",
         "config.status",
         "version.h",
+        "lib/irb.rb",
     ],
-    outs = [ "rbconfig.rb" ],
+    outs = [RBCONFIG_LINUX],
     cmd = """
 cp $(location config.status) config.status
 $(location bin/miniruby) \
         -I $$(dirname $(location lib/irb.rb)) \
         $(location tool/mkconfig.rb) \
         -cross_compiling=no \
-        -arch=""" + ARCH + """\
-        -version=2.4.3 \
+        -arch=""" + ARCH_LINUX + """\
+        -version=""" + RUBY_VERSION + """\
         -install_name=ruby \
         -so_name=ruby \
         -unicode_version=9.0.0 \
-    > $(location rbconfig.rb)
+    > $@
+""",
+)
+
+genrule(
+    name = "generate-darwin-rbconfig",
+    srcs = [
+        ":miniruby_lib",
+        "bin/miniruby",
+        "tool/mkconfig.rb",
+        "config.status",
+        "version.h",
+        "lib/irb.rb",
+    ],
+    outs = [RBCONFIG_DARWIN],
+    cmd = """
+cp $(location config.status) config.status
+$(location bin/miniruby) \
+        -I $$(dirname $(location lib/irb.rb)) \
+        $(location tool/mkconfig.rb) \
+        -cross_compiling=no \
+        -arch=""" + ARCH_DARWIN + """\
+        -version=""" + RUBY_VERSION + """\
+        -install_name=ruby \
+        -so_name=ruby \
+        -unicode_version=9.0.0 \
+    > $@
 """,
 )
 
 genrule(
     name = "prelude",
     srcs = [
-        ":bin/miniruby",
-        ":ruby_lib",
+        ":miniruby_lib",
+        "bin/miniruby",
         "lib/irb.rb",
         "tool/generic_erb.rb",
         "tool/vpath.rb",
@@ -298,11 +345,10 @@ genrule(
     ],
     outs = [ "prelude.c" ],
     cmd = """
-# -----------------
 $(location bin/miniruby) \
     -I. \
-    -I$$(dirname $(location lib/irb.rb)) \
-    -I$$(dirname $(location prelude.rb)) \
+    -I $$(dirname $(location lib/irb.rb)) \
+    -I $$(dirname $(location prelude.rb)) \
     $(location tool/generic_erb.rb) \
     -c -o $(location prelude.c) \
     $(location template/prelude.c.tmpl) \
@@ -314,7 +360,7 @@ $(location bin/miniruby) \
 
 genrule(
     name = "verconf",
-    srcs = [ ":bin/miniruby" ],
+    srcs = [ "bin/miniruby" ],
     outs = [ "verconf.h" ],
     cmd = """
 prefix=$$(dirname $(location bin/miniruby))
@@ -467,6 +513,7 @@ cc_binary(
 genrule(
     name = "enc-generated-deps",
     srcs = [
+        ":miniruby_lib",
         "bin/miniruby",
         "tool/generic_erb.rb",
         "tool/vpath.rb",
@@ -710,8 +757,8 @@ cc_library(
 genrule(
     name = "generate-ext/socket-constants",
     srcs = [
-        ":bin/miniruby",
-        ":ruby_lib",
+        ":miniruby_lib",
+        "bin/miniruby",
         "lib/optparse.rb",
         "ext/socket/mkconstants.rb",
     ],
@@ -1055,281 +1102,58 @@ cc_library(
 
 # core library #################################################################
 
-genrule(
-    name = "lib/rbconfig",
-    outs = [ "lib/rbconfig.rb" ],
-    srcs = [ "rbconfig.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/pathname",
-    srcs = [ "ext/pathname/lib/pathname.rb" ],
-    outs = [ "lib/pathname.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/bigdecimal",
-    srcs = [
-        "ext/bigdecimal/lib/bigdecimal/jacobian.rb",
-        "ext/bigdecimal/lib/bigdecimal/ludcmp.rb",
-        "ext/bigdecimal/lib/bigdecimal/math.rb",
-        "ext/bigdecimal/lib/bigdecimal/newton.rb",
-        "ext/bigdecimal/lib/bigdecimal/util.rb",
-    ],
-    outs = [
-        "lib/bigdecimal/jacobian.rb",
-        "lib/bigdecimal/ludcmp.rb",
-        "lib/bigdecimal/math.rb",
-        "lib/bigdecimal/newton.rb",
-        "lib/bigdecimal/util.rb",
-    ],
-
-    cmd = """
- cp $(location ext/bigdecimal/lib/bigdecimal/jacobian.rb) $(location lib/bigdecimal/jacobian.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/ludcmp.rb)   $(location lib/bigdecimal/ludcmp.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/math.rb)     $(location lib/bigdecimal/math.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/newton.rb)   $(location lib/bigdecimal/newton.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/util.rb)     $(location lib/bigdecimal/util.rb)
-"""
-)
-
-genrule(
-    name = "ruby_ext/json",
-    srcs = [
-        "ext/json/lib/json.rb",
-        "ext/json/lib/json/add/bigdecimal.rb",
-        "ext/json/lib/json/add/complex.rb",
-        "ext/json/lib/json/add/core.rb",
-        "ext/json/lib/json/add/date.rb",
-        "ext/json/lib/json/add/date_time.rb",
-        "ext/json/lib/json/add/exception.rb",
-        "ext/json/lib/json/add/ostruct.rb",
-        "ext/json/lib/json/add/range.rb",
-        "ext/json/lib/json/add/rational.rb",
-        "ext/json/lib/json/add/regexp.rb",
-        "ext/json/lib/json/add/struct.rb",
-        "ext/json/lib/json/add/symbol.rb",
-        "ext/json/lib/json/add/time.rb",
-        "ext/json/lib/json/common.rb",
-        "ext/json/lib/json/ext.rb",
-        "ext/json/lib/json/generic_object.rb",
-        "ext/json/lib/json/version.rb",
-    ],
-    outs = [
-        "lib/json.rb",
-        "lib/json/add/bigdecimal.rb",
-        "lib/json/add/complex.rb",
-        "lib/json/add/core.rb",
-        "lib/json/add/date.rb",
-        "lib/json/add/date_time.rb",
-        "lib/json/add/exception.rb",
-        "lib/json/add/ostruct.rb",
-        "lib/json/add/range.rb",
-        "lib/json/add/rational.rb",
-        "lib/json/add/regexp.rb",
-        "lib/json/add/struct.rb",
-        "lib/json/add/symbol.rb",
-        "lib/json/add/time.rb",
-        "lib/json/common.rb",
-        "lib/json/ext.rb",
-        "lib/json/generic_object.rb",
-        "lib/json/version.rb",
-    ],
-    cmd = """
-cp $(location ext/json/lib/json.rb)                $(location lib/json.rb)
-cp $(location ext/json/lib/json/add/bigdecimal.rb) $(location lib/json/add/bigdecimal.rb)
-cp $(location ext/json/lib/json/add/complex.rb)    $(location lib/json/add/complex.rb)
-cp $(location ext/json/lib/json/add/core.rb)       $(location lib/json/add/core.rb)
-cp $(location ext/json/lib/json/add/date.rb)       $(location lib/json/add/date.rb)
-cp $(location ext/json/lib/json/add/date_time.rb)  $(location lib/json/add/date_time.rb)
-cp $(location ext/json/lib/json/add/exception.rb)  $(location lib/json/add/exception.rb)
-cp $(location ext/json/lib/json/add/ostruct.rb)    $(location lib/json/add/ostruct.rb)
-cp $(location ext/json/lib/json/add/range.rb)      $(location lib/json/add/range.rb)
-cp $(location ext/json/lib/json/add/rational.rb)   $(location lib/json/add/rational.rb)
-cp $(location ext/json/lib/json/add/regexp.rb)     $(location lib/json/add/regexp.rb)
-cp $(location ext/json/lib/json/add/struct.rb)     $(location lib/json/add/struct.rb)
-cp $(location ext/json/lib/json/add/symbol.rb)     $(location lib/json/add/symbol.rb)
-cp $(location ext/json/lib/json/add/time.rb)       $(location lib/json/add/time.rb)
-cp $(location ext/json/lib/json/common.rb)         $(location lib/json/common.rb)
-cp $(location ext/json/lib/json/ext.rb)            $(location lib/json/ext.rb)
-cp $(location ext/json/lib/json/generic_object.rb) $(location lib/json/generic_object.rb)
-cp $(location ext/json/lib/json/version.rb)        $(location lib/json/version.rb)
-"""
-)
-
-genrule(
-    name = "ruby_ext/socket",
-    srcs = [ "ext/socket/lib/socket.rb" ],
-    outs = [ "lib/socket.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/date",
-    srcs = [ "ext/date/lib/date.rb" ],
-    outs = [ "lib/date.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/digest",
-    srcs = [
-        "ext/digest/lib/digest.rb",
-        "ext/digest/sha2/lib/sha2.rb",
-    ],
-    outs = [
-        "lib/digest.rb",
-        "lib/digest/sha2.rb",
-    ],
-    cmd = """
-cp $(location ext/digest/lib/digest.rb) $(location lib/digest.rb)
-cp $(location ext/digest/sha2/lib/sha2.rb) $(location lib/digest/sha2.rb)
-""",
-)
-
-genrule(
-    name = "ruby_ext/psych",
-    srcs = glob([
-        "ext/psych/lib/psych.rb",
-        "ext/psych/lib/psych/core_ext.rb",
-        "ext/psych/lib/psych/visitors/depth_first.rb",
-        "ext/psych/lib/psych/visitors/json_tree.rb",
-        "ext/psych/lib/psych/visitors/emitter.rb",
-        "ext/psych/lib/psych/visitors/visitor.rb",
-        "ext/psych/lib/psych/visitors/yaml_tree.rb",
-        "ext/psych/lib/psych/visitors/to_ruby.rb",
-        "ext/psych/lib/psych/scalar_scanner.rb",
-        "ext/psych/lib/psych/versions.rb",
-        "ext/psych/lib/psych/omap.rb",
-        "ext/psych/lib/psych/set.rb",
-        "ext/psych/lib/psych/nodes.rb",
-        "ext/psych/lib/psych/streaming.rb",
-        "ext/psych/lib/psych/nodes/node.rb",
-        "ext/psych/lib/psych/nodes/mapping.rb",
-        "ext/psych/lib/psych/nodes/document.rb",
-        "ext/psych/lib/psych/nodes/stream.rb",
-        "ext/psych/lib/psych/nodes/sequence.rb",
-        "ext/psych/lib/psych/nodes/scalar.rb",
-        "ext/psych/lib/psych/nodes/alias.rb",
-        "ext/psych/lib/psych/parser.rb",
-        "ext/psych/lib/psych/class_loader.rb",
-        "ext/psych/lib/psych/tree_builder.rb",
-        "ext/psych/lib/psych/json/ruby_events.rb",
-        "ext/psych/lib/psych/json/tree_builder.rb",
-        "ext/psych/lib/psych/json/stream.rb",
-        "ext/psych/lib/psych/json/yaml_events.rb",
-        "ext/psych/lib/psych/coder.rb",
-        "ext/psych/lib/psych/stream.rb",
-        "ext/psych/lib/psych/syntax_error.rb",
-        "ext/psych/lib/psych/y.rb",
-        "ext/psych/lib/psych/visitors.rb",
-        "ext/psych/lib/psych/deprecated.rb",
-        "ext/psych/lib/psych/handler.rb",
-        "ext/psych/lib/psych/handlers/recorder.rb",
-        "ext/psych/lib/psych/handlers/document_stream.rb",
-        "ext/psych/lib/psych/exception.rb",
-    ]),
-    outs = [
-        "lib/psych.rb",
-        "lib/psych/core_ext.rb",
-        "lib/psych/visitors/depth_first.rb",
-        "lib/psych/visitors/json_tree.rb",
-        "lib/psych/visitors/emitter.rb",
-        "lib/psych/visitors/visitor.rb",
-        "lib/psych/visitors/yaml_tree.rb",
-        "lib/psych/visitors/to_ruby.rb",
-        "lib/psych/scalar_scanner.rb",
-        "lib/psych/versions.rb",
-        "lib/psych/omap.rb",
-        "lib/psych/set.rb",
-        "lib/psych/nodes.rb",
-        "lib/psych/streaming.rb",
-        "lib/psych/nodes/node.rb",
-        "lib/psych/nodes/mapping.rb",
-        "lib/psych/nodes/document.rb",
-        "lib/psych/nodes/stream.rb",
-        "lib/psych/nodes/sequence.rb",
-        "lib/psych/nodes/scalar.rb",
-        "lib/psych/nodes/alias.rb",
-        "lib/psych/parser.rb",
-        "lib/psych/class_loader.rb",
-        "lib/psych/tree_builder.rb",
-        "lib/psych/json/ruby_events.rb",
-        "lib/psych/json/tree_builder.rb",
-        "lib/psych/json/stream.rb",
-        "lib/psych/json/yaml_events.rb",
-        "lib/psych/coder.rb",
-        "lib/psych/stream.rb",
-        "lib/psych/syntax_error.rb",
-        "lib/psych/y.rb",
-        "lib/psych/visitors.rb",
-        "lib/psych/deprecated.rb",
-        "lib/psych/handler.rb",
-        "lib/psych/handlers/recorder.rb",
-        "lib/psych/handlers/document_stream.rb",
-        "lib/psych/exception.rb",
-    ],
-    cmd = """
-cp  $(location ext/psych/lib/psych.rb)                          $(location lib/psych.rb)
-cp  $(location ext/psych/lib/psych/core_ext.rb)                 $(location lib/psych/core_ext.rb)
-cp  $(location ext/psych/lib/psych/visitors/depth_first.rb)     $(location lib/psych/visitors/depth_first.rb)
-cp  $(location ext/psych/lib/psych/visitors/json_tree.rb)       $(location lib/psych/visitors/json_tree.rb)
-cp  $(location ext/psych/lib/psych/visitors/emitter.rb)         $(location lib/psych/visitors/emitter.rb)
-cp  $(location ext/psych/lib/psych/visitors/visitor.rb)         $(location lib/psych/visitors/visitor.rb)
-cp  $(location ext/psych/lib/psych/visitors/yaml_tree.rb)       $(location lib/psych/visitors/yaml_tree.rb)
-cp  $(location ext/psych/lib/psych/visitors/to_ruby.rb)         $(location lib/psych/visitors/to_ruby.rb)
-cp  $(location ext/psych/lib/psych/scalar_scanner.rb)           $(location lib/psych/scalar_scanner.rb)
-cp  $(location ext/psych/lib/psych/versions.rb)                 $(location lib/psych/versions.rb)
-cp  $(location ext/psych/lib/psych/omap.rb)                     $(location lib/psych/omap.rb)
-cp  $(location ext/psych/lib/psych/set.rb)                      $(location lib/psych/set.rb)
-cp  $(location ext/psych/lib/psych/nodes.rb)                    $(location lib/psych/nodes.rb)
-cp  $(location ext/psych/lib/psych/streaming.rb)                $(location lib/psych/streaming.rb)
-cp  $(location ext/psych/lib/psych/nodes/node.rb)               $(location lib/psych/nodes/node.rb)
-cp  $(location ext/psych/lib/psych/nodes/mapping.rb)            $(location lib/psych/nodes/mapping.rb)
-cp  $(location ext/psych/lib/psych/nodes/document.rb)           $(location lib/psych/nodes/document.rb)
-cp  $(location ext/psych/lib/psych/nodes/stream.rb)             $(location lib/psych/nodes/stream.rb)
-cp  $(location ext/psych/lib/psych/nodes/sequence.rb)           $(location lib/psych/nodes/sequence.rb)
-cp  $(location ext/psych/lib/psych/nodes/scalar.rb)             $(location lib/psych/nodes/scalar.rb)
-cp  $(location ext/psych/lib/psych/nodes/alias.rb)              $(location lib/psych/nodes/alias.rb)
-cp  $(location ext/psych/lib/psych/parser.rb)                   $(location lib/psych/parser.rb)
-cp  $(location ext/psych/lib/psych/class_loader.rb)             $(location lib/psych/class_loader.rb)
-cp  $(location ext/psych/lib/psych/tree_builder.rb)             $(location lib/psych/tree_builder.rb)
-cp  $(location ext/psych/lib/psych/json/ruby_events.rb)         $(location lib/psych/json/ruby_events.rb)
-cp  $(location ext/psych/lib/psych/json/tree_builder.rb)        $(location lib/psych/json/tree_builder.rb)
-cp  $(location ext/psych/lib/psych/json/stream.rb)              $(location lib/psych/json/stream.rb)
-cp  $(location ext/psych/lib/psych/json/yaml_events.rb)         $(location lib/psych/json/yaml_events.rb)
-cp  $(location ext/psych/lib/psych/coder.rb)                    $(location lib/psych/coder.rb)
-cp  $(location ext/psych/lib/psych/stream.rb)                   $(location lib/psych/stream.rb)
-cp  $(location ext/psych/lib/psych/syntax_error.rb)             $(location lib/psych/syntax_error.rb)
-cp  $(location ext/psych/lib/psych/y.rb)                        $(location lib/psych/y.rb)
-cp  $(location ext/psych/lib/psych/visitors.rb)                 $(location lib/psych/visitors.rb)
-cp  $(location ext/psych/lib/psych/deprecated.rb)               $(location lib/psych/deprecated.rb)
-cp  $(location ext/psych/lib/psych/handler.rb)                  $(location lib/psych/handler.rb)
-cp  $(location ext/psych/lib/psych/handlers/recorder.rb)        $(location lib/psych/handlers/recorder.rb)
-cp  $(location ext/psych/lib/psych/handlers/document_stream.rb) $(location lib/psych/handlers/document_stream.rb)
-cp  $(location ext/psych/lib/psych/exception.rb)                $(location lib/psych/exception.rb)
-"""
-)
+load("@//third_party/ruby:utils.bzl", "install_file", "install_dir")
 
 filegroup(
     name = "ruby_lib",
-    srcs = [ "lib/rbconfig.rb", ":ruby_lib_staged" ],
-    visibility = ["//visibility:public"],
-)
+    srcs =
+        install_dir(
+            src_prefix = "ext/pathname/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
 
-filegroup(
-    name = "ruby_lib_staged",
-    srcs = [
-        ":ruby_ext/pathname",
-        ":ruby_ext/bigdecimal",
-        ":ruby_ext/json",
-        ":ruby_ext/socket",
-        ":ruby_ext/date",
-        ":ruby_ext/digest",
-        ":ruby_ext/psych",
-    ] + glob([ "lib/**/*.rb" ]),
+        install_dir(
+            src_prefix = "ext/bigdecimal/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/json/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/socket/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/date/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/digest/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/digest/sha2/lib",
+            out_prefix = LIB_PREFIX + "/digest",
+        ) +
+
+        install_dir(
+            src_prefix = "ext/psych/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        RBCONFIG,
+
     visibility = ["//visibility:private"],
 )
 
@@ -1349,19 +1173,40 @@ base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
 
 # was this script invoked via 'bazel run"?
 if [ -d "\$$base_dir/ruby.runfiles" ]; then
-  export RUBYLIB="\$${RUBYLIB:-}:\$$base_dir/ruby.runfiles/ruby_2_4_3/lib"
-else
-  export RUBYLIB="\$${RUBYLIB:-}:\$$base_dir/lib"
+  base_dir="\$${base_dir}/ruby.runfiles/ruby_2_4_3"
 fi
+
+PREFIX="\$${base_dir}/""" + LIB_PREFIX + """"
+
+RUBYLIB="\$${RUBYLIB:-}:\$${PREFIX}:\$${PREFIX}/""" + ARCH + """"
+
+export RUBYLIB
 
 exec "\$$base_dir/bin/ruby" "\$$@"
 EOF
     """,
 )
 
+filegroup(
+    name = "ruby_runtime_env",
+    srcs =
+        install_dir(
+            src_prefix = "include",
+            out_prefix = INC_PREFIX,
+        ) + [
+        ":bin/ruby",
+        ":ruby_lib",
+        install_file(
+            name = "install-ruby-config.h",
+            src = "include/ruby/config.h",
+            out = INC_PREFIX + "/ruby/config.h",
+        ),
+    ],
+)
+
 sh_binary(
     name = "ruby",
-    data = [ ":bin/ruby", ":ruby_lib" ],
+    data = [ ":ruby_runtime_env" ],
     srcs = [ "ruby.sh" ],
     visibility = ["//visibility:public"],
 )
