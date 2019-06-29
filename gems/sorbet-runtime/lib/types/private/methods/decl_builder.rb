@@ -119,7 +119,7 @@ module T::Private::Methods
       # TODO consider validating that :notify is a project that sentry knows about,
       # as per https://git.corp.stripe.com/stripe-internal/pay-server/blob/master/lib/event/job/sentry_job.rb#L125
       if !notify || notify == ''
-        raise BuilderError.new("You can't provide an empty notify to .soft().")
+        raise BuilderError.new("You can't provide an empty notify to .on_failure().")
       end
 
       decl.soft_notify = notify

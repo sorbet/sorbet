@@ -145,7 +145,7 @@ module Opus::Types::Test
           err = assert_raises(RuntimeError) do
             mod = Module.new do
               extend T::Sig
-              sig {void.soft(notify: 'foo')}
+              sig {void.on_failure(notify: 'foo')}
               def self.test_method; end
             end
             mod.test_method
@@ -373,7 +373,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: 'me').soft(notify: 'you')}
+            sig {returns(Integer).on_failure(notify: 'me').on_failure(notify: 'you')}
             def self.foo; end; foo
           end
         end
@@ -385,7 +385,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: 'me').checked(:never)}
+            sig {returns(Integer).on_failure(notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
         end
@@ -397,7 +397,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: 'me').checked(:never)}
+            sig {returns(Integer).on_failure(notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
         end
@@ -409,11 +409,11 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: '')}
+            sig {returns(Integer).on_failure(notify: '')}
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't provide an empty notify to .soft().")
+        assert_includes(ex.message, "You can't provide an empty notify to .on_failure().")
       end
 
       it 'forbids unpassed notify' do
@@ -444,7 +444,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {generated.returns(Integer).soft(notify: '')}
+            sig {generated.returns(Integer).on_failure(notify: '')}
             def self.foo; end; foo
           end
         end
