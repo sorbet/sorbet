@@ -33,7 +33,7 @@ struct NameRefDebugCheck {
 
     constexpr NameRefDebugCheck() : globalStateId(-1) {}
 
-    NameRefDebugCheck(int globalStateId) : globalStateId(globalStateId) {}
+    NameRefDebugCheck(const GlobalState &gs, int id);
 
     void check(const GlobalState &gs, int id) const;
     void check(const GlobalSubstitution &subst) const;
