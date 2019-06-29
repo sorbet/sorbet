@@ -4,7 +4,7 @@ class Main
     extend T::Sig
 
     sig {returns(NilClass).on_failure(notify: 'pt')}
-    def soft
+    def on_failure
     end
 
     # Since it is an experiement, all these illegal things are ok for now

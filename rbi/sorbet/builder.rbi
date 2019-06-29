@@ -31,7 +31,7 @@ class T::Private::Methods::DeclBuilder
   def void; end
 
   sig {params(notify: T.untyped).returns(T::Private::Methods::DeclBuilder)}
-  def soft(notify:); end
+  def on_failure(notify:); end
 
   sig {params(arg: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def checked(arg); end

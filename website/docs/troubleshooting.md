@@ -217,4 +217,5 @@ statically---sometimes this is more power than we need. For the cases where we
 the programmer know of an invariant that isn't currently expressed in the type
 system, [`T.cast`](type-assertions#tcast) is a good middle-ground.
 
-<!-- TODO(jez) Document .soft / .checked once API is stable. -->
+<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
+. -->

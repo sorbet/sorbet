@@ -44,7 +44,7 @@ module T::Private::Methods
       raise "Procs must specify a return type"
     end
     if decl.soft_notify != ARG_NOT_PROVIDED
-      raise "Procs cannot use .soft"
+      raise "Procs cannot use .on_failure"
     end
 
     if decl.params == ARG_NOT_PROVIDED

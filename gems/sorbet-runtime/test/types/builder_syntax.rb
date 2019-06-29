@@ -141,7 +141,7 @@ module Opus::Types::Test
 
     describe 'declarations' do
       describe '.checked' do
-        it 'raises when using .soft' do
+        it 'raises when using .on_failure' do
           err = assert_raises(RuntimeError) do
             mod = Module.new do
               extend T::Sig
@@ -150,7 +150,7 @@ module Opus::Types::Test
             end
             mod.test_method
           end
-          assert_match(/\.soft API is unstable/, err.message)
+          assert_match(/\.on_failure API is unstable/, err.message)
         end
 
         it 'raises RuntimeError with invalid level' do
@@ -368,7 +368,7 @@ module Opus::Types::Test
         assert_includes(ex.message, "You can't call .checked multiple times in a signature.")
       end
 
-      it 'forbids multiple .soft calls' do
+      it 'forbids multiple .on_failure calls' do
         skip
         ex = assert_raises do
           Class.new do
@@ -377,10 +377,10 @@ module Opus::Types::Test
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't call .soft multiple times in a signature.")
+        assert_includes(ex.message, "You can't call .on_failure multiple times in a signature.")
       end
 
-      it 'forbids .soft and then .checked' do
+      it 'forbids .on_failure and then .checked' do
         skip
         ex = assert_raises do
           Class.new do
@@ -389,10 +389,10 @@ module Opus::Types::Test
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .soft.")
+        assert_includes(ex.message, "You can't use .checked with .on_failure.")
       end
 
-      it 'forbids .checked and then .soft' do
+      it 'forbids .checked and then .on_failure' do
         skip
         ex = assert_raises do
           Class.new do
@@ -401,7 +401,7 @@ module Opus::Types::Test
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .soft.")
+        assert_includes(ex.message, "You can't use .checked with .on_failure.")
       end
 
       it 'forbids empty notify' do
@@ -421,7 +421,7 @@ module Opus::Types::Test
         ex = assert_raises(ArgumentError) do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft}
+            sig {returns(Integer).on_failure}
             def self.foo; end; foo
           end
         end
@@ -439,7 +439,7 @@ module Opus::Types::Test
         assert_includes(ex.message, "You can't use .checked with .generated.")
       end
 
-      it 'forbids .generated and then .soft' do
+      it 'forbids .generated and then .on_failure' do
         skip
         ex = assert_raises do
           Class.new do
@@ -448,7 +448,7 @@ module Opus::Types::Test
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .soft with .generated.")
+        assert_includes(ex.message, "You can't use .on_failure with .generated.")
       end
 
       it 'disallows return then void' do
