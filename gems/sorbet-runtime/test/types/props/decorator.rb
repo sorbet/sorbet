@@ -361,7 +361,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     assert_nil(MatrixStruct.new.e)
   end
 
-  it 'soft asserts if `optional` is ever specified' do
+  it 'hard asserts if `optional` is ever specified' do
     e = assert_raises do
       Class.new(T::Struct) do
         prop :optional_true, T::Boolean, optional: true
