@@ -186,6 +186,7 @@ private:
         unsigned int lastNameKnownByParentGlobalState;
     };
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
+    int rootGlobalStateNamesUsed = 0;
 
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::shared_ptr<std::vector<char>>> strings;

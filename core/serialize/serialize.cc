@@ -711,6 +711,7 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
     gs.installIntrinsics();
+    gs.rootGlobalStateNamesUsed = gs.namesUsed();
 }
 
 template <class T> void SerializerImpl::pickleTree(Pickler &p, FileRef file, unique_ptr<T> &t) {
