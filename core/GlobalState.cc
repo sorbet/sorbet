@@ -1151,7 +1151,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     }
     result->deepCloneHistory = this->deepCloneHistory;
     result->deepCloneHistory.emplace_back(DeepCloneHistoryEntry{this->globalStateId, namesUsed()});
-    result->rootGlobalStateNamesUsed = this->rootGlobalStateNamesUsed;
 
     result->strings = this->strings;
     result->stringsLastPageUsed = STRINGS_PAGE_SIZE;

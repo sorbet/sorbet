@@ -185,9 +185,6 @@ void NameRefDebugCheck::check(const GlobalState &gs, int _id) const {
     if (_id <= Names::LAST_WELL_KNOWN_NAME) {
         return;
     }
-    if (_id < gs.rootGlobalStateNamesUsed) {
-        return;
-    }
     if (globalStateId == gs.globalStateId) {
         return;
     }
