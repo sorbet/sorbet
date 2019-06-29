@@ -451,33 +451,67 @@ module Kernel
     params(
         initial: T.any(Integer, Float, Rational, BigDecimal, String),
         digits: Integer,
+        exception: TrueClass
     )
     .returns(BigDecimal)
   end
-  def BigDecimal(initial, digits=0); end
+  sig do
+    params(
+        initial: T.any(Integer, Float, Rational, BigDecimal, String),
+        digits: Integer,
+        exception: FalseClass
+    )
+    .returns(T.nilable(BigDecimal))
+  end
+  def BigDecimal(initial, digits=0, exception: true); end
 
   sig do
     params(
         x: T.any(Numeric, String),
         y: T.any(Numeric, String),
+        exception: TrueClass
+    )
+    .returns(Complex)
+  end
+  sig do
+    params(
+        x: T.any(Numeric, String),
+        y: T.any(Numeric, String),
+        exception: FalseClass
+    )
+    .returns(T.nilable(Complex))
+  end
+  sig do
+    params(
+        x: String,
+        exception: TrueClass
     )
     .returns(Complex)
   end
   sig do
     params(
         x: String,
+        exception: FalseClass
     )
-    .returns(Complex)
+    .returns(T.nilable(Complex))
   end
-  def Complex(x, y=T.unsafe(nil)); end
+  def Complex(x, y=T.unsafe(nil), exception: false); end
 
   sig do
     params(
         x: T.any(Numeric, String),
+        exception: TrueClass
     )
     .returns(Float)
   end
-  def Float(x); end
+  sig do
+    params(
+        x: T.any(Numeric, String),
+        exception: FalseClass
+    )
+    .returns(T.nilable(Float))
+  end
+  def Float(x, exception: true); end
 
   sig do
     type_parameters(:K ,:V).params(
@@ -491,25 +525,51 @@ module Kernel
     params(
         arg: T.any(Numeric, String),
         base: Integer,
+        exception: TrueClass
     )
     .returns(Integer)
   end
-  def Integer(arg, base=T.unsafe(nil)); end
+  sig do
+    params(
+        arg: T.any(Numeric, String),
+        base: Integer,
+        exception: FalseClass
+    )
+    .returns(T.nilable(Integer))
+  end
+  def Integer(arg, base=T.unsafe(nil), exception: true); end
 
   sig do
     params(
         x: T.any(Numeric, String),
         y: T.any(Numeric, String),
+        exception: TrueClass
+    )
+    .returns(Rational)
+  end
+  sig do
+    params(
+        x: T.any(Numeric, String),
+        y: T.any(Numeric, String),
+        exception: FalseClass
+    )
+    .returns(T.nilable(Rational))
+  end
+  sig do
+    params(
+        x: Object,
+        exception: TrueClass,
     )
     .returns(Rational)
   end
   sig do
     params(
         x: Object,
+        exception: FalseClass,
     )
-    .returns(Rational)
+    .returns(T.nilable(Rational))
   end
-  def Rational(x, y=T.unsafe(nil)); end
+  def Rational(x, y=T.unsafe(nil), exception: true); end
 
   sig do
     params(
