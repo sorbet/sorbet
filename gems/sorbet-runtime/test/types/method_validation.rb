@@ -368,7 +368,6 @@ module Opus::Types::Test
       end
 
       it 'raises a soft_assertion when .on_failure is used with a notify' do
-        skip
         @mod.sig {returns(Symbol).on_failure(notify: 'hello')}
         def @mod.foo
           1
