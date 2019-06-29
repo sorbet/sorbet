@@ -218,4 +218,3 @@ the programmer know of an invariant that isn't currently expressed in the type
 system, [`T.cast`](type-assertions#tcast) is a good middle-ground.
 
 <!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
-. -->
