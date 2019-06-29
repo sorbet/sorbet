@@ -367,7 +367,7 @@ module Opus::Types::Test
         assert_includes(ex.message, "You can't call .on_failure multiple times in a signature.")
       end
 
-      it 'forbids .on_failure and then .checked' do
+      it 'forbids .on_failure and then .checked(:never)' do
         ex = assert_raises do
           Class.new do
             extend T::Sig
@@ -375,18 +375,54 @@ module Opus::Types::Test
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .on_failure.")
+        assert_includes(ex.message, "You can't use .checked(:never) with .on_failure")
       end
 
-      it 'forbids .checked and then .on_failure' do
+      it 'allows .on_failure and then .checked(:tests)' do
+        skip
+        Class.new do
+          extend T::Sig
+          sig {returns(Integer).on_failure(notify: 'me').checked(:tests)}
+          def self.foo; end; foo
+        end
+        pass
+      end
+
+      it 'allows .on_failure and then .checked(:always)' do
+        skip
+        Class.new do
+          extend T::Sig
+          sig {returns(NilClass).on_failure(notify: 'me').checked(:always)}
+          def self.foo; end; foo
+        end
+        pass
+      end
+
+      it 'forbids .checked(:never) and then .on_failure' do
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).on_failure(notify: 'me').checked(:never)}
+            sig {returns(Integer).checked(:never).on_failure(notify: 'me')}
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .on_failure.")
+        assert_includes(ex.message, "You can't use .on_failure with .checked(:never)")
+      end
+
+      it 'allows .checked(:tests) and then .on_failure' do
+        Class.new do
+          extend T::Sig
+          sig {returns(Integer).checked(:tests).on_failure(notify: 'me')}
+          def self.foo; end; foo
+        end
+      end
+
+      it 'allows .checked(:always) and then .on_failure' do
+        Class.new do
+          extend T::Sig
+          sig {returns(NilClass).checked(:always).on_failure(notify: 'me')}
+          def self.foo; end; foo
+        end
       end
 
       it 'forbids empty notify' do
