@@ -80,9 +80,6 @@ module T::Private::Methods
     end
 
     def checked(level)
-      if T.unsafe(true)
-        raise "The .checked API is unstable, so we don't want it used until we redesign it. To change Sorbet's runtime behavior, see https://sorbet.org/docs/tconfiguration"
-      end
       check_live!
 
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
