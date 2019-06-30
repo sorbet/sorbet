@@ -302,6 +302,7 @@ module Opus::Types::Test
           end
 
           it 'override default checked level to :tests, without checking tests' do
+            T::Private::RuntimeLevels._toggle_checking_tests(false)
             T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
 
             a = Module.new do
@@ -312,6 +313,7 @@ module Opus::Types::Test
 
             a.foo('') # type error ignored
 
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
             pass
           end
 
@@ -346,7 +348,13 @@ module Opus::Types::Test
           end
 
           it 'setting the default checked level raises if set too late' do
-            # Since the test themselves have evalued sigs, it's too late.
+            Module.new do
+              extend T::Sig
+              sig {void}
+              def self.foo; end
+              foo
+            end
+
             err = assert_raises(RuntimeError) do
               T::Configuration.default_checked_level = :never
             end
