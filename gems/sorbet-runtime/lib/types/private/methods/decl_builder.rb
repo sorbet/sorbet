@@ -86,7 +86,7 @@ module T::Private::Methods
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
       if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .checked with .soft.")
+        raise BuilderError.new("You can't use .checked with .on_failure.")
       end
       if !decl.generated.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked with .generated.")
@@ -100,26 +100,23 @@ module T::Private::Methods
       self
     end
 
-    def soft(notify:)
-      if T.unsafe(true)
-        raise "The .soft API is unstable, so we don't want it used until we redesign it. To change Sorbet's runtime behavior, see https://sorbet.org/docs/tconfiguration"
-      end
+    def on_failure(notify:)
       check_live!
 
       if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .soft multiple times in a signature.")
+        raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .soft with .checked.")
+        raise BuilderError.new("You can't use .on_failure with .checked.")
       end
       if !decl.generated.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .soft with .generated.")
+        raise BuilderError.new("You can't use .on_failure with .generated.")
       end
 
       # TODO consider validating that :notify is a project that sentry knows about,
       # as per https://git.corp.stripe.com/stripe-internal/pay-server/blob/master/lib/event/job/sentry_job.rb#L125
       if !notify || notify == ''
-        raise BuilderError.new("You can't provide an empty notify to .soft().")
+        raise BuilderError.new("You can't provide an empty notify to .on_failure().")
       end
 
       decl.soft_notify = notify
@@ -137,7 +134,7 @@ module T::Private::Methods
         raise BuilderError.new("You can't use .generated with .checked.")
       end
       if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .generated with .soft.")
+        raise BuilderError.new("You can't use .generated with .on_failure.")
       end
 
       decl.generated = true

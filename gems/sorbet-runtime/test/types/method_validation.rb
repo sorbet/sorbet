@@ -367,18 +367,32 @@ module Opus::Types::Test
         end
       end
 
-      it 'raises a soft_assertion when .soft is used with a notify' do
-        skip
-        @mod.sig {returns(Symbol).soft(notify: 'hello')}
-        def @mod.foo
-          1
-        end
+      it 'raises a soft_assertion when .on_failure is used with a notify' do
+        begin
+          T::Configuration.call_validation_error_handler = lambda do |signature, opts|
+            if signature.soft_notify
+              T::Configuration.soft_assert_handler(
+                "TypeError: #{opts[:pretty_message]}",
+                {notify: signature.soft_notify}
+              )
+            else
+              raise 'test failed'
+            end
+          end
 
-        Opus::Error.expects(:soft).with(
-          regexp_matches(/TypeError: Return value: Expected type Symbol, got type Integer with value 1\nCaller: .+\d\nDefinition: .+\d/),
-          notify: 'hello'
-        )
-        @mod.foo
+          @mod.sig {returns(Symbol).on_failure(notify: 'hello')}
+          def @mod.foo
+            1
+          end
+
+          T::Configuration.expects(:soft_assert_handler).with(
+            regexp_matches(/TypeError: Return value: Expected type Symbol, got type Integer with value 1\nCaller: .+\d\nDefinition: .+\d/),
+            notify: 'hello'
+          )
+          @mod.foo
+        ensure
+          T::Configuration.call_validation_error_handler = nil
+        end
       end
 
       describe 'generated' do
