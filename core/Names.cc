@@ -12,7 +12,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, unsigned int id) : DebugOnlyCheck(gs.globalStateId), _id(id) {}
+NameRef::NameRef(const GlobalState &gs, unsigned int id) : DebugOnlyCheck(gs, id), _id(id) {}
 
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
@@ -175,6 +175,18 @@ bool Name::isClassName(const GlobalState &gs) const {
             return true;
         default:
             Exception::notImplemented();
+    }
+}
+
+NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, int _id) {
+    // store the globalStateId of the creating global state to allow sharing refs between siblings
+    // when the ref refers to a name in the common ancestor
+    globalStateId = gs.globalStateId;
+    for (const auto &deepCloneInfo : gs.deepCloneHistory) {
+        if (_id < deepCloneInfo.lastNameKnownByParentGlobalState) {
+            globalStateId = deepCloneInfo.globalStateId;
+            break;
+        }
     }
 }
 
