@@ -4,6 +4,23 @@ title: Frequently Asked Questions
 sidebar_label: FAQ
 ---
 
+## How do I upgrade Sorbet?
+
+Sorbet has not reached version 1.0 yet. As such, it will make 
+breaking changes constantly, without warning.
+
+To upgrade a patch level, eg. from 0.4.4314 to 0.4.4358,
+
+```
+bundle update sorbet sorbet-runtime 
+# also update plugins like sorbet-rails, if any
+rm -r sorbet
+bundle exec sorbet init
+
+# For plugins like sorbet-rails, see their docs, eg.
+https://github.com/chanzuckerberg/sorbet-rails#initial-setup
+```
+
 ## Why does Sorbet think this is `nil`? I just checked that it's not!
 
 Sorbet implements a [flow-sensitive](flow-sensitive.md) type system, but there
