@@ -28,13 +28,21 @@ CFG::CFG() {
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
-    UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> reads;
-    UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> writes;
-    UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> dead;
+    Timer timeit(ctx.state.tracer(), "findAllReadsAndWrites");
+    CFG::ReadsAndWrites target;
+    target.reads.resize(maxBasicBlockId);
+    target.writes.resize(maxBasicBlockId);
+    target.dead.resize(maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> readsAndWrites(maxBasicBlockId);
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
+        auto &blockWrites = target.writes[bb->id];
+        auto &blockReads = target.reads[bb->id];
+        auto &blockDead = target.dead[bb->id];
+        auto &blockReadsAndWrites = readsAndWrites[bb->id];
         for (Binding &bind : bb->exprs) {
-            writes[bind.bind.variable].insert(bb.get());
+            blockWrites.insert(bind.bind.variable);
+            blockReadsAndWrites.insert(bind.bind.variable);
             /*
              * When we write to an alias, we rely on the type information being
              * propagated through block arguments from the point of
@@ -42,36 +50,64 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
              * variable serves to represent this.
              */
             if (bind.bind.variable.isAliasForGlobal(ctx) && cast_instruction<Alias>(bind.value.get()) == nullptr) {
-                reads[bind.bind.variable].insert(bb.get());
+                blockReads.insert(bind.bind.variable);
             }
 
             if (auto *v = cast_instruction<Ident>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
+                blockReads.insert(v->what);
+                blockReadsAndWrites.insert(v->what);
             } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                reads[v->recv.variable].insert(bb.get());
+                blockReads.insert(v->recv.variable);
+                blockReadsAndWrites.insert(v->recv.variable);
                 for (auto &arg : v->args) {
-                    reads[arg.variable].insert(bb.get());
+                    blockReads.insert(arg.variable);
+                    blockReadsAndWrites.insert(arg.variable);
                 }
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                reads[v->what.variable].insert(bb.get());
+                blockReads.insert(v->what.variable);
+                blockReadsAndWrites.insert(v->what.variable);
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
-                reads[v->what.variable].insert(bb.get());
+                blockReads.insert(v->what.variable);
+                blockReadsAndWrites.insert(v->what.variable);
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
-                reads[v->value.variable].insert(bb.get());
+                blockReads.insert(v->value.variable);
+                blockReadsAndWrites.insert(v->value.variable);
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
-                reads[v->fallback].insert(bb.get());
+                blockReads.insert(v->fallback);
+                blockReadsAndWrites.insert(v->fallback);
             }
 
-            auto fnd = reads.find(bind.bind.variable);
-            if (fnd == reads.end() || fnd->second.count(bb.get()) == 0) {
-                dead[bind.bind.variable].insert(bb.get());
+            auto fnd = blockReads.find(bind.bind.variable);
+            if (fnd == blockReads.end()) {
+                blockDead.insert(bind.bind.variable);
             }
         }
         if (bb->bexit.cond.variable.exists()) {
-            reads[bb->bexit.cond.variable].insert(bb.get());
+            blockReads.insert(bb->bexit.cond.variable);
+            blockReadsAndWrites.insert(bb->bexit.cond.variable);
         }
     }
-    return CFG::ReadsAndWrites{std::move(reads), std::move(writes), std::move(dead)};
+    UnorderedMap<core::LocalVariable, pair<int, int>> usageCounts;
+
+    {
+        Timer timeit(ctx.state.tracer(), "privates1");
+
+        for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
+            for (auto &el : readsAndWrites[blockId]) {
+                usageCounts.try_emplace(el, make_pair(0, blockId)).first->second.first += 1;
+            }
+        }
+    }
+    {
+        Timer timeit(ctx.state.tracer(), "privates2");
+        for (const auto &[local, usages] : usageCounts) {
+            if (usages.first == 1) {
+                target.writes[usages.second].erase(local);
+            }
+        }
+    }
+
+    return target;
 }
 
 void CFG::sanityCheck(core::Context ctx) {

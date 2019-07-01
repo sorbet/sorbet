@@ -141,18 +141,6 @@ module Opus::Types::Test
 
     describe 'declarations' do
       describe '.checked' do
-        it 'raises when using .checked' do
-          err = assert_raises(RuntimeError) do
-            mod = Module.new do
-              extend T::Sig
-              sig {void.checked(:never)}
-              def self.test_method; end
-            end
-            mod.test_method
-          end
-          assert_match(/\.checked API is unstable/, err.message)
-        end
-
         it 'raises when using .soft' do
           err = assert_raises(RuntimeError) do
             mod = Module.new do
@@ -165,20 +153,7 @@ module Opus::Types::Test
           assert_match(/\.soft API is unstable/, err.message)
         end
 
-        it 'raises when using generated.' do
-          err = assert_raises(RuntimeError) do
-            mod = Module.new do
-              extend T::Sig
-              sig {generated.void}
-              def self.test_method; end
-            end
-            mod.test_method
-          end
-          assert_match(/\.generated API is unstable/, err.message)
-        end
-
         it 'raises RuntimeError with invalid level' do
-          skip
           err = assert_raises(ArgumentError) do
             mod = Module.new do
               extend T::Sig
@@ -222,14 +197,15 @@ module Opus::Types::Test
         describe 'runtime levels' do
           before do
             @orig_check_tests = T::Private::RuntimeLevels.check_tests?
+            @orig_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@default_checked_level)
           end
 
           after do
             T::Private::RuntimeLevels._toggle_checking_tests(@orig_check_tests)
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, @orig_default_checked_level)
           end
 
           it '`always` is checked' do
-            skip
             mod = Module.new do
               extend T::Sig
               sig do
@@ -246,7 +222,6 @@ module Opus::Types::Test
           end
 
           it '`never` is not checked' do
-            skip
             mod = Module.new do
               extend T::Sig
               sig do
@@ -273,7 +248,6 @@ module Opus::Types::Test
           end
 
           it '`tests` can be toggled to validate or not' do
-            skip
             T::Private::RuntimeLevels._toggle_checking_tests(false)
             mod = make_mod
             mod.test_method(:llamas) # wrong, but ignored
@@ -286,7 +260,6 @@ module Opus::Types::Test
           end
 
           it 'raises if `tests` is toggled on too late' do
-            skip
             T::Private::RuntimeLevels._toggle_checking_tests(false)
             mod = make_mod
             mod.test_method(1) # invocation ensures it's wrapped
@@ -295,6 +268,80 @@ module Opus::Types::Test
               T::Configuration.enable_checking_for_sigs_marked_checked_tests
             end
             assert_match(/Toggle `:tests`-level runtime type checking earlier/, err.message)
+          end
+
+          it 'override default checked level to :never' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void}
+              def self.foo(x); end
+            end
+
+            a.foo('') # type error ignored
+
+            pass
+          end
+
+          it 'override default checked level to :tests, without checking tests' do
+            T::Private::RuntimeLevels._toggle_checking_tests(false)
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void}
+              def self.foo(x); end
+            end
+
+            a.foo('') # type error ignored
+
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+            pass
+          end
+
+          it 'override default checked level to :tests and also check tests' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void}
+              def self.foo(x); end
+            end
+
+            assert_raises(TypeError) do
+              a.foo('')
+            end
+          end
+
+          it 'override default checked level to :never but opt in with .checked(:always)' do
+            skip
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void.checked(:always)}
+              def self.foo(x); end
+            end
+
+            assert_raises(TypeError) do
+              a.foo('')
+            end
+          end
+
+          it 'setting the default checked level raises if set too late' do
+            Module.new do
+              extend T::Sig
+              sig {void}
+              def self.foo; end
+              foo
+            end
+
+            err = assert_raises(RuntimeError) do
+              T::Configuration.default_checked_level = :never
+            end
+            assert_match(/Set the default checked level earlier/, err.message)
           end
         end
       end
@@ -311,7 +358,6 @@ module Opus::Types::Test
       end
 
       it 'forbids multiple .checked calls' do
-        skip
         ex = assert_raises do
           Class.new do
             extend T::Sig
@@ -383,7 +429,6 @@ module Opus::Types::Test
       end
 
       it 'forbids .generated and then .checked' do
-        skip
         ex = assert_raises do
           Class.new do
             extend T::Sig

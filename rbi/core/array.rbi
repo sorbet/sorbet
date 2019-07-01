@@ -150,7 +150,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(T::Enumerator[T::Array[Elem]])
   end
   def combination(arg0, &blk); end
 

@@ -2,7 +2,6 @@
 
 # This test used to cause quadratic behavior in Desugar.
 # Contributed by Harry Doan, https://github.com/manhhung741
-JSON = T.unsafe(2)
 
 module FakeData::DemoCheckpointSampleDoc
   CONTENTS = JSON.parse(%Q(

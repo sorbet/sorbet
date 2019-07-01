@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < ()
-  def self.<static-init><<static-init>$3>(<blk>)
+  def self.<static-init><<static-init>$108>(<blk>)
     begin
       Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(1)
       Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(2)

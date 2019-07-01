@@ -17,6 +17,19 @@ module T::Configuration
     T::Private::RuntimeLevels.enable_checking_in_tests
   end
 
+  # Configure the default checked level for a sig with no explicit `.checked`
+  # builder. When unset, the default checked level is `:always`.
+  #
+  # Note: setting this option is potentially dangerous! Sorbet can't check all
+  # code statically. The runtime checks complement the checks that Sorbet does
+  # statically, so that methods don't have to guard themselves from being
+  # called incorrectly by untyped code.
+  #
+  # @param [:never, :tests, :always] default_checked_level
+  def self.default_checked_level=(default_checked_level)
+    T::Private::RuntimeLevels.default_checked_level = default_checked_level
+  end
+
   # Set a handler to handle `TypeError`s raised by any in-line type assertions,
   # including `T.must`, `T.let`, `T.cast`, and `T.assert_type!`.
   #
@@ -175,14 +188,7 @@ module T::Configuration
   end
 
   private_class_method def self.call_validation_error_handler_default(signature, opts)
-    method_file, method_line = signature.method.source_location
-    location = opts[:location]
-
-    error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n" \
-      "Caller: #{location.path}:#{location.lineno}\n" \
-      "Definition: #{method_file}:#{method_line}"
-
-    raise TypeError.new(error_message)
+    raise TypeError.new(opts[:pretty_message])
   end
 
   def self.call_validation_error_handler(signature, opts)

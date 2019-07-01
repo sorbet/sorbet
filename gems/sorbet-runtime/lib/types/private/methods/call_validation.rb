@@ -1150,10 +1150,16 @@ module T::Private::Methods::CallValidation
   def self.report_error(method_sig, error_message, kind, name, type, value, caller_offset: 0)
     method_sig.mark_failed
     caller_loc = T.must(caller_locations(3 + caller_offset, 1))[0]
+    definition_file, definition_line = method_sig.method.source_location
+
+    pretty_message = "#{kind}#{name ? " '#{name}'" : ''}: #{error_message}\n" \
+      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
+      "Definition: #{definition_file}:#{definition_line}"
 
     T::Private::ErrorHandler.handle_call_validation_error(
       method_sig,
       message: error_message,
+      pretty_message: pretty_message,
       kind: kind,
       name: name,
       type: type,

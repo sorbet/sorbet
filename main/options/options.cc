@@ -348,6 +348,8 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
+    options.add_options("dev")("censor-raw-locs-within-payload",
+                               "When printing raw location information, don't show line numbers");
     options.add_options("dev")("error-white-list",
                                "Error code to whitelist into reporting. "
                                "Errors not mentioned will be silenced. "
@@ -430,7 +432,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                 cfg.outputPath = outPath;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
-                        logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
+                        logger->error("--print={} is incompatible with --cache-dir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
                 }
@@ -649,6 +651,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
+        opts.censorRawLocsWithinPayload = raw["censor-raw-locs-within-payload"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();

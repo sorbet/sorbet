@@ -1144,6 +1144,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
     result->isInitialized = this->isInitialized;
     result->runningUnderAutogen = this->runningUnderAutogen;
+    result->censorRawLocsWithinPayload = this->censorRawLocsWithinPayload;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;

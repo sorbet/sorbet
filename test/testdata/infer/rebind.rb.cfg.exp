@@ -77,7 +77,7 @@ subgraph "cluster_::<Class:B>#<static-init>" {
     "bb::<Class:B>#<static-init>_2" -> "bb::<Class:B>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:B>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$5: T.class_of(B))\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(B) = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: T.class_of(B))\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_3" -> "bb::<Class:B>#<static-init>_1" [style="bold"];
@@ -130,7 +130,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:A>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$5: T.class_of(A))\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(A) = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: T.class_of(A))\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_3" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
@@ -183,7 +183,7 @@ subgraph "cluster_::Use#shouldRemoveSelfTemp" {
     "bb::Use#shouldRemoveSelfTemp_2" -> "bb::Use#shouldRemoveSelfTemp_3" [style="tapered"];
 
     "bb::Use#shouldRemoveSelfTemp_3" [
-        label = "block[id=3](<selfRestore>$5: Use)\l<returnMethodTemp>$2: T.untyped = Solve<only_on_Use>\l<self>: Use = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: Use)\l<returnMethodTemp>$2: T.untyped = Solve<only_on_Use>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Use#shouldRemoveSelfTemp_3" -> "bb::Use#shouldRemoveSelfTemp_1" [style="bold"];
@@ -218,7 +218,7 @@ subgraph "cluster_::Use#jumpBetweenClasses" {
     "bb::Use#jumpBetweenClasses_2" -> "bb::Use#jumpBetweenClasses_3" [style="tapered"];
 
     "bb::Use#jumpBetweenClasses_3" [
-        label = "block[id=3](<selfRestore>$5: Use)\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<mySig>\l<self>: Use = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: Use)\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = Solve<mySig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
     ];
 
     "bb::Use#jumpBetweenClasses_3" -> "bb::Use#jumpBetweenClasses_1" [style="bold"];

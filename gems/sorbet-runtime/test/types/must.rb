@@ -8,6 +8,9 @@ module Opus::Types::Test
       assert_equal(0, T.must(0))
       assert_equal("", T.must(""))
       assert_equal(false, T.must(false))
+
+      # NOTE: the second argument is only checked if the first argument is `nil`
+      assert_equal(:a, T.must(:a, 10))
     end
 
     it 'disallows nil' do
@@ -26,7 +29,9 @@ module Opus::Types::Test
 
     it 'does not allow custom classes' do
       e = assert_raises(TypeError) do
-        T.must(:a, RuntimeError.new('hi'))
+        # NOTE: the second argument is only checked if the first argument is
+        # `nil`
+        T.must(nil, RuntimeError.new('hi'))
       end
       assert_equal('T.must expects a string as second argument', e.message)
     end

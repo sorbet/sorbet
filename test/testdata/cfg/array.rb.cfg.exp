@@ -94,7 +94,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_7" [
-        label = "block[id=7](<selfRestore>$16: T.class_of(TestArray))\l<statTemp>$13: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(TestArray) = <selfRestore>$16\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$16: T.class_of(TestArray))\l<statTemp>$13: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
