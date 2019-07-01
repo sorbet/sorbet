@@ -14,7 +14,7 @@ module Foo
       end
     end
 
-    class MyError2< BaseError
+    class MyError2 < BaseError
       def foo
         '2'
       end
