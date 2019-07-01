@@ -331,6 +331,19 @@ module Opus::Types::Test
             end
             assert_match(/Set the default checked level earlier/, err.message)
           end
+
+          it 'forbids .on_failure if default_checked_level is :never' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+            ex = assert_raises do
+              Class.new do
+                extend T::Sig
+                sig {void.on_failure(notify: 'me')}
+                def self.foo; end; foo
+              end
+            end
+            assert_includes(ex.message, "To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect")
+          end
         end
       end
 
