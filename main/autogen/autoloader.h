@@ -16,6 +16,9 @@ struct AutoloaderConfig {
     bool include(const NamedDefinition &) const;
     bool includePath(std::string_view path) const;
     bool includeRequire(core::NameRef req) const;
+    // Should definitions in this namespace be collapsed into their
+    // parent if they all are from the same file?
+    bool sameFileCollapsable(const std::vector<core::NameRef> &module) const;
 
     std::string rootDir;
     std::string preamble;
@@ -67,8 +70,7 @@ public:
 
     std::string path(core::Context ctx);
 
-    void prune(core::Context, const AutoloaderConfig &);
-    bool prunable(const AutoloaderConfig &) const;
+    void collapseSameFileDefs(core::Context, const AutoloaderConfig &);
 
     void merge(DefTree rhs);
 

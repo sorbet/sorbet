@@ -22,6 +22,15 @@ bool AutoloaderConfig::includeRequire(core::NameRef req) const {
     return excludedRequireRefs.find(req) == excludedRequireRefs.end();
 }
 
+bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
+    for (const auto &parts : sameFileModuleNames) {
+        if (module == parts) {
+            return false;
+        }
+    }
+    return true;
+}
+
 AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg) {
     AutoloaderConfig out;
     out.rootDir = cfg.rootDir;
@@ -136,32 +145,23 @@ core::FileRef DefTree::file() const {
 }
 
 static const core::FileRef EMPTY_FILE;
-void DefTree::prune(core::Context ctx, const AutoloaderConfig &alCfg) {
+void DefTree::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &alCfg) {
     core::FileRef definingFile = EMPTY_FILE;
     if (!namedDefs.empty()) {
         definingFile = file();
     }
-    if (!prunable(alCfg)) {
+    if (!alCfg.sameFileCollapsable(nameParts)) {
         return;
     }
 
     for (auto it = children.begin(); it != children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
-            child->prune(ctx, alCfg);
+            child->collapseSameFileDefs(ctx, alCfg);
         } else {
             children.erase(it);
         }
     }
-}
-
-bool DefTree::prunable(const AutoloaderConfig &alCfg) const {
-    for (const auto &parts : alCfg.sameFileModuleNames) {
-        if (nameParts == parts) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void DefTree::merge(DefTree rhs) {
