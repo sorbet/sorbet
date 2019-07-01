@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :soft_notify, :override_allow_incompatible, :type_parameters, :generated)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :generated)
 
   class DeclBuilder
     attr_reader :decl
@@ -25,7 +25,7 @@ module T::Private::Methods
         Modes.standard, # mode
         ARG_NOT_PROVIDED, # checked
         false, # finalized
-        ARG_NOT_PROVIDED, # soft_notify
+        ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
         ARG_NOT_PROVIDED, # generated
@@ -85,7 +85,7 @@ module T::Private::Methods
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
-      if level == :never && !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
+      if level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked(:never) with .on_failure because .on_failure will have no effect.")
       end
       if !decl.generated.equal?(ARG_NOT_PROVIDED)
@@ -100,10 +100,10 @@ module T::Private::Methods
       self
     end
 
-    def on_failure(notify:)
+    def on_failure(*args)
       check_live!
 
-      if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
+      if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
       if decl.checked == :never
@@ -113,13 +113,7 @@ module T::Private::Methods
         raise BuilderError.new("You can't use .on_failure with .generated.")
       end
 
-      # TODO consider validating that :notify is a project that sentry knows about,
-      # as per https://git.corp.stripe.com/stripe-internal/pay-server/blob/master/lib/event/job/sentry_job.rb#L125
-      if !notify || notify == ''
-        raise BuilderError.new("You can't provide an empty notify to .on_failure().")
-      end
-
-      decl.soft_notify = notify
+      decl.on_failure = args
 
       self
     end
@@ -133,7 +127,7 @@ module T::Private::Methods
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .generated with .checked.")
       end
-      if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
+      if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .generated with .on_failure.")
       end
 
@@ -244,13 +238,13 @@ module T::Private::Methods
       end
       if decl.checked.equal?(ARG_NOT_PROVIDED)
         default_checked_level = T::Private::RuntimeLevels.default_checked_level
-        if default_checked_level == :never && !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
+        if default_checked_level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
           raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
         end
         decl.checked = default_checked_level
       end
-      if decl.soft_notify.equal?(ARG_NOT_PROVIDED)
-        decl.soft_notify = nil
+      if decl.on_failure.equal?(ARG_NOT_PROVIDED)
+        decl.on_failure = nil
       end
       if decl.generated.equal?(ARG_NOT_PROVIDED)
         decl.generated = false

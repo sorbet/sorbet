@@ -43,7 +43,7 @@ module T::Private::Methods
     if decl.returns == ARG_NOT_PROVIDED
       raise "Procs must specify a return type"
     end
-    if decl.soft_notify != ARG_NOT_PROVIDED
+    if decl.on_failure != ARG_NOT_PROVIDED
       raise "Procs cannot use .on_failure"
     end
 
@@ -224,7 +224,7 @@ module T::Private::Methods
         bind: current_declaration.bind,
         mode: current_declaration.mode,
         check_level: current_declaration.checked,
-        soft_notify: current_declaration.soft_notify,
+        on_failure: current_declaration.on_failure,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
         generated: current_declaration.generated,
       )

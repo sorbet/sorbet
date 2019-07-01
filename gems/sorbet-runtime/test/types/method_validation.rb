@@ -370,10 +370,10 @@ module Opus::Types::Test
       it 'raises a soft_assertion when .on_failure is used with a notify' do
         begin
           T::Configuration.call_validation_error_handler = lambda do |signature, opts|
-            if signature.soft_notify
+            if signature.on_failure
               T::Configuration.soft_assert_handler(
                 "TypeError: #{opts[:pretty_message]}",
-                {notify: signature.soft_notify}
+                {notify: signature.on_failure[0][:notify]}
               )
             else
               raise 'test failed'
