@@ -24,8 +24,6 @@ config_setting(
 
 RUBY_VERSION = "2.4.3"
 RUBY_CORE_VERSION = "2.4.0"
-LIB_PREFIX = "lib/ruby/" + RUBY_CORE_VERSION
-INC_PREFIX = "lib/ruby/include"
 
 ARCH_LINUX = "x86_64-unknown-linux"
 ARCH_DARWIN = "x86_64-darwin18"
@@ -34,6 +32,19 @@ ARCH = select({
     ":linux": ARCH_LINUX,
     ":darwin": ARCH_DARWIN,
 })
+
+# NOTE: rbconfig expects to find itself in a directory of the form:
+#
+# > `lib/ruby/<RUBY_CORE_VERSION>/<ARCH>`
+#
+# as shown by the line that defines `TOPDIR`. `TOPDIR` is used when computing
+# the relative path to the rest of the standard library, the `include`
+# directory, and the `bin` directory when building gems with native code.
+# Without installing everything into a tree that matches this, there will be
+# errors when using `mkmf`.
+LIB_PREFIX = "lib/ruby/" + RUBY_CORE_VERSION
+
+INC_PREFIX = "lib/ruby/include"
 
 # configuration ################################################################
 
