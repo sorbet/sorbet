@@ -24,7 +24,7 @@ struct AutoloaderConfig {
     std::string preamble;
     UnorderedSet<core::NameRef> topLevelNamespaceRefs;
     UnorderedSet<core::NameRef> excludedRequireRefs;
-    std::vector<std::vector<core::NameRef>> sameFileModuleNames;
+    UnorderedSet<std::vector<core::NameRef>> nonCollapsableModuleNames;
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
 

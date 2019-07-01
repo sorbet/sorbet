@@ -23,12 +23,7 @@ bool AutoloaderConfig::includeRequire(core::NameRef req) const {
 }
 
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
-    for (const auto &parts : sameFileModuleNames) {
-        if (module == parts) {
-            return false;
-        }
-    }
-    return true;
+    return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
 }
 
 AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg) {
@@ -42,10 +37,11 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
         out.excludedRequireRefs.emplace(gs.enterNameUTF8(str));
     }
     for (auto &nameParts : cfg.sameFileModules) {
-        vector<core::NameRef> &refs = out.sameFileModuleNames.emplace_back();
+        vector<core::NameRef> refs;
         for (auto &name : nameParts) {
             refs.emplace_back(gs.enterNameConstant(name));
         }
+        out.nonCollapsableModuleNames.emplace(refs);
     }
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
