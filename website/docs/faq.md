@@ -14,7 +14,6 @@ To upgrade a patch level, eg. from 0.4.4314 to 0.4.4358,
 ```
 bundle update sorbet sorbet-runtime 
 # also update plugins like sorbet-rails, if any
-rm -r sorbet
 bundle exec sorbet init
 
 # For plugins like sorbet-rails, see their docs, eg.
