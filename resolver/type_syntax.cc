@@ -313,6 +313,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 case core::Names::soft()._id:
                     break;
+                case core::Names::on_failure()._id:
+                    break;
                 case core::Names::generated()._id:
                     sig.seen.generated = true;
                     break;
