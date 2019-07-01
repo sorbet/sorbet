@@ -1,4 +1,3 @@
-
 def install_file(name, src, out):
     """
     Install a single file, using `install`. Returns out, so that it can be easily
@@ -7,8 +6,8 @@ def install_file(name, src, out):
 
     native.genrule(
         name = name,
-        srcs = [ src ],
-        outs = [ out ],
+        srcs = [src],
+        outs = [out],
         cmd = "install -c -m 644 $(location {}) $(location {})".format(src, out),
     )
 
@@ -47,7 +46,7 @@ def install_dir(src_prefix, out_prefix):
         out_prefix += "/"
 
     outs = []
-    for src in native.glob([ "{}/**/*".format(src_prefix) ]):
+    for src in native.glob(["{}/**/*".format(src_prefix)]):
         out_name = "install_{}".format(src)
 
         base = src[prefix_len:]
@@ -55,6 +54,6 @@ def install_dir(src_prefix, out_prefix):
         out = out_prefix + base
         outs.append(out)
 
-        install_file(name=out_name, src=src, out=out)
+        install_file(name = out_name, src = src, out = out)
 
     return outs
