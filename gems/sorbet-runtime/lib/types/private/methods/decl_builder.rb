@@ -85,8 +85,8 @@ module T::Private::Methods
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
-      if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .checked with .on_failure.")
+      if level == :never && !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
+        raise BuilderError.new("You can't use .checked(:never) with .on_failure because .on_failure will have no effect.")
       end
       if !decl.generated.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked with .generated.")
@@ -106,8 +106,8 @@ module T::Private::Methods
       if !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
-      if !decl.checked.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .on_failure with .checked.")
+      if decl.checked == :never
+        raise BuilderError.new("You can't use .on_failure with .checked(:never) because .on_failure will have no effect.")
       end
       if !decl.generated.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .on_failure with .generated.")
@@ -243,7 +243,11 @@ module T::Private::Methods
         decl.bind = nil
       end
       if decl.checked.equal?(ARG_NOT_PROVIDED)
-        decl.checked = T::Private::RuntimeLevels.default_checked_level
+        default_checked_level = T::Private::RuntimeLevels.default_checked_level
+        if default_checked_level == :never && !decl.soft_notify.equal?(ARG_NOT_PROVIDED)
+          raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
+        end
+        decl.checked = default_checked_level
       end
       if decl.soft_notify.equal?(ARG_NOT_PROVIDED)
         decl.soft_notify = nil
