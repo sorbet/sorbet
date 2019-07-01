@@ -438,28 +438,6 @@ module Opus::Types::Test
         end
       end
 
-      it 'forbids empty notify' do
-        ex = assert_raises do
-          Class.new do
-            extend T::Sig
-            sig {returns(Integer).on_failure(notify: '')}
-            def self.foo; end; foo
-          end
-        end
-        assert_includes(ex.message, "You can't provide an empty notify to .on_failure().")
-      end
-
-      it 'forbids unpassed notify' do
-        ex = assert_raises(ArgumentError) do
-          Class.new do
-            extend T::Sig
-            sig {returns(Integer).on_failure}
-            def self.foo; end; foo
-          end
-        end
-        assert_includes(ex.message, "missing keyword: notify")
-      end
-
       it 'forbids .generated and then .checked' do
         ex = assert_raises do
           Class.new do

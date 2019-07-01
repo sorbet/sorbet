@@ -5,7 +5,7 @@ class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
               :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
-              :check_level, :generated, :parameters, :soft_notify, :override_allow_incompatible, :ever_failed
+              :check_level, :generated, :parameters, :on_failure, :override_allow_incompatible, :ever_failed
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `Untyped` ensures we'll get an error if we ever try validation on these.
@@ -24,7 +24,7 @@ class T::Private::Methods::Signature
       mode: mode,
       check_level: :never,
       parameters: parameters,
-      soft_notify: nil,
+      on_failure: nil,
     )
   end
 
@@ -32,7 +32,7 @@ class T::Private::Methods::Signature
     @ever_failed = true
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, parameters: method.parameters, soft_notify:, generated: false, override_allow_incompatible: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, parameters: method.parameters, on_failure:, generated: false, override_allow_incompatible: false)
     @method = method
     @method_name = method_name
     @arg_types = []
@@ -52,7 +52,7 @@ class T::Private::Methods::Signature
     @has_rest = false
     @has_keyrest = false
     @parameters = parameters
-    @soft_notify = soft_notify
+    @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
     @generated = generated
     @ever_failed = false
