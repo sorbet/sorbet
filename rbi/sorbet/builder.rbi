@@ -31,6 +31,9 @@ class T::Private::Methods::DeclBuilder
   def void; end
 
   sig {params(args: T.untyped).returns(T::Private::Methods::DeclBuilder)}
+  def soft(*args); end
+
+  sig {params(args: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def on_failure(*args); end
 
   sig {params(arg: T.untyped).returns(T::Private::Methods::DeclBuilder)}
