@@ -109,6 +109,12 @@ class Index extends React.Component {
             <ProjectList
               content={[
                 {
+                  title: 'sorbet-progress',
+                  link: 'https://github.com/jaredbeck/sorbet-progress',
+                  description:
+                    'Measure your progress as you adopt Sorbet, stay motivated!',
+                },
+                {
                   title: 'sorbet-typed',
                   link: 'https://github.com/sorbet/sorbet-typed',
                   description:

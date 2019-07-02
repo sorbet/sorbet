@@ -133,3 +133,10 @@ from YARD docs.
 Also see the [Community] page for more community-maintained projects!
 
 [sord]: https://github.com/AaronC81/sord
+
+## Can Sorbet produce statistics?
+
+Yes, you can use options like `--metrics-file` to produce statistics. For
+example, check out
+[sorbet-progress](https://github.com/jaredbeck/sorbet-progress) which uses those
+statistics to keep track of your progress adopting sorbet in big codebases.
