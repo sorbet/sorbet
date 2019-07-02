@@ -59,6 +59,13 @@ void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data
     throw sorbet::FileNotFoundException();
 }
 
+void sorbet::FileOps::createDir(string_view path) {
+    auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (err) {
+        throw sorbet::CreateDirException(fmt::format("Error in createDir('{}'): {}", path, err));
+    }
+}
+
 void sorbet::FileOps::write(string_view filename, string_view text) {
     FILE *fp = std::fopen(string(filename).c_str(), "w");
     if (fp) {
