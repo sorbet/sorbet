@@ -111,6 +111,8 @@ public:
     static std::unique_ptr<Expression> cpRef(Reference &name) {
         if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
             return std::make_unique<UnresolvedIdent>(name.loc, nm->kind, nm->name);
+        } else if (auto *nm = cast_tree<ast::Local>(&name)) {
+            return std::make_unique<ast::Local>(name.loc, nm->localVariable);
         }
         Exception::notImplemented();
     }
