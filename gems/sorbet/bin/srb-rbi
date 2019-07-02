@@ -61,15 +61,6 @@ module Sorbet::Private::Main
     end
   end
 
-  def self.main(argv)
-    command = parse_command(argv)
-    if command
-      command.call
-    else
-      puts self.usage
-    end
-  end
-
   def self.init
     puts "
 #{emojify("👋", "Hey there!")}
@@ -191,8 +182,11 @@ If instead you want to explore your files locally, here are some things to try:
     "
   end
 
-  def self.parse_command(argv)
-    return nil if argv.length == 0
+  def self.main(argv)
+    if argv.length == 0
+      puts self.usage
+      exit(1)
+    end
 
     command = case (argv[0])
     when 'help', '--help'
@@ -200,6 +194,7 @@ If instead you want to explore your files locally, here are some things to try:
       exit(1)
     when 'init', 'update'
       self.init
+      return
     when 'config', Sorbet::Private::CreateConfig.output_file
       make_step(Sorbet::Private::CreateConfig)
     when 'sorbet-typed', Sorbet::Private::FetchRBIs.output_file, Sorbet::Private::FetchRBIs::SORBET_RBI_LIST
@@ -223,7 +218,8 @@ If instead you want to explore your files locally, here are some things to try:
     end
 
     puts "Running command: #{argv[0]}"
-    command
+    command.call
+    nil
   end
 
   T::Sig::WithoutRuntime.sig {params(step: Sorbet::Private::StepInterface).returns(T.proc.void)}
