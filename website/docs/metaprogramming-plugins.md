@@ -27,7 +27,7 @@ hello.bed_time # error: Method `bed_time` does not exist on MetaProgramming
 hello.fun_time # error: Method `fun_time` does not exist on MetaProgramming
 ```
 
-Sorbet rejects this script since currently, Sorbet does not try to understand
+Sorbet rejects this script since Sorbet cannot understand
 calls to `define_method` or other similar metaprogramming facilities.
 
 Sorbet has a plugin system for handling metaprogramming patterns similar to the
