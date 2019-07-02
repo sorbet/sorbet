@@ -664,7 +664,7 @@ string ParsedFile::toMsgpack(core::Context ctx, int version) {
     return write.pack(ctx, *this);
 }
 
-vector<string> ParsedFile::listAllClasses(const core::Context ctx) {
+vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     vector<string> out;
 
     for (auto &def : defs) {
@@ -680,7 +680,7 @@ vector<string> ParsedFile::listAllClasses(const core::Context ctx) {
     return out;
 }
 
-optional<AutogenSubclassMap> ParsedFile::listAllSubclasses(const core::Context ctx,
+optional<AutogenSubclassMap> ParsedFile::listAllSubclasses(core::Context ctx,
                                                            const vector<string> &absolutePathsToIgnore,
                                                            const vector<string> &relativePathsToIgnore) {
     // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
