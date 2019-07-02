@@ -680,15 +680,14 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     return out;
 }
 
-optional<AutogenSubclassMap> ParsedFile::listAllSubclasses(core::Context ctx,
-                                                           const vector<string> &absolutePathsToIgnore,
-                                                           const vector<string> &relativePathsToIgnore) {
+optional<Subclasses::Map> ParsedFile::listAllSubclasses(core::Context ctx, const vector<string> &absolutePathsToIgnore,
+                                                        const vector<string> &relativePathsToIgnore) {
     // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
     if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
         return nullopt;
     }
 
-    AutogenSubclassMap out;
+    Subclasses::Map out;
 
     for (const Reference &ref : refs) {
         DefinitionRef defn = ref.parent_of;
@@ -717,19 +716,19 @@ optional<AutogenSubclassMap> ParsedFile::listAllSubclasses(core::Context ctx,
 
 // Generate all descendants of a parent class
 // Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
-void descendantsOf(const AutogenSubclassMap &childMap, const string &parentName, AutogenSubclassSet &out) {
+void Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &parentName, Subclasses::Entries &out) {
     if (!childMap.count(parentName)) {
         return;
     }
-    const AutogenSubclassSet &children = childMap.at(parentName);
+    const Subclasses::Entries &children = childMap.at(parentName);
 
     out.insert(children.begin(), children.end());
-    for (const AutogenSubclassEntry &child : children) {
-        descendantsOf(childMap, child.first, out);
+    for (const Subclasses::Entry &child : children) {
+        Subclasses::descendantsOf(childMap, child.first, out);
     }
 }
 
-void maybeInsertChild(const string &parentName, const AutogenSubclassSet &children, AutogenSubclassMap &out) {
+void Subclasses::maybeInsertChild(const string &parentName, const Subclasses::Entries &children, Subclasses::Map &out) {
     if (parentName.empty()) {
         // Child < NonexistentParent
         return;
@@ -739,7 +738,8 @@ void maybeInsertChild(const string &parentName, const AutogenSubclassSet &childr
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
-void patchChildMap(AutogenSubclassMap &childMap) {
+// TODO(gwu) This shouldn't be public--hide this behind a new public method that realmain.cc calls
+void Subclasses::patchChildMap(Subclasses::Map &childMap) {
     childMap["Opus::SafeMachine"].insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
                                          childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
 
@@ -748,19 +748,19 @@ void patchChildMap(AutogenSubclassMap &childMap) {
     childMap["Chalk::ODM::Model"].insert(make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
 }
 
-unique_ptr<vector<string>> serializeSubclassMap(const AutogenSubclassMap &descendantsMap,
+vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
                                                 const vector<string> &parentNames) {
-    unique_ptr<vector<string>> descendantsMapSerialized = make_unique<vector<string>>();
+    vector<string> descendantsMapSerialized;
 
     for (const string &parentName : parentNames) {
         if (!descendantsMap.count(parentName)) {
             continue;
         }
 
-        descendantsMapSerialized->emplace_back(parentName);
+        descendantsMapSerialized.emplace_back(parentName);
 
         vector<string> serializedChildren;
-        for (const AutogenSubclassEntry &entry : descendantsMap.at(parentName)) {
+        for (const Subclasses::Entry &entry : descendantsMap.at(parentName)) {
             if (entry.second != autogen::Definition::Type::Class) {
                 continue;
             }
@@ -768,9 +768,8 @@ unique_ptr<vector<string>> serializeSubclassMap(const AutogenSubclassMap &descen
         }
 
         fast_sort(serializedChildren);
-        descendantsMapSerialized->insert(descendantsMapSerialized->end(),
-                                         make_move_iterator(serializedChildren.begin()),
-                                         make_move_iterator(serializedChildren.end()));
+        descendantsMapSerialized.insert(descendantsMapSerialized.end(), make_move_iterator(serializedChildren.begin()),
+                                        make_move_iterator(serializedChildren.end()));
     }
 
     return descendantsMapSerialized;

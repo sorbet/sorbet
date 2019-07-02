@@ -71,9 +71,19 @@ struct Reference {
     DefinitionRef parent_of;
 };
 
-typedef std::pair<std::string, Definition::Type> AutogenSubclassEntry;
-typedef UnorderedSet<AutogenSubclassEntry> AutogenSubclassSet;
-typedef UnorderedMap<std::string, AutogenSubclassSet> AutogenSubclassMap;
+class Subclasses final {
+public:
+    typedef std::pair<std::string, Definition::Type> Entry;
+    typedef UnorderedSet<Entry> Entries;
+    typedef UnorderedMap<std::string, Entries> Map;
+
+    static void maybeInsertChild(const std::string &parentName, const Subclasses::Entries &children,
+                                 Subclasses::Map &out);
+    static void patchChildMap(Subclasses::Map &childMap);
+    static void descendantsOf(const Subclasses::Map &childMap, const std::string &parent, Subclasses::Entries &out);
+    static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
+                                                         const std::vector<std::string> &parentNames);
+};
 
 struct ParsedFile {
     ast::ParsedFile tree;
@@ -86,20 +96,14 @@ struct ParsedFile {
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
     std::vector<std::string> listAllClasses(core::Context ctx);
-    std::optional<AutogenSubclassMap> listAllSubclasses(core::Context ctx,
-                                                        const std::vector<std::string> &absolutePathsToIgnore,
-                                                        const std::vector<std::string> &relativePathsToIgnore);
+    std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx,
+                                                     const std::vector<std::string> &absolutePathsToIgnore,
+                                                     const std::vector<std::string> &relativePathsToIgnore);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
     friend class MsgpackWriter;
 };
-
-void maybeInsertChild(const std::string &parentName, const AutogenSubclassSet &children, AutogenSubclassMap &out);
-void patchChildMap(AutogenSubclassMap &childMap);
-void descendantsOf(const AutogenSubclassMap &childMap, const std::string &parent, AutogenSubclassSet &out);
-std::unique_ptr<std::vector<std::string>> serializeSubclassMap(const AutogenSubclassMap &descendantsMap,
-                                                               const std::vector<std::string> &parentNames);
 
 class Autogen final {
 public:
