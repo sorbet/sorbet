@@ -165,11 +165,7 @@ module T::Private::Methods
   end
 
   def self.sig_error(loc, message)
-    raise(
-      ArgumentError.new(
-        "#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"
-      )
-    )
+    raise(ArgumentError.new("#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"))
   end
 
   # Executes the `sig` block, and converts the resulting Declaration
