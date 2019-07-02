@@ -60,7 +60,6 @@ public:
 
     bool root() const;
     core::NameRef name() const;
-    void addSingleDef(core::Context, const AutoloaderConfig &, NamedDefinition);
     std::string path(core::Context ctx);
     void show(core::Context ctx, int level = 0); // Print the entire tree
     std::string fullName(core::Context) const;
@@ -70,8 +69,6 @@ public:
     std::string autoloads(core::Context ctx, const AutoloaderConfig &, std::shared_ptr<spdlog::logger> logger);
 
     void collapseSameFileDefs(core::Context, const AutoloaderConfig &);
-
-    void merge(DefTree rhs);
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
@@ -89,8 +86,15 @@ private:
     Definition::Type definitionType(core::Context);
 };
 
-// Add all definitions in a parsed file to a `DefTree` root.
-void addAutoloaderDefinitions(core::Context, const AutoloaderConfig &, ParsedFile &, DefTree &);
+class DefTreeBuilder {
+public:
+    // Add all definitions in a parsed file to a `DefTree` root.
+    static void addParsedFileDefinitions(core::Context, const AutoloaderConfig &, std::unique_ptr<DefTree> &root,
+                                         ParsedFile &);
+    static void addSingleDef(core::Context, const AutoloaderConfig &, std::unique_ptr<DefTree> &root, NamedDefinition);
+
+    static DefTree merge(DefTree lhs, DefTree rhs);
+};
 
 } // namespace sorbet::autogen
 #endif // RUBY_TYPER_AUTOGEN_AUTOLOADER_H

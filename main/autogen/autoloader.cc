@@ -62,27 +62,6 @@ NamedDefinition NamedDefinition::fromDef(core::Context ctx, ParsedFile &parsedFi
             parsedFile.tree.file};
 }
 
-void DefTree::addSingleDef(core::Context ctx, const AutoloaderConfig &alCfg, NamedDefinition ndef) {
-    if (!alCfg.include(ndef)) {
-        return;
-    }
-    auto *node = this;
-    for (const auto &part : ndef.nameParts) {
-        auto &child = node->children[part];
-        if (!child) {
-            child = make_unique<DefTree>();
-            child->nameParts = node->nameParts;
-            child->nameParts.emplace_back(part);
-        }
-        node = child.get();
-    }
-    if (ndef.def.defines_behavior) {
-        node->namedDefs.emplace_back(move(ndef));
-    } else {
-        node->nonBehaviorDefs.emplace_back(move(ndef));
-    }
-}
-
 void DefTree::show(core::Context ctx, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
     fmt::print("{} [{}]\n", name().show(ctx), fmt::map_join(namedDefs, ", ", fileRefToString));
@@ -148,21 +127,6 @@ void DefTree::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &al
             child->collapseSameFileDefs(ctx, alCfg);
         } else {
             children.erase(it);
-        }
-    }
-}
-
-void DefTree::merge(DefTree rhs) {
-    ENFORCE(nameParts == rhs.nameParts, "Name mismatch for DefTree::merge");
-    namedDefs.insert(namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
-                     make_move_iterator(rhs.namedDefs.end()));
-    nonBehaviorDefs.insert(nonBehaviorDefs.end(), make_move_iterator(rhs.nonBehaviorDefs.begin()),
-                           make_move_iterator(rhs.nonBehaviorDefs.end()));
-    for (auto &[name, tree] : rhs.children) {
-        if (children.find(name) == children.end()) {
-            children[name] = move(tree);
-        } else {
-            children[name]->merge(move(*tree));
         }
     }
 }
@@ -310,8 +274,9 @@ NamedDefinition &DefTree::definition(core::Context ctx) {
     }
 }
 
-void addAutoloaderDefinitions(core::Context ctx, const AutoloaderConfig &alConfig, ParsedFile &pf, DefTree &root) {
-    ENFORCE(root.root());
+void DefTreeBuilder::addParsedFileDefinitions(core::Context ctx, const AutoloaderConfig &alConfig,
+                                              std::unique_ptr<DefTree> &root, ParsedFile &pf) {
+    ENFORCE(root->root());
     if (!alConfig.includePath(pf.path)) {
         return;
     }
@@ -319,8 +284,47 @@ void addAutoloaderDefinitions(core::Context ctx, const AutoloaderConfig &alConfi
         if (def.id.id() == 0) {
             continue;
         }
-        root.addSingleDef(ctx, alConfig, NamedDefinition::fromDef(ctx, pf, def.id));
+        addSingleDef(ctx, alConfig, root, NamedDefinition::fromDef(ctx, pf, def.id));
     }
+}
+
+void DefTreeBuilder::addSingleDef(core::Context, const AutoloaderConfig &alCfg, std::unique_ptr<DefTree> &root,
+                                  NamedDefinition ndef) {
+    if (!alCfg.include(ndef)) {
+        return;
+    }
+    DefTree *node = root.get();
+    for (const auto &part : ndef.nameParts) {
+        auto &child = node->children[part];
+        if (!child) {
+            child = make_unique<DefTree>();
+            child->nameParts = node->nameParts;
+            child->nameParts.emplace_back(part);
+        }
+        node = child.get();
+    }
+    if (ndef.def.defines_behavior) {
+        node->namedDefs.emplace_back(move(ndef));
+    } else {
+        node->nonBehaviorDefs.emplace_back(move(ndef));
+    }
+}
+
+DefTree DefTreeBuilder::merge(DefTree lhs, DefTree rhs) {
+    ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTree::merge");
+    lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
+                         make_move_iterator(rhs.namedDefs.end()));
+    lhs.nonBehaviorDefs.insert(lhs.nonBehaviorDefs.end(), make_move_iterator(rhs.nonBehaviorDefs.begin()),
+                               make_move_iterator(rhs.nonBehaviorDefs.end()));
+    for (auto &[rname, rchild] : rhs.children) {
+        auto lchild = lhs.children.find(rname);
+        if (lchild == lhs.children.end()) {
+            lhs.children[rname] = move(rchild);
+        } else {
+            lhs.children[rname] = make_unique<DefTree>(merge(move(*lchild->second), move(*rchild)));
+        }
+    }
+    return lhs;
 }
 
 } // namespace sorbet::autogen

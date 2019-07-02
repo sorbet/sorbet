@@ -162,7 +162,7 @@ struct AutogenResult {
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
-    autogen::DefTree defTree;
+    unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
 void runAutogen(core::Context ctx, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
@@ -206,7 +206,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
                 }
                 if (opts.print.AutogenAutoloader.enabled) {
                     Timer timeit(logger, "autogenNamedDefs");
-                    autogen::addAutoloaderDefinitions(ctx, autoloaderCfg, pf, out.defTree);
+                    autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
                 }
 
                 out.prints.emplace_back(make_pair(idx, serialized));
@@ -229,7 +229,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
-            root.merge(move(out.defTree));
+            root = autogen::DefTreeBuilder::merge(move(root), move(*out.defTree));
         }
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
