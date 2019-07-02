@@ -671,9 +671,9 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
         if (def.type != Definition::Class) {
             continue;
         }
-        auto names = showFullName(ctx, def.id);
-        out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", [&ctx](const core::NameRef &nm) -> string {
-                                         return nm.data(ctx)->show(ctx);
+        vector<core::NameRef> names = showFullName(ctx, def.id);
+        out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", [&ctx](const core::NameRef &nm) -> string_view {
+                                         return nm.data(ctx)->shortName(ctx);
                                      })));
     }
 
