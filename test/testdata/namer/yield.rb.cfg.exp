@@ -95,7 +95,7 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_3" [style="tapered"];
 
     "bb::Main#blockyield_3" [
-        label = "block[id=3](<selfRestore>$5: Main)\l<returnMethodTemp>$2: T.untyped = Solve<yielder>\l<self>: Main = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$5: Main)\l<returnMethodTemp>$2: T.untyped = Solve<yielder>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];

@@ -154,8 +154,10 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private_Static());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubAncestor());
-    ENFORCE(id == Symbols::StubAncestor());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
+    ENFORCE(id == Symbols::StubMixin());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
+    ENFORCE(id == Symbols::StubSuperClass());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
     ENFORCE(id == Symbols::T_Enumerable());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
@@ -434,7 +436,11 @@ void GlobalState::initEmpty() {
     // Some of these are Modules
     Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
-    Symbols::StubAncestor().data(*this)->setIsModule(true);
+    Symbols::StubMixin().data(*this)->setIsModule(true);
+
+    // Some of these are Classes
+    Symbols::StubSuperClass().data(*this)->setIsModule(false);
+    Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
 
     // Synthesize T::Utils
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
@@ -1138,6 +1144,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
     result->isInitialized = this->isInitialized;
     result->runningUnderAutogen = this->runningUnderAutogen;
+    result->censorRawLocsWithinPayload = this->censorRawLocsWithinPayload;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;

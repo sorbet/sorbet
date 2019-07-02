@@ -43,24 +43,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "light",
-    srcs = [
-        "light.cc",
-    ],
-    hdrs = [
-        "binary.h",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//visibility:public"],
-    deps = [
-        "binary",
-    ],
-)
-
 cc_binary(
     name = "gen_state_payload",
     srcs = [
@@ -87,18 +69,6 @@ genrule(
 )
 
 genrule(
-    name = "generate-state-payload-light-cc",
-    srcs = ["state-payload-raw-light"],
-    outs = [
-        "light.cc",
-    ],
-    cmd = "$(location :gen_state_payload) $(location state-payload-raw-light) $(location light.cc)",
-    tools = [
-        ":gen_state_payload",
-    ],
-)
-
-genrule(
     name = "generate-state-payload-raw",
     srcs = [],
     outs = [
@@ -106,14 +76,4 @@ genrule(
     ],
     cmd = "$(location //main:sorbet-orig) --silence-dev-message  --store-state $(location state-payload-raw) --no-error-count",
     tools = ["//main:sorbet-orig"],
-)
-
-genrule(
-    name = "generate-state-payload-raw-light",
-    srcs = [],
-    outs = [
-        "state-payload-raw-light",
-    ],
-    cmd = "$(location //main:sorbet-orig-light) --silence-dev-message  --store-state $(location state-payload-raw-light) --no-error-count",
-    tools = ["//main:sorbet-orig-light"],
 )

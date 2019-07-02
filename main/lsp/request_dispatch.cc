@@ -93,6 +93,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             LSPResult result = pushDiagnostics(runSlowPath(move(changedFiles)));
             ENFORCE(result.gs);
             if (!disableFastPath) {
+                ShowOperation stateHashOp(*this, "GlobalStateHash", "Finishing initialization...");
                 this->globalStateHashes = computeStateHashes(result.gs->getFiles());
             }
             initialized = true;
@@ -166,7 +167,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             serverCap->definitionProvider = opts.lspGoToDefinitionEnabled;
             serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
-            serverCap->hoverProvider = opts.lspHoverEnabled;
+            serverCap->hoverProvider = true;
             serverCap->referencesProvider = opts.lspFindReferencesEnabled;
 
             if (opts.lspSignatureHelpEnabled) {

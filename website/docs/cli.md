@@ -33,6 +33,16 @@ exists), followed by arguments provided on the command line.
 For a full description of the config file format, see the output of
 `srb tc --help`.
 
+To skip loading the config file (i.e., to create minimal repro examples to
+report an issue), there's the `--no-config` flag:
+
+```
+srb tc --no-config ...
+```
+
+This makes it so that the only args Sorbet reads are those explicitly passed on
+the command line.
+
 Next we'll call out some specific flags that are likely to help troubleshoot
 problems or adapt Sorbet into an existing project.
 
@@ -123,6 +133,6 @@ This will be the output using the `--typed-override` flag:
 
 ```plaintext
 ❯ srb tc --typed-override=foo.yaml foo.rb
-foo.rb:3: `Symbol(:"symbol")` doesn't match `String` for argument `arg0`
+foo.rb:3: Expected `String` but found `Symbol(:"symbol")` for argument `arg0`
 ...
 ```

@@ -1,28 +1,15 @@
 ---
 name: Ask a question
-about: For when you're unsure how to do something in Sorbet.
+about: Ask questions on Stack Overflow with the `sorbet` tag.
 labels: question, unconfirmed
 ---
 
-Before asking your question, please make sure these are true:
+🛑🛑Stop! 🛑🛑
 
-- [ ] I have read the Troubleshooting guide.
+Please direct all questions to Stack Overflow, using the `sorbet` tag:
 
-  - https://sorbet.org/docs/troubleshooting
+→ https://stackoverflow.com/questions/tagged/sorbet
 
-- [ ] I have tried searching the docs for an answer.
-
-  - https://sorbet.org/docs/overview
-
-- [ ] I have tried to reproduce the behavior I'm seeing on sorbet.run:
-
-  - https://sorbet.run
-
-- [ ] I have read (or at least skimmed) *How to ask good questions* by Julia Evans
-
-  - https://jvns.ca/blog/good-questions/
-
-Great, thanks! Now by all means, ask away:
-
-- - -
+The Sorbet team monitors these questions, and will answer them in due time
+(if someone else doesn't answer them first.)
 

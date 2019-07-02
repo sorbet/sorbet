@@ -170,7 +170,7 @@ subgraph "cluster_::Examples#variables" {
 
     "bb::Examples#variables_6" -> "bb::Examples#variables_7" [style="bold"];
     "bb::Examples#variables_7" [
-        label = "block[id=7](a: Integer(1), b: Integer(2))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=7](b: Integer(2), a: Integer(1))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_7" -> "bb::Examples#variables_1" [style="bold"];

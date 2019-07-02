@@ -23,9 +23,8 @@ steps:
             volumes:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
-  - label: ":mac: test-static-sanitized.sh (master only)"
+  - label: ":mac: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
-    branches: "master"
     agents:
       os: mac
 

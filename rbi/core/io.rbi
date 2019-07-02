@@ -544,7 +544,7 @@ class IO < Object
         error_array: T::Array[IO],
         timeout: Integer,
     )
-    .returns(T.nilable(T::Array[IO]))
+    .returns(T.nilable(T::Array[T::Array[IO]]))
   end
   def self.select(read_array, write_array=T.unsafe(nil), error_array=T.unsafe(nil), timeout=T.unsafe(nil)); end
 

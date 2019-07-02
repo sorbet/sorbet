@@ -44,6 +44,20 @@ module T::Props::Utils
 
   # The prop_rules indicate whether we should check for writing a nil value for the prop/field.
   def self.need_nil_write_check?(prop_rules)
-    need_nil_read_check?(prop_rules) || T::Utils::Props.required_prop?(prop_rules)
+    need_nil_read_check?(prop_rules) || T::Props::Utils.required_prop?(prop_rules)
+  end
+
+  def self.required_prop?(prop_rules)
+    # Clients should never reference :_tnilable as the implementation can change.
+    !prop_rules[:_tnilable]
+  end
+
+  def self.optional_prop?(prop_rules)
+    # Clients should never reference :_tnilable as the implementation can change.
+    !!prop_rules[:_tnilable]
+  end
+
+  def self.merge_serialized_optional_rule(prop_rules)
+    {'_tnilable' => true}.merge(prop_rules.merge('_tnilable' => true))
   end
 end

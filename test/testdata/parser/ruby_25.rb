@@ -8,10 +8,9 @@ class Toto
         end
     end
 end
-  
-def main 
+
+def main
     Toto.new.toto
 end
-  
+
 main
-  

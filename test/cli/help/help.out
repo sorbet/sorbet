@@ -74,8 +74,6 @@ Usage:
                                 disable file watching via Watchman
       --watchman-path arg       Path to watchman executable. Defaults to
                                 using `watchman` on your PATH. (default: watchman)
-      --enable-experimental-lsp-hover
-                                Enable experimental LSP feature: Hover
       --enable-experimental-lsp-go-to-definition
                                 Enable experimental LSP feature:
                                 Go-to-definition
@@ -133,6 +131,9 @@ Usage:
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message
+      --censor-raw-locs-within-payload
+                                When printing raw location information, don't
+                                show line numbers
       --error-white-list errorCode
                                 Error code to whitelist into reporting.
                                 Errors not mentioned will be silenced. This option

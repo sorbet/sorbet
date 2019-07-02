@@ -13,13 +13,13 @@ TEST_F(ProtocolTest, AddFile) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
-    ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "does not match `Integer`"};
+    ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "Expected `Integer`"};
     assertDiagnostics(
         send(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
         {yolo1Diagnostic});
     assertDiagnostics(send(*openFile("yolo2.rb", "")), {yolo1Diagnostic});
 
-    ExpectedDiagnostic yolo2Diagnostic = {"yolo2.rb", 4, "does not match `Integer`"};
+    ExpectedDiagnostic yolo2Diagnostic = {"yolo2.rb", 4, "Expected `Integer`"};
     assertDiagnostics(
         send(*changeFile("yolo2.rb", "# typed: true\nclass Foo2\n\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
         {yolo1Diagnostic, yolo2Diagnostic});
@@ -179,9 +179,9 @@ TEST_F(ProtocolTest, MergesDidChangesAcrossFiles) {
 
     auto msgs = send(move(requests));
     EXPECT_EQ(msgs.size(), 4) << "Expected only 4 diagnostic responses to the merged file changes";
-    assertDiagnostics(move(msgs), {{"bar.rb", 3, "does not match `Integer`"},
-                                   {"baz.rb", 3, "does not match `Integer`"},
-                                   {"bat.rb", 3, "does not match `Integer`"},
+    assertDiagnostics(move(msgs), {{"bar.rb", 3, "Expected `Integer`"},
+                                   {"baz.rb", 3, "Expected `Integer`"},
+                                   {"bat.rb", 3, "Expected `Integer`"},
                                    {"foo.rb", 7, "Method `blah` does not exist"}});
 }
 

@@ -625,7 +625,13 @@ class Float < Numeric
   def to_s(base=10); end
 
   sig {returns(Integer)}
-  def truncate(); end
+  sig do
+    params(
+      arg0: Integer
+    )
+    .returns(T.any(Integer, Float))
+  end
+  def truncate(arg0=T.unsafe(nil)); end
 
   sig {returns(T::Boolean)}
   def zero?(); end

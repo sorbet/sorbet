@@ -94,6 +94,7 @@ NameDef names[] = {
     {"implementation"},
     {"override_", "override"},
     {"overridable"},
+    {"allow_incompatible"},
 
     // Sig builders
     {"bind"},
@@ -103,6 +104,7 @@ NameDef names[] = {
     {"void_", "void"},
     {"checked"},
     {"soft"},
+    {"on_failure"},
     {"generated"},
 
     {"all"},
@@ -166,6 +168,7 @@ NameDef names[] = {
     {"merchant"},
     {"foreign"},
     {"computedBy", "computed_by"},
+    {"factory"},
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Mutator", "Mutator", true},
@@ -340,7 +343,8 @@ NameDef names[] = {
     {"File", "File", true},
     {"Static", "Static", true},
     {"StubModule", "StubModule", true},
-    {"StubAncestor", "StubAncestor", true},
+    {"StubSuperClass", "StubSuperClass", true},
+    {"StubMixin", "StubMixin", true},
     {"Configatron", "Configatron", true},
     {"Store", "Store", true},
     {"RootStore", "RootStore", true},

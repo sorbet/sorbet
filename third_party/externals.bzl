@@ -118,7 +118,7 @@ def externals():
     git_repository(
         name = "com_google_absl",
         remote = "https://github.com/abseil/abseil-cpp.git",
-        commit = "436ba6c4a0ea3a06eca6e055f9c8d296bf3bae12",
+        commit = "d65e19dfcd8697076f68598c0131c6930cdcd74d",
     )
 
     new_git_repository(
@@ -138,10 +138,12 @@ package(default_visibility = ["//visibility:public"])
         build_file = "//third_party:parser.BUILD",
     )
 
+    # NOTE: using this branch:
+    # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     git_repository(
         name = "com_grail_bazel_toolchain",
         remote = "https://github.com/DarkDimius/bazel-toolchain.git",
-        commit = "7110338e4804c49073b41abc1dcda6b14405ef8a",
+        commit = "fc345f29d7a2b5dd431be006b36be1b3d3936987",
     )
 
     git_repository(

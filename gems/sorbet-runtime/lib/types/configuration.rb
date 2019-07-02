@@ -2,6 +2,34 @@
 # frozen_string_literal: true
 
 module T::Configuration
+  # Announces to Sorbet that we are currently in a test environment, so it
+  # should treat any sigs which are marked `.checked(:tests)` as if they were
+  # just a normal sig.
+  #
+  # If this method is not called, sigs marked `.checked(:tests)` will not be
+  # checked. In fact, such methods won't even be wrapped--the runtime will put
+  # back the original method.
+  #
+  # Note: Due to the way sigs are evaluated and methods are wrapped, this
+  # method MUST be called before any code calls `sig`. This method raises if
+  # it has been called too late.
+  def self.enable_checking_for_sigs_marked_checked_tests
+    T::Private::RuntimeLevels.enable_checking_in_tests
+  end
+
+  # Configure the default checked level for a sig with no explicit `.checked`
+  # builder. When unset, the default checked level is `:always`.
+  #
+  # Note: setting this option is potentially dangerous! Sorbet can't check all
+  # code statically. The runtime checks complement the checks that Sorbet does
+  # statically, so that methods don't have to guard themselves from being
+  # called incorrectly by untyped code.
+  #
+  # @param [:never, :tests, :always] default_checked_level
+  def self.default_checked_level=(default_checked_level)
+    T::Private::RuntimeLevels.default_checked_level = default_checked_level
+  end
+
   # Set a handler to handle `TypeError`s raised by any in-line type assertions,
   # including `T.must`, `T.let`, `T.cast`, and `T.assert_type!`.
   #
@@ -84,11 +112,10 @@ module T::Configuration
   # successfully built, but the built sig is incompatible with other sigs in
   # some way.
   #
-  # By default, sig validation errors cause an exception to be raised. One
-  # exception is for `generated` sigs, for which a message will be logged
-  # instead of raising. Setting sig_validation_error_handler to an object that
-  # implements :call (e.g. proc or lambda) allows users to customize the
-  # behavior when a method signature's build fails.
+  # By default, sig validation errors cause an exception to be raised.
+  # Setting sig_validation_error_handler to an object that implements :call
+  # (e.g. proc or lambda) allows users to customize the behavior when a method
+  # signature's build fails.
   #
   # @param [Lambda, Proc, Object, nil] value Proc that handles the error (pass
   #   nil to reset to default behavior)
@@ -116,24 +143,7 @@ module T::Configuration
   end
 
   private_class_method def self.sig_validation_error_handler_default(error, opts)
-    # if this method overrides a generated signature, report that one instead
-    bad_method = opts[:method]
-    if !opts[:declaration].generated
-      super_signature = opts[:super_signature]
-      raise error if !super_signature&.generated
-      bad_method = super_signature.method
-    end
-
-    method_file, method_line = bad_method.source_location
-    T::Configuration.log_info_handler(
-      "SIG-DECLARE-FAILED",
-      {
-        definition_file: method_file,
-        definition_line: method_line,
-        kind: "Delete",
-        message: error.message,
-      },
-    )
+    raise error
   end
 
   def self.sig_validation_error_handler(error, opts)
@@ -147,11 +157,9 @@ module T::Configuration
   # Set a handler for type errors that result from calling a method.
   #
   # By default, errors from calling a method cause an exception to be raised.
-  # One exception is for `generated` sigs, for which a message will be logged
-  # instead of raising. Setting call_validation_error_handler to an object that
-  # implements :call (e.g. proc or lambda) allows users to customize the
-  # behavior when a method is called with invalid parameters, or returns an
-  # invalid value.
+  # Setting call_validation_error_handler to an object that implements :call
+  # (e.g. proc or lambda) allows users to customize the behavior when a method
+  # is called with invalid parameters, or returns an invalid value.
   #
   # @param [Lambda, Proc, Object, nil] value Proc that handles the error
   #   report (pass nil to reset to default behavior)
@@ -180,41 +188,7 @@ module T::Configuration
   end
 
   private_class_method def self.call_validation_error_handler_default(signature, opts)
-    method_file, method_line = signature.method.source_location
-    location = opts[:location]
-    suffix = "Caller: #{location.path}:#{location.lineno}\n" \
-      "Definition: #{method_file}:#{method_line}"
-
-    error_message = "#{opts[:kind]}#{opts[:name] ? " '#{opts[:name]}'" : ''}: #{opts[:message]}\n#{suffix}"
-
-    if signature.generated
-      got = opts[:value].class
-      got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
-      T::Configuration.log_info_handler(
-        "SIG-CHECK-FAILED",
-        {
-          caller_file: location.path,
-          caller_line: location.lineno,
-          definition_file: method_file,
-          definition_line: method_line,
-          kind: opts[:kind],
-          name: opts[:name],
-          expected: opts[:type].name,
-          got: got,
-        },
-      )
-    elsif signature.soft_notify
-      T::Configuration.soft_assert_handler(
-        "TypeError: #{error_message}",
-        {notify: signature.soft_notify}
-      )
-    else
-      begin
-        raise TypeError.new(error_message)
-      rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Private::ErrorHandler.handle_inline_type_error(e)
-      end
-    end
+    raise TypeError.new(opts[:pretty_message])
   end
 
   def self.call_validation_error_handler(signature, opts)

@@ -68,6 +68,16 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
 }
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
+    for (const auto &keyExpr : hash.keys) {
+        auto *key = ast::cast_tree_const<ast::Literal>(keyExpr.get());
+        if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
     int i = -1;
     for (const auto &keyExpr : hash.keys) {
         i++;

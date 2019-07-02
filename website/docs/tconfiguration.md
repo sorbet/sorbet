@@ -58,7 +58,7 @@ end
 
 The default error handler is to raise an error.
 
-<!-- TODO(jez) Document .soft / .checked once API is stable. -->
+<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
 
 ## Errors from invalid sig procs
 

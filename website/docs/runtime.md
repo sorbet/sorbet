@@ -112,7 +112,7 @@ Sometimes runtime checks don't make sense. There are two main reasons why
     have to make the compromise that adopting Sorbet doesn't affect the runtime
     behavior of the code.
 
-<!-- TODO(jez) Document .soft / .checked once API is stable. -->
+<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
 
 It's possible to change the runtime behavior by defining callbacks. See
 [Runtime Configuration](tconfiguration.md) for more about what callbacks are

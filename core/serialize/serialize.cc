@@ -90,7 +90,8 @@ vector<u1> Pickler::result(int compressionDegree) {
     return compressedData;
 }
 
-UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
+UnPickler::UnPickler(const u1 *const compressed, spdlog::logger &tracer) : pos(0) {
+    Timer timeit(tracer, "Unpickler::UnPickler");
     int compressedSize;
     memcpy(&compressedSize, compressed, SIZE_BYTES);
     int uncompressedSize;
@@ -605,56 +606,61 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     symbols.clear();
     vector<pair<unsigned int, unsigned int>> namesByHash(std::move(result.namesByHash));
     namesByHash.clear();
+    {
+        Timer timeit(result.tracer(), "readFiles");
 
-    result.trace("Reading files");
-
-    int filesSize = p.getU4();
-    files.reserve(filesSize);
-    for (int i = 0; i < filesSize; i++) {
-        if (i == 0) {
-            files.emplace_back();
-        } else {
-            files.emplace_back(unpickleFile(p));
+        int filesSize = p.getU4();
+        files.reserve(filesSize);
+        for (int i = 0; i < filesSize; i++) {
+            if (i == 0) {
+                files.emplace_back();
+            } else {
+                files.emplace_back(unpickleFile(p));
+            }
         }
     }
 
-    result.trace("Reading names");
+    {
+        Timer timeit(result.tracer(), "readNames");
 
-    int namesSize = p.getU4();
-    ENFORCE(namesSize > 0);
-    names.reserve(nearestPowerOf2(namesSize));
-    for (int i = 0; i < namesSize; i++) {
-        if (i == 0) {
-            auto &inserted = names.emplace_back();
-            inserted.kind = NameKind::UTF8;
-            inserted.raw.utf8 = string_view();
-        } else {
-            names.emplace_back(unpickleName(p, result));
+        int namesSize = p.getU4();
+        ENFORCE(namesSize > 0);
+        names.reserve(nearestPowerOf2(namesSize));
+        for (int i = 0; i < namesSize; i++) {
+            if (i == 0) {
+                auto &inserted = names.emplace_back();
+                inserted.kind = NameKind::UTF8;
+                inserted.raw.utf8 = string_view();
+            } else {
+                names.emplace_back(unpickleName(p, result));
+            }
         }
     }
 
-    result.trace("Reading symbols");
+    {
+        Timer timeit(result.tracer(), "readSymbols");
 
-    int symbolSize = p.getU4();
-    ENFORCE(symbolSize > 0);
-    symbols.reserve(symbolSize);
-    for (int i = 0; i < symbolSize; i++) {
-        symbols.emplace_back(unpickleSymbol(p, &result));
+        int symbolSize = p.getU4();
+        ENFORCE(symbolSize > 0);
+        symbols.reserve(symbolSize);
+        for (int i = 0; i < symbolSize; i++) {
+            symbols.emplace_back(unpickleSymbol(p, &result));
+        }
     }
 
-    result.trace("Reading name table");
-
-    int namesByHashSize = p.getU4();
-    names.reserve(namesByHashSize / 2);
-    namesByHash.reserve(names.capacity() * 2);
-    for (int i = 0; i < namesByHashSize; i++) {
-        auto hash = p.getU4();
-        auto value = p.getU4();
-        namesByHash.emplace_back(make_pair(hash, value));
+    {
+        Timer timeit(result.tracer(), "readNameTable");
+        int namesByHashSize = p.getU4();
+        names.reserve(namesByHashSize / 2);
+        namesByHash.reserve(names.capacity() * 2);
+        for (int i = 0; i < namesByHashSize; i++) {
+            auto hash = p.getU4();
+            auto value = p.getU4();
+            namesByHash.emplace_back(make_pair(hash, value));
+        }
     }
 
     UnorderedMap<string, FileRef> fileRefByPath;
-    result.trace("moving");
     int i = 0;
     for (auto f : files) {
         if (f && !f->path().empty()) {
@@ -662,11 +668,15 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         }
         i++;
     }
-    result.fileRefByPath = std::move(fileRefByPath);
-    result.files = std::move(files);
-    result.names = std::move(names);
-    result.symbols = std::move(symbols);
-    result.namesByHash = std::move(namesByHash);
+
+    {
+        Timer timeit(result.tracer(), "moving");
+        result.fileRefByPath = std::move(fileRefByPath);
+        result.files = std::move(files);
+        result.names = std::move(names);
+        result.symbols = std::move(symbols);
+        result.namesByHash = std::move(namesByHash);
+    }
     result.sanityCheck();
 }
 
@@ -698,7 +708,7 @@ vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
 
 void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
-    UnPickler p(data);
+    UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
     gs.installIntrinsics();
 }
@@ -1150,7 +1160,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
 }
 
 unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1 *const p, u4 forceId) {
-    serialize::UnPickler up(p);
+    serialize::UnPickler up(p, gs.tracer());
     u4 loaded = up.getU4();
     FileRef fileId(forceId > 0 ? forceId : loaded);
     return SerializerImpl::unpickleExpr(up, gs, fileId);

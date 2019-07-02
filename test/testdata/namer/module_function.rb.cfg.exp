@@ -129,7 +129,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_10" -> "bb::<Class:Funcs>#<static-init>_11" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_11" [
-        label = "block[id=11](<selfRestore>$41: T.class_of(Funcs))\l<statTemp>$38: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Funcs) = <selfRestore>$41\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=11](<selfRestore>$41: T.class_of(Funcs))\l<statTemp>$38: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_11" -> "bb::<Class:Funcs>#<static-init>_1" [style="bold"];

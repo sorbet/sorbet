@@ -1,6 +1,8 @@
 # Sorbet logos
 
-TODO(jez) Should we have usage guidelines for our logo? https://jira.corp.stripe.com/browse/CONTRACTS-5396
+By using Sorbet's logo you are agreeing to our Trademark Policy:
+
+https://sorbet.org/docs/legal/trademark-policy
 
 ## Stickers
 
@@ -23,3 +25,8 @@ TODO(jez) Should we have usage guidelines for our logo? https://jira.corp.stripe
 
     - If going with die-cut, we usually go for the 2" x 2" square option. When
       cut, this will turn into about 1.9" x 1.5"
+
+    - One thing we've done is to either pre-rotate before uploading (or ask them
+      to rotate the proof after uploading), so that the Sorbet logo sits at a
+      45° angle within the 2x2 square. This makes the final stickers a little
+      bit taller (2.4" x 1.9")

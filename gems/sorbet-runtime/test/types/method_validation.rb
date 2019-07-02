@@ -367,102 +367,143 @@ module Opus::Types::Test
         end
       end
 
-      it 'raises a soft_assertion when .soft is used with a notify' do
-        skip
-        @mod.sig {returns(Symbol).soft(notify: 'hello')}
-        def @mod.foo
-          1
-        end
+      it 'raises a soft_assertion when .on_failure is used with a notify' do
+        begin
+          T::Configuration.call_validation_error_handler = lambda do |signature, opts|
+            if signature.on_failure
+              T::Configuration.soft_assert_handler(
+                "TypeError: #{opts[:pretty_message]}",
+                {notify: signature.on_failure[0][:notify]}
+              )
+            else
+              raise 'test failed'
+            end
+          end
 
-        Opus::Error.expects(:soft).with(
-          regexp_matches(/TypeError: Return value: Expected type Symbol, got type Integer with value 1\nCaller: .+\d\nDefinition: .+\d/),
-          notify: 'hello'
-        )
-        @mod.foo
-      end
-
-      it 'logs with generated' do
-        skip
-        @mod.sig {generated.returns(Symbol)}
-        def @mod.foo
-          1
-        end
-
-        Opus::Log.stubs(:info).once.with do |message|
-          assert_equal('SIG-CHECK-FAILED', message)
-          true
-        end
-        @mod.foo
-      end
-
-      it 'logs with generated, but only once' do
-        skip
-        @mod.sig {generated.returns(Symbol)}
-        def @mod.foo
-          1
-        end
-
-        Opus::Log.stubs(:info).once.with do |message|
-          assert_equal('SIG-CHECK-FAILED', message)
-          true
-        end
-        @mod.foo
-        @mod.foo
-      end
-
-      it 'does not throw if malformed but with .generated' do
-        skip
-        @mod.sig {generated.returns(Integer)}
-        def @mod.foo(foo)
-          1
-        end
-
-        Opus::Log.stubs(:info).once.with do |message|
-          assert_equal('SIG-DECLARE-FAILED', message)
-          true
-        end
-        @mod.foo(2)
-        @mod.foo(2)
-      end
-
-      it 'does not throw if parent is .generated' do
-        skip
-        parent = Class.new do
-          extend T::Sig
-          sig {generated.returns(Integer)}
-          def foo
+          @mod.sig {returns(Symbol).on_failure(notify: 'hello')}
+          def @mod.foo
             1
           end
-        end
 
-        child = Class.new(parent) do
-          extend T::Sig
-          sig {returns(String)}
-          def foo
-            "1"
+          T::Configuration.expects(:soft_assert_handler).with(
+            regexp_matches(/TypeError: Return value: Expected type Symbol, got type Integer with value 1\nCaller: .+\d\nDefinition: .+\d/),
+            notify: 'hello'
+          )
+          @mod.foo
+        ensure
+          T::Configuration.call_validation_error_handler = nil
+        end
+      end
+
+      describe 'generated' do
+        before do
+          T::Configuration.sig_validation_error_handler = lambda do |error, opts|
+            if opts[:declaration].generated || opts[:super_signature]&.generated
+              T::Configuration.log_info_handler('SIG-DECLARE-FAILED')
+            else
+              raise 'sig_validation error'
+            end
+          end
+
+          T::Configuration.call_validation_error_handler = lambda do |signature, opts|
+            if signature.generated
+              got = opts[:value].class
+              got = T.unsafe(T::Enumerable[T.untyped]).describe_obj(opts[:value]) if got < Enumerable
+              T::Configuration.log_info_handler(
+                'SIG-CHECK-FAILED',
+                {
+                  got: got,
+                },
+              )
+            else
+              raise 'call_validation error'
+            end
           end
         end
 
-        Opus::Log.stubs(:info).once.with do |message|
-          assert_equal('SIG-DECLARE-FAILED', message)
-          true
-        end
-        child.new.foo
-      end
-
-      it 'logs nicely for Enumerables' do
-        skip
-        @mod.sig {generated.returns(Symbol)}
-        def @mod.foo
-          [[{a: 1}, 2], "3", 4..5]
+        after do
+          T::Configuration.sig_validation_error_handler = nil
+          T::Configuration.call_validation_error_handler = nil
         end
 
-        Opus::Log.stubs(:info).once.with do |message, *args|
-          assert_equal('SIG-CHECK-FAILED', message)
-          assert_equal('T::Array[T.any(String, T::Array[T.any(Integer, T::Hash[Symbol, Integer])], T::Range[Integer])]', args[0][:got])
-          true
+        it 'logs with generated' do
+          @mod.sig {generated.returns(Symbol)}
+          def @mod.foo
+            1
+          end
+
+          T::Configuration.stubs(:log_info_handler).once.with do |message|
+            assert_equal('SIG-CHECK-FAILED', message)
+            true
+          end
+          @mod.foo
         end
-        @mod.foo
+
+        it 'logs with generated, but only once' do
+          @mod.sig {generated.returns(Symbol)}
+          def @mod.foo
+            1
+          end
+
+          T::Configuration.stubs(:log_info_handler).once.with do |message|
+            assert_equal('SIG-CHECK-FAILED', message)
+            true
+          end
+          @mod.foo
+          @mod.foo
+        end
+
+        it 'does not throw if malformed but with .generated' do
+          @mod.sig {generated.returns(Integer)}
+          def @mod.foo(foo)
+            1
+          end
+
+          T::Configuration.stubs(:log_info_handler).once.with do |message|
+            assert_equal('SIG-DECLARE-FAILED', message)
+            true
+          end
+          @mod.foo(2)
+          @mod.foo(2)
+        end
+
+        it 'does not throw if parent is .generated' do
+          parent = Class.new do
+            extend T::Sig
+            sig {generated.returns(Integer)}
+            def foo
+              1
+            end
+          end
+
+          child = Class.new(parent) do
+            extend T::Sig
+            sig {returns(String)}
+            def foo
+              "1"
+            end
+          end
+
+          T::Configuration.stubs(:log_info_handler).once.with do |message|
+            assert_equal('SIG-DECLARE-FAILED', message)
+            true
+          end
+          child.new.foo
+        end
+
+        it 'logs nicely for Enumerables' do
+          @mod.sig {generated.returns(Symbol)}
+          def @mod.foo
+            [[{a: 1}, 2], "3", 4..5]
+          end
+
+          T::Configuration.stubs(:log_info_handler).once.with do |message, *args|
+            assert_equal('SIG-CHECK-FAILED', message)
+            assert_equal('T::Array[T.any(String, T::Array[T.any(Integer, T::Hash[Symbol, Integer])], T::Range[Integer])]', args[0][:got])
+            true
+          end
+          @mod.foo
+        end
       end
 
       it 'handles splats' do

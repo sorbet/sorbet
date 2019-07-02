@@ -8,6 +8,6 @@ end
 
 class Foo2 < A
   def branch
-    1 + "stuff" # error: does not match `Integer`
+    1 + "stuff" # error: Expected `Integer`
   end
 end

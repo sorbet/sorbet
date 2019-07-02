@@ -43,8 +43,8 @@ module T::Private::Methods
     if decl.returns == ARG_NOT_PROVIDED
       raise "Procs must specify a return type"
     end
-    if decl.soft_notify != ARG_NOT_PROVIDED
-      raise "Procs cannot use .soft"
+    if decl.on_failure != ARG_NOT_PROVIDED
+      raise "Procs cannot use .on_failure"
     end
 
     if decl.params == ARG_NOT_PROVIDED
@@ -224,7 +224,7 @@ module T::Private::Methods
         bind: current_declaration.bind,
         mode: current_declaration.mode,
         check_level: current_declaration.checked,
-        soft_notify: current_declaration.soft_notify,
+        on_failure: current_declaration.on_failure,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
         generated: current_declaration.generated,
       )
@@ -306,15 +306,13 @@ module T::Private::Methods
 
     if mod.singleton_class?
       install_singleton_method_added_hook(mod)
-      install_singleton_method_added_hook(mod.singleton_class)
     else
       original_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :method_added) do |name|
         T::Private::Methods._on_method_added(self, name)
         original_method.bind(self).call(name)
       end
-
-      install_singleton_method_added_hook(mod.singleton_class)
     end
+    install_singleton_method_added_hook(mod.singleton_class)
   end
 
   private_class_method def self.install_singleton_method_added_hook(singleton_klass)

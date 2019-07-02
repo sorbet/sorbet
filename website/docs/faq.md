@@ -86,3 +86,34 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 ```ruby
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
+
+## What platforms does Sorbet support?
+
+The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.4. We
+expect it to work on Ruby 2.3 through 2.6.
+
+The static check is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
+Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
+distributions. We use static linking on both platforms, so it should not depend
+on system libraries.
+
+There is currently no Windows support.
+
+## Does Sorbet support ActiveRecord (and Rails?)
+
+[sorbet-rails] is a community-maintained project which can help generate RBI
+files for certain Rails constructs.
+
+Also see the [Community] page for more community-maintained projects!
+
+[sorbet-rails]: https://github.com/chanzuckerberg/sorbet-rails
+[community]: /en/community
+
+## Can I convert from YARD docs to Sorbet signatures?
+
+[Sord] is a community-maintained project which can generate Sorbet RBI files
+from YARD docs.
+
+Also see the [Community] page for more community-maintained projects!
+
+[sord]: https://github.com/AaronC81/sord

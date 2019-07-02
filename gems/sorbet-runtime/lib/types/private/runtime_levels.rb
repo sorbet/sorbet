@@ -17,6 +17,9 @@ module T::Private::RuntimeLevels
   @check_tests = false
   @wrapped_tests_with_validation = false
 
+  @has_read_default_checked_level = false
+  @default_checked_level = :always
+
   def self.check_tests?
     # Assume that this code path means that some `sig.checked(:tests)`
     # has been wrapped (or not wrapped) already, which is a trapdoor
@@ -33,6 +36,18 @@ module T::Private::RuntimeLevels
     end
 
     _toggle_checking_tests(true)
+  end
+
+  def self.default_checked_level
+    @has_read_default_checked_level = true
+    @default_checked_level
+  end
+
+  def self.default_checked_level=(default_checked_level)
+    if @has_read_default_checked_level
+      raise "Set the default checked level earlier. There are already some methods whose sig blocks have evaluated which would not be affected by the new default."
+    end
+    @default_checked_level = default_checked_level
   end
 
   def self._toggle_checking_tests(checked)

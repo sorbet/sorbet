@@ -17,30 +17,6 @@ class Enumerator < Object
 
   sig do
     params(
-        blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject),
-    )
-    .returns(T.untyped)
-  end
-  sig {returns(T::Enumerator[[Elem, Integer]])}
-  def each_with_index(&blk); end
-
-  sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
-        blk: T.proc.params(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject),
-    )
-    .returns(T.untyped)
-  end
-  sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
-    )
-    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
-  end
-  def each_with_object(arg0, &blk); end
-
-  sig do
-    params(
         arg0: Elem,
     )
     .returns(NilClass)
@@ -79,12 +55,18 @@ class Enumerator < Object
 
   sig do
     params(
+        offset: Integer,
         blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject),
     )
     .returns(T.untyped)
   end
-  sig {returns(T::Enumerator[[Elem, Integer]])}
-  def with_index(&blk); end
+  sig do
+    params(
+        offset: Integer,
+    )
+    .returns(T::Enumerator[[Elem, Integer]])
+  end
+  def with_index(offset=0, &blk); end
 
   sig do
     type_parameters(:U).params(

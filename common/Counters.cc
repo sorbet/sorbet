@@ -49,6 +49,9 @@ void CounterImpl::histogramAdd(const char *histogram, int key, unsigned long val
 }
 
 void CounterImpl::prodHistogramAdd(const char *histogram, int key, unsigned long value) {
+    if (fuzz_mode) {
+        return;
+    }
     this->histograms[histogram][key] += value;
 }
 
@@ -60,6 +63,9 @@ void CounterImpl::categoryCounterAdd(const char *category, const char *counter, 
 }
 
 void CounterImpl::prodCategoryCounterAdd(const char *category, const char *counter, unsigned long value) {
+    if (fuzz_mode) {
+        return;
+    }
     this->countersByCategory[category][counter] += value;
 }
 
@@ -71,10 +77,16 @@ void CounterImpl::counterAdd(const char *counter, unsigned long value) {
 }
 
 void CounterImpl::prodCounterAdd(const char *counter, unsigned long value) {
+    if (fuzz_mode) {
+        return;
+    }
     this->counters[counter] += value;
 }
 
 void CounterImpl::timingAdd(CounterImpl::Timing timing) {
+    if (fuzz_mode) {
+        return;
+    }
     this->timings.emplace_back(timing);
 }
 

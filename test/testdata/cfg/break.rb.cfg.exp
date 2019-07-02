@@ -28,7 +28,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_3" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4](<selfRestore>$9: Object, target: T.any(T::Array[T.noreturn], Integer))\l<self>: Object = <selfRestore>$9\l<statTemp>$17: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <statTemp>$17: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
+        label = "block[id=4](<selfRestore>$9: Object, target: T.any(T::Array[T.noreturn], Integer))\l<statTemp>$17: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <statTemp>$17: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
@@ -137,7 +137,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_13" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_14" [
-        label = "block[id=14](<selfRestore>$50: T.class_of(<root>), b: T.nilable(String))\l<self>: T.class_of(<root>) = <selfRestore>$50\l<statTemp>$62: T.class_of(T) = alias <C T>\l<statTemp>$61: T.nilable(String) = <statTemp>$62: T.class_of(T).reveal_type(b: T.nilable(String))\l<unconditional>\l"
+        label = "block[id=14](<selfRestore>$50: T.class_of(<root>), b: T.nilable(String))\l<statTemp>$62: T.class_of(T) = alias <C T>\l<statTemp>$61: T.nilable(String) = <statTemp>$62: T.class_of(T).reveal_type(b: T.nilable(String))\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_14" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];

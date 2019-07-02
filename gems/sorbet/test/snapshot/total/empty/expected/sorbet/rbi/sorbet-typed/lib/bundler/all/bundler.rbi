@@ -4137,8 +4137,13 @@ class Bundler::Molinillo::DependencyGraph
   end
   def detach_vertex_named(name); end
 
-  sig {returns(::T.untyped)}
-  def each(); end
+  sig do
+    params(
+      blk: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each(&blk); end
 
   sig {returns(::T.untyped)}
   def initialize(); end
@@ -4531,8 +4536,13 @@ class Bundler::Molinillo::DependencyGraph::Log
   end
   def detach_vertex_named(graph, name); end
 
-  sig {returns(::T.untyped)}
-  def each(); end
+  sig do
+    params(
+      blk: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each(&blk); end
 
   sig {returns(::T.untyped)}
   def initialize(); end
