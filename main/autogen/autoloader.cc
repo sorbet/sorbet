@@ -112,24 +112,6 @@ core::FileRef DefTree::file() const {
 }
 
 static const core::FileRef EMPTY_FILE;
-void DefTree::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &alCfg) {
-    core::FileRef definingFile = EMPTY_FILE;
-    if (!namedDefs.empty()) {
-        definingFile = file();
-    }
-    if (!alCfg.sameFileCollapsable(nameParts)) {
-        return;
-    }
-
-    for (auto it = children.begin(); it != children.end(); ++it) {
-        auto &child = it->second;
-        if (child->hasDifferentFile(definingFile)) {
-            child->collapseSameFileDefs(ctx, alCfg);
-        } else {
-            children.erase(it);
-        }
-    }
-}
 
 bool DefTree::hasDifferentFile(core::FileRef file) const {
     bool res = false;
@@ -311,7 +293,7 @@ void DefTreeBuilder::addSingleDef(core::Context, const AutoloaderConfig &alCfg, 
 }
 
 DefTree DefTreeBuilder::merge(DefTree lhs, DefTree rhs) {
-    ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTree::merge");
+    ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
     lhs.nonBehaviorDefs.insert(lhs.nonBehaviorDefs.end(), make_move_iterator(rhs.nonBehaviorDefs.begin()),
@@ -325,6 +307,25 @@ DefTree DefTreeBuilder::merge(DefTree lhs, DefTree rhs) {
         }
     }
     return lhs;
+}
+
+void DefTreeBuilder::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &alCfg, DefTree &root) {
+    core::FileRef definingFile = EMPTY_FILE;
+    if (!root.namedDefs.empty()) {
+        definingFile = root.file();
+    }
+    if (!alCfg.sameFileCollapsable(root.nameParts)) {
+        return;
+    }
+
+    for (auto it = root.children.begin(); it != root.children.end(); ++it) {
+        auto &child = it->second;
+        if (child->hasDifferentFile(definingFile)) {
+            collapseSameFileDefs(ctx, alCfg, *child);
+        } else {
+            root.children.erase(it);
+        }
+    }
 }
 
 } // namespace sorbet::autogen

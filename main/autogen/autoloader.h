@@ -68,8 +68,6 @@ public:
                         std::shared_ptr<spdlog::logger> logger);
     std::string autoloads(core::Context ctx, const AutoloaderConfig &, std::shared_ptr<spdlog::logger> logger);
 
-    void collapseSameFileDefs(core::Context, const AutoloaderConfig &);
-
     DefTree() = default;
     DefTree(const DefTree &) = delete;
     DefTree(DefTree &&) = default;
@@ -84,6 +82,8 @@ private:
     bool hasDef() const;
     NamedDefinition &definition(core::Context);
     Definition::Type definitionType(core::Context);
+
+    friend class DefTreeBuilder;
 };
 
 class DefTreeBuilder {
@@ -94,6 +94,7 @@ public:
     static void addSingleDef(core::Context, const AutoloaderConfig &, std::unique_ptr<DefTree> &root, NamedDefinition);
 
     static DefTree merge(DefTree lhs, DefTree rhs);
+    static void collapseSameFileDefs(core::Context, const AutoloaderConfig &, DefTree &root);
 };
 
 } // namespace sorbet::autogen
