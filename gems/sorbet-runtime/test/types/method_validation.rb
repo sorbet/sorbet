@@ -373,14 +373,14 @@ module Opus::Types::Test
             if signature.on_failure
               T::Configuration.soft_assert_handler(
                 "TypeError: #{opts[:pretty_message]}",
-                {notify: signature.on_failure[0][:notify]}
+                {notify: signature.on_failure[1][:notify]}
               )
             else
               raise 'test failed'
             end
           end
 
-          @mod.sig {returns(Symbol).on_failure(notify: 'hello')}
+          @mod.sig {returns(Symbol).on_failure(:soft, notify: 'hello')}
           def @mod.foo
             1
           end
@@ -397,7 +397,7 @@ module Opus::Types::Test
 
       describe 'generated' do
         before do
-          T::Configuration.sig_validation_error_handler = lambda do |error, opts|
+          T::Configuration.sig_validation_error_handler = lambda do |_error, opts|
             if opts[:declaration].generated || opts[:super_signature]&.generated
               T::Configuration.log_info_handler('SIG-DECLARE-FAILED')
             else

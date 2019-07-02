@@ -304,7 +304,6 @@ module Opus::Types::Test
           end
 
           it 'override default checked level to :never but opt in with .checked(:always)' do
-            skip
             T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
 
             a = Module.new do
@@ -384,7 +383,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).on_failure(notify: 'me').checked(:never)}
+            sig {returns(NilClass).on_failure(notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
         end
@@ -392,17 +391,15 @@ module Opus::Types::Test
       end
 
       it 'allows .on_failure and then .checked(:tests)' do
-        skip
         Class.new do
           extend T::Sig
-          sig {returns(Integer).on_failure(notify: 'me').checked(:tests)}
+          sig {returns(NilClass).on_failure(notify: 'me').checked(:tests)}
           def self.foo; end; foo
         end
         pass
       end
 
       it 'allows .on_failure and then .checked(:always)' do
-        skip
         Class.new do
           extend T::Sig
           sig {returns(NilClass).on_failure(notify: 'me').checked(:always)}
@@ -415,7 +412,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).checked(:never).on_failure(notify: 'me')}
+            sig {returns(NilClass).checked(:never).on_failure(notify: 'me')}
             def self.foo; end; foo
           end
         end
@@ -425,7 +422,7 @@ module Opus::Types::Test
       it 'allows .checked(:tests) and then .on_failure' do
         Class.new do
           extend T::Sig
-          sig {returns(Integer).checked(:tests).on_failure(notify: 'me')}
+          sig {returns(NilClass).checked(:tests).on_failure(notify: 'me')}
           def self.foo; end; foo
         end
       end
