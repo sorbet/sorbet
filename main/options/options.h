@@ -18,6 +18,7 @@ class PrinterConfig {
 public:
     bool enabled = false;
     std::string outputPath;
+    bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
     template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
