@@ -87,6 +87,22 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
+## How do I upgrade Sorbet?
+
+Sorbet has not reached version 1.0 yet. As such, it will make breaking changes
+constantly, without warning.
+
+To upgrade a patch level (e.g., from 0.4.4314 to 0.4.4358):
+
+```
+bundle update sorbet sorbet-runtime
+# also update plugins like sorbet-rails, if any
+bundle exec srb init
+
+# For plugins like sorbet-rails, see their docs, eg.
+https://github.com/chanzuckerberg/sorbet-rails#initial-setup
+```
+
 ## What platforms does Sorbet support?
 
 The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.4. We
