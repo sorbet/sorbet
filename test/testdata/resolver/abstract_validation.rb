@@ -85,11 +85,11 @@ class SplatParent
 end
 
 class SplatChild1 < SplatParent
-  def foo(*args); end # error: Implementation of abstract method `SplatParent#foo` must accept **`opts`
+  def foo(*args); end # TODO: Implementation of abstract method `SplatParent#foo` must accept **`opts`
 end
 
 class SplatChild2 < SplatParent
-  def foo(**opts); end # error: Implementation of abstract method `SplatParent#foo` must accept *`args`
+  def foo(**opts); end # TODO: Implementation of abstract method `SplatParent#foo` must accept *`args`
 end
 
 

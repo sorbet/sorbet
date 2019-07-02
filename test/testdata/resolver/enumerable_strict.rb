@@ -5,6 +5,6 @@ class A # error: Type `Elem` declared by parent `Enumerable` must be re-declared
   extend T::Sig
 
   sig {void}
-  def each # error: Implementation of abstract method `Enumerable#each` must explicitly name a block argument
+  def each # TODO: Implementation of abstract method `Enumerable#each` must explicitly name a block argument
   end
 end
