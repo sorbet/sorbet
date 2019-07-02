@@ -178,8 +178,9 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
             }
         }
+        auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
         if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
-            !method.data(gs)->isIncompatibleOverride()) {
+            !method.data(gs)->isIncompatibleOverride() && !isRBI) {
             validateCompatibleOverride(gs, overridenMethod, method);
         }
     }
