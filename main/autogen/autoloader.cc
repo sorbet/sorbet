@@ -106,14 +106,6 @@ string join(string path, string file) {
     return fmt::format("{}/{}", path, file);
 }
 
-void create_dir(string path) {
-    auto err = mkdir(fmt::format("{}", path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); // TODO cleanup
-    if (err) {
-        fmt::print("ERROR creating directory {}\n", path);
-        throw runtime_error("create_dir() failed!");
-    }
-}
-
 bool visitDefTree(const DefTree &tree, std::function<bool(const DefTree &)> visit) {
     bool descend = visit(tree);
     if (!descend) {
@@ -205,7 +197,7 @@ void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, s
     if (!children.empty()) {
         auto subdir = join(path, root() ? "" : name);
         if (!root()) {
-            create_dir(subdir);
+            FileOps::createDir(subdir);
         }
         for (auto &[_, child] : children) {
             child->writeAutoloads(ctx, alCfg, subdir, logger);

@@ -31,6 +31,11 @@ public:
     FileReadException(const std::string &message) : SorbetException(message) {}
 };
 
+class CreateDirException : SorbetException {
+public:
+    CreateDirException(const std::string &message) : SorbetException(message) {}
+};
+
 class Exception final {
 public:
     template <typename... TArgs>[[noreturn]] static bool raise(const TArgs &... args) __attribute__((noreturn));
