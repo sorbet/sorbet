@@ -137,7 +137,14 @@ public:
     bool silenceErrors = false;
     bool autocorrect = false;
     bool suggestRuntimeProfiledType = false;
-    bool isInitialized = false;
+
+    // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
+    // this into a valid ruby identifier without suffering.
+    // We want to make sure we don't round-trip through strings for those names.
+    //
+    // If this attribute is set to `true`, all strings will be checked for `<` and `>` characters in them.
+    bool ensureCleanStrings = false;
+
     // So we can know whether we're running in autogen mode.
     // Right now this is only used to turn certain DSL passes on or off.
     // Think very hard before looking at this value in namer / resolver!
