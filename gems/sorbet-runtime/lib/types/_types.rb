@@ -176,20 +176,13 @@ module T
   # Intended to be used to promise sorbet that a given nilable value happens
   # to contain a non-nil value at this point.
   #
-  # sig {params(arg: T.nilable(A), msg: T.nilable(String)).returns(A)}
-  def self.must(arg, msg=nil)
+  # sig {params(arg: T.nilable(A)).returns(A)}
+  def self.must(arg)
     return arg if arg
     return arg if arg == false
 
     begin
-      if msg
-        if !T.unsafe(msg).is_a?(String)
-          raise TypeError.new("T.must expects a string as second argument")
-        end
-      else
-        msg = "Passed `nil` into T.must"
-      end
-      raise TypeError.new(msg)
+      raise TypeError.new("Passed `nil` into T.must")
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Private::ErrorHandler.handle_inline_type_error(e)
     end

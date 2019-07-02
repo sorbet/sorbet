@@ -4,8 +4,7 @@ def test_must # error: does not have a `sig`
   x = T.cast(nil, T.nilable(String)) # error: Useless cast
   T.assert_type!(T.must(x), String)
 
-  T.must(x, "hi")
+  T.must(x)
   T.must()  # error: Not enough arguments
-  T.must(x, "hi", 0)  # error: Expected: `1..2`, got: `3`
-  T.must(x, :foo)  # error: Expected `T.nilable(String)` but found `Symbol(:"foo")` for argument `msg`
+  T.must(x, 0)  # error: Expected: `1`, got: `2`
 end
