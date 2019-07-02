@@ -83,14 +83,14 @@ void DefTree::addSingleDef(core::Context ctx, const AutoloaderConfig &alCfg, Nam
     }
 }
 
-void DefTree::prettyPrint(core::Context ctx, int level) {
+void DefTree::show(core::Context ctx, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
     fmt::print("{} [{}]\n", name().show(ctx), fmt::map_join(namedDefs, ", ", fileRefToString));
     for (auto &[name, tree] : children) {
         for (int i = 0; i < level; ++i) {
             fmt::print("  ");
         }
-        tree->prettyPrint(ctx, level + 1);
+        tree->show(ctx, level + 1);
     }
 }
 

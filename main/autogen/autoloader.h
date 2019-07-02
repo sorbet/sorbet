@@ -61,14 +61,13 @@ public:
     bool root() const;
     core::NameRef name() const;
     void addSingleDef(core::Context, const AutoloaderConfig &, NamedDefinition);
-    void prettyPrint(core::Context ctx, int level = 0);
+    std::string path(core::Context ctx);
+    void show(core::Context ctx, int level = 0); // Print the entire tree
     std::string fullName(core::Context) const;
 
     void writeAutoloads(core::Context ctx, const AutoloaderConfig &, std::string path,
                         std::shared_ptr<spdlog::logger> logger);
     std::string autoloads(core::Context ctx, const AutoloaderConfig &, std::shared_ptr<spdlog::logger> logger);
-
-    std::string path(core::Context ctx);
 
     void collapseSameFileDefs(core::Context, const AutoloaderConfig &);
 
