@@ -179,7 +179,7 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
             }
         }
         if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
-            !method.data(gs)->isIncompatibleOverride()) {
+            !method.data(gs)->isIncompatibleOverride() && !method.data(gs)->loc().file().data(gs).isRBI()) {
             validateCompatibleOverride(gs, overridenMethod, method);
         }
     }
