@@ -89,7 +89,8 @@ end;
 No errors! Great job.
 ```
 
-You can also add debug outputs by printing to `$stderr` within your plugin.
+Anything printed to `$stderr` within a plugin will show up in the terminal when
+`srb tc` runs.
 
 ## Caveats
 
