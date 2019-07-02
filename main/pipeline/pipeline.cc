@@ -973,7 +973,17 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
         }
         if (opts.print.SymbolTableJson.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root());
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+            if (opts.print.SymbolTableJson.outputPath.empty()) {
+                core::Proto::toJSON(root, cout);
+            } else {
+                stringstream buf;
+                core::Proto::toJSON(root, buf);
+                opts.print.SymbolTableJson.print(buf.str());
+            }
+        }
+        if (opts.print.SymbolTableFullJson.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
                 core::Proto::toJSON(root, cout);
             } else {

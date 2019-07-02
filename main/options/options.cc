@@ -38,6 +38,7 @@ const vector<PrintOptions> print_options({
     {"symbol-table-json", &Printers::SymbolTableJson, true},
     {"symbol-table-full", &Printers::SymbolTableFull, true},
     {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
+    {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
     {"name-tree", &Printers::NameTree, true},
     {"name-tree-raw", &Printers::NameTreeRaw, true},
     {"file-table-json", &Printers::FileTableJson, true},

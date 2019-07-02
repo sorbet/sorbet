@@ -55,6 +55,7 @@ struct Printers {
     PrinterConfig SymbolTableJson;
     PrinterConfig SymbolTableFull;
     PrinterConfig SymbolTableFullRaw;
+    PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
     PrinterConfig ResolveTree;
     PrinterConfig ResolveTreeRaw;
