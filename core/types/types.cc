@@ -526,7 +526,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass())) {
+    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass() &&
+                         asIf.data(ctx)->typeMembers().size() == what.data(ctx)->typeMembers().size())) {
         currentAlignment = what.data(ctx)->typeMembers();
     } else {
         currentAlignment.reserve(asIf.data(ctx)->typeMembers().size());
