@@ -245,7 +245,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
     if (opts.print.AutogenAutoloader.enabled) {
         {
             Timer timeit(logger, "autogenAutoloaderPrune");
-            root.collapseSameFileDefs(ctx, autoloaderCfg);
+            autogen::DefTreeBuilder::collapseSameFileDefs(ctx, autoloaderCfg, root);
         }
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
