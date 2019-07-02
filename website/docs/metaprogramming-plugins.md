@@ -13,7 +13,7 @@ example:
 # metaprogramming.rb
 # typed: true
 
-class MetaProgramming
+class Metaprogramming
   def self.macro(name)
     define_method("#{name}_time") { name }
   end
@@ -22,9 +22,9 @@ class MetaProgramming
   macro(:fun)
 end
 
-hello = MetaProgramming.new
-hello.bed_time # error: Method `bed_time` does not exist on MetaProgramming
-hello.fun_time # error: Method `fun_time` does not exist on MetaProgramming
+hello = Metaprogramming.new
+hello.bed_time # error: Method `bed_time` does not exist on Metaprogramming
+hello.fun_time # error: Method `fun_time` does not exist on Metaprogramming
 ```
 
 Sorbet rejects this script since Sorbet cannot understand
@@ -40,7 +40,7 @@ Here is a plugin for `macro` in the example above:
 # macro_plugin.rb
 
 # Sorbet calls this plugin with command line arguments similar to the following:
-# --class MetaProgramming --method macro --source macro(:bed)
+# ruby --class Metaprogramming --method macro --source macro(:bed)
 # we only care about the source here, so we use ARGV[5]
 source = ARGV[5]
 /macro\(:(.*)\)/.match(source) do |match_data|
@@ -79,11 +79,11 @@ We can ask Sorbet to print out the output of all plugin calls using
 ```shell
 ❯ srb tc --print plugin-generated-code --dsl-plugins triggers.yaml metaprogramming.rb
 # Path: "metaprogramming.rb//plugin-generated|0":
-class MetaProgramming;
+class Metaprogramming;
 def bed_time; end
 end;
 # Path: "metaprogramming.rb//plugin-generated|1":
-class MetaProgramming;
+class Metaprogramming;
 def fun_time; end
 end;
 No errors! Great job.
@@ -100,7 +100,7 @@ Anything printed to `$stderr` within a plugin will show up in the terminal when
   the following calls `macro_plugin.rb` twice but results in an error.
 
 ```ruby
-class MetaProgramming
+class Metaprogramming
   def self.macro(name)
     define_method("#{name}_time") { name }
   end
@@ -108,7 +108,7 @@ class MetaProgramming
   macro(:fun)
 end
 
-class DifferentMetaProgramming
+class DifferentMetaprogramming
   def self.macro(name)
     define_method(:different_macro) { name }
   end
@@ -116,7 +116,7 @@ class DifferentMetaProgramming
   macro(:not_so_fun)
 end
 
-DifferentMetaProgramming.new.different_macro # error: Method `different_macro` does not exist
+DifferentMetaprogramming.new.different_macro # error: Method `different_macro` does not exist
 ```
 
 - The plugin system spawns many instances of Ruby and is very slow because of
