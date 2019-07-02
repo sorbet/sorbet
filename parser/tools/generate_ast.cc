@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -176,7 +177,7 @@ NodeDef nodes[] = {
     {"Self", vector<FieldDef>()},
     // invocation
     {"Send", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
-    // not used in gerald.rb ???
+    // not used in gerald.rb ??? m { |;shadowarg| }
     {"Shadowarg", vector<FieldDef>({{"name", Name}})},
     // *foo splat operator
     {"Splat", vector<FieldDef>({{"var", Node}})},
@@ -198,6 +199,111 @@ NodeDef nodes[] = {
     {"Yield", vector<FieldDef>({{"exprs", NodeVec}})},
     {"ZSuper", vector<FieldDef>()},
 };
+
+map<string, string> internalNodeNameToRubyNodeName = {
+    {"Alias", "alias"},
+    {"And", "and"},
+    {"AndAsgn", "and_asgn"},
+    {"Arg", "arg"},
+    {"Args", "args"},
+    {"Array", "array"},
+    {"Backref", "backref"},
+    {"Assign", "assign"},
+    {"Begin", "begin"},
+    {"Block", "block"},
+    {"Blockarg", "blockarg"},
+    {"BlockPass", "block_pass"},
+    {"Break", "break"},
+    {"Case", "case"},
+    {"Cbase", "cbase"},
+    {"Class", "class"},
+    {"Complex", "complex"},
+    {"Const", "const"},
+    {"ConstLhs", "casgn"},
+    {"CSend", "csend"},
+    {"CVar", "cvar"},
+    {"CVarLhs", "cvasgn"},
+    {"DefMethod", "def"},
+    {"Defined", "defined?"},
+    {"DefS", "defs"},
+    {"DString", "dstr"},
+    {"DSymbol", "dsym"},
+    {"EFlipflop", "eflipflop"},
+    {"EncodingLiteral", "__ENCODING__"},
+    {"Ensure", "ensure"},
+    {"ERange", "erange"},
+    {"False", "false"},
+    {"FileLiteral", "__FILE__"},
+    {"For", "for"},
+    {"Float", "float"},
+    {"GVar", "gvar"},
+    {"GVarLhs", "gvasgn"},
+    {"Hash", "hash"},
+    {"Ident", "UNUSED_ident"},
+    {"If", "if"},
+    {"IFlipflop", "iflipflop"},
+    {"IRange", "irange"},
+    {"Integer", "int"},
+    {"IVar", "ivar"},
+    {"IVarLhs", "ivasgn"},
+    {"Kwarg", "kwarg"},
+    {"Kwbegin", "kwbegin"},
+    {"Kwoptarg", "kwoptarg"},
+    {"Kwrestarg", "kwrestarg"},
+    {"Kwsplat", "kwsplat"},
+    {"LineLiteral", "__LINE__"},
+    {"LVar", "lvar"},
+    {"LVarAsgn", "lvasgn"},
+    {"LVarLhs", "lvar"},
+    {"MatchAsgn", "match_with_lvasgn"},
+    {"MatchCurLine", "match_current_line"},
+    {"Masgn", "masgn"},
+    {"Mlhs", "mlhs"},
+    {"Module", "module"},
+    {"Next", "next"},
+    {"Nil", "nil"},
+    {"NthRef", "nth_ref"},
+    {"OpAsgn", "op_asgn"},
+    {"Or", "or"},
+    {"OrAsgn", "or_asgn"},
+    {"Optarg", "optarg"},
+    {"Pair", "pair"},
+    {"Postexe", "postexe"},
+    {"Preexe", "preexe"},
+    {"Procarg0", "procarg0"},
+    {"Rational", "rational"},
+    {"Redo", "redo"},
+    {"Regexp", "regexp"},
+    {"Regopt", "regopt"},
+    {"Resbody", "resbody"},
+    {"Rescue", "rescue"},
+    {"Restarg", "restarg"},
+    {"Retry", "retry"},
+    {"Return", "return"},
+    {"SClass", "sclass"},
+    {"Self", "self"},
+    {"Send", "send"},
+    {"Shadowarg", "shadowarg"},
+    {"Splat", "splat"},
+    {"SplatLhs", "splat_lhs"},
+    {"String", "str"},
+    {"Super", "super"},
+    {"Symbol", "sym"},
+    {"True", "true"},
+    {"Undef", "undef"},
+    {"Until", "until"},
+    {"UntilPost", "until_post"},
+    {"When", "when"},
+    {"While", "while"},
+    {"WhilePost", "while_post"},
+    {"XString", "xstr"},
+    {"Yield", "yield"},
+    {"ZSuper", "zsuper"},
+};
+
+string rubyNodeNameForInternalNodeName(string internalNodeName) {
+    return internalNodeNameToRubyNodeName[internalNodeName];
+}
 
 string fieldType(FieldType arg) {
     switch (arg) {
@@ -251,6 +357,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << '\n';
     out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
     out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string toRuby(const core::GlobalState &gs, int tabs = 0);" << '\n';
     out << "  virtual std::string nodeName();" << '\n';
 
     out << "};" << '\n';
@@ -307,6 +414,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  }" << '\n';
     out << '\n';
 
+    // toJSON
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
     out << "    fmt::format_to(buf,  \"{{\\n\");\n";
@@ -374,6 +482,60 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "    fmt::format_to(buf,  \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
+    out << '\n';
+
+    // toRuby
+    out << "  std::string " << node.name << "::toRuby(const core::GlobalState &gs, int tabs) {" << '\n'
+        << "    fmt::memory_buffer buf;" << '\n';
+    out << "    fmt::format_to(buf, \"s(:" << rubyNodeNameForInternalNodeName(node.name) << "\");" << '\n';
+    // Generate fields
+    for (auto &arg : node.fields) {
+        if (arg.type == Loc) {
+            continue;
+        }
+
+        switch (arg.type) {
+            case Name:
+                out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                break;
+            case Node:
+                out << "    fmt::format_to(buf, \",\");\n";
+                out << "    if (" << arg.name << ") {\n";
+                out << "     fmt::format_to(buf, \"\\n\");\n";
+                out << "     printTabs(buf, tabs + 1);" << '\n';
+                out << "     printNodeRuby(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    } else {\n";
+                out << "      fmt::format_to(buf, \" nil\");\n";
+                out << "    }\n";
+                break;
+            case NodeVec:
+                out << "    for (auto &&a: " << arg.name << ") {\n";
+                out << "      fmt::format_to(buf, \",\");\n";
+                out << "      if (a) {\n";
+                out << "        fmt::format_to(buf, \"\\n\");\n";
+                out << "        printTabs(buf, tabs + 1);" << '\n';
+                out << "        printNodeRuby(buf, a, gs, tabs + 1);\n";
+                out << "      } else {\n";
+                out << "        fmt::format_to(buf, \" nil\");\n";
+                out << "      }\n";
+                out << "    }\n";
+                break;
+            case String:
+                out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ");\n";
+                break;
+            case Uint:
+                out << "    fmt::format_to(buf, \", {}\", " << arg.name << ");\n";
+                break;
+            case Loc:
+                // quiet the compiler; we skip Loc fields above
+                abort();
+                break;
+        }
+    }
+
+    out << "    fmt::format_to(buf, \")\");";
+    out << "    return to_string(buf);\n"
+        << "  }\n";
     out << '\n';
 }
 
