@@ -23,6 +23,7 @@ struct PrintOptions {
     string option;
     PrinterConfig Printers::*config;
     bool supportsCaching = false;
+    bool supportsFlush = true; // If false, printer is responsible for flushing its own output.
 };
 
 const vector<PrintOptions> print_options({
@@ -54,7 +55,7 @@ const vector<PrintOptions> print_options({
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
-    {"autogen-autoloader", &Printers::AutogenAutoloader, true},
+    {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -71,13 +72,11 @@ void PrinterConfig::print(const string_view &contents) const {
 };
 
 void PrinterConfig::flush() {
-    if (!enabled || outputPath.empty()) {
+    if (!enabled || !supportsFlush || outputPath.empty()) {
         return;
     }
     absl::MutexLock lck(&state->mutex);
-    if (state->buf.size() > 0) {
-        FileOps::write(outputPath, to_string(state->buf));
-    }
+    FileOps::write(outputPath, to_string(state->buf));
 };
 
 vector<reference_wrapper<PrinterConfig>> Printers::printers() {
@@ -459,6 +458,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                 }
                 cfg.enabled = true;
                 cfg.outputPath = outPath;
+                cfg.supportsFlush = known.supportsFlush;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
                         logger->error("--print={} is incompatible with --cache-dir. Ignoring cache", opt);
