@@ -18,7 +18,7 @@ class T::Props::Decorator
 
   class NoRulesError < StandardError; end
 
-  sig {params(klass: DecoratedClass).void}
+  T::Sig::WithoutRuntime.sig {params(klass: DecoratedClass).void}
   def initialize(klass)
     @class = klass
     klass.plugins.each do |mod|
@@ -780,7 +780,7 @@ class T::Props::Decorator
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
   # prepended, or inherited.
-  sig {params(child: DecoratedClass).void}
+  T::Sig::WithoutRuntime.sig {params(child: DecoratedClass).void}
   def model_inherited(child)
     child.extend(T::Props::ClassMethods)
     child.plugins.concat(decorated_class.plugins)
@@ -801,7 +801,7 @@ class T::Props::Decorator
     end
   end
 
-  sig {params(mod: Module).void}
+  T::Sig::WithoutRuntime.sig {params(mod: Module).void}
   def plugin(mod)
     decorated_class.plugins << mod
     Private.apply_class_methods(mod, decorated_class)
