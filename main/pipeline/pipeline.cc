@@ -167,6 +167,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                          unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
     ast::ParsedFile dslsInlined{nullptr, file};
+    ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
 
     Timer timeit(lgs.tracer(), "indexOne");
     try {
@@ -1045,6 +1046,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
         fref = lgs->enterFile(forWhat);
+        fref.data(*lgs).strictLevel = pipeline::decideStrictLevel(*lgs, fref, emptyOpts);
     }
     vector<ast::ParsedFile> single;
     unique_ptr<KeyValueStore> kvstore;
