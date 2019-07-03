@@ -50,38 +50,6 @@ cc_binary(
     ],
 )
 
-cc_binary(
-    name = "sorbet-orig-light",
-    srcs = [
-        "main.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//visibility:public"],
-    deps = [
-        "realmain",
-        "//payload:light_text",
-    ],
-)
-
-cc_binary(
-    name = "sorbet-light",
-    srcs = [
-        "main.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//visibility:public"],
-    deps = [
-        "realmain",
-        "//payload:light",
-    ],
-)
-
 cc_library(
     name = "realmain",
     srcs = [

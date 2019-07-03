@@ -65,13 +65,13 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
         }
-        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::implied())) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *opts, core::Names::implied())) {
             implied = true;
         }
-        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::skipGetter())) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *opts, core::Names::skipGetter())) {
             skipGetter = true;
         }
-        if (ASTUtil::hasHashValue(ctx, *opts, core::Names::skipSetter())) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *opts, core::Names::skipSetter())) {
             skipSetter = true;
         }
     }

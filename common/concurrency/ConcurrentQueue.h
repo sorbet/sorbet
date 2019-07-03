@@ -1,5 +1,13 @@
 #ifndef SORBET_CONCURRENTQUEUE_H
 #define SORBET_CONCURRENTQUEUE_H
+/**
+  Those classes wrap a pre-existing concurrent queue to provide a consistent API.
+  We use https://github.com/cameron314/concurrentqueue
+  It was chosen by @DarkDimius writing a benchmark at the time that's now lost.
+  https://max0x7ba.github.io/atomic_queue/html/benchmarks.html seems to contain a similar benchmark.
+  In practice, we currently use it in either "single producer N consumers" or "N producer single consumer modes".
+*/
+
 #include "blockingconcurrentqueue.h"
 #include "common/Timer.h"
 #include "common/common.h"

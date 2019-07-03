@@ -5,6 +5,9 @@
   "editor.rulers": [
     120
   ],
+  "files.associations": {
+    "*.rbi": "ruby"
+  },
   "[cpp]": {
     "editor.tabSize": 4,
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"

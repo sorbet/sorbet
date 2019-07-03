@@ -16,7 +16,7 @@ cc_library(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//main/pipeline",
-        "//payload:light",
+        "//payload",
     ],
 )
 

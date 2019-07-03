@@ -1,0 +1,11 @@
+pull_request_rules:
+  - name: automatic merge on CI success and review
+    conditions:
+      - status-success=All tests and builds succeeded
+      - status-success=WIP
+      - "#approved-reviews-by>=1"
+      - label=mergify
+    actions:
+      merge:
+        method: squash
+        strict: true

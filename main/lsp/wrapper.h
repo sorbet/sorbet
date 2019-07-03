@@ -39,7 +39,6 @@ private:
 
 public:
     enum class LSPExperimentalFeature {
-        Hover = 1,
         GoToDefinition = 2,
         FindReferences = 3,
         Autocomplete = 4,

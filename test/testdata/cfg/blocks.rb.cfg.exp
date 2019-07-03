@@ -23,7 +23,7 @@ subgraph "cluster_::BlockTest#blockPass" {
     "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_3" [style="tapered"];
 
     "bb::BlockTest#blockPass_3" [
-        label = "block[id=3](<selfRestore>$8: BlockTest)\l<returnMethodTemp>$2: T.untyped = Solve<foo>\l<self>: BlockTest = <selfRestore>$8\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$8: BlockTest)\l<returnMethodTemp>$2: T.untyped = Solve<foo>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_3" -> "bb::BlockTest#blockPass_1" [style="bold"];

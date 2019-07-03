@@ -9,6 +9,42 @@
 # Templated files
 # * verconf.h is just a templated version of what ruby produces
 
+config_setting(
+    name = "darwin",
+    values = {"host_cpu": "darwin"},
+)
+
+config_setting(
+    name = "linux",
+    values = {"host_cpu": "k8"},
+)
+
+
+# configuration variables ######################################################
+
+RUBY_VERSION = "2.4.3"
+RUBY_CORE_VERSION = "2.4.0"
+
+ARCH_LINUX = "x86_64-unknown-linux"
+ARCH_DARWIN = "x86_64-darwin18"
+
+ARCH = select({
+    ":linux": ARCH_LINUX,
+    ":darwin": ARCH_DARWIN,
+})
+
+# NOTE: rbconfig expects to find itself in a directory of the form:
+#
+# > `lib/ruby/<RUBY_CORE_VERSION>/<ARCH>`
+#
+# as shown by the line that defines `TOPDIR`. `TOPDIR` is used when computing
+# the relative path to the rest of the standard library, the `include`
+# directory, and the `bin` directory when building gems with native code.
+# Without installing everything into a tree that matches this, there will be
+# errors when using `mkmf`.
+LIB_PREFIX = "lib/ruby/" + RUBY_CORE_VERSION
+
+INC_PREFIX = "lib/ruby/include"
 
 # configuration ################################################################
 
@@ -27,7 +63,7 @@ genrule(
         "template/*",
     ]),
     cmd = """
-CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) > /dev/null
+CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-load-relative --without-gmp > /dev/null
 find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
 cp config.status $(location config.status)
 """,
@@ -70,8 +106,41 @@ cc_library(
     visibility = [ "//visibility:private" ],
 )
 
+cc_library(
+  name = "ruby_crypt",
+  hdrs = [
+    "missing/crypt.h",
+    "missing/des_tables.c",
+  ],
+  srcs = select({
+    ":linux": ["missing/crypt.c"],
+    ":darwin": [],
+  }),
+  deps = [ ":ruby_headers" ],
+  visibility = [ "//visibility:private" ],
+)
+
+RUBY_COPTS = [
+    "-D_XOPEN_SOURCE",
+    "-Wno-constant-logical-operand",
+    "-Wno-parentheses",
+    "-D_REENTRANT",
+
+    # TODO: is this really necessary?
+    "-Wno-string-plus-int",
+] + select({
+    ":linux": [],
+    ":darwin": ["-D_DARWIN_C_SOURCE"],
+})
+
+
 
 # miniruby #####################################################################
+
+filegroup(
+    name = "miniruby_lib",
+    srcs = glob([ "lib/**/*.rb" ]),
+)
 
 cc_library(
     name = "miniruby_private_headers",
@@ -96,7 +165,7 @@ cc_library(
 cc_binary(
     name = "bin/miniruby",
 
-    data = [ ":ruby_lib_staged" ],
+    data = [ ":miniruby_lib" ],
 
     srcs = [
         "main.c",
@@ -171,7 +240,14 @@ cc_binary(
         "enc/trans/newline.c",
         "missing/explicit_bzero.c",
         "missing/setproctitle.c",
-    ] + glob([
+    ] + select({
+      ":linux": [
+          "missing/strlcpy.c",
+          "missing/strlcat.c",
+          "addr2line.c",
+      ],
+      ":darwin": [],
+    }) + glob([
         "ccan/**/*.h",
     ]),
 
@@ -181,64 +257,95 @@ cc_binary(
         ":ruby_private_headers",
     ],
 
-    copts = [
-        "-DRUBY_EXPORT",
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
+    copts = RUBY_COPTS + ["-DRUBY_EXPORT"],
 
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
-    ],
-
-    linkopts = [
+    linkopts = select({
+      ":linux": [
+        "-lpthread",
+        "-lcrypt",
+      ],
+      ":darwin": [
         "-framework",
         "Foundation",
         "-lpthread",
-    ],
+      ],
+    }),
 
-    includes = [ "include", "enc/unicode/9.0.0" ],
+    includes = [ "include", "enc/unicode/9.0.0" ] + select({
+      ":linux": ["missing"],
+      ":darwin": []
+    }),
 
     visibility = ["//visibility:public"],
 )
 
 # full ruby ####################################################################
 
-# TODO: don't hardcode the arch string
-# TODO: don't hardcode the ruby version
+RBCONFIG_LINUX = "/".join([LIB_PREFIX, ARCH_LINUX, "rbconfig.rb"])
+RBCONFIG_DARWIN = "/".join([LIB_PREFIX, ARCH_DARWIN, "rbconfig.rb"])
+
+RBCONFIG = select({
+    ":linux": [RBCONFIG_LINUX],
+    ":darwin": [RBCONFIG_DARWIN],
+})
+
 genrule(
-    name = "generate-rbconfig",
+    name = "generate-linux-rbconfig",
     srcs = [
-        ":bin/miniruby",
-        ":ruby_lib_staged",
-        "lib/irb.rb",
+        ":miniruby_lib",
+        "bin/miniruby",
         "tool/mkconfig.rb",
         "config.status",
         "version.h",
+        "lib/irb.rb",
     ],
-    outs = [ "rbconfig.rb" ],
+    outs = [RBCONFIG_LINUX],
     cmd = """
 cp $(location config.status) config.status
 $(location bin/miniruby) \
         -I $$(dirname $(location lib/irb.rb)) \
         $(location tool/mkconfig.rb) \
         -cross_compiling=no \
-        -arch=x86_64-darwin18 \
-        -version=2.4.3 \
+        -arch=""" + ARCH_LINUX + """\
+        -version=""" + RUBY_VERSION + """\
         -install_name=ruby \
         -so_name=ruby \
         -unicode_version=9.0.0 \
-    > $(location rbconfig.rb)
+    > $@
+""",
+)
+
+genrule(
+    name = "generate-darwin-rbconfig",
+    srcs = [
+        ":miniruby_lib",
+        "bin/miniruby",
+        "tool/mkconfig.rb",
+        "config.status",
+        "version.h",
+        "lib/irb.rb",
+    ],
+    outs = [RBCONFIG_DARWIN],
+    cmd = """
+cp $(location config.status) config.status
+$(location bin/miniruby) \
+        -I $$(dirname $(location lib/irb.rb)) \
+        $(location tool/mkconfig.rb) \
+        -cross_compiling=no \
+        -arch=""" + ARCH_DARWIN + """\
+        -version=""" + RUBY_VERSION + """\
+        -install_name=ruby \
+        -so_name=ruby \
+        -unicode_version=9.0.0 \
+    > $@
 """,
 )
 
 genrule(
     name = "prelude",
     srcs = [
-        ":bin/miniruby",
-        ":ruby_lib",
+        ":miniruby_lib",
+        "bin/miniruby",
         "lib/irb.rb",
         "tool/generic_erb.rb",
         "tool/vpath.rb",
@@ -249,11 +356,10 @@ genrule(
     ],
     outs = [ "prelude.c" ],
     cmd = """
-# -----------------
 $(location bin/miniruby) \
     -I. \
-    -I$$(dirname $(location lib/irb.rb)) \
-    -I$$(dirname $(location prelude.rb)) \
+    -I $$(dirname $(location lib/irb.rb)) \
+    -I $$(dirname $(location prelude.rb)) \
     $(location tool/generic_erb.rb) \
     -c -o $(location prelude.c) \
     $(location template/prelude.c.tmpl) \
@@ -265,7 +371,7 @@ $(location bin/miniruby) \
 
 genrule(
     name = "verconf",
-    srcs = [ ":bin/miniruby" ],
+    srcs = [ "bin/miniruby" ],
     outs = [ "verconf.h" ],
     cmd = """
 prefix=$$(dirname $(location bin/miniruby))
@@ -368,7 +474,14 @@ cc_binary(
         "vm_trace.c",
         "missing/explicit_bzero.c",
         "missing/setproctitle.c",
-    ] + glob([
+    ] + select({
+        ":linux": [
+            "missing/strlcpy.c",
+            "missing/strlcat.c",
+            "addr2line.c",
+        ],
+        ":darwin": [],
+    }) + glob([
         "ccan/**/*.h",
     ]),
 
@@ -388,27 +501,22 @@ cc_binary(
         ":ext/zlib",
         ":ext/date",
         ":ext/digest",
-    ],
+        ":ext/psych",
+        ":ext/strscan",
+    ] + select({
+        ":linux": [":ruby_crypt"],
+        ":darwin": [],
+    }),
 
-    copts = [
-        "-DRUBY_EXPORT",
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
-
-        "-DRUBY",
-
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
-    ],
-
-    linkopts = [
-        "-framework",
-        "Foundation",
-        "-lpthread",
-    ],
+    linkopts = select({
+        ":linux": ["-lpthread"],
+        ":darwin": [
+            "-framework",
+            "Foundation",
+            "-lpthread",
+        ],
+    }),
+    copts = RUBY_COPTS + ["-DRUBY_EXPORT","-DRUBY"],
 
     visibility = ["//visibility:public"],
 )
@@ -416,6 +524,7 @@ cc_binary(
 genrule(
     name = "enc-generated-deps",
     srcs = [
+        ":miniruby_lib",
         "bin/miniruby",
         "tool/generic_erb.rb",
         "tool/vpath.rb",
@@ -483,20 +592,10 @@ cc_library(
         ":ruby_headers",
         ":ruby_private_headers",
     ],
-    copts = [
+    copts = RUBY_COPTS + [
         "-DRUBY_EXPORT",
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
-
         # IMPORTANT: without this no Init functions are generated
         "-DEXTSTATIC=1",
-
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
-
         # for r "enc/gb2312.c"
         "-Wno-implicit-function-declaration",
     ],
@@ -553,18 +652,9 @@ cc_library(
         ":ruby_headers",
         ":ruby_private_headers",
     ],
-    copts = [
-        "-D_XOPEN_SOURCE",
-        "-Wno-constant-logical-operand",
-        "-Wno-parentheses",
-        "-D_DARWIN_C_SOURCE",
-        "-D_REENTRANT",
-
+    copts = RUBY_COPTS + [
         # IMPORTANT: without this no Init functions are generated
         "-DRUBY", "-DONIG_ENC_REGISTER=rb_enc_register",
-
-        # TODO: is this really necessary?
-        "-Wno-string-plus-int",
 
         # for r "enc/gb2312.c"
         "-Wno-implicit-function-declaration",
@@ -603,10 +693,12 @@ void Init_ext(void)
     init(Init_date_core, "date_core");
     init(Init_bubblebabble, "digest/bubblebabble");
     init(Init_sha1, "digest/sha1");
-    init(Init_sha1, "digest/sha2.so");
+    init(Init_sha2, "digest/sha2.so");
     init(Init_rmd160, "digest/rmd160");
     init(Init_md5, "digest/md5");
     init(Init_digest, "digest.so");
+    init(Init_psych, "psych.so");
+    init(Init_strscan, "strscan");
 }
 EOF
 """,
@@ -676,8 +768,8 @@ cc_library(
 genrule(
     name = "generate-ext/socket-constants",
     srcs = [
-        ":bin/miniruby",
-        ":ruby_lib",
+        ":miniruby_lib",
+        "bin/miniruby",
         "lib/optparse.rb",
         "ext/socket/mkconstants.rb",
     ],
@@ -726,74 +818,154 @@ cc_library(
         "ext/socket/unixsocket.c",
     ],
     copts = [
-        "-DHAVE_SYS_UIO_H",
-        "-DHAVE_NETINET_IN_SYSTM_H",
-        "-DHAVE_NETINET_TCP_H",
-        "-DHAVE_NETINET_TCP_FSM_H",
-        "-DHAVE_NETINET_UDP_H",
-        "-DHAVE_ARPA_INET_H",
-        "-DHAVE_NET_ETHERNET_H",
-        "-DHAVE_SYS_UN_H",
-        "-DHAVE_IFADDRS_H",
-        "-DHAVE_SYS_IOCTL_H",
-        "-DHAVE_SYS_SOCKIO_H",
-        "-DHAVE_NET_IF_H",
-        "-DHAVE_SYS_PARAM_H",
-        "-DHAVE_SYS_UCRED_H",
-        "-DHAVE_NET_IF_DL_H",
-        "-DHAVE_ARPA_NAMESER_H",
-        "-DHAVE_RESOLV_H",
-        "-DHAVE_STRUCT_SOCKADDR_SA_LEN",
-        "-DHAVE_ST_SA_LEN",
-        "-DHAVE_STRUCT_SOCKADDR_IN_SIN_LEN",
-        "-DHAVE_ST_SIN_LEN",
-        "-DHAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN",
-        "-DHAVE_ST_SIN6_LEN",
-        "-DHAVE_TYPE_STRUCT_SOCKADDR_UN",
-        "-DHAVE_STRUCT_SOCKADDR_UN_SUN_LEN",
-        "-DHAVE_ST_SUN_LEN",
-        "-DHAVE_TYPE_STRUCT_SOCKADDR_DL",
-        "-DHAVE_TYPE_STRUCT_SOCKADDR_STORAGE",
-        "-DHAVE_TYPE_STRUCT_ADDRINFO",
-        "-DHAVE_TYPE_SOCKLEN_T",
-        "-DHAVE_TYPE_STRUCT_IN_PKTINFO",
-        "-DHAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST",
-        "-DHAVE_ST_IPI_SPEC_DST",
-        "-DHAVE_TYPE_STRUCT_IN6_PKTINFO",
-        "-DHAVE_TYPE_STRUCT_IP_MREQ",
-        "-DHAVE_TYPE_STRUCT_IP_MREQN",
-        "-DHAVE_TYPE_STRUCT_IPV6_MREQ",
-        "-DHAVE_STRUCT_MSGHDR_MSG_CONTROL",
-        "-DHAVE_ST_MSG_CONTROL",
-        "-DHAVE_SOCKET",
-        "-DHAVE_SENDMSG",
-        "-DHAVE_RECVMSG",
-        "-DHAVE_FREEHOSTENT",
-        "-DHAVE_FREEADDRINFO",
-        "-DHAVE_GAI_STRERROR",
-        "-DGAI_STRERROR_CONST",
-        "-DHAVE_INET_NTOP",
-        "-DHAVE_INET_PTON",
-        "-DHAVE_GETSERVBYPORT",
-        "-DHAVE_GETIFADDRS",
-        "-DHAVE_GETPEEREID",
-        "-DHAVE_IF_INDEXTONAME",
-        "-DNEED_IF_INDEXTONAME_DECL",
-        "-DHAVE_IF_NAMETOINDEX",
-        "-DNEED_IF_NAMETOINDEX_DECL",
-        "-DHAVE_GETIPNODEBYNAME",
-        "-DHAVE_GETHOSTBYNAME2",
-        "-DHAVE_SOCKETPAIR",
-        "-DHAVE_GETHOSTNAME",
         "-DENABLE_IPV6",
-        "-DINET6",
+        "-DGAI_STRERROR_CONST",
+        "-DHAVE_ARPA_INET_H",
+        "-DHAVE_ARPA_NAMESER_H",
         "-DHAVE_CONST_AF_UNIX",
         "-DHAVE_CONST_SCM_RIGHTS",
-        "-DHAVE_GETNAMEINFO",
+        "-DHAVE_FREEADDRINFO",
+        "-DHAVE_GAI_STRERROR",
         "-DHAVE_GETADDRINFO",
+        "-DHAVE_GETHOSTBYNAME2",
+        "-DHAVE_GETHOSTNAME",
+        "-DHAVE_GETIFADDRS",
+        "-DHAVE_GETNAMEINFO",
+        "-DHAVE_GETSERVBYPORT",
+        "-DHAVE_IFADDRS_H",
+        "-DHAVE_IF_INDEXTONAME",
+        "-DHAVE_IF_NAMETOINDEX",
+        "-DHAVE_INET_NTOP",
+        "-DHAVE_INET_PTON",
+        "-DHAVE_NETINET_IN_SYSTM_H",
+        "-DHAVE_NETINET_TCP_H",
+        "-DHAVE_NETINET_UDP_H",
+        "-DHAVE_NET_ETHERNET_H",
+        "-DHAVE_NET_IF_H",
+        "-DHAVE_RECVMSG",
+        "-DHAVE_RESOLV_H",
+        "-DHAVE_SENDMSG",
+        "-DHAVE_SOCKET",
+        "-DHAVE_SOCKETPAIR",
+        "-DHAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST",
+        "-DHAVE_STRUCT_MSGHDR_MSG_CONTROL",
+        "-DHAVE_ST_IPI_SPEC_DST",
+        "-DHAVE_ST_MSG_CONTROL",
+        "-DHAVE_SYS_IOCTL_H",
+        "-DHAVE_SYS_PARAM_H",
+        "-DHAVE_SYS_UN_H",
+        "-DHAVE_TYPE_SOCKLEN_T",
+        "-DHAVE_TYPE_STRUCT_ADDRINFO",
+        "-DHAVE_TYPE_STRUCT_IN6_PKTINFO",
+        "-DHAVE_TYPE_STRUCT_IN_PKTINFO",
+        "-DHAVE_TYPE_STRUCT_IPV6_MREQ",
+        "-DHAVE_TYPE_STRUCT_IP_MREQ",
+        "-DHAVE_TYPE_STRUCT_IP_MREQN",
+        "-DHAVE_TYPE_STRUCT_SOCKADDR_STORAGE",
+        "-DHAVE_TYPE_STRUCT_SOCKADDR_UN",
+        "-DNEED_IF_INDEXTONAME_DECL",
+        "-DNEED_IF_NAMETOINDEX_DECL",
         "-Wno-dangling-else",
         "-Wno-unused-const-variable",
-    ],
+    ] + select({
+        ":linux": [
+            "-DFD_PASSING_WORK_WITH_RECVMSG_MSG_PEEK",
+            "-DHAVE_ACCEPT4",
+            "-DHAVE_CONST_TCP_CLOSE",
+            "-DHAVE_CONST_TCP_CLOSE_WAIT",
+            "-DHAVE_CONST_TCP_CLOSING",
+            "-DHAVE_CONST_TCP_ESTABLISHED",
+            "-DHAVE_CONST_TCP_FIN_WAIT1",
+            "-DHAVE_CONST_TCP_FIN_WAIT2",
+            "-DHAVE_CONST_TCP_LAST_ACK",
+            "-DHAVE_CONST_TCP_LISTEN",
+            "-DHAVE_CONST_TCP_SYN_RECV",
+            "-DHAVE_CONST_TCP_SYN_SENT",
+            "-DHAVE_CONST_TCP_TIME_WAIT",
+            "-DHAVE_NETPACKET_PACKET_H",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_ADVMSS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_ATO",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_BACKOFF",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_CA_STATE",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_FACKETS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_ACK_RECV",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_ACK_SENT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_DATA_RECV",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LAST_DATA_SENT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_LOST",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_OPTIONS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_PMTU",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_PROBES",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_MSS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_RTT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_SPACE",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RCV_SSTHRESH",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_REORDERING",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RETRANS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RETRANSMITS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RTO",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RTT",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_RTTVAR",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SACKED",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SND_CWND",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SND_MSS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_SND_SSTHRESH",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_STATE",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_TOTAL_RETRANS",
+            "-DHAVE_STRUCT_TCP_INFO_TCPI_UNACKED",
+            "-DHAVE_ST_TCPI_ADVMSS",
+            "-DHAVE_ST_TCPI_ATO",
+            "-DHAVE_ST_TCPI_BACKOFF",
+            "-DHAVE_ST_TCPI_CA_STATE",
+            "-DHAVE_ST_TCPI_FACKETS",
+            "-DHAVE_ST_TCPI_LAST_ACK_RECV",
+            "-DHAVE_ST_TCPI_LAST_ACK_SENT",
+            "-DHAVE_ST_TCPI_LAST_DATA_RECV",
+            "-DHAVE_ST_TCPI_LAST_DATA_SENT",
+            "-DHAVE_ST_TCPI_LOST",
+            "-DHAVE_ST_TCPI_OPTIONS",
+            "-DHAVE_ST_TCPI_PMTU",
+            "-DHAVE_ST_TCPI_PROBES",
+            "-DHAVE_ST_TCPI_RCV_MSS",
+            "-DHAVE_ST_TCPI_RCV_RTT",
+            "-DHAVE_ST_TCPI_RCV_SPACE",
+            "-DHAVE_ST_TCPI_RCV_SSTHRESH",
+            "-DHAVE_ST_TCPI_REORDERING",
+            "-DHAVE_ST_TCPI_RETRANS",
+            "-DHAVE_ST_TCPI_RETRANSMITS",
+            "-DHAVE_ST_TCPI_RTO",
+            "-DHAVE_ST_TCPI_RTT",
+            "-DHAVE_ST_TCPI_RTTVAR",
+            "-DHAVE_ST_TCPI_SACKED",
+            "-DHAVE_ST_TCPI_SND_CWND",
+            "-DHAVE_ST_TCPI_SND_MSS",
+            "-DHAVE_ST_TCPI_SND_SSTHRESH",
+            "-DHAVE_ST_TCPI_STATE",
+            "-DHAVE_ST_TCPI_TOTAL_RETRANS",
+            "-DHAVE_ST_TCPI_UNACKED",
+            "-DHAVE_TYPE_STRUCT_TCP_INFO",
+        ],
+        ":darwin": [
+            "-DHAVE_FREEHOSTENT",
+            "-DHAVE_GETIPNODEBYNAME",
+            "-DHAVE_GETPEEREID",
+            "-DHAVE_NETINET_TCP_FSM_H",
+            "-DHAVE_NET_IF_DL_H",
+            "-DHAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN",
+            "-DHAVE_STRUCT_SOCKADDR_IN_SIN_LEN",
+            "-DHAVE_STRUCT_SOCKADDR_SA_LEN",
+            "-DHAVE_STRUCT_SOCKADDR_UN_SUN_LEN",
+            "-DHAVE_ST_SA_LEN",
+            "-DHAVE_ST_SIN6_LEN",
+            "-DHAVE_ST_SIN_LEN",
+            "-DHAVE_ST_SUN_LEN",
+            "-DHAVE_SYS_SOCKIO_H",
+            "-DHAVE_SYS_UCRED_H",
+            "-DHAVE_SYS_UIO_H",
+            "-DHAVE_TYPE_STRUCT_SOCKADDR_DL",
+            "-DINET6",
+        ]
+    }),
     deps = [ ":ruby_headers", ":ruby_private_headers" ],
     linkstatic = 1,
 )
@@ -874,183 +1046,125 @@ cc_library(
     deps = [
         ":ruby_headers",
     ],
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-DHAVE_SHA256_TRANSFORM",
+        "-DHAVE_SHA512_TRANSFORM",
+        "-DHAVE_TYPE_SHA256_CTX",
+        "-DHAVE_TYPE_SHA512_CTX",
+        "-DHAVE_SYS_CDEFS_H",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "ext/psych",
+    srcs = [
+        "ext/psych/psych.c",
+        "ext/psych/psych_emitter.c",
+        "ext/psych/psych_parser.c",
+        "ext/psych/psych_to_ruby.c",
+        "ext/psych/psych_yaml_tree.c",
+        "ext/psych/yaml/api.c",
+        "ext/psych/yaml/dumper.c",
+        "ext/psych/yaml/emitter.c",
+        "ext/psych/yaml/loader.c",
+        "ext/psych/yaml/parser.c",
+        "ext/psych/yaml/reader.c",
+        "ext/psych/yaml/scanner.c",
+        "ext/psych/yaml/writer.c",
+    ] + glob([ "ext/psych/**/*.h" ]),
+    includes = [
+        "ext/psych",
+        "ext/psych/yaml",
+        "include/ruby",
+    ],
+    copts = [
+        "-DHAVE_DLFCN_H",
+        "-DHAVE_INTTYPES_H",
+        "-DHAVE_MEMORY_H",
+        "-DHAVE_STDINT_H",
+        "-DHAVE_STDLIB_H",
+        "-DHAVE_STRINGS_H",
+        "-DHAVE_STRING_H",
+        "-DHAVE_SYS_STAT_H",
+        "-DHAVE_SYS_TYPES_H",
+        "-DHAVE_UNISTD_H",
+        "-DHAVE_CONFIG_H",
+    ],
+    deps = [
+        ":ruby_headers",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "ext/strscan",
+    srcs = [
+        "ext/strscan/strscan.c",
+    ],
+    deps = [
+        ":ruby_headers",
+        ":ruby_private_headers",
+    ],
     linkstatic = 1,
 )
 
 
 # core library #################################################################
 
-genrule(
-    name = "lib/rbconfig",
-    outs = [ "lib/rbconfig.rb" ],
-    srcs = [ "rbconfig.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/pathname",
-    srcs = [ "ext/pathname/lib/pathname.rb" ],
-    outs = [ "lib/pathname.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/bigdecimal",
-    srcs = [
-        "ext/bigdecimal/lib/bigdecimal/jacobian.rb",
-        "ext/bigdecimal/lib/bigdecimal/ludcmp.rb",
-        "ext/bigdecimal/lib/bigdecimal/math.rb",
-        "ext/bigdecimal/lib/bigdecimal/newton.rb",
-        "ext/bigdecimal/lib/bigdecimal/util.rb",
-    ],
-    outs = [
-        "lib/bigdecimal/jacobian.rb",
-        "lib/bigdecimal/ludcmp.rb",
-        "lib/bigdecimal/math.rb",
-        "lib/bigdecimal/newton.rb",
-        "lib/bigdecimal/util.rb",
-    ],
-
-    cmd = """
- cp $(location ext/bigdecimal/lib/bigdecimal/jacobian.rb) $(location lib/bigdecimal/jacobian.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/ludcmp.rb)   $(location lib/bigdecimal/ludcmp.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/math.rb)     $(location lib/bigdecimal/math.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/newton.rb)   $(location lib/bigdecimal/newton.rb)
- cp $(location ext/bigdecimal/lib/bigdecimal/util.rb)     $(location lib/bigdecimal/util.rb)
-"""
-)
-
-genrule(
-    name = "ruby_ext/json",
-    srcs = [
-        "ext/json/lib/json.rb",
-        "ext/json/lib/json/add/bigdecimal.rb",
-        "ext/json/lib/json/add/complex.rb",
-        "ext/json/lib/json/add/core.rb",
-        "ext/json/lib/json/add/date.rb",
-        "ext/json/lib/json/add/date_time.rb",
-        "ext/json/lib/json/add/exception.rb",
-        "ext/json/lib/json/add/ostruct.rb",
-        "ext/json/lib/json/add/range.rb",
-        "ext/json/lib/json/add/rational.rb",
-        "ext/json/lib/json/add/regexp.rb",
-        "ext/json/lib/json/add/struct.rb",
-        "ext/json/lib/json/add/symbol.rb",
-        "ext/json/lib/json/add/time.rb",
-        "ext/json/lib/json/common.rb",
-        "ext/json/lib/json/ext.rb",
-        "ext/json/lib/json/generic_object.rb",
-        "ext/json/lib/json/version.rb",
-    ],
-    outs = [
-        "lib/json.rb",
-        "lib/json/add/bigdecimal.rb",
-        "lib/json/add/complex.rb",
-        "lib/json/add/core.rb",
-        "lib/json/add/date.rb",
-        "lib/json/add/date_time.rb",
-        "lib/json/add/exception.rb",
-        "lib/json/add/ostruct.rb",
-        "lib/json/add/range.rb",
-        "lib/json/add/rational.rb",
-        "lib/json/add/regexp.rb",
-        "lib/json/add/struct.rb",
-        "lib/json/add/symbol.rb",
-        "lib/json/add/time.rb",
-        "lib/json/common.rb",
-        "lib/json/ext.rb",
-        "lib/json/generic_object.rb",
-        "lib/json/version.rb",
-    ],
-    cmd = """
-cp $(location ext/json/lib/json.rb)                $(location lib/json.rb)
-cp $(location ext/json/lib/json/add/bigdecimal.rb) $(location lib/json/add/bigdecimal.rb)
-cp $(location ext/json/lib/json/add/complex.rb)    $(location lib/json/add/complex.rb)
-cp $(location ext/json/lib/json/add/core.rb)       $(location lib/json/add/core.rb)
-cp $(location ext/json/lib/json/add/date.rb)       $(location lib/json/add/date.rb)
-cp $(location ext/json/lib/json/add/date_time.rb)  $(location lib/json/add/date_time.rb)
-cp $(location ext/json/lib/json/add/exception.rb)  $(location lib/json/add/exception.rb)
-cp $(location ext/json/lib/json/add/ostruct.rb)    $(location lib/json/add/ostruct.rb)
-cp $(location ext/json/lib/json/add/range.rb)      $(location lib/json/add/range.rb)
-cp $(location ext/json/lib/json/add/rational.rb)   $(location lib/json/add/rational.rb)
-cp $(location ext/json/lib/json/add/regexp.rb)     $(location lib/json/add/regexp.rb)
-cp $(location ext/json/lib/json/add/struct.rb)     $(location lib/json/add/struct.rb)
-cp $(location ext/json/lib/json/add/symbol.rb)     $(location lib/json/add/symbol.rb)
-cp $(location ext/json/lib/json/add/time.rb)       $(location lib/json/add/time.rb)
-cp $(location ext/json/lib/json/common.rb)         $(location lib/json/common.rb)
-cp $(location ext/json/lib/json/ext.rb)            $(location lib/json/ext.rb)
-cp $(location ext/json/lib/json/generic_object.rb) $(location lib/json/generic_object.rb)
-cp $(location ext/json/lib/json/version.rb)        $(location lib/json/version.rb)
-"""
-)
-
-genrule(
-    name = "ruby_ext/socket",
-    srcs = [ "ext/socket/lib/socket.rb" ],
-    outs = [ "lib/socket.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/date",
-    srcs = [ "ext/date/lib/date.rb" ],
-    outs = [ "lib/date.rb" ],
-    cmd = "cp $< $@",
-)
-
-genrule(
-    name = "ruby_ext/digest",
-    srcs = [
-        "ext/digest/lib/digest.rb",
-        "ext/digest/sha2/lib/sha2.rb",
-    ],
-    outs = [
-        "lib/digest.rb",
-        "lib/digest/sha2.rb",
-    ],
-    cmd = """
-cp $(location ext/digest/lib/digest.rb) $(location lib/digest.rb)
-cp $(location ext/digest/sha2/lib/sha2.rb) $(location lib/digest/sha2.rb)
-""",
-)
+load("@//third_party/ruby:utils.bzl", "install_file", "install_dir")
 
 filegroup(
     name = "ruby_lib",
-    srcs = [ "lib/rbconfig.rb", ":ruby_lib_staged" ],
-    visibility = ["//visibility:public"],
-)
+    srcs =
+        install_dir(
+            src_prefix = "ext/pathname/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
 
-filegroup(
-    name = "ruby_lib_staged",
-    srcs = [
-        "lib/pathname.rb",
-        "lib/bigdecimal/jacobian.rb",
-        "lib/bigdecimal/ludcmp.rb",
-        "lib/bigdecimal/math.rb",
-        "lib/bigdecimal/newton.rb",
-        "lib/bigdecimal/util.rb",
-        "lib/json.rb",
-        "lib/json/add/bigdecimal.rb",
-        "lib/json/add/complex.rb",
-        "lib/json/add/core.rb",
-        "lib/json/add/date.rb",
-        "lib/json/add/date_time.rb",
-        "lib/json/add/exception.rb",
-        "lib/json/add/ostruct.rb",
-        "lib/json/add/range.rb",
-        "lib/json/add/rational.rb",
-        "lib/json/add/regexp.rb",
-        "lib/json/add/struct.rb",
-        "lib/json/add/symbol.rb",
-        "lib/json/add/time.rb",
-        "lib/json/common.rb",
-        "lib/json/ext.rb",
-        "lib/json/generic_object.rb",
-        "lib/json/version.rb",
-        "lib/socket.rb",
-        "lib/date.rb",
-        "lib/digest.rb",
-    ] + glob([ "lib/**/*.rb" ]),
+        install_dir(
+            src_prefix = "ext/bigdecimal/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/json/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/socket/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/date/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/digest/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "ext/digest/sha2/lib",
+            out_prefix = LIB_PREFIX + "/digest",
+        ) +
+
+        install_dir(
+            src_prefix = "ext/psych/lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        install_dir(
+            src_prefix = "lib",
+            out_prefix = LIB_PREFIX,
+        ) +
+
+        RBCONFIG,
+
     visibility = ["//visibility:private"],
 )
 
@@ -1070,19 +1184,40 @@ base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
 
 # was this script invoked via 'bazel run"?
 if [ -d "\$$base_dir/ruby.runfiles" ]; then
-  export RUBYLIB="\$${RUBYLIB:-}:\$$base_dir/ruby.runfiles/ruby_2_4_3/lib"
-else
-  export RUBYLIB="\$${RUBYLIB:-}:\$$base_dir/lib"
+  base_dir="\$${base_dir}/ruby.runfiles/ruby_2_4_3"
 fi
+
+PREFIX="\$${base_dir}/""" + LIB_PREFIX + """"
+
+RUBYLIB="\$${RUBYLIB:-}:\$${PREFIX}:\$${PREFIX}/""" + ARCH + """"
+
+export RUBYLIB
 
 exec "\$$base_dir/bin/ruby" "\$$@"
 EOF
     """,
 )
 
+filegroup(
+    name = "ruby_runtime_env",
+    srcs =
+        install_dir(
+            src_prefix = "include",
+            out_prefix = INC_PREFIX,
+        ) + [
+        ":bin/ruby",
+        ":ruby_lib",
+        install_file(
+            name = "install-ruby-config.h",
+            src = "include/ruby/config.h",
+            out = INC_PREFIX + "/ruby/config.h",
+        ),
+    ],
+)
+
 sh_binary(
     name = "ruby",
-    data = [ ":bin/ruby", ":ruby_lib" ],
+    data = [ ":ruby_runtime_env" ],
     srcs = [ "ruby.sh" ],
     visibility = ["//visibility:public"],
 )

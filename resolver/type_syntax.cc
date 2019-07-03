@@ -233,9 +233,44 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 case core::Names::abstract()._id:
                     sig.seen.abstract = true;
                     break;
-                case core::Names::override_()._id:
+                case core::Names::override_()._id: {
                     sig.seen.override_ = true;
+
+                    if (send->args.size() > 1) {
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
+                                        "0-1", send->args.size());
+                        }
+                    }
+
+                    if (send->args.size() == 1) {
+                        auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                        if (hash == nullptr) {
+                            if (auto e =
+                                    ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                                auto paramsStr = send->fun.show(ctx);
+                                e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
+                            }
+                            break;
+                        }
+
+                        int i = 0;
+                        for (auto &key : hash->keys) {
+                            auto &value = hash->values[i++];
+                            auto lit = ast::cast_tree<ast::Literal>(key.get());
+                            if (lit && lit->isSymbol(ctx)) {
+                                if (lit->asSymbol(ctx) == core::Names::allow_incompatible()) {
+                                    auto val = ast::cast_tree<ast::Literal>(value.get());
+                                    if (val && val->isTrue(ctx)) {
+                                        sig.seen.incompatibleOverride = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     break;
+                }
                 case core::Names::implementation()._id:
                     sig.seen.implementation = true;
                     break;
@@ -277,6 +312,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     sig.seen.checked = true;
                     break;
                 case core::Names::soft()._id:
+                    break;
+                case core::Names::on_failure()._id:
                     break;
                 case core::Names::generated()._id:
                     sig.seen.generated = true;

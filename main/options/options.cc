@@ -38,6 +38,7 @@ const vector<PrintOptions> print_options({
     {"symbol-table-json", &Printers::SymbolTableJson, true},
     {"symbol-table-full", &Printers::SymbolTableFull, true},
     {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
+    {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
     {"name-tree", &Printers::NameTree, true},
     {"name-tree-raw", &Printers::NameTreeRaw, true},
     {"file-table-json", &Printers::FileTableJson, true},
@@ -311,7 +312,6 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
-    options.add_options("advanced")("enable-experimental-lsp-hover", "Enable experimental LSP feature: Hover");
     options.add_options("advanced")("enable-experimental-lsp-go-to-definition",
                                     "Enable experimental LSP feature: Go-to-definition");
     options.add_options("advanced")("enable-experimental-lsp-find-references",
@@ -349,6 +349,8 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
+    options.add_options("dev")("censor-raw-locs-within-payload",
+                               "When printing raw location information, don't show line numbers");
     options.add_options("dev")("error-white-list",
                                "Error code to whitelist into reporting. "
                                "Errors not mentioned will be silenced. "
@@ -431,7 +433,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                 cfg.outputPath = outPath;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
-                        logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
+                        logger->error("--print={} is incompatible with --cache-dir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
                 }
@@ -517,7 +519,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
             auto rawFiles = raw["files"].as<vector<string>>();
-            UnorderedSet<string> acceptableExtensions = {".rb", ".rbi"};
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
@@ -571,7 +572,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
-        opts.lspHoverEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-hover"].as<bool>();
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {
@@ -652,6 +652,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
+        opts.censorRawLocsWithinPayload = raw["censor-raw-locs-within-payload"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();

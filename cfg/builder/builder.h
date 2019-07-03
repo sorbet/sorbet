@@ -15,7 +15,7 @@ private:
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
     static void sanityCheck(core::Context ctx, CFG &cfg);
-    static void fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static void fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);

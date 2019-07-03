@@ -442,7 +442,7 @@ This is a standard type mismatch. A method's `sig` declares one type, but the
 actual value didn't match. For example:
 
 ```ruby
-'str' + :sym  # error: `Symbol(:"sym")` doesn't match `String` for argument `arg0`
+'str' + :sym  # error: Expected `String` but found `Symbol(:"sym")` for argument `arg0`
 ```
 
 Even still, sometimes these errors can be rather confusing. Consider using
@@ -479,7 +479,8 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
 
     See the [RBI](rbi.md) docs for how to regenerate the `*.rbi` files.
 
-1.  Sorbet will complain about this code:
+1.  <a class="anchor" aria-hidden="true" id="include-kernel"></a>Sorbet will
+    complain about this code:
 
     ```ruby
     module MyModule; end
@@ -609,6 +610,15 @@ constant and method definitions)!
 For how to fix, see [Method Signatures](sigs.md).
 
 See also: [5028](#5028), [6002](#6002).
+
+## 7018
+
+At `typed: strong`, Sorbet no longer allows `T.untyped` as the intermediate
+result of any method call. This effectively means that Sorbet knew the type
+statically for 100% of calls within a file. This sigil is rarely used—usually
+the only files that are `# typed: strong` are RBI files and files with empty
+class definitions. Most Ruby files that actually do interesting things will have
+errors in `# typed: strong`.
 
 ## 7019
 

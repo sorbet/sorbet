@@ -1,0 +1,85 @@
+{
+ "id": 3,
+ "name": {
+  "kind": "CONSTANT",
+  "name": "\u003croot\u003e"
+ },
+ "kind": "CLASS",
+ "superClass": 6,
+ "children": [
+  {
+   "id": 4,
+   "name": {
+    "kind": "UNIQUE",
+    "name": "\u003cClass:\u003croot\u003e\u003e"
+   },
+   "kind": "CLASS",
+   "superClass": 96,
+   "children": [
+    {
+     "id": 10928,
+     "name": {
+      "kind": "UNIQUE",
+      "name": "\u003cstatic-init\u003e"
+     },
+     "kind": "METHOD",
+     "arguments": [
+      {
+       "name": {
+        "kind": "UTF8",
+        "name": "\u003cblk\u003e"
+       },
+       "isBlock": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 10924,
+   "name": {
+    "kind": "CONSTANT",
+    "name": "A"
+   },
+   "kind": "CLASS",
+   "superClass": 6
+  },
+  {
+   "id": 10925,
+   "name": {
+    "kind": "UNIQUE",
+    "name": "\u003cClass:A\u003e"
+   },
+   "kind": "CLASS",
+   "superClass": 96,
+   "children": [
+    {
+     "id": 10926,
+     "name": {
+      "kind": "UTF8",
+      "name": "\u003cstatic-init\u003e"
+     },
+     "kind": "METHOD",
+     "arguments": [
+      {
+       "name": {
+        "kind": "UTF8",
+        "name": "\u003cblk\u003e"
+       },
+       "isBlock": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 10927,
+   "name": {
+    "kind": "CONSTANT",
+    "name": "B"
+   },
+   "kind": "STATIC_FIELD",
+   "aliasTo": 10924
+  }
+ ]
+}

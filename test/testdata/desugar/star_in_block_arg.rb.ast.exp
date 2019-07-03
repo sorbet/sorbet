@@ -12,8 +12,9 @@ class <emptyTree><<C <root>>> < ()
   <self>.foo() do |<destructure>$2|
     begin
       begin
-        <assignTemp>$3 = ::<Magic>.<expand-splat>(<destructure>$2, 1, 0)
-        args = <assignTemp>$3.[](0)
+        <assignTemp>$3 = <destructure>$2
+        <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 1, 0)
+        args = <assignTemp>$4.[](0)
         <assignTemp>$3
       end
       <emptyTree>::<C T>.reveal_type(args)

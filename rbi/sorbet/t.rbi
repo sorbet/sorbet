@@ -57,8 +57,8 @@ module T
   def self.self_type; end
   def self.type_alias(type); end
 
-  sig {params(arg: T.untyped, msg: T.nilable(String)).returns(T.untyped)}
-  def self.must(arg, msg=nil); end
+  sig {params(arg: T.untyped).returns(T.untyped)}
+  def self.must(arg); end
 
   def self.coerce(type); end
 end
@@ -103,6 +103,7 @@ module T::CFGExport
 end
 
 class T::InexactStruct
+  def initialize(rules={}); end
   def prop(name, type, rules={}); end
   def const(name, type, rules={}); end
 end

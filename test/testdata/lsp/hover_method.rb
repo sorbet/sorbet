@@ -35,4 +35,37 @@ class Foo
   sig {void}
   def no_args_and_void
   end
+
+  sig {returns(T.noreturn)}
+  def always_raises
+    # ^ sig {returns(T.noreturn)}
+    raise RuntimeError
+  end
+
+
+  sig {params(blk: T.proc.params(arg0: Integer, arg1: String).returns(String)).returns(String)}
+  def self.blk_arg(&blk)
+    yield(1, "hello")
+  # ^ hover: T.proc.params(arg0: Integer, arg1: String).returns(String)
+  end
+
+  sig {params(a: String, x: String).returns(T::Array[String])}
+  def self.splat_arg(a, *x)
+                       # ^ hover: String
+    x << a
+  # ^ hover: T::Array[String]
+    x
+  end
+end
+
+def main
+  rv = Foo.blk_arg {|num, str| num.to_s + str}
+# ^ hover: String
+         # ^ hover: sig {params(blk: T.proc.params(arg0: Integer, arg1: String).returns(String)).returns(String)}
+                   # ^ hover: sig {params(args: T.untyped).returns(Integer)}
+                        # ^ hover: sig {params(args: T.untyped).returns(String)}
+  rv2 = Foo.splat_arg("a", "b", "c")
+# ^ hover: T::Array[String]
+          # ^ hover: sig {params(a: String, x: String).returns(T::Array[String])}
+
 end

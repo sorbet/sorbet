@@ -141,44 +141,7 @@ module Opus::Types::Test
 
     describe 'declarations' do
       describe '.checked' do
-        it 'raises when using .checked' do
-          err = assert_raises(RuntimeError) do
-            mod = Module.new do
-              extend T::Sig
-              sig {void.checked(:never)}
-              def self.test_method; end
-            end
-            mod.test_method
-          end
-          assert_match(/\.checked API is unstable/, err.message)
-        end
-
-        it 'raises when using .soft' do
-          err = assert_raises(RuntimeError) do
-            mod = Module.new do
-              extend T::Sig
-              sig {void.soft(notify: 'foo')}
-              def self.test_method; end
-            end
-            mod.test_method
-          end
-          assert_match(/\.soft API is unstable/, err.message)
-        end
-
-        it 'raises when using generated.' do
-          err = assert_raises(RuntimeError) do
-            mod = Module.new do
-              extend T::Sig
-              sig {generated.void}
-              def self.test_method; end
-            end
-            mod.test_method
-          end
-          assert_match(/\.generated API is unstable/, err.message)
-        end
-
         it 'raises RuntimeError with invalid level' do
-          skip
           err = assert_raises(ArgumentError) do
             mod = Module.new do
               extend T::Sig
@@ -222,14 +185,15 @@ module Opus::Types::Test
         describe 'runtime levels' do
           before do
             @orig_check_tests = T::Private::RuntimeLevels.check_tests?
+            @orig_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@default_checked_level)
           end
 
           after do
             T::Private::RuntimeLevels._toggle_checking_tests(@orig_check_tests)
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, @orig_default_checked_level)
           end
 
           it '`always` is checked' do
-            skip
             mod = Module.new do
               extend T::Sig
               sig do
@@ -246,7 +210,6 @@ module Opus::Types::Test
           end
 
           it '`never` is not checked' do
-            skip
             mod = Module.new do
               extend T::Sig
               sig do
@@ -273,7 +236,6 @@ module Opus::Types::Test
           end
 
           it '`tests` can be toggled to validate or not' do
-            skip
             T::Private::RuntimeLevels._toggle_checking_tests(false)
             mod = make_mod
             mod.test_method(:llamas) # wrong, but ignored
@@ -286,15 +248,100 @@ module Opus::Types::Test
           end
 
           it 'raises if `tests` is toggled on too late' do
-            skip
             T::Private::RuntimeLevels._toggle_checking_tests(false)
             mod = make_mod
             mod.test_method(1) # invocation ensures it's wrapped
 
             err = assert_raises(RuntimeError) do
-              T::Utils.DANGER_enable_checking_in_tests
+              T::Configuration.enable_checking_for_sigs_marked_checked_tests
             end
             assert_match(/Toggle `:tests`-level runtime type checking earlier/, err.message)
+          end
+
+          it 'override default checked level to :never' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void}
+              def self.foo(x); end
+            end
+
+            a.foo('') # type error ignored
+
+            pass
+          end
+
+          it 'override default checked level to :tests, without checking tests' do
+            T::Private::RuntimeLevels._toggle_checking_tests(false)
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void}
+              def self.foo(x); end
+            end
+
+            a.foo('') # type error ignored
+
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+            pass
+          end
+
+          it 'override default checked level to :tests and also check tests' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void}
+              def self.foo(x); end
+            end
+
+            assert_raises(TypeError) do
+              a.foo('')
+            end
+          end
+
+          it 'override default checked level to :never but opt in with .checked(:always)' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+            a = Module.new do
+              extend T::Sig
+              sig {params(x: Integer).void.checked(:always)}
+              def self.foo(x); end
+            end
+
+            assert_raises(TypeError) do
+              a.foo('')
+            end
+          end
+
+          it 'setting the default checked level raises if set too late' do
+            Module.new do
+              extend T::Sig
+              sig {void}
+              def self.foo; end
+              foo
+            end
+
+            err = assert_raises(RuntimeError) do
+              T::Configuration.default_checked_level = :never
+            end
+            assert_match(/Set the default checked level earlier/, err.message)
+          end
+
+          it 'forbids .on_failure if default_checked_level is :never' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+            ex = assert_raises do
+              Class.new do
+                extend T::Sig
+                sig {void.on_failure(notify: 'me')}
+                def self.foo; end; foo
+              end
+            end
+            assert_includes(ex.message, "To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect")
           end
         end
       end
@@ -311,7 +358,6 @@ module Opus::Types::Test
       end
 
       it 'forbids multiple .checked calls' do
-        skip
         ex = assert_raises do
           Class.new do
             extend T::Sig
@@ -322,68 +368,74 @@ module Opus::Types::Test
         assert_includes(ex.message, "You can't call .checked multiple times in a signature.")
       end
 
-      it 'forbids multiple .soft calls' do
-        skip
+      it 'forbids multiple .on_failure calls' do
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: 'me').soft(notify: 'you')}
+            sig {returns(Integer).on_failure(notify: 'me').on_failure(notify: 'you')}
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't call .soft multiple times in a signature.")
+        assert_includes(ex.message, "You can't call .on_failure multiple times in a signature.")
       end
 
-      it 'forbids .soft and then .checked' do
-        skip
+      it 'forbids .on_failure and then .checked(:never)' do
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: 'me').checked(:never)}
+            sig {returns(NilClass).on_failure(notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .soft.")
+        assert_includes(ex.message, "You can't use .checked(:never) with .on_failure")
       end
 
-      it 'forbids .checked and then .soft' do
-        skip
+      it 'allows .on_failure and then .checked(:tests)' do
+        Class.new do
+          extend T::Sig
+          sig {returns(NilClass).on_failure(notify: 'me').checked(:tests)}
+          def self.foo; end; foo
+        end
+        pass
+      end
+
+      it 'allows .on_failure and then .checked(:always)' do
+        Class.new do
+          extend T::Sig
+          sig {returns(NilClass).on_failure(notify: 'me').checked(:always)}
+          def self.foo; end; foo
+        end
+        pass
+      end
+
+      it 'forbids .checked(:never) and then .on_failure' do
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).soft(notify: 'me').checked(:never)}
+            sig {returns(NilClass).checked(:never).on_failure(notify: 'me')}
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .soft.")
+        assert_includes(ex.message, "You can't use .on_failure with .checked(:never)")
       end
 
-      it 'forbids empty notify' do
-        skip
-        ex = assert_raises do
-          Class.new do
-            extend T::Sig
-            sig {returns(Integer).soft(notify: '')}
-            def self.foo; end; foo
-          end
+      it 'allows .checked(:tests) and then .on_failure' do
+        Class.new do
+          extend T::Sig
+          sig {returns(NilClass).checked(:tests).on_failure(notify: 'me')}
+          def self.foo; end; foo
         end
-        assert_includes(ex.message, "You can't provide an empty notify to .soft().")
       end
 
-      it 'forbids unpassed notify' do
-        skip
-        ex = assert_raises(ArgumentError) do
-          Class.new do
-            extend T::Sig
-            sig {returns(Integer).soft}
-            def self.foo; end; foo
-          end
+      it 'allows .checked(:always) and then .on_failure' do
+        Class.new do
+          extend T::Sig
+          sig {returns(NilClass).checked(:always).on_failure(notify: 'me')}
+          def self.foo; end; foo
         end
-        assert_includes(ex.message, "missing keyword: notify")
       end
 
       it 'forbids .generated and then .checked' do
-        skip
         ex = assert_raises do
           Class.new do
             extend T::Sig
@@ -394,16 +446,15 @@ module Opus::Types::Test
         assert_includes(ex.message, "You can't use .checked with .generated.")
       end
 
-      it 'forbids .generated and then .soft' do
-        skip
+      it 'forbids .generated and then .on_failure' do
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {generated.returns(Integer).soft(notify: '')}
+            sig {generated.returns(Integer).on_failure(notify: '')}
             def self.foo; end; foo
           end
         end
-        assert_includes(ex.message, "You can't use .soft with .generated.")
+        assert_includes(ex.message, "You can't use .on_failure with .generated.")
       end
 
       it 'disallows return then void' do

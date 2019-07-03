@@ -27,7 +27,7 @@ public:
     u1 getU1();
     int64_t getS8();
     std::string_view getStr();
-    explicit UnPickler(const u1 *const compressed);
+    explicit UnPickler(const u1 *const compressed, spdlog::logger &tracer);
 };
 
 } // namespace sorbet::core::serialize

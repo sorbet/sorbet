@@ -87,7 +87,7 @@ module T::Props
     #   hash. This will not affect objects loaded by {.from_hash}.
     # @option rules [Proc] :factory A `Proc` that will be called to
     #   generate an initial value for this prop on {#initialize}, if
-    #   none is providede.
+    #   none is provided.
     # @option rules [T::Boolean] :immutable If true, this prop cannot be
     #   modified after an instance is created or loaded from a hash.
     # @option rules [Class,T::Props::CustomType] :array If set, specifies the

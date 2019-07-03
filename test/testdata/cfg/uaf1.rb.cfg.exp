@@ -23,7 +23,7 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_2" -> "bb::A#initialize_3" [style="tapered"];
 
     "bb::A#initialize_3" [
-        label = "block[id=3](<selfRestore>$6: A)\l<returnMethodTemp>$2: T.untyped = Solve<map>\l<self>: A = <selfRestore>$6\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$6: A)\l<returnMethodTemp>$2: T.untyped = Solve<map>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];

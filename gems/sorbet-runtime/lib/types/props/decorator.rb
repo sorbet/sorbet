@@ -18,7 +18,7 @@ class T::Props::Decorator
 
   class NoRulesError < StandardError; end
 
-  sig {params(klass: DecoratedClass).void}
+  T::Sig::WithoutRuntime.sig {params(klass: DecoratedClass).void}
   def initialize(klass)
     @class = klass
     klass.plugins.each do |mod|
@@ -27,7 +27,7 @@ class T::Props::Decorator
   end
 
   # prop stuff
-  sig {returns(T::Hash[Symbol, Rules])}
+  sig {returns(T::Hash[Symbol, Rules]).checked(:never)}
   def props
     @props ||= {}.freeze
   end
@@ -44,7 +44,7 @@ class T::Props::Decorator
   sig {returns(T::Array[Symbol])}
   def all_props; props.keys; end
 
-  sig {params(prop: T.any(Symbol, String)).returns(Rules)}
+  sig {params(prop: T.any(Symbol, String)).returns(Rules).checked(:never)}
   def prop_rules(prop); props[prop.to_sym] || raise("No such prop: #{prop.inspect}"); end
 
   sig {params(prop: Symbol, rules: Rules).void}
@@ -80,7 +80,7 @@ class T::Props::Decorator
     }
   end
 
-  sig {returns(DecoratedClass)}
+  sig {returns(DecoratedClass).checked(:never)}
   def decorated_class; @class; end
 
   # Accessors
@@ -94,6 +94,7 @@ class T::Props::Decorator
       rules: T.nilable(Rules)
     )
     .returns(T.untyped)
+    .checked(:never)
   end
   def get(instance, prop, rules=props[prop.to_sym])
     # For backwards compatibility, fall back to reconstructing the accessor key
@@ -111,6 +112,7 @@ class T::Props::Decorator
       rules: T.nilable(Rules)
     )
     .void
+    .checked(:never)
   end
   def set(instance, prop, value, rules=props[prop.to_sym])
     # For backwards compatibility, fall back to reconstructing the accessor key
@@ -119,7 +121,7 @@ class T::Props::Decorator
   end
 
   # Use this to validate that a value will validate for a given prop. Useful for knowing whether a value can be set on a model without setting it.
-  sig {params(prop: Symbol, val: T.untyped).void}
+  sig {params(prop: Symbol, val: T.untyped).void.checked(:never)}
   def validate_prop_value(prop, val)
     # This implements a 'public api' on document so that we don't allow callers to pass in rules
     # Rules seem like an implementation detail so it seems good to now allow people to specify them manually.
@@ -127,7 +129,7 @@ class T::Props::Decorator
   end
 
   # Passing in rules here is purely a performance optimization.
-  sig {params(prop: Symbol, val: T.untyped, rules: Rules).void}
+  sig {params(prop: Symbol, val: T.untyped, rules: Rules).void.checked(:never)}
   private def check_prop_type(prop, val, rules=prop_rules(prop))
     type_object = rules.fetch(:type_object)
     type = rules.fetch(:type)
@@ -149,7 +151,7 @@ class T::Props::Decorator
     # T::Props::CustomType is not a real object based class so that we can not run real type check call.
     # T::Props::CustomType.valid?() is only a helper function call.
     valid =
-      if type.is_a?(T::Props::CustomType) && T::Utils::Props.optional_prop?(rules)
+      if type.is_a?(T::Props::CustomType) && T::Props::Utils.optional_prop?(rules)
         type.valid?(val)
       else
         type_object.valid?(val)
@@ -173,6 +175,7 @@ class T::Props::Decorator
       rules: T.nilable(Rules)
     )
     .void
+    .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
     check_prop_type(prop, val, T.must(rules))
@@ -188,6 +191,7 @@ class T::Props::Decorator
       rules: T.nilable(Rules)
     )
     .returns(T.untyped)
+    .checked(:never)
   end
   def prop_get(instance, prop, rules=props[prop.to_sym])
     val = get(instance, prop, rules)
@@ -222,6 +226,7 @@ class T::Props::Decorator
       opts: Hash
     )
     .returns(T.untyped)
+    .checked(:never)
   end
   def foreign_prop_get(instance, prop, foreign_class, rules=props[prop.to_sym], opts={})
     return if !(value = prop_get(instance, prop, rules))
@@ -325,7 +330,6 @@ class T::Props::Decorator
     .void
   end
   def prop_defined(name, cls, rules={})
-    # TODO(jerry): Create similar soft assertions against false
     if rules[:optional] == true
       T::Configuration.hard_assert_handler(
         'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
@@ -371,8 +375,8 @@ class T::Props::Decorator
     if T::Utils::Nilable.is_union_with_nilclass(cls)
       # :_tnilable is introduced internally for performance purpose so that clients do not need to call
       # T::Utils::Nilable.is_tnilable(cls) again.
-      # It is strictly internal: clients should always use T::Utils::Props.required_prop?() or
-      # T::Utils::Props.optional_prop?() for checking whether a field is required or optional.
+      # It is strictly internal: clients should always use T::Props::Utils.required_prop?() or
+      # T::Props::Utils.optional_prop?() for checking whether a field is required or optional.
       rules[:_tnilable] = true
     end
 
@@ -776,7 +780,7 @@ class T::Props::Decorator
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
   # prepended, or inherited.
-  sig {params(child: DecoratedClass).void}
+  T::Sig::WithoutRuntime.sig {params(child: DecoratedClass).void}
   def model_inherited(child)
     child.extend(T::Props::ClassMethods)
     child.plugins.concat(decorated_class.plugins)
@@ -797,7 +801,7 @@ class T::Props::Decorator
     end
   end
 
-  sig {params(mod: Module).void}
+  T::Sig::WithoutRuntime.sig {params(mod: Module).void}
   def plugin(mod)
     decorated_class.plugins << mod
     Private.apply_class_methods(mod, decorated_class)

@@ -6,6 +6,7 @@ require_relative '../real_stdlib'
 
 require 'set'
 require 'fileutils'
+require 'delegate'
 
 
 module Sorbet::Private
@@ -207,7 +208,7 @@ module Sorbet::Private
         match =
           location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
           location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
-          location&.match(/^.*\/gems\/(?:ruby-)?[\d.]+(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
+          location&.match(/^.*\/gems\/(?:ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
         if match.nil?
           # uncomment to generate files for methods outside of gems
           # {

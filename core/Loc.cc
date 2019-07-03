@@ -1,6 +1,7 @@
 // has to go first as it violates our poisons
 #include "rang.hpp"
 
+#include "absl/strings/match.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
@@ -152,8 +153,8 @@ string Loc::showRaw(const GlobalState &gs) const {
     if (!exists()) {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
-    if (path == "https://github.com/sorbet/sorbet/tree/master/rbi/light.rbi") {
-        // This is so that changing light.rbi doesn't necessarily mean invalidating every symbol-table exp test.
+    if (absl::StartsWith(path, "https://github.com/sorbet/sorbet/tree/master/rbi/") && gs.censorRawLocsWithinPayload) {
+        // This is so that changing RBIs doesn't mean invalidating every symbol-table exp test.
         return fmt::format("Loc {{file={} start=removed end=removed}}", path);
     }
     auto [start, end] = this->position(gs);

@@ -526,7 +526,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass())) {
+    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass() &&
+                         asIf.data(ctx)->typeMembers().size() == what.data(ctx)->typeMembers().size())) {
         currentAlignment = what.data(ctx)->typeMembers();
     } else {
         currentAlignment.reserve(asIf.data(ctx)->typeMembers().size());
@@ -654,8 +655,7 @@ bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
 }
 
 bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    Exception::raise(
-        "SelfTypeParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
+    return false;
 }
 
 TypePtr LambdaParam::getCallArguments(Context ctx, NameRef name) {

@@ -148,8 +148,8 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(ctx),
                         expectedType->show(ctx));
         } else {
-            e.setHeader("`{}` does not match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
-                        argSym.argumentName(ctx));
+            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType->show(ctx),
+                        argTpe.type->show(ctx), argSym.argumentName(ctx));
             e.addErrorSection(ErrorSection({
                 ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(ctx)->show(ctx),
                                 argSym.argumentName(ctx), expectedType->show(ctx)),
@@ -467,7 +467,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             } else {
                 if (symbol.data(ctx)->isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
-                    if (objMeth.exists()) {
+                    if (objMeth.exists() && objMeth.data(ctx)->owner.data(ctx)->isClassModule()) {
                         e.addErrorSection(
                             ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
                                                              objMeth.data(ctx)->owner.data(ctx)->name.show(ctx))));
@@ -1388,8 +1388,8 @@ private:
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, targs);
                 }
             } else if (auto e = ctx.state.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
-                e.setHeader("`{}` does not match `{}` for block argument", passedInBlockType->show(ctx),
-                            link->blockPreType->show(ctx));
+                e.setHeader("Expected `{}` but found `{}` for block argument", link->blockPreType->show(ctx),
+                            passedInBlockType->show(ctx));
                 if (dispatched.components.size() == 1) {
                     Magic_callWithBlock::showLocationOfArgDefn(ctx, e, link->blockPreType, dispatched.components[0]);
                 }
@@ -1857,7 +1857,7 @@ public:
 class Module_tripleEq : public IntrinsicMethod {
 public:
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs");
+        ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs, got {}", args.args.size());
         auto rhs = args.args[0]->type;
         if (rhs->isUntyped()) {
             return rhs;

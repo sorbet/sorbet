@@ -366,7 +366,7 @@ end
 class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   include ::Enumerable
   sig {returns(::T.untyped)}
-  def each(); end
+  def each(&blk); end
 
   sig do
     params(
@@ -867,7 +867,7 @@ module OpenSSL::Buffering
     )
     .returns(::T.untyped)
   end
-  def each(eol=T.unsafe(nil)); end
+  def each(eol=T.unsafe(nil), &blk); end
 
   sig {returns(::T.untyped)}
   def each_byte(); end
@@ -1310,7 +1310,7 @@ class OpenSSL::Config
   def data(); end
 
   sig {returns(::T.untyped)}
-  def each(); end
+  def each(&blk); end
 
   sig do
     params(

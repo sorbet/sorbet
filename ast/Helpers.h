@@ -111,6 +111,8 @@ public:
     static std::unique_ptr<Expression> cpRef(Reference &name) {
         if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
             return std::make_unique<UnresolvedIdent>(name.loc, nm->kind, nm->name);
+        } else if (auto *nm = cast_tree<ast::Local>(&name)) {
+            return std::make_unique<ast::Local>(name.loc, nm->localVariable);
         }
         Exception::notImplemented();
     }
@@ -118,10 +120,24 @@ public:
     static std::unique_ptr<Expression> Assign(core::Loc loc, std::unique_ptr<Expression> lhs,
                                               std::unique_ptr<Expression> rhs) {
         if (auto *s = cast_tree<ast::Send>(lhs.get())) {
+            // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
+            // x.y=(rhs)
             s->args.emplace_back(std::move(rhs));
             return lhs;
+        } else if (auto *seq = cast_tree<ast::InsSeq>(lhs.get())) {
+            // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
+            //   { $t = x; if $t == nil then nil else $t.y=() }
+            // in which case we just need to dril down into the else-case of the condition and add the rhs to the send
+            //   { $t = x; if $t == nil then nil else $t.y=(rhs)
+            if (auto *cond = cast_tree<ast::If>(seq->expr.get())) {
+                if (auto *s = cast_tree<ast::Send>(cond->elsep.get())) {
+                    s->args.emplace_back(std::move(rhs));
+                    return lhs;
+                }
+            }
         }
 
+        // otherwise, just assign to it!
         return std::make_unique<ast::Assign>(loc, std::move(lhs), std::move(rhs));
     }
 
@@ -293,8 +309,7 @@ public:
                 return Unsafe(loc, Nil(loc));
             }
         }
-        return Send2(loc, Constant(loc, core::Symbols::T()), core::Names::cast(), Unsafe(loc, Nil(loc)),
-                     std::move(type));
+        return Send2(loc, T(loc), core::Names::cast(), Unsafe(loc, Nil(loc)), std::move(type));
     }
 
     static std::unique_ptr<Expression> T(core::Loc loc) {

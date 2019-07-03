@@ -7,7 +7,7 @@ class ParentInitialize
   def initialize; end
 end
 class ChildInitialize < ParentInitialize
-  sig {generated.void}
+  sig {void}
   def initialize; end
 end
 
@@ -43,22 +43,22 @@ class ParentNeedsOverridable
   def multiline_x_to_returns(x); end
 end
 class ChildForcesOverridable < ParentNeedsOverridable
-  sig {generated.override.void}
+  sig {override.void}
   def just_void; end
 
-  sig {generated.override.returns(NilClass)}
+  sig {override.returns(NilClass)}
   def just_returns; end
 
-  sig {generated.params(x: Integer).override.void}
+  sig {params(x: Integer).override.void}
   def x_to_void(x); end
 
-  sig {generated.params(x: Integer).override.returns(NilClass)}
+  sig {params(x: Integer).override.returns(NilClass)}
   def x_to_returns(x); end
 
-  sig {generated.params(x: Integer).override.void}
+  sig {params(x: Integer).override.void}
   def multiline_x_to_void(x); end
 
-  sig {generated.params(x: Integer).override.returns(NilClass)}
+  sig {params(x: Integer).override.returns(NilClass)}
   def multiline_x_to_returns(x); end
 end
 
@@ -67,13 +67,13 @@ class DoesntNeedOverridable
   extend T::Sig
   # random words to trip up our hacky text search:
   # void return sig params generated
-  sig {generated.returns(NilClass)}
+  sig {returns(NilClass)}
   def nope; end
 end
 
 class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
   extend T::Sig
-  sig {generated.returns(NilClass)}
+  sig {returns(NilClass)}
   def nope; end
 end
 
@@ -86,7 +86,7 @@ end
 
 class ChildOfDoesntNeedGenerated < DoesntNeedGenerated
   extend T::Sig
-  sig {generated.override.void}
+  sig {override.void}
   def already_overridable; end
 end
 
@@ -97,6 +97,6 @@ end
 
 class DSLChild < DSLParent
   extend T::Sig
-  sig {generated.returns(T.nilable(String))}
+  sig {returns(T.nilable(String))}
   def opt_string; end
 end
