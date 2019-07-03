@@ -165,10 +165,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<core::ErrorRegion> errs;
     for (auto file : files) {
         errs.emplace_back(gs, file);
-        if (file.data(ctx).source().find("# typed:") == string::npos) {
-            ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
-        }
-
         unique_ptr<parser::Node> nodes;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
