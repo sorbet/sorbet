@@ -9,5 +9,7 @@ class Test
     *a, b = array
     a, b, *c, d, e = array
     a, * = array
+    a.x, b = array
+    a&.x, b = array
   end
 end
