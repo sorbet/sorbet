@@ -54,6 +54,7 @@ core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     }
 
     vector<string> emptyInputNames;
+    fref.data(*initialGS).strictLevel = pipeline::decideStrictLevel(*initialGS, fref, opts);
     auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore);
     int id = t.file.id();
     if (id >= indexed.size()) {
