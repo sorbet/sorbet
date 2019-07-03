@@ -47,8 +47,8 @@ void Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &pa
     const Subclasses::Entries &children = childMap.at(parentName);
 
     out.insert(children.begin(), children.end());
-    for (const Subclasses::Entry &child : children) {
-        Subclasses::descendantsOf(childMap, child.first, out);
+    for (const auto &[name, _type] : children) {
+        Subclasses::descendantsOf(childMap, name, out);
     }
 }
 
@@ -84,11 +84,11 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         descendantsMapSerialized.emplace_back(parentName);
 
         vector<string> serializedChildren;
-        for (const Subclasses::Entry &entry : descendantsMap.at(parentName)) {
-            if (entry.second != autogen::Definition::Type::Class) {
+        for (const auto &[name, type] : descendantsMap.at(parentName)) {
+            if (type != autogen::Definition::Type::Class) {
                 continue;
             }
-            serializedChildren.emplace_back(fmt::format(" {}", entry.first));
+            serializedChildren.emplace_back(fmt::format(" {}", name));
         }
 
         fast_sort(serializedChildren);
