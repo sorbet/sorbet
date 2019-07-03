@@ -120,13 +120,6 @@ def _setup_bundler(repo_ctx):
         substitutions = substitutions,
     )
 
-    repo_ctx.template(
-        "bundler/bundle-env.sh",
-        Label("//third_party/gems:bundle-env.sh"),
-        executable = True,
-        substitutions = substitutions,
-    )
-
 def _setup_build_defs(repo_ctx):
     """
     Install build_defs provided by this package.
