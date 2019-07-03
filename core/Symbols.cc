@@ -1,4 +1,5 @@
 #include "core/Symbols.h"
+#include "absl/strings/match.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
 #include "core/Context.h"
@@ -570,9 +571,39 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     if (!locs_.empty()) {
         fmt::format_to(buf, " @ ");
         if (locs_.size() > 1) {
-            fmt::format_to(buf, "({})", fmt::map_join(locs_, ", ", [&](auto loc) {
-                               return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
-                           }));
+            if (ref(gs) == core::Symbols::root() && gs.censorRawLocsWithinPayload) {
+                const auto payloadPathPrefix = "https://github.com/sorbet/sorbet/tree/master/rbi/";
+                bool hasPayloadLoc = absl::c_any_of(locs_, [&](const auto loc) {
+                    return absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix);
+                });
+
+                fmt::format_to(buf, "(");
+                if (hasPayloadLoc) {
+                    fmt::format_to(buf, "... removed core rbi locs ...");
+                }
+
+                bool first = true;
+                for (const auto loc : locs_) {
+                    if (absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix)) {
+                        continue;
+                    }
+
+                    if (first) {
+                        first = false;
+                        if (hasPayloadLoc) {
+                            fmt::format_to(buf, ", ");
+                        }
+                    } else {
+                        fmt::format_to(buf, ", ");
+                    }
+                    fmt::format_to(buf, "{}", showRaw ? loc.showRaw(gs) : loc.filePosToString(gs));
+                }
+                fmt::format_to(buf, ")");
+            } else {
+                fmt::format_to(buf, "({})", fmt::map_join(locs_, ", ", [&](auto loc) {
+                                   return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
+                               }));
+            }
         } else {
             fmt::format_to(buf, "{}", showRaw ? locs_[0].showRaw(gs) : locs_[0].filePosToString(gs));
         }
