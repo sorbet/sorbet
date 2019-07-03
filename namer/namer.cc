@@ -77,6 +77,7 @@ class NameInserter {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
             auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            ctx.owner.data(ctx)->arguments()[pos].loc = parsedArg.loc;
             return move(localExpr);
         }
 
