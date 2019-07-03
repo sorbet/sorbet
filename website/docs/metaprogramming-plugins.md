@@ -4,7 +4,7 @@ title: Metaprogramming plugins
 ---
 
 > **Warning**: This feature is experimental and has known limitations. It may
-> not work as expected or change without notice.
+> not work as expected and may change without notice.
 
 In Ruby, it is possible to dynamically define methods. Consider the following
 example:
